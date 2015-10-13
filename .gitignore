@@ -1,0 +1,43 @@
+config/
+in/
+lib/
+out/
+ReaderBench_lib/
+
+
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.jar
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Other #
+*.pptx
+/target/
+!/src/main/resources/lib/gephi-toolkit-0.8.7.jar
+!/src/main/resources/lib/knowceans-tools.jar
+!/src/main/resources/lib/
