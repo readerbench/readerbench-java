@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import DAO.discourse.SemanticCohesion;
 import edu.cmu.lti.jawjaw.pobj.Lang;
@@ -63,18 +64,31 @@ public class Block extends AnalysisElement implements Serializable {
 		// determine if a block is significant from a quantitative point of view
 		// useful for eliminating short utterances
 		int noOccurences = 0;
-		for (Word w : getWordOccurences().keySet())
-			noOccurences += getWordOccurences().get(w);
+		for (Entry<Word, Integer> entry : getWordOccurences().entrySet())
+			noOccurences += entry.getValue();
 
 		return (noOccurences >= 5);
 	}
 
-	public static void addBlock(AbstractDocument d, Block b) {
-		if (d.getBlocks().size() < b.getIndex() + 1) {
-			d.getBlocks().setSize(b.getIndex() + 1);
-		}
-		d.getBlocks().set(b.getIndex(), b);
+	public int noSignificant() {
+		// determine if a block is significant from a quantitative point of view
+		// useful for eliminating short utterances
+		int noOccurences = 0;
+		for (Entry<Word, Integer> entry : getWordOccurences().entrySet())
+			noOccurences += entry.getValue();
 
+		return noOccurences;
+	}
+
+	public static void addBlock(AbstractDocument d, Block b) {
+		if (b.getIndex() != -1) {
+			if (d.getBlocks().size() < b.getIndex() + 1) {
+				d.getBlocks().setSize(b.getIndex() + 1);
+			}
+			d.getBlocks().set(b.getIndex(), b);
+		} else {
+			d.getBlocks().add(b);
+		}
 		d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
 
 		// sum block vectors

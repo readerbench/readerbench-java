@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import DAO.AbstractDocument;
@@ -157,6 +156,7 @@ public class Community extends AnalysisElement {
 				// update corresponding global significant utterances
 				for (Block b : p.getInterventions().getBlocks()) {
 					if (b != null) {
+						b.setIndex(-1);
 						Block.addBlock(participantToUpdate.getInterventions(), b);
 						if (b.isSignificant()) {
 							Block.addBlock(participantToUpdate.getSignificantInterventions(), b);
@@ -205,6 +205,7 @@ public class Community extends AnalysisElement {
 			if (p.getSignificantInterventions().getBlocks().size() >= MIN_NO_CONTRIBUTIONS
 					&& noContentWords >= MIN_NO_CONTENT_WORDS) {
 				// build cohesion graph for additional indices
+
 				CohesionGraph.buildCohesionGraph(p.getSignificantInterventions());
 				for (IComplexityFactors f : complexityFactors) {
 					f.computeComplexityFactors(p.getSignificantInterventions());
@@ -440,19 +441,5 @@ public class Community extends AnalysisElement {
 
 	public void setSpecificityClass(TopicClass specificityClass) {
 		this.specificityClass = specificityClass;
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		processDocumentCollection("in/blogs_Nic/1 year/KB45", null);
-
-		// processDocumentCollection("in/forum_Nic", null);
-
-		// processDocumentCollection("in/forum_Nic",
-		// TopicClass.ACADEMIC_ADMINISTRATION);
-
-		// processDocumentCollection("in/forum_Nic",
-		// TopicClass.EDUCATIONAL_SCIENCES);
 	}
 }
