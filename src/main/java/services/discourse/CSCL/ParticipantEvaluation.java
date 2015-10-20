@@ -3,14 +3,11 @@ package services.discourse.CSCL;
 import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.gephi.data.attributes.api.AttributeColumn;
@@ -44,46 +41,49 @@ public class ParticipantEvaluation {
 		Node[] participantNodes = new Node[participants.size()];
 
 		// TODO change list for specific elements to ignore
-		Set<String> namesToIgnore = new TreeSet<String>(Arrays.asList(new String[] { "2093911", "1516180", "90343" }));
+		// Set<String> namesToIgnore = new TreeSet<String>(Arrays.asList(new
+		// String[] { "2093911", "1516180", "90343" }));
 
 		Color colorParticipant = Color.LIGHT_GRAY;
 
 		// build all nodes
 		for (int i = 0; i < participants.size(); i++) {
-			if (!namesToIgnore.contains(participants.get(i).getName())) {
-				// build block element
-				Node participant = null;
-				if (isAnonymized) {
-					participant = graphModel.factory().newNode(genericName + " " + i);
-					participant.getNodeData().setLabel(genericName + " " + i);
-				} else {
-					participant = graphModel.factory().newNode(participants.get(i).getName());
-					participant.getNodeData().setLabel(participants.get(i).getName());
-				}
-				participant.getNodeData().setColor((float) (colorParticipant.getRed()) / 256,
-						(float) (colorParticipant.getGreen()) / 256, (float) (colorParticipant.getBlue()) / 256);
-				graph.addNode(participant);
-				participantNodes[i] = participant;
+			// if (!namesToIgnore.contains(participants.get(i).getName())) {
+			// build block element
+			Node participant = null;
+			if (isAnonymized) {
+				participant = graphModel.factory().newNode(genericName + " " + i);
+				participant.getNodeData().setLabel(genericName + " " + i);
 			} else {
-				logger.info("Ignoring " + participants.get(i).getName());
+				participant = graphModel.factory().newNode(participants.get(i).getName());
+				participant.getNodeData().setLabel(participants.get(i).getName());
 			}
+			participant.getNodeData().setColor((float) (colorParticipant.getRed()) / 256,
+					(float) (colorParticipant.getGreen()) / 256, (float) (colorParticipant.getBlue()) / 256);
+			graph.addNode(participant);
+			participantNodes[i] = participant;
+			// } else {
+			// logger.info("Ignoring " + participants.get(i).getName());
+			// }
 		}
 
 		// determine max value
 		double maxVal = Double.MIN_VALUE;
 		for (int i = 0; i < participants.size(); i++) {
 			for (int j = 0; j < participants.size(); j++) {
-				if (!namesToIgnore.contains(participants.get(i).getName())
-						&& !namesToIgnore.contains(participants.get(j).getName())) {
-					maxVal = Math.max(maxVal, participantContributions[i][j]);
-				}
+				// if (!namesToIgnore.contains(participants.get(i).getName())
+				// && !namesToIgnore.contains(participants.get(j).getName())) {
+				maxVal = Math.max(maxVal, participantContributions[i][j]);
+				// }
 			}
 		}
 
 		for (int i = 0; i < participants.size(); i++) {
 			for (int j = 0; j < participants.size(); j++) {
-				if (participantContributions[i][j] > 0 && !namesToIgnore.contains(participants.get(i).getName())
-						&& !namesToIgnore.contains(participants.get(j).getName())) {
+				if (participantContributions[i][j] > 0
+				// && !namesToIgnore.contains(participants.get(i).getName())
+				// && !namesToIgnore.contains(participants.get(j).getName())
+				) {
 					graph.addEdge(participantNodes[i], participantNodes[j]);
 					Edge e = graph.getEdge(participantNodes[i], participantNodes[j]);
 					e.setWeight((float) (participantContributions[i][j] / maxVal));

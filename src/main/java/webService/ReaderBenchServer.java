@@ -26,9 +26,6 @@ import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import spark.Request;
-import spark.Response;
-import spark.Route;
 import spark.Spark;
 
 class Result implements Comparable<Result> {

@@ -142,7 +142,7 @@ public class Community extends AnalysisElement {
 						// .getBlocks().get(i).getCombinedScore();
 						Participant participantToUpdate = community.get(index1);
 						participantToUpdate
-								.setOverallScore(participantToUpdate.getOverallScore() + u.getCombinedScore());
+								.setOverallScore(participantToUpdate.getOverallScore() + u.getOverallScore());
 						participantToUpdate.setPersonalKB(participantToUpdate.getPersonalKB() + u.getPersonalKB());
 						participantToUpdate.setSocialKB(participantToUpdate.getSocialKB() + u.getSocialKB());
 
@@ -152,11 +152,11 @@ public class Community extends AnalysisElement {
 								int index2 = community.indexOf(p2);
 								if (index2 >= 0) {
 									// model knowledge building effect
-									double addedKB = d.getBlocks().get(j).getCombinedScore()
+									double addedKB = d.getBlocks().get(j).getOverallScore()
 											* d.getPrunnedBlockDistances()[j][i].getCohesion();
 									participantContributions[index2][index1] += addedKB;
 
-									addedKB = d.getBlocks().get(i).getCombinedScore()
+									addedKB = d.getBlocks().get(i).getOverallScore()
 											* d.getPrunnedBlockDistances()[j][i].getCohesion();
 									participantContributions[index1][index2] += addedKB;
 								}
@@ -351,14 +351,14 @@ public class Community extends AnalysisElement {
 						}
 					}
 
-					out.write(
-							new File(d.getPath()).getName() + "," + noBlocks + "," + ((Conversation) d).getParticipants().size()
-									+ "," + Formatting.formatNumber(d.getOverallScore()) + ","
-									+ Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-									+ "," + Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-									+ "\n");
+					out.write(new File(d.getPath()).getName() + "," + noBlocks + ","
+							+ ((Conversation) d).getParticipants().size() + ","
+							+ Formatting.formatNumber(d.getOverallScore()) + ","
+							+ Formatting
+									.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+							+ "," + Formatting.formatNumber(
+									VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+							+ "\n");
 				}
 
 				// print interaction matrix
@@ -464,8 +464,8 @@ public class Community extends AnalysisElement {
 		String path = "in/MOOC/forum_posts&comments";
 		SerialCorpusAssessment.processCorpus(path, "config/LSA/tasa_lak_en", "config/LDA/tasa_lak_en", Lang.eng, true,
 				true, null, null, true);
-		Long startDate = 1383235200L;
-		// Long startDate = 1383843600L;
+		// Long startDate = 1383235200L;
+		Long startDate = 1383843600L;
 		Community.processDocumentCollection(path, new Date(startDate * 1000), null);
 	}
 }
