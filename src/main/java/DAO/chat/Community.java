@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import DAO.AbstractDocument;
@@ -23,6 +25,7 @@ import DAO.AnalysisElement;
 import DAO.Block;
 import DAO.Word;
 import DAO.discourse.Topic;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;
@@ -39,9 +42,8 @@ import services.complexity.syntax.PronounsComplexity;
 import services.complexity.syntax.TreeComplexity;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
-import services.discourse.topicMining.TopicCoverage;
-import services.discourse.topicMining.TopicCoverage.TopicClass;
 import services.discourse.topicMining.TopicModeling;
+import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.chat.ParticipantInvolvementView;
 import view.widgets.document.corpora.PaperConceptView;
 
@@ -53,54 +55,96 @@ public class Community extends AnalysisElement {
 	static Logger logger = Logger.getLogger(Community.class);
 
 	private List<Participant> community;
-	private List<AbstractDocument> documents;
+	private List<Chat> documents;
 	private double[][] participantContributions;
-	private TopicClass specificityClass; // if specificity == null ignore
+	private Date startDate;
+	private Date endDate;
 	private boolean[] selectedIndices;
 
-	public Community(TopicClass specificityClass) {
+	public Community(Date startDate, Date endDate) {
 		super(null, 0, null, null, null);
-		this.specificityClass = specificityClass;
+		this.startDate = startDate;
+		this.endDate = endDate;
 		community = new LinkedList<Participant>();
-		documents = new LinkedList<AbstractDocument>();
+		documents = new LinkedList<Chat>();
 	}
 
 	private void updateParticipantContributions() {
-		// determine the contributions and also indegree / outdegree for each
-		// node
+		for (Chat c : documents) {
+			// update the community correspondingly
+			for (Participant p : c.getParticipants()) {
+				int index = community.indexOf(p);
+				Participant participantToUpdate = null;
+				if (index >= 0) {
+					participantToUpdate = community.get(index);
+				} else {
+					participantToUpdate = new Participant(p.getName(), c);
+					community.add(participantToUpdate);
+				}
+
+				for (Block b : p.getInterventions().getBlocks()) {
+					Utterance u = (Utterance) b;
+					// select contributions in imposed timeframe
+					if (u != null && u.isEligible(startDate, endDate)) {
+						b.setIndex(-1);
+						Block.addBlock(participantToUpdate.getInterventions(), b);
+						if (b.isSignificant()) {
+							Block.addBlock(participantToUpdate.getSignificantInterventions(), b);
+						}
+
+						participantToUpdate.setNoContributions(participantToUpdate.getNoContributions() + 1);
+
+						for (Entry<Word, Integer> entry : u.getWordOccurences().entrySet()) {
+							if (entry.getKey().getPOS() != null) {
+								if (entry.getKey().getPOS().startsWith("N"))
+									participantToUpdate.setNoNouns(participantToUpdate.getNoNouns() + entry.getValue());
+								if (entry.getKey().getPOS().startsWith("V"))
+									participantToUpdate.setNoVerbs(participantToUpdate.getNoVerbs() + entry.getValue());
+							}
+						}
+
+						int noSelectedTopics = 0;
+						for (Topic topic : c.getTopics()) {
+							if (topic.getWord().getPOS() == null || (topic.getWord().getPOS().startsWith("N")
+									|| topic.getWord().getPOS().startsWith("V"))) {
+								noSelectedTopics++;
+								if (u.getWordOccurences().containsKey(topic.getWord())) {
+									double relevance = u.getWordOccurences().get(topic.getWord())
+											* topic.getRelevance();
+									participantToUpdate.setRelevanceTop10Topics(
+											participantToUpdate.getRelevanceTop10Topics() + relevance);
+								}
+								if (noSelectedTopics == 10)
+									break;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		participantContributions = new double[community.size()][community.size()];
 
 		for (Participant p : community) {
 			p.resetIndices();
 		}
 
-		// determine specificity for each block
-		for (AbstractDocument d : documents) {
-			for (Block b : d.getBlocks()) {
-				if (b != null) {
-					b.setSpecificity(TopicCoverage.coverage(b, specificityClass));
-				}
-			}
-		}
-
-		for (AbstractDocument d : documents) {
+		for (Chat d : documents) {
 			// determine strength of links
 			for (int i = 0; i < d.getBlocks().size(); i++) {
-				if (d.getBlocks().get(i) != null) {
-					Participant p1 = ((Utterance) d.getBlocks().get(i)).getParticipant();
+				Utterance u = (Utterance) d.getBlocks().get(i);
+				// select contributions in imposed timeframe
+				if (u != null && u.isEligible(startDate, endDate)) {
+					Participant p1 = u.getParticipant();
 					int index1 = community.indexOf(p1);
 					if (index1 >= 0) {
 						// participantContributions[index1][index1] += d
 						// .getBlocks().get(i).getCombinedScore();
 						Participant participantToUpdate = community.get(index1);
-						participantToUpdate.setOverallScore(
-								participantToUpdate.getOverallScore() + d.getBlocks().get(i).getCombinedScore());
-						participantToUpdate.setPersonalKB(
-								participantToUpdate.getPersonalKB() + ((Utterance) d.getBlocks().get(i)).getPersonalKB()
-										* d.getBlocks().get(i).getSpecificity());
-						participantToUpdate.setSocialKB(
-								participantToUpdate.getSocialKB() + ((Utterance) d.getBlocks().get(i)).getSocialKB()
-										* d.getBlocks().get(i).getSpecificity());
+						participantToUpdate
+								.setOverallScore(participantToUpdate.getOverallScore() + u.getCombinedScore());
+						participantToUpdate.setPersonalKB(participantToUpdate.getPersonalKB() + u.getPersonalKB());
+						participantToUpdate.setSocialKB(participantToUpdate.getSocialKB() + u.getSocialKB());
 
 						for (int j = i + 1; j < d.getBlocks().size(); j++) {
 							if (d.getPrunnedBlockDistances()[j][i] != null) {
@@ -121,48 +165,9 @@ public class Community extends AnalysisElement {
 					}
 				}
 			}
-		}
-
-		// update degree of inter-animation
-		for (AbstractDocument d : documents) {
-			for (Participant p : ((Chat) d).getParticipants()) {
+			for (Participant p : d.getParticipants()) {
 				Participant pToUpdate = community.get(community.indexOf(p));
 				pToUpdate.setDegreeInterAnimation(pToUpdate.getDegreeInterAnimation() + p.getDegreeInterAnimation());
-			}
-		}
-	}
-
-	public void addDocument(Chat c) {
-		if (c != null) {
-			logger.info("Adding document " + c.getPath());
-			documents.add(c);
-			// update the community correspondingly
-			for (Participant p : c.getParticipants()) {
-				int index = community.indexOf(p);
-				Participant participantToUpdate = null;
-				if (index >= 0) {
-					participantToUpdate = community.get(index);
-				} else {
-					participantToUpdate = new Participant(p.getName(), c);
-					community.add(participantToUpdate);
-				}
-				participantToUpdate
-						.setNoContributions(participantToUpdate.getNoContributions() + p.getNoContributions());
-				participantToUpdate.setRelevanceTop10Topics(
-						participantToUpdate.getRelevanceTop10Topics() + p.getRelevanceTop10Topics());
-				participantToUpdate.setNoNouns(participantToUpdate.getNoNouns() + p.getNoNouns());
-				participantToUpdate.setNoVerbs(participantToUpdate.getNoVerbs() + p.getNoVerbs());
-
-				// update corresponding global significant utterances
-				for (Block b : p.getInterventions().getBlocks()) {
-					if (b != null) {
-						b.setIndex(-1);
-						Block.addBlock(participantToUpdate.getInterventions(), b);
-						if (b.isSignificant()) {
-							Block.addBlock(participantToUpdate.getSignificantInterventions(), b);
-						}
-					}
-				}
 			}
 		}
 	}
@@ -377,7 +382,7 @@ public class Community extends AnalysisElement {
 		}
 	}
 
-	public static Community loadMultipleConversations(String rootPath, TopicClass specificityClass) {
+	public static Community loadMultipleConversations(String rootPath, Date startDate, Date endDate) {
 		logger.info("Loading all files in " + rootPath);
 
 		FileFilter filter = new FileFilter() {
@@ -386,15 +391,16 @@ public class Community extends AnalysisElement {
 			}
 		};
 
-		Community collection = new Community(specificityClass);
+		Community collection = new Community(startDate, endDate);
 		File dir = new File(rootPath);
 		if (!dir.isDirectory())
 			return null;
 		File[] filesTODO = dir.listFiles(filter);
 		for (File f : filesTODO) {
-			Chat d = (Chat) Chat.loadSerializedDocument(f.getPath());
+			Chat c = (Chat) Chat.loadSerializedDocument(f.getPath());
 			// d.exportIM();
-			collection.addDocument(d);
+			if (c != null)
+				collection.getDocuments().add(c);
 		}
 
 		collection.updateParticipantContributions();
@@ -402,20 +408,34 @@ public class Community extends AnalysisElement {
 		return collection;
 	}
 
-	public static void processDocumentCollection(String rootPath, TopicClass specificityClass) {
-		Community dc = Community.loadMultipleConversations(rootPath, specificityClass);
+	public static void processDocumentCollection(String rootPath, Date startDate, Date endDate) {
+		Community dc = Community.loadMultipleConversations(rootPath, startDate, endDate);
 		if (dc != null) {
 			dc.computeMetrics();
 			File f = new File(rootPath);
-			if (dc.getSpecificityClass() != null) {
-				dc.export(rootPath + "/" + f.getName() + "_" + dc.getSpecificityClass().toString().toLowerCase()
-						+ ".csv");
-			} else {
-				dc.export(rootPath + "/" + f.getName() + ".csv");
-			}
-
+			dc.export(rootPath + "/" + f.getName() + ".csv");
 			dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
 			dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
+		}
+	}
+
+	public static void processAllFolders(String folder, String prefix, String pathToLSA, String pathToLDA, Lang lang,
+			boolean usePOSTagging, Date startDate, Date endDate) {
+		File dir = new File(folder);
+		if (dir.isDirectory()) {
+			File[] communityFolder = dir.listFiles();
+			for (File f : communityFolder) {
+				if (f.isDirectory() && f.getName().startsWith(prefix)) {
+					// remove checkpoint file
+					// File checkpoint = new File(f + "/checkpoint.xml");
+					// if (checkpoint.exists())
+					// checkpoint.delete();
+					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+							true, null, null, true);
+					Community.processDocumentCollection(f.getAbsolutePath(), startDate, endDate);
+				}
+
+			}
 		}
 	}
 
@@ -427,19 +447,25 @@ public class Community extends AnalysisElement {
 		this.community = community;
 	}
 
-	public List<AbstractDocument> getDocuments() {
+	public List<Chat> getDocuments() {
 		return documents;
 	}
 
-	public void setDocuments(List<AbstractDocument> documents) {
+	public void setDocuments(List<Chat> documents) {
 		this.documents = documents;
 	}
 
-	public TopicClass getSpecificityClass() {
-		return specificityClass;
-	}
+	public static void main(String[] args) {
+		BasicConfigurator.configure();
 
-	public void setSpecificityClass(TopicClass specificityClass) {
-		this.specificityClass = specificityClass;
+		// processAllFolders("in/blogs_Nic/1 year", "PW", "config/LSA/tasa_en",
+		// "config/LDA/tasa_en", Lang.eng, true, null,
+		// null);
+		String path = "in/MOOC/forum_posts&comments";
+		SerialCorpusAssessment.processCorpus(path, "config/LSA/tasa_lak_en", "config/LDA/tasa_lak_en", Lang.eng, true,
+				true, null, null, true);
+		Long startDate = 1383235200L;
+		// Long startDate = 1383843600L;
+		Community.processDocumentCollection(path, new Date(startDate * 1000), null);
 	}
 }

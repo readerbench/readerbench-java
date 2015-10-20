@@ -18,8 +18,7 @@ public class Utterance extends Block {
 	private double personalKB;
 
 	public Utterance(Block b, Participant p, Date time) {
-		super(b.getContainer(), b.getIndex(), b.getText(), b.getLSA(), b
-				.getLDA(), b.getLanguage());
+		super(b.getContainer(), b.getIndex(), b.getText(), b.getLSA(), b.getLDA(), b.getLanguage());
 		// inherit all attributes
 		setSentences(b.getSentences());
 		setRefBlock(b.getRefBlock());
@@ -73,6 +72,11 @@ public class Utterance extends Block {
 
 	public void setPersonalKB(double personalKB) {
 		this.personalKB = personalKB;
+	}
+
+	public boolean isEligible(Date startDate, Date endDate) {
+		return ((startDate == null) || ((startDate != null) && time.after(startDate)))
+				&& ((endDate == null) || ((endDate != null) && time.before(endDate)));
 	}
 
 	@Override

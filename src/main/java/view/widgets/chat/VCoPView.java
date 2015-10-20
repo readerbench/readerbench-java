@@ -294,12 +294,7 @@ public class VCoPView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (!textFieldPath.getText().equals("")) {
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					if (comboBoxSpecificity.getSelectedIndex() == 0) {
-						Community.processDocumentCollection(textFieldPath.getText(), null);
-					} else {
-						Community.processDocumentCollection(textFieldPath.getText(),
-								TopicClass.valueOf((String) comboBoxSpecificity.getSelectedItem()));
-					}
+					Community.processDocumentCollection(textFieldPath.getText(), null, null);
 					Toolkit.getDefaultToolkit().beep();
 					setCursor(null); // turn off the wait cursor
 				} else

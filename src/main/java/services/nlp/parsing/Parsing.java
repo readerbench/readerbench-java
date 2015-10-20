@@ -129,7 +129,7 @@ public abstract class Parsing {
 							try {
 								time = df2.parse(blockTmp.getTime());
 							} catch (ParseException e2) {
-								DateFormat df3 = new SimpleDateFormat("HH.mm.ss");
+								DateFormat df3 = new SimpleDateFormat("kk.mm.ss");
 								try {
 									time = df3.parse(blockTmp.getTime());
 								} catch (ParseException e3) {
@@ -145,7 +145,12 @@ public abstract class Parsing {
 											try {
 												time = df6.parse(blockTmp.getTime());
 											} catch (ParseException e6) {
-												logger.error(e6.getMessage());
+												try {
+													Long longTime = Long.parseLong(blockTmp.getTime());
+													time = new Date(longTime * 1000);
+												} catch (NumberFormatException e7) {
+													logger.error("Unparsable date: " + blockTmp.getTime());
+												}
 											}
 										}
 									}
