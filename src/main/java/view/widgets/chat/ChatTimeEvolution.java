@@ -26,9 +26,9 @@ import view.models.document.CustomLineAnnotation;
 import view.models.document.CustomToolTipGenerator;
 import DAO.Block;
 import DAO.Sentence;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 
 public class ChatTimeEvolution extends JFrame {
 
@@ -46,7 +46,7 @@ public class ChatTimeEvolution extends JFrame {
 		return ls;
 	}
 
-	public ChatTimeEvolution(Chat c) {
+	public ChatTimeEvolution(Conversation c) {
 		super("ReaderBench - Chat Time Evolution");
 
 		this.setSize(800, 600);

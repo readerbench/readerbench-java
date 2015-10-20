@@ -10,8 +10,8 @@ import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
 import DAO.Block;
-import DAO.chat.Chat;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Utterance;
 import DAO.discourse.CollaborationZone;
 import DAO.discourse.SemanticCohesion;
 
@@ -80,7 +80,7 @@ public class Collaboration {
 	}
 
 	public static List<CollaborationZone> getCollaborationZones(
-			double[] distribution, Chat chat) {
+			double[] distribution, Conversation chat) {
 		CollaborationZones collaborations = new CollaborationZones(chat,
 				distribution);
 		// generic method for determining intense collaboration zones
@@ -365,7 +365,7 @@ public class Collaboration {
 		return zones;
 	}
 
-	public static void evaluateSocialKB(Chat c) {
+	public static void evaluateSocialKB(Conversation c) {
 		try {
 			logger.info("Computing collaboration zones");
 			double no_diff_speaker = 0;
@@ -463,7 +463,7 @@ public class Collaboration {
 		}
 	}
 
-	public static double[] overlapCollaborationZones(Chat c,
+	public static double[] overlapCollaborationZones(Conversation c,
 			List<CollaborationZone> l1, List<CollaborationZone> l2) {
 		// evaluate precision and recall for identified collaboration zones
 		double precision = 0, recall = 0, fscore = 0;

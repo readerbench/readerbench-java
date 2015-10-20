@@ -14,9 +14,9 @@ import services.libsvm.svm_node;
 import services.libsvm.svm_parameter;
 import services.libsvm.svm_problem;
 import DAO.AbstractDocument;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
 import DAO.complexity.Measurement;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
 
 public class ComputeBalancedMeasure {
 	static Logger logger = Logger.getLogger(ComputeBalancedMeasure.class);
@@ -240,7 +240,7 @@ public class ComputeBalancedMeasure {
 				null);
 	}
 
-	public static void evaluateTextualComplexityParticipants(Chat chat,
+	public static void evaluateTextualComplexityParticipants(Conversation chat,
 			String path, int[] selectedMeasurements) {
 		List<AbstractDocument> participantInterventions = new LinkedList<AbstractDocument>();
 

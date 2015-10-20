@@ -1,4 +1,4 @@
-package DAO.chat;
+package DAO.cscl;
 
 import java.io.Serializable;
 
@@ -35,9 +35,9 @@ public class Participant implements Comparable<Participant>, Serializable {
 	public Participant(String name, AbstractDocument d) {
 		super();
 		this.name = name;
-		this.interventions = new Chat(null, d.getLSA(), d.getLDA(),
+		this.interventions = new Conversation(null, d.getLSA(), d.getLDA(),
 				d.getLanguage());
-		this.significantInterventions = new Chat(null, d.getLSA(), d.getLDA(),
+		this.significantInterventions = new Conversation(null, d.getLSA(), d.getLDA(),
 				d.getLanguage());
 	}
 

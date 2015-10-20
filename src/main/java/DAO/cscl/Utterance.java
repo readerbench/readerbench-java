@@ -1,4 +1,4 @@
-package DAO.chat;
+package DAO.cscl;
 
 import java.util.Date;
 

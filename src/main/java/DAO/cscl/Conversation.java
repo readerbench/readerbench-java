@@ -1,4 +1,4 @@
-package DAO.chat;
+package DAO.cscl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,7 +40,7 @@ import services.nlp.parsing.Parsing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
-public class Chat extends AbstractDocument {
+public class Conversation extends AbstractDocument {
 
 	private static final long serialVersionUID = 2096182930189552475L;
 
@@ -62,7 +62,7 @@ public class Chat extends AbstractDocument {
 												// annotations
 												// throughout the conversation
 
-	public Chat(String path, LSA lsa, LDA lda, Lang lang) {
+	public Conversation(String path, LSA lsa, LDA lda, Lang lang) {
 		super(path, lsa, lda, lang);
 		participants = new TreeSet<Participant>();
 		intenseCollabZonesSocialKB = new LinkedList<CollaborationZone>();
@@ -70,7 +70,7 @@ public class Chat extends AbstractDocument {
 		annotatedCollabZones = new LinkedList<CollaborationZone>();
 	}
 
-	public Chat(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
+	public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		this(path, lsa, lda, lang);
 		this.setText(contents.getText());
@@ -79,7 +79,7 @@ public class Chat extends AbstractDocument {
 		determineParticipantInterventions();
 	}
 
-	public static Chat load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+	public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		// load also LSA vector space and LDA model
 		LSA lsa = LSA.loadLSA(pathToLSA, lang);
@@ -87,10 +87,10 @@ public class Chat extends AbstractDocument {
 		return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
 	}
 
-	public static Chat load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+	public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		Chat c = null;
+		Conversation c = null;
 		// determine contents
 		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
 		List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
@@ -155,7 +155,7 @@ public class Chat extends AbstractDocument {
 				}
 			}
 			contents.setBlocks(blocks);
-			c = new Chat(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
+			c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
 			// set title as a concatenation of topics
 			String title = "";
 			nl1 = doc.getElementsByTagName("Topic");
@@ -243,8 +243,8 @@ public class Chat extends AbstractDocument {
 	public void determineParticipantInterventions() {
 		if (getParticipants().size() > 0) {
 			for (Participant p : getParticipants()) {
-				p.setInterventions(new Chat(null, getLSA(), getLDA(), getLanguage()));
-				p.setSignificantInterventions(new Chat(null, getLSA(), getLDA(), getLanguage()));
+				p.setInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
+				p.setSignificantInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
 			}
 			for (Block b : getBlocks()) {
 				if (b != null && ((Utterance) b).getParticipant() != null) {

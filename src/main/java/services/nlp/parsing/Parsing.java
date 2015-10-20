@@ -17,12 +17,12 @@ import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
 import DAO.AbstractDocument;
 import DAO.AbstractDocumentTemplate.BlockTemplate;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.Block;
 import DAO.Sentence;
 import DAO.Word;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
 import DAO.sentiment.SentimentEntity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
@@ -103,8 +103,8 @@ public abstract class Parsing {
 					BlockTemplate blockTmp = it.next();
 					Participant activeSpeaker = null;
 					// extract name (if applicable)
-					if (d instanceof Chat) {
-						Chat c = (Chat) d;
+					if (d instanceof Conversation) {
+						Conversation c = (Conversation) d;
 						if (!blockTmp.getSpeaker().isEmpty()) {
 							activeSpeaker = new Participant(blockTmp.getSpeaker(), d);
 							boolean contains = false;
@@ -216,7 +216,7 @@ public abstract class Parsing {
 					} else {
 						b = SimpleParsing.processBlock(d, id, text);
 					}
-					if (d instanceof Chat) {
+					if (d instanceof Conversation) {
 						u = new Utterance(b, activeSpeaker, time);
 						u.setFollowedByVerbalization(followedByVerbalization);
 						Block.addBlock(d, u);

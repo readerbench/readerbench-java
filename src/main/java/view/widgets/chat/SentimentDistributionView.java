@@ -34,8 +34,8 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 
 import DAO.Block;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
 import DAO.discourse.SemanticChain;
 import view.models.document.CustomToolTipGeneratorVoice;
 
@@ -47,10 +47,10 @@ public class SentimentDistributionView extends JFrame {
 	private JComboBox<String> comboBoxSelectVoice;
 	private ChartPanel chartPanel;
 	private JPanel panel;
-	private Chat chat;
+	private Conversation chat;
 	private Map<Integer, Color> sentimentColors;
 
-	public SentimentDistributionView(Chat chat, List<SemanticChain> chains) {
+	public SentimentDistributionView(Conversation chat, List<SemanticChain> chains) {
 		super("ReaderBench - Sentiment distribution across voices");
 		this.chat = chat;
 		this.chains = chains;

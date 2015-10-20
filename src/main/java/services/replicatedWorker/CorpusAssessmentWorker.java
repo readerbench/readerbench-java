@@ -7,9 +7,9 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import DAO.cscl.Conversation;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import DAO.chat.Chat;
 
 public class CorpusAssessmentWorker extends Worker {
 	static Logger logger = Logger.getLogger(CorpusAssessmentWorker.class);
@@ -37,7 +37,7 @@ public class CorpusAssessmentWorker extends Worker {
 			send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE,
 					new String[] { taskMsg.getArgs()[0].toString() }, null));
 
-			Chat d = Chat.load(
+			Conversation d = Conversation.load(
 					new File(taskMsg.getArgs()[0].toString()), lsa, lda,
 					CorpusAssessmentMaster.PROCESSING_LANGUAGE,
 					CorpusAssessmentMaster.USE_POS_TAGGING,

@@ -17,9 +17,9 @@ import DAO.AnalysisElement;
 import DAO.Block;
 import DAO.Sentence;
 import DAO.Word;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.SemanticChain;
 import DAO.lexicalChains.LexicalChain;
 
@@ -124,7 +124,7 @@ public class DialogismComputations {
 
 		// build time intervals
 		d.setBlockOccurrencePattern(new long[d.getBlocks().size()]);
-		if (d instanceof Chat) {
+		if (d instanceof Conversation) {
 			Date earlierDate = null, laterDate = null;
 			for (int blockIndex = 0; blockIndex < d.getBlocks().size(); blockIndex++) {
 				if (d.getBlocks().get(blockIndex) != null) {
@@ -220,7 +220,7 @@ public class DialogismComputations {
 		}
 	}
 
-	public static void determineParticipantInterAnimation(Chat c) {
+	public static void determineParticipantInterAnimation(Conversation c) {
 		if (c.getVoices() == null || c.getVoices().size() == 0)
 			return;
  

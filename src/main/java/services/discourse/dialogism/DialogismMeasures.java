@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
 import DAO.discourse.SemanticChain;
 
 public class DialogismMeasures {
@@ -206,7 +206,7 @@ public class DialogismMeasures {
 		return evolution;
 	}
 
-	public static double[] getCollaborationEvolution(Chat c) {
+	public static double[] getCollaborationEvolution(Conversation c) {
 		if (c.getVoices() == null || c.getVoices().size() == 0)
 			return null;
 		double[] evolution = new double[c.getVoices().get(0)

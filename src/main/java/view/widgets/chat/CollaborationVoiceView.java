@@ -18,7 +18,7 @@ import javax.swing.border.EtchedBorder;
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
-import DAO.chat.Chat;
+import DAO.cscl.Conversation;
 import DAO.discourse.CollaborationZone;
 
 import javax.swing.JTextField;
@@ -34,7 +34,7 @@ public class CollaborationVoiceView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public CollaborationVoiceView(Chat chat) {
+	public CollaborationVoiceView(Conversation chat) {
 		setTitle("ReaderBench - Collaboration as Voice Overlapping");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 650, 550);

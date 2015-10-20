@@ -29,10 +29,10 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import DAO.cscl.Community;
 import services.discourse.topicMining.TopicCoverage.TopicClass;
 import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.ReaderBenchView;
-import DAO.chat.Community;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class VCoPView extends JFrame {

@@ -46,9 +46,9 @@ import view.models.document.TopicsTableModel;
 import view.widgets.document.ConceptView;
 import view.widgets.document.VoiceSelectionView;
 import DAO.Block;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.Topic;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
@@ -61,7 +61,7 @@ public class ChatView extends JFrame {
 	private static final long serialVersionUID = -4709511294166379162L;
 	private static final int MAX_LENGTH_TITLE = 100;
 
-	private Chat chat;
+	private Conversation chat;
 	private JLabel lblChatTitle;
 	private JTable tableTopics;
 	private JSlider sliderTopics;
@@ -73,7 +73,7 @@ public class ChatView extends JFrame {
 	private JComboBox<String> comboBoxCategory;
 	private List<Topic> topTopics;
 
-	public ChatView(Chat documentToDisplay) {
+	public ChatView(Conversation documentToDisplay) {
 		super();
 		setTitle("ReaderBench - Chat Visualization");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -567,19 +567,19 @@ public class ChatView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				List<Chat> chats = new LinkedList<Chat>();
+				List<Conversation> chats = new LinkedList<Conversation>();
 
-				Chat c1 = Chat.load("in/cscl/echipa4.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c1 = Conversation.load("in/cscl/echipa4.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c1.computeAll(null, null, true);
 				chats.add(c1);
 
-				Chat c2 = Chat.load("in/cscl/echipa34.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c2 = Conversation.load("in/cscl/echipa34.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c2.computeAll(null, null, true);
 				chats.add(c2);
 
-				Chat c3 = Chat.load("in/cscl/echipa36.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c3 = Conversation.load("in/cscl/echipa36.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c3.computeAll(null, null, true);
 				// Chat c3 = (Chat) AbstractDocument
@@ -603,7 +603,7 @@ public class ChatView extends JFrame {
 				for (File file : files) {
 					try {
 						logger.info("Processing " + file.getPath() + " file");
-						Chat c = Chat.load(file.getPath(), "config/LSA/lemonde_fr", "config/LDA/lemonde_fr", Lang.fr,
+						Conversation c = Conversation.load(file.getPath(), "config/LSA/lemonde_fr", "config/LDA/lemonde_fr", Lang.fr,
 								true, true);
 						c.computeAll(null, null, true);
 						chats.add(c);

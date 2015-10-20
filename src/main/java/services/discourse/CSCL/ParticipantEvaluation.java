@@ -27,9 +27,9 @@ import org.openide.util.Lookup;
 
 import DAO.Block;
 import DAO.Word;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.SemanticCohesion;
 import DAO.discourse.Topic;
 
@@ -98,7 +98,7 @@ public class ParticipantEvaluation {
 		}
 	}
 
-	public static void evaluateInteraction(Chat c) {
+	public static void evaluateInteraction(Conversation c) {
 		if (c.getParticipants().size() > 0) {
 			c.setParticipantContributions(new double[c.getParticipants().size()][c.getParticipants().size()]);
 
@@ -126,7 +126,7 @@ public class ParticipantEvaluation {
 		}
 	}
 
-	private static List<Participant> getParticipantList(Chat c) {
+	private static List<Participant> getParticipantList(Conversation c) {
 		Iterator<Participant> it = c.getParticipants().iterator();
 		List<Participant> lsPart = new ArrayList<Participant>();
 		while (it.hasNext()) {
@@ -136,7 +136,7 @@ public class ParticipantEvaluation {
 		return lsPart;
 	}
 
-	public static void evaluateInvolvement(Chat c) {
+	public static void evaluateInvolvement(Conversation c) {
 		if (c.getParticipants().size() > 0) {
 			for (Block b : c.getBlocks()) {
 				if (b != null) {
@@ -150,7 +150,7 @@ public class ParticipantEvaluation {
 		}
 	}
 
-	public static void evaluateUsedConcepts(Chat c) {
+	public static void evaluateUsedConcepts(Conversation c) {
 		// determine cumulated effect of top 10 topics (nouns and verbs only)
 		int noSelectedTopics = 0;
 		for (Topic topic : c.getTopics()) {
@@ -183,7 +183,7 @@ public class ParticipantEvaluation {
 		}
 	}
 
-	public static void performSNA(Chat c) {
+	public static void performSNA(Conversation c) {
 		List<Participant> lsPart = getParticipantList(c);
 		performSNA(lsPart, c.getParticipantContributions(), true);
 	}

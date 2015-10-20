@@ -35,9 +35,9 @@ import org.jfree.data.gantt.TaskSeriesCollection;
 
 import view.models.document.CustomToolTipGeneratorVoice;
 import DAO.Block;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.SemanticChain;
 
 public class ParticipantVoiceCoverageView extends JFrame {
@@ -48,7 +48,7 @@ public class ParticipantVoiceCoverageView extends JFrame {
 
 	private Map<Participant, Color> participantColors;
 	private Vector<Vector<Color>> taskColors;
-	private Chat chat;
+	private Conversation chat;
 	private List<SemanticChain> chains;
 	private JComboBox<String> comboBoxSelectVoice;
 	private ChartPanel chartPanel;
@@ -57,7 +57,7 @@ public class ParticipantVoiceCoverageView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ParticipantVoiceCoverageView(Chat chat, List<SemanticChain> chains,
+	public ParticipantVoiceCoverageView(Conversation chat, List<SemanticChain> chains,
 			Map<Participant, Color> participantColors) {
 		super("ReaderBench - Implicit (alien) voices");
 		this.chat = chat;

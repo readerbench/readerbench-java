@@ -53,7 +53,7 @@ import processing.core.PApplet;
 import services.discourse.topicMining.TopicModeling;
 import DAO.AbstractDocument;
 import DAO.Word;
-import DAO.chat.Participant;
+import DAO.cscl.Participant;
 import DAO.discourse.SemanticCohesion;
 import DAO.discourse.Topic;
 

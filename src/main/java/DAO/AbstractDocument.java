@@ -41,9 +41,9 @@ import services.nlp.parsing.Parsing_IT;
 import services.nlp.parsing.SimpleParsing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.CollaborationZone;
 import DAO.discourse.SemanticChain;
 import DAO.discourse.SemanticCohesion;
@@ -259,7 +259,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 				return d;
 			}
 			if (isChat) {
-				Chat c = Chat.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
+				Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
 				c.computeAll(null, null, true);
 				return c;
 			}
@@ -393,9 +393,9 @@ public abstract class AbstractDocument extends AnalysisElement {
 				out.write("\n");
 			}
 
-			if (this instanceof Chat) {
+			if (this instanceof Conversation) {
 				out.write("\nTopics per Participant\n");
-				Chat c = (Chat) this;
+				Conversation c = (Conversation) this;
 				if (c.getParticipants().size() > 0) {
 					for (Participant p : c.getParticipants()) {
 						topics = TopicModeling.getSublist(p.getInterventions().getTopics(), 100, false, false);

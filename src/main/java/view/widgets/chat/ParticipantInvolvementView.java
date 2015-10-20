@@ -35,7 +35,7 @@ import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import DAO.chat.Participant;
+import DAO.cscl.Participant;
 import processing.core.PApplet;
 import services.discourse.CSCL.ParticipantEvaluation;
 

@@ -8,9 +8,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 
 public class ParticipantEvolutionView extends JFrame {
 
@@ -20,7 +20,7 @@ public class ParticipantEvolutionView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ParticipantEvolutionView(Chat c) {
+	public ParticipantEvolutionView(Conversation c) {
 		setTitle("ReaderBench - Participant Evolution");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 700, 500);

@@ -65,7 +65,7 @@ import view.widgets.document.corpora.PaperKeywordAbstractOverlap;
 import view.widgets.document.corpora.PaperSimilarityView;
 import view.widgets.document.search.SearchSimilarityView;
 import DAO.AbstractDocument;
-import DAO.chat.Chat;
+import DAO.cscl.Conversation;
 import DAO.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
@@ -402,8 +402,8 @@ public class DocumentProcessingView extends JInternalFrame {
 					if (row >= 0 && row < allLoadedDocuments.size()) {
 						int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
 						AbstractDocument d = allLoadedDocuments.get(modelRow);
-						if (d instanceof Chat) {
-							ChatView view = new ChatView((Chat) d);
+						if (d instanceof Conversation) {
+							ChatView view = new ChatView((Conversation) d);
 							view.setVisible(true);
 						}
 						if (d instanceof Document) {
@@ -550,8 +550,8 @@ public class DocumentProcessingView extends JInternalFrame {
 				if (docTable.getSelectedRow() != -1) {
 					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
 					AbstractDocument d = allLoadedDocuments.get(modelRow);
-					if (d instanceof Chat) {
-						ChatView view = new ChatView((Chat) d);
+					if (d instanceof Conversation) {
+						ChatView view = new ChatView((Conversation) d);
 						view.setVisible(true);
 					}
 					if (d instanceof Document) {
@@ -754,7 +754,7 @@ public class DocumentProcessingView extends JInternalFrame {
 					} else {
 						dataRow.add("");
 					}
-					if (d instanceof Chat)
+					if (d instanceof Conversation)
 						dataRow.add(true);
 					else
 						dataRow.add(false);
@@ -823,7 +823,7 @@ public class DocumentProcessingView extends JInternalFrame {
 						} else {
 							dataRow.add("");
 						}
-						if (d instanceof Chat)
+						if (d instanceof Conversation)
 							dataRow.add(true);
 						else
 							dataRow.add(false);

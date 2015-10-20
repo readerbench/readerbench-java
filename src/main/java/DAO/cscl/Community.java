@@ -1,4 +1,4 @@
-package DAO.chat;
+package DAO.cscl;
 
 import java.awt.EventQueue;
 import java.io.BufferedWriter;
@@ -55,7 +55,7 @@ public class Community extends AnalysisElement {
 	static Logger logger = Logger.getLogger(Community.class);
 
 	private List<Participant> community;
-	private List<Chat> documents;
+	private List<Conversation> documents;
 	private double[][] participantContributions;
 	private Date startDate;
 	private Date endDate;
@@ -66,11 +66,11 @@ public class Community extends AnalysisElement {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		community = new LinkedList<Participant>();
-		documents = new LinkedList<Chat>();
+		documents = new LinkedList<Conversation>();
 	}
 
 	private void updateParticipantContributions() {
-		for (Chat c : documents) {
+		for (Conversation c : documents) {
 			// update the community correspondingly
 			for (Participant p : c.getParticipants()) {
 				int index = community.indexOf(p);
@@ -129,7 +129,7 @@ public class Community extends AnalysisElement {
 			p.resetIndices();
 		}
 
-		for (Chat d : documents) {
+		for (Conversation d : documents) {
 			// determine strength of links
 			for (int i = 0; i < d.getBlocks().size(); i++) {
 				Utterance u = (Utterance) d.getBlocks().get(i);
@@ -233,10 +233,10 @@ public class Community extends AnalysisElement {
 								participantToUpdate.getNewThreadsOverallScore() + d.getOverallScore());
 						participantToUpdate.setNewThreadsCumulativeInteranimation(
 								participantToUpdate.getNewThreadsCumulativeInteranimation()
-										+ VectorAlgebra.sumElements(((Chat) d).getVoicePMIEvolution()));
+										+ VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()));
 						participantToUpdate
 								.setNewThreadsCumulativeSocialKB(participantToUpdate.getNewThreadsCumulativeSocialKB()
-										+ VectorAlgebra.sumElements(((Chat) d).getSocialKBEvolution()));
+										+ VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
 						participantToUpdate.setAverageNewThreadsLength(participantToUpdate.getAverageNewThreadsLength()
 								+ d.getBlocks().get(i).getText().length());
 					}
@@ -352,12 +352,12 @@ public class Community extends AnalysisElement {
 					}
 
 					out.write(
-							new File(d.getPath()).getName() + "," + noBlocks + "," + ((Chat) d).getParticipants().size()
+							new File(d.getPath()).getName() + "," + noBlocks + "," + ((Conversation) d).getParticipants().size()
 									+ "," + Formatting.formatNumber(d.getOverallScore()) + ","
 									+ Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Chat) d).getVoicePMIEvolution()))
+											VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
 									+ "," + Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Chat) d).getSocialKBEvolution()))
+											VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
 									+ "\n");
 				}
 
@@ -397,7 +397,7 @@ public class Community extends AnalysisElement {
 			return null;
 		File[] filesTODO = dir.listFiles(filter);
 		for (File f : filesTODO) {
-			Chat c = (Chat) Chat.loadSerializedDocument(f.getPath());
+			Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
 			// d.exportIM();
 			if (c != null)
 				collection.getDocuments().add(c);
@@ -447,11 +447,11 @@ public class Community extends AnalysisElement {
 		this.community = community;
 	}
 
-	public List<Chat> getDocuments() {
+	public List<Conversation> getDocuments() {
 		return documents;
 	}
 
-	public void setDocuments(List<Chat> documents) {
+	public void setDocuments(List<Conversation> documents) {
 		this.documents = documents;
 	}
 

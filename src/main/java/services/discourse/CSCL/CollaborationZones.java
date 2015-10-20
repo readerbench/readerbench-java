@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Vector;
 
 import DAO.Block;
-import DAO.chat.Chat;
+import DAO.cscl.Conversation;
 import DAO.discourse.CollaborationZone;
 
 public class CollaborationZones {
 
-	private Chat chat;
+	private Conversation chat;
 
 	private List<CollaborationZone> convergencies;
 	private double noConvergencies;
@@ -30,7 +30,7 @@ public class CollaborationZones {
 
 	double[] distribution;
 
-	public CollaborationZones(Chat chat, double[] distribution) {
+	public CollaborationZones(Conversation chat, double[] distribution) {
 		convergencies = new LinkedList<CollaborationZone>();
 		divergencies = new LinkedList<CollaborationZone>();
 		this.chat = chat;

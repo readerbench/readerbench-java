@@ -19,8 +19,8 @@ import javax.swing.border.EtchedBorder;
 import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
-import DAO.chat.Chat;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Utterance;
 import DAO.discourse.CollaborationZone;
 
 public class CollaborationKBView extends JFrame {
@@ -28,14 +28,14 @@ public class CollaborationKBView extends JFrame {
 
 	static Logger logger = Logger.getLogger(CollaborationKBView.class);
 
-	private Chat chat;
+	private Conversation chat;
 	private JPanel panelPersonalKB;
 	private JPanel panelSocialKB;
 	private JTextField textFieldQuantCollab;
 	private JTextField textFieldSocialKB;
 	private JTextField textFieldSocialKBvsScore;
 
-	public CollaborationKBView(Chat chat) {
+	public CollaborationKBView(Conversation chat) {
 		setTitle("ReaderBench - Collaboration and Knowledge Building visualization");
 		getContentPane().setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

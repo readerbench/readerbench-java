@@ -35,9 +35,9 @@ import org.jfree.data.gantt.TaskSeriesCollection;
 import view.models.document.CustomToolTipGeneratorVoice;
 import DAO.Block;
 import DAO.Word;
-import DAO.chat.Chat;
-import DAO.chat.Participant;
-import DAO.chat.Utterance;
+import DAO.cscl.Conversation;
+import DAO.cscl.Participant;
+import DAO.cscl.Utterance;
 import DAO.discourse.SemanticChain;
 
 public class ChatVoiceInterAnimationView extends JFrame {
@@ -50,7 +50,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 
 	private Map<Participant, Color> participantColors;
 	private Vector<Vector<Color>> taskColors;
-	private Chat chat;
+	private Conversation chat;
 	private List<SemanticChain> chains;
 	// private Random rand = new Random();
 	private int colorIndex = -1;
@@ -68,7 +68,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ChatVoiceInterAnimationView(Chat chat, List<SemanticChain> chains) {
+	public ChatVoiceInterAnimationView(Conversation chat, List<SemanticChain> chains) {
 		super();
 		setTitle("ReaderBench - Inter-animation of participants' voices and of implicit (alien) voices");
 
