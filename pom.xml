@@ -16,6 +16,7 @@
 					<executions>
 						<execution>
 							<id>1</id>
+							<phase>initialize</phase>
 							<goals>
 								<goal>install-file</goal>
 							</goals>
@@ -29,6 +30,7 @@
 						</execution>
 						<execution>
 							<id>2</id>
+							<phase>initialize</phase>
 							<goals>
 								<goal>install-file</goal>
 							</goals>

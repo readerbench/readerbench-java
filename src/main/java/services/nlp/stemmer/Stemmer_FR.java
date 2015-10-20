@@ -1450,6 +1450,6 @@ public class Stemmer_FR extends SnowballProgram {
     }
 
     public static void main(String[] args) {
-        System.out.println(Stemmer_FR.stemWord("académique"));
+        System.out.println(Stemmer_FR.stemWord("acadÃ©mique"));
     }
 }
