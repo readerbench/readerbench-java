@@ -50,6 +50,9 @@ public abstract class AnalysisElement implements Serializable {
 
 	private transient SentimentEntity sentimentEntity;
 
+	/**
+	 * 
+	 */
 	public AnalysisElement() {
 		this.processedText = "";
 		this.alternateText = "";
@@ -60,6 +63,11 @@ public abstract class AnalysisElement implements Serializable {
 		this.sentimentEntity = new SentimentEntity();
 	}
 
+	/**
+	 * @param lsa
+	 * @param lda
+	 * @param language
+	 */
 	public AnalysisElement(LSA lsa, LDA lda, Lang language) {
 		this();
 		this.lsa = lsa;
@@ -67,6 +75,13 @@ public abstract class AnalysisElement implements Serializable {
 		this.language = language;
 	}
 
+	/**
+	 * @param elem
+	 * @param index
+	 * @param lsa
+	 * @param lda
+	 * @param language
+	 */
 	public AnalysisElement(AnalysisElement elem, int index, LSA lsa, LDA lda,
 			Lang language) {
 		this(lsa, lda, language);
@@ -74,12 +89,26 @@ public abstract class AnalysisElement implements Serializable {
 		this.container = elem;
 	}
 
+	/**
+	 * @param text
+	 * @param lsa
+	 * @param lda
+	 * @param language
+	 */
 	public AnalysisElement(String text, LSA lsa, LDA lda, Lang language) {
 		this(lsa, lda, language);
 		this.text = text;
 		this.alternateText = text;
 	}
 
+	/**
+	 * @param elem
+	 * @param index
+	 * @param text
+	 * @param lsa
+	 * @param lda
+	 * @param language
+	 */
 	public AnalysisElement(AnalysisElement elem, int index, String text,
 			LSA lsa, LDA lda, Lang language) {
 		this(elem, index, lsa, lda, language);
@@ -87,6 +116,10 @@ public abstract class AnalysisElement implements Serializable {
 		this.alternateText = text;
 	}
 
+	
+	/**
+	 * 
+	 */
 	public void determineSemanticDimensions() {
 		// determine the vector for the corresponding analysis element by using
 		// local TfIdf * LSA
@@ -105,6 +138,9 @@ public abstract class AnalysisElement implements Serializable {
 			this.ldaProbDistribution = lda.getProbDistribution(this);
 	}
 
+	/**
+	 * @param elements
+	 */
 	public void determineWordOccurences(List<? extends AnalysisElement> elements) {
 		// add all word occurrences from lower level analysis elements
 		// (Documents from Blocks), (Blocks from Utterances)
@@ -123,151 +159,262 @@ public abstract class AnalysisElement implements Serializable {
 		}
 	}
 
+	/**
+	 * @return
+	 */
 	public Map<Word, Integer> getWordOccurences() {
 		return wordOccurences;
 	}
 
+	/**
+	 * @param wordOccurences
+	 */
 	public void setWordOccurences(Map<Word, Integer> wordOccurences) {
 		this.wordOccurences = wordOccurences;
 	}
 
+	/**
+	 * @return
+	 */
 	public LSA getLSA() {
 		return lsa;
 	}
 
+	/**
+	 * @param lsa
+	 */
 	public void setLSA(LSA lsa) {
 		this.lsa = lsa;
 	}
 
+	/**
+	 * @return
+	 */
 	public LDA getLDA() {
 		return lda;
 	}
 
+	/**
+	 * @param lda
+	 */
 	public void setLDA(LDA lda) {
 		this.lda = lda;
 	}
 
+	/**
+	 * @return
+	 */
 	public Lang getLanguage() {
 		return language;
 	}
 
+	/**
+	 * @param language
+	 */
 	public void setLanguage(Lang language) {
 		this.language = language;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getLSAVector() {
 		return lsaVector;
 	}
 
+	/**
+	 * @param vector
+	 */
 	public void setLSAVector(double[] vector) {
 		this.lsaVector = vector;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getLDAProbDistribution() {
 		return ldaProbDistribution;
 	}
 
+	/**
+	 * @param ldaProbDistribution
+	 */
 	public void setLDAProbDistribution(double[] ldaProbDistribution) {
 		this.ldaProbDistribution = ldaProbDistribution;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getIndividualScore() {
 		return individualScore;
 	}
 
+	/**
+	 * @param individualScore
+	 */
 	public void setIndividualScore(double individualScore) {
 		this.individualScore = individualScore;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getOverallScore() {
 		return overallScore;
 	}
 
+	/**
+	 * @param overallScore
+	 */
 	public void setOverallScore(double overallScore) {
 		this.overallScore = overallScore;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getText() {
 		return text;
 	}
 
+	/**
+	 * @param text
+	 */
 	public void setText(String text) {
 		this.text = text;
 		this.alternateText = text;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getProcessedText() {
 		return processedText;
 	}
 
+	/**
+	 * @param processedText
+	 */
 	public void setProcessedText(String processedText) {
 		this.processedText = processedText;
 	}
 
+	/**
+	 * @return
+	 */
 	public int getIndex() {
 		return index;
 	}
 
+	/**
+	 * @param index
+	 */
 	public void setIndex(int index) {
 		this.index = index;
 	}
 
+	/**
+	 * @return
+	 */
 	public AnalysisElement getContainer() {
 		return container;
 	}
 
+	/**
+	 * @param container
+	 */
 	public void setContainer(AnalysisElement container) {
 		this.container = container;
 	}
 
+	/**
+	 * @return
+	 */
 	public String getAlternateText() {
 		return alternateText;
 	}
 
+	/**
+	 * @param alternateText
+	 */
 	public void setAlternateText(String alternateText) {
 		this.alternateText = alternateText;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<Topic> getTopics() {
 		return topics;
 	}
 
+	/**
+	 * @param topics
+	 */
 	public void setTopics(List<Topic> topics) {
 		this.topics = topics;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<Topic> getInferredConcepts() {
 		return inferredConcepts;
 	}
 
+	/**
+	 * @param inferredConcepts
+	 */
 	public void setInferredConcepts(List<Topic> inferredConcepts) {
 		this.inferredConcepts = inferredConcepts;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getSpecificity() {
 		return specificity;
 	}
 
+	/**
+	 * @param specificity
+	 */
 	public void setSpecificity(double specificity) {
 		this.specificity = specificity;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getCombinedScore() {
 		return specificity * overallScore;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getVoiceDistribution() {
 		return voiceDistribution;
 	}
 
+	/**
+	 * @param voiceDistribution
+	 */
 	public void setVoiceDistribution(double[] voiceDistribution) {
 		this.voiceDistribution = voiceDistribution;
 	}
 
+	/**
+	 * @return
+	 */
 	public SentimentEntity getSentimentEntity() {
 		return sentimentEntity;
 	}
 
+	/**
+	 * @param sentimentEntity
+	 */
 	public void setSentimentEntity(SentimentEntity sentimentEntity) {
 		this.sentimentEntity = sentimentEntity;
 	}
