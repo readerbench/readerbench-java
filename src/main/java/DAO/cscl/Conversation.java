@@ -40,6 +40,10 @@ import services.nlp.parsing.Parsing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
+/**
+ * @author Mihai Dascalu
+ *
+ */
 public class Conversation extends AbstractDocument {
 
 	private static final long serialVersionUID = 2096182930189552475L;
@@ -62,6 +66,12 @@ public class Conversation extends AbstractDocument {
 												// annotations
 												// throughout the conversation
 
+	/**
+	 * @param path
+	 * @param lsa
+	 * @param lda
+	 * @param lang
+	 */
 	public Conversation(String path, LSA lsa, LDA lda, Lang lang) {
 		super(path, lsa, lda, lang);
 		participants = new TreeSet<Participant>();
@@ -70,6 +80,15 @@ public class Conversation extends AbstractDocument {
 		annotatedCollabZones = new LinkedList<CollaborationZone>();
 	}
 
+	/**
+	 * @param path
+	 * @param contents
+	 * @param lsa
+	 * @param lda
+	 * @param lang
+	 * @param usePOSTagging
+	 * @param cleanInput
+	 */
 	public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		this(path, lsa, lda, lang);
@@ -79,6 +98,15 @@ public class Conversation extends AbstractDocument {
 		determineParticipantInterventions();
 	}
 
+	/**
+	 * @param pathToDoc
+	 * @param pathToLSA
+	 * @param pathToLDA
+	 * @param lang
+	 * @param usePOSTagging
+	 * @param cleanInput
+	 * @return
+	 */
 	public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		// load also LSA vector space and LDA model
@@ -87,6 +115,16 @@ public class Conversation extends AbstractDocument {
 		return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
 	}
 
+	/**
+	 * Load a conversation
+	 * @param docFile
+	 * @param lsa
+	 * @param lda
+	 * @param lang
+	 * @param usePOSTagging
+	 * @param cleanInput
+	 * @return
+	 */
 	public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -94,10 +132,12 @@ public class Conversation extends AbstractDocument {
 		// determine contents
 		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
 		List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
+		
 		try {
-
+			
 			InputSource input = new InputSource(new FileInputStream(docFile));
 			input.setEncoding("UTF-8");
+			
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			org.w3c.dom.Document dom = null;
 			try {
@@ -105,6 +145,7 @@ public class Conversation extends AbstractDocument {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			
 			Element doc = dom.getDocumentElement();
 			Element el = null;
 			NodeList nl1 = null, nl2 = null;
@@ -120,11 +161,11 @@ public class Conversation extends AbstractDocument {
 					} else {
 						block.setSpeaker("unregistered member");
 					}
+					
 					nl2 = el.getElementsByTagName("Utterance");
 					if (nl2 != null && nl2.getLength() > 0) {
 						for (int j = 0; j < nl2.getLength(); j++) {
 							el = (Element) nl2.item(j);
-
 							if (el.getFirstChild() != null) {
 								if (el.hasAttribute("time"))
 									block.setTime(el.getAttribute("time"));
@@ -154,6 +195,7 @@ public class Conversation extends AbstractDocument {
 					}
 				}
 			}
+			
 			contents.setBlocks(blocks);
 			c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
 			// set title as a concatenation of topics
@@ -166,6 +208,7 @@ public class Conversation extends AbstractDocument {
 				}
 				c.setDocumentTitle(title, lsa, lda, lang, usePOSTagging);
 			}
+			
 			if (title.length() == 0) {
 				c.setDocumentTitle(docFile.getName(), lsa, lda, lang, usePOSTagging);
 			}
@@ -240,6 +283,9 @@ public class Conversation extends AbstractDocument {
 		return c;
 	}
 
+	/**
+	 * 
+	 */
 	public void determineParticipantInterventions() {
 		if (getParticipants().size() > 0) {
 			for (Participant p : getParticipants()) {
@@ -259,6 +305,11 @@ public class Conversation extends AbstractDocument {
 		}
 	}
 
+	/**
+	 * @param voice
+	 * @param p
+	 * @return
+	 */
 	public double[] getParticipantBlockDistribution(SemanticChain voice, Participant p) {
 		double[] distribution = new double[voice.getBlockDistribution().length];
 		for (int i = 0; i < getBlocks().size(); i++) {
@@ -268,6 +319,11 @@ public class Conversation extends AbstractDocument {
 		return distribution;
 	}
 
+	/**
+	 * @param voice
+	 * @param p
+	 * @return
+	 */
 	public double[] getParticipantSentimentBlockDistribution(SemanticChain voice, Participant p) {
 		double[] distribution = new double[voice.getBlockDistribution().length];
 		for (int i = 0; i < getBlocks().size(); i++) {
@@ -278,6 +334,11 @@ public class Conversation extends AbstractDocument {
 		return distribution;
 	}
 
+	/**
+	 * @param voice
+	 * @param p
+	 * @return
+	 */
 	public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
 		double[] distribution = getParticipantBlockDistribution(voice, p);
 
@@ -285,6 +346,11 @@ public class Conversation extends AbstractDocument {
 				DialogismComputations.MAXIMUM_INTERVAL);
 	}
 
+	/**
+	 * @param pathToComplexityModel
+	 * @param selectedComplexityFactors
+	 * @param saveOutput
+	 */
 	public void computeAll(String pathToComplexityModel, int[] selectedComplexityFactors, boolean saveOutput) {
 		super.computeAll(pathToComplexityModel, selectedComplexityFactors);
 
@@ -318,6 +384,9 @@ public class Conversation extends AbstractDocument {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public void exportIM() {
 		try {
 			logger.info("Writing document export in IM format");
@@ -337,6 +406,10 @@ public class Conversation extends AbstractDocument {
 		}
 	}
 
+	/**
+	 * @param stream
+	 * @throws IOException
+	 */
 	private void writeObject(ObjectOutputStream stream) throws IOException {
 		// save serialized object - only path for LSA / LDA
 		stream.defaultWriteObject();
@@ -351,6 +424,11 @@ public class Conversation extends AbstractDocument {
 		}
 	}
 
+	/**
+	 * @param stream
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 */
 	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		// load serialized object - and rebuild LSA / LDA
 		stream.defaultReadObject();
@@ -378,90 +456,156 @@ public class Conversation extends AbstractDocument {
 		}
 	}
 
+	/**
+	 * @return
+	 */
 	public Set<Participant> getParticipants() {
 		return participants;
 	}
 
+	/**
+	 * @param participants
+	 */
 	public void setParticipants(TreeSet<Participant> participants) {
 		this.participants = participants;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[][] getParticipantContributions() {
 		return participantContributions;
 	}
 
+	/**
+	 * @param participantContributions
+	 */
 	public void setParticipantContributions(double[][] participantContributions) {
 		this.participantContributions = participantContributions;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<CollaborationZone> getIntenseCollabZonesSocialKB() {
 		return intenseCollabZonesSocialKB;
 	}
 
+	/**
+	 * @param intenseCollabZonesSocialKB
+	 */
 	public void setIntenseCollabZonesSocialKB(List<CollaborationZone> intenseCollabZonesSocialKB) {
 		this.intenseCollabZonesSocialKB = intenseCollabZonesSocialKB;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<CollaborationZone> getIntenseCollabZonesVoice() {
 		return intenseCollabZonesVoice;
 	}
 
+	/**
+	 * @param intenseCollabZonesVoice
+	 */
 	public void setIntenseCollabZonesVoice(List<CollaborationZone> intenseCollabZonesVoice) {
 		this.intenseCollabZonesVoice = intenseCollabZonesVoice;
 	}
 
+	/**
+	 * @return
+	 */
 	public List<CollaborationZone> getAnnotatedCollabZones() {
 		return annotatedCollabZones;
 	}
 
+	/**
+	 * @param annotatedCollabZones
+	 */
 	public void setAnnotatedCollabZones(List<CollaborationZone> annotatedCollabZones) {
 		this.annotatedCollabZones = annotatedCollabZones;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getQuantCollabPercentage() {
 		return quantCollabPercentage;
 	}
 
+	/**
+	 * @param quantCollabPercentage
+	 */
 	public void setQuantCollabPercentage(double quantCollabPercentage) {
 		this.quantCollabPercentage = quantCollabPercentage;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getSocialKBPercentage() {
 		return socialKBPercentage;
 	}
 
+	/**
+	 * @param socialKBPercentage
+	 */
 	public void setSocialKBPercentage(double socialKBPercentage) {
 		this.socialKBPercentage = socialKBPercentage;
 	}
 
+	/**
+	 * @return
+	 */
 	public double getSocialKBvsScore() {
 		return socialKBvsScore;
 	}
 
+	/**
+	 * @param socialKBvsScore
+	 */
 	public void setSocialKBvsScore(double socialKBvsScore) {
 		this.socialKBvsScore = socialKBvsScore;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getSocialKBEvolution() {
 		return socialKBEvolution;
 	}
 
+	/**
+	 * @param socialKBEvolution
+	 */
 	public void setSocialKBEvolution(double[] socialKBEvolution) {
 		this.socialKBEvolution = socialKBEvolution;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getVoicePMIEvolution() {
 		return voicePMIEvolution;
 	}
 
+	/**
+	 * @param voicePMIEvolution
+	 */
 	public void setVoicePMIEvolution(double[] voicePMIEvolution) {
 		this.voicePMIEvolution = voicePMIEvolution;
 	}
 
+	/**
+	 * @return
+	 */
 	public double[] getAnnotatedCollabEvolution() {
 		return annotatedCollabEvolution;
 	}
 
+	/**
+	 * @param annotatedCollabEvolution
+	 */
 	public void setAnnotatedCollabEvolution(double[] annotatedCollabEvolution) {
 		this.annotatedCollabEvolution = annotatedCollabEvolution;
 	}

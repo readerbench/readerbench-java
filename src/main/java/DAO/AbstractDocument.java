@@ -47,6 +47,7 @@ import DAO.cscl.Utterance;
 import DAO.discourse.CollaborationZone;
 import DAO.discourse.SemanticChain;
 import DAO.discourse.SemanticCohesion;
+import DAO.discourse.SemanticSimilarity;
 import DAO.discourse.Topic;
 import DAO.document.Document;
 import DAO.lexicalChains.DisambiguationGraph;
@@ -73,6 +74,14 @@ public abstract class AbstractDocument extends AnalysisElement {
 	// inter-block cohesion values
 	private SemanticCohesion[][] blockDistances;
 	private SemanticCohesion[][] prunnedBlockDistances;
+	
+	// similarity between a block and the overall document
+	private SemanticSimilarity[] blockDocSimilarities;
+	// inter-block similarity values
+	private SemanticSimilarity[][] blockSimilarities;
+	private SemanticSimilarity[][] prunnedBlockSimilarities;
+		
+		
 	private AbstractDocumentTemplate docTmp;
 	private String genre;
 	// useful for time series analysis - 0 for documents and the difference in
@@ -619,6 +628,30 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 	public void setBlockDocDistances(SemanticCohesion[] blockDocDistances) {
 		this.blockDocDistances = blockDocDistances;
+	}
+	
+	public SemanticSimilarity[][] getBlockSimilarities() {
+		return blockSimilarities;
+	}
+
+	public void setBlockSimilarities(SemanticSimilarity[][] blockSimilarities) {
+		this.blockSimilarities = blockSimilarities;
+	}
+
+	public SemanticSimilarity[][] getPrunnedBlockSimilarities() {
+		return prunnedBlockSimilarities;
+	}
+
+	public void setPrunnedBlockSimilarities(SemanticSimilarity[][] prunnedBlockSimilarities) {
+		this.prunnedBlockSimilarities = prunnedBlockSimilarities;
+	}
+
+	public SemanticSimilarity[] getBlockDocSimilarities() {
+		return blockDocSimilarities;
+	}
+
+	public void setBlockDocSimilarities(SemanticSimilarity[] blockDocSimilarities) {
+		this.blockDocSimilarities = blockDocSimilarities;
 	}
 
 	public List<LexicalChain> getLexicalChains() {

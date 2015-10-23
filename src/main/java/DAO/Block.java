@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import DAO.discourse.SemanticCohesion;
+import DAO.discourse.SemanticSimilarity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -38,12 +39,19 @@ public class Block extends AnalysisElement implements Serializable {
 	private transient Map<Integer, CorefChain> corefs;
 	private transient List<CoreMap> stanfordSentences;
 
-	// inter-utterance cohesion values
+	// inter-sentence cohesion values
 	private SemanticCohesion[][] sentenceDistances;
 	private SemanticCohesion[][] prunnedSentenceDistances;
 	// cohesion between an utterance and its corresponding block
 	private SemanticCohesion[] sentenceBlockDistances;
 	private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
+	
+	// inner-sentence semantic similarity values
+	private SemanticSimilarity[][] sentenceSimilarities;
+	private SemanticSimilarity[][] prunnedSentenceSimilarities;
+	// semantic similarity between an utterance and its corresponding block
+	private SemanticSimilarity[] sentenceBlockSimilarities;
+	private SemanticSimilarity prevSentenceBlockSimilarity, nextSentenceBlockSimilarity;
 
 	public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(d, index, text.trim(), lsa, lda, lang);
@@ -176,9 +184,42 @@ public class Block extends AnalysisElement implements Serializable {
 	// public void setPersonalKB(double personalKB) {
 	// this.personalKB = personalKB;
 	// }
-
+	
+	public SemanticSimilarity[] getSentenceBlockSimilarities() {
+		return sentenceBlockSimilarities;
+	}
+	
+	public void setSentenceBlockSimilarities(SemanticSimilarity[] sentenceBlockSimilarities) {
+		this.sentenceBlockSimilarities = sentenceBlockSimilarities;
+	}
+	
 	public SemanticCohesion[][] getSentenceDistances() {
 		return sentenceDistances;
+	}
+	
+	public void setSentenceSimilarities(SemanticSimilarity[][] sentenceSimilarities) {
+		this.sentenceSimilarities = sentenceSimilarities;
+	}
+
+	public SemanticSimilarity[][] getPrunnedSentenceSimilarities() {
+		return prunnedSentenceSimilarities;
+	}
+
+	public void setPrunnedSentenceSimilarities(SemanticSimilarity[][] prunnedSentenceSimilarities) {
+		this.prunnedSentenceSimilarities = prunnedSentenceSimilarities;
+	}
+	
+
+	public SemanticCohesion[] getSentenceBlockDistances() {
+		return sentenceBlockDistances;
+	}
+
+	public void setSentenceBlockDistances(SemanticCohesion[] sentenceBlockDistances) {
+		this.sentenceBlockDistances = sentenceBlockDistances;
+	}
+	
+	public SemanticSimilarity[][] getSentenceSimilarities() {
+		return sentenceSimilarities;
 	}
 
 	public void setSentenceDistances(SemanticCohesion[][] sentenceDistances) {
@@ -191,14 +232,6 @@ public class Block extends AnalysisElement implements Serializable {
 
 	public void setPrunnedSentenceDistances(SemanticCohesion[][] prunnedSentenceDistances) {
 		this.prunnedSentenceDistances = prunnedSentenceDistances;
-	}
-
-	public SemanticCohesion[] getSentenceBlockDistances() {
-		return sentenceBlockDistances;
-	}
-
-	public void setSentenceBlockDistances(SemanticCohesion[] sentenceBlockDistances) {
-		this.sentenceBlockDistances = sentenceBlockDistances;
 	}
 
 	public boolean isFollowedByVerbalization() {
@@ -223,6 +256,22 @@ public class Block extends AnalysisElement implements Serializable {
 
 	public void setNextSentenceBlockDistance(SemanticCohesion nextSentenceBlockDistance) {
 		this.nextSentenceBlockDistance = nextSentenceBlockDistance;
+	}
+	
+	public SemanticSimilarity getPrevSentenceBlockSimilarity() {
+		return prevSentenceBlockSimilarity;
+	}
+
+	public void setPrevSentenceBlockSimilarity(SemanticSimilarity prevSentenceBlockSimilarity) {
+		this.prevSentenceBlockSimilarity = prevSentenceBlockSimilarity;
+	}
+
+	public SemanticSimilarity getNextSentenceBlockSimilarity() {
+		return nextSentenceBlockSimilarity;
+	}
+
+	public void setNextSentenceBlockSimilarity(SemanticSimilarity nextSentenceBlockSimilarity) {
+		this.nextSentenceBlockSimilarity = nextSentenceBlockSimilarity;
 	}
 
 	@Override

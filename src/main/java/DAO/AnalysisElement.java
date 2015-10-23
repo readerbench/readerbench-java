@@ -15,14 +15,22 @@ import DAO.sentiment.SentimentEntity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 /**
- * 
+ * This abstract class is the base for all type of elements. It is extended later for 
+ * all processing elements in the following hierarchical order: Document > Block > 
+ * Utterance.
+ *   
  * @author Mihai Dascalu
  */
-// abstract class extended later on for all processing elements Document > Block
-// > Utterance
 public abstract class AnalysisElement implements Serializable {
+	
+	/**
+	 * A version number for the AnaylisElement class
+	 */
 	private static final long serialVersionUID = -8110285459013257550L;
 
+	/**
+	 * The logger instance
+	 */
 	public static Logger logger = Logger.getLogger(AnalysisElement.class);
 
 	private int index;
@@ -118,7 +126,10 @@ public abstract class AnalysisElement implements Serializable {
 
 	
 	/**
-	 * 
+	 * Determines the LSA vector for the corresponding analysis element by using local
+	 * tf-idf * LSA
+	 * Determines the LDA probability distribution.
+	 * TODO: explain better
 	 */
 	public void determineSemanticDimensions() {
 		// determine the vector for the corresponding analysis element by using
@@ -139,7 +150,13 @@ public abstract class AnalysisElement implements Serializable {
 	}
 
 	/**
+	 * Determines number of occurrences for each word in a list of analysis elements.
+	 * The method goes through all elements and, for each word, increments the number of 
+	 * occurrences in a local variable. 
+	 * TODO: word occurences from (Documents from Blocks), (Blocks from Sentences) (mai spunem?)
+	 * 
 	 * @param elements
+	 * 			The list of analysis elements
 	 */
 	public void determineWordOccurences(List<? extends AnalysisElement> elements) {
 		// add all word occurrences from lower level analysis elements
@@ -160,7 +177,7 @@ public abstract class AnalysisElement implements Serializable {
 	}
 
 	/**
-	 * @return
+	 * @return map of (word, no_occurrences) associations  
 	 */
 	public Map<Word, Integer> getWordOccurences() {
 		return wordOccurences;
@@ -168,13 +185,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param wordOccurences
+	 * 			map of (word, no_occurences) associations to be set
 	 */
 	public void setWordOccurences(Map<Word, Integer> wordOccurences) {
 		this.wordOccurences = wordOccurences;
 	}
 
 	/**
-	 * @return
+	 * @return Latent Semantic Analysis object
 	 */
 	public LSA getLSA() {
 		return lsa;
@@ -182,13 +200,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param lsa
+	 * 			Latent Semantic Analysis object to be set
 	 */
 	public void setLSA(LSA lsa) {
 		this.lsa = lsa;
 	}
 
 	/**
-	 * @return
+	 * @return Latent Dirichlet Allocation object
 	 */
 	public LDA getLDA() {
 		return lda;
@@ -196,13 +215,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param lda
+	 * 			Latent Dirichlet Allocation object to be set
 	 */
 	public void setLDA(LDA lda) {
 		this.lda = lda;
 	}
 
 	/**
-	 * @return
+	 * @return the language the text is written in
 	 */
 	public Lang getLanguage() {
 		return language;
@@ -210,13 +230,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param language
+	 * 			the language the text is written in to be set
 	 */
 	public void setLanguage(Lang language) {
 		this.language = language;
 	}
 
 	/**
-	 * @return
+	 * @return Latent Semantic Analysis vector
 	 */
 	public double[] getLSAVector() {
 		return lsaVector;
@@ -224,13 +245,15 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param vector
+	 * 			Latent Semantic Analysis vector to be set
 	 */
 	public void setLSAVector(double[] vector) {
 		this.lsaVector = vector;
 	}
 
 	/**
-	 * @return
+	 * TODO: e ok explicatia?
+	 * @return Latent Dirichlet Allocation Probability Distribution vector
 	 */
 	public double[] getLDAProbDistribution() {
 		return ldaProbDistribution;
@@ -238,13 +261,15 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param ldaProbDistribution
+	 * 			Latent Dirichlet Allocation Probability Distribution vector to be set
 	 */
 	public void setLDAProbDistribution(double[] ldaProbDistribution) {
 		this.ldaProbDistribution = ldaProbDistribution;
 	}
 
 	/**
-	 * @return
+	 * TODO: e ok explicatia?
+	 * @return score for the analysis element 
 	 */
 	public double getIndividualScore() {
 		return individualScore;
@@ -252,13 +277,15 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param individualScore
+	 * 			score for the analysis element to be set
 	 */
 	public void setIndividualScore(double individualScore) {
 		this.individualScore = individualScore;
 	}
 
 	/**
-	 * @return
+	 * TODO: e ok explicatia?
+	 * @return total score
 	 */
 	public double getOverallScore() {
 		return overallScore;
@@ -266,13 +293,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param overallScore
+	 * 			total score to be set
 	 */
 	public void setOverallScore(double overallScore) {
 		this.overallScore = overallScore;
 	}
 
 	/**
-	 * @return
+	 * @return parsed text
 	 */
 	public String getText() {
 		return text;
@@ -280,6 +308,7 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param text
+	 * 			parsed text to be set
 	 */
 	public void setText(String text) {
 		this.text = text;
@@ -287,7 +316,7 @@ public abstract class AnalysisElement implements Serializable {
 	}
 
 	/**
-	 * @return
+	 * @return processed text
 	 */
 	public String getProcessedText() {
 		return processedText;
@@ -295,13 +324,15 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param processedText
+	 * 			processed text to be set
 	 */
 	public void setProcessedText(String processedText) {
 		this.processedText = processedText;
 	}
 
 	/**
-	 * @return
+	 * TODO: e ok explicatia?
+	 * @return current index
 	 */
 	public int getIndex() {
 		return index;
@@ -309,13 +340,14 @@ public abstract class AnalysisElement implements Serializable {
 
 	/**
 	 * @param index
+	 * 			current index to be set
 	 */
 	public void setIndex(int index) {
 		this.index = index;
 	}
 
 	/**
-	 * @return
+	 * @return 
 	 */
 	public AnalysisElement getContainer() {
 		return container;

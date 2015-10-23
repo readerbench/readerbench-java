@@ -9,8 +9,13 @@ import DAO.AnalysisElement;
 import DAO.Word;
 import cc.mallet.util.Maths;
 
+/**
+ * @author Mihai Dascalu
+ *
+ */
 public class SemanticCohesion implements Serializable {
 	private static final long serialVersionUID = 7561413289472294392L;
+	
 	public static final int NO_COHESION_DIMENSIONS = 6;
 
 	public static final int WINDOW_SIZE = 20;
@@ -54,6 +59,10 @@ public class SemanticCohesion implements Serializable {
 		return 0;
 	}
 
+	/**
+	 * @param source
+	 * @param destination
+	 */
 	public SemanticCohesion(AnalysisElement source, AnalysisElement destination) {
 		this.source = source;
 		this.destination = destination;
@@ -73,7 +82,7 @@ public class SemanticCohesion implements Serializable {
 			cohesion = getCohesionMeasure(ontologySim[OntologySupport.WU_PALMER], lsaSim, ldaSim);
 		}
 	}
-
+	
 	public AnalysisElement getSource() {
 		return source;
 	}
