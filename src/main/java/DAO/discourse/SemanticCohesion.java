@@ -23,11 +23,11 @@ public class SemanticCohesion implements Serializable {
 	public static final double WEIGH_LSA = 1.0;
 	public static final double WEIGH_LDA = 1.0;
 
-	private AnalysisElement source;
-	private AnalysisElement destination;
-	private double[] ontologySim = new double[OntologySupport.NO_SIMILARITIES];
-	private double lsaSim;
-	private double ldaSim;
+	protected AnalysisElement source;
+	protected AnalysisElement destination;
+	protected double[] ontologySim = new double[OntologySupport.NO_SIMILARITIES];
+	protected double lsaSim;
+	protected double ldaSim;
 
 	private double cohesion;
 

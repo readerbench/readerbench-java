@@ -7,7 +7,7 @@ import DAO.AbstractDocument;
 import DAO.Sentence;
 import DAO.Word;
 import DAO.discourse.SemanticCohesion;
-import DAO.discourse.SemanticSimilarity;
+import DAO.discourse.SemanticRelatedness;
 
 /**
  * 
@@ -32,14 +32,14 @@ public class CohesionGraph {
 		// initialize semantic cohesion vector for the semantic cohesion of (block, document) pairs
 		d.setBlockDocDistances(new SemanticCohesion[d.getBlocks().size()]);
 		// initialize semantic similarity vector for the semantic cohesion of (block, document) pairs
-		d.setBlockDocSimilarities(new SemanticSimilarity[d.getBlocks().size()]);
+		d.setBlockDocSimilarities(new SemanticRelatedness[d.getBlocks().size()]);
 		// iterate through all blocks of the document
 		for (int i = 0; i < d.getBlocks().size(); i++) {
 			if (d.getBlocks().get(i) != null) {
 				// set semantic cohesion between the block and the document 
 				d.getBlockDocDistances()[i] = new SemanticCohesion(d.getBlocks().get(i), d);
 				// set semantic similarity between the block and the document
-				d.getBlockDocSimilarities()[i] = new SemanticSimilarity(d.getBlocks().get(i), d);
+				d.getBlockDocSimilarities()[i] = new SemanticRelatedness(d.getBlocks().get(i), d);
 			}
 		}
 		
@@ -69,8 +69,8 @@ public class CohesionGraph {
 		d.setBlockDistances(new SemanticCohesion[d.getBlocks().size()][d.getBlocks().size()]);
 		d.setPrunnedBlockDistances(new SemanticCohesion[d.getBlocks().size()][d.getBlocks().size()]);
 		//initialize semantic similarity arrays for the semantic cohesion of (block, block) pairs
-		d.setBlockSimilarities(new SemanticSimilarity[d.getBlocks().size()][d.getBlocks().size()]);
-		d.setPrunnedBlockSimilarities(new SemanticSimilarity[d.getBlocks().size()][d.getBlocks().size()]);
+		d.setBlockSimilarities(new SemanticRelatedness[d.getBlocks().size()][d.getBlocks().size()]);
+		d.setPrunnedBlockSimilarities(new SemanticRelatedness[d.getBlocks().size()][d.getBlocks().size()]);
 		// iterate through all blocks of the document
 		for (int i = 0; i < d.getBlocks().size() - 1; i++) {
 			if (d.getBlocks().get(i) != null) {
@@ -89,7 +89,7 @@ public class CohesionGraph {
 							s2 += Math.pow(coh.getCohesion(), 2);
 						}
 						
-						SemanticSimilarity sim = new SemanticSimilarity(d.getBlocks().get(j), d.getBlocks().get(i));
+						SemanticRelatedness sim = new SemanticRelatedness(d.getBlocks().get(j), d.getBlocks().get(i));
 						d.getBlockSimilarities()[j][i] = sim;
 						d.getBlockSimilarities()[i][j] = sim;
 						if (sim.getSimilarity() != 0) {
@@ -113,7 +113,7 @@ public class CohesionGraph {
 							s2 += Math.pow(coh.getCohesion(), 2);
 						}
 						
-						SemanticSimilarity sim = new SemanticSimilarity(d.getBlocks().get(j), d.getBlocks().get(i));
+						SemanticRelatedness sim = new SemanticRelatedness(d.getBlocks().get(j), d.getBlocks().get(i));
 						d.getBlockSimilarities()[j][i] = sim;
 						d.getBlockSimilarities()[i][j] = sim;
 						if (sim.getSimilarity() != 0) {
@@ -217,7 +217,7 @@ public class CohesionGraph {
 				// set semantic cohesion and similarity between block's first sentence and previous block
 				if (prevBlock != null && b.getSentences().size() > 0) {
 					b.setPrevSentenceBlockDistance(new SemanticCohesion(b.getSentences().get(0), prevBlock));
-					b.setPrevSentenceBlockSimilarity(new SemanticSimilarity(b.getSentences().get(0), prevBlock));
+					b.setPrevSentenceBlockSimilarity(new SemanticRelatedness(b.getSentences().get(0), prevBlock));
 				}
 				
 				// set semantic cohesion and similarity between block's last sentence and next block
@@ -225,19 +225,19 @@ public class CohesionGraph {
 					b.setNextSentenceBlockDistance(
 							new SemanticCohesion(nextBlock, b.getSentences().get(b.getSentences().size() - 1)));
 					b.setNextSentenceBlockSimilarity(
-							new SemanticSimilarity(nextBlock, b.getSentences().get(b.getSentences().size() - 1)));
+							new SemanticRelatedness(nextBlock, b.getSentences().get(b.getSentences().size() - 1)));
 				}
 				
 				// determine sentence-block semantic cohesion and similarity
 
 				// initialize semantic cohesion and similarity vector for the semantic cohesion and similarity of (sentence, block) pairs
 				b.setSentenceBlockDistances(new SemanticCohesion[b.getSentences().size()]);
-				b.setSentenceBlockSimilarities(new SemanticSimilarity[b.getSentences().size()]);
+				b.setSentenceBlockSimilarities(new SemanticRelatedness[b.getSentences().size()]);
 				// iterate through all sentences of the block
 				for (int i = 0; i < b.getSentences().size(); i++) {
 					// set semantic cohesion and similarity between the sentence and the block
 					b.getSentenceBlockDistances()[i] = new SemanticCohesion(b.getSentences().get(i), b);
-					b.getSentenceBlockSimilarities()[i] = new SemanticSimilarity(b.getSentences().get(i), b);
+					b.getSentenceBlockSimilarities()[i] = new SemanticRelatedness(b.getSentences().get(i), b);
 				}
 
 				// determine sentence-sentence semantic cohesion and similarity
@@ -245,8 +245,8 @@ public class CohesionGraph {
 				// initialize semantic cohesion and similarity arrays for the semantic cohesion and similarity of (sentence, sentence) pairs
 				b.setSentenceDistances(new SemanticCohesion[b.getSentences().size()][b.getSentences().size()]);
 				b.setPrunnedSentenceDistances(new SemanticCohesion[b.getSentences().size()][b.getSentences().size()]);
-				b.setSentenceSimilarities(new SemanticSimilarity[b.getSentences().size()][b.getSentences().size()]);
-				b.setPrunnedSentenceSimilarities(new SemanticSimilarity[b.getSentences().size()][b.getSentences().size()]);
+				b.setSentenceSimilarities(new SemanticRelatedness[b.getSentences().size()][b.getSentences().size()]);
+				b.setPrunnedSentenceSimilarities(new SemanticRelatedness[b.getSentences().size()][b.getSentences().size()]);
 
 				s0 = 0;
 				s1 = 0;
@@ -274,7 +274,7 @@ public class CohesionGraph {
 						}
 
 						// compute semantic similarity between the sentence and the following blocks
-						SemanticSimilarity sim = new SemanticSimilarity(b.getSentences().get(j), b.getSentences().get(i));
+						SemanticRelatedness sim = new SemanticRelatedness(b.getSentences().get(j), b.getSentences().get(i));
 						b.getSentenceSimilarities()[i][j] = sim;
 						b.getSentenceSimilarities()[j][i] = sim;
 						if (sim.getSimilarity() != 0) {

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import DAO.discourse.SemanticCohesion;
-import DAO.discourse.SemanticSimilarity;
+import DAO.discourse.SemanticRelatedness;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -47,11 +47,11 @@ public class Block extends AnalysisElement implements Serializable {
 	private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
 	
 	// inner-sentence semantic similarity values
-	private SemanticSimilarity[][] sentenceSimilarities;
-	private SemanticSimilarity[][] prunnedSentenceSimilarities;
+	private SemanticRelatedness[][] sentenceSimilarities;
+	private SemanticRelatedness[][] prunnedSentenceSimilarities;
 	// semantic similarity between an utterance and its corresponding block
-	private SemanticSimilarity[] sentenceBlockSimilarities;
-	private SemanticSimilarity prevSentenceBlockSimilarity, nextSentenceBlockSimilarity;
+	private SemanticRelatedness[] sentenceBlockSimilarities;
+	private SemanticRelatedness prevSentenceBlockSimilarity, nextSentenceBlockSimilarity;
 
 	public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(d, index, text.trim(), lsa, lda, lang);
@@ -185,11 +185,11 @@ public class Block extends AnalysisElement implements Serializable {
 	// this.personalKB = personalKB;
 	// }
 	
-	public SemanticSimilarity[] getSentenceBlockSimilarities() {
+	public SemanticRelatedness[] getSentenceBlockSimilarities() {
 		return sentenceBlockSimilarities;
 	}
 	
-	public void setSentenceBlockSimilarities(SemanticSimilarity[] sentenceBlockSimilarities) {
+	public void setSentenceBlockSimilarities(SemanticRelatedness[] sentenceBlockSimilarities) {
 		this.sentenceBlockSimilarities = sentenceBlockSimilarities;
 	}
 	
@@ -197,15 +197,15 @@ public class Block extends AnalysisElement implements Serializable {
 		return sentenceDistances;
 	}
 	
-	public void setSentenceSimilarities(SemanticSimilarity[][] sentenceSimilarities) {
+	public void setSentenceSimilarities(SemanticRelatedness[][] sentenceSimilarities) {
 		this.sentenceSimilarities = sentenceSimilarities;
 	}
 
-	public SemanticSimilarity[][] getPrunnedSentenceSimilarities() {
+	public SemanticRelatedness[][] getPrunnedSentenceSimilarities() {
 		return prunnedSentenceSimilarities;
 	}
 
-	public void setPrunnedSentenceSimilarities(SemanticSimilarity[][] prunnedSentenceSimilarities) {
+	public void setPrunnedSentenceSimilarities(SemanticRelatedness[][] prunnedSentenceSimilarities) {
 		this.prunnedSentenceSimilarities = prunnedSentenceSimilarities;
 	}
 	
@@ -218,7 +218,7 @@ public class Block extends AnalysisElement implements Serializable {
 		this.sentenceBlockDistances = sentenceBlockDistances;
 	}
 	
-	public SemanticSimilarity[][] getSentenceSimilarities() {
+	public SemanticRelatedness[][] getSentenceSimilarities() {
 		return sentenceSimilarities;
 	}
 
@@ -258,19 +258,19 @@ public class Block extends AnalysisElement implements Serializable {
 		this.nextSentenceBlockDistance = nextSentenceBlockDistance;
 	}
 	
-	public SemanticSimilarity getPrevSentenceBlockSimilarity() {
+	public SemanticRelatedness getPrevSentenceBlockSimilarity() {
 		return prevSentenceBlockSimilarity;
 	}
 
-	public void setPrevSentenceBlockSimilarity(SemanticSimilarity prevSentenceBlockSimilarity) {
+	public void setPrevSentenceBlockSimilarity(SemanticRelatedness prevSentenceBlockSimilarity) {
 		this.prevSentenceBlockSimilarity = prevSentenceBlockSimilarity;
 	}
 
-	public SemanticSimilarity getNextSentenceBlockSimilarity() {
+	public SemanticRelatedness getNextSentenceBlockSimilarity() {
 		return nextSentenceBlockSimilarity;
 	}
 
-	public void setNextSentenceBlockSimilarity(SemanticSimilarity nextSentenceBlockSimilarity) {
+	public void setNextSentenceBlockSimilarity(SemanticRelatedness nextSentenceBlockSimilarity) {
 		this.nextSentenceBlockSimilarity = nextSentenceBlockSimilarity;
 	}
 

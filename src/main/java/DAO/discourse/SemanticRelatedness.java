@@ -1,6 +1,5 @@
 package DAO.discourse;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 
 import services.commons.VectorAlgebra;
@@ -10,65 +9,54 @@ import DAO.Word;
 import cc.mallet.util.Maths;
 
 /**
+ * Computes a semantic relatedness value of two analysis element by combining three
+ * different semantic relatedness metric techniques: Latent Semantic Analysis, 
+ * Latent Dirichlet Allocation and three different WordNet metrics: Leacock Chodorow,
+ * Wu Palmer and PathSim.
+ * 
  * @author Gabriel Gutu
  *
  */
-public class SemanticSimilarity implements Serializable {
+public class SemanticRelatedness extends SemanticCohesion {
 	
 	private static final long serialVersionUID = 7561413289472294392L;
 	
-	public static final int NO_SIMILARITY_DIMENSIONS = 6;
+	/**
+	 * Holds a value quantifying semantic relatedness between the two object of 
+	 * type AnalysisElement: source and destination. 
+	 */
+	private double relatedness;
 
-	public static final int WINDOW_SIZE = 20;
-	public static final double WEIGH_WN = 1.0;
-	public static final double WEIGH_LSA = 1.0;
-	public static final double WEIGH_LDA = 1.0;
-
-	private AnalysisElement source;
-	private AnalysisElement destination;
-	private double[] ontologySim = new double[OntologySupport.NO_SIMILARITIES];
-	private double lsaSim;
-	private double ldaSim;
-
-	private double similarity;
-
-	public static double getAggregatedSemanticMeasure(double lsaSim, double ldaSim) {
-		double cohesion = 0;
-		double divisor = 0;
-		if (lsaSim > 0) {
-			divisor += WEIGH_LSA;
-		} else {
-			lsaSim = 0;
-		}
-		if (ldaSim > 0) {
-			divisor += WEIGH_LDA;
-		} else {
-			ldaSim = 0;
-		}
-		if (divisor > 0)
-			cohesion = (WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim) / divisor;
-		if (cohesion > 0)
-			return cohesion;
-		return 0;
-	}
-
+	/**
+	 * Combines similarity metrics with different weights in order to compute a 
+	 * final semantic relatedness score.  
+	 *  
+	 * @param WNSim
+	 * 			computed WordNet similarity
+	 * @param lsaSim
+	 * 			computed LatentSemanticAnalysis similarity
+	 * @param ldaSim
+	 * 			computed Latent Dirichlet similarity
+	 * @return
+	 * 			computed semantic relatedness score
+	 */
 	public static double getSimilarityMeasure(double WNSim, double lsaSim, double ldaSim) {
-		double similarity = (WEIGH_WN * WNSim + WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim)
+		double relatedness = (WEIGH_WN * WNSim + WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim)
 				/ (WEIGH_WN + WEIGH_LSA + WEIGH_LDA);
-		if (similarity > 0)
-			return similarity;
-		return 0;
+		return relatedness > 0 ? relatedness : 0;
 	}
 
 	/**
 	 * @param source
+	 * 			The first element for which semantic relatedness should be computed.
 	 * @param destination
+	 * 			The second element for which semantic relatedness should be computed.
 	 */
-	public SemanticSimilarity(AnalysisElement source, AnalysisElement destination) {
-		this.source = source;
-		this.destination = destination;
+	public SemanticRelatedness(AnalysisElement source, AnalysisElement destination) {
+		super(source, destination);
 		
-		double
+		// helper values
+		double 
 			lowerValue = 0,
 			upperValueLsa = 0,
 			upperValueLda = 0,
@@ -76,24 +64,33 @@ public class SemanticSimilarity implements Serializable {
 			leftHandValueLda = 0,
 			rightHandValueLsa = 0,
 			rightHandValueLda = 0;
+		
+		// helper values
 		double
 			upperValueOntology[] = new double[OntologySupport.NO_SIMILARITIES],
 			leftHandValueOntology[] = new double[OntologySupport.NO_SIMILARITIES],
 			rightHandValueOntology[] = new double[OntologySupport.NO_SIMILARITIES];
 		
-		// iterate through all words of analysis element
+		// iterate through all words of source analysis element
 		for (Word w1 : source.getWordOccurences().keySet()) {
-			
+			// helper values
 			double 
 				maxSimLsa = 0,
 				maxSimLda = 0;
 			double
 				maxSimOntology[] = new double[OntologySupport.NO_SIMILARITIES];
 			
+			// iterate through all words of destination analysis element
 			for (Word w2 : destination.getWordOccurences().keySet()) {
+				// determine the word of the destination analysis element for whom
+				// the Latent Semantic Analysis value is the highest with the word
+				// of the source analysis element
 				double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getLSAVector(), w2.getLSAVector());
 				if (localSimLsa > maxSimLsa) maxSimLsa = localSimLsa;
 				
+				// determine the word of the destination analysis element for whom
+				// the Latent Dirichlet Allocation value is the highest with the word
+				// of the source analysis element 
 				double localSimLda;
 				if (w1.getLDAProbDistribution() == null || w2.getLDAProbDistribution() == null)
 					localSimLda = 0;
@@ -102,6 +99,9 @@ public class SemanticSimilarity implements Serializable {
 							VectorAlgebra.normalize(w2.getLDAProbDistribution()));
 				if (localSimLda > maxSimLda) maxSimLda = localSimLda;
 				
+				// determine the word of the destination analysis element for whom
+				// the WordNet similarity value is the highest with the word
+				// of the source analysis element, for different algorithms
 				double localOntologySim[] = new double[OntologySupport.NO_SIMILARITIES];
 				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = OntologySupport.semanticSimilarity(w1, w2,
 						OntologySupport.LEACOCK_CHODOROW);
@@ -113,25 +113,25 @@ public class SemanticSimilarity implements Serializable {
 				localOntologySim[OntologySupport.PATH_SIM] = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.PATH_SIM);
 				if (localOntologySim[OntologySupport.PATH_SIM] > maxSimOntology[OntologySupport.PATH_SIM])
 					maxSimOntology[OntologySupport.PATH_SIM] = localOntologySim[OntologySupport.PATH_SIM];
-				
 			}
 			
-			// TODO: multiply with tf?
+			// TODO: multiply with term-frequency (how to?)
 			upperValueLsa += maxSimLsa * w1.getIdf();
 			upperValueLda += maxSimLda * w1.getIdf();
 			upperValueOntology[OntologySupport.LEACOCK_CHODOROW] += maxSimOntology[OntologySupport.LEACOCK_CHODOROW] * w1.getIdf();
 			upperValueOntology[OntologySupport.WU_PALMER] += maxSimOntology[OntologySupport.WU_PALMER] * w1.getIdf();
 			upperValueOntology[OntologySupport.PATH_SIM] += maxSimOntology[OntologySupport.PATH_SIM] * w1.getIdf();
 			lowerValue += w1.getIdf();
-			
 		}
 		
+		// compute the left hand side of the equation
 		leftHandValueLsa = upperValueLsa/lowerValue;
 		leftHandValueLda = upperValueLda/lowerValue;
 		leftHandValueOntology[OntologySupport.LEACOCK_CHODOROW] = upperValueOntology[OntologySupport.LEACOCK_CHODOROW]/lowerValue;
 		leftHandValueOntology[OntologySupport.WU_PALMER] = upperValueOntology[OntologySupport.WU_PALMER]/lowerValue;
 		leftHandValueOntology[OntologySupport.PATH_SIM] = upperValueOntology[OntologySupport.PATH_SIM]/lowerValue;
 		
+		// helper values reset
 		lowerValue = 0;
 		upperValueLsa = 0;
 		upperValueLda = 0;
@@ -139,17 +139,24 @@ public class SemanticSimilarity implements Serializable {
 		
 		// iterate through all words of destination analysis element
 		for (Word w1 : destination.getWordOccurences().keySet()) {
-					
+			// helper values
 			double 
 				maxSimLsa = 0,
 				maxSimLda = 0;
 			double
 				maxSimOntology[] = new double[OntologySupport.NO_SIMILARITIES];
 			
+			// iterate through all words of source analysis element
 			for (Word w2 : source.getWordOccurences().keySet()) {
+				// determine the word of the destination analysis element for whom
+				// the Latent Semantic Analysis value is the highest with the word
+				// of the source analysis element				
 				double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getLSAVector(), w2.getLSAVector());
 				if (localSimLsa > maxSimLsa) maxSimLsa = localSimLsa;
-				
+
+				// determine the word of the destination analysis element for whom
+				// the Latent Dirichlet Allocation value is the highest with the word
+				// of the source analysis element 
 				double localSimLda;
 				if (w1.getLDAProbDistribution() == null || w2.getLDAProbDistribution() == null)
 					localSimLda = 0;
@@ -157,7 +164,10 @@ public class SemanticSimilarity implements Serializable {
 					localSimLda = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(w1.getLDAProbDistribution()),
 							VectorAlgebra.normalize(w2.getLDAProbDistribution()));
 				if (localSimLda > maxSimLda) maxSimLda = localSimLda;
-				
+
+				// determine the word of the destination analysis element for whom
+				// the WordNet similarity value is the highest with the word
+				// of the source analysis element, for different algorithms
 				double localOntologySim[] = new double[OntologySupport.NO_SIMILARITIES];
 				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = OntologySupport.semanticSimilarity(w1, w2,
 						OntologySupport.LEACOCK_CHODOROW);
@@ -172,22 +182,24 @@ public class SemanticSimilarity implements Serializable {
 
 			}
 			
-			// TODO: multiply with tf?
+			// TODO: multiply with term-frequency (how to?)
 			upperValueLsa += maxSimLsa * w1.getIdf();
 			upperValueLda += maxSimLda * w1.getIdf();
 			upperValueOntology[OntologySupport.LEACOCK_CHODOROW] += maxSimOntology[OntologySupport.LEACOCK_CHODOROW] * w1.getIdf();
 			upperValueOntology[OntologySupport.WU_PALMER] += maxSimOntology[OntologySupport.WU_PALMER] * w1.getIdf();
 			upperValueOntology[OntologySupport.PATH_SIM] += maxSimOntology[OntologySupport.PATH_SIM] * w1.getIdf();
 			lowerValue += w1.getIdf();
-			
 		}
-		
+
+		// compute the right hand side of the equation
 		rightHandValueLsa = upperValueLsa/lowerValue;
 		rightHandValueLda = upperValueLda/lowerValue;
 		rightHandValueOntology[OntologySupport.LEACOCK_CHODOROW] = upperValueOntology[OntologySupport.LEACOCK_CHODOROW]/lowerValue;
 		rightHandValueOntology[OntologySupport.WU_PALMER] = upperValueOntology[OntologySupport.WU_PALMER]/lowerValue;
 		rightHandValueOntology[OntologySupport.PATH_SIM] = upperValueOntology[OntologySupport.PATH_SIM]/lowerValue;
 		
+		// compute the semantic relatedness values for the three different semantic
+		// similarity measurement techniques
 		this.lsaSim = 0.5 * (leftHandValueLsa + rightHandValueLsa);
 		this.ldaSim = 0.5 * (leftHandValueLda + rightHandValueLda);
 		ontologySim[OntologySupport.LEACOCK_CHODOROW] = 
@@ -200,41 +212,12 @@ public class SemanticSimilarity implements Serializable {
 				0.5 * (leftHandValueOntology[OntologySupport.PATH_SIM] +
 						rightHandValueOntology[OntologySupport.PATH_SIM]);
 		
+		// compute the final semantic relatedness value by combining different metrics 
 		if (Math.min(source.getWordOccurences().size(), destination.getWordOccurences().size()) > 0) {
-			similarity = getSimilarityMeasure(ontologySim[OntologySupport.WU_PALMER], lsaSim, ldaSim);
+			relatedness = getSimilarityMeasure(ontologySim[OntologySupport.WU_PALMER], lsaSim, ldaSim);
 		}
 	}
 	
-	public AnalysisElement getSource() {
-		return source;
-	}
-
-	public void setSource(AnalysisElement source) {
-		this.source = source;
-	}
-
-	public AnalysisElement getDestination() {
-		return destination;
-	}
-
-	public void setDestination(AnalysisElement destination) {
-		this.destination = destination;
-	}
-
-	// compute semantic distance between word and Analysis Element
-	public double getMaxSemOntologySim(Word w1, AnalysisElement u2, int typeOfSimilarity) {
-		double maxLocalDist = 0;
-		// identify closest concept
-		for (Word w2 : u2.getWordOccurences().keySet()) {
-			if (w1.getLemma().equals(w2.getLemma()) || w1.getStem().equals(w2.getStem())) {
-				return 1;
-			} else {
-				maxLocalDist = Math.max(maxLocalDist, OntologySupport.semanticSimilarity(w1, w2, typeOfSimilarity));
-			}
-		}
-		return maxLocalDist;
-	}
-
 	private double getMaxSemOntologySim(AnalysisElement u1, AnalysisElement u2, int typeOfSimilarity) {
 		double distance = 0;
 		double sum = 0;
@@ -251,63 +234,33 @@ public class SemanticSimilarity implements Serializable {
 		return 0;
 	}
 
-	// compute symmetric measure of similarity
-	private double getOntologySim(AnalysisElement u1, AnalysisElement u2, int typeOfSimilarity) {
-		return 1.0d / 2
-				* (getMaxSemOntologySim(u1, u2, typeOfSimilarity) + getMaxSemOntologySim(u2, u1, typeOfSimilarity));
+	/**
+	 * Returns computed semantic relatedness of the two analysis elements.
+	 * 
+	 * @return
+	 * 			semantic relatedness
+	 */
+	public double getRelatedness() {
+		return relatedness;
 	}
 
-	public double getLSASim() {
-		return lsaSim;
-	}
-
-	public void setLSASim(double lsaSim) {
-		this.lsaSim = lsaSim;
-	}
-
-	public double getLDASim() {
-		return ldaSim;
-	}
-
-	public void setLDASim(double ldaSim) {
-		this.ldaSim = ldaSim;
-	}
-
-	public double getSimilarity() {
-		return similarity;
-	}
-
-	public double[] getSemanticDistances() {
-		return new double[] { ontologySim[OntologySupport.LEACOCK_CHODOROW], ontologySim[OntologySupport.WU_PALMER],
-				ontologySim[OntologySupport.PATH_SIM], lsaSim, ldaSim, similarity };
-	}
-
-	public static String[] getSemanticDistanceNames() {
-		// Normalized Leackock-Chodorow by log(2*ontology depth)
-		return new String[] { "Leackock-Chodorow", "Wu-Palmer", "Inverse path length", "LSA", "LDA",
-				"Aggregated score" };
-	}
-
-	public void setSimilarity(double similarity) {
-		this.similarity = similarity;
-	}
-
-	public double[] getOntologySim() {
-		return ontologySim;
-	}
-
-	public void setOntologySim(double[] ontologySim) {
-		this.ontologySim = ontologySim;
+	/**
+	 * Sets semantic relatedness of the two analysis elements.
+	 * 
+	 * @param relatedness
+	 * 			semantic relatedness
+	 */
+	public void setRelatedness(double relatedness) {
+		this.relatedness = relatedness;
 	}
 
 	@Override
 	public String toString() {
 		DecimalFormat formatter = new DecimalFormat("#.##");
-		// TODO: Why was it cohesion here?
-		return "Similarity [ Leacock-Chodorow=" + formatter.format(ontologySim[OntologySupport.LEACOCK_CHODOROW])
+		return "Semantic relatedness [ Leacock-Chodorow=" + formatter.format(ontologySim[OntologySupport.LEACOCK_CHODOROW])
 				+ "; WU-Palmer=" + formatter.format(ontologySim[OntologySupport.WU_PALMER]) + "; Path="
 				+ formatter.format(ontologySim[OntologySupport.PATH_SIM]) + "; cos(LSA)=" + formatter.format(lsaSim)
-				+ "; sim(LDA)=" + formatter.format(ldaSim) + "]=" + formatter.format(similarity);
+				+ "; sim(LDA)=" + formatter.format(ldaSim) + "]=" + formatter.format(relatedness);
 	}
 
 	public String print() {
@@ -315,6 +268,6 @@ public class SemanticSimilarity implements Serializable {
 		return formatter.format(lsaSim) + "," + formatter.format(ldaSim) + ","
 				+ formatter.format(ontologySim[OntologySupport.LEACOCK_CHODOROW]) + ","
 				+ formatter.format(ontologySim[OntologySupport.WU_PALMER]) + ","
-				+ formatter.format(ontologySim[OntologySupport.PATH_SIM]) + "," + formatter.format(similarity);
+				+ formatter.format(ontologySim[OntologySupport.PATH_SIM]) + "," + formatter.format(relatedness);
 	}
 }
