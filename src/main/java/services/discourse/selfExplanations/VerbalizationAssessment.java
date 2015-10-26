@@ -22,7 +22,7 @@ public class VerbalizationAssessment {
 			if (v.getRefBlock() != null) {
 				endIndex = v.getRefBlock().getIndex();
 				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-					metacognition.getBlockSimilarities()[refBlockId] = new SemanticCohesion(v,
+					metacognition.getBlockRelatedness()[refBlockId] = new SemanticCohesion(v,
 							metacognition.getReferredDoc().getBlocks().get(refBlockId));
 				}
 				startIndex = endIndex + 1;

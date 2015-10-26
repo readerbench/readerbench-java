@@ -47,11 +47,11 @@ public class Block extends AnalysisElement implements Serializable {
 	private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
 	
 	// inner-sentence semantic similarity values
-	private SemanticRelatedness[][] sentenceSimilarities;
-	private SemanticRelatedness[][] prunnedSentenceSimilarities;
+	private SemanticRelatedness[][] sentenceRelatedness;
+	private SemanticRelatedness[][] prunnedSentenceRelatedness;
 	// semantic similarity between an utterance and its corresponding block
-	private SemanticRelatedness[] sentenceBlockSimilarities;
-	private SemanticRelatedness prevSentenceBlockSimilarity, nextSentenceBlockSimilarity;
+	private SemanticRelatedness[] sentenceBlockRelatedness;
+	private SemanticRelatedness prevSentenceBlockRelatedness, nextSentenceBlockRelatedness;
 
 	public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(d, index, text.trim(), lsa, lda, lang);
@@ -185,93 +185,158 @@ public class Block extends AnalysisElement implements Serializable {
 	// this.personalKB = personalKB;
 	// }
 	
-	public SemanticRelatedness[] getSentenceBlockSimilarities() {
-		return sentenceBlockSimilarities;
+	/**
+	 * @return
+	 */
+	public SemanticRelatedness[] getSentenceBlockRelatedness() {
+		return sentenceBlockRelatedness;
 	}
 	
-	public void setSentenceBlockSimilarities(SemanticRelatedness[] sentenceBlockSimilarities) {
-		this.sentenceBlockSimilarities = sentenceBlockSimilarities;
+	/**
+	 * @param sentenceBlockRelatedness
+	 */
+	public void setSentenceBlockRelatedness(SemanticRelatedness[] sentenceBlockRelatedness) {
+		this.sentenceBlockRelatedness = sentenceBlockRelatedness;
 	}
 	
-	public SemanticCohesion[][] getSentenceDistances() {
-		return sentenceDistances;
+	/**
+	 * @return
+	 */
+	public SemanticRelatedness[][] getSentenceRelatedness() {
+		return sentenceRelatedness;
 	}
 	
-	public void setSentenceSimilarities(SemanticRelatedness[][] sentenceSimilarities) {
-		this.sentenceSimilarities = sentenceSimilarities;
+	/**
+	 * @param sentenceRelatedness
+	 */
+	public void setSentenceRelatedness(SemanticRelatedness[][] sentenceRelatedness) {
+		this.sentenceRelatedness = sentenceRelatedness;
 	}
 
-	public SemanticRelatedness[][] getPrunnedSentenceSimilarities() {
-		return prunnedSentenceSimilarities;
+	/**
+	 * @return
+	 */
+	public SemanticRelatedness[][] getPrunnedSentenceRelatedness() {
+		return prunnedSentenceRelatedness;
 	}
 
-	public void setPrunnedSentenceSimilarities(SemanticRelatedness[][] prunnedSentenceSimilarities) {
-		this.prunnedSentenceSimilarities = prunnedSentenceSimilarities;
+	/**
+	 * @param prunnedSentenceRelatedness
+	 */
+	public void setPrunnedSentenceRelatedness(SemanticRelatedness[][] prunnedSentenceRelatedness) {
+		this.prunnedSentenceRelatedness = prunnedSentenceRelatedness;
 	}
 	
-
+	/**
+	 * @return
+	 */
 	public SemanticCohesion[] getSentenceBlockDistances() {
 		return sentenceBlockDistances;
 	}
 
+	/**
+	 * @param sentenceBlockDistances
+	 */
 	public void setSentenceBlockDistances(SemanticCohesion[] sentenceBlockDistances) {
 		this.sentenceBlockDistances = sentenceBlockDistances;
 	}
-	
-	public SemanticRelatedness[][] getSentenceSimilarities() {
-		return sentenceSimilarities;
-	}
 
+	/**
+	 * @return
+	 */
+	public SemanticCohesion[][] getSentenceDistances() {
+		return sentenceDistances;
+	}
+	
+	/**
+	 * @param sentenceDistances
+	 */
 	public void setSentenceDistances(SemanticCohesion[][] sentenceDistances) {
 		this.sentenceDistances = sentenceDistances;
 	}
 
+	/**
+	 * @return
+	 */
 	public SemanticCohesion[][] getPrunnedSentenceDistances() {
 		return prunnedSentenceDistances;
 	}
 
+	/**
+	 * @param prunnedSentenceDistances
+	 */
 	public void setPrunnedSentenceDistances(SemanticCohesion[][] prunnedSentenceDistances) {
 		this.prunnedSentenceDistances = prunnedSentenceDistances;
 	}
 
+	/**
+	 * @return
+	 */
 	public boolean isFollowedByVerbalization() {
 		return isFollowedByVerbalization;
 	}
 
+	/**
+	 * @param isFollowedByVerbalization
+	 */
 	public void setFollowedByVerbalization(boolean isFollowedByVerbalization) {
 		this.isFollowedByVerbalization = isFollowedByVerbalization;
 	}
+	
+	/**
+	 * @return
+	 */
+	public SemanticRelatedness getPrevSentenceBlockSimilarity() {
+		return prevSentenceBlockRelatedness;
+	}
 
+	/**
+	 * @param prevSentenceBlockRelatedness
+	 */
+	public void setPrevSentenceBlockRelatedness(SemanticRelatedness prevSentenceBlockRelatedness) {
+		this.prevSentenceBlockRelatedness = prevSentenceBlockRelatedness;
+	}
+
+	/**
+	 * @return
+	 */
+	public SemanticRelatedness getNextSentenceBlockRelatedness() {
+		return nextSentenceBlockRelatedness;
+	}
+
+	/**
+	 * @param nextSentenceBlockRelatedness
+	 */
+	public void setNextSentenceBlockRelatedness(SemanticRelatedness nextSentenceBlockRelatedness) {
+		this.nextSentenceBlockRelatedness = nextSentenceBlockRelatedness;
+	}
+
+	/**
+	 * @return
+	 */
 	public SemanticCohesion getPrevSentenceBlockDistance() {
 		return prevSentenceBlockDistance;
 	}
 
+	/**
+	 * @param prevSentenceBlockDistance
+	 */
 	public void setPrevSentenceBlockDistance(SemanticCohesion prevSentenceBlockDistance) {
 		this.prevSentenceBlockDistance = prevSentenceBlockDistance;
 	}
 
+	/**
+	 * @return
+	 */
 	public SemanticCohesion getNextSentenceBlockDistance() {
 		return nextSentenceBlockDistance;
 	}
 
+	/**
+	 * @param nextSentenceBlockDistance
+	 */
 	public void setNextSentenceBlockDistance(SemanticCohesion nextSentenceBlockDistance) {
 		this.nextSentenceBlockDistance = nextSentenceBlockDistance;
-	}
-	
-	public SemanticRelatedness getPrevSentenceBlockSimilarity() {
-		return prevSentenceBlockSimilarity;
-	}
-
-	public void setPrevSentenceBlockSimilarity(SemanticRelatedness prevSentenceBlockSimilarity) {
-		this.prevSentenceBlockSimilarity = prevSentenceBlockSimilarity;
-	}
-
-	public SemanticRelatedness getNextSentenceBlockSimilarity() {
-		return nextSentenceBlockSimilarity;
-	}
-
-	public void setNextSentenceBlockSimilarity(SemanticRelatedness nextSentenceBlockSimilarity) {
-		this.nextSentenceBlockSimilarity = nextSentenceBlockSimilarity;
 	}
 
 	@Override

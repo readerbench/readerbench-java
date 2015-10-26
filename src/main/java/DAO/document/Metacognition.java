@@ -334,7 +334,7 @@ public class Metacognition extends Document {
 			for (int j = 0; j < this.getBlocks().size(); j++) {
 				endIndex = this.getBlocks().get(j).getRefBlock().getIndex();
 				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-					SemanticCohesion coh = this.getBlockSimilarities()[refBlockId];
+					SemanticCohesion coh = this.getBlockRelatedness()[refBlockId];
 					for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
 						meanCohesion[k] += coh.getSemanticDistances()[k];
 					noSimilarities++;
@@ -376,7 +376,7 @@ public class Metacognition extends Document {
 				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
 					// add rows as blocks within the document
 
-					SemanticCohesion coh = getBlockSimilarities()[refBlockId];
+					SemanticCohesion coh = getBlockRelatedness()[refBlockId];
 					// add block text
 					out.write(getReferredDoc().getBlocks().get(refBlockId).getText().replaceAll(",", "") + ",");
 					for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
@@ -452,7 +452,7 @@ public class Metacognition extends Document {
 		this.referredDoc = referredDoc;
 	}
 
-	public SemanticCohesion[] getBlockSimilarities() {
+	public SemanticCohesion[] getBlockRelatedness() {
 		return blockSimilarities;
 	}
 

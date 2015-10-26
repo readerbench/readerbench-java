@@ -301,7 +301,7 @@ public class VerbalizationView extends JFrame {
 					// add rows as blocks within the document
 					Vector<Object> dataRow = new Vector<Object>();
 
-					SemanticCohesion coh = verbalization.getBlockSimilarities()[refBlockId];
+					SemanticCohesion coh = verbalization.getBlockRelatedness()[refBlockId];
 					// add block text
 					String text = "";
 					for (Sentence s : verbalization.getReferredDoc()

@@ -75,11 +75,11 @@ public abstract class AbstractDocument extends AnalysisElement {
 	private SemanticCohesion[][] blockDistances;
 	private SemanticCohesion[][] prunnedBlockDistances;
 	
-	// similarity between a block and the overall document
-	private SemanticRelatedness[] blockDocSimilarities;
-	// inter-block similarity values
-	private SemanticRelatedness[][] blockSimilarities;
-	private SemanticRelatedness[][] prunnedBlockSimilarities;
+	// semantic relatdness between a block and the overall document
+	private SemanticRelatedness[] blockDocRelatedness;
+	// inter-block semantic relatedness values
+	private SemanticRelatedness[][] blockRelatedness;
+	private SemanticRelatedness[][] prunnedBlockRelatedness;
 		
 		
 	private AbstractDocumentTemplate docTmp;
@@ -630,28 +630,28 @@ public abstract class AbstractDocument extends AnalysisElement {
 		this.blockDocDistances = blockDocDistances;
 	}
 	
-	public SemanticRelatedness[][] getBlockSimilarities() {
-		return blockSimilarities;
+	public SemanticRelatedness[][] getBlockRelatedness() {
+		return blockRelatedness;
 	}
 
-	public void setBlockSimilarities(SemanticRelatedness[][] blockSimilarities) {
-		this.blockSimilarities = blockSimilarities;
+	public void setBlockRelatedness(SemanticRelatedness[][] blockRelatedness) {
+		this.blockRelatedness = blockRelatedness;
 	}
 
-	public SemanticRelatedness[][] getPrunnedBlockSimilarities() {
-		return prunnedBlockSimilarities;
+	public SemanticRelatedness[][] getPrunnedBlockRelatedness() {
+		return prunnedBlockRelatedness;
 	}
 
-	public void setPrunnedBlockSimilarities(SemanticRelatedness[][] prunnedBlockSimilarities) {
-		this.prunnedBlockSimilarities = prunnedBlockSimilarities;
+	public void setPrunnedBlockRelatedness(SemanticRelatedness[][] prunnedBlockRelatedness) {
+		this.prunnedBlockRelatedness = prunnedBlockRelatedness;
 	}
 
-	public SemanticRelatedness[] getBlockDocSimilarities() {
-		return blockDocSimilarities;
+	public SemanticRelatedness[] getBlockDocRelatedness() {
+		return blockDocRelatedness;
 	}
 
-	public void setBlockDocSimilarities(SemanticRelatedness[] blockDocSimilarities) {
-		this.blockDocSimilarities = blockDocSimilarities;
+	public void setBlockDocRelatedness(SemanticRelatedness[] blockDocRelatedness) {
+		this.blockDocRelatedness = blockDocRelatedness;
 	}
 
 	public List<LexicalChain> getLexicalChains() {
