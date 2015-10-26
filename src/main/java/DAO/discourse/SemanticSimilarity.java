@@ -103,14 +103,14 @@ public class SemanticSimilarity implements Serializable {
 				if (localSimLda > maxSimLda) maxSimLda = localSimLda;
 				
 				double localOntologySim[] = new double[OntologySupport.NO_SIMILARITIES];
-				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = getOntologySim(w1, w2,
+				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = OntologySupport.semanticSimilarity(w1, w2,
 						OntologySupport.LEACOCK_CHODOROW);
 				if (localOntologySim[OntologySupport.LEACOCK_CHODOROW] > maxSimOntology[OntologySupport.LEACOCK_CHODOROW])
 					maxSimOntology[OntologySupport.LEACOCK_CHODOROW] = localOntologySim[OntologySupport.LEACOCK_CHODOROW];
-				localOntologySim[OntologySupport.WU_PALMER] = getOntologySim(w1, w2, OntologySupport.WU_PALMER);
+				localOntologySim[OntologySupport.WU_PALMER] = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.WU_PALMER);
 				if (localOntologySim[OntologySupport.WU_PALMER] > maxSimOntology[OntologySupport.WU_PALMER])
 					maxSimOntology[OntologySupport.WU_PALMER] = localOntologySim[OntologySupport.WU_PALMER];
-				localOntologySim[OntologySupport.PATH_SIM] = getOntologySim(w1, w2, OntologySupport.PATH_SIM);
+				localOntologySim[OntologySupport.PATH_SIM] = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.PATH_SIM);
 				if (localOntologySim[OntologySupport.PATH_SIM] > maxSimOntology[OntologySupport.PATH_SIM])
 					maxSimOntology[OntologySupport.PATH_SIM] = localOntologySim[OntologySupport.PATH_SIM];
 				
@@ -159,14 +159,14 @@ public class SemanticSimilarity implements Serializable {
 				if (localSimLda > maxSimLda) maxSimLda = localSimLda;
 				
 				double localOntologySim[] = new double[OntologySupport.NO_SIMILARITIES];
-				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = getOntologySim(w1, w2,
+				localOntologySim[OntologySupport.LEACOCK_CHODOROW] = OntologySupport.semanticSimilarity(w1, w2,
 						OntologySupport.LEACOCK_CHODOROW);
 				if (localOntologySim[OntologySupport.LEACOCK_CHODOROW] > maxSimOntology[OntologySupport.LEACOCK_CHODOROW])
 					maxSimOntology[OntologySupport.LEACOCK_CHODOROW] = localOntologySim[OntologySupport.LEACOCK_CHODOROW];
-				localOntologySim[OntologySupport.WU_PALMER] = getOntologySim(w1, w2, OntologySupport.WU_PALMER);
+				localOntologySim[OntologySupport.WU_PALMER] = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.WU_PALMER);
 				if (localOntologySim[OntologySupport.WU_PALMER] > maxSimOntology[OntologySupport.WU_PALMER])
 					maxSimOntology[OntologySupport.WU_PALMER] = localOntologySim[OntologySupport.WU_PALMER];
-				localOntologySim[OntologySupport.PATH_SIM] = getOntologySim(w1, w2, OntologySupport.PATH_SIM);
+				localOntologySim[OntologySupport.PATH_SIM] = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.PATH_SIM);
 				if (localOntologySim[OntologySupport.PATH_SIM] > maxSimOntology[OntologySupport.PATH_SIM])
 					maxSimOntology[OntologySupport.PATH_SIM] = localOntologySim[OntologySupport.PATH_SIM];
 
