@@ -98,7 +98,7 @@ public class Collaboration {
 			}
 			if (b != null) {
 				sentimentDistribution[k] = b.getSentimentEntity()
-						.getSentimentValue() - 2;
+						.getAggregatedValue() - 2;
 				k++;
 			}
 		}

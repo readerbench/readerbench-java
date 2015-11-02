@@ -25,9 +25,9 @@ public class SentimentAnalysis {
 				double avgBlock = 0, sumWeightsBlock = 0;
 				for (int j = 0; j < b.getSentences().size(); j++) {
 					Sentence s = b.getSentences().get(j);
-					if (s.getSentimentEntity().getSentimentValue() != -1) {
+					if (s.getSentimentEntity().getAggregatedValue() != -1) {
 						avgBlock += b.getSentenceBlockDistances()[j].getCohesion()
-								* s.getSentimentEntity().getSentimentValue();
+								* s.getSentimentEntity().getAggregatedValue();
 						sumWeightsBlock += b.getSentenceBlockDistances()[j].getCohesion();
 					}
 				}

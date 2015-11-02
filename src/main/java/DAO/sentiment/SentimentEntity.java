@@ -1,6 +1,7 @@
 package DAO.sentiment;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -14,15 +15,23 @@ import java.util.Map;
 public class SentimentEntity {
 	
 	/**
-	 * HashMap storing the valences and their quantifier 
+	 * Map that stores the valences and their 
+	 * quantifier for simple sentiments 
 	 */
-	private Map<Integer, Double> sentiments;
+	private Map<SentimentValence, Double> sentiments;
+	
+	/**
+	 * Map that stores the valences and their 
+	 * quantifiers for complex sentiments
+	 */
+	private Map<SentimentValence, Double> complexSentiments;
 	
 	/**
 	 * Initializes an empty Map for the sentiments 
 	 */
 	public SentimentEntity() {
 		sentiments = new HashMap<>();
+		complexSentiments = new HashMap<>();
 	}
 
 	/**
@@ -35,7 +44,7 @@ public class SentimentEntity {
 	 * @param value
 	 * 			sentiment's quantifier
 	 */
-	public void add(Integer key, double value) {
+	public void add(SentimentValence key, double value) {
 		sentiments.put(key, value);
 	}
 	
@@ -81,7 +90,7 @@ public class SentimentEntity {
 	 * @param value
 	 * 			sentiment's quantifier
 	 */
-	public void set(Integer key, double value) {
+	public void set(SentimentValence key, double value) {
 		if (sentiments.containsKey(key)) {
 			sentiments.put(key, value);
 		}
@@ -93,7 +102,7 @@ public class SentimentEntity {
 	 * @return
 	 * 			sentiments representation
 	 */
-	public Map<Integer, Double> getAll() {
+	public Map<SentimentValence, Double> getAll() {
 		return sentiments;
 	}
 	
@@ -113,22 +122,38 @@ public class SentimentEntity {
 	public int size() {
 		return sentiments.size();
 	}
+	
+	/**
+	 * Returns the aggregated score of sentiments
+	 * 
+	 * @return
+	 * 			aggregated score of sentiments
+	 */
+	public double getAggregatedValue() {
+		double sentimentAggregatedValue = 0.0;
+		Iterator<Map.Entry<SentimentValence, Double>> it = sentiments.entrySet().iterator();
+		while (it.hasNext()) {
+	        Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+	        SentimentValence sentimentValence = (SentimentValence)pair.getKey();
+	        Double sentimentValue = (Double)pair.getValue();
+	        sentimentAggregatedValue += sentimentValence.getWeight() * sentimentValue;
+	        it.remove();
+		}
+		return sentimentAggregatedValue;
+	}
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("[");
-		for (Integer key : sentiments.keySet()) {
+		for (SentimentValence sentimentValence : sentiments.keySet()) {
 			try {
-				sb.append(Valences.getValenceName(key).toString());
+				//sb.append(Valences.getValenceName(key).toString());
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			sb.append("=");
-			sb.append(sentiments.get(key));
+			sb.append(sentiments.get(sentimentValence));
 			sb.append(",");
 		}
 		// delete trailing comma

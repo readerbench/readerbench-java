@@ -56,7 +56,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		int i = 0;
 		int counter = 0;
 		for (Word w : words) {
-			sentimentDistribution[i] = w.getSentiment().getSentimentValue();
+			sentimentDistribution[i] = w.getSentiment().getAggregatedValue();
 			i++;
 			if (w.isNoun() || w.isVerb()) {
 				counter++;
