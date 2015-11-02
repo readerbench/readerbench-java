@@ -34,7 +34,7 @@ public enum SentimentValence {
 		this(name, 1.0, false);
 	}
 	
-	private SentimentValence(String name, Double weight) {
+	private SentimentValence(String name, Double value) {
 		this(name, weight, false);
 	}
 	
