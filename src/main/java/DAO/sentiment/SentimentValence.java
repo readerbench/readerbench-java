@@ -1,5 +1,7 @@
 package DAO.sentiment;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.*;
@@ -12,16 +14,35 @@ import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
  */
 public enum SentimentValence {
 	
-	ANEW_VALENCE("ANEW Valence", 1),
-	ANEW_AROUSAL("ANEW Arousal", 1),
-	ANEW_DOMINANCE("ANEW Dominance", 1);
+	ANEW_VALENCE("ANEW Valence", null),
+	ANEW_AROUSAL("ANEW Arousal", null),
+	ANEW_DOMINANCE("ANEW Dominance", null),
+	
+	GI_ONE("GI One", null),
+	GI_TWO("GI Two", null),
+	
+	STANFORD_NLP("Stanford NLP", null)
+	;
 	
 	private String name;
-	private double weight;
+	private Double weight;
+	private boolean isRageValence;
 	
-	private SentimentValence(String name, double weight) {
+	private Map<Integer, Double> rageWeights;
+	
+	private SentimentValence(String name) {
+		this(name, 1.0, false);
+	}
+	
+	private SentimentValence(String name, Double weight) {
+		this(name, weight, false);
+	}
+	
+	private SentimentValence(String name, Double weight, boolean isRageValence) {
 		this.name = name;
 		this.weight = weight;
+		this.isRageValence = isRageValence;
+		if (isRageValence) this.rageWeights = new HashMap<Integer, Double>();
 	}
 	
 	public String getName() {
@@ -32,53 +53,40 @@ public enum SentimentValence {
 		this.name = name;
 	}
 	
-	public double getWeight() {
-		return this.weight;
+	public Double getWeight() {
+		return weight;
 	}
 	
-	public void setWeight(double weight) {
+	public void setWeight(Double weight) {
 		this.weight = weight;
 	}
 	
+	public boolean isRageValence() {
+		return isRageValence;
+	}
+	
+	public void setRageValence(boolean isRageValence) {
+		this.isRageValence = isRageValence;
+	}
+	
+	public Map<Integer, Double> getRageWeights() {
+		if (!isRageValence) return null;
+		return this.rageWeights;
+	}
+	
+	public void setRageWeights(Map<Integer, Double> rageWeights) {
+		if (!isRageValence) return;
+		this.rageWeights = rageWeights;
+	}
+	
+	public Double getRageWeight(Integer index) {
+		if (!isRageValence) return null;
+		return this.rageWeights.get(index);
+	}
+	
+	public void setRageWeight(Integer index, Double value) {
+		if (!isRageValence) return;
+		this.rageWeights.put(index, value);
+	}
 	
 }	
-	
-
-	// available valences
-	// TODO: add all valences here; recommendation: group them by decimal figure 
-	/*public static Integer ANEW_VALENCE	=	11;
-	public static Integer ANEW_AROUSAL	=	12;
-	public static Integer ANEW_DOMINANCE	=	12;
-	
-	public static double ANEW_VALENCE_ONE_WEIGHT	=	0.5;
-	public static double ANEW_VALENCE_TWO_WEIGHT	= 	0.5;
-	
-	public static Integer VADER_VALENCE_ONE =	21;
-	public static Integer VADER_VALENCE_TWO =	22;
-	
-	public static double VADER_VALENCE_ONE_WEIGHT	=	0.5;
-	public static double VADER_VALENCE_TWO_HEIGHT	=	0.5;
-	
-	private static Map<Integer, String> valenceNames = null;*/
-	
-	/**
-	 * @param valence
-	 * @return
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 */
-	/*public static String getValenceName(Integer valence) throws IllegalArgumentException, IllegalAccessException {
-	    if (valenceNames == null) {
-	    	Map<Integer, String> vNames = new HashMap<Integer, String>();
-	    	for (Field field : Valences.class.getDeclaredFields()) {
-		        if ((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0
-		            && Integer.class == field.getType()) {
-		            vNames.put((Integer)field.get(null), field.getName());
-		       	}
-		    }
-	    	valenceNames = vNames;
-		}
-	      
-	    return valenceNames.get(valence);
-	  }
-	*/

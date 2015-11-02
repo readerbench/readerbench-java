@@ -16,22 +16,27 @@ public class SentimentEntity {
 	
 	/**
 	 * Map that stores the valences and their 
-	 * quantifier for simple sentiments 
+	 * quantifier for sentiments 
 	 */
 	private Map<SentimentValence, Double> sentiments;
-	
-	/**
-	 * Map that stores the valences and their 
-	 * quantifiers for complex sentiments
-	 */
-	private Map<SentimentValence, Double> complexSentiments;
 	
 	/**
 	 * Initializes an empty Map for the sentiments 
 	 */
 	public SentimentEntity() {
 		sentiments = new HashMap<>();
-		complexSentiments = new HashMap<>();
+	}
+	
+	public void computeRageWeights() {
+		Iterator<Map.Entry<SentimentValence, Double>> it = sentiments.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+	        System.out.println(pair.getKey() + " = " + pair.getValue());
+	        
+	        // compute Rage valences here
+	        
+	        it.remove(); // avoids a ConcurrentModificationException
+	    }
 	}
 
 	/**
