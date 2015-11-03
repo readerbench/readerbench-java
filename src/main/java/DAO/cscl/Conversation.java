@@ -328,7 +328,7 @@ public class Conversation extends AbstractDocument {
 		double[] distribution = new double[voice.getBlockDistribution().length];
 		for (int i = 0; i < getBlocks().size(); i++) {
 			if (getBlocks().get(i) != null && ((Utterance) getBlocks().get(i)).getParticipant().equals(p)) {
-				distribution[i] = getBlocks().get(i).getSentimentEntity().getSentimentValue();
+				distribution[i] = getBlocks().get(i).getSentimentEntity().getAggregatedValue();
 			}
 		}
 		return distribution;
