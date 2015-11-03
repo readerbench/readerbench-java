@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
@@ -244,6 +245,11 @@ public class LSA implements ISemanticModel {
 		return words;
 	}
 
+	@Override
+	public Set<Word> getWordSet() {
+		return words.keySet();
+	}
+
 	public void setWords(BidiMap<Word, Integer> words) {
 		this.words = words;
 	}
@@ -284,9 +290,12 @@ public class LSA implements ISemanticModel {
 		Word w2 = Word.getWordFromConcept("address", Lang.eng);
 		System.out.println(lsa.getSimilarity(w1, w2));
 
-//		for (Entry<Word, Double> entry : lsa.getSimilarConcepts(Word.getWordFromConcept("psicología", Lang.es), 0.3)
-//				.entrySet()) {
-//			System.out.println(entry.getKey().getLemma() + "\t" + entry.getValue());
-//		}
+		// for (Entry<Word, Double> entry :
+		// lsa.getSimilarConcepts(Word.getWordFromConcept("psicología",
+		// Lang.es), 0.3)
+		// .entrySet()) {
+		// System.out.println(entry.getKey().getLemma() + "\t" +
+		// entry.getValue());
+		// }
 	}
 }

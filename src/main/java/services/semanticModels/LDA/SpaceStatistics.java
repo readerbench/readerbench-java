@@ -1,5 +1,12 @@
 package services.semanticModels.LDA;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +42,14 @@ public class SpaceStatistics {
 
 	private LDA lda;
 	private int noWords;
-	private List<Connection> significantSimilarities;
+	private List<Connection> relevantSimilarities;
 
 	public SpaceStatistics(LDA lda) {
 		logger.info("Building statistics for " + lda.getPath() + "...");
 		this.lda = lda;
 		this.noWords = lda.getWordProbDistributions().size();
 
-		significantSimilarities = new ArrayList<Connection>();
+		relevantSimilarities = new ArrayList<Connection>();
 	}
 
 	public void buildWordDistances() {
@@ -94,7 +101,7 @@ public class SpaceStatistics {
 
 		for (Connection c : allSimilarities) {
 			if (c.getSimilarity() >= threshold) {
-				significantSimilarities.add(c);
+				relevantSimilarities.add(c);
 				s02++;
 				s12 += c.getSimilarity();
 				s22 += Math.pow(c.getSimilarity(), 2);
@@ -131,7 +138,7 @@ public class SpaceStatistics {
 			graph.addNode(wordNode);
 		}
 
-		for (Connection c : significantSimilarities) {
+		for (Connection c : relevantSimilarities) {
 			graph.addEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
 			Edge e = graph.getEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
 			e.setWeight((float) (c.getSimilarity()));
@@ -191,6 +198,53 @@ public class SpaceStatistics {
 		System.out.println("Semantic model path length:\t" + Formatting.formatNumber(distance.getPathLength()));
 	}
 
+	public List<Connection> getRelevantSimilarities() {
+		return relevantSimilarities;
+	}
+
+	public LDA getLDA() {
+		return lda;
+	}
+
+	/**
+	 * Compares all pairs of concepts from the baseline to all subsequent
+	 * corpora
+	 * 
+	 * @param baseline
+	 * @param corpora
+	 */
+	public static void compareSpaces(String pathToOutput, SpaceStatistics baseline, List<SpaceStatistics> corpora) {
+		baseline.buildWordDistances();
+		logger.info("Writing comparisons");
+		File output = new File(pathToOutput);
+
+		try {
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
+					32768);
+			out.write("Word 1, Word 2, Initial similarity");
+			for (SpaceStatistics space : corpora) {
+				out.write("," + space.getLDA().getPath());
+			}
+
+			for (Connection c : baseline.getRelevantSimilarities()) {
+				out.write("\n" + c.getWord1() + "," + c.getWord2() + "," + c.getSimilarity());
+				for (SpaceStatistics space : corpora) {
+					out.write("," + space.getLDA().getSimilarity(
+							Word.getWordFromConcept(c.getWord1(), baseline.getLDA().getLanguage()),
+							Word.getWordFromConcept(c.getWord2(), baseline.getLDA().getLanguage())));
+				}
+			}
+			out.close();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private class Connection {
 		private String word1;
 		private String word2;
@@ -219,9 +273,18 @@ public class SpaceStatistics {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		SpaceStatistics ss = new SpaceStatistics(LDA.loadLDA("in/HDP/grade4", Lang.eng));
-		ss.buildWordDistances();
-		ss.computeGraphStatistics();
+		// SpaceStatistics ss = new SpaceStatistics(LDA.loadLDA("in/HDP/grade4",
+		// Lang.eng));
+		// ss.buildWordDistances();
+		// ss.computeGraphStatistics();
+		int initialGrade = 5;
+		SpaceStatistics baseline = new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + initialGrade, Lang.eng));
+		List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
+
+		for (int i = initialGrade + 1; i <= 12; i++) {
+			corpora.add(new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + i, Lang.eng)));
+		}
+		compareSpaces("in/HDP/comparison.csv", baseline, corpora);
 	}
 
 }
