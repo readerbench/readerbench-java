@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -500,6 +501,11 @@ public class LDA implements ISemanticModel, Serializable {
 
 	public Map<Word, double[]> getWordProbDistributions() {
 		return wordProbDistributions;
+	}
+
+	@Override
+	public Set<Word> getWordSet() {
+		return wordProbDistributions.keySet();
 	}
 
 	public void setWordProbDistributions(Map<Word, double[]> wordProbDistributions) {

@@ -1,10 +1,11 @@
 package services.semanticModels;
 
+import java.util.Set;
 import java.util.TreeMap;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import DAO.AnalysisElement;
 import DAO.Word;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public interface ISemanticModel {
 	public double getSimilarity(Word w1, Word w2);
@@ -14,6 +15,8 @@ public interface ISemanticModel {
 	public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold);
 
 	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold);
+
+	public Set<Word> getWordSet();
 
 	public String getPath();
 
