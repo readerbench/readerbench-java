@@ -14,79 +14,49 @@ import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
  */
 public enum SentimentValence {
 	
-	ANEW_VALENCE("ANEW Valence", null),
-	ANEW_AROUSAL("ANEW Arousal", null),
-	ANEW_DOMINANCE("ANEW Dominance", null),
+	ANEW_VALENCE("ANEW Valence", false),
+	ANEW_AROUSAL("ANEW Arousal", false),
+	ANEW_DOMINANCE("ANEW Dominance", false),
 	
-	GI_ONE("GI One", null),
-	GI_TWO("GI Two", null),
+	GI_ONE("GI One", false),
+	GI_TWO("GI Two", false),
 	
-	STANFORD_NLP("Stanford NLP", null)
+	STANFORD_NLP("Stanford NLP", false),
+	
+	RAGE_ONE("RAGE One", true)
 	;
 	
+	private Integer id;
 	private String name;
-	private Double weight;
-	private boolean isRageValence;
+	private boolean rage;
 	
-	private Map<Integer, Double> rageWeights;
-	
-	private SentimentValence(String name) {
-		this(name, 1.0, false);
-	}
-	
-	private SentimentValence(String name, Double value) {
-		this(name, weight, false);
-	}
-	
-	private SentimentValence(String name, Double weight, boolean isRageValence) {
+	private SentimentValence(String name, boolean rage) {
 		this.name = name;
-		this.weight = weight;
-		this.isRageValence = isRageValence;
-		if (isRageValence) this.rageWeights = new HashMap<Integer, Double>();
+		this.rage = rage;
+	}
+	
+	public Integer getId() {
+		return id;
+	}
+	
+	public void setId(Integer id) {
+		this.id = id;
 	}
 	
 	public String getName() {
-		return this.name;
+		return name;
 	}
 	
 	public void setName(String name) {
 		this.name = name;
 	}
 	
-	public Double getWeight() {
-		return weight;
+	public boolean getRage() {
+		return rage;
 	}
 	
-	public void setWeight(Double weight) {
-		this.weight = weight;
-	}
-	
-	public boolean isRageValence() {
-		return isRageValence;
-	}
-	
-	public void setRageValence(boolean isRageValence) {
-		this.isRageValence = isRageValence;
-	}
-	
-	public Map<Integer, Double> getRageWeights() {
-		if (!isRageValence) return null;
-		return this.rageWeights;
-	}
-	
-	public void setRageWeights(Map<Integer, Double> rageWeights) {
-		if (!isRageValence) return;
-		this.rageWeights = rageWeights;
-	}
-	
-	public Double getRageWeight(Integer index) {
-		if (!isRageValence) return null;
-		return this.rageWeights.get(index);
-	}
-	
-	public void setRageWeight(Integer index, Double value) {
-		if (!isRageValence) return;
-		this.rageWeights.put(index, value);
+	public void setRage(boolean rage) {
+		this.rage = rage;
 	}
 	
 }	
