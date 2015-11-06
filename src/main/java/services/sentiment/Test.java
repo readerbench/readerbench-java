@@ -1,6 +1,7 @@
 package services.sentiment;
 
-import DAO.AbstractDAO;
+import DAO.db.DAOService;
+import DAO.db.WordDAO;
 import pojo.Word;
 
 /**
@@ -8,9 +9,11 @@ import pojo.Word;
  * @author Stefan
  */
 public class Test {
+	
+	
     public static void main(String[] args) {
-        AbstractDAO ad = AbstractDAO.getInstance();
-        Word word = ad.findById(Word.class, 2);
+        DAOService ad = DAOService.getInstance();
+        Word word = new WordDAO().findById(2);
         System.out.println(word);
         ad.close();
     }
