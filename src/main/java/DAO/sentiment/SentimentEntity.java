@@ -20,11 +20,14 @@ public class SentimentEntity {
 	 */
 	private Map<SentimentValence, Double> sentiments;
 	
+	private Map<SentimentValence, Double> rageSentiments;
+	
 	/**
 	 * Initializes an empty Map for the sentiments 
 	 */
 	public SentimentEntity() {
 		sentiments = new HashMap<>();
+		rageSentiments = new HashMap<>();
 	}
 	
 	public void computeRageWeights() {
@@ -134,18 +137,33 @@ public class SentimentEntity {
 	 * @return
 	 * 			aggregated score of sentiments
 	 */
-	public double getAggregatedValue() {
-		double sentimentAggregatedValue = 0.0;
+	public Map<SentimentValence,Double> getAggregatedValue() {
+		Map<SentimentValence, Double> sentimentAggregatedValues = new HashMap<SentimentValence, Double>();
 		Iterator<Map.Entry<SentimentValence, Double>> it = sentiments.entrySet().iterator();
 		while (it.hasNext()) {
-	        Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
-	        SentimentValence sentimentValence = (SentimentValence)pair.getKey();
-	        Double sentimentValue = (Double)pair.getValue();
-	        sentimentAggregatedValue += SentimentWeights.getSentimentsWeight(sentimentValence.getId(), sentimentValence.getId()) * sentimentValue;
+			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
+			Double sentimentValue = (Double)pair.getValue();
+			sentimentAggregatedValues.put(sentimentValence, 0.0);
+			
+			Iterator<Map.Entry<SentimentValence, Double>> itRage = rageSentiments.entrySet().iterator();
+			while (itRage.hasNext()) {
+				Map.Entry<SentimentValence, Double> pairRage = (Map.Entry<SentimentValence, Double>)it.next();
+				SentimentValence sentimentValenceRage = (SentimentValence)pairRage.getKey();
+				Double sentimentValueRage = (Double)pairRage.getValue();
+				
+				sentimentAggregatedValues.put(sentimentValence, 
+						SentimentWeights.getSentimentsWeight(
+								sentimentValence.getId(), sentimentValenceRage.getId()) *
+						sentimentAggregatedValues.get(sentimentValence));
+				
+				itRage.remove();
+			}
+			
 	        // TODO: compute (primary sentiment, RAGE sentiment) weights here
 	        it.remove();
 		}
-		return sentimentAggregatedValue;
+		return sentimentAggregatedValues;
 	}
 
 	public String toString() {

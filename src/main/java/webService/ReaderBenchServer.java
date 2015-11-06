@@ -2,7 +2,9 @@ package webService;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -21,6 +23,7 @@ import DAO.Block;
 import DAO.Sentence;
 import DAO.discourse.Topic;
 import DAO.document.Document;
+import DAO.sentiment.SentimentValence;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
@@ -106,14 +109,42 @@ public class ReaderBenchServer {
         List<Result> results = new ArrayList<Result>();
         AbstractDocument queryDoc = processQuery(query);
 
-        results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
+        //results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
+        Map<SentimentValence, Double> sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
+        Iterator<Map.Entry<SentimentValence, Double>> it = sentimentAggregatedValues.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
+			Double sentimentValue = (Double)pair.getValue();
+			results.add(new Result("Document (valence " + sentimentValence.getName() + ")", Formatting.formatNumber(sentimentValue)));
+		}
 
         for (Block b : queryDoc.getBlocks()) {
-            results.add(new Result("Paragraph " + b.getIndex(),
-                    Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue())));
+            /*results.add(new Result("Paragraph " + b.getIndex(),
+                    Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue())));*/
+        	
+        	sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
+            it = sentimentAggregatedValues.entrySet().iterator();
+    		while (it.hasNext()) {
+    			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+    			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
+    			Double sentimentValue = (Double)pair.getValue();
+    			results.add(new Result("Paragraph " + b.getIndex() + " (valence " + sentimentValence.getName() + ")", Formatting.formatNumber(sentimentValue)));
+    		}
+        	
             for (Sentence s : b.getSentences()) {
-                results.add(new Result("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex(),
-                        Formatting.formatNumber(s.getSentimentEntity().getAggregatedValue())));
+                /*results.add(new Result("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex(),
+                        Formatting.formatNumber(s.getSentimentEntity().getAggregatedValue())));*/
+            	
+            	sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
+                it = sentimentAggregatedValues.entrySet().iterator();
+        		while (it.hasNext()) {
+        			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
+        			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
+        			Double sentimentValue = (Double)pair.getValue();
+        			results.add(new Result("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex() + " (valence " + sentimentValence.getName() + ")", Formatting.formatNumber(sentimentValue)));
+        		}
+            	
             }
         }
 
@@ -185,6 +216,7 @@ public class ReaderBenchServer {
         Spark.get("/getSentiment", (request, response) -> {
             response.type("text/xml");
             String q = request.queryParams("q");
+            System.out.println("Am primit: " + q);
             QueryResult queryResult = new QueryResult();
             queryResult.data = getSentiment(q);
             String result = convertToXml(queryResult);

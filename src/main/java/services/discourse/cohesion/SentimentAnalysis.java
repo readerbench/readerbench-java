@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import DAO.AbstractDocument;
 import DAO.Block;
 import DAO.Sentence;
+import DAO.Word;
 import DAO.sentiment.SentimentEntity;
 
 /**
@@ -25,11 +26,18 @@ public class SentimentAnalysis {
 				double avgBlock = 0, sumWeightsBlock = 0;
 				for (int j = 0; j < b.getSentences().size(); j++) {
 					Sentence s = b.getSentences().get(j);
-					if (s.getSentimentEntity().getAggregatedValue() != -1) {
+					for (int k = 0; k < s.getWords().size(); k++) {
+						Word w = s.getWords().get(k);
+						
+						
+						w.getSentiment().getAggregatedValue();
+						
+					}
+					/*if (s.getSentimentEntity().getAggregatedValue() != -1) {
 						avgBlock += b.getSentenceBlockDistances()[j].getCohesion()
 								* s.getSentimentEntity().getAggregatedValue();
 						sumWeightsBlock += b.getSentenceBlockDistances()[j].getCohesion();
-					}
+					}*/
 				}
 				if (sumWeightsBlock != 0) {
 					avgBlock /= sumWeightsBlock;
