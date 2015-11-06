@@ -141,7 +141,8 @@ public class SentimentEntity {
 	        Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
 	        SentimentValence sentimentValence = (SentimentValence)pair.getKey();
 	        Double sentimentValue = (Double)pair.getValue();
-	        sentimentAggregatedValue += sentimentValence.getWeight() * sentimentValue;
+	        sentimentAggregatedValue += SentimentWeights.getSentimentsWeight(sentimentValence.getId(), sentimentValence.getId()) * sentimentValue;
+	        // TODO: compute (primary sentiment, RAGE sentiment) weights here
 	        it.remove();
 		}
 		return sentimentAggregatedValue;

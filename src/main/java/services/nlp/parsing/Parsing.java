@@ -307,7 +307,7 @@ public abstract class Parsing {
 			tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
 			if (s.getLanguage().equals(Lang.eng)) {
 				int score = RNNCoreAnnotations.getPredictedClass(tree);
-				s.setSentimentEntity(new SentimentEntity(sentence.toString(), score));
+				s.setSentimentEntity(new SentimentEntity());
 			}
 		}
 
@@ -360,7 +360,7 @@ public abstract class Parsing {
 					String lemma = Morphology.lemmaStatic(word, pos, true);
 					w = new Word(s.getContainer().getIndex(), s.getIndex(), word, lemma,
 							Stemmer.stemWord(word.toLowerCase(), s.getLanguage()), pos, ne, s.getLSA(), s.getLDA(),
-							new SentimentEntity(lemma, score), s.getLanguage());
+							new SentimentEntity(), s.getLanguage());
 					break;
 				}
 

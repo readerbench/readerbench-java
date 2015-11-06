@@ -106,14 +106,14 @@ public class ReaderBenchServer {
         List<Result> results = new ArrayList<Result>();
         AbstractDocument queryDoc = processQuery(query);
 
-        results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getSentimentValue())));
+        results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
 
         for (Block b : queryDoc.getBlocks()) {
             results.add(new Result("Paragraph " + b.getIndex(),
-                    Formatting.formatNumber(b.getSentimentEntity().getSentimentValue())));
+                    Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue())));
             for (Sentence s : b.getSentences()) {
                 results.add(new Result("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex(),
-                        Formatting.formatNumber(s.getSentimentEntity().getSentimentValue())));
+                        Formatting.formatNumber(s.getSentimentEntity().getAggregatedValue())));
             }
         }
 
