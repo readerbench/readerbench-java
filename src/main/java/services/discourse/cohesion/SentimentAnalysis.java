@@ -33,7 +33,8 @@ public class SentimentAnalysis {
 				}
 				if (sumWeightsBlock != 0) {
 					avgBlock /= sumWeightsBlock;
-					b.setSentimentEntity(new SentimentEntity(b.getProcessedText().trim(), avgBlock));
+					//b.setSentimentEntity(new SentimentEntity(b.getProcessedText().trim(), avgBlock));
+					b.setSentimentEntity(new SentimentEntity());
 					avgDoc += avgBlock * d.getBlockDocDistances()[i].getCohesion();
 					sumWeightsDoc += d.getBlockDocDistances()[i].getCohesion();
 				}
@@ -41,7 +42,9 @@ public class SentimentAnalysis {
 		}
 
 		if (sumWeightsDoc != 0) {
-			d.setSentimentEntity(new SentimentEntity(d.getProcessedText().trim(), avgDoc / sumWeightsDoc));
+			//d.setSentimentEntity(new SentimentEntity(d.getProcessedText().trim(), avgDoc / sumWeightsDoc));
+			// TODO: do we really need to add parameters to SentimentEntity?
+			d.setSentimentEntity(new SentimentEntity());
 		}
 	}
 }

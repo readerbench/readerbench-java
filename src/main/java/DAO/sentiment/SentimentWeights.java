@@ -30,7 +30,7 @@ public class SentimentWeights {
 	 * of (primary sentiment, RAGE sentiment) pairs
 	 * for weights
 	 */
-	private SentimentGrid<Double> sentimentGrid;
+	private static SentimentGrid<Double> sentimentGrid;
 	private SentimentValence[] sentimentValences;
 	
 	/**
@@ -76,7 +76,7 @@ public class SentimentWeights {
 	 * @return
 	 * 			the weight of the pair of sentiments
 	 */
-	public Double getSentimentsWeight(Integer primarySentiment, Integer rageSentiment) {
+	public static Double getSentimentsWeight(Integer primarySentiment, Integer rageSentiment) {
 		return sentimentGrid.get(primarySentiment, rageSentiment);
 	}
 	

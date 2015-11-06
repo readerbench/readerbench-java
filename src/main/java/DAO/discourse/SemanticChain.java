@@ -15,6 +15,7 @@ import DAO.Word;
 import DAO.lexicalChains.LexicalChain;
 import DAO.lexicalChains.LexicalChainLink;
 import DAO.sentiment.SentimentEntity;
+import DAO.sentiment.SentimentValence;
 
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
@@ -76,7 +77,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		int VPosOcc = 0;
 		double average = 0;
 		for (Word word : words) {
-			switch ((int) word.getSentiment().getSentimentValue()) {
+			switch ((int) word.getSentiment().getAggregatedValue()) {
 			case 0:
 				VNegOcc++;
 				break;
@@ -411,7 +412,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		for (Word w : words) {
 			s = s + w.getText() + " ";
 		}
-		sre.addSentimentResultEntity(s, sentiment);
+		//sre.addSentimentResultEntity(s, sentiment);
 		this.chainSentiment = sre;
 	}
 
