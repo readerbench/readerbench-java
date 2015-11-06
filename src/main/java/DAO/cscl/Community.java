@@ -458,11 +458,11 @@ public class Community extends AnalysisElement {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		// processAllFolders("in/blogs_Nic/1 year", "PW", "config/LSA/tasa_en",
-		// "config/LDA/tasa_en", Lang.eng, true, null,
+		// processAllFolders("in/blogs_Nic/1 year", "PW", "resources/config/LSA/tasa_en",
+		// "resources/config/LDA/tasa_en", Lang.eng, true, null,
 		// null);
 		String path = "in/MOOC/forum_posts&comments";
-		SerialCorpusAssessment.processCorpus(path, "config/LSA/tasa_lak_en", "config/LDA/tasa_lak_en", Lang.eng, true,
+		SerialCorpusAssessment.processCorpus(path, "resources/config/LSA/tasa_lak_en", "resources/config/LDA/tasa_lak_en", Lang.eng, true,
 				true, null, null, true);
 		// Long startDate = 1383235200L;
 		Long startDate = 1383843600L;

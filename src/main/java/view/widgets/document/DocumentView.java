@@ -607,8 +607,8 @@ public class DocumentView extends JFrame {
 				// ComplexityFactors.AVERAGE_INTER_BLOCK_COHESION,
 				// ComplexityFactors.AVERAGE_INTRA_BLOCK_COHESION };
 				//
-				Document d1 = Document.load("in/NLP2012/reading_material_en.xml", "config/LSA/tasa_en",
-						"config/LDA/tasa_en", Lang.eng, true, true);
+				Document d1 = Document.load("in/NLP2012/reading_material_en.xml", "resources/config/LSA/tasa_en",
+						"resources/config/LDA/tasa_en", Lang.eng, true, true);
 				d1.computeAll(null, null, true);
 				// Document d1 = (Document) AbstractDocument
 				// .loadSerializedDocument("in/NLP2012/reading_material_en.ser");
@@ -627,8 +627,8 @@ public class DocumentView extends JFrame {
 				// Document d2 = Document
 				// .load("in/Matilda/Verbalization extracts AIED/MATILDA grain
 				// moyen.xml",
-				// "config/LSA/lemonde_fr",
-				// "config/LDA/lemonde_fr", Lang.fr, true, true);
+				// "resources/config/LSA/lemonde_fr",
+				// "resources/config/LDA/lemonde_fr", Lang.fr, true, true);
 				// d2.computeAll(null, null, true);
 				// AbstractDocument d2 = AbstractDocument
 				// .loadSerializedDocument("in/Matilda/Verbalization extracts
@@ -637,15 +637,15 @@ public class DocumentView extends JFrame {
 
 				// Document d4 = Document.loadGenericDocument(
 				// "in/Avaleur_de_Nuages/L'avaleur de nuages.xml",
-				// "config/LSA/lemonde_fr", "config/LDA/lemonde_fr",
+				// "resources/config/LSA/lemonde_fr", "resources/config/LDA/lemonde_fr",
 				// Lang.fr, true, true);
 				// d4.computeAll(null, null, true);
 				// docs.add(d4);
 
-				// String lsaSpace = "config/LSA/lemonde_fr";
-				// String ldaSpace = "config/LDA/lemonde_fr";
-				// String lsaSpace = "config/LSA/textenfants_fr";
-				// String ldaSpace = "config/LDA/textenfants_fr";
+				// String lsaSpace = "resources/config/LSA/lemonde_fr";
+				// String ldaSpace = "resources/config/LDA/lemonde_fr";
+				// String lsaSpace = "resources/config/LSA/textenfants_fr";
+				// String ldaSpace = "resources/config/LDA/textenfants_fr";
 
 				// Document d11 = Document.loadGenericDocument(
 				// "in/textes jugement thematique/avaleurnuages.xml",

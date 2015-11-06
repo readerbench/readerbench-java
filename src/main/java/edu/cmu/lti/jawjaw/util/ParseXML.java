@@ -269,9 +269,9 @@ public class ParseXML {
 		BasicConfigurator.configure();
 
 		ParseXML parser = new ParseXML();
-		parser.parse("config/WN", "wnrom.xml", "WNROM", Lang.ro);
+		parser.parse("resources/config/WN", "wnrom.xml", "WNROM", Lang.ro);
 
-		// parser.parse("config/WN", "wolf-0.1.6.xml", "WOLF", Lang.fr);
+		// parser.parse("resources/config/WN", "wolf-0.1.6.xml", "WOLF", Lang.fr);
 	}
 
 }

@@ -77,8 +77,8 @@ public class ReaderBenchServer {
         }
 
         Lang lang = Lang.eng;
-        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA("config/LSA/tasa_en", lang),
-                LDA.loadLDA("config/LDA/tasa_en", lang), lang, true, false);
+        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA("resources/config/LSA/tasa_en", lang),
+                LDA.loadLDA("resources/config/LDA/tasa_en", lang), lang, true, false);
         queryDoc.computeAll(null, null);
         ComplexityIndices.computeComplexityFactors(queryDoc);
         return queryDoc;

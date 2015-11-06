@@ -36,31 +36,31 @@ public class StopWords {
 
 	public static ListOfWords getStopwordsRo() {
 		if (stopwords_ro == null)
-			stopwords_ro = new ListOfWords("config/Stopwords/stopwords_ro.txt");
+			stopwords_ro = new ListOfWords("resources/config/Stopwords/stopwords_ro.txt");
 		return stopwords_ro;
 	}
 
 	public static ListOfWords getStopwordsFr() {
 		if (stopwords_fr == null)
-			stopwords_fr = new ListOfWords("config/Stopwords/stopwords_fr.txt");
+			stopwords_fr = new ListOfWords("resources/config/Stopwords/stopwords_fr.txt");
 		return stopwords_fr;
 	}
 
 	public static ListOfWords getStopwordsEn() {
 		if (stopwords_en == null)
-			stopwords_en = new ListOfWords("config/Stopwords/stopwords_en.txt");
+			stopwords_en = new ListOfWords("resources/config/Stopwords/stopwords_en.txt");
 		return stopwords_en;
 	}
 
 	public static ListOfWords getStopwordsIt() {
 		if (stopwords_it == null)
-			stopwords_it = new ListOfWords("config/Stopwords/stopwords_it.txt");
+			stopwords_it = new ListOfWords("resources/config/Stopwords/stopwords_it.txt");
 		return stopwords_it;
 	}
 
 	public static ListOfWords getStopwordsEs() {
 		if (stopwords_es == null)
-			stopwords_es = new ListOfWords("config/Stopwords/stopwords_es.txt");
+			stopwords_es = new ListOfWords("resources/config/Stopwords/stopwords_es.txt");
 		return stopwords_es;
 	}
 }

@@ -361,8 +361,8 @@ public class VerbalizationView extends JFrame {
 			public void run() {
 				// Document d = Document
 				// .load("in/Matilda/Verbalization extracts AIED/MATILDA grain moyen.xml",
-				// "config/LSA/lemonde_fr",
-				// "config/LDA/lemonde_fr", Lang.fr, true, true);
+				// "resources/config/LSA/lemonde_fr",
+				// "resources/config/LDA/lemonde_fr", Lang.fr, true, true);
 				// d.computeAll(null, null, true);
 				//
 				// logger.info("Finished building all documents");

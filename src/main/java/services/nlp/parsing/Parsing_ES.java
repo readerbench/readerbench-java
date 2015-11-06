@@ -43,7 +43,7 @@ class ParsingParams_ES extends Properties {
 	public ParsingParams_ES() {
 		super();
 		this.put("tokenize.language", "es");
-		this.put("pos.model", "config/POSmodels/spanish-distsim.tagger");
+		this.put("pos.model", "resources/config/POSmodels/spanish-distsim.tagger");
 		this.put("parse.model",
 				"edu/stanford/nlp/models/lexparser/spanishPCFG.ser.gz");
 		this.put("parse.flags", "");

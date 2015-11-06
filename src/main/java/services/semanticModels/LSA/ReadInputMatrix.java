@@ -56,6 +56,6 @@ public class ReadInputMatrix {
 	 */
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		readSVD("config/LSA/lak_en/matrix.svd", "config/LSA/lak_en/matrix.txt");
+		readSVD("resources/config/LSA/lak_en/matrix.svd", "resources/config/LSA/lak_en/matrix.txt");
 	}
 }

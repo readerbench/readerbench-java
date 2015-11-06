@@ -129,8 +129,8 @@ public class DataGathering {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		LSA lsa = LSA.loadLSA("config/LSA/tasa_en", Lang.eng);
-		LDA lda = LDA.loadLDA("config/LDA/tasa_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
 		try {
 			// DataGathering.processTexts("in/essays/essays_FYP_en/texts", -1,
 			// true, lsa, lda, Lang.eng, true);

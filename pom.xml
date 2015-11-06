@@ -42,6 +42,21 @@
                                 <file>${project.basedir}/src/main/resources/lib/gephi-toolkit-0.8.7.jar</file>
                             </configuration>
                         </execution>
+                        <execution>
+                            <id>3</id>
+                            <phase>initialize</phase>
+                            <goals>
+                                <goal>install-file</goal>
+                            </goals>
+                            <configuration>
+                                <groupId>edu.stanford.nlp</groupId>
+                                <artifactId>stanford-corenlp-caseless</artifactId>
+                                <version>3.5.2</version>
+                                <packaging>jar</packaging>
+                                <file>${project.basedir}/src/main/resources/lib/stanford-corenlp-caseless-2015-04-20-models.jar</file>
+                            </configuration>
+                        </execution>
+                        
                     </executions>
                 </plugin>
             </plugins>
@@ -107,6 +122,17 @@
             <version>3.5.2</version>
         </dependency>
         <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <version>3.5.2</version>
+            <classifier>models</classifier>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp-caseless</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
             <version>1.3.2</version>
@@ -169,11 +195,6 @@
             <version>4.3.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.37</version>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.persistence</groupId>
             <artifactId>eclipselink</artifactId>
             <version>2.5.2</version>
@@ -183,6 +204,17 @@
             <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
             <version>2.5.2</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.37</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-parser</artifactId>
+            <version>3.5.2</version>
+            <classifier>models</classifier>
         </dependency>
     </dependencies>
     <properties>

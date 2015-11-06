@@ -67,19 +67,19 @@ public class ReaderBenchView extends JFrame {
 	public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
 	public static final String[] TRAINED_LSA_SPACES_EN = {
-			"config/LSA/tasa_en", "config/LSA/tasa_lak_en" };
+			"resources/config/LSA/tasa_en", "resources/config/LSA/tasa_lak_en" };
 	public static final String[] TRAINED_LSA_SPACES_FR = {
-			"config/LSA/lemonde_fr", "config/LSA/textenfants_fr" };
+			"resources/config/LSA/lemonde_fr", "resources/config/LSA/textenfants_fr" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
-	public static final String[] TRAINED_LSA_SPACES_ES = { "config/LSA/joseantonio_es" };
+	public static final String[] TRAINED_LSA_SPACES_ES = { "resources/config/LSA/joseantonio_es" };
 	public static final String[] TRAINED_LDA_MODELS_EN = {
-			"config/LDA/tasa_en", "config/LDA/tasa_lak_en",
-			"config/LDA/tasa_smart_cities_en" };
+			"resources/config/LDA/tasa_en", "resources/config/LDA/tasa_lak_en",
+			"resources/config/LDA/tasa_smart_cities_en" };
 	public static final String[] TRAINED_LDA_MODELS_FR = {
-			"config/LDA/lemonde_fr", "config/LDA/textenfants_fr",
-			"config/LDA/philosophy_fr" };
-	public static final String[] TRAINED_LDA_MODELS_IT = { "config/LDA/paisa_it" };
-	public static final String[] TRAINED_LDA_MODELS_ES = { "config/LDA/joseantonio_es" };
+			"resources/config/LDA/lemonde_fr", "resources/config/LDA/textenfants_fr",
+			"resources/config/LDA/philosophy_fr" };
+	public static final String[] TRAINED_LDA_MODELS_IT = { "resources/config/LDA/paisa_it" };
+	public static final String[] TRAINED_LDA_MODELS_ES = { "resources/config/LDA/joseantonio_es" };
 
 	public static Lang RUNTIME_LANGUAGE = null;
 
@@ -118,7 +118,7 @@ public class ReaderBenchView extends JFrame {
 		getContentPane().setBackground(Color.WHITE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		setTitle("ReaderBench");
-		setIconImage(Toolkit.getDefaultToolkit().getImage("config/RB_icon.png"));
+		setIconImage(Toolkit.getDefaultToolkit().getImage("resources/config/RB_icon.png"));
 		Locale.setDefault(LOADED_LOCALE);
 
 		// adjust view to desktop size
@@ -607,7 +607,7 @@ public class ReaderBenchView extends JFrame {
 		panelSelfExplanations.add(panelVerbSpecific, BorderLayout.CENTER);
 
 		JLabel lblReaderbench = new JLabel();
-		lblReaderbench.setIcon(new ImageIcon("config/RB_logo.png"));
+		lblReaderbench.setIcon(new ImageIcon("resources/config/RB_logo.png"));
 		lblReaderbench.setForeground(Color.BLACK);
 		lblReaderbench.setFont(new Font("Helvetica", Font.BOLD, 40));
 
@@ -922,7 +922,7 @@ public class ReaderBenchView extends JFrame {
 			public void run() {
 				ReaderBenchView view = new ReaderBenchView();
 				view.setIconImage(Toolkit.getDefaultToolkit().getImage(
-						"config/RB_logo.png"));
+						"resources/config/RB_logo.png"));
 				view.setVisible(true);
 			}
 		});

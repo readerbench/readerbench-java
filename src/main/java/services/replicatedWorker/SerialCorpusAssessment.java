@@ -154,7 +154,7 @@ public class SerialCorpusAssessment {
 		BasicConfigurator.configure();
 
 		SerialCorpusAssessment.processCorpus("in/forum_Nic",
-				"config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				"resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
 				true, null, null, true);
 	}
 }

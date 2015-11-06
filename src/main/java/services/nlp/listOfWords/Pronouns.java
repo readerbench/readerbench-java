@@ -4,9 +4,9 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class Pronouns {
 	public static final ClassesOfWords PRONOUNS_EN = new ClassesOfWords(
-			"config/WordLists/pronouns_en.txt");
+			"resources/config/WordLists/pronouns_en.txt");
 	public static final ClassesOfWords PRONOUNS_FR = new ClassesOfWords(
-			"config/WordLists/pronouns_fr.txt");
+			"resources/config/WordLists/pronouns_fr.txt");
 	public static final int NO_PRONOUN_TYPES = PRONOUNS_EN.getClasses().size();
 
 	public static boolean isConnective(String s, Lang lang) {

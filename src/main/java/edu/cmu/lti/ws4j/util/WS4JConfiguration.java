@@ -21,9 +21,9 @@ final public class WS4JConfiguration {
 			cache = true;
 			trace = true;
 			maxCacheSize = 1000;
-			infoContent = "config/WN/ic-semcor.dat";
+			infoContent = "resources/config/WN/ic-semcor.dat";
 			stem = true;
-			stopList = "config/Stopwords/stopwords_en.txt";
+			stopList = "resources/config/Stopwords/stopwords_en.txt";
 			leskNormalize = true;
 			mfs = true;
 		} catch (Exception e) {

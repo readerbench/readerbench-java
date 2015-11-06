@@ -4,9 +4,9 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class Connectives {
 	public static final ClassesOfWords CONNECTIVES_EN = new ClassesOfWords(
-			"config/WordLists/connectives_en.txt");
+			"resources/config/WordLists/connectives_en.txt");
 	public static final ClassesOfWords CONNECTIVES_FR = new ClassesOfWords(
-			"config/WordLists/connectives_fr.txt");
+			"resources/config/WordLists/connectives_fr.txt");
 	public static final int NO_CONNECTIVE_TYPES = CONNECTIVES_EN.getClasses()
 			.size();
 
