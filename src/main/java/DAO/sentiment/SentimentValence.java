@@ -9,28 +9,30 @@ import java.lang.reflect.*;
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
 
 /**
+ * Holds a sentiment valence
+ * 
  * @author Gabriel Gutu
  *
  */
-public enum SentimentValence {
-	
-	ANEW_VALENCE("ANEW Valence", false),
-	ANEW_AROUSAL("ANEW Arousal", false),
-	ANEW_DOMINANCE("ANEW Dominance", false),
-	
-	GI_ONE("GI One", false),
-	GI_TWO("GI Two", false),
-	
-	STANFORD_NLP("Stanford NLP", false),
-	
-	RAGE_ONE("RAGE One", true)
-	;
+public class SentimentValence {
 	
 	private Integer id;
 	private String name;
 	private boolean rage;
 	
-	private SentimentValence(String name, boolean rage) {
+	/**
+	 * Creates a sentiment valence
+	 * 
+	 * @param id
+	 * 			id of the sentiment valence
+	 * @param name
+	 * 			name of the sentiment valence
+	 * @param rage
+	 * 			shows if it is a RAGE valence
+	 * 			or a primary one
+	 */
+	private SentimentValence(Integer id, String name, boolean rage) {
+		this.id = id;
 		this.name = name;
 		this.rage = rage;
 	}

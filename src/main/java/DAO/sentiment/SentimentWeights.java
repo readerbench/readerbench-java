@@ -24,17 +24,6 @@ public class SentimentWeights {
 	 * Number of RAGE valences 
 	 */
 	private static Integer NO_RAGE_VALENCES = 6;
-	
-	private static Integer ANEW_VALENCE = 0;
-	private static Integer ANEW_AROUSAL = 1;
-	private static Integer ANEW_DOMINANCE = 2;
-	private static Integer GI_ONE = 3;
-	private static Integer GI_TWO = 4;
-	private static Integer STANFORD_NLP = 5;
-	
-	private static Integer RAGE_ONE = 0;
-	private static Integer RAGE_TWO = 1;
-	private static Integer RAGE_THREE = 2;
 
 	/**
 	 * The sentiment grid contains the associations
@@ -42,6 +31,7 @@ public class SentimentWeights {
 	 * for weights
 	 */
 	private SentimentGrid<Double> sentimentGrid;
+	private SentimentValence[] sentimentValences;
 	
 	/**
 	 * Initializes the sentiments grid
@@ -58,19 +48,22 @@ public class SentimentWeights {
 	 */
 	private void setSentimentsIds() {
 		// database request to get id of sentiment valences
-		SentimentValence.ANEW_VALENCE.setId(0); // put database id here
-		SentimentValence.ANEW_AROUSAL.setId(0); // put database id here
-		SentimentValence.ANEW_DOMINANCE.setId(0); // put database id here
+		
+		/*sentimentValences = databaseRequestHere();
+		foreach(SentimentValence sentimentValence : dbSentimentValences) {
+			
+		}*/
+		
 	}
 	
 	/**
 	 * Sets sentiments weights
 	 */
 	private void setSentimentsWeights() {
-		// TODO: get weight from database?
-		sentimentGrid.set(SentimentValence.ANEW_VALENCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
+		// TODO: get weight from database
+		/*sentimentGrid.set(SentimentValence.ANEW_VALENCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
 		sentimentGrid.set(SentimentValence.ANEW_AROUSAL.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
-		sentimentGrid.set(SentimentValence.ANEW_DOMINANCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
+		sentimentGrid.set(SentimentValence.ANEW_DOMINANCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);*/
 	}
 	
 	/**
