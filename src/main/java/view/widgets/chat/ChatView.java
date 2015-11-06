@@ -569,17 +569,17 @@ public class ChatView extends JFrame {
 			public void run() {
 				List<Conversation> chats = new LinkedList<Conversation>();
 
-				Conversation c1 = Conversation.load("in/cscl/echipa4.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c1 = Conversation.load("in/cscl/echipa4.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c1.computeAll(null, null, true);
 				chats.add(c1);
 
-				Conversation c2 = Conversation.load("in/cscl/echipa34.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c2 = Conversation.load("in/cscl/echipa34.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c2.computeAll(null, null, true);
 				chats.add(c2);
 
-				Conversation c3 = Conversation.load("in/cscl/echipa36.xml", "config/LSA/tasa_en", "config/LDA/tasa_en", Lang.eng, true,
+				Conversation c3 = Conversation.load("in/cscl/echipa36.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
 						true);
 				c3.computeAll(null, null, true);
 				// Chat c3 = (Chat) AbstractDocument
@@ -603,7 +603,7 @@ public class ChatView extends JFrame {
 				for (File file : files) {
 					try {
 						logger.info("Processing " + file.getPath() + " file");
-						Conversation c = Conversation.load(file.getPath(), "config/LSA/lemonde_fr", "config/LDA/lemonde_fr", Lang.fr,
+						Conversation c = Conversation.load(file.getPath(), "resources/config/LSA/lemonde_fr", "resources/config/LDA/lemonde_fr", Lang.fr,
 								true, true);
 						c.computeAll(null, null, true);
 						chats.add(c);

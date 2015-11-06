@@ -71,19 +71,19 @@ public class StaticLemmatizer {
 
 	public static Map<String, String> getLemmasEn() {
 		if (lemmas_en == null)
-			lemmas_en = initialize("config/Lemmas/lemmas_en.txt", Lang.eng);
+			lemmas_en = initialize("resources/config/Lemmas/lemmas_en.txt", Lang.eng);
 		return lemmas_en;
 	}
 
 	public static Map<String, String> getLemmasRo() {
 		if (lemmas_ro == null)
-			lemmas_ro = initialize("config/Lemmas/lemmas_ro.txt", Lang.ro);
+			lemmas_ro = initialize("resources/config/Lemmas/lemmas_ro.txt", Lang.ro);
 		return lemmas_ro;
 	}
 
 	public static Map<String, String> getLemmasEs() {
 		if (lemmas_es == null)
-			lemmas_es = initialize("config/Lemmas/lemmas_es.txt", Lang.es);
+			lemmas_es = initialize("resources/config/Lemmas/lemmas_es.txt", Lang.es);
 		return lemmas_es;
 	}
 

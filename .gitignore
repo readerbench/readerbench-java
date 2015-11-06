@@ -13,7 +13,6 @@ ReaderBench_lib/
 *.exe
 *.o
 *.so
-*.jar
 
 # Build results
 [Dd]ebug/

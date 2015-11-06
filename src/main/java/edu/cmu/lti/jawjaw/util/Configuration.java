@@ -57,25 +57,25 @@ public class Configuration {
 
 	public static Configuration getWordNetEn() {
 		if (instance_en == null)
-			instance_en = new Configuration("config/WN/wnjpn-0.9.db", false, 100000);
+			instance_en = new Configuration("resources/config/WN/wnjpn-0.9.db", false, 100000);
 		return instance_en;
 	}
 
 	public static Configuration getWordNetFr() {
 		if (instance_fr == null)
-			instance_fr = new Configuration("config/WN/wolf-0.1.6.db", false, 100000);
+			instance_fr = new Configuration("resources/config/WN/wolf-0.1.6.db", false, 100000);
 		return instance_fr;
 	}
 
 	public static Configuration getWordNetIt() {
 		if (instance_it == null)
-			instance_it = new Configuration("config/WN/italian_wn.db", false, 100000);
+			instance_it = new Configuration("resources/config/WN/italian_wn.db", false, 100000);
 		return instance_it;
 	}
 
 	public static Configuration getWordNetRo() {
 		if (instance_ro == null)
-			instance_ro = new Configuration("config/WN/wnrom.db", false, 100000);
+			instance_ro = new Configuration("resources/config/WN/wnrom.db", false, 100000);
 		return instance_ro;
 	}
 

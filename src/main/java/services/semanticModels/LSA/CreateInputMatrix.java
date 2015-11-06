@@ -219,7 +219,7 @@ public class CreateInputMatrix extends LSA {
 		BasicConfigurator.configure();
 		try {
 			CreateInputMatrix lsaTraining = new CreateInputMatrix();
-			lsaTraining.parseCorpus("config/LSA/tasa_new_en2", "tasa.txt",
+			lsaTraining.parseCorpus("resources/config/LSA/tasa_new_en2", "tasa.txt",
 					"matrix.svd", Lang.eng);
 		} catch (Exception ex) {
 			ex.printStackTrace();

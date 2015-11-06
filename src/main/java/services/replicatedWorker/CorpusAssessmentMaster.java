@@ -30,8 +30,8 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 public class CorpusAssessmentMaster extends Master {
 	static Logger logger = Logger.getLogger(CorpusAssessmentMaster.class);
 
-	public static final String PATH_TO_LSA = "config/LSA/tasa_en";
-	public static final String PATH_TO_LDA = "config/LDA/tasa_en";
+	public static final String PATH_TO_LSA = "resources/config/LSA/tasa_en";
+	public static final String PATH_TO_LDA = "resources/config/LDA/tasa_en";
 	public static final Lang PROCESSING_LANGUAGE = Lang.eng;
 	public static final boolean USE_POS_TAGGING = true;
 	public static final boolean CLEAN_INPUT = true;

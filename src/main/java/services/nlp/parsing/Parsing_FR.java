@@ -46,7 +46,7 @@ class ParsingParams_FR extends Properties {
 	public ParsingParams_FR() {
 		super();
 		this.put("tokenize.language", "fr");
-		this.put("pos.model", "config/POSmodels/french.tagger");
+		this.put("pos.model", "resources/config/POSmodels/french.tagger");
 		this.put("parse.model", "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
 		this.put("parse.flags", "");
 		this.put("parse.buildgraphs", "false");

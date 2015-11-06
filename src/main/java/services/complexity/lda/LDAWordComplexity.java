@@ -82,7 +82,7 @@ public class LDAWordComplexity {
 	public static void main(String[] args) throws IOException {
 		BasicConfigurator.configure();
 
-		String path = "config/LDA/lemonde_fr";
+		String path = "resources/config/LDA/lemonde_fr";
 		Lang lang = Lang.fr;
 		LDA lda = LDA.loadLDA(path, lang);
 

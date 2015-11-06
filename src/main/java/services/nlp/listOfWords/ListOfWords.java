@@ -77,8 +77,8 @@ public class ListOfWords {
 
 	public static void main(String[] args) {
 
-		ListOfWords dict1 = new ListOfWords("config/Dictionary/dict_en.txt");
-		ListOfWords dict2 = new ListOfWords("config/Dictionary/EN/names_en.txt");
+		ListOfWords dict1 = new ListOfWords("resources/config/Dictionary/dict_en.txt");
+		ListOfWords dict2 = new ListOfWords("resources/config/Dictionary/EN/names_en.txt");
 
 		Set<String> finalWords = new TreeSet<String>();
 		finalWords.addAll(dict1.getWords());
@@ -93,6 +93,6 @@ public class ListOfWords {
 		// finalWords.add(w);
 		// }
 		dict1.setWords(finalWords);
-		dict1.writeListOfWords("config/Dictionary/dict2_en.txt");
+		dict1.writeListOfWords("resources/config/Dictionary/dict2_en.txt");
 	}
 }

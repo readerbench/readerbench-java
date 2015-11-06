@@ -18,9 +18,9 @@ public class PatternMatching {
 	static Logger logger = Logger.getLogger(PatternMatching.class);
 
 	public static final ListOfWords PATTERNS_CAUSALITY_FR = new ListOfWords(
-			"config/ReadingStrategies/causality_fr.txt");
+			"resources/config/ReadingStrategies/causality_fr.txt");
 	public static final ListOfWords PATTERNS_CONTROL_FR = new ListOfWords(
-			"config/ReadingStrategies/control_fr.txt");
+			"resources/config/ReadingStrategies/control_fr.txt");
 	private static final Color COLOR_CAUSALITY = new Color(255, 0, 255);
 	private static final Color COLOR_CONTROL = new Color(0, 203, 255);
 

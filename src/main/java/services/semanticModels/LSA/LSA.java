@@ -272,7 +272,7 @@ public class LSA implements ISemanticModel {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		// LSA lsa = LSA.loadLSA("config/LSA/tasa_new_en2", Lang.eng);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_new_en2", Lang.eng);
 		//
 		// Word w1 = Word.getWordFromConcept("cat", Lang.eng);
 		// Word w2 = Word.getWordFromConcept("dog", Lang.eng);
@@ -284,7 +284,7 @@ public class LSA implements ISemanticModel {
 		// + entry.getValue());
 		// }
 
-		LSA lsa = LSA.loadLSA("config/LSA/tasa_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
 
 		Word w1 = Word.getWordFromConcept("men", Lang.eng);
 		Word w2 = Word.getWordFromConcept("address", Lang.eng);
