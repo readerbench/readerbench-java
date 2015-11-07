@@ -389,7 +389,7 @@ public class SemanticModelsTraining extends JFrame {
 		JLabel lblLSAInputFile = new JLabel(LocalizationUtils.getTranslation("Input file") + "*:");
 
 		textFieldLSAFile = new JTextField();
-		textFieldLSAFile.setText("config/LSA");
+		textFieldLSAFile.setText("resources/config/LSA");
 		textFieldLSAFile.setColumns(10);
 
 		JLabel lblTxtOnly = new JLabel("* " + LocalizationUtils.getTranslation("Only a single TXT file is used for building the TermDoc matrix"));
@@ -398,7 +398,7 @@ public class SemanticModelsTraining extends JFrame {
 		JButton btnLSAFile = new JButton("...");
 		btnLSAFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser("config/LSA");
+				JFileChooser fc = new JFileChooser("resources/config/LSA");
 				fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 				fc.setFileFilter(new FileFilter() {
 					public boolean accept(File f) {
@@ -567,7 +567,7 @@ public class SemanticModelsTraining extends JFrame {
 		JButton btnLDADirectory = new JButton("...");
 		btnLDADirectory.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser("config/LDA");
+				JFileChooser fc = new JFileChooser("resources/config/LDA");
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int returnVal = fc.showOpenDialog(SemanticModelsTraining.this);
 
@@ -579,7 +579,7 @@ public class SemanticModelsTraining extends JFrame {
 		});
 
 		textFieldLDADirectory = new JTextField();
-		textFieldLDADirectory.setText("config/LDA");
+		textFieldLDADirectory.setText("resources/config/LDA");
 		textFieldLDADirectory.setColumns(10);
 
 		JLabel lblAllTxt = new JLabel("* " + LocalizationUtils.getTranslation("All TXT files within the provided directory will be taken into consideration"));

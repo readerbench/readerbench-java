@@ -16,8 +16,8 @@ import org.xml.sax.SAXException;
 
 public class Digest_FR {
 	static Logger logger = Logger.getLogger(Digest_FR.class);
-	public static final String PATH_TO_TEXT_LEMMAS_FR = "config/Lemmas/lemmas_pos_fr.txt";
-	public static final String PATH_TO_MORPHALOU_FR = "config/Lemmas/Morphalou-2.0.xml";
+	public static final String PATH_TO_TEXT_LEMMAS_FR = "resources/config/Lemmas/lemmas_pos_fr.txt";
+	public static final String PATH_TO_MORPHALOU_FR = "resources/config/Lemmas/Morphalou-2.0.xml";
 
 	public static void parseMorpholau() throws IOException, SAXException {
 		logger.info("Parsing Morphalou");

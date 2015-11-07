@@ -136,23 +136,23 @@ public class LDA implements ISemanticModel, Serializable {
 		// remove stopwords
 		switch (language) {
 		case fr:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("config/Stopwords/stopwords_fr.txt"), "UTF-8", false,
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_fr.txt"), "UTF-8", false,
 					false, false));
 			break;
 		case it:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("config/Stopwords/stopwords_it.txt"), "UTF-8", false,
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_it.txt"), "UTF-8", false,
 					false, false));
 			break;
 		case ro:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("config/Stopwords/stopwords_ro.txt"), "UTF-8", false,
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_ro.txt"), "UTF-8", false,
 					false, false));
 			break;
 		case es:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("config/Stopwords/stopwords_es.txt"), "UTF-8", false,
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_es.txt"), "UTF-8", false,
 					false, false));
 			break;
 		default:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("config/Stopwords/stopwords_en.txt"), "UTF-8", false,
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_en.txt"), "UTF-8", false,
 					false, false));
 		}
 
@@ -519,7 +519,7 @@ public class LDA implements ISemanticModel, Serializable {
 			// LDA lda = new LDA(Lang.eng);
 			// System.out
 			// .println(lda.createHDPModel("in/LOWE1/class11", 5, 10000));
-			String path = "config/LDA/tasa_en";
+			String path = "resources/config/LDA/tasa_en";
 			Lang lang = Lang.eng;
 
 			LDA lda = new LDA(path, lang);

@@ -117,8 +117,8 @@ public class PunData {
 		BasicConfigurator.configure();
 		PunData comp = new PunData();
 
-		 LDA lda = LDA.loadLDA("config/LDA/tasa_en", Lang.eng);
-//		LSA lsa = LSA.loadLSA("config/LSA/tasa_en", Lang.eng);
+		 LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
+//		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
 		comp.comparePuns("in/pun data/pun data.csv", lda, 0.5);
 	}
 }

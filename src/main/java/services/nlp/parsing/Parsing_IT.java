@@ -105,14 +105,14 @@ public class Parsing_IT {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		// parseTrainingCorpus("config/POSmodels/train_it.txt",
-		// "config/POSmodels/train_PENN_it.txt");
+		// parseTrainingCorpus("resources/config/POSmodels/train_it.txt",
+		// "resources/config/POSmodels/train_PENN_it.txt");
 
 		AbstractDocumentTemplate docTmp = getDocumentModel();
 		AbstractDocument d = new Document(
 				null,
 				docTmp,
-				null, LDA.loadLDA("config/LDA/paisa1_it", Lang.it), Lang.it,
+				null, LDA.loadLDA("resources/config/LDA/paisa1_it", Lang.it), Lang.it,
 				true, false);
 		d.computeAll(null, null);
 		System.out.println(d);
@@ -136,7 +136,7 @@ class ParsingParams_IT extends Properties {
 
 	public ParsingParams_IT() {
 		super();
-		this.put("pos.model", "config/POSmodels/italian.tagger");
+		this.put("pos.model", "resources/config/POSmodels/italian.tagger");
 		this.put("annotators", "tokenize, ssplit, pos");
 	}
 }

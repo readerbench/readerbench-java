@@ -164,7 +164,7 @@ public class ProcessSVDOutput extends LSA {
 		try {
 			// post-process
 			ProcessSVDOutput processing = new ProcessSVDOutput();
-			processing.performPostProcessing("config/LSA/joseantonion_es",
+			processing.performPostProcessing("resources/config/LSA/joseantonion_es",
 					Lang.es, true);
 		} catch (Exception ex) {
 			ex.printStackTrace();

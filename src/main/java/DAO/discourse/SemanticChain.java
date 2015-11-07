@@ -34,8 +34,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 	private double[] blockMovingAverage;
 	private double averageImportanceScore;
 
-	private double[] sentimentDistribution;
-	private double sentimentAverage;
 	private boolean NNVB;
 	private transient SentimentEntity chainSentiment;
 
@@ -47,9 +45,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 			words.add(link.getWord());
 		}
 		this.setChainSentiment(new SentimentEntity());
-		this.sentimentDistribution = new double[getNoWords()];
 		this.NNVB = false;
-		computeAverageSentiment();
 		computeSentimentDistribution();
 	}
 
@@ -57,7 +53,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		int i = 0;
 		int counter = 0;
 		for (Word w : words) {
-			sentimentDistribution[i] = w.getSentiment().getAggregatedValue();
 			i++;
 			if (w.isNoun() || w.isVerb()) {
 				counter++;
@@ -67,59 +62,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 			NNVB = true;
 		else
 			NNVB = false;
-	}
-
-	private void computeAverageSentiment() {
-		int VNegOcc = 0;
-		int NegOcc = 0;
-		int NeutralOcc = 0;
-		int PosOcc = 0;
-		int VPosOcc = 0;
-		double average = 0;
-		for (Word word : words) {
-			switch ((int) word.getSentiment().getAggregatedValue()) {
-			case 0:
-				VNegOcc++;
-				break;
-			case 1:
-				NegOcc++;
-				break;
-			case 2:
-				NeutralOcc++;
-				break;
-			case 3:
-				PosOcc++;
-				break;
-			case 4:
-				VPosOcc++;
-				break;
-			default:
-				break;
-			}
-		}
-
-		double sum = (VPosOcc + PosOcc + NeutralOcc + NegOcc + VNegOcc);
-		average = (VPosOcc * 2 + PosOcc - NegOcc - VNegOcc * 2) / sum;
-		this.sentimentAverage = average;
-
-		computeChainSentiment();
-	}
-
-	private void computeChainSentiment() {
-		int sentiment = 0;
-		if (sentimentAverage < -1.5) {
-			sentiment = 0;
-		} else if (-1.5 <= sentimentAverage && sentimentAverage < -0.5) {
-			sentiment = 1;
-		} else if (-0.5 <= sentimentAverage && sentimentAverage < 0.5) {
-			sentiment = 2;
-		} else if (0.5 <= sentimentAverage && sentimentAverage < 1.5) {
-			sentiment = 3;
-		} else if (1.5 <= sentimentAverage) {
-			sentiment = 4;
-		}
-
-		setChainSentiment(sentiment);
 	}
 
 	public static double similarity(SemanticChain chain1, SemanticChain chain2) {
@@ -390,14 +332,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		this.averageImportanceScore = averageImportanceScore;
 	}
 
-	public double[] getSentimentDistribution() {
-		return sentimentDistribution;
-	}
-
-	public void setSentimentDistribution(double[] sentimentDistribution) {
-		this.sentimentDistribution = sentimentDistribution;
-	}
-
 	public SentimentEntity getChainSentiment() {
 		return chainSentiment;
 	}
@@ -414,10 +348,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		}
 		//sre.addSentimentResultEntity(s, sentiment);
 		this.chainSentiment = sre;
-	}
-
-	public double getSentimentAverage() {
-		return this.sentimentAverage;
 	}
 
 	public double getStdevSentiment() {

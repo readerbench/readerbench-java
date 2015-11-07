@@ -212,15 +212,15 @@ public class CompareResults {
 		BasicConfigurator.configure();
 		CompareResults comp = new CompareResults();
 
-//		LSA lsa = LSA.loadLSA("config/LSA/tasa_lak_en", Lang.eng);
-//		comp.compare("config/LSA/word_associations_en.txt", lsa, 3, false, 20,
+//		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
+//		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, false, 20,
 //				0.3);
 
-		LDA lda = LDA.loadLDA("config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("config/LSA/word_associations_en.txt", lda, 3, false, 20,
+		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
+		comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3, false, 20,
 				0.3);
-		// printSimilarConcepts("config/LSA/joseantonion_es", Lang.es, 20, 0.3);
-		// comp.compare("config/LSA/tasa_lak_en", "word_associations_en.txt",
+		// printSimilarConcepts("resources/config/LSA/joseantonion_es", Lang.es, 20, 0.3);
+		// comp.compare("resources/config/LSA/tasa_lak_en", "word_associations_en.txt",
 		// Lang.en, 0.3);
 	}
 }

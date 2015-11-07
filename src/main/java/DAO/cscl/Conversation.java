@@ -324,21 +324,6 @@ public class Conversation extends AbstractDocument {
 	 * @param p
 	 * @return
 	 */
-	public double[] getParticipantSentimentBlockDistribution(SemanticChain voice, Participant p) {
-		double[] distribution = new double[voice.getBlockDistribution().length];
-		for (int i = 0; i < getBlocks().size(); i++) {
-			if (getBlocks().get(i) != null && ((Utterance) getBlocks().get(i)).getParticipant().equals(p)) {
-				distribution[i] = getBlocks().get(i).getSentimentEntity().getAggregatedValue();
-			}
-		}
-		return distribution;
-	}
-
-	/**
-	 * @param voice
-	 * @param p
-	 * @return
-	 */
 	public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
 		double[] distribution = getParticipantBlockDistribution(voice, p);
 

@@ -14,9 +14,9 @@ public class TopicCoverage {
 	static Logger logger = Logger.getLogger(PatternMatching.class);
 
 	public static final MapOfWordWeights WORDS_ACADEMIC_ADMINISTRATION_EN = new MapOfWordWeights(
-			"config/Topics/academic administration_en.txt", Lang.eng);
+			"resources/config/Topics/academic administration_en.txt", Lang.eng);
 	public static final MapOfWordWeights WORDS_EDUCATIONAL_SCIENCES_EN = new MapOfWordWeights(
-			"config/Topics/educational sciences_en.txt", Lang.eng);
+			"resources/config/Topics/educational sciences_en.txt", Lang.eng);
 
 	public static enum TopicClass {
 		ACADEMIC_ADMINISTRATION, EDUCATIONAL_SCIENCES

@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 public class Digest_IT {
 	private static Logger logger = Logger.getLogger(Digest_IT.class);
 
-	public static final String PATH_TO_TEXT_LEMMAS_IT = "config/Lemmas/lemmas_pos_it.txt";
-	public static final String PATH_TO_MORPH_IT = "config/Lemmas/morph-it_048.txt";
+	public static final String PATH_TO_TEXT_LEMMAS_IT = "resources/config/Lemmas/lemmas_pos_it.txt";
+	public static final String PATH_TO_MORPH_IT = "resources/config/Lemmas/morph-it_048.txt";
 
 	private static Map<String, String> lemmas;
 

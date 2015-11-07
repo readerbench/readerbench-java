@@ -199,7 +199,7 @@ public class TASAAnalyzerFull {
 		String word;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(
-					"config/WordLists/age_of_acquisition_en/" + normFile));
+					"resources/config/WordLists/age_of_acquisition_en/" + normFile));
 			while ((line = br.readLine()) != null) {
 				tokens = line.split(",");
 				word = tokens[0].trim().replaceAll(" ", "");
