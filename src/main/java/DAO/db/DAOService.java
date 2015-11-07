@@ -37,6 +37,7 @@ public class DAOService {
             return result;
         } catch (Exception ex) {
             em.getTransaction().rollback();
+			em.close();
             return null;
         }
     }

@@ -1,5 +1,6 @@
 package DAO.sentiment;
 
+import DAO.db.ValenceDAO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
  *
  */
 public class SentimentValence {
+	
+	private static Map<String, SentimentValence> valenceMap;
 	
 	private Integer id;
 	private String name;
@@ -59,6 +62,20 @@ public class SentimentValence {
 	
 	public void setRage(boolean rage) {
 		this.rage = rage;
+	}
+	
+	public static void initValences() {
+		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
+		valenceMap = new HashMap<>();
+		for (pojo.SentimentValence v : valences) {
+			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getRage());
+			valenceMap.put(v.getIndexLabel(), sv);
+		}
+	}
+	
+	public static SentimentValence get(String index) {
+		if (valenceMap == null) SentimentGrid.init();
+		return valenceMap.get(index);
 	}
 	
 }	

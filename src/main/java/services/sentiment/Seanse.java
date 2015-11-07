@@ -49,8 +49,12 @@ public class Seanse {
                 String line = s.nextLine();
                 Scanner lineScanner = new Scanner(line);
                 String sentiment = lineScanner.next();
+				SentimentValence valence = new SentimentValence(
+						DAO.sentiment.SentimentValence.get(sentiment).getId());
                 while (lineScanner.hasNext()) {
-                    String word = lineScanner.next();
+                    String w = lineScanner.next(); 
+					Word word = WordDAO.getInstance().findByLabel(w);
+					System.out.println(w + " " + word);
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -65,7 +69,7 @@ public class Seanse {
     }
 	
 	public void saveWordsToDB() {
-		WordDAO wd = new WordDAO();
+		WordDAO wd = WordDAO.getInstance();
 		low.getWords().stream().map((word) -> {
 			Word w = new Word();
 			w.setLabel(word);
@@ -98,7 +102,8 @@ public class Seanse {
 	public static void main(String[] args) throws IOException {
         Seanse seanse = new Seanse();
 		//seanse.saveWordsToDB();
-		seanse.createValences();
+		//seanse.createValences();
+		seanse.readAffectiveList();
 		DAOService.getInstance().close();
         //seanse.readAffectiveList();
         //Path link = Files.readSymbolicLink(Paths.get(BASE_DIR + AFFECTIVE_LIST));

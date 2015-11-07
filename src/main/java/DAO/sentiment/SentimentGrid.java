@@ -72,4 +72,7 @@ public class SentimentGrid<V> {
         return grid[indexes.get(row)][indexes.get(col)];
     }
 	
+	public static void init() {
+		SentimentValence.initValences();
+	}
 }
