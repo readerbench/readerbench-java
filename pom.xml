@@ -16,7 +16,7 @@
                     <executions>
                         <execution>
                             <id>1</id>
-                            <phase>initialize</phase>
+                            <phase>clean</phase>
                             <goals>
                                 <goal>install-file</goal>
                             </goals>
@@ -30,7 +30,7 @@
                         </execution>
                         <execution>
                             <id>2</id>
-                            <phase>initialize</phase>
+                            <phase>clean</phase>
                             <goals>
                                 <goal>install-file</goal>
                             </goals>
@@ -44,7 +44,7 @@
                         </execution>
                         <execution>
                             <id>3</id>
-                            <phase>initialize</phase>
+                            <phase>clean</phase>
                             <goals>
                                 <goal>install-file</goal>
                             </goals>
@@ -62,13 +62,6 @@
             </plugins>
         </pluginManagement>
     </build>
-    <repositories>
-        <repository>
-            <id>unknown-jars-temp-repo</id>
-            <name>A temporary repository created by NetBeans for libraries and jars it could not identify. Please replace the dependencies in this repository with correct ones and delete this repository.</name>
-            <url>file:${project.basedir}/lib</url>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>log4j</groupId>
