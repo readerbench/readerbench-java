@@ -35,7 +35,7 @@ public class SentimentEntity implements Serializable {
     @Basic(optional = false)
     @Column(name = "id")
     private Integer id;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sentimentEntityId", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkSentimentEntity", fetch = FetchType.LAZY)
     private List<EntityXValence> entityXValenceList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkSentimentEntity", fetch = FetchType.LAZY)
     private List<Word> wordList;

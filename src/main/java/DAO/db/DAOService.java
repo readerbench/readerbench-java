@@ -1,12 +1,10 @@
 package DAO.db;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
-import javax.persistence.TypedQuery;
 
 /**
  *
@@ -17,9 +15,11 @@ public class DAOService {
     private static DAOService instance = null;
     
     private final EntityManagerFactory emf;
+    private EntityManager em;
 	
     private DAOService() {
 		emf = Persistence.createEntityManagerFactory("ReaderBench"); 
+        em = emf.createEntityManager();
     }
         
     public static DAOService getInstance() {
@@ -28,22 +28,30 @@ public class DAOService {
     }
     
     public <T> T executeQuery(Function<EntityManager, T> f) {
-        EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
             T result = f.apply(em);
             em.getTransaction().commit();
-			em.close();
-            return result;
-        } catch (Exception ex) {
-            em.getTransaction().rollback();
-			em.close();
-            return null;
+			return result;
+        } 
+        catch (NoResultException ex) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+			return null;
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+			return null;
         }
     }
     
     
     public void close() {
+        if (em != null) em.close();
         emf.close();
     }
     

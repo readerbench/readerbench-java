@@ -25,8 +25,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Word.findAll", query = "SELECT w FROM Word w"),
     @NamedQuery(name = "Word.findById", query = "SELECT w FROM Word w WHERE w.id = :id"),
-    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.label = :label")})
+    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.label = :label"),
+    @NamedQuery(name = "Word.findByPrefix", query = "SELECT w FROM Word w WHERE w.label like :label")})
 public class Word implements Serializable {
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -98,7 +100,7 @@ public class Word implements Serializable {
 
     @Override
     public String toString() {
-        return "pojo.Word[ id=" + id + " ]";
+        return label;
     }
-    
+
 }

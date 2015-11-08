@@ -5,6 +5,7 @@
  */
 package DAO.db;
 
+import java.util.List;
 import javax.persistence.TypedQuery;
 import pojo.Word;
 
@@ -30,8 +31,16 @@ public class WordDAO extends AbstractDAO<Word>{
 	public Word findByLabel(String label) {
 		return dao.executeQuery(em -> {
 			TypedQuery<Word> query = em.createNamedQuery("Word.findByLabel", Word.class);
-			query.setParameter(1, label);
+			query.setParameter("label", label);
 			return query.getSingleResult();
+		});
+	}
+    
+    public List<Word> findByPrefix(String label) {
+		return dao.executeQuery(em -> {
+			TypedQuery<Word> query = em.createNamedQuery("Word.findByPrefix", Word.class);
+            query.setParameter("label", label + "%");
+			return query.getResultList();
 		});
 	}
 	

@@ -49,7 +49,7 @@ public class SentimentValence implements Serializable {
     private List<Weight> weightList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkRageValence", fetch = FetchType.LAZY)
     private List<Weight> weightList1;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sentimentValenceId", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkSentimentValence", fetch = FetchType.LAZY)
     private List<EntityXValence> entityXValenceList;
 
     public SentimentValence() {

@@ -27,6 +27,12 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "EntityXValence.findById", query = "SELECT e FROM EntityXValence e WHERE e.id = :id"),
     @NamedQuery(name = "EntityXValence.findByValue", query = "SELECT e FROM EntityXValence e WHERE e.value = :value")})
 public class EntityXValence implements Serializable {
+    @JoinColumn(name = "fk_sentiment_entity", referencedColumnName = "id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private SentimentEntity fkSentimentEntity;
+    @JoinColumn(name = "fk_sentiment_valence", referencedColumnName = "id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private SentimentValence fkSentimentValence;
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,13 +42,7 @@ public class EntityXValence implements Serializable {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "value")
     private Double value;
-    @JoinColumn(name = "sentiment_entity_id", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private SentimentEntity sentimentEntityId;
-    @JoinColumn(name = "sentiment_valence_id", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private SentimentValence sentimentValenceId;
-
+    
     public EntityXValence() {
     }
 
@@ -64,22 +64,6 @@ public class EntityXValence implements Serializable {
 
     public void setValue(Double value) {
         this.value = value;
-    }
-
-    public SentimentEntity getSentimentEntityId() {
-        return sentimentEntityId;
-    }
-
-    public void setSentimentEntityId(SentimentEntity sentimentEntityId) {
-        this.sentimentEntityId = sentimentEntityId;
-    }
-
-    public SentimentValence getSentimentValenceId() {
-        return sentimentValenceId;
-    }
-
-    public void setSentimentValenceId(SentimentValence sentimentValenceId) {
-        this.sentimentValenceId = sentimentValenceId;
     }
 
     @Override
@@ -105,6 +89,22 @@ public class EntityXValence implements Serializable {
     @Override
     public String toString() {
         return "pojo.EntityXValence[ id=" + id + " ]";
+    }
+
+    public SentimentEntity getFkSentimentEntity() {
+        return fkSentimentEntity;
+    }
+
+    public void setFkSentimentEntity(SentimentEntity fkSentimentEntity) {
+        this.fkSentimentEntity = fkSentimentEntity;
+    }
+
+    public SentimentValence getFkSentimentValence() {
+        return fkSentimentValence;
+    }
+
+    public void setFkSentimentValence(SentimentValence fkSentimentValence) {
+        this.fkSentimentValence = fkSentimentValence;
     }
     
 }
