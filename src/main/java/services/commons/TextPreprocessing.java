@@ -48,7 +48,8 @@ public class TextPreprocessing {
 					"[^a-zàâäæçéêèëîïôœùûü ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		case ro:
-			result = result.replaceAll("[^a-zăâîșț ,:;'\\-\\.\\!\\?\n]", " ");
+			result = result.replaceAll("ş", "ş").replaceAll("ț", "ţ");
+			result = result.replaceAll("[^a-zăâîşţ ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		case es:
 			result = result.replaceAll("[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]", " ");

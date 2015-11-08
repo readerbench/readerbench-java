@@ -187,7 +187,8 @@ public class SemSpaceView extends JFrame {
 		// Export
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
 		try {
-			ec.exportFile(new File("out/graph.pdf"));
+			ec.exportFile(new File(
+					"out/graph_" + wordTextField.getText() + "_" + (new File(semModel.getPath()).getName()) + ".pdf"));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			return;
@@ -407,7 +408,7 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("in/HDP/grade12", Lang.eng));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("in/HDP/grade6", Lang.eng));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);

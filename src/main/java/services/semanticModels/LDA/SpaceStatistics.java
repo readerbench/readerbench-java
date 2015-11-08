@@ -277,7 +277,7 @@ public class SpaceStatistics {
 		// Lang.eng));
 		// ss.buildWordDistances();
 		// ss.computeGraphStatistics();
-		int initialGrade = 5;
+		int initialGrade = 2;
 		SpaceStatistics baseline = new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + initialGrade, Lang.eng));
 		List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
 
