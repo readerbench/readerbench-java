@@ -11,14 +11,15 @@ public class DialogismMeasuresSentiment {
 	static Logger logger = Logger.getLogger(DialogismMeasuresSentiment.class);
 
 	public static double[][] getSentimentCorrelationMatrix(List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+		/*double[][] correlations = new double[voices.size()][voices.size()];
 		for (int i = 0; i < voices.size(); i++) {
 			for (int j = 0; j < i; j++) {
 				correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices.get(i).getSentimentDistribution(),
 						voices.get(j).getSentimentDistribution());
 			}
 		}
-		return correlations;
+		return correlations;*/
+		return null;
 	}
 
 	public static double[][] getSentimentMovingAverageCorrelationMatrix(List<SemanticChain> voices) {
@@ -30,14 +31,14 @@ public class DialogismMeasuresSentiment {
 			}
 		}
 
-		for (int i = 0; i < correlations.length; i++) {
+		/*for (int i = 0; i < correlations.length; i++) {
 			for (int j = 0; j < correlations[i].length; j++) {
 				double sentiment = voices.get(i).getSentimentAverage();
 				if (sentiment != 0) {
 					correlations[i][j] *= sentiment;
 				}
 			}
-		}
+		}*/
 		return correlations;
 	}
 
@@ -72,10 +73,10 @@ public class DialogismMeasuresSentiment {
 		if (no > 0) {
 			for (int k = 0; k < evolution.length; k++) {
 				evolution[k] /= no;
-				for (SemanticChain s : voices) {
+				/*for (SemanticChain s : voices) {
 					if (s.getSentimentAverage() != 0)
 						evolution[k] *= s.getSentimentAverage();
-				}
+				}*/
 			}
 			return evolution;
 		}

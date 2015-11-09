@@ -10,11 +10,14 @@ import services.nlp.stemmer.Stemmer;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import DAO.db.WordDAO;
 import DAO.discourse.SemanticChain;
 import DAO.lexicalChains.LexicalChain;
 import DAO.lexicalChains.LexicalChainLink;
 import DAO.sentiment.SentimentEntity;
+import DAO.sentiment.SentimentValence;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import pojo.EntityXValence;
 
 /**
  * 
@@ -54,7 +57,19 @@ public class Word implements Comparable<Word>, Serializable {
 		this.NE = NE;
 		this.language = lang;
 		this.readingStrategies = new boolean[ReadingStrategies.NO_READING_STRATEGIES];
-		this.sentiment = new SentimentEntity();
+		//loadSentimentEntity();
+	}
+	
+	private void loadSentimentEntity() {
+		pojo.Word word = WordDAO.getInstance().findByLabel(text);
+		if (word == null) return; // sentiment entity gol - nu avem info despre cuvant
+		pojo.SentimentEntity se = word.getFkSentimentEntity();
+		if (se == null) return;
+		sentiment = new SentimentEntity();
+		for (EntityXValence exv : se.getEntityXValenceList()) {
+			sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
+		}
+		
 	}
 
 	public Word(String text, String lemma, String stem, String POS, String NE,
@@ -296,6 +311,7 @@ public class Word implements Comparable<Word>, Serializable {
 	}
 
 	public SentimentEntity getSentiment() {
+		if (sentiment == null) loadSentimentEntity();
 		return sentiment;
 	}
 

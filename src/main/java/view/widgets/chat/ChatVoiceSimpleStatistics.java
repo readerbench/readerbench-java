@@ -131,7 +131,7 @@ public class ChatVoiceSimpleStatistics extends JFrame {
 			dataRow.add(Formatting.formatNumber(voice.getEntropyBlock(true)));
 			dataRow.add(Formatting.formatNumber(voice.getAvgRecurrenceBlock()));
 			dataRow.add(Formatting.formatNumber(voice.getStdevRecurrenceBlock()));
-			dataRow.add(Formatting.formatNumber(voice.getSentimentAverage()));
+			//dataRow.add(Formatting.formatNumber(voice.getSentimentAverage()));
 			dataRow.add(Formatting.formatNumber(voice.getStdevSentiment()));
 
 			tableModel.addRow(dataRow);

@@ -17,7 +17,7 @@ public class WordDAO extends AbstractDAO<Word>{
 	
 	private static WordDAO instance = null;
 	
-	private WordDAO() {
+	public WordDAO() {
 		
 	}
 	

@@ -81,6 +81,11 @@ public class ReaderBenchServer {
                 LDA.loadLDA("resources/config/LDA/tasa_en", lang), lang, true, false);
         queryDoc.computeAll(null, null);
         ComplexityIndices.computeComplexityFactors(queryDoc);
+        
+        
+        
+        
+        
         return queryDoc;
     }
 
@@ -179,6 +184,10 @@ public class ReaderBenchServer {
         }
         return result.toString();
     }
+    
+    private String convertToJson(QueryResult queryResult) {
+    	return null;
+    }
 
     @Root(name = "response")
     private static class QueryResult {
@@ -207,7 +216,13 @@ public class ReaderBenchServer {
         });
         Spark.get("/getTopics", (request, response) -> {
             response.type("text/xml");
+            
             String q = request.queryParams("q");
+            /*String pathToLSA = request.queryParams("lsa");
+            String pathToLDA = request.queryParams("lda");
+            String lang = request.queryParams("lang");
+            String usePOSTagging = request.queryParams("postagging");*/
+            
             QueryResult queryResult = new QueryResult();
             queryResult.data = getTopics(q);
             String result = convertToXml(queryResult);
@@ -215,7 +230,13 @@ public class ReaderBenchServer {
         });
         Spark.get("/getSentiment", (request, response) -> {
             response.type("text/xml");
+            
             String q = request.queryParams("q");
+            /*String pathToLSA = request.queryParams("lsa");
+            String pathToLDA = request.queryParams("lda");
+            String lang = request.queryParams("lang");
+            String usePOSTagging = request.queryParams("postagging");*/
+            
             System.out.println("Am primit: " + q);
             QueryResult queryResult = new QueryResult();
             queryResult.data = getSentiment(q);
@@ -224,7 +245,13 @@ public class ReaderBenchServer {
         });
         Spark.get("/getComplexity", (request, response) -> {
             response.type("text/xml");
+            
             String q = request.queryParams("q");
+            String pathToLSA = request.queryParams("lsa");
+            String pathToLDA = request.queryParams("lda");
+            String lang = request.queryParams("lang");
+            String usePOSTagging = request.queryParams("postagging");
+            
             QueryResult queryResult = new QueryResult();
             queryResult.data = getComplexityIndices(q);
             String result = convertToXml(queryResult);

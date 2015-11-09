@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 import org.apache.log4j.Logger;
 
@@ -450,4 +451,5 @@ public abstract class AnalysisElement implements Serializable {
 	public void setSentimentEntity(SentimentEntity sentimentEntity) {
 		this.sentimentEntity = sentimentEntity;
 	}
+	
 }

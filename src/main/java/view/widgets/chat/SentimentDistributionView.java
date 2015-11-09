@@ -129,10 +129,10 @@ public class SentimentDistributionView extends JFrame {
 
 			double[] voiceCoverage = chat.getParticipantBlockDistribution(v, p);
 
-			double[] sentimentCoverage = chat.getParticipantSentimentBlockDistribution(v, p);
+			//double[] sentimentCoverage = chat.getParticipantSentimentBlockDistribution(v, p);
 
 			int noSubtasks = 0;
-			for (int blockIndex = 0; blockIndex < voiceCoverage.length; blockIndex++) {
+			/*for (int blockIndex = 0; blockIndex < voiceCoverage.length; blockIndex++) {
 				if (chat.getBlocks().get(blockIndex) != null && voiceCoverage[blockIndex] > 0) {
 					sentimentMapping.put(blockIndex, sentimentCoverage[blockIndex]);
 					Task subTask = new Task(chat.getBlocks().get(blockIndex).getText(), new Date(blockIndex),
@@ -159,7 +159,7 @@ public class SentimentDistributionView extends JFrame {
 						noSubtasks++;
 					}
 				}
-			}
+			}*/
 			if (noSubtasks > 0)
 				s.add(t);
 		}
