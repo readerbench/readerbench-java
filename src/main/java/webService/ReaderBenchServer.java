@@ -16,6 +16,9 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import DAO.AbstractDocument;
 import DAO.AbstractDocumentTemplate;
 import DAO.AbstractDocumentTemplate.BlockTemplate;
@@ -186,7 +189,9 @@ public class ReaderBenchServer {
     }
     
     private String convertToJson(QueryResult queryResult) {
-    	return null;
+    	Gson gson = new GsonBuilder().create();
+    	String json = gson.toJson(queryResult);
+    	return json;
     }
 
     @Root(name = "response")
@@ -215,7 +220,7 @@ public class ReaderBenchServer {
             return "OK";
         });
         Spark.get("/getTopics", (request, response) -> {
-            response.type("text/xml");
+            response.type("application/json");
             
             String q = request.queryParams("q");
             /*String pathToLSA = request.queryParams("lsa");
@@ -225,7 +230,7 @@ public class ReaderBenchServer {
             
             QueryResult queryResult = new QueryResult();
             queryResult.data = getTopics(q);
-            String result = convertToXml(queryResult);
+            String result = convertToJson(queryResult);
             return result;
         });
         Spark.get("/getSentiment", (request, response) -> {
