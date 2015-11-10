@@ -230,7 +230,7 @@ public class ReaderBenchServer {
             
             QueryResult queryResult = new QueryResult();
             queryResult.data = getTopics(q);
-            String result = convertToJson(queryResult);
+            String result = convertToXml(queryResult);
             return result;
         });
         Spark.get("/getSentiment", (request, response) -> {
