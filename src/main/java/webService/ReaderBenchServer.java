@@ -68,7 +68,12 @@ public class ReaderBenchServer {
     private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
     public static final int PORT = 5656;
 
-    public AbstractDocument processQuery(String query) {
+    public AbstractDocument processQuery(
+    		String query,
+    		String pathToLSA,
+    		String pathToLDA,
+    		String language,
+    		boolean posTagging) {
         logger.info("Processign query ...");
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
         String[] blocks = query.split("\n");
@@ -79,9 +84,16 @@ public class ReaderBenchServer {
             contents.getBlocks().add(block);
         }
 
-        Lang lang = Lang.eng;
-        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA("resources/config/LSA/tasa_en", lang),
-                LDA.loadLDA("resources/config/LDA/tasa_en", lang), lang, true, false);
+        //Lang lang = Lang.eng;
+        Lang lang = Lang.getLang(language);
+        AbstractDocument queryDoc = new Document(
+        		null,
+        		contents,
+        		LSA.loadLSA(pathToLSA, lang),
+                LDA.loadLDA(pathToLDA, lang),
+                lang,
+                posTagging,
+                false);
         queryDoc.computeAll(null, null);
         ComplexityIndices.computeComplexityFactors(queryDoc);
         
@@ -98,9 +110,19 @@ public class ReaderBenchServer {
      * @param query
      * @return List of keywords and corresponding relevance scores for results
      */
-    private List<Result> getTopics(String query) {
+    private List<Result> getTopics(
+    		String query,
+    		String pathToLSA,
+    		String pathToLDA,
+    		String lang,
+    		boolean posTagging
+    		) {
         List<Result> results = new ArrayList<Result>();
-        AbstractDocument queryDoc = processQuery(query);
+        AbstractDocument queryDoc = processQuery(query,
+        		pathToLSA,
+        		pathToLDA,
+        		lang,
+        		posTagging);
         for (Topic t : queryDoc.getTopics()) {
             results.add(new Result(t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance())));
         }
@@ -113,9 +135,19 @@ public class ReaderBenchServer {
      * @param query
      * @return List of sentiment values per entity
      */
-    private List<Result> getSentiment(String query) {
+    private List<Result> getSentiment(
+    		String query,
+    		String pathToLSA,
+    		String pathToLDA,
+    		String lang,
+    		boolean posTagging) {
         List<Result> results = new ArrayList<Result>();
-        AbstractDocument queryDoc = processQuery(query);
+        AbstractDocument queryDoc = processQuery(query,
+        		pathToLSA,
+        		pathToLDA,
+        		lang,
+        		posTagging
+        		);
 
         //results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
         Map<SentimentValence, Double> sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
@@ -166,9 +198,17 @@ public class ReaderBenchServer {
      * @param query
      * @return List of sentiment values per entity
      */
-    private List<Result> getComplexityIndices(String query) {
+    private List<Result> getComplexityIndices(String query,
+    		String pathToLSA,
+    		String pathToLDA,
+    		String lang,
+    		boolean posTagging) {
         List<Result> results = new ArrayList<Result>();
-        AbstractDocument queryDoc = processQuery(query);
+        AbstractDocument queryDoc = processQuery(query,
+        		pathToLSA,
+        		pathToLDA,
+        		lang,
+        		posTagging);
 
         for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
             results.add(new Result(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[i],
@@ -189,7 +229,7 @@ public class ReaderBenchServer {
     }
     
     private String convertToJson(QueryResult queryResult) {
-    	Gson gson = new GsonBuilder().create();
+    	Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
     	String json = gson.toJson(queryResult);
     	return json;
     }
@@ -223,43 +263,43 @@ public class ReaderBenchServer {
             response.type("application/json");
             
             String q = request.queryParams("q");
-            /*String pathToLSA = request.queryParams("lsa");
+            String pathToLSA = request.queryParams("lsa");
             String pathToLDA = request.queryParams("lda");
             String lang = request.queryParams("lang");
-            String usePOSTagging = request.queryParams("postagging");*/
+            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
             
             QueryResult queryResult = new QueryResult();
-            queryResult.data = getTopics(q);
-            String result = convertToXml(queryResult);
+            queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+            String result = convertToJson(queryResult);
             return result;
         });
         Spark.get("/getSentiment", (request, response) -> {
-            response.type("text/xml");
-            
-            String q = request.queryParams("q");
-            /*String pathToLSA = request.queryParams("lsa");
-            String pathToLDA = request.queryParams("lda");
-            String lang = request.queryParams("lang");
-            String usePOSTagging = request.queryParams("postagging");*/
-            
-            System.out.println("Am primit: " + q);
-            QueryResult queryResult = new QueryResult();
-            queryResult.data = getSentiment(q);
-            String result = convertToXml(queryResult);
-            return result;
-        });
-        Spark.get("/getComplexity", (request, response) -> {
-            response.type("text/xml");
+            response.type("application/json");
             
             String q = request.queryParams("q");
             String pathToLSA = request.queryParams("lsa");
             String pathToLDA = request.queryParams("lda");
             String lang = request.queryParams("lang");
-            String usePOSTagging = request.queryParams("postagging");
+            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
+            
+            System.out.println("Am primit: " + q);
+            QueryResult queryResult = new QueryResult();
+            queryResult.data = getSentiment(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+            String result = convertToJson(queryResult);
+            return result;
+        });
+        Spark.get("/getComplexity", (request, response) -> {
+            response.type("application/json");
+            
+            String q = request.queryParams("q");
+            String pathToLSA = request.queryParams("lsa");
+            String pathToLDA = request.queryParams("lda");
+            String lang = request.queryParams("lang");
+            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
             
             QueryResult queryResult = new QueryResult();
-            queryResult.data = getComplexityIndices(q);
-            String result = convertToXml(queryResult);
+            queryResult.data = getComplexityIndices(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+            String result = convertToJson(queryResult);
             return result;
         });
 
