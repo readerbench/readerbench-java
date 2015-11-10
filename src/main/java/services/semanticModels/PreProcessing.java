@@ -13,10 +13,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
 import services.commons.TextPreprocessing;
+import services.nlp.listOfWords.Dictionary;
 import services.semanticModels.LSA.LSA;
 import DAO.AbstractDocument;
 import DAO.AbstractDocumentTemplate;
@@ -29,6 +34,10 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class PreProcessing {
 	static Logger logger = Logger.getLogger(PreProcessing.class);
+
+	private static final int MIN_NO_OCCURRENCES = 5;
+
+	private Map<String, Integer> newConcepts = new TreeMap<String, Integer>();
 
 	private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc) {
 		// returns new entries to write
@@ -59,6 +68,19 @@ public class PreProcessing {
 
 	public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc) {
 		AbstractDocumentTemplate docTmp = getDocumentModel(content);
+
+		StringTokenizer st = new StringTokenizer(content.trim().toLowerCase(), " \\.,:;!?-+[](){}'’“”\"");
+
+		// determine new concepts
+		while (st.hasMoreTokens()) {
+			String word = st.nextToken().replaceAll("[^a-z]", "").trim();
+			if (word.length() > 0 && !Dictionary.getDictionaryEn().getWords().contains(word)) {
+				if (newConcepts.containsKey(word))
+					newConcepts.put(word, newConcepts.get(word) + 1);
+				else
+					newConcepts.put(word, 1);
+			}
+		}
 		// perform processing
 		AbstractDocument d = new Document(null, docTmp, null, null, lang, usePOSTagging, true);
 		return parseDocumentProcessing(d, noMinWordPerDoc);
@@ -75,6 +97,14 @@ public class PreProcessing {
 		block.setContent(content.trim().toLowerCase());
 		docTmp.getBlocks().add(block);
 		return docTmp;
+	}
+
+	private void printNewConcepts() {
+		// write new concepts
+		for (Entry<String, Integer> entry : newConcepts.entrySet()) {
+			if (entry.getValue() >= MIN_NO_OCCURRENCES)
+				System.out.println(entry.getKey() + "\t" + entry.getValue());
+		}
 	}
 
 	public void parseGeneralCorpus(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
@@ -134,6 +164,7 @@ public class PreProcessing {
 				}
 			}
 			in.close();
+			printNewConcepts();
 			logger.info("Finished pre-processing " + f.getName());
 		}
 
@@ -217,6 +248,7 @@ public class PreProcessing {
 					out.write(toWrite);
 				}
 			}
+			printNewConcepts();
 			in.close();
 		}
 		out.close();
@@ -284,7 +316,7 @@ public class PreProcessing {
 								+ total_docs_to_process);
 				}
 			}
-
+			printNewConcepts();
 			in.close();
 		}
 		out.close();

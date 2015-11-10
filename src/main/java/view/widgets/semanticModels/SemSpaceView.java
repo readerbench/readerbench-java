@@ -408,7 +408,7 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("in/HDP/grade6", Lang.eng));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);
