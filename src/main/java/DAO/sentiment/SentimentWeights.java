@@ -2,6 +2,15 @@ package DAO.sentiment;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import DAO.db.ValenceDAO;
+import DAO.db.WeightDAO;
+import webService.ReaderBenchServer;
+
 /**
  * SentimentWeights contains an array that stores 
  * weights between primary sentiments and RAGE
@@ -14,6 +23,8 @@ import java.util.Map;
  *
  */
 public class SentimentWeights {
+	
+	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	
 	/**
 	 * Number of primary valences 
@@ -39,31 +50,18 @@ public class SentimentWeights {
 	public SentimentWeights() {
 		sentimentGrid = new SentimentGrid<>(NO_PRIMARY_VALENCES, NO_RAGE_VALENCES);
 		
-		setSentimentsIds();
-		setSentimentsWeights();
-	}
-	
-	/**
-	 * Sets sentiments database ids
-	 */
-	private void setSentimentsIds() {
-		// database request to get id of sentiment valences
+		// load all sentiment valences from database
+		List<pojo.SentimentValence> svs = ValenceDAO.getInstance().findAll();
+		for (pojo.SentimentValence sv : svs) {
+			System.out.println("Valenta " + sv.getLabel());
+		}
 		
-		/*sentimentValences = databaseRequestHere();
-		foreach(SentimentValence sentimentValence : dbSentimentValences) {
-			
-		}*/
-		
-	}
-	
-	/**
-	 * Sets sentiments weights
-	 */
-	private void setSentimentsWeights() {
-		// TODO: get weight from database
-		/*sentimentGrid.set(SentimentValence.ANEW_VALENCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
-		sentimentGrid.set(SentimentValence.ANEW_AROUSAL.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);
-		sentimentGrid.set(SentimentValence.ANEW_DOMINANCE.getId(), SentimentValence.RAGE_ONE.getId(), 1.0);*/
+		// load all sentiment valences weights and store them in SentimentGrid
+		List<pojo.Weight> weights = WeightDAO.getInstance().findAll();
+		for (pojo.Weight w : weights) {
+			logger.info("Perchea (" + w.getFkPrimaryValence().getLabel() + ", " + w.getFkRageValence().getIndexLabel() + ")" + " = " + w.getValue());
+			sentimentGrid.set(w.getFkPrimaryValence().getId(), w.getFkRageValence().getId(), w.getValue());
+		}
 	}
 	
 	/**

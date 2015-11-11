@@ -27,6 +27,7 @@ import DAO.Sentence;
 import DAO.discourse.Topic;
 import DAO.document.Document;
 import DAO.sentiment.SentimentValence;
+import DAO.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
@@ -141,6 +142,8 @@ public class ReaderBenchServer {
     		String pathToLDA,
     		String lang,
     		boolean posTagging) {
+    	SentimentWeights sw = new SentimentWeights();
+    	
         List<Result> results = new ArrayList<Result>();
         AbstractDocument queryDoc = processQuery(query,
         		pathToLSA,
