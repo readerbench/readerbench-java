@@ -34,7 +34,7 @@ public class CompareResults {
 	private Map<Word, Double> simMax;
 	private Map<Word, Word> simMaxConcept;
 
-	private void initialLoad(String pathToFile, Lang lang, int countMax) {
+	public void initialLoad(String pathToFile, Lang lang, int countMax) {
 		wordAssociations = new TreeMap<Word, Map<Word, Integer>>();
 		try {
 			FileInputStream inputFile = new FileInputStream(pathToFile);
@@ -46,25 +46,19 @@ public class CompareResults {
 					StringTokenizer st = new StringTokenizer(line);
 					try {
 						AbstractDocumentTemplate docTmp = AbstractDocumentTemplate
-								.getDocumentModel(st.nextToken() + " "
-										+ st.nextToken());
+								.getDocumentModel(st.nextToken() + " " + st.nextToken());
 
-						AbstractDocument d = new Document(null, docTmp, null,
-								null, lang, false, false);
-						Word word1 = d.getBlocks().get(0).getSentences().get(0)
-								.getAllWords().get(0);
-						Word word2 = d.getBlocks().get(0).getSentences().get(0)
-								.getAllWords().get(1);
+						AbstractDocument d = new Document(null, docTmp, null, null, lang, false, false);
+						Word word1 = d.getBlocks().get(0).getSentences().get(0).getAllWords().get(0);
+						Word word2 = d.getBlocks().get(0).getSentences().get(0).getAllWords().get(1);
 
 						Integer noOccurences = Integer.valueOf(st.nextToken());
 						if (!wordAssociations.containsKey(word1)) {
-							wordAssociations.put(word1,
-									new TreeMap<Word, Integer>());
+							wordAssociations.put(word1, new TreeMap<Word, Integer>());
 						}
 						if (countMax != -1) {
 							if (wordAssociations.get(word1).size() < countMax)
-								wordAssociations.get(word1).put(word2,
-										noOccurences);
+								wordAssociations.get(word1).put(word2, noOccurences);
 						}
 					} catch (Exception e) {
 					}
@@ -81,8 +75,7 @@ public class CompareResults {
 		try {
 			logger.info("Comparing all word pairs");
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(semModel.getPath()
-							+ "/compare_individual.csv"), "UTF-8"));
+					new FileOutputStream(semModel.getPath() + "/compare_individual.csv"), "UTF-8"));
 			simTop = new TreeMap<Word, Double>();
 			simMax = new TreeMap<Word, Double>();
 			simMaxConcept = new TreeMap<Word, Word>();
@@ -99,8 +92,7 @@ public class CompareResults {
 					// * sim;
 					sumWeights++;
 					sumSimilarities += sim;
-					out.write(word1.getLemma() + "," + word2.getLemma() + ","
-							+ sim + "\n");
+					out.write(word1.getLemma() + "," + word2.getLemma() + "," + sim + "\n");
 					if (sim > max) {
 						max = sim;
 						maxSimWord = word2;
@@ -121,43 +113,30 @@ public class CompareResults {
 		}
 	}
 
-	public void compare(String pathToFile, ISemanticModel semModel,
-			int countMax, boolean printSimilarConcepts, int noConcepts,
-			double minThreshold) {
-		BasicConfigurator.configure();
+	public void compare(String pathToFile, ISemanticModel semModel, int countMax, boolean printSimilarConcepts,
+			int noConcepts, double minThreshold) {
 		initialLoad(pathToFile, semModel.getLanguage(), countMax);
 
 		compareIndividual(semModel);
 
 		try {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(semModel.getPath()
-							+ "/compare_aggregated.csv"), "UTF-8"));
+					new FileOutputStream(semModel.getPath() + "/compare_aggregated.csv"), "UTF-8"));
 			out.write("Concept,Average Similarity,Max Similarity,Most similar word association\n");
 			for (Word word : wordAssociations.keySet()) {
-				out.write(word.getLemma()
-						+ ","
-						+ simTop.get(word)
-						+ ","
-						+ simMax.get(word)
-						+ (simMaxConcept.containsKey(word) ? (",("
-								+ simMaxConcept.get(word).getLemma() + ")")
-								: ""));
+				out.write(word.getLemma() + "," + simTop.get(word) + "," + simMax.get(word)
+						+ (simMaxConcept.containsKey(word) ? (",(" + simMaxConcept.get(word).getLemma() + ")") : ""));
 				if (printSimilarConcepts) {
 					// determine most similar concepts;
 					List<Topic> similarConcepts = new LinkedList<Topic>();
-					TreeMap<Word, Double> listLSA = semModel
-							.getSimilarConcepts(word, minThreshold);
+					TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(word, minThreshold);
 					for (Entry<Word, Double> entry : listLSA.entrySet())
-						similarConcepts.add(new Topic(entry.getKey(), entry
-								.getValue()));
+						similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
 					Collections.sort(similarConcepts);
 					// output top 5 concepts
-					for (int i = 0; i < Math.min(noConcepts,
-							similarConcepts.size()); i++) {
-						out.write(","
-								+ similarConcepts.get(i).getWord().getLemma()
-								+ "," + similarConcepts.get(i).getRelevance());
+					for (int i = 0; i < Math.min(noConcepts, similarConcepts.size()); i++) {
+						out.write("," + similarConcepts.get(i).getWord().getLemma() + ","
+								+ similarConcepts.get(i).getRelevance());
 					}
 				}
 				out.write("\n");
@@ -169,14 +148,12 @@ public class CompareResults {
 		}
 	}
 
-	public static void printSimilarConcepts(String path, Lang lang,
-			int noConcepts, double minThreshold) {
+	public static void printSimilarConcepts(String path, Lang lang, int noConcepts, double minThreshold) {
 		try {
 			LSA lsa = LSA.loadLSA(path, lang);
 			logger.info("Determining most similar word pairs for each concept");
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(path + "/similar_concepts.csv"),
-					"UTF-8"));
+			BufferedWriter out = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream(path + "/similar_concepts.csv"), "UTF-8"));
 			out.write("Concept,Similar words\n");
 			int noWords = lsa.getWords().size();
 			int no = 0;
@@ -184,21 +161,17 @@ public class CompareResults {
 				out.write(word.getLemma());
 				// determine most similar concepts;
 				List<Topic> similarConcepts = new LinkedList<Topic>();
-				TreeMap<Word, Double> listLSA = lsa.getSimilarConcepts(word,
-						minThreshold);
+				TreeMap<Word, Double> listLSA = lsa.getSimilarConcepts(word, minThreshold);
 				for (Entry<Word, Double> entry : listLSA.entrySet())
-					similarConcepts.add(new Topic(entry.getKey(), entry
-							.getValue()));
+					similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
 				Collections.sort(similarConcepts);
 				// output top concepts
-				for (int i = 0; i < Math
-						.min(noConcepts, similarConcepts.size()); i++) {
-					out.write("," + similarConcepts.get(i).getWord().getLemma()
-							+ "," + similarConcepts.get(i).getRelevance());
+				for (int i = 0; i < Math.min(noConcepts, similarConcepts.size()); i++) {
+					out.write("," + similarConcepts.get(i).getWord().getLemma() + ","
+							+ similarConcepts.get(i).getRelevance());
 				}
 				if ((++no) % 1000 == 0) {
-					logger.info("Finished comparing " + no + " words out of "
-							+ noWords);
+					logger.info("Finished comparing " + no + " words out of " + noWords);
 				}
 				out.write("\n");
 			}
@@ -208,19 +181,25 @@ public class CompareResults {
 		}
 	}
 
+	public Map<Word, Map<Word, Integer>> getWordAssociations() {
+		return wordAssociations;
+	}
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		CompareResults comp = new CompareResults();
 
-//		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
-//		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, false, 20,
-//				0.3);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
+		// comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3,
+		// false, 20,
+		// 0.3);
 
 		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3, false, 20,
-				0.3);
-		// printSimilarConcepts("resources/config/LSA/joseantonion_es", Lang.es, 20, 0.3);
-		// comp.compare("resources/config/LSA/tasa_lak_en", "word_associations_en.txt",
+		comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3, false, 20, 0.3);
+		// printSimilarConcepts("resources/config/LSA/joseantonion_es", Lang.es,
+		// 20, 0.3);
+		// comp.compare("resources/config/LSA/tasa_lak_en",
+		// "word_associations_en.txt",
 		// Lang.en, 0.3);
 	}
 }
