@@ -25,7 +25,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Weight.findAll", query = "SELECT w FROM Weight w"),
     @NamedQuery(name = "Weight.findById", query = "SELECT w FROM Weight w WHERE w.id = :id"),
-    @NamedQuery(name = "Weight.findByValue", query = "SELECT w FROM Weight w WHERE w.value = :value")})
+    @NamedQuery(name = "Weight.findByValue", query = "SELECT w FROM Weight w WHERE w.value = :value"),
+	@NamedQuery(name = "Weight.findByPair", query = "SELECT w FROM Weight w WHERE w.fkPrimaryValence = :primaryValence AND w.fkRageValence = :rageValence")})
 public class Weight implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
