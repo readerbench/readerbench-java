@@ -4,8 +4,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -41,6 +43,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations.SentimentAnnotatedTre
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
+import pojo.SentimentValence;
 
 /**
  * 
@@ -283,6 +286,8 @@ public abstract class Parsing {
 				// add utterance to block
 				b.getSentences().add(s);
 				b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
+				
+				// add sentiment entity to the block
 			}
 		}
 
@@ -306,6 +311,34 @@ public abstract class Parsing {
 			// tp.printTree(tree);
 			tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
 			if (s.getLanguage().equals(Lang.eng)) {
+				
+				SentimentEntity se = new SentimentEntity();
+				// iterate through SentimentValence.valenceMap to add all sentiments
+				Iterator it = DAO.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
+			    while (it.hasNext()) {
+			        Map.Entry pair = (Map.Entry)it.next();
+			        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
+			        //System.out.println(pair.getKey() + " = " + pair.getValue());
+			        
+			        // iterate through all words and get that sentiments' value
+			        double wordSentimentSum = 0.0;
+			        for (Word w : s.getWords()) {
+						Double wordSentimentScore = w.getSentiment().get(daoSe);
+						if (wordSentimentScore != null) {
+							wordSentimentSum += wordSentimentScore;
+						}
+					}
+			        
+			        // add sentiment entity to the sentence
+			        se.add(new DAO.sentiment.SentimentValence(
+			        		daoSe.getId(),
+			        		daoSe.getName(),
+			        		daoSe.getIndexLabel(),
+			        		daoSe.getRage()
+			        		), wordSentimentSum);
+			        it.remove(); // avoids a ConcurrentModificationException
+			    }
+				
 				int score = RNNCoreAnnotations.getPredictedClass(tree);
 				s.setSentimentEntity(new SentimentEntity());
 			}

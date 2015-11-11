@@ -1,5 +1,10 @@
 package services.discourse.cohesion;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 
 import DAO.AbstractDocument;
@@ -7,6 +12,7 @@ import DAO.Block;
 import DAO.Sentence;
 import DAO.Word;
 import DAO.sentiment.SentimentEntity;
+import DAO.sentiment.SentimentValence;
 
 /**
  * 
@@ -16,35 +22,47 @@ public class SentimentAnalysis {
 	static Logger logger = Logger.getLogger(CohesionGraph.class);
 
 	public static void weightSemanticValences(AbstractDocument d) {
-		logger.info("Weighting sentiment valences ...");
+		logger.info("Weighting sentiment valences ...");		
 
 		double avgDoc = 0, sumWeightsDoc = 0;
 		// perform weighted sentiment per block and per document
 		for (int i = 0; i < d.getBlocks().size(); i++) {
 			Block b = d.getBlocks().get(i);
 			if (b != null) {
-				double avgBlock = 0, sumWeightsBlock = 0;
+				Map<SentimentValence, Double> avgBlock = new HashMap<>();
+				Map<SentimentValence, Double> sumWeightsBlock = new HashMap<>();
+				Map<SentimentValence, Double> elemValences = b.getSentimentEntity().getAll();
+				Iterator it;
+				//double avgBlock = 0, sumWeightsBlock = 0;
 				for (int j = 0; j < b.getSentences().size(); j++) {
 					Sentence s = b.getSentences().get(j);
-					for (int k = 0; k < s.getWords().size(); k++) {
-						Word w = s.getWords().get(k);
-						
-						
-						w.getSentiment().getAggregatedValue();
-						
-					}
-					/*if (s.getSentimentEntity().getAggregatedValue() != -1) {
-						avgBlock += b.getSentenceBlockDistances()[j].getCohesion()
-								* s.getSentimentEntity().getAggregatedValue();
-						sumWeightsBlock += b.getSentenceBlockDistances()[j].getCohesion();
-					}*/
+					it = elemValences.entrySet().iterator();
+				    while (it.hasNext()) {
+				        Map.Entry pair = (Map.Entry)it.next();
+				        SentimentValence sv = (SentimentValence)pair.getKey();
+				        Double value = (Double)pair.getValue();
+				        logger.info(" Sentence s (sentiment " + sv.getName() + " = " + value);
+				        if (value != -1) { // -1?
+				        	avgBlock.put(sv, (avgBlock.get(sv) == null ? 0 : avgBlock.get(sv))
+				        			+ b.getSentenceBlockDistances()[j].getCohesion()
+									* value);
+				        	sumWeightsBlock.put(sv, (sumWeightsBlock.get(sv) == null ? 0 : sumWeightsBlock.get(sv))
+				        			+ b.getSentenceBlockDistances()[j].getCohesion());
+				        }
+				        it.remove(); // avoids a ConcurrentModificationException
+				    }
 				}
-				if (sumWeightsBlock != 0) {
-					avgBlock /= sumWeightsBlock;
-					//b.setSentimentEntity(new SentimentEntity(b.getProcessedText().trim(), avgBlock));
-					b.setSentimentEntity(new SentimentEntity());
-					avgDoc += avgBlock * d.getBlockDocDistances()[i].getCohesion();
-					sumWeightsDoc += d.getBlockDocDistances()[i].getCohesion();
+				it = elemValences.entrySet().iterator();
+				while (it.hasNext()) {
+			        Map.Entry pair = (Map.Entry)it.next();
+			        SentimentValence sv = (SentimentValence)pair.getKey();
+			        Double value = (Double)pair.getValue();
+					if (sumWeightsBlock.get(sv) != 0) {
+						avgBlock.put(sv, avgBlock.get(sv) / sumWeightsBlock.get(sv));
+						//b.setSentimentEntity(new SentimentEntity(b.getProcessedText().trim(), avgBlock));
+						b.setSentimentEntity(new SentimentEntity());
+						b.getSentimentEntity().add(sv, avgBlock.get(sv));
+					}
 				}
 			}
 		}

@@ -21,6 +21,7 @@ public class SentimentValence {
 	
 	private Integer id;
 	private String name;
+	private String indexLabel;
 	private boolean rage;
 	
 	/**
@@ -34,9 +35,10 @@ public class SentimentValence {
 	 * 			shows if it is a RAGE valence
 	 * 			or a primary one
 	 */
-	private SentimentValence(Integer id, String name, boolean rage) {
+	public SentimentValence(Integer id, String name, String index, boolean rage) {
 		this.id = id;
 		this.name = name;
+		this.indexLabel = index;
 		this.rage = rage;
 	}
 	
@@ -56,6 +58,14 @@ public class SentimentValence {
 		this.name = name;
 	}
 	
+	public String getIndexLabel() {
+		return indexLabel;
+	}
+	
+	public void setIndexLabel(String index) {
+		this.indexLabel = index;
+	}
+	
 	public boolean getRage() {
 		return rage;
 	}
@@ -64,17 +74,21 @@ public class SentimentValence {
 		this.rage = rage;
 	}
 	
+	public static Map<String, SentimentValence> getValenceMap() {
+		return valenceMap;
+	}
+	
 	public static void initValences() {
 		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
 		valenceMap = new HashMap<>();
 		for (pojo.SentimentValence v : valences) {
-			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getRage());
+			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
 			valenceMap.put(v.getIndexLabel(), sv);
 		}
 	}
 	
 	public static SentimentValence get(String index) {
-		if (valenceMap == null) SentimentGrid.init();
+		if (valenceMap == null) SentimentWeights.initValences();
 		return valenceMap.get(index);
 	}
 	

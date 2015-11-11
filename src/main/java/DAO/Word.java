@@ -69,7 +69,6 @@ public class Word implements Comparable<Word>, Serializable {
 		for (EntityXValence exv : se.getEntityXValenceList()) {
 			sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
 		}
-		
 	}
 
 	public Word(String text, String lemma, String stem, String POS, String NE,
@@ -318,4 +317,6 @@ public class Word implements Comparable<Word>, Serializable {
 	public void setSentiment(SentimentEntity sentimentEntity) {
 		this.sentiment = sentimentEntity;
 	}
+	
+	
 }

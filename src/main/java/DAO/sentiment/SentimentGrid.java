@@ -13,7 +13,7 @@ import java.util.Map;
 public class SentimentGrid<V> {
 
 	private V[][] grid;
-    private Map<Integer, Integer> indexes;
+    private Map<String, Integer> indexes;
 
     /**
      * Creates the array for the (primary sentiment,
@@ -27,7 +27,7 @@ public class SentimentGrid<V> {
     @SuppressWarnings("unchecked")
 	public SentimentGrid(int rows, int cols) {
         grid = (V[][]) new Object[rows][cols];
-        indexes = new HashMap<Integer, Integer>();
+        indexes = new HashMap<String, Integer>();
     }
 
     /**
@@ -38,7 +38,7 @@ public class SentimentGrid<V> {
      * @param index
      * 			index value
      */
-    public void setIndex(Integer key, int index) {
+    public void setIndex(String key, int index) {
         indexes.put(key, index);
     }
 
@@ -53,7 +53,7 @@ public class SentimentGrid<V> {
      * @param value
      * 			the weight of the pair
      */
-    public void set(Integer row, Integer col, V weight) {
+    public void set(String row, String col, V weight) {
         grid[indexes.get(row)][indexes.get(col)] = weight;
     }
     
@@ -68,11 +68,7 @@ public class SentimentGrid<V> {
      * @return
      * 			the weight of the pair
      */
-    public V get(Integer row, Integer col) {
+    public V get(String row, String col) {
         return grid[indexes.get(row)][indexes.get(col)];
     }
-	
-	public static void init() {
-		SentimentValence.initValences();
-	}
 }
