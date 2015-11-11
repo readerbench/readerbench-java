@@ -58,7 +58,7 @@ public class SentimentWeights {
 		// load all sentiment valences weights and store them in SentimentGrid
 		List<pojo.Weight> weights = WeightDAO.getInstance().findAll();
 		for (pojo.Weight w : weights) {
-			logger.info("Perchea (" +
+			logger.info("Perechea (" +
 					w.getFkPrimaryValence().getLabel() + 
 					" (id: " + w.getFkPrimaryValence().getId() + "), " 
 					+ w.getFkRageValence().getIndexLabel() + 

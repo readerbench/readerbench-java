@@ -322,10 +322,12 @@ public abstract class Parsing {
 			        
 			        // iterate through all words and get that sentiments' value
 			        double wordSentimentSum = 0.0;
+			        double noWordWeights = 0;
 			        for (Word w : s.getWords()) {
 						Double wordSentimentScore = w.getSentiment().get(daoSe);
 						if (wordSentimentScore != null) {
 							wordSentimentSum += wordSentimentScore;
+							noWordWeights++;
 						}
 					}
 			        
@@ -335,7 +337,7 @@ public abstract class Parsing {
 			        		daoSe.getName(),
 			        		daoSe.getIndexLabel(),
 			        		daoSe.getRage()
-			        		), wordSentimentSum);
+			        		), wordSentimentSum / noWordWeights);
 			        it.remove(); // avoids a ConcurrentModificationException
 			    }
 				
