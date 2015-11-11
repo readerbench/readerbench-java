@@ -339,10 +339,12 @@ public abstract class Parsing {
 			        		daoSe.getRage()
 			        		), wordSentimentSum / noWordWeights);
 			        it.remove(); // avoids a ConcurrentModificationException
-			    }
+			    
+			        // TODO: add this valence to SE for sentence
+			        int score = RNNCoreAnnotations.getPredictedClass(tree);
+			        s.setSentimentEntity(new SentimentEntity());
 				
-				int score = RNNCoreAnnotations.getPredictedClass(tree);
-				s.setSentimentEntity(new SentimentEntity());
+			    }
 			}
 		}
 
@@ -357,10 +359,6 @@ public abstract class Parsing {
 			String word = token.get(OriginalTextAnnotation.class);
 			String pos = token.get(PartOfSpeechAnnotation.class);
 			String ne = token.get(NamedEntityTagAnnotation.class);
-			Tree tokenTree = token.get(SentimentAnnotatedTree.class);
-			int score = 2;
-			if (tokenTree != null)
-				score = RNNCoreAnnotations.getPredictedClass(tokenTree);
 
 			if (!word.matches("[,:;'\\.\\!\\?\\-]")) {
 				Word w = null;
