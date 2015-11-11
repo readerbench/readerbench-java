@@ -152,9 +152,11 @@ public class ReaderBenchServer {
         		posTagging
         		);
 
+        logger.info("Starting building sentiments...");
         //results.add(new Result("Document", Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
-        Map<SentimentValence, Double> sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
-        Iterator<Map.Entry<SentimentValence, Double>> it = sentimentAggregatedValues.entrySet().iterator();
+        Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
+        logger.info("There are " + rageSentimentsValues.size() + " rage setiments.");
+        Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
 			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
@@ -166,8 +168,8 @@ public class ReaderBenchServer {
             /*results.add(new Result("Paragraph " + b.getIndex(),
                     Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue())));*/
         	
-        	sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
-            it = sentimentAggregatedValues.entrySet().iterator();
+        	rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
+            it = rageSentimentsValues.entrySet().iterator();
     		while (it.hasNext()) {
     			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
     			SentimentValence sentimentValence = (SentimentValence)pair.getKey();
@@ -179,8 +181,8 @@ public class ReaderBenchServer {
                 /*results.add(new Result("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex(),
                         Formatting.formatNumber(s.getSentimentEntity().getAggregatedValue())));*/
             	
-            	sentimentAggregatedValues = queryDoc.getSentimentEntity().getAggregatedValue();
-                it = sentimentAggregatedValues.entrySet().iterator();
+            	rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
+                it = rageSentimentsValues.entrySet().iterator();
         		while (it.hasNext()) {
         			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>)it.next();
         			SentimentValence sentimentValence = (SentimentValence)pair.getKey();

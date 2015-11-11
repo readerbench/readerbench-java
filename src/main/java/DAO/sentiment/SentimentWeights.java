@@ -5,10 +5,12 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import DAO.db.ValenceDAO;
 import DAO.db.WeightDAO;
+import pojo.SentimentValence;
 import webService.ReaderBenchServer;
 
 /**
@@ -27,40 +29,42 @@ public class SentimentWeights {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	
 	/**
-	 * Number of primary valences 
-	 */
-	private static Integer NO_PRIMARY_VALENCES = 10;
-	
-	/**
-	 * Number of RAGE valences 
-	 */
-	private static Integer NO_RAGE_VALENCES = 6;
-
-	/**
 	 * The sentiment grid contains the associations
 	 * of (primary sentiment, RAGE sentiment) pairs
 	 * for weights
 	 */
 	private static SentimentGrid<Double> sentimentGrid;
-	private SentimentValence[] sentimentValences;
 	
 	/**
 	 * Initializes the sentiments grid
 	 */
 	public SentimentWeights() {
-		sentimentGrid = new SentimentGrid<>(NO_PRIMARY_VALENCES, NO_RAGE_VALENCES);
+		
+		int noPrimarySentiments = ValenceDAO.getInstance().findByRage(false).size();
+		int noRageSentiments = ValenceDAO.getInstance().findByRage(true).size();
+		sentimentGrid = new SentimentGrid<>(noPrimarySentiments, noRageSentiments);;
 		
 		// load all sentiment valences from database
 		List<pojo.SentimentValence> svs = ValenceDAO.getInstance().findAll();
 		for (pojo.SentimentValence sv : svs) {
-			System.out.println("Valenta " + sv.getLabel());
+			logger.info("Valenta " + (sv.getRage() == true ? " rage: " : " primara: ") + sv.getLabel());
+			// create DAO SentimentValences HashMap for Sentiment Entity initialization 
+			if (!sv.getRage())
+				sentimentGrid.setIndex(sv.getIndexLabel(), sv.getId() - 1);
+			else
+				sentimentGrid.setIndex(sv.getIndexLabel(), sv.getId() - noPrimarySentiments - 1);
 		}
 		
 		// load all sentiment valences weights and store them in SentimentGrid
 		List<pojo.Weight> weights = WeightDAO.getInstance().findAll();
 		for (pojo.Weight w : weights) {
-			logger.info("Perchea (" + w.getFkPrimaryValence().getLabel() + ", " + w.getFkRageValence().getIndexLabel() + ")" + " = " + w.getValue());
-			sentimentGrid.set(w.getFkPrimaryValence().getId(), w.getFkRageValence().getId(), w.getValue());
+			logger.info("Perchea (" +
+					w.getFkPrimaryValence().getLabel() + 
+					" (id: " + w.getFkPrimaryValence().getId() + "), " 
+					+ w.getFkRageValence().getIndexLabel() + 
+					" (id: " + w.getFkRageValence().getId() + "))" 
+					+ " = " + w.getValue());
+			sentimentGrid.set(w.getFkPrimaryValence().getIndexLabel(), w.getFkRageValence().getIndexLabel(), w.getValue());
 		}
 	}
 	
@@ -74,8 +78,12 @@ public class SentimentWeights {
 	 * @return
 	 * 			the weight of the pair of sentiments
 	 */
-	public static Double getSentimentsWeight(Integer primarySentiment, Integer rageSentiment) {
+	public static Double getSentimentsWeight(String primarySentiment, String rageSentiment) {
 		return sentimentGrid.get(primarySentiment, rageSentiment);
+	}
+	
+	public static void initValences() {
+		DAO.sentiment.SentimentValence.initValences();
 	}
 	
 }
