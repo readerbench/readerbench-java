@@ -139,10 +139,11 @@ public class SentimentEntity {
 					Double primarySentimentValue = (Double)pairPrimary.getValue();
 					if (!primarySentimentValence.getRage()) {
 						Double rageValence = rageSentimentsValues.get(rageSentimentValence);
+						Double weight = SentimentWeights.getSentimentsWeight(primarySentimentValence.getIndexLabel(), rageSentimentValence.getIndexLabel());
 						rageSentimentsValues.put(rageSentimentValence,
 								(rageValence == null ? 0.0 : rageValence) + 
-								SentimentWeights.getSentimentsWeight(primarySentimentValence.getIndexLabel(), rageSentimentValence.getIndexLabel())
-								* primarySentimentValue
+								(weight == null ? 0.0 : weight) *
+								primarySentimentValue
 								);
 					}
 					itPrimarySentiments.remove();
