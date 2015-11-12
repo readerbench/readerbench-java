@@ -88,7 +88,7 @@ public class SentimentValence {
 	}
 	
 	public static SentimentValence get(String index) {
-		if (valenceMap == null) SentimentWeights.initValences();
+		if (valenceMap == null) initValences();
 		return valenceMap.get(index);
 	}
 	

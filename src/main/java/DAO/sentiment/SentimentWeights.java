@@ -40,6 +40,8 @@ public class SentimentWeights {
 	 */
 	public SentimentWeights() {
 		
+		DAO.sentiment.SentimentValence.initValences();
+		
 		int noPrimarySentiments = ValenceDAO.getInstance().findByRage(false).size();
 		int noRageSentiments = ValenceDAO.getInstance().findByRage(true).size();
 		sentimentGrid = new SentimentGrid<>(noPrimarySentiments, noRageSentiments);;
@@ -80,10 +82,6 @@ public class SentimentWeights {
 	 */
 	public static Double getSentimentsWeight(String primarySentiment, String rageSentiment) {
 		return sentimentGrid.get(primarySentiment, rageSentiment);
-	}
-	
-	public static void initValences() {
-		DAO.sentiment.SentimentValence.initValences();
 	}
 	
 }

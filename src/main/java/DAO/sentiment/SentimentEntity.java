@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
+import services.discourse.cohesion.CohesionGraph;
+
 /**
  * Holds a HashMap containing different sentiments and their 
  * scores.
@@ -13,6 +17,8 @@ import java.util.Map;
  *
  */
 public class SentimentEntity {
+	
+	static Logger logger = Logger.getLogger(CohesionGraph.class);
 	
 	/**
 	 * Map that stores the valences and their 
@@ -125,6 +131,7 @@ public class SentimentEntity {
 	public Map<SentimentValence,Double> getAggregatedValue() {
 		Map<SentimentValence, Double> rageSentimentsValues = new HashMap<SentimentValence, Double>();
 		Iterator<Map.Entry<SentimentValence, Double>> itRageSentiments = sentiments.entrySet().iterator();
+		logger.info("There are " + sentiments.size() + " sentiments in my sentiment entity object.");
 		// iterate all rage sentiments
 		while (itRageSentiments.hasNext()) {
 			Map.Entry<SentimentValence, Double> pairRage = (Map.Entry<SentimentValence, Double>)itRageSentiments.next();

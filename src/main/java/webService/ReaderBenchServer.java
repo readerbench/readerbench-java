@@ -78,6 +78,7 @@ public class ReaderBenchServer {
         logger.info("Processign query ...");
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
         String[] blocks = query.split("\n");
+        logger.info("[Processing] There should be " + blocks.length + " blocks in the document");
         for (int i = 0; i < blocks.length; i++) {
             BlockTemplate block = contents.new BlockTemplate();
             block.setId(i);
@@ -95,6 +96,7 @@ public class ReaderBenchServer {
                 lang,
                 posTagging,
                 false);
+        logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
         queryDoc.computeAll(null, null);
         ComplexityIndices.computeComplexityFactors(queryDoc);
         

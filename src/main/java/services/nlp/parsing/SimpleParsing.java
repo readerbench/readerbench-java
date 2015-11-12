@@ -39,40 +39,8 @@ public class SimpleParsing {
 		// basic parsing
 		Sentence s = new Sentence(b, utteranceIndex, sentence.toString(),
 				b.getLSA(), b.getLDA(), b.getLanguage());
-		Word w = null;
-		StringTokenizer st = new StringTokenizer(s.getText(), " ,:;'-");
-		while (st.hasMoreTokens()) {
-			String wordText = st.nextToken().toLowerCase();
-			String stem = Stemmer.stemWord(wordText, s.getLanguage());
-			String lemma = StaticLemmatizer.lemmaStatic(wordText,
-					s.getLanguage());
-			if (b != null) {
-				w = new Word(s.getContainer().getIndex(), s.getIndex(),
-						wordText, lemma, stem, null, null, s.getLSA(),
-						s.getLDA(), s.getLanguage());
-			} else {
-				w = new Word(0, s.getIndex(), wordText, lemma, stem, null,
-						null, s.getLSA(), s.getLDA(), s.getLanguage());
-			}
-			s.getAllWords().add(w);
 
-			if (!StopWords.isStopWord(w.getText(), s.getLanguage())
-					&& !StopWords.isStopWord(w.getLemma(), s.getLanguage())
-					&& (Dictionary.isDictionaryWord(w.getText(),
-							s.getLanguage()) || Dictionary
-							.isDictionaryWord(w.getLemma(), s.getLanguage()))
-					&& wordText.length() > 2) {
-				s.getWords().add(w);
-				if (s.getWordOccurences().containsKey(w)) {
-					s.getWordOccurences().put(w,
-							s.getWordOccurences().get(w) + 1);
-				} else {
-					s.getWordOccurences().put(w, 1);
-				}
-			}
-		}
-
-		s.finalProcessing();
+		s.finalProcessing(false, b, null);
 		return s;
 	}
 }

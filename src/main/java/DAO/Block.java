@@ -59,6 +59,13 @@ public class Block extends AnalysisElement implements Serializable {
 	}
 
 	public void finalProcessing() {
+		
+		// add sentiment entity to the block
+		
+		
+		// end add sentiment entity to the block
+		
+		
 		setProcessedText(getProcessedText().trim());
 
 		// determine overall word occurrences
