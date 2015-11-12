@@ -144,6 +144,8 @@ public class ReaderBenchServer {
     		String pathToLDA,
     		String lang,
     		boolean posTagging) {
+    	
+    	logger.info("Valence map has " + DAO.sentiment.SentimentValence.getValenceMap().size() + " sentiments after initialization.");
     	SentimentWeights sw = new SentimentWeights();
     	
         List<Result> results = new ArrayList<Result>();

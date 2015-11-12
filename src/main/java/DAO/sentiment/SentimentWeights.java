@@ -40,8 +40,6 @@ public class SentimentWeights {
 	 */
 	public SentimentWeights() {
 		
-		DAO.sentiment.SentimentValence.initValences();
-		
 		int noPrimarySentiments = ValenceDAO.getInstance().findByRage(false).size();
 		int noRageSentiments = ValenceDAO.getInstance().findByRage(true).size();
 		sentimentGrid = new SentimentGrid<>(noPrimarySentiments, noRageSentiments);;

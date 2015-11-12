@@ -2,6 +2,8 @@ package DAO.sentiment;
 
 import DAO.db.ValenceDAO;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,16 @@ import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
  */
 public class SentimentValence {
 	
-	private static Map<String, SentimentValence> valenceMap;
+	private static final Map<String, SentimentValence> valenceMap;
+	static {
+		Map<String, SentimentValence> valenceMaplocal = new HashMap<>();
+		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
+		for (pojo.SentimentValence v : valences) {
+			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
+			valenceMaplocal.put(v.getIndexLabel(), sv);
+		}
+		valenceMap = Collections.unmodifiableMap(valenceMaplocal);
+	}
 	
 	private Integer id;
 	private String name;
@@ -78,17 +89,7 @@ public class SentimentValence {
 		return valenceMap;
 	}
 	
-	public static void initValences() {
-		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
-		valenceMap = new HashMap<>();
-		for (pojo.SentimentValence v : valences) {
-			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
-			valenceMap.put(v.getIndexLabel(), sv);
-		}
-	}
-	
 	public static SentimentValence get(String index) {
-		if (valenceMap == null) initValences();
 		return valenceMap.get(index);
 	}
 	

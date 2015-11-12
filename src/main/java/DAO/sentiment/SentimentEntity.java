@@ -141,7 +141,7 @@ public class SentimentEntity {
 			if (rageSentimentValence != null && rageSentimentValence.getRage()) {
 				Iterator<Map.Entry<SentimentValence, Double>> itPrimarySentiments = sentiments.entrySet().iterator();
 				while(itPrimarySentiments.hasNext()) {
-					Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>)itRageSentiments.next();
+					Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>)itPrimarySentiments.next();
 					SentimentValence primarySentimentValence = (SentimentValence)pairPrimary.getKey();
 					Double primarySentimentValue = (Double)pairPrimary.getValue();
 					if (!primarySentimentValence.getRage()) {
@@ -153,10 +153,8 @@ public class SentimentEntity {
 								primarySentimentValue
 								);
 					}
-					itPrimarySentiments.remove();
 				}
 			}
-			itRageSentiments.remove();
 		}
 		return rageSentimentsValues;
 	}
@@ -171,12 +169,13 @@ public class SentimentEntity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			sb.append(sentimentValence.getIndexLabel());
 			sb.append("=");
 			sb.append(sentiments.get(sentimentValence));
 			sb.append(",");
 		}
 		// delete trailing comma
-		sb.deleteCharAt(sb.length()-1);
+		if (sb.length() > 1) sb.deleteCharAt(sb.length()-1);
 		sb.append("]");
 		return sb.toString();
 	}

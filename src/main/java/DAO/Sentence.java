@@ -58,6 +58,10 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
 	public void finalProcessing(boolean fullParsing, Block b, CoreMap sentence) {
 		
+		for (Word w : getWords()) {
+			
+		}
+		
 		if (fullParsing) {
 	
 			// ContextBuilding.buildContext(tree, s.getLanguage());
@@ -105,7 +109,8 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 						String lemma = Morphology.lemmaStatic(word, pos, true);
 						w = new Word(getContainer().getIndex(), getIndex(), word, lemma,
 								Stemmer.stemWord(word.toLowerCase(), getLanguage()), pos, ne, getLSA(), getLDA(),
-								new SentimentEntity(), getLanguage());
+								getLanguage());
+								//new SentimentEntity(), getLanguage());
 						break;
 					}
 	
@@ -154,6 +159,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 				        double noWordWeights = 0;
 				        logger.info("There are " + getWords().size() + " words in this sentence.");
 				        for (Word w : getWords()) {
+				        	logger.info("Word " + w + " sentiments: " + w.getSentiment());
 							Double wordSentimentScore = w.getSentiment().get(daoSe);
 							if (wordSentimentScore != null) {
 								wordSentimentSum += wordSentimentScore;
@@ -168,8 +174,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 				        		daoSe.getName(),
 				        		daoSe.getIndexLabel(),
 				        		daoSe.getRage()
-				        		), wordSentimentSum / noWordWeights);
-				        it.remove(); // avoids a ConcurrentModificationException
+				        		), (noWordWeights > 0 ? wordSentimentSum / noWordWeights : 0.0));
 				    
 				        // TODO: add this valence to SE for sentence
 				        int score = RNNCoreAnnotations.getPredictedClass(tree);
