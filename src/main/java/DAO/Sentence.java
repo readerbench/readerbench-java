@@ -175,12 +175,18 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 				        		daoSe.getIndexLabel(),
 				        		daoSe.getRage()
 				        		), (noWordWeights > 0 ? wordSentimentSum / noWordWeights : 0.0));
-				    
-				        // TODO: add this valence to SE for sentence
-				        int score = RNNCoreAnnotations.getPredictedClass(tree);
-				        setSentimentEntity(se);
-					
 				    }
+				    
+				    // Stanford Valence
+				    int score = RNNCoreAnnotations.getPredictedClass(tree);
+				    se.add(new DAO.sentiment.SentimentValence(
+			        		10000,
+			        		"Stanford",
+			        		"STANFORD",
+			        		false
+			        		), score);
+				    
+				    setSentimentEntity(se);
 				}
 			}
 		}
