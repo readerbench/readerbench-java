@@ -169,12 +169,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 				        
 				        // add sentiment entity to the sentence
 				        logger.info("Adding sentiment " + daoSe.getName() + " for sentence " + this.getIndex());
-				        se.add(new DAO.sentiment.SentimentValence(
-				        		daoSe.getId(),
-				        		daoSe.getName(),
-				        		daoSe.getIndexLabel(),
-				        		daoSe.getRage()
-				        		), (noWordWeights > 0 ? wordSentimentSum / noWordWeights : 0.0));
+				        se.add(daoSe, (noWordWeights > 0 ? wordSentimentSum / noWordWeights : 0.0));
 				    }
 				    
 				    // Stanford Valence

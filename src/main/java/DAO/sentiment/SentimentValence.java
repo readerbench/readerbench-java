@@ -10,6 +10,7 @@ import java.util.Map;
 import java.lang.reflect.*;
 
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
+import java.util.Objects;
 
 /**
  * Holds a sentiment valence
@@ -92,5 +93,29 @@ public class SentimentValence {
 	public static SentimentValence get(String index) {
 		return valenceMap.get(index);
 	}
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 19 * hash + Objects.hashCode(this.indexLabel);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SentimentValence other = (SentimentValence) obj;
+        if (!Objects.equals(this.indexLabel, other.indexLabel)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 	
 }	

@@ -3,6 +3,8 @@ package DAO.sentiment;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.DoubleStream;
 
 import org.apache.log4j.Logger;
 
@@ -156,8 +158,18 @@ public class SentimentEntity {
 				}
 			}
 		}
-		return rageSentimentsValues;
+		return normalizeValues(rageSentimentsValues);
 	}
+    
+    public static Map<SentimentValence,Double> normalizeValues(Map<SentimentValence,Double> valences) {
+        double max = valences.values().stream().mapToDouble(d -> d).max().getAsDouble();
+        double min = valences.values().stream().mapToDouble(d -> d).min().getAsDouble();
+        Map<SentimentValence,Double> result = new HashMap<>();
+        valences.entrySet().stream().forEach(e -> {
+            result.put(e.getKey(), (e.getValue() - min) / (max - min));
+        });
+        return result;
+    }
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
