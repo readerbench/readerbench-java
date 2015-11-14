@@ -297,6 +297,28 @@ public class ReaderBenchServer {
 			data = new ArrayList<ResultSentiment>();
 		}
 	}
+	
+	before(new Filter("/") {
+	    @Override
+	    public void handle(Request request, Response response) {
+	        try (InputStream stream = getClass().getResourceAsStream("/public/index.html")) {
+	            halt(200, IOUtils.toString(stream));
+	        } catch (IOException e) {
+	            // if the resource doesn't exist we just carry on.
+	        }
+	    }
+	});
+	
+	private static void enableCORS(final String origin, final String methods, final String headers) {
+	    before(new Filter() {
+	        @Override
+	        public void handle(Request request, Response response) {
+	            response.header("Access-Control-Allow-Origin", origin);
+	            response.header("Access-Control-Request-Method", methods);
+	            response.header("Access-Control-Allow-Headers", headers);
+	        }
+	    });
+	}
 
 	public void start() {
 		Spark.port(PORT);
@@ -304,6 +326,9 @@ public class ReaderBenchServer {
 			return "OK";
 		});
 		Spark.get("/getTopics", (request, response) -> {
+			
+			
+			
 			response.type("application/json");
 
 			String q = request.queryParams("q");
