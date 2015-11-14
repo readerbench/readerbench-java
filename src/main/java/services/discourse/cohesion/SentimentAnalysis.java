@@ -31,12 +31,7 @@ public class SentimentAnalysis {
 		while (itValenceMap.hasNext()) {
 	        Map.Entry pair = (Map.Entry)itValenceMap.next();
 	        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
-	        se.add(new DAO.sentiment.SentimentValence(
-	        		daoSe.getId(),
-	        		daoSe.getName(),
-	        		daoSe.getIndexLabel(),
-	        		daoSe.getRage()
-	        		), 0.0);
+	        se.add(daoSe, 0.0);
 		}
 		d.setSentimentEntity(se);
 
@@ -50,18 +45,11 @@ public class SentimentAnalysis {
 			while (itValenceMap.hasNext()) {
 		        Map.Entry pair = (Map.Entry)itValenceMap.next();
 		        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
-		        se.add(new DAO.sentiment.SentimentValence(
-		        		daoSe.getId(),
-		        		daoSe.getName(),
-		        		daoSe.getIndexLabel(),
-		        		daoSe.getRage()
-		        		), 0.0);
+		        se.add(daoSe, 0.0);
 			}
 			b.setSentimentEntity(se);
 			logger.info("Block " + b.getIndex() + " has " + b.getSentimentEntity().getAll().size() + " initialized sentiments now");
 		}
-		
-		Iterator<Map.Entry<SentimentValence, Double>> it;
 		
 		Map<SentimentValence, Double> avgDoc = new HashMap<>();
 		Map<SentimentValence, Double> sumWeightsDoc = new HashMap<>();
@@ -79,12 +67,10 @@ public class SentimentAnalysis {
 				logger.info("[Weighting] Block " + b.getIndex() + " has " + b.getSentences().size() + " sentences."); 
 				for (int j = 0; j < b.getSentences().size(); j++) {
 					Sentence s = b.getSentences().get(j);
-					it = s.getSentimentEntity().getAll().entrySet().iterator();
 					logger.info("[Weighting] There are " + s.getSentimentEntity().getAll().size() + " sentiments set for this sentence.");
-				    while (it.hasNext()) {
-				        Map.Entry<SentimentValence, Double> pair = it.next();
-				        SentimentValence sv = (SentimentValence)pair.getKey();
-				        Double value = (Double)pair.getValue();
+				    for (Map.Entry<SentimentValence, Double> pair : s.getSentimentEntity().getAll().entrySet()) {
+				        SentimentValence sv = pair.getKey();
+				        Double value = pair.getValue();
 				        logger.info(" Sentence s (sentiment " + sv.getName() + " = " + value + ")");
 				        if (value != null) {
 				        	avgBlock.put(sv, (avgBlock.get(sv) == null ? 0 : avgBlock.get(sv))
@@ -93,43 +79,32 @@ public class SentimentAnalysis {
 				        	sumWeightsBlock.put(sv, (sumWeightsBlock.get(sv) == null ? 0 : sumWeightsBlock.get(sv))
 				        			+ b.getSentenceBlockDistances()[j].getCohesion());
 				        }
-				        it.remove(); // avoids a ConcurrentModificationException
 				    }
 				}
 				
 				// updating sentiment values for block
-				it = b.getSentimentEntity().getAll().entrySet().iterator();
 				logger.info("Updating sentiment valences for current block. Block has " + b.getSentimentEntity().getAll().size() + " sentiments.");
-				while (it.hasNext()) {
-			        Map.Entry pair = (Map.Entry)it.next();
-			        SentimentValence sv = (SentimentValence)pair.getKey();
-			        Double value = (Double)pair.getValue();
+				for (Map.Entry<SentimentValence, Double> pair : b.getSentimentEntity().getAll().entrySet()) {
+			        SentimentValence sv = pair.getKey();
+			        Double value = pair.getValue();
 					if (sumWeightsBlock.get(sv) != null) {
 						avgBlock.put(sv, avgBlock.get(sv) / sumWeightsBlock.get(sv));
 						//b.setSentimentEntity(new SentimentEntity(b.getProcessedText().trim(), avgBlock));
-						se = new SentimentEntity();
-						se.add(sv, avgBlock.get(sv));
 						avgDoc.put(sv, (avgDoc.get(sv) == null ? 0 : avgDoc.get(sv)) + avgBlock.get(sv) * d.getBlockDocDistances()[i].getCohesion());
-						sumWeightsDoc.put(sv,  (sumWeightsDoc.get(sv) == null ? 0 : sumWeightsDoc.get(sv) + d.getBlockDocDistances()[i].getCohesion()));
+						sumWeightsDoc.put(sv,  (sumWeightsDoc.get(sv) == null ? 0 : sumWeightsDoc.get(sv)) + d.getBlockDocDistances()[i].getCohesion());
 						logger.info("Adding sentiment " + sv.getIndexLabel() + " to block " + b.getIndex());
-						b.setSentimentEntity(se);
 						b.getSentimentEntity().add(sv, avgBlock.get(sv));
 					}
-					it.remove();
 				}
 			}
 		}
 
-		it = d.getSentimentEntity().getAll().entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry)it.next();
-	        SentimentValence sv = (SentimentValence)pair.getKey();
-	        Double value = (Double)pair.getValue();
+		for (Map.Entry<SentimentValence, Double> pair : d.getSentimentEntity().getAll().entrySet()) {
+			SentimentValence sv = pair.getKey();
+	        Double value = pair.getValue();
 			if (sumWeightsDoc.get(sv) != null) {
-				se = new SentimentEntity();
-				se.add(sv, avgDoc.get(sv) / sumWeightsDoc.get(sv));
+				d.getSentimentEntity().add(sv, avgDoc.get(sv) / sumWeightsDoc.get(sv));
 				logger.info("Adding sentiment " + sv.getIndexLabel() + " to document ");
-				d.setSentimentEntity(se);
 			}
 		}
 	}
