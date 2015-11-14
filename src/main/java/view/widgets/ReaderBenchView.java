@@ -51,6 +51,7 @@ import view.events.TCPopupEventQueue;
 import view.widgets.chat.VCoPView;
 import view.widgets.complexity.CorpusEvaluationView;
 import view.widgets.complexity.DocumentEvaluationView;
+import view.widgets.complexity.EssayProcessingView;
 import view.widgets.complexity.RunMeasurementsView;
 import view.widgets.document.DocumentManagementView;
 import view.widgets.document.DocumentProcessingView;
@@ -110,6 +111,10 @@ public class ReaderBenchView extends JFrame {
 	private JButton btnDocProcessing;
 	private JButton btnDocumentSemanticSearch;
 	private JButton btnPredictTextualComplexity;
+	
+	// textual complexity
+	private JButton btnCorpusEvaluation;
+	private JButton btnEssayProcessing;
 	
 	private JDesktopPane desktopPane;
 	private JButton btnVerbaCreation;
@@ -373,6 +378,63 @@ public class ReaderBenchView extends JFrame {
 		panelDocSpecific.setLayout(gl_panelDocSpecific);
 		panelDocument.setLayout(new BorderLayout(0, 0));
 		panelDocument.add(panelDocSpecific, BorderLayout.CENTER);
+		
+				JPanel panelTextualComplexity = new JPanel();
+				panelTextualComplexity.setToolTipText("Textual Complexity");
+				tabbedPane
+						.addTab(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
+								.getString(
+										"ReaderBenchView.panelTextualComplexity.title"), //$NON-NLS-1$
+								null, panelTextualComplexity, null);
+				panelTextualComplexity.setLayout(new BorderLayout(0, 0));
+				panelTextualComplexity.setBorder(new EtchedBorder(EtchedBorder.LOWERED,
+						null, null));
+				
+				JPanel panelTextualComplexityGeneral = new JPanel();
+				panelTextualComplexityGeneral.setBorder(new TitledBorder(
+						new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
+						TitledBorder.LEADING, TitledBorder.TOP, null, null));
+				panelTextualComplexityGeneral.setBackground(Color.WHITE);
+				panelTextualComplexity.add(panelTextualComplexityGeneral,
+						BorderLayout.CENTER);
+								
+				btnCorpusEvaluation = new JButton(ResourceBundle.getBundle(
+						"utils.localization.messages") //$NON-NLS-1$
+						.getString("ReaderBenchView.btnCorpusEvaluation.text")); //$NON-NLS-1$
+				btnCorpusEvaluation.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						CorpusEvaluationView frame = new CorpusEvaluationView();
+						frame.setVisible(true);
+					}
+				});
+				
+				btnEssayProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.btnEssayProcessing.text")); //$NON-NLS-1$ //$NON-NLS-2$
+				btnEssayProcessing.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						EssayProcessingView frame = new EssayProcessingView();
+						frame.setVisible(true);
+					}
+				});
+				GroupLayout gl_panel = new GroupLayout(panelTextualComplexityGeneral);
+				gl_panel.setHorizontalGroup(
+					gl_panel.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(btnCorpusEvaluation, GroupLayout.PREFERRED_SIZE, 171, GroupLayout.PREFERRED_SIZE)
+							.addGap(18)
+							.addComponent(btnEssayProcessing, GroupLayout.PREFERRED_SIZE, 179, GroupLayout.PREFERRED_SIZE)
+							.addContainerGap(1001, Short.MAX_VALUE))
+				);
+				gl_panel.setVerticalGroup(
+					gl_panel.createParallelGroup(Alignment.TRAILING)
+						.addGroup(gl_panel.createSequentialGroup()
+							.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+								.addComponent(btnCorpusEvaluation, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnEssayProcessing))
+							.addGap(49))
+				);
+				panelTextualComplexityGeneral.setLayout(gl_panel);
 
 		JPanel panelSelfExplanations = new JPanel();
 		panelSelfExplanations.setBorder(new EtchedBorder(EtchedBorder.LOWERED,
@@ -555,83 +617,6 @@ public class ReaderBenchView extends JFrame {
 						.addPreferredGap(ComponentPlacement.RELATED, 477,
 								Short.MAX_VALUE).addComponent(lblReaderbench)
 						.addContainerGap()));
-
-		JPanel panelTextualComplexity = new JPanel();
-		panelTextualComplexity.setToolTipText("Textual Complexity");
-		tabbedPane
-				.addTab(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-						.getString(
-								"ReaderBenchView.panelTextualComplexity.title"), //$NON-NLS-1$
-						null, panelTextualComplexity, null);
-		panelTextualComplexity.setLayout(new BorderLayout(0, 0));
-		panelTextualComplexity.setBorder(new EtchedBorder(EtchedBorder.LOWERED,
-				null, null));
-
-		JPanel panelTextualComplexityGeneral = new JPanel();
-		panelTextualComplexityGeneral.setBorder(new TitledBorder(
-				new EtchedBorder(EtchedBorder.LOWERED, null, null), "General",
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelTextualComplexityGeneral.setBackground(Color.WHITE);
-		panelTextualComplexity.add(panelTextualComplexityGeneral,
-				BorderLayout.WEST);
-
-		JButton btnRunMeasurements = new JButton(
-				ResourceBundle
-						.getBundle("utils.localization.messages").getString("ReaderBenchView.btnRunMeasurements.text")); //$NON-NLS-1$ //$NON-NLS-2$
-		btnRunMeasurements.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				RunMeasurementsView frame = new RunMeasurementsView();
-				frame.setVisible(true);
-			}
-		});
-
-		JButton btnCorpusEvaluation = new JButton(ResourceBundle.getBundle(
-				"utils.localization.messages") //$NON-NLS-1$
-				.getString("ReaderBenchView.btnCorpusEvaluation.text")); //$NON-NLS-1$
-		btnCorpusEvaluation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CorpusEvaluationView frame = new CorpusEvaluationView();
-				frame.setVisible(true);
-			}
-		});
-		GroupLayout gl_panel = new GroupLayout(panelTextualComplexityGeneral);
-		gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_panel.createSequentialGroup()
-						.addContainerGap()
-						.addGroup(
-								gl_panel.createParallelGroup(Alignment.LEADING)
-										.addComponent(btnRunMeasurements,
-												GroupLayout.DEFAULT_SIZE, 200,
-												Short.MAX_VALUE)
-										.addComponent(btnCorpusEvaluation,
-												GroupLayout.DEFAULT_SIZE, 200,
-												Short.MAX_VALUE))
-						.addContainerGap()));
-		gl_panel.setVerticalGroup(gl_panel.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_panel.createSequentialGroup()
-						.addComponent(btnRunMeasurements,
-								GroupLayout.PREFERRED_SIZE, 27,
-								GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED, 9,
-								Short.MAX_VALUE)
-						.addComponent(btnCorpusEvaluation).addContainerGap()));
-		panelTextualComplexityGeneral.setLayout(gl_panel);
-
-		JPanel panelTextualComplexitySpecific = new JPanel();
-		panelTextualComplexitySpecific.setBorder(new TitledBorder(
-				new EtchedBorder(EtchedBorder.LOWERED, null, null), "Specific",
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelTextualComplexitySpecific.setBackground(Color.WHITE);
-		panelTextualComplexity.add(panelTextualComplexitySpecific,
-				BorderLayout.CENTER);
-		GroupLayout gl_panel_1 = new GroupLayout(panelTextualComplexitySpecific);
-		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(
-				Alignment.LEADING).addGap(0, 920, Short.MAX_VALUE));
-		gl_panel_1.setVerticalGroup(gl_panel_1.createParallelGroup(
-				Alignment.LEADING).addGap(0, 79, Short.MAX_VALUE));
-		panelTextualComplexitySpecific.setLayout(gl_panel_1);
 
 		JPanel panelAdditional = new JPanel();
 		panelAdditional.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,
@@ -825,6 +810,18 @@ public class ReaderBenchView extends JFrame {
 		this.btnPredictTextualComplexity.setText(LocalizationUtils
 				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
 						"btnPredictTextualComplexity"));
+		
+		// textual complexity
+		this.tabbedPane
+		.setTitleAt(3, LocalizationUtils.getLocalizedString(
+				this.getClass(), LocalizationUtils.TITLE,
+				"panelTextualComplexity"));
+		this.btnCorpusEvaluation.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnCorpusEvaluation"));
+		this.btnEssayProcessing.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnEssayProcessing"));
 	}
 
 	public void updateLocale(Locale newLocale) {

@@ -47,6 +47,7 @@ import services.complexity.ComplexityIndices;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import DAO.complexity.Measurement;
 
 public class CorpusEvaluationView extends JFrame {
@@ -331,7 +332,7 @@ public class CorpusEvaluationView extends JFrame {
 	}
 
 	public CorpusEvaluationView() {
-		setTitle("ReaderBench - Corpus Complexity Evaluation");
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Corpus Complexity Evaluation"));
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(50, 50, 1000, 600);
@@ -340,7 +341,7 @@ public class CorpusEvaluationView extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 
-		JLabel lblPath = new JLabel("Path:");
+		JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
 		lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		textFieldDirectory = new JTextField();
@@ -362,11 +363,11 @@ public class CorpusEvaluationView extends JFrame {
 		});
 
 		chckbxAll = new JCheckBox(
-				"Perform measurements for all factors combined ");
+				LocalizationUtils.getTranslation("Perform measurements for all factors combined"));
 		chckbxAll.setSelected(true);
 
 		chckbxClass = new JCheckBox(
-				"Perform measurements for each class of textual complexity factors");
+				LocalizationUtils.getTranslation("Perform measurements for each class of textual complexity factors"));
 		chckbxClass.setSelected(true);
 
 		JLabel lblBaselines = new JLabel("Baselines");
@@ -374,23 +375,23 @@ public class CorpusEvaluationView extends JFrame {
 
 		JSeparator separator = new JSeparator();
 
-		lblSelectiveMeasurements = new JLabel("Selective measurements");
+		lblSelectiveMeasurements = new JLabel(LocalizationUtils.getTranslation("Selective measurements"));
 		lblSelectiveMeasurements.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		separator_1 = new JSeparator();
 
 		chckbxIndividual = new JCheckBox(
-				"Perform measurements for each individually selected factor");
+				LocalizationUtils.getTranslation("Perform measurements for each individually selected factor"));
 		chckbxIndividual.setSelected(true);
 
 		chckbxAllSelected = new JCheckBox(
-				"Perform measurements for all selected factors combined");
+				LocalizationUtils.getTranslation("Perform measurements for all selected factors combined"));
 		chckbxAllSelected.setSelected(true);
 
-		lblResults = new JLabel("Results");
+		lblResults = new JLabel(LocalizationUtils.getTranslation("Results"));
 		lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		lblKCrossValidation = new JLabel("k cross-validation folds:");
+		lblKCrossValidation = new JLabel(LocalizationUtils.getTranslation("k cross-validation folds") + ":");
 		lblKCrossValidation.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		textFieldCrossValidation = new JTextField();
@@ -398,7 +399,7 @@ public class CorpusEvaluationView extends JFrame {
 		textFieldCrossValidation.setText("3");
 		textFieldCrossValidation.setColumns(10);
 
-		btnSelectComplexityIndices = new JButton("Select complexity indices");
+		btnSelectComplexityIndices = new JButton(LocalizationUtils.getTranslation("Select complexity indices"));
 		btnSelectComplexityIndices.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ComplexityIndicesView view = new ComplexityIndicesView();
@@ -408,7 +409,7 @@ public class CorpusEvaluationView extends JFrame {
 
 		separator_2 = new JSeparator();
 
-		btnPerformMeasurements = new JButton("Perform measurements");
+		btnPerformMeasurements = new JButton(LocalizationUtils.getTranslation("Perform measurements"));
 		btnPerformMeasurements.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String path = textFieldDirectory.getText();
@@ -459,7 +460,8 @@ public class CorpusEvaluationView extends JFrame {
 		scrollPane.setViewportView(table);
 
 		lblComments = new JLabel(
-				"* EA - Exact Agreement; AA - Adjacent Agreement");
+				"* EA - " + LocalizationUtils.getTranslation("Exact Agreement") 
+				+ " ; AA - " + LocalizationUtils.getTranslation("Adjacent Agreement"));
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
 				.setHorizontalGroup(gl_contentPane
