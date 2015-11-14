@@ -116,9 +116,13 @@ public class ReaderBenchView extends JFrame {
 	private JButton btnCorpusEvaluation;
 	private JButton btnEssayProcessing;
 	
-	private JDesktopPane desktopPane;
-	private JButton btnVerbaCreation;
+	// self-explanations
 	private JButton btnVerbaProcessing;
+	private JButton btnSummaryProcessing;
+	
+	
+	private JDesktopPane desktopPane;
+	
 	private GroupLayout gl_panelSettingsSpecific;
 	private GroupLayout gl_panelSettingsGeneral;
 
@@ -444,75 +448,11 @@ public class ReaderBenchView extends JFrame {
 		tabbedPane
 				.addTab(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
 						.getString(
-								"ReaderBenchView.panelSelfExplanations.title"), null, panelSelfExplanations, null); //$NON-NLS-1$
-
-		JPanel panelVerbGeneral = new JPanel();
-		panelVerbGeneral.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "General",
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelVerbGeneral.setBackground(Color.WHITE);
-
-		btnVerbaCreation = new JButton(
-				ResourceBundle
-						.getBundle("utils.localization.messages").getString("ReaderBenchView.btnVerbaCreation.text")); //$NON-NLS-1$ //$NON-NLS-2$
-		btnVerbaCreation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				CreateVerbalizationView view = new CreateVerbalizationView();
-				view.setVisible(true);
-			}
-		});
-
-		JButton btnVerbaAnnotation = new JButton(
-				ResourceBundle
-						.getBundle("utils.localization.messages").getString("ReaderBenchView.btnVerbaAnnotation.text")); //$NON-NLS-1$ //$NON-NLS-2$
-		btnVerbaAnnotation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AnnotateVerbalizationView view = new AnnotateVerbalizationView();
-				view.setVisible(true);
-			}
-		});
-
-		GroupLayout gl_panelVerbGeneral = new GroupLayout(panelVerbGeneral);
-		gl_panelVerbGeneral
-				.setHorizontalGroup(gl_panelVerbGeneral
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_panelVerbGeneral
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_panelVerbGeneral
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																btnVerbaAnnotation,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																200,
-																Short.MAX_VALUE)
-														.addComponent(
-																btnVerbaCreation,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																200,
-																Short.MAX_VALUE))
-										.addContainerGap()));
-		gl_panelVerbGeneral.setVerticalGroup(gl_panelVerbGeneral
-				.createParallelGroup(Alignment.LEADING).addGroup(
-						gl_panelVerbGeneral
-								.createSequentialGroup()
-								.addComponent(btnVerbaCreation,
-										GroupLayout.PREFERRED_SIZE, 27,
-										GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(ComponentPlacement.RELATED, 9,
-										Short.MAX_VALUE)
-								.addComponent(btnVerbaAnnotation)
-								.addContainerGap()));
-		panelVerbGeneral.setLayout(gl_panelVerbGeneral);
+								"ReaderBenchView.panelSelfExplanations.title"), null, panelSelfExplanations, null);
 
 		JPanel panelVerbSpecific = new JPanel();
 		panelVerbSpecific.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "Specific",
+				EtchedBorder.LOWERED, null, null), "",
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelVerbSpecific.setBackground(Color.WHITE);
 
@@ -532,7 +472,7 @@ public class ReaderBenchView extends JFrame {
 			}
 		});
 
-		JButton btnSummaryProcessing = new JButton(ResourceBundle.getBundle(
+		btnSummaryProcessing = new JButton(ResourceBundle.getBundle(
 				"utils.localization.messages") //$NON-NLS-1$
 				.getString("ReaderBenchView.btnSummaryProcessing.text")); //$NON-NLS-1$
 		btnSummaryProcessing.addActionListener(new ActionListener() {
@@ -548,43 +488,26 @@ public class ReaderBenchView extends JFrame {
 			}
 		});
 		GroupLayout gl_panelVerbSpecific = new GroupLayout(panelVerbSpecific);
-		gl_panelVerbSpecific
-				.setHorizontalGroup(gl_panelVerbSpecific
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_panelVerbSpecific
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_panelVerbSpecific
-														.createParallelGroup(
-																Alignment.TRAILING,
-																false)
-														.addComponent(
-																btnSummaryProcessing,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																Short.MAX_VALUE)
-														.addComponent(
-																btnVerbaProcessing,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																200,
-																Short.MAX_VALUE))
-										.addContainerGap(722, Short.MAX_VALUE)));
-		gl_panelVerbSpecific.setVerticalGroup(gl_panelVerbSpecific
-				.createParallelGroup(Alignment.LEADING).addGroup(
-						gl_panelVerbSpecific
-								.createSequentialGroup()
-								.addComponent(btnVerbaProcessing)
-								.addPreferredGap(ComponentPlacement.RELATED, 9,
-										Short.MAX_VALUE)
-								.addComponent(btnSummaryProcessing)
-								.addContainerGap()));
+		gl_panelVerbSpecific.setHorizontalGroup(
+			gl_panelVerbSpecific.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelVerbSpecific.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(btnVerbaProcessing, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE)
+					.addGap(37)
+					.addComponent(btnSummaryProcessing, GroupLayout.DEFAULT_SIZE, 208, Short.MAX_VALUE)
+					.addGap(938))
+		);
+		gl_panelVerbSpecific.setVerticalGroup(
+			gl_panelVerbSpecific.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelVerbSpecific.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panelVerbSpecific.createParallelGroup(Alignment.BASELINE)
+						.addComponent(btnVerbaProcessing)
+						.addComponent(btnSummaryProcessing))
+					.addContainerGap(49, Short.MAX_VALUE))
+		);
 		panelVerbSpecific.setLayout(gl_panelVerbSpecific);
 		panelSelfExplanations.setLayout(new BorderLayout(0, 0));
-		panelSelfExplanations.add(panelVerbGeneral, BorderLayout.WEST);
 		panelSelfExplanations.add(panelVerbSpecific, BorderLayout.CENTER);
 
 		JLabel lblReaderbench = new JLabel();
@@ -822,6 +745,18 @@ public class ReaderBenchView extends JFrame {
 		this.btnEssayProcessing.setText(LocalizationUtils
 				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
 						"btnEssayProcessing"));
+		
+		// self explanations
+		this.tabbedPane
+		.setTitleAt(4, LocalizationUtils.getLocalizedString(
+				this.getClass(), LocalizationUtils.TITLE,
+				"panelSelfExplanations"));
+		this.btnVerbaProcessing.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnVerbaProcessing"));
+		this.btnSummaryProcessing.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnSummaryProcessing"));
 	}
 
 	public void updateLocale(Locale newLocale) {

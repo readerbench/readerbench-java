@@ -37,6 +37,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
 
+import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
@@ -156,7 +157,7 @@ public class SummaryProcessingView extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public SummaryProcessingView() {
-		setTitle("ReaderBench - Summary Processing");
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Summary Processing"));
 		setResizable(true);
 		setClosable(true);
 		setMaximizable(true);
@@ -188,7 +189,7 @@ public class SummaryProcessingView extends JInternalFrame {
 		desktopPane.setBackground(Color.WHITE);
 		setContentPane(desktopPane);
 
-		btnAddSummary = new JButton("Add summary(s)");
+		btnAddSummary = new JButton(LocalizationUtils.getTranslation("Add summary(s)"));
 		btnAddSummary.setEnabled(true);
 		btnAddSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -217,7 +218,7 @@ public class SummaryProcessingView extends JInternalFrame {
 			}
 		});
 
-		btnRemoveSummary = new JButton("Remove summary");
+		btnRemoveSummary = new JButton(LocalizationUtils.getTranslation("Remove summary"));
 		btnRemoveSummary.setEnabled(false);
 		btnRemoveSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -261,7 +262,7 @@ public class SummaryProcessingView extends JInternalFrame {
 
 		scrollPane.setViewportView(summariesTable);
 
-		btnAddSerializedSummary = new JButton("Add serialized summary(s)");
+		btnAddSerializedSummary = new JButton(LocalizationUtils.getTranslation("Add serialized summary(s)"));
 		btnAddSerializedSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
@@ -294,7 +295,7 @@ public class SummaryProcessingView extends JInternalFrame {
 			}
 		});
 
-		btnComprehensionPrediction = new JButton("Comprehension Prediction");
+		btnComprehensionPrediction = new JButton(LocalizationUtils.getTranslation("Comprehension Prediction"));
 		btnComprehensionPrediction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -309,7 +310,7 @@ public class SummaryProcessingView extends JInternalFrame {
 		});
 		btnComprehensionPrediction.setEnabled(false);
 
-		btnViewSummary = new JButton("View summary");
+		btnViewSummary = new JButton(LocalizationUtils.getTranslation("View summary"));
 		btnViewSummary.setEnabled(false);
 		btnViewSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
