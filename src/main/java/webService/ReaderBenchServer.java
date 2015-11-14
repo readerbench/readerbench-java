@@ -298,7 +298,7 @@ public class ReaderBenchServer {
 		}
 	}
 	
-	before(new Filter("/") {
+	/*before(new Filter("/") {
 	    @Override
 	    public void handle(Request request, Response response) {
 	        try (InputStream stream = getClass().getResourceAsStream("/public/index.html")) {
@@ -307,9 +307,9 @@ public class ReaderBenchServer {
 	            // if the resource doesn't exist we just carry on.
 	        }
 	    }
-	});
+	});*/
 	
-	private static void enableCORS(final String origin, final String methods, final String headers) {
+	/*private static void enableCORS(final String origin, final String methods, final String headers) {
 	    before(new Filter() {
 	        @Override
 	        public void handle(Request request, Response response) {
@@ -318,15 +318,19 @@ public class ReaderBenchServer {
 	            response.header("Access-Control-Allow-Headers", headers);
 	        }
 	    });
-	}
+	}*/
 
 	public void start() {
 		Spark.port(PORT);
 		Spark.get("/", (request, response) -> {
 			return "OK";
 		});
+        Spark.before((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Request-Method", "*");
+            response.header("Access-Control-Allow-Headers", "*");
+        });
 		Spark.get("/getTopics", (request, response) -> {
-			
 			
 			
 			response.type("application/json");
