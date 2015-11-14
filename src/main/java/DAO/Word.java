@@ -6,6 +6,7 @@ package DAO;
 
 import java.io.Serializable;
 
+import services.discourse.cohesion.CohesionGraph;
 import services.nlp.stemmer.Stemmer;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
@@ -19,11 +20,16 @@ import DAO.sentiment.SentimentValence;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import pojo.EntityXValence;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  * @author Mihai Dascalu
  */
 public class Word implements Comparable<Word>, Serializable {
+	
+	static Logger logger = Logger.getLogger(CohesionGraph.class);
+	
 	private static final long serialVersionUID = -3809934014813200184L;
 
 	private int blockIndex;// the number of the block the word is part of
@@ -310,7 +316,11 @@ public class Word implements Comparable<Word>, Serializable {
 	}
 
 	public SentimentEntity getSentiment() {
-		if (sentiment == null) loadSentimentEntity();
+		if (sentiment == null) {
+			logger.info("Pentru cuvantul " + this + " nu avem initializate sentimentele");
+			loadSentimentEntity();
+		}
+		logger.info("Pentru cuvantul " + this + " avem initializate sentimentele");
 		return sentiment;
 	}
 

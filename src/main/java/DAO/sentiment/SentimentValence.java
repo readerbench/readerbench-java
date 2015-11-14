@@ -2,12 +2,15 @@ package DAO.sentiment;
 
 import DAO.db.ValenceDAO;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.reflect.*;
 
 import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
+import java.util.Objects;
 
 /**
  * Holds a sentiment valence
@@ -17,7 +20,18 @@ import edu.stanford.nlp.patterns.GetPatternsFromDataMultiClass;
  */
 public class SentimentValence {
 	
-	private static Map<String, SentimentValence> valenceMap;
+	private static final Map<String, SentimentValence> valenceMap;
+    private static final List<SentimentValence> valences = new ArrayList<>();
+	static {
+		Map<String, SentimentValence> valenceMaplocal = new HashMap<>();
+		List<pojo.SentimentValence> valenceEntities = ValenceDAO.getInstance().findAll();
+		for (pojo.SentimentValence v : valenceEntities) {
+			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
+            valences.add(sv);
+			valenceMaplocal.put(v.getIndexLabel(), sv);
+		}
+		valenceMap = Collections.unmodifiableMap(valenceMaplocal);
+	}
 	
 	private Integer id;
 	private String name;
@@ -78,18 +92,36 @@ public class SentimentValence {
 		return valenceMap;
 	}
 	
-	public static void initValences() {
-		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
-		valenceMap = new HashMap<>();
-		for (pojo.SentimentValence v : valences) {
-			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
-			valenceMap.put(v.getIndexLabel(), sv);
-		}
-	}
-	
 	public static SentimentValence get(String index) {
-		if (valenceMap == null) SentimentWeights.initValences();
 		return valenceMap.get(index);
 	}
+    
+    public static List<SentimentValence> getAllValences() {
+        return valences;
+    }
+ 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 19 * hash + Objects.hashCode(this.indexLabel);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SentimentValence other = (SentimentValence) obj;
+        if (!Objects.equals(this.indexLabel, other.indexLabel)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 	
 }	

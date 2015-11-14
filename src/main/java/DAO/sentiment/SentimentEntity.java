@@ -3,6 +3,12 @@ package DAO.sentiment;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.DoubleStream;
+
+import org.apache.log4j.Logger;
+
+import services.discourse.cohesion.CohesionGraph;
 
 /**
  * Holds a HashMap containing different sentiments and their 
@@ -13,6 +19,8 @@ import java.util.Map;
  *
  */
 public class SentimentEntity {
+	
+	static Logger logger = Logger.getLogger(CohesionGraph.class);
 	
 	/**
 	 * Map that stores the valences and their 
@@ -125,6 +133,7 @@ public class SentimentEntity {
 	public Map<SentimentValence,Double> getAggregatedValue() {
 		Map<SentimentValence, Double> rageSentimentsValues = new HashMap<SentimentValence, Double>();
 		Iterator<Map.Entry<SentimentValence, Double>> itRageSentiments = sentiments.entrySet().iterator();
+		logger.info("There are " + sentiments.size() + " sentiments in my sentiment entity object.");
 		// iterate all rage sentiments
 		while (itRageSentiments.hasNext()) {
 			Map.Entry<SentimentValence, Double> pairRage = (Map.Entry<SentimentValence, Double>)itRageSentiments.next();
@@ -134,7 +143,7 @@ public class SentimentEntity {
 			if (rageSentimentValence != null && rageSentimentValence.getRage()) {
 				Iterator<Map.Entry<SentimentValence, Double>> itPrimarySentiments = sentiments.entrySet().iterator();
 				while(itPrimarySentiments.hasNext()) {
-					Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>)itRageSentiments.next();
+					Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>)itPrimarySentiments.next();
 					SentimentValence primarySentimentValence = (SentimentValence)pairPrimary.getKey();
 					Double primarySentimentValue = (Double)pairPrimary.getValue();
 					if (!primarySentimentValence.getRage()) {
@@ -146,13 +155,21 @@ public class SentimentEntity {
 								primarySentimentValue
 								);
 					}
-					itPrimarySentiments.remove();
 				}
 			}
-			itRageSentiments.remove();
 		}
-		return rageSentimentsValues;
+		return normalizeValues(rageSentimentsValues);
 	}
+    
+    public static Map<SentimentValence,Double> normalizeValues(Map<SentimentValence,Double> valences) {
+        double max = valences.values().stream().mapToDouble(d -> d).max().getAsDouble();
+        double min = valences.values().stream().mapToDouble(d -> d).min().getAsDouble();
+        Map<SentimentValence,Double> result = new HashMap<>();
+        valences.entrySet().stream().forEach(e -> {
+            result.put(e.getKey(), (e.getValue() - min) / (max - min));
+        });
+        return result;
+    }
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -164,12 +181,13 @@ public class SentimentEntity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			sb.append(sentimentValence.getIndexLabel());
 			sb.append("=");
 			sb.append(sentiments.get(sentimentValence));
 			sb.append(",");
 		}
 		// delete trailing comma
-		sb.deleteCharAt(sb.length()-1);
+		if (sb.length() > 1) sb.deleteCharAt(sb.length()-1);
 		sb.append("]");
 		return sb.toString();
 	}

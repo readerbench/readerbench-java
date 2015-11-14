@@ -2,6 +2,8 @@ package view.models.verbalization;
 
 import javax.swing.table.DefaultTableModel;
 
+import utils.localization.LocalizationUtils;
+
 public class VerbalisationManagementTableModel extends DefaultTableModel {
 
 	private static final long serialVersionUID = 3089645556989916569L;
@@ -13,8 +15,10 @@ public class VerbalisationManagementTableModel extends DefaultTableModel {
 	};
 
 	public VerbalisationManagementTableModel() {
-		super(new Object[][] {}, new String[] { "Author", "Document name",
-				"LSA vector space", "LDA model" });
+		super(new Object[][] {}, new String[] { LocalizationUtils.getTranslation("Author"), 
+				LocalizationUtils.getTranslation("Document name"),
+				LocalizationUtils.getTranslation("LSA vector space"), 
+				LocalizationUtils.getTranslation("LDA model") });
 	}
 
 	@Override
