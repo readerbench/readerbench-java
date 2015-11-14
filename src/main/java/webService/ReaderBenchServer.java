@@ -193,7 +193,7 @@ public class ReaderBenchServer {
 				 * getAggregatedValue())));
 				 */
 
-				rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
+				rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
 				it = rageSentimentsValues.entrySet().iterator();
 				localResults = new ArrayList<Result>();
 				while (it.hasNext()) {
