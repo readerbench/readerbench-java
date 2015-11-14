@@ -1,6 +1,7 @@
 package webService;
 
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -162,7 +163,7 @@ public class ReaderBenchServer {
 			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 			SentimentValence sentimentValence = (SentimentValence) pair.getKey();
 			Double sentimentValue = (Double) pair.getValue();
-			localResults.add(new Result(sentimentValence.getIndexLabel(), Formatting.formatNumber(sentimentValue)));
+			localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""), Formatting.formatNumber(sentimentValue)));
 		}
 		resultsSentiments.add(new ResultSentiment("Document", localResults));
 
@@ -180,9 +181,9 @@ public class ReaderBenchServer {
 				Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 				SentimentValence sentimentValence = (SentimentValence) pair.getKey();
 				Double sentimentValue = (Double) pair.getValue();
-				localResults.add(new Result(sentimentValence.getIndexLabel(), Formatting.formatNumber(sentimentValue)));
+				localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""), Formatting.formatNumber(sentimentValue)));
 			}
-			resultsSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults));
+			resultsSentiments.add(new ResultSentiment("\tParagraph " + b.getIndex(), localResults));
 
 			for (Sentence s : b.getSentences()) {
 				/*
@@ -200,10 +201,10 @@ public class ReaderBenchServer {
 					SentimentValence sentimentValence = (SentimentValence) pair.getKey();
 					Double sentimentValue = (Double) pair.getValue();
 					localResults
-							.add(new Result(sentimentValence.getIndexLabel(), Formatting.formatNumber(sentimentValue)));
+							.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""), Formatting.formatNumber(sentimentValue)));
 				}
 				resultsSentiments.add(
-						new ResultSentiment("Paragraph " + b.getIndex() + " / Sentence " + s.getIndex(), localResults));
+						new ResultSentiment("\t\tSentence " + s.getIndex(), localResults));
 
 			}
 		}
@@ -298,28 +299,6 @@ public class ReaderBenchServer {
 		}
 	}
 	
-	/*before(new Filter("/") {
-	    @Override
-	    public void handle(Request request, Response response) {
-	        try (InputStream stream = getClass().getResourceAsStream("/public/index.html")) {
-	            halt(200, IOUtils.toString(stream));
-	        } catch (IOException e) {
-	            // if the resource doesn't exist we just carry on.
-	        }
-	    }
-	});*/
-	
-	/*private static void enableCORS(final String origin, final String methods, final String headers) {
-	    before(new Filter() {
-	        @Override
-	        public void handle(Request request, Response response) {
-	            response.header("Access-Control-Allow-Origin", origin);
-	            response.header("Access-Control-Request-Method", methods);
-	            response.header("Access-Control-Allow-Headers", headers);
-	        }
-	    });
-	}*/
-
 	public void start() {
 		Spark.port(PORT);
 		Spark.get("/", (request, response) -> {
@@ -331,8 +310,6 @@ public class ReaderBenchServer {
             response.header("Access-Control-Allow-Headers", "*");
         });
 		Spark.get("/getTopics", (request, response) -> {
-			
-			
 			response.type("application/json");
 
 			String q = request.queryParams("q");
@@ -344,6 +321,7 @@ public class ReaderBenchServer {
 			QueryResult queryResult = new QueryResult();
 			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging);
 			String result = convertToJson(queryResult);
+			//return Charset.forName("UTF-8").encode(result);
 			return result;
 		});
 		Spark.get("/getSentiment", (request, response) -> {
@@ -355,7 +333,7 @@ public class ReaderBenchServer {
 			String lang = request.queryParams("lang");
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 
-			System.out.println("Am primit: " + q);
+			//System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
 			queryResult.data = getSentiment(q, pathToLSA, pathToLDA, lang, usePOSTagging);
 			String result = convertToJson(queryResult);
@@ -365,6 +343,8 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String q = request.queryParams("q");
+			logger.info("Text primit");
+			logger.info(q);
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
