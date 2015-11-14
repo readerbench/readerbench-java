@@ -317,10 +317,10 @@ public class Word implements Comparable<Word>, Serializable {
 
 	public SentimentEntity getSentiment() {
 		if (sentiment == null) {
-			logger.info("Pentru cuvantul " + this + " nu avem initializate sentimentele");
+			//logger.info("Pentru cuvantul " + this + " nu avem initializate sentimentele");
 			loadSentimentEntity();
 		}
-		logger.info("Pentru cuvantul " + this + " avem initializate sentimentele");
+		//logger.info("Pentru cuvantul " + this + " avem initializate sentimentele");
 		return sentiment;
 	}
 
