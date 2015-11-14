@@ -13,7 +13,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -52,41 +54,47 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import services.discourse.topicMining.TopicModeling;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.chat.ChatView;
 import view.widgets.complexity.ComplexityIndicesView;
+import view.widgets.document.corpora.PaperConceptView;
+import view.widgets.document.corpora.PaperCorpusSimilarityView;
+import view.widgets.document.corpora.PaperKeywordAbstractOverlap;
 import view.widgets.document.corpora.PaperSimilarityView;
+import view.widgets.document.search.SearchSimilarityView;
 import DAO.AbstractDocument;
 import DAO.cscl.Conversation;
 import DAO.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
-public class DocumentProcessingView extends JInternalFrame {
+public class DocumentSemanticSearchView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;
 	static Logger logger = Logger.getLogger(DocumentProcessingView.class);
 
 	private JLabel lblLanguage;
 	private JComboBox<String> comboBoxLanguage;
-	private JButton btnRemoveDocument = null;
-	private JButton btnAddDocument = null;
-	private JButton btnViewDocument = null;
+	
 	private JButton btnAddSerializedDocument = null;
-	private JTable docTable;
 	private DocumentManagementTableModel docTableModel = null;
 	private TableRowSorter<DocumentManagementTableModel> docSorter;
-	private JScrollPane scrollPane;
 	private JDesktopPane desktopPane;
 	private static File lastDirectory = null;
 
 	private static List<AbstractDocument> allLoadedDocuments = new LinkedList<AbstractDocument>();
 	private static List<Document> loadedDocuments = new LinkedList<Document>();
+	private JButton btnKeywordsOverlap;
+	private JButton btnConceptView;
+	private JButton btnSimilarityView;
+	private JButton btnSearch;
 	private CustomTextField articleTextField;
 	private CustomTextField authorsTextField;
-	private JButton btnViewSimilarDocs;
 	private String queryArticleName;
 	private String queryAuthorName;
+	private JLabel lblSearchQuery;
+	private JTextField textFieldQuery;
 
 	public class DocumentProcessingTask extends SwingWorker<Void, Void> {
 		private String pathToDoc;
@@ -125,7 +133,6 @@ public class DocumentProcessingView extends JInternalFrame {
 		}
 
 		public Void doInBackground() {
-			btnAddDocument.setEnabled(false);
 			btnAddSerializedDocument.setEnabled(false);
 
 			File file = new File(pathToDoc);
@@ -164,7 +171,6 @@ public class DocumentProcessingView extends JInternalFrame {
 		@Override
 		public void done() {
 			Toolkit.getDefaultToolkit().beep();
-			btnAddDocument.setEnabled(true);
 			btnAddSerializedDocument.setEnabled(true);
 		}
 	}
@@ -271,14 +277,14 @@ public class DocumentProcessingView extends JInternalFrame {
 	/**
 	 * Create the frame.
 	 */
-	public DocumentProcessingView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Document Processing"));
+	public DocumentSemanticSearchView() {
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Semantic Search"));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setResizable(true);
 		setClosable(true);
 		setMaximizable(true);
 		setIconifiable(true);
-		setBounds(20, 20, 840, 450);
+		setBounds(20, 20, 819, 300);
 		queryAuthorName = "";
 		queryArticleName = "";
 
@@ -290,26 +296,6 @@ public class DocumentProcessingView extends JInternalFrame {
 		comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
 		for (String lang : Lang.SUPPORTED_LANGUAGES)
 			comboBoxLanguage.addItem(lang);
-
-		btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add document(s)"));
-		btnAddDocument.setEnabled(false);
-		btnAddDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					JInternalFrame frame = new AddDocumentView(ReaderBenchView.RUNTIME_LANGUAGE,
-							DocumentProcessingView.this);
-					frame.setVisible(true);
-					desktopPane.add(frame);
-					try {
-						frame.setSelected(true);
-					} catch (java.beans.PropertyVetoException exception) {
-						exception.printStackTrace();
-					}
-				} catch (Exception exception) {
-					exception.printStackTrace();
-				}
-			}
-		});
 
 		btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed document(s)"));
 		btnAddSerializedDocument.setEnabled(false);
@@ -333,12 +319,12 @@ public class DocumentProcessingView extends JInternalFrame {
 						return "Serialized documents (*.ser) or directory";
 					}
 				});
-				int returnVal = fc.showOpenDialog(DocumentProcessingView.this);
+				int returnVal = fc.showOpenDialog(DocumentSemanticSearchView.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					lastDirectory = file.getParentFile();
-					DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(
+					DocumentSemanticSearchView.DocumentProcessingTask task = DocumentSemanticSearchView.this.new DocumentProcessingTask(
 							file.getPath(), null, null, false, true);
 					task.execute();
 				}
@@ -352,7 +338,6 @@ public class DocumentProcessingView extends JInternalFrame {
 					ReaderBenchView.RUNTIME_LANGUAGE = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
 					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
 					comboBoxLanguage.setEnabled(false);
-					btnAddDocument.setEnabled(true);
 					btnAddSerializedDocument.setEnabled(true);
 				}
 			}
@@ -376,36 +361,7 @@ public class DocumentProcessingView extends JInternalFrame {
 		}
 
 		docTableModel = new DocumentManagementTableModel();
-		docTable = new JTable(docTableModel);
-		docTable.setFillsViewportHeight(true);
 		docSorter = new TableRowSorter<DocumentManagementTableModel>(docTableModel);
-		docTable.setRowSorter(docSorter);
-
-		docTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					JTable target = (JTable) event.getSource();
-					int row = target.getSelectedRow();
-					if (row >= 0 && row < allLoadedDocuments.size()) {
-						int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
-						AbstractDocument d = allLoadedDocuments.get(modelRow);
-						if (d instanceof Conversation) {
-							ChatView view = new ChatView((Conversation) d);
-							view.setVisible(true);
-						}
-						if (d instanceof Document) {
-							DocumentView view = new DocumentView((Document) d);
-							view.setVisible(true);
-						}
-					}
-				}
-			}
-		});
-
-		scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setViewportView(docTable);
 
 		desktopPane = new JDesktopPane() {
 			private static final long serialVersionUID = 8453433109734630086L;
@@ -429,15 +385,15 @@ public class DocumentProcessingView extends JInternalFrame {
 		};
 		desktopPane.setBackground(Color.WHITE);
 
+		JPanel panelAllDocs = new JPanel();
+		panelAllDocs.setBackground(Color.WHITE);
+		panelAllDocs.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+				LocalizationUtils.getTranslation("Generalized analysis for all loaded documents"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+
 		JPanel panelSingleDoc = new JPanel();
 		panelSingleDoc.setBackground(Color.WHITE);
 		panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
 				LocalizationUtils.getTranslation("Specific document operations"), TitledBorder.LEFT, TitledBorder.TOP, null, null));
-
-		JPanel panelSearch = new JPanel();
-		panelSearch.setBackground(Color.WHITE);
-		panelSearch.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Filter",
-				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
 		gl_desktopPane.setHorizontalGroup(
@@ -445,13 +401,12 @@ public class DocumentProcessingView extends JInternalFrame {
 				.addGroup(gl_desktopPane.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE)
-						.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE)
-						.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addGroup(gl_desktopPane.createSequentialGroup()
 							.addComponent(lblLanguage)
 							.addGap(2)
-							.addComponent(comboBoxLanguage, 0, 718, Short.MAX_VALUE)))
+							.addComponent(comboBoxLanguage, 0, 718, Short.MAX_VALUE))
+						.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(panelAllDocs, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_desktopPane.setVerticalGroup(
@@ -461,18 +416,12 @@ public class DocumentProcessingView extends JInternalFrame {
 					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
 						.addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 						.addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGap(28)
 					.addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addGap(113))
+					.addGap(18)
+					.addComponent(panelAllDocs, GroupLayout.PREFERRED_SIZE, 93, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(383, Short.MAX_VALUE))
 		);
-
-		JSplitPane splitPane = new JSplitPane();
-		splitPane.setBackground(Color.WHITE);
-		panelSearch.add(splitPane);
 
 		articleTextField = new CustomTextField(1);
 		articleTextField.setPlaceholder(LocalizationUtils.getTranslation("Insert Article Name"));
@@ -523,87 +472,111 @@ public class DocumentProcessingView extends JInternalFrame {
 				newFilter();
 			}
 		});
-		splitPane.setLeftComponent(articleTextField);
 		articleTextField.setColumns(25);
-
-		splitPane.setRightComponent(authorsTextField);
 		authorsTextField.setColumns(25);
-
-		btnViewDocument = new JButton(LocalizationUtils.getTranslation("View document"));
-		btnViewDocument.setEnabled(false);
-		btnViewDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument d = allLoadedDocuments.get(modelRow);
-					if (d instanceof Conversation) {
-						ChatView view = new ChatView((Conversation) d);
-						view.setVisible(true);
-					}
-					if (d instanceof Document) {
-						DocumentView view = new DocumentView((Document) d);
-						view.setVisible(true);
-					}
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
-
-		btnViewSimilarDocs = new JButton(LocalizationUtils.getTranslation("View similar docs"));
-		btnViewSimilarDocs.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (docTable.getSelectedRow() != -1) {
-					AbstractDocument d = allLoadedDocuments.get(docTable.getSelectedRow());
-					if (d instanceof Document) {
-						PaperSimilarityView view = new PaperSimilarityView(loadedDocuments, (Document) d);
-						view.setVisible(true);
-					} else {
-						JOptionPane.showMessageDialog(desktopPane,
-								"Please select a document (not a conversation) from the list!", "Information",
-								JOptionPane.INFORMATION_MESSAGE);
-					}
-				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please select a document (not a conversation) from the list!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
-		btnViewSimilarDocs.setEnabled(false);
-
-		btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove document"));
-		btnRemoveDocument.setEnabled(false);
 		GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
-		gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(2).addComponent(btnViewDocument).addGap(5)
-						.addComponent(btnViewSimilarDocs).addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(btnAddDocument).addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(btnAddSerializedDocument).addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(btnRemoveDocument).addGap(26)));
-		gl_panelSingleDoc
-				.setVerticalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(5)
-								.addGroup(gl_panelSingleDoc.createParallelGroup(Alignment.BASELINE)
-										.addComponent(btnViewDocument).addComponent(btnViewSimilarDocs)
-										.addComponent(btnAddDocument).addComponent(btnAddSerializedDocument)
-										.addComponent(btnRemoveDocument))));
+		gl_panelSingleDoc.setHorizontalGroup(
+			gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSingleDoc.createSequentialGroup()
+					.addComponent(btnAddSerializedDocument)
+					.addGap(578))
+		);
+		gl_panelSingleDoc.setVerticalGroup(
+			gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSingleDoc.createSequentialGroup()
+					.addGap(5)
+					.addComponent(btnAddSerializedDocument))
+		);
 		panelSingleDoc.setLayout(gl_panelSingleDoc);
-		btnRemoveDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument toRemove = allLoadedDocuments.get(modelRow);
-					loadedDocuments.remove(toRemove);
-					allLoadedDocuments.remove(toRemove);
-					docTableModel.removeRow(modelRow);
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
+
+		btnSimilarityView = new JButton(LocalizationUtils.getTranslation("Similarity View"));
+		btnSimilarityView.setEnabled(false);
+		btnSimilarityView.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (loadedDocuments == null || loadedDocuments.size() == 0) {
+					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, "Please load appropriate documents!",
+							"Error", JOptionPane.WARNING_MESSAGE);
+					return;
 				}
+
+				PaperCorpusSimilarityView view = new PaperCorpusSimilarityView(loadedDocuments);
+				view.setVisible(true);
 			}
 		});
+
+		lblSearchQuery = new JLabel(LocalizationUtils.getTranslation("Find semantically related docs to query") + ":");
+
+		textFieldQuery = new JTextField();
+		textFieldQuery.setColumns(10);
+
+		btnConceptView = new JButton(LocalizationUtils.getTranslation("Concept View"));
+		btnConceptView.setEnabled(false);
+		btnConceptView.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (loadedDocuments == null || loadedDocuments.size() == 0) {
+					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
+							"Please load at least one appropriate document!", "Error", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				PaperConceptView conceptView = new PaperConceptView(TopicModeling.getCollectionTopics(loadedDocuments),
+						"out/concepts_" + new Timestamp(new Date().getTime()) + ".pdf");
+				conceptView.setVisible(true);
+			}
+		});
+
+		btnKeywordsOverlap = new JButton(LocalizationUtils.getTranslation("Keyword-Abstract overlaps"));
+		btnKeywordsOverlap.setEnabled(false);
+		btnKeywordsOverlap.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (loadedDocuments == null || loadedDocuments.size() == 0) {
+					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, "Please load appropriate documents!",
+							"Error", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				PaperKeywordAbstractOverlap view = new PaperKeywordAbstractOverlap(loadedDocuments);
+				view.setVisible(true);
+			}
+		});
+
+		btnSearch = new JButton(LocalizationUtils.getTranslation("Search"));
+		btnSearch.setEnabled(false);
+		btnSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (loadedDocuments == null || loadedDocuments.size() == 0) {
+					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, "Please load appropriate documents!",
+							"Error", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				if (textFieldQuery.getText().length() == 0) {
+					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, "Please input a query string!", "Error",
+							JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				SearchSimilarityView view = new SearchSimilarityView(loadedDocuments, textFieldQuery.getText());
+				view.setVisible(true);
+			}
+		});
+		GroupLayout gl_panelAllDocs = new GroupLayout(panelAllDocs);
+		gl_panelAllDocs.setHorizontalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelAllDocs.createSequentialGroup()
+						.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelAllDocs.createSequentialGroup().addContainerGap()
+										.addComponent(lblSearchQuery).addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(textFieldQuery, GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE))
+						.addGroup(gl_panelAllDocs.createSequentialGroup().addComponent(btnSimilarityView)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnConceptView)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnKeywordsOverlap)))
+						.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch).addContainerGap()));
+		gl_panelAllDocs.setVerticalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelAllDocs.createSequentialGroup().addGap(5)
+						.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(lblSearchQuery)
+								.addComponent(textFieldQuery, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSearch))
+				.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(btnSimilarityView)
+						.addComponent(btnConceptView).addComponent(btnKeywordsOverlap)).addContainerGap()));
+		panelAllDocs.setLayout(gl_panelAllDocs);
 		desktopPane.setLayout(gl_desktopPane);
 
 		setContentPane(desktopPane);
@@ -656,13 +629,15 @@ public class DocumentProcessingView extends JInternalFrame {
 				}
 
 				if (allLoadedDocuments.size() > 0) {
-					btnRemoveDocument.setEnabled(true);
-					btnViewDocument.setEnabled(true);
-					btnViewSimilarDocs.setEnabled(true);
+					btnKeywordsOverlap.setEnabled(true);
+					btnConceptView.setEnabled(true);
+					btnSimilarityView.setEnabled(true);
+					btnSearch.setEnabled(true);
 				} else {
-					btnRemoveDocument.setEnabled(false);
-					btnViewDocument.setEnabled(false);
-					btnViewSimilarDocs.setEnabled(false);
+					btnKeywordsOverlap.setEnabled(false);
+					btnConceptView.setEnabled(false);
+					btnSimilarityView.setEnabled(false);
+					btnSearch.setEnabled(false);
 				}
 
 				docTableModel.fireTableDataChanged();
@@ -717,13 +692,13 @@ public class DocumentProcessingView extends JInternalFrame {
 					}
 
 					if (allLoadedDocuments.size() > 0) {
-						btnRemoveDocument.setEnabled(true);
-						btnViewDocument.setEnabled(true);
-						btnViewSimilarDocs.setEnabled(true);
+						btnKeywordsOverlap.setEnabled(true);
+						btnConceptView.setEnabled(true);
+						btnSimilarityView.setEnabled(true);
 					} else {
-						btnRemoveDocument.setEnabled(false);
-						btnViewDocument.setEnabled(false);
-						btnViewSimilarDocs.setEnabled(false);
+						btnKeywordsOverlap.setEnabled(false);
+						btnConceptView.setEnabled(false);
+						btnSimilarityView.setEnabled(false);
 					}
 
 					docTableModel.fireTableDataChanged();

@@ -2,6 +2,8 @@ package view.models.document;
 
 import javax.swing.table.DefaultTableModel;
 
+import utils.localization.LocalizationUtils;
+
 public class DocumentManagementTableModel extends DefaultTableModel {
 
 	private static final long serialVersionUID = 1730686324860907760L;
@@ -10,12 +12,12 @@ public class DocumentManagementTableModel extends DefaultTableModel {
 			String.class, // Author
 			String.class, // LSA space
 			String.class, // LDA model
-			Boolean.class // is chat?
 	};
 
 	public DocumentManagementTableModel() {
-		super(new Object[][] {}, new String[] { "Title", "Author",
-				"LSA vector space", "LDA model", "Is chat discussion?" });
+		super(new Object[][] {}, new String[] { 
+				LocalizationUtils.getTranslation("Title"), LocalizationUtils.getTranslation("Author"),
+				LocalizationUtils.getTranslation("LSA vector space"), LocalizationUtils.getTranslation("LDA model") });
 	}
 
 	@Override
