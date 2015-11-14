@@ -37,6 +37,7 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
 
+import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
@@ -159,7 +160,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public VerbalizationProcessingView() {
-		setTitle("ReaderBench - Verbalization Processing");
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Verbalization Processing"));
 		setResizable(true);
 		setClosable(true);
 		setMaximizable(true);
@@ -191,7 +192,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		desktopPane.setBackground(Color.WHITE);
 		setContentPane(desktopPane);
 
-		btnAddVerbalization = new JButton("Add verbalization(s)");
+		btnAddVerbalization = new JButton(LocalizationUtils.getTranslation("Add verbalization(s)"));
 		btnAddVerbalization.setEnabled(true);
 		btnAddVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -213,14 +214,14 @@ public class VerbalizationProcessingView extends JInternalFrame {
 					JOptionPane
 							.showMessageDialog(
 									desktopPane,
-									"At least one document must be already loaded in order to be able to start processing verbalizations!",
-									"Information",
+									LocalizationUtils.getTranslation("At least one document must be already loaded in order to be able to start processing verbalizations!"),
+									LocalizationUtils.getTranslation("Information"),
 									JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
 
-		btnRemoveVerbalization = new JButton("Remove verbalization");
+		btnRemoveVerbalization = new JButton(LocalizationUtils.getTranslation("Remove verbalization"));
 		btnRemoveVerbalization.setEnabled(false);
 		btnRemoveVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -231,13 +232,13 @@ public class VerbalizationProcessingView extends JInternalFrame {
 				} else {
 					JOptionPane.showMessageDialog(
 							VerbalizationProcessingView.this,
-							"Please select a row to be deleted!",
+							LocalizationUtils.getTranslation("Please select a row to be deleted!"),
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
 
-		btnViewVerbalization = new JButton("View verbalization");
+		btnViewVerbalization = new JButton(LocalizationUtils.getTranslation("View verbalization"));
 		btnViewVerbalization.setEnabled(false);
 		btnViewVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -316,7 +317,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 			}
 		});
 
-		btnViewDetailedStatistics = new JButton("View detailed statistics");
+		btnViewDetailedStatistics = new JButton(LocalizationUtils.getTranslation("View detailed statistics"));
 		btnViewDetailedStatistics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -332,7 +333,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		btnViewDetailedStatistics.setEnabled(false);
 
 		btnViewCummulativeStatistics = new JButton(
-				"View cummulative statistics");
+				LocalizationUtils.getTranslation("View cummulative statistics"));
 		btnViewCummulativeStatistics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -347,7 +348,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		});
 		btnViewCummulativeStatistics.setEnabled(false);
 
-		btnComprehensionPrediction = new JButton("Comprehension Prediction");
+		btnComprehensionPrediction = new JButton(LocalizationUtils.getTranslation("Comprehension Prediction"));
 		btnComprehensionPrediction.setEnabled(false);
 		btnComprehensionPrediction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
