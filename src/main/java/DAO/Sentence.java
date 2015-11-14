@@ -20,6 +20,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import DAO.discourse.SemanticCohesion;
 import DAO.sentiment.SentimentEntity;
+import DAO.sentiment.SentimentValence;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
@@ -147,18 +148,22 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 					
 					SentimentEntity se = new SentimentEntity();
 					// iterate through SentimentValence.valenceMap to add all sentiments
-					Iterator it = DAO.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
-					logger.info("There are " + DAO.sentiment.SentimentValence.getValenceMap().size() + " sentiments that should be mapped.");
-				    while (it.hasNext()) {
-				        Map.Entry pair = (Map.Entry)it.next();
-				        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
+					logger.info("There are " + SentimentValence.getAllValences().size() + " sentiments that should be mapped.");
+				    for (SentimentValence daoSe : SentimentValence.getAllValences()) {
 				        //System.out.println(pair.getKey() + " = " + pair.getValue());
 				        
 				        // iterate through all words and get that sentiments' value
 				        double wordSentimentSum = 0.0;
 				        double noWordWeights = 0;
 				        logger.info("There are " + getWords().size() + " words in this sentence.");
-				        for (Word w : getWords()) {
+                        double value = getWords().stream()
+                                .mapToDouble(w -> {
+                                    SentimentEntity e = w.getSentiment();
+                                    if (e == null) return 0.;
+                                    Double v = e.get(daoSe);
+                                    return (v == null ? 0. : v);
+                                }).sum() / getWords().size();
+				        /*for (Word w : getWords()) {
 				        	logger.info("Word " + w + " sentiments: " + w.getSentiment());
 							Double wordSentimentScore = w.getSentiment().get(daoSe);
 							if (wordSentimentScore != null) {
@@ -166,10 +171,10 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 								noWordWeights++;
 							}
 						}
-				        
+				        */
 				        // add sentiment entity to the sentence
 				        logger.info("Adding sentiment " + daoSe.getName() + " for sentence " + this.getIndex());
-				        se.add(daoSe, (noWordWeights > 0 ? wordSentimentSum / noWordWeights : 0.0));
+				        se.add(daoSe, value);
 				    }
 				    
 				    // Stanford Valence

@@ -46,13 +46,14 @@ public class SentimentWeights {
 		
 		// load all sentiment valences from database
 		List<pojo.SentimentValence> svs = ValenceDAO.getInstance().findAll();
+        int i = 0, j = 0;
 		for (pojo.SentimentValence sv : svs) {
 			logger.info("Valenta " + (sv.getRage() == true ? " rage: " : " primara: ") + sv.getLabel());
 			// create DAO SentimentValences HashMap for Sentiment Entity initialization 
 			if (!sv.getRage())
-				sentimentGrid.setIndex(sv.getIndexLabel(), sv.getId() - 1);
+				sentimentGrid.setIndex(sv.getIndexLabel(), i++);
 			else
-				sentimentGrid.setIndex(sv.getIndexLabel(), sv.getId() - noPrimarySentiments - 1);
+				sentimentGrid.setIndex(sv.getIndexLabel(), j++);
 		}
 		
 		// load all sentiment valences weights and store them in SentimentGrid

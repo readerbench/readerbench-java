@@ -21,11 +21,13 @@ import java.util.Objects;
 public class SentimentValence {
 	
 	private static final Map<String, SentimentValence> valenceMap;
+    private static final List<SentimentValence> valences = new ArrayList<>();
 	static {
 		Map<String, SentimentValence> valenceMaplocal = new HashMap<>();
-		List<pojo.SentimentValence> valences = ValenceDAO.getInstance().findAll();
-		for (pojo.SentimentValence v : valences) {
+		List<pojo.SentimentValence> valenceEntities = ValenceDAO.getInstance().findAll();
+		for (pojo.SentimentValence v : valenceEntities) {
 			SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
+            valences.add(sv);
 			valenceMaplocal.put(v.getIndexLabel(), sv);
 		}
 		valenceMap = Collections.unmodifiableMap(valenceMaplocal);
@@ -93,7 +95,11 @@ public class SentimentValence {
 	public static SentimentValence get(String index) {
 		return valenceMap.get(index);
 	}
-
+    
+    public static List<SentimentValence> getAllValences() {
+        return valences;
+    }
+ 
     @Override
     public int hashCode() {
         int hash = 7;
