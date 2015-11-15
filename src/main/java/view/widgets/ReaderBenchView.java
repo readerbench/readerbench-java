@@ -48,6 +48,8 @@ import DAO.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import utils.localization.LocalizationUtils;
 import view.events.TCPopupEventQueue;
+import view.widgets.chat.ConversationProcessingView;
+import view.widgets.chat.VCoPEvaluationView;
 import view.widgets.chat.VCoPView;
 import view.widgets.complexity.CorpusEvaluationView;
 import view.widgets.complexity.DocumentEvaluationView;
@@ -56,7 +58,6 @@ import view.widgets.complexity.RunMeasurementsView;
 import view.widgets.document.DocumentManagementView;
 import view.widgets.document.DocumentProcessingView;
 import view.widgets.document.DocumentSemanticSearchView;
-import view.widgets.document.EssayManagementView;
 import view.widgets.selfexplanation.summary.SummaryProcessingView;
 import view.widgets.selfexplanation.verbalization.AnnotateVerbalizationView;
 import view.widgets.selfexplanation.verbalization.CreateVerbalizationView;
@@ -120,11 +121,14 @@ public class ReaderBenchView extends JFrame {
 	private JButton btnVerbaProcessing;
 	private JButton btnSummaryProcessing;
 	
+	// cscl 
+	private JButton btnVCoPProcessing;
 	
 	private JDesktopPane desktopPane;
 	
 	private GroupLayout gl_panelSettingsSpecific;
-	private GroupLayout gl_panelSettingsGeneral;
+	private JButton btnVcopprocessingevaluation;
+	private JButton btnConversationProcessing;
 
 	public ReaderBenchView() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -245,7 +249,7 @@ public class ReaderBenchView extends JFrame {
 
 		btnPreprocessingTrainSemanticModels = new JButton(
 				ResourceBundle
-						.getBundle("utils.localization.messages").getString("ReaderBenchView.btnTrainSemanticModels.text")); //$NON-NLS-1$ //$NON-NLS-2$
+						.getBundle("utils.localization.messages").getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text")); //$NON-NLS-1$ //$NON-NLS-2$
 		btnPreprocessingTrainSemanticModels
 				.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
@@ -509,108 +513,103 @@ public class ReaderBenchView extends JFrame {
 		panelVerbSpecific.setLayout(gl_panelVerbSpecific);
 		panelSelfExplanations.setLayout(new BorderLayout(0, 0));
 		panelSelfExplanations.add(panelVerbSpecific, BorderLayout.CENTER);
-
-		JLabel lblReaderbench = new JLabel();
-		lblReaderbench.setIcon(new ImageIcon("resources/config/RB_logo.png"));
-		lblReaderbench.setForeground(Color.BLACK);
-		lblReaderbench.setFont(new Font("Helvetica", Font.BOLD, 40));
+		
+				JLabel lblReaderbench = new JLabel();
+				lblReaderbench.setIcon(new ImageIcon("resources/config/RB_logo.png"));
+				lblReaderbench.setForeground(Color.BLACK);
+				lblReaderbench.setFont(new Font("Helvetica", Font.BOLD, 40));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_desktopPane
-						.createSequentialGroup()
-						.addContainerGap()
-						.addGroup(
-								gl_desktopPane
-										.createParallelGroup(Alignment.LEADING)
-										.addComponent(tabbedPane,
-												GroupLayout.DEFAULT_SIZE, 1168,
-												Short.MAX_VALUE)
-										.addComponent(lblReaderbench,
-												Alignment.TRAILING))
-						.addContainerGap()));
-		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_desktopPane
-						.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(tabbedPane, GroupLayout.PREFERRED_SIZE,
-								125, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED, 477,
-								Short.MAX_VALUE).addComponent(lblReaderbench)
-						.addContainerGap()));
+		gl_desktopPane.setHorizontalGroup(
+			gl_desktopPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_desktopPane.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_desktopPane.createSequentialGroup()
+							.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1394, Short.MAX_VALUE)
+							.addContainerGap())
+						.addGroup(Alignment.TRAILING, gl_desktopPane.createSequentialGroup()
+							.addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 195, GroupLayout.PREFERRED_SIZE)
+							.addGap(282))))
+		);
+		gl_desktopPane.setVerticalGroup(
+			gl_desktopPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_desktopPane.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(tabbedPane, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE)
+					.addGap(275)
+					.addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(44, Short.MAX_VALUE))
+		);
 
-		JPanel panelAdditional = new JPanel();
-		panelAdditional.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,
+		JPanel panelCSCL = new JPanel();
+		panelCSCL.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null,
 				null));
 		tabbedPane
 				.addTab(ResourceBundle
-						.getBundle("utils.localization.messages").getString("ReaderBenchView.panelAdditional.title"), //$NON-NLS-1$ //$NON-NLS-2$
-						null, panelAdditional, null);
-		panelAdditional.setLayout(new BorderLayout(0, 0));
-
-		JPanel panelSettingsGeneral = new JPanel();
-		panelSettingsGeneral.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "General",
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panelSettingsGeneral.setBackground(Color.WHITE);
-		panelAdditional.add(panelSettingsGeneral, BorderLayout.WEST);
-
-		JButton btnTrainSemanticModels = new JButton(ResourceBundle.getBundle(
-				"utils.localization.messages") //$NON-NLS-1$
-				.getString("ReaderBenchView.btnTrainSemanticModels.text")); //$NON-NLS-1$
-		btnTrainSemanticModels.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						try {
-							SemanticModelsTraining frame = new SemanticModelsTraining();
-							frame.setVisible(true);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
-			}
-		});
-		gl_panelSettingsGeneral = new GroupLayout(panelSettingsGeneral);
-		gl_panelSettingsGeneral.setHorizontalGroup(gl_panelSettingsGeneral
-				.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 200, Short.MAX_VALUE)
-				.addGroup(
-						gl_panelSettingsGeneral
-								.createSequentialGroup()
-								.addContainerGap()
-								.addComponent(btnTrainSemanticModels,
-										GroupLayout.DEFAULT_SIZE, 200,
-										Short.MAX_VALUE).addContainerGap()));
-		gl_panelSettingsGeneral.setVerticalGroup(gl_panelSettingsGeneral
-				.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 92, Short.MAX_VALUE)
-				.addGroup(
-						gl_panelSettingsGeneral
-								.createSequentialGroup()
-								.addComponent(btnTrainSemanticModels,
-										GroupLayout.PREFERRED_SIZE, 27,
-										GroupLayout.PREFERRED_SIZE)
-								.addContainerGap(42, Short.MAX_VALUE)));
-		panelSettingsGeneral.setLayout(gl_panelSettingsGeneral);
+						.getBundle("utils.localization.messages").getString("ReaderBenchView.panelCSCL.title"), //$NON-NLS-1$ //$NON-NLS-2$
+						null, panelCSCL, null);
+		panelCSCL.setLayout(new BorderLayout(0, 0));
 
 		JPanel panelSettingsSpecific = new JPanel();
 		panelSettingsSpecific.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "Specific",
+				EtchedBorder.LOWERED, null, null), "",
 				TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelSettingsSpecific.setBackground(Color.WHITE);
-		panelAdditional.add(panelSettingsSpecific, BorderLayout.CENTER);
+		panelCSCL.add(panelSettingsSpecific, BorderLayout.CENTER);
+		
+		btnVCoPProcessing = new JButton(ResourceBundle
+				.getBundle("utils.localization.messages").getString("ReaderBenchView.btnVCoPProcessing.text")); //$NON-NLS-1$ //$NON-NLS-2$
+		btnVCoPProcessing.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				VCoPView frame = new VCoPView();
+				frame.setVisible(true);
+			}
+		});
+		
+		btnVcopprocessingevaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.btnVcopprocessingevaluation.text")); //$NON-NLS-1$ //$NON-NLS-2$
+		btnVcopprocessingevaluation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				VCoPEvaluationView frame = new VCoPEvaluationView();
+				frame.setVisible(true);
+			}
+		});
+		
+		btnConversationProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.btnConversationProcessing.text")); //$NON-NLS-1$ //$NON-NLS-2$
+		btnConversationProcessing.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ConversationProcessingView frame = new ConversationProcessingView();
+				frame.setVisible(true);
+				desktopPane.add(frame);
+				try {
+					frame.setSelected(true);
+				} catch (PropertyVetoException e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		gl_panelSettingsSpecific = new GroupLayout(panelSettingsSpecific);
-		gl_panelSettingsSpecific.setHorizontalGroup(gl_panelSettingsSpecific
-				.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 940, Short.MAX_VALUE)
-				.addGap(0, 928, Short.MAX_VALUE));
-		gl_panelSettingsSpecific.setVerticalGroup(gl_panelSettingsSpecific
-				.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 92, Short.MAX_VALUE).addGap(0, 69, Short.MAX_VALUE));
+		gl_panelSettingsSpecific.setHorizontalGroup(
+			gl_panelSettingsSpecific.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSettingsSpecific.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(btnConversationProcessing, GroupLayout.PREFERRED_SIZE, 201, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(btnVcopprocessingevaluation, GroupLayout.PREFERRED_SIZE, 152, GroupLayout.PREFERRED_SIZE)
+					.addGap(18)
+					.addComponent(btnVCoPProcessing, GroupLayout.PREFERRED_SIZE, 137, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(863, Short.MAX_VALUE))
+		);
+		gl_panelSettingsSpecific.setVerticalGroup(
+			gl_panelSettingsSpecific.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSettingsSpecific.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panelSettingsSpecific.createParallelGroup(Alignment.BASELINE)
+						.addComponent(btnConversationProcessing)
+						.addComponent(btnVcopprocessingevaluation)
+						.addComponent(btnVCoPProcessing))
+					.addContainerGap(49, Short.MAX_VALUE))
+		);
 		panelSettingsSpecific.setLayout(gl_panelSettingsSpecific);
 		desktopPane.setLayout(gl_desktopPane);
 
@@ -757,6 +756,21 @@ public class ReaderBenchView extends JFrame {
 		this.btnSummaryProcessing.setText(LocalizationUtils
 				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
 						"btnSummaryProcessing"));
+		
+		//cscl
+		this.tabbedPane
+		.setTitleAt(5, LocalizationUtils.getLocalizedString(
+				this.getClass(), LocalizationUtils.TITLE,
+				"panelCSCL"));
+		this.btnVCoPProcessing.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnVCoPProcessing"));
+		this.btnVcopprocessingevaluation.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnVcopprocessingevaluation"));
+		this.btnConversationProcessing.setText(LocalizationUtils
+				.getLocalizedString(this.getClass(), LocalizationUtils.TEXT,
+						"btnConversationProcessing"));
 	}
 
 	public void updateLocale(Locale newLocale) {
