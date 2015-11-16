@@ -148,14 +148,14 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 					
 					SentimentEntity se = new SentimentEntity();
 					// iterate through SentimentValence.valenceMap to add all sentiments
-					logger.info("There are " + SentimentValence.getAllValences().size() + " sentiments that should be mapped.");
+					//logger.info("There are " + SentimentValence.getAllValences().size() + " sentiments that should be mapped.");
 				    for (SentimentValence daoSe : SentimentValence.getAllValences()) {
 				        //System.out.println(pair.getKey() + " = " + pair.getValue());
 				        
 				        // iterate through all words and get that sentiments' value
 				        double wordSentimentSum = 0.0;
 				        double noWordWeights = 0;
-				        logger.info("There are " + getWords().size() + " words in this sentence.");
+				        //logger.info("There are " + getWords().size() + " words in this sentence.");
                         double value = getWords().stream()
                                 .mapToDouble(w -> {
                                     SentimentEntity e = w.getSentiment();
@@ -173,7 +173,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 						}
 				        */
 				        // add sentiment entity to the sentence
-				        logger.info("Adding sentiment " + daoSe.getName() + " for sentence " + this.getIndex());
+				        //logger.info("Adding sentiment " + daoSe.getName() + " for sentence " + this.getIndex());
 				        se.add(daoSe, value);
 				    }
 				    
@@ -225,7 +225,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 			}
 		}
 		
-		logger.info("There are " + getSentimentEntity().getAll().size() + " sentiments added to my sentence.");
+		//logger.info("There are " + getSentimentEntity().getAll().size() + " sentiments added to my sentence.");
 		
 		// write the processedText
 		String processedText = "";
