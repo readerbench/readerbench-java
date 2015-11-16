@@ -1,6 +1,9 @@
 package webService;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -36,6 +39,8 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticSearch.SemanticSearch;
+import services.semanticSearch.SemanticSearchResult;
 import spark.Spark;
 
 class Result implements Comparable<Result> {
@@ -91,10 +96,43 @@ class ResultSentiment {
 	}
 }
 
+class ResultSearch implements Comparable<ResultSearch> {
+
+    private String url;
+    private String content;
+    private double relevance;
+
+    public ResultSearch(String url, String content, double relevance) {
+        this.url = url;
+        this.content = content;
+        this.relevance = relevance;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public double getRelevance() {
+        return relevance;
+    }
+
+    @Override
+    public int compareTo(ResultSearch o) {
+        return (int) Math.signum(o.getRelevance() - this.getRelevance());
+    }
+}
+
 public class ReaderBenchServer {
 
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	public static final int PORT = 5656;
+	
+	public static final double MIN_THRESHOLD = 0.2d;
+    public static final int NO_RESULTS = 20;
 
 	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
 			boolean posTagging) {
@@ -235,6 +273,42 @@ public class ReaderBenchServer {
 
 		return resultsComplexity;
 	}
+	
+	/**
+     * Search for query in documents
+     *
+     * @param documents
+     * @param query
+     * @return List of urls for results
+     */
+    private List<ResultSearch> search(String query, List<AbstractDocument> documents, int maxContentSize) {
+        logger.info("Processign query:" + query);
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        BlockTemplate block = contents.new BlockTemplate();
+        block.setId(0);
+        block.setContent(query);
+        contents.getBlocks().add(block);
+
+        AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(),
+                documents.get(0).getLDA(), documents.get(0).getLanguage(), true, false);
+        queryDoc.computeAll(null, null);
+        queryDoc.setTitleText(query);
+
+        List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD,
+                NO_RESULTS);
+        List<ResultSearch> searchResults = new ArrayList<ResultSearch>();
+        for (SemanticSearchResult r : results) {
+            String content = r.getDoc().getText();
+            if (content.length() > maxContentSize) {
+                content = content.substring(0, maxContentSize);
+                content = content.substring(0, content.lastIndexOf(" ")) + "...";
+            }
+            searchResults.add(
+                    new ResultSearch(r.getDoc().getPath(), content, Formatting.formatNumber(r.getRelevance())));
+        }
+
+        return searchResults;
+    }
 
 	private String convertToXml(QueryResult queryResult) {
 		Serializer serializer = new Persister();
@@ -254,6 +328,12 @@ public class ReaderBenchServer {
 	}
 
 	private String convertToJson(QueryResultSentiment queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
+	private String convertToJson(QueryResultSearch queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -298,6 +378,26 @@ public class ReaderBenchServer {
 			data = new ArrayList<ResultSentiment>();
 		}
 	}
+	
+	@Root(name = "response")
+    private static class QueryResultSearch {
+
+        @Element
+        public boolean success;
+
+        @Element(name = "errormsg")
+        public String errorMsg; // custom error message (optional)
+
+        @Path("data")
+        @ElementList(inline = true, entry = "result")
+        public List<ResultSearch> data; // list of query results (urls)
+
+        QueryResultSearch() {
+            success = true;
+            errorMsg = "";
+            data = new ArrayList<ResultSearch>();
+        }
+    }
 	
 	public void start() {
 		Spark.port(PORT);
@@ -355,23 +455,58 @@ public class ReaderBenchServer {
 			String result = convertToJson(queryResult);
 			return result;
 		});
-		/*Spark.get("/search", (request, response) -> {
+		Spark.get("/search", (request, response) -> {
 
-			// TODO: de modificat sa faca search
 			response.type("application/json");
 
 			String q = request.queryParams("q");
-			String pathToLSA = request.queryParams("lsa");
+			String path = request.queryParams("path");
+			/*String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
-			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
+			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));*/
+			
+			int maxContentSize = Integer.MAX_VALUE;
+            String maxContentSizeStr = request.queryParams("mcs");
+            if (maxContentSizeStr != null) {
+                maxContentSize = Integer.parseInt(maxContentSizeStr);
+            }
 
-			QueryResult queryResult = new QueryResultS();
+			QueryResultSearch queryResult = new QueryResultSearch();
 			//queryResult.data = getComplexityIndices(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+			queryResult.success = true;
+            queryResult.errorMsg = "";
+            queryResult.data = search(q, setDocuments(path), maxContentSize);
 			String result = convertToJson(queryResult);
 			return result;
-		});*/
+		});
 
+	}
+	
+	private static List<AbstractDocument> setDocuments(String path) { // path = "in/test"
+		BasicConfigurator.configure();
+
+        List<AbstractDocument> docs = new ArrayList<AbstractDocument>();
+
+        try {
+        	File dir = new File(URLDecoder.decode("resources/in/" + path));
+	        File[] files = dir.listFiles(new FilenameFilter() {
+	            @Override
+	            public boolean accept(File dir, String name) {
+	                return name.endsWith(".ser");
+	            }
+	        });
+	
+	        for (File file : files) {
+	            Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+	            docs.add(d);
+	        }
+        }
+        catch(Exception e) {
+        	 e.printStackTrace();
+        }
+
+        return docs;
 	}
 
 	public static void main(String[] args) {
