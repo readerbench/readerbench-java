@@ -1,5 +1,6 @@
 package webService;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.StringWriter;
@@ -9,11 +10,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.Node;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
@@ -29,14 +33,18 @@ import DAO.AbstractDocumentTemplate;
 import DAO.AbstractDocumentTemplate.BlockTemplate;
 import DAO.Block;
 import DAO.Sentence;
+import DAO.Word;
+import DAO.discourse.SemanticCohesion;
 import DAO.discourse.Topic;
 import DAO.document.Document;
+import DAO.sentiment.SentimentGrid;
 import DAO.sentiment.SentimentValence;
 import DAO.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
@@ -126,13 +134,103 @@ class ResultSearch implements Comparable<ResultSearch> {
     }
 }
 
+class ResultTopic {
+	
+	private List<ResultNode> nodes;
+	private List<ResultEdge> links;
+	
+	public ResultTopic(List<ResultNode> nodes, List<ResultEdge> links) {
+		this.nodes = nodes;
+		this.links = links;
+	}
+	
+}
+
+class ResultNode implements Comparable<ResultNode> {
+
+	private int id;
+	private String content;
+	private double score;
+	private int group;
+
+	public ResultNode(int id, String content, double score, int group) {
+		super();
+		this.id = id;
+		this.content = content;
+		this.score = score;
+		this.group = group;
+	}
+	
+	public int getId() {
+		return id;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public double getScore() {
+		return score;
+	}
+	
+	public double getGroup() {
+		return group;
+	}
+
+	@Override
+	public int compareTo(ResultNode o) {
+		return (int) Math.signum(o.getScore() - this.getScore());
+	}
+}
+
+class ResultEdge implements Comparable<ResultEdge> {
+
+	private int source;
+	private int target;
+	private double score;
+
+	public ResultEdge(int source, int target, double score) {
+		super();
+		this.source = source;
+		this.target = target;
+		this.score = score;
+	}
+
+	public int getSource() {
+		return source;
+	}
+
+	public int getTarget() {
+		return target;
+	}
+	
+	public double getScore() {
+		return score;
+	}
+
+	@Override
+	public int compareTo(ResultEdge o) {
+		return (int) Math.signum(o.getScore() - this.getScore());
+	}
+}
+
 public class ReaderBenchServer {
 
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
-	public static final int PORT = 5656;
+	public static final int PORT = 8080;
+	
+	private static final double MIN_SIZE = 5;
+	private static final double MAX_SIZE_TOPIC = 20;
+	private static final double MAX_SIZE_INFERRED_CONCEPT = 20;
 	
 	public static final double MIN_THRESHOLD = 0.2d;
     public static final int NO_RESULTS = 20;
+    public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
+    public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
 
 	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
 			boolean posTagging) {
@@ -164,15 +262,101 @@ public class ReaderBenchServer {
 	 * @param query
 	 * @return List of keywords and corresponding relevance scores for results
 	 */
-	private List<Result> getTopics(String query, String pathToLSA, String pathToLDA, String lang, boolean posTagging) {
-		List<Result> results = new ArrayList<Result>();
+	private ResultTopic getTopics(String query, String pathToLSA, String pathToLDA, String lang, boolean posTagging, double threshold) {
+		
+		List<ResultNode> nodes = new ArrayList<ResultNode>();
+		List<ResultEdge> links = new ArrayList<ResultEdge>();
 		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
-		for (Topic t : queryDoc.getTopics()) {
-			results.add(new Result(t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance())));
-		}
-		return results;
-	}
+		
+		List<Topic> topics = queryDoc.getTopics();
+				
+		// build connected graph
+		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
+		// build nodes
+		Map<Word, Double> nodeSizes = new TreeMap<Word, Double>(); 
+		Map<Word, Integer> nodeGroups = new TreeMap<Word, Integer>();
+		SentimentGrid<Double> edges = new SentimentGrid<>(topics.size(), topics.size());
+		Map<Word, Integer> nodeIndexes = new TreeMap<Word, Integer>();
 
+		for (Topic t : topics) {
+			visibleConcepts.put(t.getWord(), false);
+		}
+
+		// determine similarities
+		for (Word w1 : visibleConcepts.keySet()) {
+			for (Word w2 : visibleConcepts.keySet()) {
+				double lsaSim = 0;
+				double ldaSim = 0;
+				if (queryDoc.getLSA() != null)
+					lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
+				if (queryDoc.getLDA() != null)
+					ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
+				double sim = SemanticCohesion.getAggregatedSemanticMeasure(
+						lsaSim, ldaSim);
+				if (!w1.equals(w2) && sim >= threshold) {
+					visibleConcepts.put(w1, true);
+					visibleConcepts.put(w2, true);
+				}
+			}
+		}
+
+		// determine optimal sizes
+		double min = Double.MAX_VALUE, max = Double.MIN_VALUE;
+		for (Topic t : topics) {
+			if (visibleConcepts.get(t.getWord()) && t.getRelevance() >= 0) {
+				min = Math.min(min, Math.log(1 + t.getRelevance()));
+				max = Math.max(max, Math.log(1 + t.getRelevance()));
+			}
+		}
+
+		int i = 0, j;
+		for (Topic t : topics) {
+			if (visibleConcepts.get(t.getWord())) {
+				double nodeSize = 0;
+				if (max != min && t.getRelevance() >= 0) {
+					nodeSize = (MIN_SIZE + (Math.log(1 + t
+											.getRelevance()) - min)
+											/ (max - min)
+											* (MAX_SIZE_TOPIC - MIN_SIZE));
+				} else {
+					nodeSize = MIN_SIZE;
+				}
+				nodeIndexes.put(t.getWord(), i);
+				nodes.add(new ResultNode(i++, t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance()), 1));
+			}
+		}
+
+		// determine similarities
+		i = 0; j = 0;
+		for (Word w1 : visibleConcepts.keySet()) {
+			edges.setIndex(w1.toString(), i++);
+			for (Word w2 : visibleConcepts.keySet()) {
+				edges.setIndex(w2.toString(), j++);
+				if (!w1.equals(w2) && visibleConcepts.get(w1)
+						&& visibleConcepts.get(w2)) {
+					double lsaSim = 0;
+					double ldaSim = 0;
+					if (queryDoc.getLSA() != null) {
+						lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
+					}
+					if (queryDoc.getLDA() != null) {
+						ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
+					}
+					double sim = SemanticCohesion.getAggregatedSemanticMeasure(
+							lsaSim, ldaSim);
+					if (sim >= threshold) {
+						double distance = Double.MAX_VALUE;
+						if (sim > .9) distance = 1;
+						else distance = (1f - sim) * 10;
+						links.add(new ResultEdge(nodeIndexes.get(w1), nodeIndexes.get(w2), distance));
+					}
+				}
+			}
+		}
+		
+		return new ResultTopic(nodes, links);
+	}
+	
 	/**
 	 * Get sentiment values for the entire document and for each paragraph
 	 *
@@ -338,7 +522,13 @@ public class ReaderBenchServer {
 		String json = gson.toJson(queryResult);
 		return json;
 	}
-
+	
+	private String convertToJson(QueryResultTopic queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
 	@Root(name = "response")
 	private static class QueryResult {
 
@@ -399,6 +589,26 @@ public class ReaderBenchServer {
         }
     }
 	
+	@Root(name = "response")
+	private static class QueryResultTopic {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultTopic data; // list of query results (urls)
+
+		private QueryResultTopic() {
+			success = true;
+			errorMsg = "";
+			data = new ResultTopic(null, null);
+		}
+	}
+	
 	public void start() {
 		Spark.port(PORT);
 		Spark.get("/", (request, response) -> {
@@ -417,9 +627,10 @@ public class ReaderBenchServer {
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
+			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
-			QueryResult queryResult = new QueryResult();
-			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+			QueryResultTopic queryResult = new QueryResultTopic();
+			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
 			String result = convertToJson(queryResult);
 			//return Charset.forName("UTF-8").encode(result);
 			return result;
