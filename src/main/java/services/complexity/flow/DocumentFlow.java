@@ -48,7 +48,8 @@ public class DocumentFlow {
 						}
 					}
 				}
-				graph[i][maxIndex] = maxVal;
+				if (maxIndex != -1)
+                    graph[i][maxIndex] = maxVal;
 			}
 			break;
 
