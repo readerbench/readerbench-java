@@ -149,15 +149,15 @@ class ResultTopic {
 class ResultNode implements Comparable<ResultNode> {
 
 	private int id;
-	private String content;
-	private double score;
+	private String name;
+	private double value;
 	private int group;
 
-	public ResultNode(int id, String content, double score, int group) {
+	public ResultNode(int id, String name, double value, int group) {
 		super();
 		this.id = id;
-		this.content = content;
-		this.score = score;
+		this.name = name;
+		this.value = value;
 		this.group = group;
 	}
 	
@@ -165,16 +165,16 @@ class ResultNode implements Comparable<ResultNode> {
 		return id;
 	}
 
-	public String getContent() {
-		return content;
+	public String getName() {
+		return name;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public double getScore() {
-		return score;
+	public double getValue() {
+		return value;
 	}
 	
 	public double getGroup() {
@@ -183,7 +183,7 @@ class ResultNode implements Comparable<ResultNode> {
 
 	@Override
 	public int compareTo(ResultNode o) {
-		return (int) Math.signum(o.getScore() - this.getScore());
+		return (int) Math.signum(o.getValue() - this.getValue());
 	}
 }
 
