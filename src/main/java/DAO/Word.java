@@ -27,9 +27,11 @@ import org.apache.log4j.Logger;
  * @author Mihai Dascalu
  */
 public class Word implements Comparable<Word>, Serializable {
-	
+
 	static Logger logger = Logger.getLogger(CohesionGraph.class);
-	
+
+	public static final String WORD_ASSOCIATION = "<>";
+
 	private static final long serialVersionUID = -3809934014813200184L;
 
 	private int blockIndex;// the number of the block the word is part of
@@ -54,8 +56,7 @@ public class Word implements Comparable<Word>, Serializable {
 
 	private transient SentimentEntity sentiment;
 
-	public Word(String text, String lemma, String stem, String POS, String NE,
-			Lang lang) {
+	public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
 		this.text = text;
 		this.lemma = lemma;
 		this.stem = stem;
@@ -63,22 +64,23 @@ public class Word implements Comparable<Word>, Serializable {
 		this.NE = NE;
 		this.language = lang;
 		this.readingStrategies = new boolean[ReadingStrategies.NO_READING_STRATEGIES];
-		//loadSentimentEntity();
+		// loadSentimentEntity();
 	}
-	
+
 	private void loadSentimentEntity() {
 		pojo.Word word = WordDAO.getInstance().findByLabel(text);
-		if (word == null) return; // sentiment entity gol - nu avem info despre cuvant
+		if (word == null)
+			return; // sentiment entity gol - nu avem info despre cuvant
 		pojo.SentimentEntity se = word.getFkSentimentEntity();
-		if (se == null) return;
+		if (se == null)
+			return;
 		sentiment = new SentimentEntity();
 		for (EntityXValence exv : se.getEntityXValenceList()) {
 			sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
 		}
 	}
 
-	public Word(String text, String lemma, String stem, String POS, String NE,
-			LSA lsa, LDA lda, Lang lang) {
+	public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda, Lang lang) {
 		this(text, lemma, stem, POS, NE, lang);
 		this.lsa = lsa;
 		this.lda = lda;
@@ -91,24 +93,22 @@ public class Word implements Comparable<Word>, Serializable {
 		}
 	}
 
-	public Word(String text, String lemma, String stem, String POS, String NE,
-			LSA lsa, LDA lda, SentimentEntity sentiment, Lang lang) {
+	public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda,
+			SentimentEntity sentiment, Lang lang) {
 		this(text, lemma, stem, POS, NE, lsa, lda, lang);
 		this.sentiment = sentiment;
 	}
 
-	public Word(int blockIndex, int utteranceIndex, String text, String lemma,
-			String stem, String POS, String NE, LSA lsa, LDA lda, Lang lang) {
+	public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
+			LSA lsa, LDA lda, Lang lang) {
 		this(text, lemma, stem, POS, NE, lsa, lda, lang);
 		this.blockIndex = blockIndex;
 		this.utteranceIndex = utteranceIndex;
 	}
 
-	public Word(int blockIndex, int utteranceIndex, String text, String lemma,
-			String stem, String POS, String NE, LSA lsa, LDA lda,
-			SentimentEntity sentiment, Lang lang) {
-		this(blockIndex, utteranceIndex, text, lemma, stem, POS, NE, lsa, lda,
-				lang);
+	public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
+			LSA lsa, LDA lda, SentimentEntity sentiment, Lang lang) {
+		this(blockIndex, utteranceIndex, text, lemma, stem, POS, NE, lsa, lda, lang);
 		this.sentiment = sentiment;
 	}
 
@@ -117,11 +117,9 @@ public class Word implements Comparable<Word>, Serializable {
 		if (concept.indexOf("_") > 0) {
 			String word = concept.substring(0, concept.indexOf("_"));
 			String POS = concept.substring(concept.indexOf("_") + 1);
-			w = new Word(word, word, Stemmer.stemWord(word, lang), POS, null,
-					lang);
+			w = new Word(word, word, Stemmer.stemWord(word, lang), POS, null, lang);
 		} else {
-			w = new Word(concept, concept, Stemmer.stemWord(concept, lang),
-					null, null, lang);
+			w = new Word(concept, concept, Stemmer.stemWord(concept, lang), null, null, lang);
 		}
 		return w;
 	}
@@ -131,8 +129,7 @@ public class Word implements Comparable<Word>, Serializable {
 			return Double.MAX_VALUE;
 		} else {
 			LexicalChain chain = word.getLexicalChainLink().getLexicalChain();
-			return chain.getDistance(word.getLexicalChainLink(),
-					word.getLexicalChainLink());
+			return chain.getDistance(word.getLexicalChainLink(), word.getLexicalChainLink());
 		}
 	}
 
@@ -145,16 +142,13 @@ public class Word implements Comparable<Word>, Serializable {
 	}
 
 	public boolean partOfSameLexicalChain(Word word) {
-		if (word.getLexicalChainLink() == null
-				|| word.getLexicalChainLink().getLexicalChain() == null
-				|| lexicalChainLink == null
-				|| lexicalChainLink.getLexicalChain() == null) {
+		if (word.getLexicalChainLink() == null || word.getLexicalChainLink().getLexicalChain() == null
+				|| lexicalChainLink == null || lexicalChainLink.getLexicalChain() == null) {
 			// some words do not have a lexical chain link associated since they
 			// were not found in WordNet
 			return false;
 		}
-		return lexicalChainLink.getLexicalChain().equals(
-				word.getLexicalChainLink().getLexicalChain());
+		return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
 	}
 
 	public int getBlockIndex() {
@@ -289,15 +283,13 @@ public class Word implements Comparable<Word>, Serializable {
 	public boolean equals(Object obj) {
 		Word w = (Word) obj;
 		if (this.getPOS() != null && w.getPOS() != null)
-			return this.getLemma().equals(w.getLemma())
-					&& this.getPOS().equals(w.getPOS());
+			return this.getLemma().equals(w.getLemma()) && this.getPOS().equals(w.getPOS());
 		return this.getLemma().equals(w.getLemma());
 	}
 
 	@Override
 	public String toString() {
-		return this.text + "(" + this.lemma + ", " + this.stem + ", "
-				+ this.POS + ")";
+		return this.text + "(" + this.lemma + ", " + this.stem + ", " + this.POS + ")";
 	}
 
 	public String getExtendedLemma() {
@@ -310,23 +302,23 @@ public class Word implements Comparable<Word>, Serializable {
 	@Override
 	public int compareTo(Word o) {
 		if (this.getPOS() != null && o.getPOS() != null)
-			return (this.getLemma() + "_" + this.getPOS()).compareTo(o
-					.getLemma() + "_" + o.getPOS());
+			return (this.getLemma() + "_" + this.getPOS()).compareTo(o.getLemma() + "_" + o.getPOS());
 		return this.getLemma().compareTo(o.getLemma());
 	}
 
 	public SentimentEntity getSentiment() {
 		if (sentiment == null) {
-			//logger.info("Pentru cuvantul " + this + " nu avem initializate sentimentele");
+			// logger.info("Pentru cuvantul " + this + " nu avem initializate
+			// sentimentele");
 			loadSentimentEntity();
 		}
-		//logger.info("Pentru cuvantul " + this + " avem initializate sentimentele");
+		// logger.info("Pentru cuvantul " + this + " avem initializate
+		// sentimentele");
 		return sentiment;
 	}
 
 	public void setSentiment(SentimentEntity sentimentEntity) {
 		this.sentiment = sentimentEntity;
 	}
-	
-	
+
 }

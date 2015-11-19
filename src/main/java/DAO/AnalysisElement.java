@@ -269,8 +269,7 @@ public abstract class AnalysisElement implements Serializable {
 	}
 
 	/**
-	 * TODO: e ok explicatia?
-	 * @return score for the analysis element 
+	 * @return initial score for the analysis element 
 	 */
 	public double getIndividualScore() {
 		return individualScore;
@@ -285,8 +284,7 @@ public abstract class AnalysisElement implements Serializable {
 	}
 
 	/**
-	 * TODO: e ok explicatia?
-	 * @return total score
+	 * @return total score after augmentation from the cohesion graph
 	 */
 	public double getOverallScore() {
 		return overallScore;

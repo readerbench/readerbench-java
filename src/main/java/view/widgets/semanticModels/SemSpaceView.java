@@ -30,6 +30,7 @@ import org.gephi.data.attributes.api.AttributeController;
 import org.gephi.data.attributes.api.AttributeModel;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
 import org.gephi.preview.api.PreviewController;
@@ -55,7 +56,14 @@ import services.semanticModels.LDA.LDA;
 public class SemSpaceView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	public static final Color COLOR_ORIGINAL_CONCEPT = new Color(176, 46, 46);
+
 	static Logger logger = Logger.getLogger(SemSpaceView.class);
+
+	public static final int MIN_NODE_SIZE = 5;
+	public static final int MAX_NODE_SIZE = 40;
+	public static final int MIN_LABEL_SIZE = 1;
+	public static final int MAX_LABEL_SIZE = 5;
 
 	private ISemanticModel semModel = null;
 	private JSplitPane viewSplitPane = null;
@@ -117,13 +125,6 @@ public class SemSpaceView extends JFrame {
 			lsaProc.buildGraph(graph, graphModel, wordTextField.getText(), threshold, depth);
 			logger.info(
 					wordTextField.getText() + " - nodes: " + graph.getNodeCount() + " edges: " + graph.getEdgeCount());
-			// Iterate over nodes
-			// for (Node n : graph.getNodes()) {
-			// Node[] neighbors = graph.getNeighbors(n).toArray();
-			// logger.info(n.getNodeData().getLabel() + " has " +
-			// neighbors.length
-			// + " neighbors");
-			// }
 		}
 
 		// Rank color by Degree
@@ -133,7 +134,7 @@ public class SemSpaceView extends JFrame {
 		AbstractColorTransformer<?> colorTransformer = (AbstractColorTransformer<?>) rankingController.getModel()
 				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_COLOR);
 
-		colorTransformer.setColors(new Color[] { new Color(0xD6D6D6), new Color(0x858585) });
+		colorTransformer.setColors(new Color[] { new Color(0x9C9C9C), new Color(0xEDEDED) });
 		rankingController.transform(degreeRanking, colorTransformer);
 
 		// Get Centrality
@@ -147,17 +148,28 @@ public class SemSpaceView extends JFrame {
 				centralityColumn.getId());
 		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
 				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
+		sizeTransformer.setMinSize(MIN_NODE_SIZE);
+		sizeTransformer.setMaxSize(MAX_NODE_SIZE);
 		rankingController.transform(centralityRanking, sizeTransformer);
+
+		//augment the central node and make it more visible
+		for (Node n : graph.getNodes()) {
+			if (n.getNodeData().getLabel().equals(wordTextField.getText())) {
+				n.getNodeData().setSize(MAX_NODE_SIZE);
+				n.getNodeData().setColor((float) (COLOR_ORIGINAL_CONCEPT.getRed()) / 256,
+						(float) (COLOR_ORIGINAL_CONCEPT.getGreen()) / 256,
+						(float) (COLOR_ORIGINAL_CONCEPT.getBlue()) / 256);
+				break;
+			}
+		}
 
 		// Rank label size - set a multiplier size
 		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
 				centralityColumn.getId());
 		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
 				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
-		labelSizeTransformer.setMinSize(1);
-		labelSizeTransformer.setMaxSize(5);
+		labelSizeTransformer.setMinSize(MIN_LABEL_SIZE);
+		labelSizeTransformer.setMaxSize(MAX_LABEL_SIZE);
 		rankingController.transform(centralityRanking2, labelSizeTransformer);
 
 		// Preview configuration
@@ -408,7 +420,7 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("in/HDP/grade0", Lang.eng));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);

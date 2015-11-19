@@ -284,9 +284,19 @@ public class SpaceStatistics {
 
 			for (Word word1 : comp.getWordAssociations().keySet()) {
 				for (Word word2 : comp.getWordAssociations().get(word1).keySet()) {
-					out.write("\n" + word1.getLemma() + "," + word2.getLemma());
+					String outputString = "\n" + word1.getLemma() + "," + word2.getLemma();
+					boolean viableEntry = true;
 					for (SpaceStatistics space : corpora) {
-						out.write("," + space.getLDA().getSimilarity(word1, word2));
+						double similarity = space.getLDA().getSimilarity(word1, word2);
+						if (similarity > 0) {
+							outputString += "," + similarity;
+						} else {
+							viableEntry = false;
+							break;
+						}
+					}
+					if (viableEntry) {
+						out.write(outputString);
 					}
 				}
 			}
@@ -333,16 +343,16 @@ public class SpaceStatistics {
 		// Lang.eng));
 		// ss.buildWordDistances();
 		// ss.computeGraphStatistics();
-		int initialGrade = 1;
+		int initialGrade = 12;
 		SpaceStatistics baseline = new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + initialGrade, Lang.eng));
 		List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
 
 		corpora.add(baseline);
-		for (int i = initialGrade + 1; i <= 12; i++) {
+		for (int i = initialGrade - 1; i > 0; i--) {
 			corpora.add(new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + i, Lang.eng)));
 		}
 
-		compareSpaces("in/HDP/comparison HDP 1+.csv", corpora);
+		compareSpaces("in/HDP/comparison HDP 12-.csv", corpora);
 
 		compareSpaces("resources/config/LSA/word_associations_en.txt", 3, "in/HDP/comparison HDP Nelson.csv", corpora);
 	}

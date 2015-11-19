@@ -14,15 +14,12 @@ import java.io.OutputStreamWriter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import services.commons.TextPreprocessing;
-import services.nlp.listOfWords.Dictionary;
-import services.semanticModels.LSA.LSA;
 import DAO.AbstractDocument;
 import DAO.AbstractDocumentTemplate;
 import DAO.AbstractDocumentTemplate.BlockTemplate;
@@ -31,6 +28,12 @@ import DAO.Sentence;
 import DAO.Word;
 import DAO.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import services.commons.TextPreprocessing;
+import services.nlp.lemmatizer.StaticLemmatizer;
+import services.nlp.listOfWords.Dictionary;
+import services.semanticModels.LSA.LSA;
 
 public class PreProcessing {
 	static Logger logger = Logger.getLogger(PreProcessing.class);
@@ -51,6 +54,25 @@ public class PreProcessing {
 					no_words_to_write++;
 					document.add(w);
 				}
+				// include semantic graph dependencies as word associations
+				SemanticGraph dependencies = s.getDependencies();
+				if (s.getDependencies() != null) {
+					for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
+						String dependent = edge.getDependent().word().toLowerCase();
+						Word w1 = Word.getWordFromConcept(dependent, d.getLanguage());
+						w1.setLemma(StaticLemmatizer.lemmaStatic(dependent, d.getLanguage()));
+
+						String governor = edge.getGovernor().word().toLowerCase();
+						Word w2 = Word.getWordFromConcept(governor, d.getLanguage());
+						w2.setLemma(StaticLemmatizer.lemmaStatic(governor, d.getLanguage()));
+						// GrammaticalRelation relation = edge.getRelation();
+						if (s.getWords().contains(w1) && s.getWords().contains(w2)) {
+							String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
+							document.add(new Word(association, association, association, null, null, d.getLanguage()));
+						}
+					}
+				}
+
 				document.add(new Word(".", ".", ".", null, null, d.getLanguage()));
 			}
 			if (no_words_to_write >= noMinWordPerDoc) {
