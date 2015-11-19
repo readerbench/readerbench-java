@@ -227,7 +227,7 @@ public class SemanticModelsTraining extends JFrame {
 	public SemanticModelsTraining() {
 		setResizable(false);
 		setTitle(LocalizationUtils.getTranslation("Semantic Models Training"));
-		
+
 		setBounds(100, 100, 450, 240);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
@@ -290,15 +290,17 @@ public class SemanticModelsTraining extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (textFieldInput.getText().equals("")) {
 					JOptionPane.showMessageDialog(SemanticModelsTraining.this,
-							LocalizationUtils.getTranslation("Please select an appropriate input folder to be preprocessed") + "!", "Error",
-							JOptionPane.WARNING_MESSAGE);
+							LocalizationUtils.getTranslation(
+									"Please select an appropriate input folder to be preprocessed") + "!",
+							"Error", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				File input = new File(textFieldInput.getText());
 				if (textFieldOutput.getText().equals("")) {
 					JOptionPane.showMessageDialog(SemanticModelsTraining.this,
-							LocalizationUtils.getTranslation("Please select an appropriate output file to save the preprocessing results"), "Error",
-							JOptionPane.WARNING_MESSAGE);
+							LocalizationUtils.getTranslation(
+									"Please select an appropriate output file to save the preprocessing results"),
+							"Error", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				Lang lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLanguage.getSelectedItem()));
@@ -392,7 +394,8 @@ public class SemanticModelsTraining extends JFrame {
 		textFieldLSAFile.setText("resources/config/LSA");
 		textFieldLSAFile.setColumns(10);
 
-		JLabel lblTxtOnly = new JLabel("* " + LocalizationUtils.getTranslation("Only a single TXT file is used for building the TermDoc matrix"));
+		JLabel lblTxtOnly = new JLabel("* "
+				+ LocalizationUtils.getTranslation("Only a single TXT file is used for building the TermDoc matrix"));
 		lblTxtOnly.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
 		JButton btnLSAFile = new JButton("...");
@@ -582,7 +585,8 @@ public class SemanticModelsTraining extends JFrame {
 		textFieldLDADirectory.setText("resources/config/LDA");
 		textFieldLDADirectory.setColumns(10);
 
-		JLabel lblAllTxt = new JLabel("* " + LocalizationUtils.getTranslation("All TXT files within the provided directory will be taken into consideration"));
+		JLabel lblAllTxt = new JLabel("* " + LocalizationUtils
+				.getTranslation("All TXT files within the provided directory will be taken into consideration"));
 		lblAllTxt.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
 		JLabel lblLDALanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");

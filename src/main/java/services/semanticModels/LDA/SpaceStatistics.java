@@ -34,6 +34,7 @@ import org.openide.util.Lookup;
 import DAO.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
+import services.semanticModels.CompareResults;
 
 public class SpaceStatistics {
 	private static final double MINIMUM_IMPOSED_THRESHOLD = 0.3d;
@@ -45,7 +46,7 @@ public class SpaceStatistics {
 	private List<Connection> relevantSimilarities;
 
 	public SpaceStatistics(LDA lda) {
-		logger.info("Building statistics for " + lda.getPath() + "...");
+		logger.info("Loading " + lda.getPath() + "...");
 		this.lda = lda;
 		this.noWords = lda.getWordProbDistributions().size();
 
@@ -210,28 +211,93 @@ public class SpaceStatistics {
 	 * Compares all pairs of concepts from the baseline to all subsequent
 	 * corpora
 	 * 
+	 * The first space is the baseline
+	 * 
 	 * @param baseline
 	 * @param corpora
 	 */
-	public static void compareSpaces(String pathToOutput, SpaceStatistics baseline, List<SpaceStatistics> corpora) {
-		baseline.buildWordDistances();
-		logger.info("Writing comparisons");
+	public static void compareSpaces(String pathToOutput, List<SpaceStatistics> corpora) {
+		corpora.get(0).buildWordDistances();
+		logger.info("Writing comparisons based on baseline corpus ...");
 		File output = new File(pathToOutput);
 
 		try {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
 					32768);
-			out.write("Word 1, Word 2, Initial similarity");
+			out.write("Word 1, Word 2");
 			for (SpaceStatistics space : corpora) {
 				out.write("," + space.getLDA().getPath());
 			}
 
-			for (Connection c : baseline.getRelevantSimilarities()) {
-				out.write("\n" + c.getWord1() + "," + c.getWord2() + "," + c.getSimilarity());
-				for (SpaceStatistics space : corpora) {
-					out.write("," + space.getLDA().getSimilarity(
-							Word.getWordFromConcept(c.getWord1(), baseline.getLDA().getLanguage()),
-							Word.getWordFromConcept(c.getWord2(), baseline.getLDA().getLanguage())));
+			for (Connection c : corpora.get(0).getRelevantSimilarities()) {
+				if (c.getSimilarity() > 0) {
+					String outputString = "\n" + c.getWord1() + "," + c.getWord2();
+					boolean viableEntry = true;
+					for (SpaceStatistics space : corpora) {
+						double similarity = space.getLDA().getSimilarity(
+								Word.getWordFromConcept(c.getWord1(), space.getLDA().getLanguage()),
+								Word.getWordFromConcept(c.getWord2(), space.getLDA().getLanguage()));
+						if (similarity > 0) {
+							outputString += "," + similarity;
+						} else {
+							viableEntry = false;
+							break;
+						}
+					}
+					if (viableEntry) {
+						out.write(outputString);
+					}
+				}
+			}
+			out.close();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Compares all pairs of norms from the baseline to all subsequent corpora
+	 * 
+	 * @param corpora
+	 */
+	public static void compareSpaces(String pathToInputNorms, int countMax, String pathToOutput,
+			List<SpaceStatistics> corpora) {
+		logger.info("Loading frequent word associations ...");
+		CompareResults comp = new CompareResults();
+		comp.initialLoad(pathToInputNorms, corpora.get(0).getLDA().getLanguage(), countMax);
+
+		logger.info("Writing comparisons for frequent word associations ...");
+		File output = new File(pathToOutput);
+
+		try {
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
+					32768);
+			out.write("Word 1, Word 2");
+			for (SpaceStatistics space : corpora) {
+				out.write("," + space.getLDA().getPath());
+			}
+
+			for (Word word1 : comp.getWordAssociations().keySet()) {
+				for (Word word2 : comp.getWordAssociations().get(word1).keySet()) {
+					String outputString = "\n" + word1.getLemma() + "," + word2.getLemma();
+					boolean viableEntry = true;
+					for (SpaceStatistics space : corpora) {
+						double similarity = space.getLDA().getSimilarity(word1, word2);
+						if (similarity > 0) {
+							outputString += "," + similarity;
+						} else {
+							viableEntry = false;
+							break;
+						}
+					}
+					if (viableEntry) {
+						out.write(outputString);
+					}
 				}
 			}
 			out.close();
@@ -277,14 +343,18 @@ public class SpaceStatistics {
 		// Lang.eng));
 		// ss.buildWordDistances();
 		// ss.computeGraphStatistics();
-		int initialGrade = 2;
+		int initialGrade = 12;
 		SpaceStatistics baseline = new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + initialGrade, Lang.eng));
 		List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
 
-		for (int i = initialGrade + 1; i <= 12; i++) {
+		corpora.add(baseline);
+		for (int i = initialGrade - 1; i > 0; i--) {
 			corpora.add(new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + i, Lang.eng)));
 		}
-		compareSpaces("in/HDP/comparison.csv", baseline, corpora);
+
+		compareSpaces("in/HDP/comparison HDP 12-.csv", corpora);
+
+		compareSpaces("resources/config/LSA/word_associations_en.txt", 3, "in/HDP/comparison HDP Nelson.csv", corpora);
 	}
 
 }

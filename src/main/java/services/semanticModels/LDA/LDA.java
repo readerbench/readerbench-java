@@ -136,24 +136,24 @@ public class LDA implements ISemanticModel, Serializable {
 		// remove stopwords
 		switch (language) {
 		case fr:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_fr.txt"), "UTF-8", false,
-					false, false));
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_fr.txt"),
+					"UTF-8", false, false, false));
 			break;
 		case it:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_it.txt"), "UTF-8", false,
-					false, false));
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_it.txt"),
+					"UTF-8", false, false, false));
 			break;
 		case ro:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_ro.txt"), "UTF-8", false,
-					false, false));
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_ro.txt"),
+					"UTF-8", false, false, false));
 			break;
 		case es:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_es.txt"), "UTF-8", false,
-					false, false));
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_es.txt"),
+					"UTF-8", false, false, false));
 			break;
 		default:
-			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_en.txt"), "UTF-8", false,
-					false, false));
+			pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_en.txt"),
+					"UTF-8", false, false, false));
 		}
 
 		// Rather than storing tokens as strings, convert
@@ -348,6 +348,8 @@ public class LDA implements ISemanticModel, Serializable {
 
 	public static double getSimilarity(double[] prob1, double[] prob2) {
 		if (prob1 == null || prob2 == null)
+			return 0;
+		if (VectorAlgebra.avg(prob1) == 0 || VectorAlgebra.avg(prob2) == 0)
 			return 0;
 		double sim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
 		if (sim >= 0 && sim <= 1)

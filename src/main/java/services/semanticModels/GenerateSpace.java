@@ -12,6 +12,7 @@ import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 
 import DAO.Word;
+import services.commons.Formatting;
 
 public class GenerateSpace {
 	static Logger logger = Logger.getLogger(GenerateSpace.class);
@@ -37,6 +38,8 @@ public class GenerateSpace {
 		graph.addNode(node);
 		addedNodes.add(node);
 		existingNodes.put(word, addedNodes.size() - 1);
+		int noNodes = 1;
+		double s0 = 0, s1 = 0, s2 = 0;
 
 		if (semSpace.getWordSet().contains(word)) {
 			while (!currentProcessing.isEmpty()) {
@@ -55,14 +58,19 @@ public class GenerateSpace {
 								currentProcessing.add(to);
 								existingNodes.put(to, addedNodes.size() - 1);
 								depthNodes.put(to, depthNodes.get(crt) + 1);
+								noNodes++;
 							}
 							// add edge
 							Edge e = graphModel.factory().newEdge(addedNodes.get(existingNodes.get(crt)),
 									addedNodes.get(existingNodes.get(to)));
 							e.setWeight(1.0f - dist);
 							e.getEdgeData().setLabel(dist + "");
-							if (!graph.contains(e))
+							if (!graph.contains(e)) {
 								graph.addEdge(e);
+								s0++;
+								s1 += dist;
+								s2 += Math.pow(dist, 2);
+							}
 						}
 					}
 				} else {
@@ -78,8 +86,13 @@ public class GenerateSpace {
 											addedNodes.get(existingNodes.get(to)));
 									e.setWeight(1.0f - dist);
 									e.getEdgeData().setLabel(dist + "");
-									if (!graph.contains(e))
+
+									if (!graph.contains(e)) {
 										graph.addEdge(e);
+										s0++;
+										s1 += dist;
+										s2 += Math.pow(dist, 2);
+									}
 								}
 							}
 						}
@@ -87,5 +100,12 @@ public class GenerateSpace {
 				}
 			}
 		}
+		double mean = 0, stdev = 0;
+		if (s0 != 0) {
+			mean = s1 / s0;
+			stdev = Math.sqrt(s0 * s2 - Math.pow(s1, 2)) / s0;
+		}
+		logger.info("No nodes:\t" + noNodes + "\tNo edges:\t" + ((int) s0) + "\tAverage similarity:\t"
+				+ Formatting.formatNumber(mean) + "\tStdev similarity:\t" + Formatting.formatNumber(stdev));
 	}
 }
