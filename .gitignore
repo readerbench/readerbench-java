@@ -40,3 +40,5 @@ Thumbs.db
 !/src/main/resources/lib/gephi-toolkit-0.8.7.jar
 !/src/main/resources/lib/knowceans-tools.jar
 !/src/main/resources/lib/
+
+!/src/main/resources/META-INF/persistence.xml
