@@ -38,11 +38,11 @@ import services.semanticModels.LSA.LSA;
 public class PreProcessing {
 	static Logger logger = Logger.getLogger(PreProcessing.class);
 
-	private static final int MIN_NO_OCCURRENCES = 5;
+	public static final int MIN_NO_OCCURRENCES = 5;
 
 	private Map<String, Integer> newConcepts = new TreeMap<String, Integer>();
 
-	private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc) {
+	private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc, boolean includeWordAssociations) {
 		// returns new entries to write
 		String toWrite = "";
 		List<Word> document = new LinkedList<Word>();
@@ -56,7 +56,7 @@ public class PreProcessing {
 				}
 				// include semantic graph dependencies as word associations
 				SemanticGraph dependencies = s.getDependencies();
-				if (s.getDependencies() != null) {
+				if (includeWordAssociations && dependencies != null) {
 					for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
 						String dependent = edge.getDependent().word().toLowerCase();
 						Word w1 = Word.getWordFromConcept(dependent, d.getLanguage());
@@ -66,7 +66,8 @@ public class PreProcessing {
 						Word w2 = Word.getWordFromConcept(governor, d.getLanguage());
 						w2.setLemma(StaticLemmatizer.lemmaStatic(governor, d.getLanguage()));
 						// GrammaticalRelation relation = edge.getRelation();
-						if (s.getWords().contains(w1) && s.getWords().contains(w2)) {
+						if (s.getWords().contains(w1) && s.getWords().contains(w2)
+								&& !w1.getLemma().equals(w2.getLemma())) {
 							String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
 							document.add(new Word(association, association, association, null, null, d.getLanguage()));
 						}
@@ -88,7 +89,8 @@ public class PreProcessing {
 		return toWrite;
 	}
 
-	public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc) {
+	public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
+			boolean includeWordAssociations) {
 		AbstractDocumentTemplate docTmp = getDocumentModel(content);
 
 		StringTokenizer st = new StringTokenizer(content.trim().toLowerCase(), " \\.,:;!?-+[](){}'’“”\"");
@@ -105,7 +107,7 @@ public class PreProcessing {
 		}
 		// perform processing
 		AbstractDocument d = new Document(null, docTmp, null, null, lang, usePOSTagging, true);
-		return parseDocumentProcessing(d, noMinWordPerDoc);
+		return parseDocumentProcessing(d, noMinWordPerDoc, includeWordAssociations);
 	}
 
 	/**
@@ -129,8 +131,8 @@ public class PreProcessing {
 		}
 	}
 
-	public void parseGeneralCorpus(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
-			throws FileNotFoundException, IOException {
+	public void parseGeneralCorpus(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
+			boolean includeWordAssociations) throws FileNotFoundException, IOException {
 		// determine number of documents
 
 		if (!new File(path).isDirectory()) {
@@ -176,7 +178,7 @@ public class PreProcessing {
 					// TextPreprocessing.replaceFrCorpusAdnotations(StringEscapeUtils.escapeXml(line)),
 					// lang, usePOSTagging, noMinWordPerDoc);
 					toWrite = processContent(TextPreprocessing.replaceFrCorpusAdnotations(line, lang), lang,
-							usePOSTagging, noMinWordPerDoc);
+							usePOSTagging, noMinWordPerDoc, includeWordAssociations);
 
 					if (toWrite.length() > 0)
 						out.write(toWrite + "\n");
@@ -194,8 +196,8 @@ public class PreProcessing {
 		logger.info("Finished all pre-processing");
 	}
 
-	public void parseTasa(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
-			throws FileNotFoundException, IOException {
+	public void parseTasa(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
+			boolean includeWordAssociations) throws FileNotFoundException, IOException {
 		// determine number of documents
 
 		if (!new File(path).isDirectory()) {
@@ -243,7 +245,8 @@ public class PreProcessing {
 			while ((line = in.readLine()) != null) {
 				if (line.length() == 0 || line.startsWith("<")) {
 					if (content.length() > LSA.LOWER_BOUND) {
-						toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc);
+						toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc,
+								includeWordAssociations);
 						if (toWrite.length() > 0)
 							out.write(toWrite + "\n");
 						// flush content
@@ -265,7 +268,7 @@ public class PreProcessing {
 			if (content.length() > LSA.LOWER_BOUND) {
 				logger.info("Processing last block document " + (++current_doc_to_process) + " of "
 						+ total_docs_to_process);
-				toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc);
+				toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc, includeWordAssociations);
 				if (toWrite.length() > 0) {
 					out.write(toWrite);
 				}
@@ -277,8 +280,8 @@ public class PreProcessing {
 		logger.info("Finished all pre-processing");
 	}
 
-	public void parseCOCA(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
-			throws FileNotFoundException, IOException {
+	public void parseCOCA(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
+			boolean includeWordAssociations) throws FileNotFoundException, IOException {
 		// determine number of documents
 
 		if (!new File(path).isDirectory()) {
@@ -329,7 +332,7 @@ public class PreProcessing {
 					line = line.replaceAll(" # ", "\n");
 					line = line.replaceAll("@ @ @ @ @ @ @ @ @ @", " ");
 
-					toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc);
+					toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc, includeWordAssociations);
 
 					if (toWrite.length() > 0)
 						out.write(toWrite + "\n");

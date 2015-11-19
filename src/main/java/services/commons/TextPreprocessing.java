@@ -22,14 +22,10 @@ public class TextPreprocessing {
 
 	public static String replaceFrCorpusAdnotations(String s, Lang lang) {
 		if (lang.equals(Lang.fr))
-			return s.replaceAll("_ei", "é").replaceAll("_eo", "è")
-					.replaceAll("_ea", "ê").replaceAll("_ee", "ë")
-					.replaceAll("_ao", "à").replaceAll("_ae", "ä")
-					.replaceAll("_aa", "â").replaceAll("_ie", "ï")
-					.replaceAll("_ia", "î").replaceAll("_oe", "ö")
-					.replaceAll("_oa", "ô").replaceAll("_ue", "ü")
-					.replaceAll("_ua", "û").replaceAll("_uo", "ù")
-					.replaceAll("_cz", "ç");
+			return s.replaceAll("_ei", "é").replaceAll("_eo", "è").replaceAll("_ea", "ê").replaceAll("_ee", "ë")
+					.replaceAll("_ao", "à").replaceAll("_ae", "ä").replaceAll("_aa", "â").replaceAll("_ie", "ï")
+					.replaceAll("_ia", "î").replaceAll("_oe", "ö").replaceAll("_oa", "ô").replaceAll("_ue", "ü")
+					.replaceAll("_ua", "û").replaceAll("_uo", "ù").replaceAll("_cz", "ç");
 		return s;
 	}
 
@@ -37,15 +33,13 @@ public class TextPreprocessing {
 		// clean initial text
 
 		// lowercase + eliminate numbers
-		String result = text.toLowerCase().replaceAll("\\s+", " ").trim()
-				.replaceAll("[-+]?\\d+(\\.\\d+)?", "")
+		String result = text.toLowerCase().replaceAll("\\s+", " ").trim().replaceAll("[-+]?\\d+(\\.\\d+)?", "")
 				.replaceAll("[-+]?\\d+(,\\d+)?", "");
 
 		// eliminate non-relevant characters
 		switch (lang) {
 		case fr:
-			result = result.replaceAll(
-					"[^a-zàâäæçéêèëîïôœùûü ,:;'\\-\\.\\!\\?\n]", " ");
+			result = result.replaceAll("[^a-zàâäæçéêèëîïôœùûü ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		case ro:
 			result = result.replaceAll("ş", "ş").replaceAll("ț", "ţ");
@@ -55,6 +49,8 @@ public class TextPreprocessing {
 			result = result.replaceAll("[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		default:
+			// TODO add more tokenization rules
+			result = result.replaceAll("n't", " not");
 			result = result.replaceAll("[^a-z ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		}
@@ -87,8 +83,7 @@ public class TextPreprocessing {
 		result = result.replaceAll("(\\?)+", "\\?");
 		result = result.replaceAll("(!)+", "!");
 		result = result.replaceAll(" - ", "");
-		result = result.replaceAll(
-				"[^a-zàâäæçéêèëîïôœùûü ,:;'\\(\\)\\-\\.\\!\\?\n]", "");
+		result = result.replaceAll("[^a-zàâäæçéêèëîïôœùûü ,:;'\\(\\)\\-\\.\\!\\?\n]", "");
 
 		result = result.replaceAll(" j' ", " je ");
 		result = result.replaceAll(" d' ", " de ");
@@ -192,8 +187,7 @@ public class TextPreprocessing {
 				});
 				for (File f : files) {
 					try {
-						InputSource input = new InputSource(
-								new FileInputStream(f));
+						InputSource input = new InputSource(new FileInputStream(f));
 						input.setEncoding("UTF-8");
 
 						DocumentBuilder db = dbf.newDocumentBuilder();
@@ -218,34 +212,27 @@ public class TextPreprocessing {
 						if (nl != null && nl.getLength() > 0) {
 							for (int i = 0; i < nl.getLength(); i++) {
 								el = (Element) nl.item(i);
-								contents = el.getFirstChild().getNodeValue()
-										.trim();
-								System.out
-										.println(contents
-												+ "\n---------------\n"
-												+ cleanText(
-														doubleCleanVerbalization(contents),
-														Lang.fr) + "\n");
+								contents = el.getFirstChild().getNodeValue().trim();
+								System.out.println(contents + "\n---------------\n"
+										+ cleanText(doubleCleanVerbalization(contents), Lang.fr) + "\n");
 							}
 						}
 					} catch (Exception e) {
-						logger.error("Error processing " + f.getName() + ": "
-								+ e.getMessage());
+						logger.error("Error processing " + f.getName() + ": " + e.getMessage());
 					}
 				}
 			}
 
 		} catch (Exception e) {
-			System.err.print("Error evaluating input directory "
-					+ pathToDirectory + "!");
+			System.err.print("Error evaluating input directory " + pathToDirectory + "!");
 			e.printStackTrace();
 		}
 	}
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		System.out
-				.println(cleanVerbalisation("alors parce que i mangent i zarrete devant alors e alors la pace qu pusqu' télé et iii .. i et  ii  puis???"));
+		System.out.println(cleanVerbalisation(
+				"alors parce que i mangent i zarrete devant alors e alors la pace qu pusqu' télé et iii .. i et  ii  puis???"));
 		// displayCleaningResults("in/Matilda/MATILDA_CE2/parts");
 	}
 }

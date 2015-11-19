@@ -151,6 +151,10 @@ public class Word implements Comparable<Word>, Serializable {
 		return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
 	}
 
+	public boolean isWordAssociation() {
+		return lemma.contains(WORD_ASSOCIATION);
+	}
+
 	public int getBlockIndex() {
 		return blockIndex;
 	}

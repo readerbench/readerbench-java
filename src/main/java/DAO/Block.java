@@ -45,7 +45,7 @@ public class Block extends AnalysisElement implements Serializable {
 	// cohesion between an utterance and its corresponding block
 	private SemanticCohesion[] sentenceBlockDistances;
 	private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
-	
+
 	// inner-sentence semantic similarity values
 	private SemanticRelatedness[][] sentenceRelatedness;
 	private SemanticRelatedness[][] prunnedSentenceRelatedness;
@@ -59,13 +59,11 @@ public class Block extends AnalysisElement implements Serializable {
 	}
 
 	public void finalProcessing() {
-		
+
 		// add sentiment entity to the block
-		
-		
+
 		// end add sentiment entity to the block
-		
-		
+
 		setProcessedText(getProcessedText().trim());
 
 		// determine overall word occurrences
@@ -152,67 +150,27 @@ public class Block extends AnalysisElement implements Serializable {
 		this.stanfordSentences = sentences;
 	}
 
-	// public Participant getParticipant() {
-	// return participant;
-	// }
-	//
-	// public void setParticipant(Participant participant) {
-	// this.participant = participant;
-	// }
-	//
-	// public Date getTime() {
-	// return time;
-	// }
-	//
-	// public void setTime(Date time) {
-	// this.time = time;
-	// }
-	//
-	// public double getKB() {
-	// return KB;
-	// }
-	//
-	// public void setKB(double kB) {
-	// KB = kB;
-	// }
-	//
-	// public double getSocialKB() {
-	// return socialKB;
-	// }
-	//
-	// public void setSocialKB(double socialKB) {
-	// this.socialKB = socialKB;
-	// }
-	//
-	// public double getPersonalKB() {
-	// return personalKB;
-	// }
-	//
-	// public void setPersonalKB(double personalKB) {
-	// this.personalKB = personalKB;
-	// }
-	
 	/**
 	 * @return
 	 */
 	public SemanticRelatedness[] getSentenceBlockRelatedness() {
 		return sentenceBlockRelatedness;
 	}
-	
+
 	/**
 	 * @param sentenceBlockRelatedness
 	 */
 	public void setSentenceBlockRelatedness(SemanticRelatedness[] sentenceBlockRelatedness) {
 		this.sentenceBlockRelatedness = sentenceBlockRelatedness;
 	}
-	
+
 	/**
 	 * @return
 	 */
 	public SemanticRelatedness[][] getSentenceRelatedness() {
 		return sentenceRelatedness;
 	}
-	
+
 	/**
 	 * @param sentenceRelatedness
 	 */
@@ -233,7 +191,7 @@ public class Block extends AnalysisElement implements Serializable {
 	public void setPrunnedSentenceRelatedness(SemanticRelatedness[][] prunnedSentenceRelatedness) {
 		this.prunnedSentenceRelatedness = prunnedSentenceRelatedness;
 	}
-	
+
 	/**
 	 * @return
 	 */
@@ -254,7 +212,7 @@ public class Block extends AnalysisElement implements Serializable {
 	public SemanticCohesion[][] getSentenceDistances() {
 		return sentenceDistances;
 	}
-	
+
 	/**
 	 * @param sentenceDistances
 	 */
@@ -289,7 +247,7 @@ public class Block extends AnalysisElement implements Serializable {
 	public void setFollowedByVerbalization(boolean isFollowedByVerbalization) {
 		this.isFollowedByVerbalization = isFollowedByVerbalization;
 	}
-	
+
 	/**
 	 * @return
 	 */

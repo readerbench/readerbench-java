@@ -62,6 +62,7 @@ public class SemanticModelsTraining extends JFrame {
 	private JComboBox<String> comboBoxLDALanguage;
 	private JComboBox<String> comboBoxLSALanguage;
 	private JCheckBox chckbxUsePosTagging;
+	private JCheckBox chckbxConsiderWordAssociations;
 	private JTextField textFieldLSAFile;
 	private JTextField textFieldLSARank;
 	private JTextField textFieldLSAReduceTasks;
@@ -77,9 +78,10 @@ public class SemanticModelsTraining extends JFrame {
 		private int minNoWords;
 		private boolean usePosTagging;
 		private int selectedCase;
+		private boolean includeWordAssociations;
 
 		public PreProcessingTask(String input, String output, Lang lang, int minNoWords, boolean usePosTagging,
-				int selectedCase) {
+				boolean includeWordAssociations, int selectedCase) {
 			super();
 			this.input = input;
 			this.output = output;
@@ -87,6 +89,7 @@ public class SemanticModelsTraining extends JFrame {
 			this.minNoWords = minNoWords;
 			this.usePosTagging = usePosTagging;
 			this.selectedCase = selectedCase;
+			this.includeWordAssociations = includeWordAssociations;
 		}
 
 		public Void doInBackground() {
@@ -98,13 +101,14 @@ public class SemanticModelsTraining extends JFrame {
 				PreProcessing preprocess = new PreProcessing();
 				switch (selectedCase) {
 				case 1:
-					preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords);
+					preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords, includeWordAssociations);
 					break;
 				case 2:
-					preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords);
+					preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords, includeWordAssociations);
 					break;
 				default:
-					preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
+					preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords,
+							includeWordAssociations);
 				}
 			} catch (Exception exc) {
 				logger.error("Error processing input file " + exc.getMessage(), exc);
@@ -228,7 +232,7 @@ public class SemanticModelsTraining extends JFrame {
 		setResizable(false);
 		setTitle(LocalizationUtils.getTranslation("Semantic Models Training"));
 
-		setBounds(100, 100, 450, 240);
+		setBounds(100, 100, 500, 260);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -312,7 +316,7 @@ public class SemanticModelsTraining extends JFrame {
 				}
 
 				PreProcessingTask task = new PreProcessingTask(input.getPath(), textFieldOutput.getText(), lang,
-						minNoWords, chckbxUsePosTagging.isSelected(),
+						minNoWords, chckbxUsePosTagging.isSelected(), chckbxConsiderWordAssociations.isSelected(),
 						SemanticModelsTraining.this.comboBoxFormat.getSelectedIndex());
 				task.execute();
 			}
@@ -325,33 +329,36 @@ public class SemanticModelsTraining extends JFrame {
 		textFieldMinWords.setHorizontalAlignment(SwingConstants.RIGHT);
 		textFieldMinWords.setColumns(10);
 
+		chckbxConsiderWordAssociations = new JCheckBox("Consider word associations");
+
 		GroupLayout gl_panelPreProcessing = new GroupLayout(panelPreProcessing);
 		gl_panelPreProcessing.setHorizontalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
 						.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblSelectInput).addComponent(lblOutputFileName)
-								.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.TRAILING)
-										.addComponent(lblFormat, Alignment.LEADING)
-										.addComponent(lblLanguage, Alignment.LEADING))
-								.addComponent(lblMinWords))
+								.addComponent(lblSelectInput).addComponent(lblOutputFileName).addComponent(lblFormat)
+								.addComponent(lblLanguage).addComponent(lblMinWords))
 						.addGap(18)
 						.addGroup(
-								gl_panelPreProcessing.createParallelGroup(Alignment.TRAILING)
+								gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_panelPreProcessing.createSequentialGroup()
-												.addComponent(textFieldInput, GroupLayout.DEFAULT_SIZE, 250,
+												.addComponent(textFieldInput, GroupLayout.DEFAULT_SIZE, 255,
 														Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnBrowse))
-								.addGroup(Alignment.LEADING, gl_panelPreProcessing.createSequentialGroup()
+										.addComponent(comboBoxFormat, 0, 336, Short.MAX_VALUE)
+										.addComponent(comboBoxLanguage, 0, 336, Short.MAX_VALUE)
+										.addComponent(textFieldOutput, 336, 336,
+												336)
+								.addGroup(gl_panelPreProcessing.createSequentialGroup()
 										.addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE, 97,
 												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED).addComponent(chckbxUsePosTagging)
-										.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE,
-												Short.MAX_VALUE)
-										.addComponent(btnPreProcess))
-								.addComponent(comboBoxFormat, Alignment.LEADING, 0, GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE)
-								.addComponent(comboBoxLanguage, Alignment.LEADING, 0, 245, Short.MAX_VALUE)
-								.addComponent(textFieldOutput, Alignment.LEADING))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+												.addComponent(chckbxConsiderWordAssociations)
+												.addGroup(gl_panelPreProcessing.createSequentialGroup()
+														.addComponent(chckbxUsePosTagging)
+														.addPreferredGap(ComponentPlacement.RELATED,
+																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+														.addComponent(btnPreProcess)))))
 						.addContainerGap()));
 		gl_panelPreProcessing.setVerticalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
@@ -380,7 +387,8 @@ public class SemanticModelsTraining extends JFrame {
 										.addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 								.addComponent(chckbxUsePosTagging).addComponent(btnPreProcess))
-						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+						.addPreferredGap(ComponentPlacement.RELATED).addComponent(chckbxConsiderWordAssociations)
+						.addContainerGap(14, Short.MAX_VALUE)));
 		panelPreProcessing.setLayout(gl_panelPreProcessing);
 
 		JPanel panelLSATraining = new JPanel();
