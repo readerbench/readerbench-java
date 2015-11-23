@@ -43,8 +43,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocument;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import utils.localization.LocalizationUtils;
 import view.events.TCPopupEventQueue;

@@ -2,8 +2,8 @@ package services.complexity.syntax;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Sentence;
+import data.AbstractDocument;
+import data.Sentence;
 
 public class TreeComplexity implements IComplexityFactors {
 	public static double getAverageTreeSize(AbstractDocument d) {

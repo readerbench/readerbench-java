@@ -22,13 +22,13 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import DAO.Block;
-import DAO.Word;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.Topic;
+import data.Block;
+import data.Word;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
 
 public class ParticipantEvaluation {
 	static Logger logger = Logger.getLogger(ParticipantEvaluation.class);

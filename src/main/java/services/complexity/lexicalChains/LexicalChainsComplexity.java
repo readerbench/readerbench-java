@@ -2,9 +2,9 @@ package services.complexity.lexicalChains;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.lexicalChains.LexicalChain;
+import data.AbstractDocument;
+import data.Block;
+import data.lexicalChains.LexicalChain;
 
 public class LexicalChainsComplexity implements IComplexityFactors {
 

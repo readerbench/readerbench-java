@@ -4,7 +4,7 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.Connectives;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class ConnectivesComplexity implements IComplexityFactors {
 

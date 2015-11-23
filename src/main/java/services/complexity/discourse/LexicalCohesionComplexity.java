@@ -4,10 +4,10 @@ import java.util.Iterator;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.Sentence;
-import DAO.Word;
+import data.Block;
+import data.AbstractDocument;
+import data.Sentence;
+import data.Word;
 
 public class LexicalCohesionComplexity implements IComplexityFactors {
 	/**

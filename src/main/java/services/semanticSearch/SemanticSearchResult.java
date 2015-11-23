@@ -1,6 +1,6 @@
 package services.semanticSearch;
 
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class SemanticSearchResult implements Comparable<SemanticSearchResult> {
 	private AbstractDocument doc;

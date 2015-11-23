@@ -56,8 +56,8 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import processing.core.PApplet;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
+import data.Word;
+import data.discourse.SemanticCohesion;
 
 public class PaperConceptView extends JFrame {
 	private static PaperConceptView paperConceptView;

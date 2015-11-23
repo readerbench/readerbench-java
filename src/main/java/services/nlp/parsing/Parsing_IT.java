@@ -14,10 +14,10 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import services.semanticModels.LDA.LDA;
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 

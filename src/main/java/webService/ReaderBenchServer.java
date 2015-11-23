@@ -24,18 +24,18 @@ import org.simpleframework.xml.core.Persister;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.Topic;
-import DAO.document.Document;
-import DAO.sentiment.SentimentGrid;
-import DAO.sentiment.SentimentValence;
-import DAO.sentiment.SentimentWeights;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
+import data.document.Document;
+import data.sentiment.SentimentGrid;
+import data.sentiment.SentimentValence;
+import data.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
@@ -363,7 +363,7 @@ public class ReaderBenchServer {
 	private List<ResultSentiment> getSentiment(String query, String pathToLSA, String pathToLDA, String lang,
 			boolean posTagging) {
 
-		logger.info("Valence map has " + DAO.sentiment.SentimentValence.getValenceMap().size()
+		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
 				+ " sentiments after initialization.");
 		SentimentWeights sw = new SentimentWeights();
 

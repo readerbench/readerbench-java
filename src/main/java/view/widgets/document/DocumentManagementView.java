@@ -45,8 +45,8 @@ import org.apache.log4j.Logger;
 
 import services.converters.Txt2XmlConverter;
 import utils.localization.LocalizationUtils;
-import DAO.Block;
-import DAO.document.Document;
+import data.Block;
+import data.document.Document;
 
 import javax.swing.JCheckBox;
 

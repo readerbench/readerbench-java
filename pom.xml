@@ -25,7 +25,7 @@
                                 <artifactId>knowceans-tools</artifactId>
                                 <version>1</version>
                                 <packaging>jar</packaging>
-                                <file>${project.basedir}/src/main/resources/lib/knowceans-tools.jar</file>
+                                <file>${project.basedir}/resources/lib/knowceans-tools.jar</file>
                             </configuration>
                         </execution>
                         <execution>
@@ -39,7 +39,7 @@
                                 <artifactId>gephi-toolkit</artifactId>
                                 <version>0.8.7</version>
                                 <packaging>jar</packaging>
-                                <file>${project.basedir}/src/main/resources/lib/gephi-toolkit-0.8.7.jar</file>
+                                <file>${project.basedir}/resources/lib/gephi-toolkit-0.8.7.jar</file>
                             </configuration>
                         </execution>
                         <execution>
@@ -53,7 +53,7 @@
                                 <artifactId>stanford-corenlp-caseless</artifactId>
                                 <version>3.5.2</version>
                                 <packaging>jar</packaging>
-                                <file>${project.basedir}/src/main/resources/lib/stanford-corenlp-caseless-2015-04-20-models.jar</file>
+                                <file>${project.basedir}/resources/lib/stanford-corenlp-caseless-2015-04-20-models.jar</file>
                             </configuration>
                         </execution>
                         

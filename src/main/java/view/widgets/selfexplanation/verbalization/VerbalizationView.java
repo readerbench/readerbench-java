@@ -30,10 +30,10 @@ import services.readingStrategies.ReadingStrategies;
 import view.models.verbalization.VerbalizationTable;
 import view.models.verbalization.VerbalizationTableModel;
 import view.widgets.document.DocumentView;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.discourse.SemanticCohesion;
-import DAO.document.Metacognition;
+import data.Block;
+import data.Sentence;
+import data.discourse.SemanticCohesion;
+import data.document.Metacognition;
 
 /**
  * 

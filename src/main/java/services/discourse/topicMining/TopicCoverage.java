@@ -4,9 +4,9 @@ import org.apache.log4j.Logger;
 
 import services.nlp.listOfWords.MapOfWordWeights;
 import services.readingStrategies.PatternMatching;
-import DAO.AnalysisElement;
-import DAO.Word;
-import DAO.discourse.SemanticChain;
+import data.AnalysisElement;
+import data.Word;
+import data.discourse.SemanticChain;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class TopicCoverage {

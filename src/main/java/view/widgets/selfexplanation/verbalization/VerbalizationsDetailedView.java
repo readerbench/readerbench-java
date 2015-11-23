@@ -17,7 +17,7 @@ import services.commons.VectorAlgebra;
 import services.readingStrategies.ReadingStrategies;
 import view.models.verbalization.VerbalizationsTable;
 import view.models.verbalization.VerbalizationsDetailedTableModel;
-import DAO.document.Metacognition;
+import data.document.Metacognition;
 
 public class VerbalizationsDetailedView extends JFrame {
 

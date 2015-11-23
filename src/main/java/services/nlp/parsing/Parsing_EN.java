@@ -4,9 +4,9 @@ import java.util.Properties;
 
 import org.apache.log4j.BasicConfigurator;
 
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 

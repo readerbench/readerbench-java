@@ -9,11 +9,11 @@ import java.util.Vector;
 import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
-import DAO.Block;
-import DAO.cscl.Conversation;
-import DAO.cscl.Utterance;
-import DAO.discourse.CollaborationZone;
-import DAO.discourse.SemanticCohesion;
+import data.Block;
+import data.cscl.Conversation;
+import data.cscl.Utterance;
+import data.discourse.CollaborationZone;
+import data.discourse.SemanticCohesion;
 
 /**
  * 

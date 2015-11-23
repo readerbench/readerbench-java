@@ -3,8 +3,8 @@ package services.semanticModels;
 import java.util.Set;
 import java.util.TreeMap;
 
-import DAO.AnalysisElement;
-import DAO.Word;
+import data.AnalysisElement;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public interface ISemanticModel {

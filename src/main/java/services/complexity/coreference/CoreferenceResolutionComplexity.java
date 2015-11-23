@@ -6,10 +6,10 @@ import java.util.Map;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.Sentence;
-import DAO.Word;
+import data.Block;
+import data.AbstractDocument;
+import data.Sentence;
+import data.Word;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.dcoref.CorefChain.CorefMention;
 import edu.stanford.nlp.dcoref.Dictionaries.MentionType;

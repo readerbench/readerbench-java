@@ -24,7 +24,7 @@ import javax.swing.table.DefaultTableModel;
 import services.commons.Formatting;
 import services.discourse.dialogism.DialogismMeasures;
 import services.discourse.dialogism.DialogismMeasuresSentiment;
-import DAO.discourse.SemanticChain;
+import data.discourse.SemanticChain;
 
 public class VoiceSynergyView extends JFrame {
 

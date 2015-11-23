@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
-import DAO.Word;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class LDAWordComplexity {

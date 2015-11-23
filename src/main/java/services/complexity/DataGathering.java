@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import DAO.complexity.Measurement;
-import DAO.document.Document;
+import data.complexity.Measurement;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class DataGathering {

@@ -8,9 +8,9 @@ import org.apache.log4j.Logger;
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.discourse.SemanticChain;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.discourse.SemanticChain;
 
 public class DialogismMeasures {
 	static Logger logger = Logger.getLogger(DialogismMeasures.class);

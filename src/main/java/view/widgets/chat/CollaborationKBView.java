@@ -19,9 +19,9 @@ import javax.swing.border.EtchedBorder;
 import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
-import DAO.cscl.Conversation;
-import DAO.cscl.Utterance;
-import DAO.discourse.CollaborationZone;
+import data.cscl.Conversation;
+import data.cscl.Utterance;
+import data.discourse.CollaborationZone;
 
 public class CollaborationKBView extends JFrame {
 	private static final long serialVersionUID = -461457535432534468L;

@@ -7,8 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import services.nlp.listOfWords.ListOfWords;
-import DAO.AnalysisElement;
-import DAO.Sentence;
+import data.AnalysisElement;
+import data.Sentence;
 
 /**
  * 

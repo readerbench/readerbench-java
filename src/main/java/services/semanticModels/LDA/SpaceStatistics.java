@@ -31,7 +31,7 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.gephi.statistics.plugin.Modularity;
 import org.openide.util.Lookup;
 
-import DAO.Word;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.semanticModels.CompareResults;

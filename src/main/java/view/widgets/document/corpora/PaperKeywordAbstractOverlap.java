@@ -31,11 +31,11 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Word;
-import DAO.discourse.WordOverlap;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.Block;
+import data.Word;
+import data.discourse.WordOverlap;
+import data.document.Document;
 
 public class PaperKeywordAbstractOverlap extends JFrame {
 	private static final long serialVersionUID = -8582615231233815258L;

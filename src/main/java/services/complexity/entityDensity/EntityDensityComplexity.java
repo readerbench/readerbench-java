@@ -5,10 +5,10 @@ import java.util.TreeSet;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.Word;
 
 /***
  * @author Mihai Dascalu

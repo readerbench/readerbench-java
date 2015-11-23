@@ -17,15 +17,15 @@ import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.sentiment.SentimentEntity;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.sentiment.SentimentEntity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
@@ -43,7 +43,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations.SentimentAnnotatedTre
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
-import pojo.SentimentValence;
+import data.pojo.SentimentValence;
 
 /**
  * 

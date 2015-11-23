@@ -19,9 +19,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import DAO.Block;
-import DAO.discourse.SemanticCohesion;
-import DAO.document.Document;
+import data.Block;
+import data.discourse.SemanticCohesion;
+import data.document.Document;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.complexity.flow.DocumentFlow;

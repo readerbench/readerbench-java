@@ -35,8 +35,8 @@ import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import DAO.AbstractDocument;
-import DAO.Block;
+import data.AbstractDocument;
+import data.Block;
 import processing.core.PApplet;
 import services.complexity.flow.DocumentFlow;
 

@@ -43,8 +43,8 @@ import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
 import view.widgets.document.DocumentProcessingView;
 import view.widgets.selfexplanation.ComprehensionPredictionView;
-import DAO.document.Document;
-import DAO.document.Metacognition;
+import data.document.Document;
+import data.document.Metacognition;
 
 public class VerbalizationProcessingView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;

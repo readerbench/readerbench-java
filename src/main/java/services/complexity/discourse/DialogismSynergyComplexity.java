@@ -4,7 +4,7 @@ import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.discourse.dialogism.DialogismMeasures;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class DialogismSynergyComplexity implements IComplexityFactors {
 

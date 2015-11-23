@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.Topic;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.discourse.Topic;
 
 /**
  * 

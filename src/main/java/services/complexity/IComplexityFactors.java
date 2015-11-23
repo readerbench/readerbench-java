@@ -3,7 +3,7 @@
  */
 package services.complexity;
 
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 /**
  * @author Mihai Dascalu

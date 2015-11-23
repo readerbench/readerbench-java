@@ -5,10 +5,10 @@
  */
 package services.sentiment;
 
-import DAO.db.DAOService;
-import DAO.db.EntityXValenceDAO;
-import DAO.db.ValenceDAO;
-import DAO.db.WordDAO;
+import data.dao.DAOService;
+import data.dao.EntityXValenceDAO;
+import data.dao.ValenceDAO;
+import data.dao.WordDAO;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import org.openide.util.Exceptions;
-import pojo.SentimentValence;
-import pojo.Word;
+import data.pojo.SentimentValence;
+import data.pojo.Word;
 import services.nlp.listOfWords.ListOfWords;
 
 /**
@@ -41,7 +41,7 @@ public class Seanse {
     public void readList(String listFile, String key) {
         try {
             SentimentValence valence = new SentimentValence(
-                    DAO.sentiment.SentimentValence.get(key).getId());
+                    data.sentiment.SentimentValence.get(key).getId());
             Scanner s = new Scanner(new File(BASE_DIR + listFile));
             while (s.hasNext()) {
                 String word = s.next();
@@ -57,7 +57,7 @@ public class Seanse {
             SentimentValence[] valences = new SentimentValence[valenceNames.length];
             for (int i = 0; i < valences.length; i++) {
                 SentimentValence valence = new SentimentValence(
-                        DAO.sentiment.SentimentValence.get(valenceNames[i]).getId());
+                        data.sentiment.SentimentValence.get(valenceNames[i]).getId());
                 valences[i] = valence;
             }
             Scanner s = new Scanner(new File(BASE_DIR + fileName));
@@ -104,7 +104,7 @@ public class Seanse {
                 Scanner lineScanner = new Scanner(line);
                 String sentiment = lineScanner.next();
                 SentimentValence valence = new SentimentValence(
-                        DAO.sentiment.SentimentValence.get(sentiment).getId());
+                        data.sentiment.SentimentValence.get(sentiment).getId());
                 while (lineScanner.hasNext()) {
                     String w = lineScanner.next();
                     saveWordValence(w, valence, 1.);

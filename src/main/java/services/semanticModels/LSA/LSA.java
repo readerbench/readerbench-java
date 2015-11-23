@@ -17,8 +17,8 @@ import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.AnalysisElement;
-import DAO.Word;
+import data.AnalysisElement;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;

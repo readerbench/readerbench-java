@@ -39,8 +39,8 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
-import DAO.Block;
-import DAO.document.EssayCreator;
+import data.Block;
+import data.document.EssayCreator;
 
 public class EssayManagementView extends JFrame {
 

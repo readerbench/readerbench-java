@@ -17,9 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import services.complexity.ComplexityIndices;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
 
 /**
  * 

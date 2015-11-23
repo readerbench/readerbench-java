@@ -32,10 +32,10 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.Block;
-import DAO.Sentence;
-import DAO.discourse.Topic;
-import DAO.document.Document;
+import data.Block;
+import data.Sentence;
+import data.discourse.Topic;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.discourse.topicMining.TopicModeling;

@@ -30,7 +30,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
-import DAO.Word;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.PreProcessing;
 

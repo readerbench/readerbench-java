@@ -14,12 +14,12 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 
 import view.widgets.complexity.RunMeasurementsView;
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.document.Document;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class GenericTasaDocument implements Comparable<GenericTasaDocument> {

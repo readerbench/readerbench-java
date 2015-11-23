@@ -51,11 +51,11 @@ import org.openide.util.Lookup;
 
 import processing.core.PApplet;
 import services.discourse.topicMining.TopicModeling;
-import DAO.AbstractDocument;
-import DAO.Word;
-import DAO.cscl.Participant;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.Topic;
+import data.AbstractDocument;
+import data.Word;
+import data.cscl.Participant;
+import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
 
 public class ConceptView extends JFrame {
 	private static final long serialVersionUID = -8582615231233815258L;

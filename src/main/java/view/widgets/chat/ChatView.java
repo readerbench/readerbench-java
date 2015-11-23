@@ -45,11 +45,11 @@ import view.models.document.DocumentTableModel;
 import view.models.document.TopicsTableModel;
 import view.widgets.document.ConceptView;
 import view.widgets.document.VoiceSelectionView;
-import DAO.Block;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
-import DAO.discourse.Topic;
+import data.Block;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.discourse.Topic;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 /**

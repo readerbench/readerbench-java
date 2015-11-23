@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.sentiment.SentimentEntity;
-import DAO.sentiment.SentimentValence;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.sentiment.SentimentEntity;
+import data.sentiment.SentimentValence;
 
 /**
  * 
@@ -26,11 +26,11 @@ public class SentimentAnalysis {
 		
 		// initialize sentiment valence map for document
 		SentimentEntity se = new SentimentEntity();
-		Iterator itValenceMap = DAO.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
+		Iterator itValenceMap = data.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
 		//logger.info("Valence map has " + DAO.sentiment.SentimentValence.getValenceMap().size() + " sentiments.");
 		while (itValenceMap.hasNext()) {
 	        Map.Entry pair = (Map.Entry)itValenceMap.next();
-	        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
+	        data.sentiment.SentimentValence daoSe = (data.sentiment.SentimentValence)pair.getValue();
 	        se.add(daoSe, 0.0);
 		}
 		d.setSentimentEntity(se);
@@ -40,11 +40,11 @@ public class SentimentAnalysis {
 			Block b = d.getBlocks().get(i);
 			
 			se = new SentimentEntity();
-			itValenceMap = DAO.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
+			itValenceMap = data.sentiment.SentimentValence.getValenceMap().entrySet().iterator();
 			//logger.info("Should add " + DAO.sentiment.SentimentValence.getValenceMap().size() + " sentiments to block " + b.getIndex());
 			while (itValenceMap.hasNext()) {
 		        Map.Entry pair = (Map.Entry)itValenceMap.next();
-		        DAO.sentiment.SentimentValence daoSe = (DAO.sentiment.SentimentValence)pair.getValue();
+		        data.sentiment.SentimentValence daoSe = (data.sentiment.SentimentValence)pair.getValue();
 		        se.add(daoSe, 0.0);
 			}
 			b.setSentimentEntity(se);

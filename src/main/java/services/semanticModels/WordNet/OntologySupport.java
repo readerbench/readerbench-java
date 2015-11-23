@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
-import DAO.Word;
+import data.Word;
 import edu.cmu.lti.jawjaw.JAWJAW;
 import edu.cmu.lti.jawjaw.db.SenseDAO;
 import edu.cmu.lti.jawjaw.db.WordDAO;

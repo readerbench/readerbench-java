@@ -14,9 +14,9 @@ import java.util.StringTokenizer;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.document.Document;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class Txt2XmlConverter {

@@ -18,10 +18,10 @@ import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocumentTemplate;
-import DAO.Word;
-import DAO.discourse.Topic;
-import DAO.document.Document;
+import data.AbstractDocumentTemplate;
+import data.Word;
+import data.discourse.Topic;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;

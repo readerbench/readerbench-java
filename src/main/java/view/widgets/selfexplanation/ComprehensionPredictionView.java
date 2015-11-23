@@ -35,7 +35,7 @@ import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ComprehensionPrediction;
 import view.widgets.complexity.ComplexityIndicesView;
-import DAO.document.Metacognition;
+import data.document.Metacognition;
 
 public class ComprehensionPredictionView extends JFrame {
 

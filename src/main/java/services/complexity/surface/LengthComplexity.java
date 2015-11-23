@@ -2,10 +2,10 @@ package services.complexity.surface;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.Word;
 
 public class LengthComplexity implements IComplexityFactors {
 	// Average number of characters in a block

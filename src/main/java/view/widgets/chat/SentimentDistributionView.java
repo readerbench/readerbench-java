@@ -33,10 +33,10 @@ import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 
-import DAO.Block;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.discourse.SemanticChain;
+import data.Block;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.discourse.SemanticChain;
 import view.models.document.CustomToolTipGeneratorVoice;
 
 public class SentimentDistributionView extends JFrame {

@@ -2,7 +2,7 @@ package view.widgets.document.search;
 
 import java.util.List;
 
-import DAO.Word;
+import data.Word;
 
 public class WordDiffContainer implements Comparable<WordDiffContainer> {
 	private Word wRef;

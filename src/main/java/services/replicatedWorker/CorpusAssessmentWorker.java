@@ -7,7 +7,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import DAO.cscl.Conversation;
+import data.cscl.Conversation;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 

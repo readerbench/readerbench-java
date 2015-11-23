@@ -18,9 +18,9 @@ import org.apache.log4j.BasicConfigurator;
 
 import services.converters.GenericTasaDocument;
 import services.converters.SplitTASA;
-import DAO.AbstractDocument;
-import DAO.Word;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.Word;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class EvaluateTASA {

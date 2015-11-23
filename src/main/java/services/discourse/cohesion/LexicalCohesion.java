@@ -3,10 +3,10 @@ package services.discourse.cohesion;
 import java.io.Serializable;
 import java.util.Iterator;
 
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.Sentence;
-import DAO.Word;
+import data.Block;
+import data.AbstractDocument;
+import data.Sentence;
+import data.Word;
 
 public class LexicalCohesion implements Serializable{
 	private static final long serialVersionUID = -2519627724570229014L;

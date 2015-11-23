@@ -9,11 +9,11 @@ import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
-import DAO.AnalysisElement;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
+import data.AnalysisElement;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.discourse.SemanticCohesion;
 
 public class InferredKnowledgeStrategy {
 	private static final Color COLOR_INFERRED_CONCEPTS = new Color(255, 102, 0);
