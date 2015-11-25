@@ -18,8 +18,8 @@ import javax.swing.border.EtchedBorder;
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
-import DAO.cscl.Conversation;
-import DAO.discourse.CollaborationZone;
+import data.cscl.Conversation;
+import data.discourse.CollaborationZone;
 
 import javax.swing.JTextField;
 

@@ -24,7 +24,7 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.Logger;
 
 import view.widgets.document.DocumentProcessingView;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class AddSummaryView extends JInternalFrame {
 	private static final long serialVersionUID = 8894652868238113117L;

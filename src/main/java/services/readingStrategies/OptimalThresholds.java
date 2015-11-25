@@ -12,7 +12,7 @@ import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
-import DAO.document.Metacognition;
+import data.document.Metacognition;
 
 public class OptimalThresholds {
 	static Logger logger = Logger.getLogger(OptimalThresholds.class);

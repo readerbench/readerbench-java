@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import DAO.cscl.Conversation;
+import data.cscl.Conversation;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import edu.cmu.lti.jawjaw.pobj.Lang;

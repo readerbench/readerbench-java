@@ -20,7 +20,7 @@ import javax.swing.ScrollPaneConstants;
 import org.apache.log4j.Logger;
 
 import view.widgets.document.DocumentView;
-import DAO.document.Summary;
+import data.document.Summary;
 import javax.swing.JTextArea;
 
 /**

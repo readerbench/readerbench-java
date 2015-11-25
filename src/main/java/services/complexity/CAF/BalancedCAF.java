@@ -3,7 +3,7 @@ package services.complexity.CAF;
 import java.util.ArrayList;
 import services.complexity.IComplexityFactors;
 import services.complexity.ComplexityIndices;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class BalancedCAF implements IComplexityFactors {
 	public static final String CPeriodTokens = "[.!?]+";

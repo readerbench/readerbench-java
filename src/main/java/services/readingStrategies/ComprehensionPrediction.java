@@ -9,8 +9,8 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import services.complexity.ComputeBalancedMeasure;
-import DAO.complexity.Measurement;
-import DAO.document.Metacognition;
+import data.complexity.Measurement;
+import data.document.Metacognition;
 
 public class ComprehensionPrediction extends ComputeBalancedMeasure {
 	static Logger logger = Logger.getLogger(ComprehensionPrediction.class);

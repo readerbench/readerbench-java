@@ -48,7 +48,7 @@ import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import services.complexity.IComplexityFactors;
 import utils.localization.LocalizationUtils;
-import DAO.complexity.Measurement;
+import data.complexity.Measurement;
 
 public class CorpusEvaluationView extends JFrame {
 

@@ -33,10 +33,10 @@ import org.jfree.data.gantt.TaskSeriesCollection;
 import view.models.document.CustomToolTipGeneratorVoice;
 import view.widgets.chat.ChatVoiceSimpleStatistics;
 import view.widgets.chat.VoiceSynergyView;
-import DAO.Block;
-import DAO.Word;
-import DAO.discourse.SemanticChain;
-import DAO.document.Document;
+import data.Block;
+import data.Word;
+import data.discourse.SemanticChain;
+import data.document.Document;
 
 public class SentenceLevelInterAnimationView extends JFrame {
 

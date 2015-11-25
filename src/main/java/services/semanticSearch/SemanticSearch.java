@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import DAO.AbstractDocument;
-import DAO.discourse.SemanticCohesion;
+import data.AbstractDocument;
+import data.discourse.SemanticCohesion;
 import cc.mallet.util.Maths;
 import services.commons.VectorAlgebra;
 

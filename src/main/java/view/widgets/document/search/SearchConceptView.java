@@ -58,11 +58,11 @@ import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import DAO.AbstractDocument;
-import DAO.AnalysisElement;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.Topic;
+import data.AbstractDocument;
+import data.AnalysisElement;
+import data.Word;
+import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
 import processing.core.PApplet;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;

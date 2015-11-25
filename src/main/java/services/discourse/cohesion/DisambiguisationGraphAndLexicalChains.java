@@ -7,12 +7,12 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import services.semanticModels.WordNet.OntologySupport;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.lexicalChains.LexicalChain;
-import DAO.lexicalChains.LexicalChainLink;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.lexicalChains.LexicalChain;
+import data.lexicalChains.LexicalChainLink;
 import edu.cmu.lti.jawjaw.pobj.Sense;
 
 public class DisambiguisationGraphAndLexicalChains {

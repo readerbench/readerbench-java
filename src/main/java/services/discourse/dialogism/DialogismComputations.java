@@ -12,16 +12,16 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import services.commons.VectorAlgebra;
-import DAO.AbstractDocument;
-import DAO.AnalysisElement;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
-import DAO.discourse.SemanticChain;
-import DAO.lexicalChains.LexicalChain;
+import data.AbstractDocument;
+import data.AnalysisElement;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.discourse.SemanticChain;
+import data.lexicalChains.LexicalChain;
 
 public class DialogismComputations {
 	static Logger logger = Logger.getLogger(DialogismComputations.class);

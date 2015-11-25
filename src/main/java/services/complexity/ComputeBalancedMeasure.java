@@ -13,10 +13,10 @@ import services.libsvm.svm_model;
 import services.libsvm.svm_node;
 import services.libsvm.svm_parameter;
 import services.libsvm.svm_problem;
-import DAO.AbstractDocument;
-import DAO.complexity.Measurement;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
+import data.AbstractDocument;
+import data.complexity.Measurement;
+import data.cscl.Conversation;
+import data.cscl.Participant;
 
 public class ComputeBalancedMeasure {
 	static Logger logger = Logger.getLogger(ComputeBalancedMeasure.class);

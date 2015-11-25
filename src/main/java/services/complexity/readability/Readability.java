@@ -3,7 +3,7 @@ package services.complexity.readability;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.complexity.readability.Fathom.Stats;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 /**
  * <p>

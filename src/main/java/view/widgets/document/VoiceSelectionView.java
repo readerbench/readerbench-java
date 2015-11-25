@@ -30,8 +30,8 @@ import javax.swing.table.TableCellRenderer;
 import view.models.complexity.HeaderCheckBoxHandler;
 import view.models.complexity.HeaderRenderer;
 import view.models.complexity.Status;
-import DAO.AbstractDocument;
-import DAO.discourse.SemanticChain;
+import data.AbstractDocument;
+import data.discourse.SemanticChain;
 
 public class VoiceSelectionView extends JFrame {
 

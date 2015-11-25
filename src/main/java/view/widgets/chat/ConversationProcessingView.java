@@ -57,9 +57,9 @@ import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.chat.ChatView;
 import view.widgets.complexity.ComplexityIndicesView;
-import DAO.AbstractDocument;
-import DAO.cscl.Conversation;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.cscl.Conversation;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class ConversationProcessingView extends JInternalFrame {

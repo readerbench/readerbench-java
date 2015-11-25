@@ -57,9 +57,9 @@ import view.widgets.document.corpora.PaperConceptView;
 import view.widgets.document.corpora.PaperCorpusSimilarityView;
 import view.widgets.document.corpora.PaperKeywordAbstractOverlap;
 import view.widgets.document.search.SearchSimilarityView;
-import DAO.AbstractDocument;
-import DAO.cscl.Conversation;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.cscl.Conversation;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class DocumentSemanticSearchView extends JInternalFrame {

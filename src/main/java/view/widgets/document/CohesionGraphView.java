@@ -38,9 +38,9 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import processing.core.PApplet;
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.discourse.SemanticCohesion;
+import data.Block;
+import data.AbstractDocument;
+import data.discourse.SemanticCohesion;
 
 public class CohesionGraphView extends JFrame {
 	private static final long serialVersionUID = -5991280949453890249L;

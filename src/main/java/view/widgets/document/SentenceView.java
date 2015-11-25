@@ -15,10 +15,10 @@ import services.commons.Formatting;
 import services.semanticModels.WordNet.OntologySupport;
 import view.models.document.SentenceTable;
 import view.models.document.SentenceTableModel;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.discourse.SemanticCohesion;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
+import data.discourse.SemanticCohesion;
 
 public class SentenceView extends JFrame {
 

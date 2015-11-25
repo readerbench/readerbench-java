@@ -42,8 +42,8 @@ import services.complexity.Clustering;
 import services.complexity.ComplexityIndices;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
-import DAO.AbstractDocument;
-import DAO.complexity.Measurement;
+import data.AbstractDocument;
+import data.complexity.Measurement;
 
 public class DocumentEvaluationView extends JFrame {
 

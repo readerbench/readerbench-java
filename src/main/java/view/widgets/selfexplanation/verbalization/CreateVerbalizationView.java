@@ -43,9 +43,9 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import utils.localization.LocalizationUtils;
-import DAO.Block;
-import DAO.document.Document;
-import DAO.document.Metacognition;
+import data.Block;
+import data.document.Document;
+import data.document.Metacognition;
 
 import javax.swing.JCheckBox;
 

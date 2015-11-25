@@ -15,10 +15,10 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.document.Document;
 import services.commons.Formatting;
 import services.semanticSearch.SemanticSearch;
 import services.semanticSearch.SemanticSearchResult;

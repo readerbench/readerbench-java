@@ -42,9 +42,9 @@ import services.readingStrategies.ReadingStrategies;
 import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalizationAnnotationTable;
 import view.models.verbalization.VerbalizationAnnotationTableModel;
-import DAO.Block;
-import DAO.document.Document;
-import DAO.document.Metacognition;
+import data.Block;
+import data.document.Document;
+import data.document.Metacognition;
 
 public class AnnotateVerbalizationView extends JFrame {
 

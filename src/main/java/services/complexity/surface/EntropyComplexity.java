@@ -5,10 +5,10 @@ import java.util.Map;
 
 import services.complexity.IComplexityFactors;
 import services.complexity.ComplexityIndices;
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.Sentence;
-import DAO.Word;
+import data.Block;
+import data.AbstractDocument;
+import data.Sentence;
+import data.Word;
 
 public class EntropyComplexity implements IComplexityFactors {
 	public static double getStemEntropy(AbstractDocument d) {

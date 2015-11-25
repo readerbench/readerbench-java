@@ -20,13 +20,13 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.AbstractDocumentTemplate.BlockTemplate;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;

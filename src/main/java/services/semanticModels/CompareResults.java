@@ -20,11 +20,11 @@ import org.apache.log4j.Logger;
 
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import DAO.AbstractDocument;
-import DAO.AbstractDocumentTemplate;
-import DAO.Word;
-import DAO.discourse.Topic;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.Word;
+import data.discourse.Topic;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class CompareResults {

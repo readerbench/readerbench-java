@@ -2,9 +2,9 @@ package services.complexity.discourse;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.discourse.SemanticCohesion;
+import data.AbstractDocument;
+import data.Block;
+import data.discourse.SemanticCohesion;
 
 public class SemanticCohesionComplexity implements IComplexityFactors {
 	private final int semanticDistIndex;

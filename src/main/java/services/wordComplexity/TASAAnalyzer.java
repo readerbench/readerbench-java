@@ -24,7 +24,7 @@ import org.apache.log4j.BasicConfigurator;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
-import DAO.Word;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class TASAAnalyzer {

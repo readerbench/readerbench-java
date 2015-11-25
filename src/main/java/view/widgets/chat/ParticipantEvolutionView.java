@@ -8,9 +8,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
 
 public class ParticipantEvolutionView extends JFrame {
 

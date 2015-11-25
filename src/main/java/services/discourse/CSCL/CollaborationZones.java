@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import DAO.Block;
-import DAO.cscl.Conversation;
-import DAO.discourse.CollaborationZone;
+import data.Block;
+import data.cscl.Conversation;
+import data.discourse.CollaborationZone;
 
 public class CollaborationZones {
 

@@ -2,9 +2,9 @@ package services.complexity.discourse;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.Sentence;
+import data.AbstractDocument;
+import data.Block;
+import data.Sentence;
 
 public class DiscourseComplexity implements IComplexityFactors {
 	// average value for block scores

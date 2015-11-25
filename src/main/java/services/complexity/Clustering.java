@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 public class Clustering {
 	static Logger logger = Logger.getLogger(Clustering.class);

@@ -2,9 +2,9 @@ package services.complexity.discourse;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
-import DAO.AbstractDocument;
-import DAO.Block;
-import DAO.discourse.SemanticChain;
+import data.AbstractDocument;
+import data.Block;
+import data.discourse.SemanticChain;
 
 public class DialogismStatisticsComplexity implements IComplexityFactors {
 	public static double getAvgNoVoices(AbstractDocument d) {

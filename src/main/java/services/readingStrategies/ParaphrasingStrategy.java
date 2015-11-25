@@ -5,11 +5,11 @@ import java.awt.Color;
 import org.apache.commons.lang3.StringUtils;
 
 import services.semanticModels.WordNet.OntologySupport;
-import DAO.AnalysisElement;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
+import data.AnalysisElement;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.discourse.SemanticCohesion;
 
 public class ParaphrasingStrategy {
 	private static final Color COLOR_PARAPHRASING = new Color(0, 100, 17);

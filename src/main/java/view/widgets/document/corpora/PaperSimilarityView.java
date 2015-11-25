@@ -69,9 +69,9 @@ import org.openide.util.Lookup;
 import processing.core.PApplet;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
-import DAO.AbstractDocument;
-import DAO.discourse.SemanticCohesion;
-import DAO.document.Document;
+import data.AbstractDocument;
+import data.discourse.SemanticCohesion;
+import data.document.Document;
 import cc.mallet.util.Maths;
 
 public class PaperSimilarityView extends JFrame {

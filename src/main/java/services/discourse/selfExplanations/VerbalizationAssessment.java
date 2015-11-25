@@ -3,9 +3,9 @@ package services.discourse.selfExplanations;
 import org.apache.log4j.Logger;
 
 import services.semanticModels.LSA.LSA;
-import DAO.Block;
-import DAO.discourse.SemanticCohesion;
-import DAO.document.Metacognition;
+import data.Block;
+import data.discourse.SemanticCohesion;
+import data.document.Metacognition;
 
 public class VerbalizationAssessment {
 	static Logger logger = Logger.getLogger(LSA.class);

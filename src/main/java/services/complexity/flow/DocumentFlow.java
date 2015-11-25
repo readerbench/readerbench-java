@@ -7,7 +7,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 import services.complexity.ComplexityIndices;
 
 public class DocumentFlow {
@@ -48,7 +48,8 @@ public class DocumentFlow {
 						}
 					}
 				}
-				if (maxIndex != -1) graph[i][maxIndex] = maxVal;
+				if (maxIndex != -1)
+                    graph[i][maxIndex] = maxVal;
 			}
 			break;
 

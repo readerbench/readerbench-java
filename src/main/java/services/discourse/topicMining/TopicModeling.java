@@ -22,11 +22,11 @@ import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
-import DAO.AbstractDocument;
-import DAO.AnalysisElement;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.Topic;
+import data.AbstractDocument;
+import data.AnalysisElement;
+import data.Word;
+import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
 
 public class TopicModeling {
 	static Logger logger = Logger.getLogger(TopicModeling.class);

@@ -11,7 +11,7 @@ import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 
-import DAO.Word;
+import data.Word;
 import services.commons.Formatting;
 
 public class GenerateSpace {

@@ -24,11 +24,11 @@ import org.jfree.data.gantt.TaskSeriesCollection;
 
 import view.models.document.CustomLineAnnotation;
 import view.models.document.CustomToolTipGenerator;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
+import data.Block;
+import data.Sentence;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
 
 public class ChatTimeEvolution extends JFrame {
 

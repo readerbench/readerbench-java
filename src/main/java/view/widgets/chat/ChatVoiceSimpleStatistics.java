@@ -18,7 +18,7 @@ import javax.swing.table.TableRowSorter;
 
 import services.commons.Formatting;
 
-import DAO.discourse.SemanticChain;
+import data.discourse.SemanticChain;
 
 public class ChatVoiceSimpleStatistics extends JFrame {
 

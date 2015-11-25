@@ -1,7 +1,7 @@
 package services.complexity.flow;
 
-import DAO.AbstractDocument;
-import DAO.discourse.SemanticCohesion;
+import data.AbstractDocument;
+import data.discourse.SemanticCohesion;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 

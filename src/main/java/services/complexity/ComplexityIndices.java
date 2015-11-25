@@ -24,7 +24,7 @@ import services.complexity.syntax.TreeComplexity;
 import services.complexity.wordComplexity.WordComplexity;
 import services.nlp.listOfWords.Connectives;
 import services.nlp.listOfWords.Pronouns;
-import DAO.AbstractDocument;
+import data.AbstractDocument;
 
 /**
  * 

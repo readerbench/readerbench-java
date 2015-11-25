@@ -36,7 +36,7 @@ import javax.swing.event.DocumentListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import DAO.cscl.Community;
+import data.cscl.Community;
 import services.discourse.topicMining.TopicCoverage.TopicClass;
 import utils.localization.LocalizationUtils;
 

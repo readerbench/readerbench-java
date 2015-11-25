@@ -33,12 +33,12 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 
 import view.models.document.CustomToolTipGeneratorVoice;
-import DAO.Block;
-import DAO.Word;
-import DAO.cscl.Conversation;
-import DAO.cscl.Participant;
-import DAO.cscl.Utterance;
-import DAO.discourse.SemanticChain;
+import data.Block;
+import data.Word;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.discourse.SemanticChain;
 
 public class ChatVoiceInterAnimationView extends JFrame {
 

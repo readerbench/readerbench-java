@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import services.commons.VectorAlgebra;
-import DAO.discourse.SemanticChain;
+import data.discourse.SemanticChain;
 
 public class DialogismMeasuresSentiment {
 	static Logger logger = Logger.getLogger(DialogismMeasuresSentiment.class);

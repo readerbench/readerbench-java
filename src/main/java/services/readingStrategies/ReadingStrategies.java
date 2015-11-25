@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.document.Summary;
-import DAO.document.Metacognition;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.document.Summary;
+import data.document.Metacognition;
 
 public class ReadingStrategies {
 	static Logger logger = Logger.getLogger(ReadingStrategies.class);

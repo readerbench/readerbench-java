@@ -7,12 +7,12 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import services.commons.Formatting;
-import DAO.Block;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
-import DAO.document.Summary;
-import DAO.document.Metacognition;
+import data.Block;
+import data.Sentence;
+import data.Word;
+import data.discourse.SemanticCohesion;
+import data.document.Summary;
+import data.document.Metacognition;
 
 public class BridgingStrategy {
 	private static final Color COLOR_BRIDGING = new Color(221, 8, 6);

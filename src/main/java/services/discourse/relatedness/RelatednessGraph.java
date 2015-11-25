@@ -2,12 +2,12 @@ package services.discourse.relatedness;
 
 import org.apache.log4j.Logger;
 
-import DAO.Block;
-import DAO.AbstractDocument;
-import DAO.Sentence;
-import DAO.Word;
-import DAO.discourse.SemanticCohesion;
-import DAO.discourse.SemanticRelatedness;
+import data.Block;
+import data.AbstractDocument;
+import data.Sentence;
+import data.Word;
+import data.discourse.SemanticCohesion;
+import data.discourse.SemanticRelatedness;
 
 /**
  * 
