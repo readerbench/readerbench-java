@@ -375,7 +375,7 @@ public class ReaderBenchServer {
 		// results.add(new Result("Document",
 		// Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
 		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-		logger.info("There are " + rageSentimentsValues.size() + " rage setiments.");
+		//logger.info("There are " + rageSentimentsValues.size() + " rage setiments.");
 		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
 		List<Result> localResults = new ArrayList<Result>();
 		while (it.hasNext()) {
