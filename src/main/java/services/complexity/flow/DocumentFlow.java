@@ -40,16 +40,18 @@ public class DocumentFlow {
 				double maxVal = 0;
 				int maxIndex = -1;
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
-					double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
-					if (coh > 0) {
-						if (coh > maxVal) {
-							maxVal = coh;
-							maxIndex = j;
+					if (doc.getBlockDistances()[i][j] != null) {
+						double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
+						if (coh > 0) {
+							if (coh > maxVal) {
+								maxVal = coh;
+								maxIndex = j;
+							}
 						}
 					}
 				}
 				if (maxIndex != -1)
-                    graph[i][maxIndex] = maxVal;
+					graph[i][maxIndex] = maxVal;
 			}
 			break;
 
@@ -58,11 +60,13 @@ public class DocumentFlow {
 			// determine mean+stdev
 			for (int i = 0; i < doc.getBlocks().size() - 1; i++) {
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
-					double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
-					if (coh > 0) {
-						s0++;
-						s1 += coh;
-						s2 += Math.pow(coh, 2);
+					if (doc.getBlockDistances()[i][j] != null) {
+						double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
+						if (coh > 0) {
+							s0++;
+							s1 += coh;
+							s2 += Math.pow(coh, 2);
+						}
 					}
 				}
 			}
@@ -73,9 +77,11 @@ public class DocumentFlow {
 
 			for (int i = 0; i < doc.getBlocks().size() - 1; i++) {
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
-					double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
-					if (coh >= mean + stdev) {
-						graph[i][j] = coh;
+					if (doc.getBlockDistances()[i][j] != null) {
+						double coh = doc.getBlockDistances()[i][j].getSemanticDistances()[semanticDistanceIndex];
+						if (coh >= mean + stdev) {
+							graph[i][j] = coh;
+						}
 					}
 				}
 			}

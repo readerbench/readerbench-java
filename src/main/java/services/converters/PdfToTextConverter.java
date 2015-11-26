@@ -3,6 +3,7 @@ package services.converters;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -11,7 +12,7 @@ import org.apache.pdfbox.util.PDFTextStripper;
 public class PdfToTextConverter {
 
 	// Extract text from PDF Document
-	static String pdftoText(String fileName) {
+	public static String pdftoText(String fileName) {
 		PDFParser parser;
 		String parsedText = null;;
 		PDFTextStripper pdfStripper = null;
@@ -33,8 +34,9 @@ public class PdfToTextConverter {
 			cosDoc = parser.getDocument();
 			pdfStripper = new PDFTextStripper();
 			pdDoc = new PDDocument(cosDoc);
-			pdfStripper.setStartPage(1);
-			pdfStripper.setEndPage(5);
+			
+			//pdfStripper.setStartPage(1);
+			//pdfStripper.setEndPage(5);
 			parsedText = pdfStripper.getText(pdDoc);
 		} catch (Exception e) {
 			System.err
@@ -51,10 +53,6 @@ public class PdfToTextConverter {
 			}
 		}
 		return parsedText;
-	}
-	
-	public static void main(String args[]){
-		System.out.println(pdftoText("/home/santhosh/pdfbox/test.pdf"));
 	}
 
 }

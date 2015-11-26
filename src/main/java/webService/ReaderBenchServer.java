@@ -40,6 +40,8 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import services.converters.PdfToTextConverter;
+import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
@@ -213,6 +215,24 @@ class ResultEdge implements Comparable<ResultEdge> {
 	}
 }
 
+class ResultPdfToText {
+
+	private String content;
+
+	public ResultPdfToText(String content) {
+		super();
+		this.content = content;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+}
+
 public class ReaderBenchServer {
 
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
@@ -267,7 +287,9 @@ public class ReaderBenchServer {
 		List<ResultEdge> links = new ArrayList<ResultEdge>();
 		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
 
-		List<Topic> topics = queryDoc.getTopics();
+		//List<Topic> topics = queryDoc.getTopics();
+		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50,
+				false, false);
 
 		// build connected graph
 		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
@@ -491,6 +513,11 @@ public class ReaderBenchServer {
 
 		return searchResults;
 	}
+	
+	private ResultPdfToText getTextFromPdf(String uri) {
+		// MS_training_SE_1999
+		return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf"));
+	}
 
 	private String convertToXml(QueryResult queryResult) {
 		Serializer serializer = new Persister();
@@ -522,6 +549,12 @@ public class ReaderBenchServer {
 	}
 
 	private String convertToJson(QueryResultTopic queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
+	private String convertToJson(QueryResultPdfToText queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -604,6 +637,26 @@ public class ReaderBenchServer {
 			success = true;
 			errorMsg = "";
 			data = new ResultTopic(null, null);
+		}
+	}
+	
+	@Root(name = "response")
+	private static class QueryResultPdfToText {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultPdfToText data;
+
+		private QueryResultPdfToText() {
+			success = true;
+			errorMsg = "";
+			data = new ResultPdfToText("");
 		}
 	}
 
@@ -691,6 +744,31 @@ public class ReaderBenchServer {
 			queryResult.data = search(q, setDocuments(path), maxContentSize);
 			String result = convertToJson(queryResult);
 			return result;
+		});
+		Spark.get("/getTopicsFromPdf", (request, response) -> {
+			response.type("application/json");
+
+			String uri = request.queryParams("uri");
+			logger.info("URI primit");
+			logger.info(uri);
+			
+			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
+			queryResult.data = getTextFromPdf(uri);
+			String result = convertToJson(queryResult);*/
+			
+			String q = getTextFromPdf(uri).getContent();
+			String pathToLSA = request.queryParams("lsa");
+			String pathToLDA = request.queryParams("lda");
+			String lang = request.queryParams("lang");
+			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
+			double threshold = Double.parseDouble(request.queryParams("threshold"));
+
+			QueryResultTopic queryResult = new QueryResultTopic();
+			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			String result = convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+			
 		});
 
 	}

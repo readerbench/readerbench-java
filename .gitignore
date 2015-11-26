@@ -38,3 +38,4 @@ Thumbs.db
 *.pptx
 /target/
 !/src/main/resources/META-INF/persistence.xml
+/db.properties
