@@ -1,37 +1,35 @@
 package data.pojo;
 
 import java.io.Serializable;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  *
  * @author Stefan
  */
 @Entity
-@Table(name = "word")
+@Table(name = "category")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Word.findAll", query = "SELECT w FROM Word w"),
-    @NamedQuery(name = "Word.findById", query = "SELECT w FROM Word w WHERE w.id = :id"),
-    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.label = :label"),
-    @NamedQuery(name = "Word.findByPrefix", query = "SELECT w FROM Word w WHERE w.label like :label")})
-public class Word implements Serializable {
-    @JoinColumn(name = "fk_language", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Language fkLanguage;
-
+    @NamedQuery(name = "Category.findAll", query = "SELECT c FROM Category c"),
+    @NamedQuery(name = "Category.findById", query = "SELECT c FROM Category c WHERE c.id = :id"),
+    @NamedQuery(name = "Category.findByLabel", query = "SELECT c FROM Category c WHERE c.label = :label")})
+public class Category implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,18 +39,17 @@ public class Word implements Serializable {
     @Basic(optional = false)
     @Column(name = "label")
     private String label;
-    @JoinColumn(name = "fk_sentiment_entity", referencedColumnName = "id")
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    private SentimentEntity fkSentimentEntity;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkCategory", fetch = FetchType.LAZY)
+    private List<CategoryPhrase> categoryPhraseList;
 
-    public Word() {
+    public Category() {
     }
 
-    public Word(Integer id) {
+    public Category(Integer id) {
         this.id = id;
     }
 
-    public Word(Integer id, String label) {
+    public Category(Integer id, String label) {
         this.id = id;
         this.label = label;
     }
@@ -73,12 +70,14 @@ public class Word implements Serializable {
         this.label = label;
     }
 
-    public SentimentEntity getFkSentimentEntity() {
-        return fkSentimentEntity;
+    @XmlTransient
+    @JsonIgnore
+    public List<CategoryPhrase> getCategoryPhraseList() {
+        return categoryPhraseList;
     }
 
-    public void setFkSentimentEntity(SentimentEntity fkSentimentEntity) {
-        this.fkSentimentEntity = fkSentimentEntity;
+    public void setCategoryPhraseList(List<CategoryPhrase> categoryPhraseList) {
+        this.categoryPhraseList = categoryPhraseList;
     }
 
     @Override
@@ -91,10 +90,10 @@ public class Word implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Word)) {
+        if (!(object instanceof Category)) {
             return false;
         }
-        Word other = (Word) object;
+        Category other = (Category) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -103,15 +102,7 @@ public class Word implements Serializable {
 
     @Override
     public String toString() {
-        return label;
+        return "data.pojo.Category[ id=" + id + " ]";
     }
-
-    public Language getFkLanguage() {
-        return fkLanguage;
-    }
-
-    public void setFkLanguage(Language fkLanguage) {
-        this.fkLanguage = fkLanguage;
-    }
-
+    
 }

@@ -20,18 +20,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author Stefan
  */
 @Entity
-@Table(name = "word")
+@Table(name = "category_phrase")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "Word.findAll", query = "SELECT w FROM Word w"),
-    @NamedQuery(name = "Word.findById", query = "SELECT w FROM Word w WHERE w.id = :id"),
-    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.label = :label"),
-    @NamedQuery(name = "Word.findByPrefix", query = "SELECT w FROM Word w WHERE w.label like :label")})
-public class Word implements Serializable {
-    @JoinColumn(name = "fk_language", referencedColumnName = "id")
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    private Language fkLanguage;
-
+    @NamedQuery(name = "CategoryPhrase.findAll", query = "SELECT c FROM CategoryPhrase c"),
+    @NamedQuery(name = "CategoryPhrase.findById", query = "SELECT c FROM CategoryPhrase c WHERE c.id = :id"),
+    @NamedQuery(name = "CategoryPhrase.findByLabel", query = "SELECT c FROM CategoryPhrase c WHERE c.label = :label")})
+public class CategoryPhrase implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,18 +36,18 @@ public class Word implements Serializable {
     @Basic(optional = false)
     @Column(name = "label")
     private String label;
-    @JoinColumn(name = "fk_sentiment_entity", referencedColumnName = "id")
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    private SentimentEntity fkSentimentEntity;
+    @JoinColumn(name = "fk_category", referencedColumnName = "id")
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Category fkCategory;
 
-    public Word() {
+    public CategoryPhrase() {
     }
 
-    public Word(Integer id) {
+    public CategoryPhrase(Integer id) {
         this.id = id;
     }
 
-    public Word(Integer id, String label) {
+    public CategoryPhrase(Integer id, String label) {
         this.id = id;
         this.label = label;
     }
@@ -73,12 +68,12 @@ public class Word implements Serializable {
         this.label = label;
     }
 
-    public SentimentEntity getFkSentimentEntity() {
-        return fkSentimentEntity;
+    public Category getFkCategory() {
+        return fkCategory;
     }
 
-    public void setFkSentimentEntity(SentimentEntity fkSentimentEntity) {
-        this.fkSentimentEntity = fkSentimentEntity;
+    public void setFkCategory(Category fkCategory) {
+        this.fkCategory = fkCategory;
     }
 
     @Override
@@ -91,10 +86,10 @@ public class Word implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof Word)) {
+        if (!(object instanceof CategoryPhrase)) {
             return false;
         }
-        Word other = (Word) object;
+        CategoryPhrase other = (CategoryPhrase) object;
         if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
             return false;
         }
@@ -103,15 +98,7 @@ public class Word implements Serializable {
 
     @Override
     public String toString() {
-        return label;
+        return "data.pojo.CategoryPhrase[ id=" + id + " ]";
     }
-
-    public Language getFkLanguage() {
-        return fkLanguage;
-    }
-
-    public void setFkLanguage(Language fkLanguage) {
-        this.fkLanguage = fkLanguage;
-    }
-
+    
 }

@@ -7,6 +7,9 @@
     <class>data.pojo.SentimentValence</class>
     <class>data.pojo.SentimentEntity</class>
     <class>data.pojo.EntityXValence</class>
+    <class>data.pojo.Language</class>
+    <class>data.pojo.CategoryPhrase</class>
+    <class>data.pojo.Category</class>
     <properties>
       <property name="hibernate.show_sql" value="false"/>
     </properties>
