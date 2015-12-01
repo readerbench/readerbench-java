@@ -51,5 +51,6 @@ class ParsingParams_FR extends Properties {
 		this.put("parse.flags", "");
 		this.put("parse.buildgraphs", "false");
 		this.put("annotators", "tokenize, ssplit, pos, parse");
+		this.put("numThreads", "8");
 	}
 }
