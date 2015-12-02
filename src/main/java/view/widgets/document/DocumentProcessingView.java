@@ -80,7 +80,6 @@ public class DocumentProcessingView extends JInternalFrame {
 	private JDesktopPane desktopPane;
 	private static File lastDirectory = null;
 
-	private static List<AbstractDocument> allLoadedDocuments = new LinkedList<AbstractDocument>();
 	private static List<Document> loadedDocuments = new LinkedList<Document>();
 	private CustomTextField articleTextField;
 	private CustomTextField authorsTextField;
@@ -114,10 +113,14 @@ public class DocumentProcessingView extends JInternalFrame {
 						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-				DocumentProcessingView.getAllLoadedDocuments().add(d);
-				if (d instanceof Document)
-					DocumentProcessingView.getLoadedDocuments().add((Document) d);
-				addDocument(d);
+				if (d instanceof Document) {
+					addDocument((Document)d);
+				}
+				else {
+					JOptionPane.showMessageDialog(desktopPane, "Please load only a document!", "Information",
+							JOptionPane.INFORMATION_MESSAGE);
+				}
+				
 			} else {
 				JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
@@ -387,13 +390,9 @@ public class DocumentProcessingView extends JInternalFrame {
 				if (event.getClickCount() == 2) {
 					JTable target = (JTable) event.getSource();
 					int row = target.getSelectedRow();
-					if (row >= 0 && row < allLoadedDocuments.size()) {
+					if (row >= 0 && row < loadedDocuments.size()) {
 						int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
-						AbstractDocument d = allLoadedDocuments.get(modelRow);
-						if (d instanceof Conversation) {
-							ChatView view = new ChatView((Conversation) d);
-							view.setVisible(true);
-						}
+						AbstractDocument d = loadedDocuments.get(modelRow);
 						if (d instanceof Document) {
 							DocumentView view = new DocumentView((Document) d);
 							view.setVisible(true);
@@ -535,11 +534,7 @@ public class DocumentProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (docTable.getSelectedRow() != -1) {
 					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument d = allLoadedDocuments.get(modelRow);
-					if (d instanceof Conversation) {
-						ChatView view = new ChatView((Conversation) d);
-						view.setVisible(true);
-					}
+					AbstractDocument d = loadedDocuments.get(modelRow);
 					if (d instanceof Document) {
 						DocumentView view = new DocumentView((Document) d);
 						view.setVisible(true);
@@ -555,7 +550,7 @@ public class DocumentProcessingView extends JInternalFrame {
 		btnViewSimilarDocs.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (docTable.getSelectedRow() != -1) {
-					AbstractDocument d = allLoadedDocuments.get(docTable.getSelectedRow());
+					AbstractDocument d = loadedDocuments.get(docTable.getSelectedRow());
 					if (d instanceof Document) {
 						PaperSimilarityView view = new PaperSimilarityView(loadedDocuments, (Document) d);
 						view.setVisible(true);
@@ -594,9 +589,8 @@ public class DocumentProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (docTable.getSelectedRow() != -1) {
 					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument toRemove = allLoadedDocuments.get(modelRow);
+					AbstractDocument toRemove = loadedDocuments.get(modelRow);
 					loadedDocuments.remove(toRemove);
-					allLoadedDocuments.remove(toRemove);
 					docTableModel.removeRow(modelRow);
 				} else {
 					JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
@@ -608,10 +602,6 @@ public class DocumentProcessingView extends JInternalFrame {
 
 		setContentPane(desktopPane);
 		updateContents();
-	}
-
-	public static List<AbstractDocument> getAllLoadedDocuments() {
-		return allLoadedDocuments;
 	}
 
 	public static List<Document> getLoadedDocuments() {
@@ -627,46 +617,41 @@ public class DocumentProcessingView extends JInternalFrame {
 		return out;
 	}
 
-	public void addDocument(AbstractDocument d) {
+	public void addDocument(Document d) {
 		if (docTableModel != null) {
-			synchronized (docTableModel) {
+			synchronized (loadedDocuments) {
+				// add rows as loaded documents
+				Vector<Object> dataRow = new Vector<Object>();
 
-				synchronized (allLoadedDocuments) {
-					// add rows as loaded documents
-					Vector<Object> dataRow = new Vector<Object>();
-
-					dataRow.add(d.getTitleText());
-					if (d instanceof Document) {
-						dataRow.add(getStringFromList(((Document) d).getAuthors()));
-					} else {
-						dataRow.add("");
-					}
-					if (d.getLSA() != null) {
-						dataRow.add(d.getLSA().getPath());
-					} else {
-						dataRow.add("");
-					}
-					if (d.getLDA() != null) {
-						dataRow.add(d.getLDA().getPath());
-					} else {
-						dataRow.add("");
-					}
-					
-					docTableModel.addRow(dataRow);
-				}
-
-				if (allLoadedDocuments.size() > 0) {
-					btnRemoveDocument.setEnabled(true);
-					btnViewDocument.setEnabled(true);
-					btnViewSimilarDocs.setEnabled(true);
+				dataRow.add(d.getTitleText());
+				dataRow.add(getStringFromList(((Document) d).getAuthors()));
+				if (d.getLSA() != null) {
+					dataRow.add(d.getLSA().getPath());
 				} else {
-					btnRemoveDocument.setEnabled(false);
-					btnViewDocument.setEnabled(false);
-					btnViewSimilarDocs.setEnabled(false);
+					dataRow.add("");
 				}
-
-				docTableModel.fireTableDataChanged();
+				if (d.getLDA() != null) {
+					dataRow.add(d.getLDA().getPath());
+				} else {
+					dataRow.add("");
+				}
+				
+				docTableModel.addRow(dataRow);
+				loadedDocuments.add(d);
 			}
+
+			if (loadedDocuments.size() > 0) {
+				btnRemoveDocument.setEnabled(true);
+				btnViewDocument.setEnabled(true);
+				btnViewSimilarDocs.setEnabled(true);
+			} else {
+				btnRemoveDocument.setEnabled(false);
+				btnViewDocument.setEnabled(false);
+				btnViewSimilarDocs.setEnabled(false);
+			}
+
+			docTableModel.fireTableDataChanged();
+			
 		}
 	}
 
@@ -678,8 +663,8 @@ public class DocumentProcessingView extends JInternalFrame {
 					docTableModel.removeRow(0);
 				}
 
-				synchronized (allLoadedDocuments) {
-					for (AbstractDocument d : allLoadedDocuments) {
+				synchronized (loadedDocuments) {
+					for (AbstractDocument d : loadedDocuments) {
 						// add rows as loaded documents
 						Vector<Object> dataRow = new Vector<Object>();
 
@@ -691,6 +676,9 @@ public class DocumentProcessingView extends JInternalFrame {
 								continue;
 							if (!authors.toLowerCase().contains(queryAuthorName.toLowerCase()))
 								continue;
+						}
+						else {
+							continue;
 						}
 
 						dataRow.add(d.getTitleText());
@@ -716,7 +704,7 @@ public class DocumentProcessingView extends JInternalFrame {
 						docTableModel.addRow(dataRow);
 					}
 
-					if (allLoadedDocuments.size() > 0) {
+					if (loadedDocuments.size() > 0) {
 						btnRemoveDocument.setEnabled(true);
 						btnViewDocument.setEnabled(true);
 						btnViewSimilarDocs.setEnabled(true);

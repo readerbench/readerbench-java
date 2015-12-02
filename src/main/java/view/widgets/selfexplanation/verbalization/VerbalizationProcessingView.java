@@ -196,7 +196,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		btnAddVerbalization.setEnabled(true);
 		btnAddVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getAllLoadedDocuments().size() > 0) {
+				if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
 					try {
 						JInternalFrame frame = new AddVerbalizationView(
 								VerbalizationProcessingView.this);

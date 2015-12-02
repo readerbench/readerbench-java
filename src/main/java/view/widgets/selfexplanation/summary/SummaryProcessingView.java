@@ -193,7 +193,7 @@ public class SummaryProcessingView extends JInternalFrame {
 		btnAddSummary.setEnabled(true);
 		btnAddSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getAllLoadedDocuments().size() > 0) {
+				if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
 					try {
 						JInternalFrame frame = new AddSummaryView(
 								SummaryProcessingView.this);
