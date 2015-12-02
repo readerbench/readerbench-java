@@ -114,7 +114,6 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-				DocumentProcessingView.getAllLoadedDocuments().add(d);
 				if (d instanceof Document)
 					DocumentProcessingView.getLoadedDocuments().add((Document) d);
 				addDocument(d);
