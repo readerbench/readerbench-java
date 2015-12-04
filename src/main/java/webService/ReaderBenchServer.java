@@ -14,6 +14,8 @@ import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
@@ -27,12 +29,15 @@ import com.google.gson.GsonBuilder;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.dao.CategoryDAO;
 import data.Block;
 import data.Sentence;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
+import data.pojo.Category;
+import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentGrid;
 import data.sentiment.SentimentValence;
 import data.sentiment.SentimentWeights;
@@ -139,6 +144,92 @@ class ResultTopic {
 	public ResultTopic(List<ResultNode> nodes, List<ResultEdge> links) {
 		this.nodes = nodes;
 		this.links = links;
+	}
+
+}
+
+
+class ResultKeyword implements Comparable<ResultCategory> {
+	
+	private String name;
+	private int noOccurences;
+	private double relevance;
+	
+	public ResultKeyword(String name, int noOccurences, double relevance) {
+		this.name = name;
+		this.noOccurences = noOccurences;
+		this.relevance = relevance;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	private int getNoOccurences() {
+		return noOccurences;
+	}
+
+	public double getRelevance() {
+		return relevance;
+	}
+
+	@Override
+	public int compareTo(ResultCategory o) {
+		return (int) Math.signum(o.getRelevance() - this.getRelevance());
+	}
+	
+}
+
+class ResultCategory implements Comparable<ResultCategory> {
+	
+	private String name;
+	private double relevance;
+	
+	public ResultCategory(String name, double relevance) {
+		this.name = name;
+		this.relevance = relevance;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public double getRelevance() {
+		return relevance;
+	}
+
+	@Override
+	public int compareTo(ResultCategory o) {
+		return (int) Math.signum(o.getRelevance() - this.getRelevance());
+	}
+	
+}
+
+
+class ResultSemanticAnnotation {
+	
+	private ResultTopic concepts;
+	
+	private double abstractDocumentRelevance;
+	private double keywordsAbstractRelevance;
+	private double keywordsDocumentRelevance;
+	
+	private List<ResultKeyword> keywords;
+	private List<ResultCategory> categories;
+
+	public ResultSemanticAnnotation(
+			ResultTopic resultTopic,
+			double abstractDocumentRelevance,
+			double keywordsAbstractRelevance,
+			double keywordsDocumentRelevance,
+			List<ResultKeyword> resultKeywords,
+			List<ResultCategory> resultCategories) {
+		this.concepts = resultTopic;
+		this.abstractDocumentRelevance = abstractDocumentRelevance;
+		this.keywordsAbstractRelevance = keywordsAbstractRelevance;
+		this.keywordsDocumentRelevance = keywordsDocumentRelevance;
+		this.keywords = resultKeywords;
+		this.categories = resultCategories;
 	}
 
 }
@@ -514,6 +605,104 @@ public class ReaderBenchServer {
 		return searchResults;
 	}
 	
+	public List<ResultKeyword> getKeywords(
+			String documentKeywords,
+			String documentContent,
+			String pathToLSA,
+			String pathToLDA,
+			String lang,
+			boolean usePOSTagging,
+			double threshold) {
+		
+		List<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
+		
+		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
+		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging);
+		queryKey.computeAll(null, null);
+		
+		for (Word keyword : queryKey.getWordOccurences().keySet()) {
+			AbstractDocument queryKeyword = processQuery(keyword.getLemma(), pathToLSA, pathToLDA, lang, usePOSTagging);
+			SemanticCohesion sc = new SemanticCohesion(queryKeyword, queryDoc);
+			int occ = 0;
+			if (queryDoc.getWordOccurences().containsKey(keyword)) {
+				occ = queryDoc.getWordOccurences().get(keyword).intValue();
+			}
+			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, sc.getCohesion()));
+		}
+		
+		return resultKeywords;
+		
+	}
+	
+	public List<ResultCategory> getCategories(
+			String documentContent,
+			String pathToLSA,
+			String pathToLDA,
+			String lang,
+			boolean usePOSTagging,
+			double threshold) {
+		
+		List<ResultCategory> resultCategories = new ArrayList<ResultCategory>();
+		
+		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
+		List<Category> dbCategories = CategoryDAO.getInstance().findAll();
+		
+		for (Category cat : dbCategories) {
+			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
+			StringBuilder sb = new StringBuilder();
+			for (CategoryPhrase categoryPhrase : categoryPhrases) {
+				sb.append(categoryPhrase.getLabel());
+				sb.append(" ");
+			}
+			
+			AbstractDocument queryCategory = processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging);
+			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
+			resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion()));
+		}
+		
+		return resultCategories;
+		
+	}
+	
+	private ResultSemanticAnnotation getSemanticAnnotation(
+			String documentAbstract,
+			String documentKeywords,
+			String documentContent,
+			String pathToLSA,
+			String pathToLDA,
+			String lang,
+			boolean usePOSTagging,
+			double threshold) {
+		
+		// concepts
+		ResultTopic resultTopic = getTopics(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+
+		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
+		AbstractDocument queryAbs = processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging);
+		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging);
+		
+		// (abstract, document) relevance
+		SemanticCohesion scAbstractDocument = new SemanticCohesion(queryAbs, queryDoc);
+		
+		// (abstract, keywords) relevance
+		SemanticCohesion scKeywordsAbstract = new SemanticCohesion(queryKey, queryAbs);
+		
+		// (keywords, document) relevance
+		SemanticCohesion scKeywordsDocument = new SemanticCohesion(queryKey, queryDoc);
+		
+		ResultSemanticAnnotation rsa = new ResultSemanticAnnotation(
+				resultTopic,
+				scAbstractDocument.getCohesion(),
+				scKeywordsAbstract.getCohesion(),
+				scKeywordsDocument.getCohesion(),
+				resultKeywords,
+				resultCategories);
+		
+		return rsa;
+	}
+	
 	private ResultPdfToText getTextFromPdf(String uri) {
 		// MS_training_SE_1999
 		return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf"));
@@ -555,6 +744,12 @@ public class ReaderBenchServer {
 	}
 	
 	private String convertToJson(QueryResultPdfToText queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
+	private String convertToJson(QueryResultSemanticAnnotation queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -637,6 +832,26 @@ public class ReaderBenchServer {
 			success = true;
 			errorMsg = "";
 			data = new ResultTopic(null, null);
+		}
+	}
+	
+	@Root(name = "response")
+	private static class QueryResultSemanticAnnotation {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultSemanticAnnotation data; // list of query results (urls)
+
+		private QueryResultSemanticAnnotation() {
+			success = true;
+			errorMsg = "";
+			data = new ResultSemanticAnnotation(null, 0, 0, 0, null, null);
 		}
 	}
 	
@@ -765,6 +980,45 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			String result = convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+			
+		});
+		Spark.post("/semanticProcess", (request, response) -> {
+			JSONObject json = (JSONObject)new JSONParser().parse(request.body());
+			
+			response.type("application/json");
+
+			String uri = (String) json.get("q");
+			logger.info("URI primit");
+			logger.info(uri);
+			
+			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
+			queryResult.data = getTextFromPdf(uri);
+			String result = convertToJson(queryResult);*/
+			
+			String documentContent = getTextFromPdf(uri).getContent();
+			
+			String documentAbstract = (String) json.get("abstract");
+			String documentKeywords = (String) json.get("keywords");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			double threshold = (double) json.get("threshold");
+
+			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+			queryResult.data = getSemanticAnnotation(
+					documentAbstract,
+					documentKeywords,
+					documentContent,
+					pathToLSA,
+					pathToLDA,
+					lang,
+					usePOSTagging,
+					threshold
+			);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
