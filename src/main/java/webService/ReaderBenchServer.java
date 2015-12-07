@@ -703,9 +703,14 @@ public class ReaderBenchServer {
 		return rsa;
 	}
 	
-	private ResultPdfToText getTextFromPdf(String uri) {
+	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
 		// MS_training_SE_1999
-		return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf"));
+		if (localFile) {
+			return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
+		}
+		else {
+			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, false));
+		}
 	}
 
 	private String convertToXml(QueryResult queryResult) {
@@ -971,7 +976,7 @@ public class ReaderBenchServer {
 			queryResult.data = getTextFromPdf(uri);
 			String result = convertToJson(queryResult);*/
 			
-			String q = getTextFromPdf(uri).getContent();
+			String q = getTextFromPdf(uri, true).getContent();
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
@@ -990,15 +995,26 @@ public class ReaderBenchServer {
 			
 			response.type("application/json");
 
-			String uri = (String) json.get("q");
-			logger.info("URI primit");
-			logger.info(uri);
+			String uri = (String) json.get("uri");
+			String url = (String) json.get("url");
 			
 			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
 			queryResult.data = getTextFromPdf(uri);
 			String result = convertToJson(queryResult);*/
 			
-			String documentContent = getTextFromPdf(uri).getContent();
+			String documentContent = null;
+			if (uri != null && !uri.isEmpty()) {
+				documentContent = getTextFromPdf(uri, true).getContent();
+			}
+			else {
+				if (url != null && !url.isEmpty()) {
+					documentContent = getTextFromPdf(url, false).getContent();
+				}
+				else {
+					logger.error("URI an URL are empty. Aborting...");
+					System.exit(-1);
+				}
+			}
 			
 			String documentAbstract = (String) json.get("abstract");
 			String documentKeywords = (String) json.get("keywords");
