@@ -2,11 +2,12 @@ package services.complexity.lexicalChains;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.lexicalChains.LexicalChain;
 
-public class LexicalChainsComplexity implements IComplexityFactors {
+public class LexicalChainsComplexity extends IComplexityFactors {
 
 	public static double getAvgBlockLexicalChains(AbstractDocument d) {
 		int noChains = 0;
@@ -64,26 +65,30 @@ public class LexicalChainsComplexity implements IComplexityFactors {
 		return ComplexityIndices.IDENTITY;
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Discourse Factors (Lexical chains)";
+		return LocalizationUtils.getTranslation("Discourse Factors (Lexical chains)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.LEXICAL_CHAINS_AVERAGE_SPAN] = "Average span of lexical chains";
-		names[ComplexityIndices.LEXICAL_CHAINS_MAX_SPAN] = "Maximum span of lexical chains normalized by "
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.LEXICAL_CHAINS_AVERAGE_SPAN] = LocalizationUtils.getTranslation("Average span of lexical chains");
+		descriptions[ComplexityIndices.LEXICAL_CHAINS_MAX_SPAN] = LocalizationUtils.getTranslation("Maximum span of lexical chains normalized by") + " "
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words";
-		names[ComplexityIndices.AVERAGE_NO_LEXICAL_CHAINS] = "Average paragraph number of lexical chains with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.AVERAGE_NO_LEXICAL_CHAINS] = LocalizationUtils.getTranslation("Average paragraph number of lexical chains with more concepts than") + " "
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words";
-		names[ComplexityIndices.PERCENTAGE_LEXICAL_CHAINS_COVERAGE] = "Percentage of words that are included in lexical chains with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.PERCENTAGE_LEXICAL_CHAINS_COVERAGE] = LocalizationUtils.getTranslation("Percentage of words that are included in lexical chains with more concepts than")+" "
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words";
+				+ "% " + LocalizationUtils.getTranslation("document content words");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.LEXICAL_CHAINS_AVERAGE_SPAN] = this.getComplexityIndexAcronym("LEXICAL_CHAINS_AVERAGE_SPAN");
+		acronyms[ComplexityIndices.LEXICAL_CHAINS_MAX_SPAN] = this.getComplexityIndexAcronym("LEXICAL_CHAINS_MAX_SPAN");
+		acronyms[ComplexityIndices.AVERAGE_NO_LEXICAL_CHAINS] = this.getComplexityIndexAcronym("AVERAGE_NO_LEXICAL_CHAINS");
+		acronyms[ComplexityIndices.PERCENTAGE_LEXICAL_CHAINS_COVERAGE] = this.getComplexityIndexAcronym("PERCENTAGE_LEXICAL_CHAINS_COVERAGE");
 	}
 
-	@Override
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.LEXICAL_CHAINS_AVERAGE_SPAN] = LexicalChainsComplexity
 				.getAvgSpan(d);
@@ -95,7 +100,6 @@ public class LexicalChainsComplexity implements IComplexityFactors {
 				.getCoverage(d);
 	}
 
-	@Override
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.LEXICAL_CHAINS_AVERAGE_SPAN,
 				ComplexityIndices.LEXICAL_CHAINS_MAX_SPAN,

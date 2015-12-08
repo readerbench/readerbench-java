@@ -5,12 +5,13 @@ import java.util.TreeSet;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.Word;
 
-public class POSComplexity implements IComplexityFactors {
+public class POSComplexity extends IComplexityFactors {
 	public static double getAveragePOSperSentence(AbstractDocument d, String pos) {
 		// available POS: NN, PR (pronoun), VB, RB (adverb), JJ (adjective), IN
 		// (preposition)
@@ -73,32 +74,58 @@ public class POSComplexity implements IComplexityFactors {
 			return ((double) uniqueEntity.size()) / noBlocks;
 		return ComplexityIndices.IDENTITY;
 	}
-
+	
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_NO_NOUNS_PER_BLOCK] = "Average number of nouns per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_BLOCK] = "Average number of pronouns per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_VERBS_PER_BLOCK] = "Average number of verbs per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_BLOCK] = "Average number of adverbs per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_BLOCK] = "Average number of adjectives per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_BLOCK] = "Average number of prepositions per paragraph";
-		
-		names[ComplexityIndices.AVERAGE_NO_NOUNS_PER_SENTENCE] = "Average number of nouns per sentence";
-		names[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_SENTENCE] = "Average number of pronouns per sentence";
-		names[ComplexityIndices.AVERAGE_NO_VERBS_PER_SENTENCE] = "Average number of verbs per sentence";
-		names[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_SENTENCE] = "Average number of adverbs per sentence";
-		names[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_SENTENCE] = "Average number of adjectives per sentence";
-		names[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE] = "Average number of prepositions per sentence";
-		names[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE] = "Average number of prepositions per sentence";
-		
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK] = "Average number of unique nouns per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK] = "Average number of unique pronouns per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK] = "Average number of unique verbs per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK] = "Average number of unique adverbs per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK] = "Average number of unique adjectives per paragraph";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK] = "Average number of unique prepositions per paragraph";
+	public String getClassName() {
+		return LocalizationUtils.getTranslation("Syntax (Part of speech statistics)");
 	}
 
+	@Override
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_NO_NOUNS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of nouns per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of pronouns per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_VERBS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of verbs per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of adverbs per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of adjectives per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of prepositions per paragraph");
+		
+		descriptions[ComplexityIndices.AVERAGE_NO_NOUNS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of nouns per sentence");
+		descriptions[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of pronouns per sentence");
+		descriptions[ComplexityIndices.AVERAGE_NO_VERBS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of verbs per sentence");
+		descriptions[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of adverbs per sentence");
+		descriptions[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of adjectives per sentence");
+		descriptions[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of prepositions per sentence");
+		
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique nouns per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique pronouns per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique verbs per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique adverbs per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique adjectives per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique prepositions per paragraph");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_NO_NOUNS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_NOUNS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_PRONOUNS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_VERBS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_VERBS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_ADVERBS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_ADJECTIVES_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_PREPOSITIONS_PER_BLOCK");
+		
+		acronyms[ComplexityIndices.AVERAGE_NO_NOUNS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_NOUNS_PER_SENTENCE");
+		acronyms[ComplexityIndices.AVERAGE_NO_PRONOUNS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_PRONOUNS_PER_SENTENCE");
+		acronyms[ComplexityIndices.AVERAGE_NO_VERBS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_VERBS_PER_SENTENCE");
+		acronyms[ComplexityIndices.AVERAGE_NO_ADVERBS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_ADVERBS_PER_SENTENCE");
+		acronyms[ComplexityIndices.AVERAGE_NO_ADJECTIVES_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_ADJECTIVES_PER_SENTENCE");
+		acronyms[ComplexityIndices.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_PREPOSITIONS_PER_SENTENCE");
+		
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK");
+	}
+		
 	@Override
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_NO_NOUNS_PER_BLOCK] = POSComplexity
@@ -139,11 +166,6 @@ public class POSComplexity implements IComplexityFactors {
 				.getAverageUniquePOSperBlock(d, "JJ");
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK] = POSComplexity
 				.getAverageUniquePOSperBlock(d, "IN");
-	}
-
-	@Override
-	public String getClassName() {
-		return "Syntax (Part of speech statistics)";
 	}
 
 	@Override

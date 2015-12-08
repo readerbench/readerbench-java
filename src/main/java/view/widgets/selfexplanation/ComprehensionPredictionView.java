@@ -97,7 +97,7 @@ public class ComprehensionPredictionView extends JFrame {
 				for (int index : ComplexityIndicesView
 						.getSelectedMeasurements()) {
 					Test(new int[] { index },
-							ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[index]);
+							ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[index]);
 				}
 				for (int index : ReadingStrategiesIndicesView
 						.getSelectedMeasurements()) {
@@ -137,7 +137,7 @@ public class ComprehensionPredictionView extends JFrame {
 					BufferedWriter file = new BufferedWriter(fstream);
 
 					file.write("Filename,Comprehension score,Comprehension class");
-					for (String s : ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES)
+					for (String s : ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS)
 						file.write("," + s);
 					for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES)
 						file.write("," + s);

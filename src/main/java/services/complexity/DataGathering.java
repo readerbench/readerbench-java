@@ -33,7 +33,7 @@ public class DataGathering {
 			BufferedWriter out = new BufferedWriter(fstream);
 			out.write("Grade Level,File name,Genre,Complexity");
 			for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
-				out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[i]);
+				out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
 			out.close();
 		} catch (Exception e) {
 			logger.error("Runtime error while initializing measurements.csv file");

@@ -218,7 +218,7 @@ public class CorpusEvaluationView extends JFrame {
 				for (int index : ComplexityIndicesView
 						.getSelectedMeasurements()) {
 					Test(new int[] { index },
-							ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[index]);
+							ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[index]);
 				}
 			}
 

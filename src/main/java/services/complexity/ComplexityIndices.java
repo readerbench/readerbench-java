@@ -227,13 +227,19 @@ public class ComplexityIndices {
 			new DocumentFlowComplexity(5, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
 			new DocumentFlowComplexity(5, DocumentFlow.Criteria.MAX_VALUE) };
 
-	public static String TEXTUAL_COMPLEXITY_INDEX_NAMES[] = new String[NO_COMPLEXITY_INDICES];
-
+	//public static String TEXTUAL_COMPLEXITY_INDEX_NAMES[] = new String[NO_COMPLEXITY_INDICES];
+	public static String TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[] = new String[NO_COMPLEXITY_INDICES];
 	static {
 		for (IComplexityFactors f : TEXTUAL_COMPLEXITY_FACTORS)
-			f.setComplexityFactorNames(TEXTUAL_COMPLEXITY_INDEX_NAMES);
+			f.setComplexityIndexDescription(TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS);
 	}
 
+	public static String TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[] = new String[NO_COMPLEXITY_INDICES];
+	static {
+		for (IComplexityFactors f : TEXTUAL_COMPLEXITY_FACTORS)
+			f.setComplexityIndexAcronym(TEXTUAL_COMPLEXITY_INDEX_ACRONYMS);
+	}
+	
 	public static void computeComplexityFactors(AbstractDocument d) {
 		d.setComplexityIndices(new double[NO_COMPLEXITY_INDICES]);
 		for (IComplexityFactors f : TEXTUAL_COMPLEXITY_FACTORS)
@@ -244,7 +250,7 @@ public class ComplexityIndices {
 		for (IComplexityFactors factors : TEXTUAL_COMPLEXITY_FACTORS) {
 			System.out.println(factors.getClassName());
 			for (int i : factors.getIDs())
-				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_NAMES[i]);
+				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[i]);
 		}
 		System.out.println("TOTAL:" + NO_COMPLEXITY_INDICES + " factors");
 	}

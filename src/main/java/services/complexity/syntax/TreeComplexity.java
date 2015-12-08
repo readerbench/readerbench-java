@@ -2,10 +2,11 @@ package services.complexity.syntax;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Sentence;
 
-public class TreeComplexity implements IComplexityFactors {
+public class TreeComplexity extends IComplexityFactors {
 	public static double getAverageTreeSize(AbstractDocument d) {
 		int noSentences = 0, size = 0;
 		for (Sentence s : d.getSentencesInDocument()) {
@@ -47,12 +48,21 @@ public class TreeComplexity implements IComplexityFactors {
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_TREE_DEPTH] = "Average parsing tree depth";
-		names[ComplexityIndices.AVERAGE_TREE_SIZE] = "Average parsing tree size";
-		names[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = "Average number of dependencies from the syntactic graph (EN only)";
+	public String getClassName() {
+		return LocalizationUtils.getTranslation("Syntax (Parsing tree complexity)");
 	}
-
+	@Override
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_TREE_DEPTH] = LocalizationUtils.getTranslation("Average parsing tree depth");
+		descriptions[ComplexityIndices.AVERAGE_TREE_SIZE] = LocalizationUtils.getTranslation("Average parsing tree size");
+		descriptions[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = LocalizationUtils.getTranslation("Average number of dependencies from the syntactic graph (EN only)");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_TREE_DEPTH] = this.getComplexityIndexAcronym("AVERAGE_TREE_DEPTH");
+		acronyms[ComplexityIndices.AVERAGE_TREE_SIZE] = this.getComplexityIndexAcronym("AVERAGE_TREE_SIZE");
+		acronyms[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = this.getComplexityIndexAcronym("AVERAGE_NO_SEMANTIC_DEPENDENCIES");
+	}
+	
 	@Override
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_TREE_DEPTH] = TreeComplexity
@@ -61,11 +71,6 @@ public class TreeComplexity implements IComplexityFactors {
 				.getAverageTreeSize(d);
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = TreeComplexity
 				.getAverageNoDependencies(d);
-	}
-
-	@Override
-	public String getClassName() {
-		return "Syntax (Parsing tree complexity)";
 	}
 
 	@Override

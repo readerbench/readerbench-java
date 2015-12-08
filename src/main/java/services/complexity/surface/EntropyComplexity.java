@@ -5,12 +5,13 @@ import java.util.Map;
 
 import services.complexity.IComplexityFactors;
 import services.complexity.ComplexityIndices;
+import utils.localization.LocalizationUtils;
 import data.Block;
 import data.AbstractDocument;
 import data.Sentence;
 import data.Word;
 
-public class EntropyComplexity implements IComplexityFactors {
+public class EntropyComplexity extends IComplexityFactors {
 	public static double getStemEntropy(AbstractDocument d) {
 		double entropy = 0;
 		Map<String, Integer> occurences = new HashMap<String, Integer>();
@@ -65,13 +66,18 @@ public class EntropyComplexity implements IComplexityFactors {
 
 	@Override
 	public String getClassName() {
-		return "Surface Factors (Entropy)";
+		return LocalizationUtils.getTranslation("Surface Factors (Entropy)");
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.WORD_ENTROPY] = "Word entropy";
-		names[ComplexityIndices.CHAR_ENTROPY] = "Character entropy";
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.WORD_ENTROPY] = LocalizationUtils.getTranslation("Word entropy");
+		descriptions[ComplexityIndices.CHAR_ENTROPY] = LocalizationUtils.getTranslation("Character entropy");
+	}
+	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.WORD_ENTROPY] = this.getComplexityIndexAcronym("WORD_ENTROPY");
+		acronyms[ComplexityIndices.CHAR_ENTROPY] = this.getComplexityIndexAcronym("CHAR_ENTROPY");
 	}
 
 	@Override

@@ -2,11 +2,12 @@ package services.complexity.discourse;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 
-public class DiscourseComplexity implements IComplexityFactors {
+public class DiscourseComplexity extends IComplexityFactors {
 	// average value for block scores
 	private static double getAvgBlockScore(AbstractDocument d) {
 		int noBlocks = 0, sum = 0;
@@ -89,22 +90,28 @@ public class DiscourseComplexity implements IComplexityFactors {
 		return ComplexityIndices.IDENTITY;
 	}
 
-	@Override
 	public String getClassName() {
-		return "Discourse Factors (Cohesion-based scoring mechanism)";
+		return LocalizationUtils.getTranslation("Discourse Factors (Cohesion based scoring mechanism)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_BLOCK_SCORE] = "Average paragraph score";
-		names[ComplexityIndices.BLOCK_SCORE_STANDARD_DEVIATION] = "Paragraph score standard deviation";
-		names[ComplexityIndices.AVERAGE_SENTENCE_SCORE] = "Average sentence score";
-		names[ComplexityIndices.SENTENCE_SCORE_STANDARD_DEVIATION] = "Sentence score standard deviation";
-		names[ComplexityIndices.AVERAGE_TOP10_KEYWORDS_RELEVANCE] = "Average relevance of top 10 keywords";
-		names[ComplexityIndices.TOP10_KEYWORDS_RELEVANCE_STANDARD_DEVIATION] = "Standard deviation of the relevance of top 10 keywords";
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_SCORE] = LocalizationUtils.getTranslation("Average paragraph score");
+		descriptions[ComplexityIndices.BLOCK_SCORE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Paragraph score standard deviation");
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_SCORE] = LocalizationUtils.getTranslation("Average sentence score");
+		descriptions[ComplexityIndices.SENTENCE_SCORE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Sentence score standard deviation");
+		descriptions[ComplexityIndices.AVERAGE_TOP10_KEYWORDS_RELEVANCE] = LocalizationUtils.getTranslation("Average relevance of top 10 keywords");
+		descriptions[ComplexityIndices.TOP10_KEYWORDS_RELEVANCE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of the relevance of top 10 keywords");
 	}
-
-	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_SCORE] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_SCORE");
+		acronyms[ComplexityIndices.BLOCK_SCORE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("BLOCK_SCORE_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_SCORE] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_SCORE");
+		acronyms[ComplexityIndices.SENTENCE_SCORE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("SENTENCE_SCORE_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_TOP10_KEYWORDS_RELEVANCE] = this.getComplexityIndexAcronym("AVERAGE_TOP10_KEYWORDS_RELEVANCE");
+		acronyms[ComplexityIndices.TOP10_KEYWORDS_RELEVANCE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("TOP10_KEYWORDS_RELEVANCE_STANDARD_DEVIATION");
+	}
+	
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_BLOCK_SCORE] = DiscourseComplexity
 				.getAvgBlockScore(d);
@@ -120,7 +127,7 @@ public class DiscourseComplexity implements IComplexityFactors {
 				.getTop10TopicsRelevanceStandardDeviation(d);
 	}
 
-	@Override
+	
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.AVERAGE_BLOCK_SCORE,
 				ComplexityIndices.BLOCK_SCORE_STANDARD_DEVIATION,
