@@ -174,37 +174,37 @@ public class DocumentFlowView extends JFrame {
 			}
 		}
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\n");
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\n");
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_ADJACENCY_ACCURACY
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ADJACENCY_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\n");
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_SPEARMAN_CORRELATION
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_SPEARMAN_CORRELATION
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getSpearmanCorrelation()) + "\n");
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_MAX_ORDERED_SEQUENCE
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_MAX_ORDERED_SEQUENCE
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getMaxOrderedSequence()) + "\n");
 		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[ComplexityIndices.DOC_FLOW_AVERAGE_COHESION
+				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_AVERAGE_COHESION
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]

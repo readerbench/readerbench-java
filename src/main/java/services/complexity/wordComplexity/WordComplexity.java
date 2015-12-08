@@ -9,13 +9,14 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.complexity.readability.Syllable;
 import services.semanticModels.WordNet.OntologySupport;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Word;
 import edu.cmu.lti.jawjaw.JAWJAW;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.cmu.lti.jawjaw.pobj.Sense;
 
-public class WordComplexity implements IComplexityFactors {
+public class WordComplexity extends IComplexityFactors {
 
 	private static int getSyllables(Word word) {
 		return Syllable.syllable(word.getLemma());
@@ -180,16 +181,23 @@ public class WordComplexity implements IComplexityFactors {
 
 	@Override
 	public String getClassName() {
-		return "Word Complexity Factors";
+		return LocalizationUtils.getTranslation("Word Complexity Factors");
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_WORD_DIFF_LEMMA_STEM] = "Average distance between lemma and word stems (only content words)";
-		names[ComplexityIndices.AVERAGE_WORD_DIFF_WORD_STEM] = "Average distance between words and corresponding stems (only content words)";
-		names[ComplexityIndices.AVERAGE_WORD_DEPTH_HYPERNYM_TREE] = "Average word depth in hypernym tree (only content words)";
-		names[ComplexityIndices.AVERAGE_WORD_POLYSEMY_COUNT] = "Average word polysemy count (only content words)";
-		names[ComplexityIndices.AVERAGE_WORD_SYLLABLE_COUNT] = "Average word syllable count (lemmas for content words) (EN only)";
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_WORD_DIFF_LEMMA_STEM] = LocalizationUtils.getTranslation("Average distance between lemma and word stems (only content words)");
+		descriptions[ComplexityIndices.AVERAGE_WORD_DIFF_WORD_STEM] = LocalizationUtils.getTranslation("Average distance between words and corresponding stems (only content words)");
+		descriptions[ComplexityIndices.AVERAGE_WORD_DEPTH_HYPERNYM_TREE] = LocalizationUtils.getTranslation("Average word depth in hypernym tree (only content words)");
+		descriptions[ComplexityIndices.AVERAGE_WORD_POLYSEMY_COUNT] = LocalizationUtils.getTranslation("Average word polysemy count (only content words)");
+		descriptions[ComplexityIndices.AVERAGE_WORD_SYLLABLE_COUNT] = LocalizationUtils.getTranslation("Average word syllable count (lemmas for content words) (EN only)");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_WORD_DIFF_LEMMA_STEM] = this.getComplexityIndexAcronym("AVERAGE_WORD_DIFF_LEMMA_STEM");
+		acronyms[ComplexityIndices.AVERAGE_WORD_DIFF_WORD_STEM] = this.getComplexityIndexAcronym("AVERAGE_WORD_DIFF_WORD_STEM");
+		acronyms[ComplexityIndices.AVERAGE_WORD_DEPTH_HYPERNYM_TREE] = this.getComplexityIndexAcronym("AVERAGE_WORD_DEPTH_HYPERNYM_TREE");
+		acronyms[ComplexityIndices.AVERAGE_WORD_POLYSEMY_COUNT] = this.getComplexityIndexAcronym("AVERAGE_WORD_POLYSEMY_COUNT");
+		acronyms[ComplexityIndices.AVERAGE_WORD_SYLLABLE_COUNT] = this.getComplexityIndexAcronym("AVERAGE_WORD_SYLLABLE_COUNT");
 	}
 
 	@Override

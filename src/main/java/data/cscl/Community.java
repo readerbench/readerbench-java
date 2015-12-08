@@ -288,7 +288,7 @@ public class Community extends AnalysisElement {
 								+ ",Cummulative social knowledge-building for initiated threads,Cummulative inter-animation for initiated threads");
 				for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
 					if (selectedIndices[i]) {
-						out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[i]);
+						out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
 					}
 				}
 				out.write("\n");

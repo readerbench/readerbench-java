@@ -3,6 +3,7 @@ package services.complexity.readability;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.complexity.readability.Fathom.Stats;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 
 /**
@@ -23,7 +24,7 @@ import data.AbstractDocument;
  * 
  * @version $Revision: 1.1 $ $Date: 2009/11/04 12:20:08 $
  */
-public class Readability implements IComplexityFactors {
+public class Readability extends IComplexityFactors {
 
 	/**
 	 * Returns the Fog index.
@@ -147,10 +148,21 @@ public class Readability implements IComplexityFactors {
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.READABILITY_FLESCH] = "Readability Flesh (EN only)";
-		names[ComplexityIndices.READABILITY_FOG] = "Readability FOG (EN only)";
-		names[ComplexityIndices.READABILITY_KINCAID] = "Readability Kincaid (EN only)";
+	public String getClassName() {
+		return LocalizationUtils.getTranslation("Readability Formulas (EN only)");
+	}
+	
+	@Override
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.READABILITY_FLESCH] = LocalizationUtils.getTranslation("Readability Flesh (EN only)");
+		descriptions[ComplexityIndices.READABILITY_FOG] = LocalizationUtils.getTranslation("Readability FOG (EN only)");
+		descriptions[ComplexityIndices.READABILITY_KINCAID] = LocalizationUtils.getTranslation("Readability Kincaid (EN only)");
+	}
+	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.READABILITY_FLESCH] = this.getComplexityIndexAcronym("READABILITY_FLESCH");
+		acronyms[ComplexityIndices.READABILITY_FOG] = this.getComplexityIndexAcronym("READABILITY_FOG");
+		acronyms[ComplexityIndices.READABILITY_KINCAID] = this.getComplexityIndexAcronym("READABILITY_KINCAID");
 	}
 
 	@Override
@@ -171,11 +183,6 @@ public class Readability implements IComplexityFactors {
 					.calcKincaid(stats);
 			break;
 		}
-	}
-
-	@Override
-	public String getClassName() {
-		return "Readability Formulas (EN only)";
 	}
 
 	@Override

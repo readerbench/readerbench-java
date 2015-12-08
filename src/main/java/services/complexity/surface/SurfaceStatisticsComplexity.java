@@ -4,11 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 
-public class SurfaceStatisticsComplexity implements IComplexityFactors {
+public class SurfaceStatisticsComplexity extends IComplexityFactors {
 	private static double averageCommasPerBlock(AbstractDocument d) {
 		int noCommas = 0;
 		int noBlocks = 0;
@@ -187,26 +188,43 @@ public class SurfaceStatisticsComplexity implements IComplexityFactors {
 
 	@Override
 	public String getClassName() {
-		return "Surface Factors (Statistics)";
+		return LocalizationUtils.getTranslation("Surface Factors (Statistics)");
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_COMMAS_PER_BLOCK] = "Average number of commas per paragraph";
-		names[ComplexityIndices.AVERAGE_COMMAS_PER_SENTENCE] = "Average number of commas per sentence";
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_COMMAS_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of commas per paragraph");
+		descriptions[ComplexityIndices.AVERAGE_COMMAS_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of commas per sentence");
 
-		names[ComplexityIndices.AVERAGE_SENTENCES_IN_BLOCK] = "Average number of sentences per paragraph";
-		names[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_SENTENCES] = "Paragraph standard deviation in terms of no. sentences";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCES_IN_BLOCK] = LocalizationUtils.getTranslation("Average number of sentences per paragraph");
+		descriptions[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_SENTENCES] = LocalizationUtils.getTranslation("Paragraph standard deviation in terms of no sentences");
 
-		names[ComplexityIndices.AVERAGE_WORDS_IN_BLOCK] = "Average number of words per paragraph";
-		names[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_WORDS] = "Paragraph standard deviation in terms of no. words";
-		names[ComplexityIndices.AVERAGE_WORDS_IN_SENTENCE] = "Average number of words in sentence";
-		names[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_WORDS] = "Sentence standard deviation in terms of no. words";
+		descriptions[ComplexityIndices.AVERAGE_WORDS_IN_BLOCK] = LocalizationUtils.getTranslation("Average number of words per paragraph");
+		descriptions[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_WORDS] = LocalizationUtils.getTranslation("Paragraph standard deviation in terms of no words");
+		descriptions[ComplexityIndices.AVERAGE_WORDS_IN_SENTENCE] = LocalizationUtils.getTranslation("Average number of words in sentence");
+		descriptions[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_WORDS] = LocalizationUtils.getTranslation("Sentence standard deviation in terms of no words");
 
-		names[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_BLOCK] = "Average number of unique content words per paragraph";
-		names[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = "Paragraph standard deviation in terms of no. unique content words";
-		names[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_SENTENCE] = "Average number of unique content words in sentence";
-		names[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = "Sentence standard deviation in terms of no. unique content words";
+		descriptions[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_BLOCK] = LocalizationUtils.getTranslation("Average number of unique content words per paragraph");
+		descriptions[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = LocalizationUtils.getTranslation("Paragraph standard deviation in terms of no unique content words");
+		descriptions[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_SENTENCE] = LocalizationUtils.getTranslation("Average number of unique content words in sentence");
+		descriptions[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = LocalizationUtils.getTranslation("Sentence standard deviation in terms of no unique content words");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_COMMAS_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_COMMAS_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_COMMAS_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_COMMAS_PER_SENTENCE");
+
+		acronyms[ComplexityIndices.AVERAGE_SENTENCES_IN_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_SENTENCES_IN_BLOCK");
+		acronyms[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_SENTENCES] = this.getComplexityIndexAcronym("BLOCK_STANDARD_DEVIATION_NO_SENTENCES");
+
+		acronyms[ComplexityIndices.AVERAGE_WORDS_IN_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_WORDS_IN_BLOCK");
+		acronyms[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_WORDS] = this.getComplexityIndexAcronym("BLOCK_STANDARD_DEVIATION_NO_WORDS");
+		acronyms[ComplexityIndices.AVERAGE_WORDS_IN_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_WORDS_IN_SENTENCE");
+		acronyms[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_WORDS] = this.getComplexityIndexAcronym("SENTENCE_STANDARD_DEVIATION_NO_WORDS");
+
+		acronyms[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_UNIQUE_WORDS_IN_BLOCK");
+		acronyms[ComplexityIndices.BLOCK_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = this.getComplexityIndexAcronym("BLOCK_STANDARD_DEVIATION_NO_UNIQUE_WORDS");
+		acronyms[ComplexityIndices.AVERAGE_UNIQUE_WORDS_IN_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_UNIQUE_WORDS_IN_SENTENCE");
+		acronyms[ComplexityIndices.SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS] = this.getComplexityIndexAcronym("SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS");
 	}
 
 	@Override

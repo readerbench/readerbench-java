@@ -4,27 +4,38 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.Connectives;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 
-public class ConnectivesComplexity implements IComplexityFactors {
+public class ConnectivesComplexity extends IComplexityFactors {
 
-	@Override
+	
 	public String getClassName() {
-		return "Discourse Factors (Connectives)";
+		return LocalizationUtils.getTranslation("Discourse Factors (Connectives)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
 		int index = 0;
 		for (String className : Connectives.CONNECTIVES_EN.getClasses()
 				.keySet()) {
-			names[ComplexityIndices.CONNECTIVES + index] = "Average number of "
-					+ className.replaceAll("_", " ") + " per paragraph";
+			descriptions[ComplexityIndices.CONNECTIVES + index] = LocalizationUtils.getTranslation("Average number of ")
+					+ className.replaceAll("_", " ") + LocalizationUtils.getTranslation(" per paragraph");
 			index++;
 		}
 	}
-
-	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		int index = 0;
+		for (String className : Connectives.CONNECTIVES_EN.getClasses()
+				.keySet()) {
+			String classNameAcronym = className.replaceAll("_", " ");
+			classNameAcronym = classNameAcronym.substring(0, Math.min(classNameAcronym.length(), 3));
+			acronyms[ComplexityIndices.CONNECTIVES + index] = "AvgNo" + classNameAcronym + "PerParag";
+			index++;
+		}
+	}
+	
+	
 	public int[] getIDs() {
 		int[] ids = new int[Connectives.NO_CONNECTIVE_TYPES];
 		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES; i++)
@@ -32,7 +43,7 @@ public class ConnectivesComplexity implements IComplexityFactors {
 		return ids;
 	}
 
-	@Override
+	
 	public void computeComplexityFactors(AbstractDocument document) {
 		ClassesOfWords classes = null;
 		switch (document.getLanguage()) {

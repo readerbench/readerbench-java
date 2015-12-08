@@ -2,11 +2,12 @@ package services.complexity.discourse;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.discourse.SemanticChain;
 
-public class DialogismStatisticsComplexity implements IComplexityFactors {
+public class DialogismStatisticsComplexity extends IComplexityFactors {
 	public static double getAvgNoVoices(AbstractDocument d) {
 		if (d.getSignificantVoices() == null)
 			return ComplexityIndices.IDENTITY;
@@ -124,45 +125,63 @@ public class DialogismStatisticsComplexity implements IComplexityFactors {
 				ComplexityIndices.IDENTITY };
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Dialogism Factors (Semantic chains statistics)";
+		return LocalizationUtils.getTranslation("Dialogism Factors (Semantic chains statistics)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_NO_VOICES] = "Average number of voices per paragraph with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICES_AVERAGE_SPAN] = "Average number of concepts per voice normalized by "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICES_MAX_SPAN] = "Max number of concepts per voice normalized by "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_NO_VOICES] = LocalizationUtils.getTranslation("Average number of voices per paragraph with more concepts than") + " "
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICES_AVERAGE_SPAN] = LocalizationUtils.getTranslation("Average number of concepts per voice normalized by") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICES_MAX_SPAN] = LocalizationUtils.getTranslation("Max number of concepts per voice normalized by") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
 
-		names[ComplexityIndices.AVERAGE_VOICE_BLOCK_ENTROPY] = "Average paragraph entropy of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.AVERAGE_VOICE_SENTENCE_ENTROPY] = "Average sentence entropy of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
+		descriptions[ComplexityIndices.AVERAGE_VOICE_BLOCK_ENTROPY] = LocalizationUtils.getTranslation("Average paragraph entropy of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.AVERAGE_VOICE_SENTENCE_ENTROPY] = LocalizationUtils.getTranslation("Average sentence entropy of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
 
-		names[ComplexityIndices.AVERAGE_VOICE_BLOCK_DISTRIBUTION] = "Average distribution per paragraph of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = "Standard deviation of distributions per paragraph of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.AVERAGE_VOICE_SENTENCE_DISTRIBUTION] = "Average distribution per sentence of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICE_SENTENCE_DISTRIBUTION_STANDARD_DEVIATION] = "Standard deviation of distributions per sentence of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
+		descriptions[ComplexityIndices.AVERAGE_VOICE_BLOCK_DISTRIBUTION] = LocalizationUtils.getTranslation("Average distribution per paragraph of voices with more concepts than") + " " + 
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of distributions per paragraph of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.AVERAGE_VOICE_SENTENCE_DISTRIBUTION] = LocalizationUtils.getTranslation("Average distribution per sentence of voices with more concepts than")+ " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICE_SENTENCE_DISTRIBUTION_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of distributions per sentence of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
 
-		names[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_BLOCK] = "Average reccurrence per paragraph of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICE_RECURRENCE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = "Standard deviation of reccurence per paragraph of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_SENTENCE] = "Average reccurrence per sentence of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
-		names[ComplexityIndices.VOICE_RECURRENCE_SENTENCE_STANDARD_DEVIATION] = "Standard deviation of reccurence per sentence of voices with more concepts than "
-				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% document content words";
+		descriptions[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_BLOCK] = LocalizationUtils.getTranslation("Average reccurrence per paragraph of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICE_RECURRENCE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of reccurence per paragraph of voices with more concepts than")+" " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_SENTENCE] = LocalizationUtils.getTranslation("Average reccurrence per sentence of voices with more concepts than") + " " + 
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+		descriptions[ComplexityIndices.VOICE_RECURRENCE_SENTENCE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of reccurence per sentence of voices with more concepts than") + " " +
+				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS + "% " + LocalizationUtils.getTranslation("document content words");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_NO_VOICES] = this.getComplexityIndexAcronym("AVERAGE_NO_VOICES");
+		acronyms[ComplexityIndices.VOICES_AVERAGE_SPAN] = this.getComplexityIndexAcronym("VOICES_AVERAGE_SPAN");
+		acronyms[ComplexityIndices.VOICES_MAX_SPAN] = this.getComplexityIndexAcronym("VOICES_MAX_SPAN");
+
+		acronyms[ComplexityIndices.AVERAGE_VOICE_BLOCK_ENTROPY] = this.getComplexityIndexAcronym("AVERAGE_VOICE_BLOCK_ENTROPY");
+		acronyms[ComplexityIndices.AVERAGE_VOICE_SENTENCE_ENTROPY] = this.getComplexityIndexAcronym("AVERAGE_VOICE_SENTENCE_ENTROPY");
+
+		acronyms[ComplexityIndices.AVERAGE_VOICE_BLOCK_DISTRIBUTION] = this.getComplexityIndexAcronym("AVERAGE_VOICE_BLOCK_DISTRIBUTION");
+		acronyms[ComplexityIndices.VOICE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("VOICE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_VOICE_SENTENCE_DISTRIBUTION] = this.getComplexityIndexAcronym("AVERAGE_VOICE_SENTENCE_DISTRIBUTION");
+		acronyms[ComplexityIndices.VOICE_SENTENCE_DISTRIBUTION_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("VOICE_SENTENCE_DISTRIBUTION_STANDARD_DEVIATION");
+
+		acronyms[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_VOICE_RECURRENCE_BLOCK");
+		acronyms[ComplexityIndices.VOICE_RECURRENCE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("VOICE_RECURRENCE_BLOCK_DISTRIBUTION_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_VOICE_RECURRENCE_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_VOICE_RECURRENCE_SENTENCE");
+		acronyms[ComplexityIndices.VOICE_RECURRENCE_SENTENCE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("VOICE_RECURRENCE_SENTENCE_STANDARD_DEVIATION");
 	}
 
-	@Override
+	
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_NO_VOICES] = DialogismStatisticsComplexity.getAvgNoVoices(d);
 		d.getComplexityIndices()[ComplexityIndices.VOICES_AVERAGE_SPAN] = DialogismStatisticsComplexity.getAvgSpan(d);
@@ -192,7 +211,7 @@ public class DialogismStatisticsComplexity implements IComplexityFactors {
 				.getAvgVoiceReccurrence(d)[3];
 	}
 
-	@Override
+	
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.AVERAGE_NO_VOICES, ComplexityIndices.VOICES_AVERAGE_SPAN,
 				ComplexityIndices.VOICES_MAX_SPAN,
