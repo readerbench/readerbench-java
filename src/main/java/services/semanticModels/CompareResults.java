@@ -18,14 +18,13 @@ import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Word;
 import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.semanticModels.LSA.LSA;
 
 public class CompareResults {
 	static Logger logger = Logger.getLogger(CompareResults.class);
@@ -125,13 +124,16 @@ public class CompareResults {
 			out.write("Concept,Average Similarity,Max Similarity,Most similar word association\n");
 			for (Word word : wordAssociations.keySet()) {
 				out.write(word.getLemma() + "," + simTop.get(word) + "," + simMax.get(word)
-						+ (simMaxConcept.containsKey(word) ? (",(" + simMaxConcept.get(word).getLemma() + ")") : ""));
+						+ (simMaxConcept.containsKey(word) ? (",(" + simMaxConcept.get(word).getLemma() + ")") : ","));
 				if (printSimilarConcepts) {
 					// determine most similar concepts;
 					List<Topic> similarConcepts = new LinkedList<Topic>();
 					TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(word, minThreshold);
-					for (Entry<Word, Double> entry : listLSA.entrySet())
-						similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+					for (Entry<Word, Double> entry : listLSA.entrySet()) {
+						if (!entry.getKey().getLemma().equals(word.getLemma())
+								&& !entry.getKey().getStem().equals(word.getStem()))
+							similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+					}
 					Collections.sort(similarConcepts);
 					// output top 5 concepts
 					for (int i = 0; i < Math.min(noConcepts, similarConcepts.size()); i++) {
@@ -162,8 +164,11 @@ public class CompareResults {
 				// determine most similar concepts;
 				List<Topic> similarConcepts = new LinkedList<Topic>();
 				TreeMap<Word, Double> listLSA = lsa.getSimilarConcepts(word, minThreshold);
-				for (Entry<Word, Double> entry : listLSA.entrySet())
-					similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+				for (Entry<Word, Double> entry : listLSA.entrySet()) {
+					if (!entry.getKey().getLemma().equals(word.getLemma())
+							&& !entry.getKey().getStem().equals(word.getStem()))
+						similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+				}
 				Collections.sort(similarConcepts);
 				// output top concepts
 				for (int i = 0; i < Math.min(noConcepts, similarConcepts.size()); i++) {
@@ -189,13 +194,12 @@ public class CompareResults {
 		BasicConfigurator.configure();
 		CompareResults comp = new CompareResults();
 
-		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
-		// comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3,
-		// false, 20,
-		// 0.3);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/financial2_en", Lang.eng);
+		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
 
-		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3, false, 20, 0.3);
+		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
+		// comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3,
+		// false, 20, 0.3);
 		// printSimilarConcepts("resources/config/LSA/joseantonion_es", Lang.es,
 		// 20, 0.3);
 		// comp.compare("resources/config/LSA/tasa_lak_en",
