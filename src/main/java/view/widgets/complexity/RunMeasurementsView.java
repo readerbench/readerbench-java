@@ -126,7 +126,7 @@ public class RunMeasurementsView extends JFrame {
 		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Corpus Assessment in terms of Textual Complexity"));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 549, 200);
+		setBounds(100, 100, 560, 220);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

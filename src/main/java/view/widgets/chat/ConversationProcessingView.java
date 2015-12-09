@@ -282,7 +282,7 @@ public class ConversationProcessingView extends JInternalFrame {
 		setClosable(true);
 		setMaximizable(true);
 		setIconifiable(true);
-		setBounds(20, 20, 880, 350);
+		setBounds(20, 20, 950, 350);
 		queryArticleName = "";
 
 		lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language")

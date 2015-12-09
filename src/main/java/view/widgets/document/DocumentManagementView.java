@@ -80,7 +80,7 @@ public class DocumentManagementView extends JFrame {
 				quitFormDialogue();
 			}
 		});
-		setBounds(100, 100, 700, 700);
+		setBounds(100, 100, 750, 700);
 
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);

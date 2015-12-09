@@ -441,17 +441,21 @@ public class DocumentProcessingView extends JInternalFrame {
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
 		gl_desktopPane.setHorizontalGroup(
 			gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_desktopPane.createSequentialGroup()
+				.addGroup(Alignment.LEADING, gl_desktopPane.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE)
-						.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 779, Short.MAX_VALUE)
-						.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
 						.addGroup(gl_desktopPane.createSequentialGroup()
-							.addComponent(lblLanguage)
-							.addGap(2)
-							.addComponent(comboBoxLanguage, 0, 718, Short.MAX_VALUE)))
-					.addContainerGap())
+							.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+								.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
+								.addGroup(gl_desktopPane.createSequentialGroup()
+									.addComponent(lblLanguage)
+									.addGap(2)
+									.addComponent(comboBoxLanguage, 0, 740, Short.MAX_VALUE)))
+							.addContainerGap())
+						.addGroup(gl_desktopPane.createSequentialGroup()
+							.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+							.addGap(11))))
 		);
 		gl_desktopPane.setVerticalGroup(
 			gl_desktopPane.createParallelGroup(Alignment.LEADING)
@@ -463,10 +467,10 @@ public class DocumentProcessingView extends JInternalFrame {
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addGap(113))
+					.addContainerGap())
 		);
 
 		JSplitPane splitPane = new JSplitPane();
