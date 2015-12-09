@@ -4,12 +4,13 @@ import java.util.Iterator;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.Block;
 import data.AbstractDocument;
 import data.Sentence;
 import data.Word;
 
-public class LexicalCohesionComplexity implements IComplexityFactors {
+public class LexicalCohesionComplexity extends IComplexityFactors {
 	/**
 	 * Cohesion between two utterances is measured as being : c = 1/distance
 	 * where distance(u1, u2) = SUM<w1 in u1>(MIN<w2 in u2>(dist(w1, w2)))
@@ -146,19 +147,23 @@ public class LexicalCohesionComplexity implements IComplexityFactors {
 		return cohesion;
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Lexical cohesion based on lexical chains";
+		return LocalizationUtils.getTranslation("Lexical cohesion based on lexical chains");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION] = "Average intra sentence cohesion based on lexical chains";
-		names[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES] = "Average paragrah cohesion based on lexical chains from adjacent sentences";
-		names[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION] = "Average paragrah cohesion based on lexical chains";
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION] = LocalizationUtils.getTranslation("Average intra sentence cohesion based on lexical chains");
+		descriptions[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES] = LocalizationUtils.getTranslation("Average paragrah cohesion based on lexical chains from adjacent sentences");
+		descriptions[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION] = LocalizationUtils.getTranslation("Average paragrah cohesion based on lexical chains");
 	}
-
-	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION] = this.getComplexityIndexAcronym("AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION");
+		acronyms[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES] = this.getComplexityIndexAcronym("AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES");
+		acronyms[ComplexityIndices.AVERAGE_LEXICAL_BLOCK_COHESION] = this.getComplexityIndexAcronym("AVERAGE_LEXICAL_BLOCK_COHESION");
+	}
+	
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION] = LexicalCohesionComplexity
 				.getAvgIntraSentenceCohesion(d);
@@ -168,7 +173,7 @@ public class LexicalCohesionComplexity implements IComplexityFactors {
 				.getAvgBlockCohesion(d);
 	}
 
-	@Override
+	
 	public int[] getIDs() {
 		return new int[] {
 				ComplexityIndices.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION,

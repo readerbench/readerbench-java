@@ -166,7 +166,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		setMaximizable(true);
 		setIconifiable(true);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 750, 450);
+		setBounds(100, 100, 780, 450);
 
 		desktopPane = new JDesktopPane() {
 			private static final long serialVersionUID = 8453433109734630086L;

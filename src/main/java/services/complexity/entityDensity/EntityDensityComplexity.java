@@ -5,6 +5,7 @@ import java.util.TreeSet;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
@@ -13,7 +14,7 @@ import data.Word;
 /***
  * @author Mihai Dascalu
  */
-public class EntityDensityComplexity implements IComplexityFactors {
+public class EntityDensityComplexity extends IComplexityFactors {
 
 	// Average number of named entities per paragraph/block
 	private static double getAverageNamedEntitiesPerBlock(AbstractDocument d) {
@@ -100,12 +101,21 @@ public class EntityDensityComplexity implements IComplexityFactors {
 		return ComplexityIndices.IDENTITY;
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_BLOCK] = "Average number of named entities per paragraph (EN only)";
-		names[ComplexityIndices.AVERAGE_NO_NOUN_NAMED_ENT_PER_BLOCK] = "Average number of named entities that are nouns per paragraph (EN only)";
-		names[ComplexityIndices.AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK] = "Average number of unique named entities per paragraph (EN only)";
-		names[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_SENTENCE] = "Average number of entities per sentence (EN only)";
+	public String getClassName() {
+		return LocalizationUtils.getTranslation("Named Entity Complexity Factors (EN only)");
+	}
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of named entities per paragraph (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_NO_NOUN_NAMED_ENT_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of named entities that are nouns per paragraph (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK] = LocalizationUtils.getTranslation("Average number of unique named entities per paragraph (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_SENTENCE] = LocalizationUtils.getTranslation("Average number of entities per sentence (EN only)");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_NAMED_ENT_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_NOUN_NAMED_ENT_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_NOUN_NAMED_ENT_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK] = this.getComplexityIndexAcronym("AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK");
+		acronyms[ComplexityIndices.AVERAGE_NO_NAMED_ENT_PER_SENTENCE] = this.getComplexityIndexAcronym("AVERAGE_NO_NAMED_ENT_PER_SENTENCE");
 	}
 
 	@Override
@@ -130,10 +140,6 @@ public class EntityDensityComplexity implements IComplexityFactors {
 		}
 	}
 
-	@Override
-	public String getClassName() {
-		return "Named Entity Complexity Factors (EN only)";
-	}
 
 	@Override
 	public int[] getIDs() {

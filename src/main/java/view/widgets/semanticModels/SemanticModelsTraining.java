@@ -232,7 +232,7 @@ public class SemanticModelsTraining extends JFrame {
 		setResizable(false);
 		setTitle(LocalizationUtils.getTranslation("Semantic Models Training"));
 
-		setBounds(100, 100, 500, 260);
+		setBounds(100, 100, 540, 280);
 		contentPane = new JPanel();
 		contentPane.setBackground(Color.WHITE);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));

@@ -4,46 +4,24 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import services.commons.TextPreprocessing;
-import services.nlp.lemmatizer.StaticLemmatizer;
-import services.nlp.lemmatizer.StaticLemmatizerPOS;
-import services.nlp.listOfWords.Dictionary;
-import services.nlp.listOfWords.StopWords;
-import services.nlp.stemmer.Stemmer;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Block;
+import data.Sentence;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
-import data.Block;
-import data.Sentence;
-import data.Word;
-import data.sentiment.SentimentEntity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
-import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.ling.CoreLabel;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.process.Morphology;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations.SentimentAnnotatedTree;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
-import data.pojo.SentimentValence;
+import services.commons.TextPreprocessing;
 
 /**
  * 
@@ -100,6 +78,7 @@ public abstract class Parsing {
 
 	public static void parseDoc(AbstractDocument d, boolean usePOSTagging, boolean cleanInput) {
 		try {
+			logger.info("Parsing document ...");
 			if (!d.getDocTmp().getBlocks().isEmpty()) {
 				java.util.Iterator<BlockTemplate> it = d.getDocTmp().getBlocks().iterator();
 				while (it.hasNext()) {
@@ -286,7 +265,7 @@ public abstract class Parsing {
 				// add utterance to block
 				b.getSentences().add(s);
 				b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
-				
+
 				// add sentiment entity to the block
 			}
 		}

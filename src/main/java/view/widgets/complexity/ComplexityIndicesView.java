@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import view.models.complexity.HeaderCheckBoxHandler;
 import view.models.complexity.HeaderRenderer;
 import view.models.complexity.Status;
@@ -42,7 +43,7 @@ public class ComplexityIndicesView extends JFrame {
 
 	private JPanel contentPane;
 
-	private static int modelColumnIndex = 3;
+	private static int modelColumnIndex = 4;
 	private static JTable complexityIndicesTable;
 	private static DefaultTableModel complexityIndicesTableModel = null;
 	private static boolean[] selectedIndices = new boolean[ComplexityIndices.NO_COMPLEXITY_INDICES];
@@ -102,7 +103,7 @@ public class ComplexityIndicesView extends JFrame {
 	}
 
 	public ComplexityIndicesView() {
-		setTitle("ReaderBench - Textual Complexity Indices");
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Textual Complexity Indices"));
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 800, 400);
@@ -115,19 +116,21 @@ public class ComplexityIndicesView extends JFrame {
 
 		if (complexityIndicesTableModel == null)
 			complexityIndicesTableModel = new DefaultTableModel(
-					new Object[][] {}, new Object[] { "ID", "Class name",
-							"Index name", Status.INDETERMINATE }) {
+					new Object[][] {}, new Object[] { "ID", LocalizationUtils.getTranslation("Class name"),
+							LocalizationUtils.getTranslation("Index description"), 
+							LocalizationUtils.getTranslation("Index acronym"), Status.INDETERMINATE }) {
 				private static final long serialVersionUID = 6850181164110466483L;
 
 				private Class<?>[] columnTypes = new Class[] { Integer.class, // identifier
 						String.class, // class name
+						String.class, // factor name
 						String.class, // factor name
 						Boolean.class, // selected
 				};
 
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					if (columnIndex == 3 && editableIndices[rowIndex])
+					if (columnIndex == modelColumnIndex && editableIndices[rowIndex])
 						return true;
 					return false;
 				}
@@ -227,7 +230,8 @@ public class ComplexityIndicesView extends JFrame {
 
 					dataRow.add(id);
 					dataRow.add(complexityClass.getClassName());
-					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[id]);
+					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[id]);
+					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[id]);
 					dataRow.add(selectedIndices[id]);
 					complexityIndicesTableModel.addRow(dataRow);
 				}

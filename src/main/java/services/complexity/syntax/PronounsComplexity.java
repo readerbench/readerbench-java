@@ -4,26 +4,38 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.Pronouns;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 
-public class PronounsComplexity implements IComplexityFactors {
+public class PronounsComplexity extends IComplexityFactors {
 
 	@Override
 	public String getClassName() {
-		return "Syntax (Pronouns)";
+		return LocalizationUtils.getTranslation("Syntax (Pronouns)");
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
+	public void setComplexityIndexDescription(String[] descriptions) {
 		int index = 0;
 		for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
-			names[ComplexityIndices.PRONOUNS + index] = "Average number of "
+			descriptions[ComplexityIndices.PRONOUNS + index] = LocalizationUtils.getTranslation("Average number of") + " "
 					+ className.replaceAll("_", " ")
-					+ " pronouns per paragraph";
+					+ " "+ LocalizationUtils.getTranslation("pronouns per paragraph");
 			index++;
 		}
 	}
-
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		int index = 0;
+		for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
+			String acronymClassName = className.replaceAll("_", " ");
+			acronymClassName = acronymClassName.substring(0, Math.min(3, acronymClassName.length()));
+			acronyms[ComplexityIndices.PRONOUNS + index] = "AvgNoOf" + " "
+					+ acronymClassName
+					+ " "+ "PronPerPar";
+			index++;
+		}
+	}
+	
 	@Override
 	public int[] getIDs() {
 		int[] ids = new int[Pronouns.NO_PRONOUN_TYPES];

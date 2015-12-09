@@ -2,12 +2,13 @@ package services.complexity.surface;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.Word;
 
-public class LengthComplexity implements IComplexityFactors {
+public class LengthComplexity extends IComplexityFactors {
 	// Average number of characters in a block
 	private static double getAverageBlockLength(AbstractDocument d) {
 		int size = 0;
@@ -73,15 +74,22 @@ public class LengthComplexity implements IComplexityFactors {
 
 	@Override
 	public String getClassName() {
-		return "Surface Factors (Average lengths in characters)";
+		return LocalizationUtils.getTranslation("Surface Factors (Average lengths in characters)");
 	}
 
 	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_BLOCK_LENGTH] = "Average paragraph length (characters)";
-		names[ComplexityIndices.AVERAGE_SENTENCE_LENGTH] = "Average sentence length (characters)";
-		names[ComplexityIndices.AVERAGE_WORD_LENGTH] = "Average word length (characters)";
-		names[ComplexityIndices.WORD_LETTERS_STANDARD_DEVIATION] = "Standard deviation for words (characters)";
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_LENGTH] = LocalizationUtils.getTranslation("Average paragraph length (characters)");
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_LENGTH] = LocalizationUtils.getTranslation("Average sentence length (characters)");
+		descriptions[ComplexityIndices.AVERAGE_WORD_LENGTH] = LocalizationUtils.getTranslation("Average word length (characters)");
+		descriptions[ComplexityIndices.WORD_LETTERS_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation for words (characters)");
+	}
+	@Override
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_LENGTH] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_LENGTH");
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_LENGTH] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_LENGTH");
+		acronyms[ComplexityIndices.AVERAGE_WORD_LENGTH] = this.getComplexityIndexAcronym("AVERAGE_WORD_LENGTH");
+		acronyms[ComplexityIndices.WORD_LETTERS_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("WORD_LETTERS_STANDARD_DEVIATION");
 	}
 
 	@Override

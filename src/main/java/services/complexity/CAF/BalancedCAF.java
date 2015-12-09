@@ -1,11 +1,13 @@
 package services.complexity.CAF;
 
 import java.util.ArrayList;
+
 import services.complexity.IComplexityFactors;
 import services.complexity.ComplexityIndices;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 
-public class BalancedCAF implements IComplexityFactors {
+public class BalancedCAF extends IComplexityFactors {
 	public static final String CPeriodTokens = "[.!?]+";
 
 	public static double[] GetMeasurement(String text) {
@@ -85,21 +87,28 @@ public class BalancedCAF implements IComplexityFactors {
 		return new double[] { v1, v2, v3, v4, CB };
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Balanced CAF Factors";
+		return LocalizationUtils.getTranslation("Balanced CAF Factors");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.LEXICAL_DIVERSITY] = "Lexical Diversity";
-		names[ComplexityIndices.LEXICAL_SOPHISTICATION] = "Lexical Sophistication";
-		names[ComplexityIndices.SYNTACTIC_DIVERSITY] = "Syntactic Diversity";
-		names[ComplexityIndices.SYNTACTIC_SOPHISTICATION] = "Syntactic Sophistication";
-		names[ComplexityIndices.BALANCED_CAF] = "Balanced CAF";
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.LEXICAL_DIVERSITY] = LocalizationUtils.getTranslation("Lexical Diversity");
+		descriptions[ComplexityIndices.LEXICAL_SOPHISTICATION] = LocalizationUtils.getTranslation("Lexical Sophistication");
+		descriptions[ComplexityIndices.SYNTACTIC_DIVERSITY] = LocalizationUtils.getTranslation("Syntactic Diversity");
+		descriptions[ComplexityIndices.SYNTACTIC_SOPHISTICATION] = LocalizationUtils.getTranslation("Syntactic Sophistication");
+		descriptions[ComplexityIndices.BALANCED_CAF] = LocalizationUtils.getTranslation("Balanced CAF");
+	}
+	
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.LEXICAL_DIVERSITY] = this.getComplexityIndexAcronym("LEXICAL_DIVERSITY");
+		acronyms[ComplexityIndices.LEXICAL_SOPHISTICATION] = this.getComplexityIndexAcronym("LEXICAL_SOPHISTICATION");
+		acronyms[ComplexityIndices.SYNTACTIC_DIVERSITY] = this.getComplexityIndexAcronym("SYNTACTIC_DIVERSITY");
+		acronyms[ComplexityIndices.SYNTACTIC_SOPHISTICATION] = this.getComplexityIndexAcronym("SYNTACTIC_SOPHISTICATION");
+		acronyms[ComplexityIndices.BALANCED_CAF] = this.getComplexityIndexAcronym("BALANCED_CAF");
 	}
 
-	@Override
+	
 	public void computeComplexityFactors(AbstractDocument d) {
 		double[] balancedCaf = BalancedCAF.GetMeasurement(d.getProcessedText());
 		d.getComplexityIndices()[ComplexityIndices.LEXICAL_DIVERSITY] = balancedCaf[0];
@@ -109,7 +118,7 @@ public class BalancedCAF implements IComplexityFactors {
 		d.getComplexityIndices()[ComplexityIndices.BALANCED_CAF] = balancedCaf[4];
 	}
 
-	@Override
+	
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.LEXICAL_DIVERSITY,
 				ComplexityIndices.LEXICAL_SOPHISTICATION,

@@ -186,8 +186,8 @@ public class DocumentEvaluationView extends JFrame {
 
 				for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
 					dataRow = new Vector<Object>();
-					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[i]);
-					out.write(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[i]);
+					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+					out.write(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
 					for (AbstractDocument d : documents) {
 						dataRow.add(d.getComplexityIndices()[i]);
 						out.write("," + d.getComplexityIndices()[i]);

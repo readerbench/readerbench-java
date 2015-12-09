@@ -561,7 +561,7 @@ public class ReaderBenchServer {
 		for (IComplexityFactors complexityClass : ComplexityIndices.TEXTUAL_COMPLEXITY_FACTORS) {
 			localResults = new ArrayList<Result>();
 			for (int id : complexityClass.getIDs()) {
-				localResults.add(new Result(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_NAMES[id],
+				localResults.add(new Result(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[id],
 						Formatting.formatNumber(queryDoc.getComplexityIndices()[id])));
 			}
 			resultsComplexity.add(new ResultSentiment(complexityClass.getClassName(), localResults));

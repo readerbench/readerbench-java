@@ -4,9 +4,10 @@ import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.discourse.dialogism.DialogismMeasures;
+import utils.localization.LocalizationUtils;
 import data.AbstractDocument;
 
-public class DialogismSynergyComplexity implements IComplexityFactors {
+public class DialogismSynergyComplexity extends IComplexityFactors {
 
 	// Co-occurrence
 	private static double getAvgBlockVoiceCoOccurrence(AbstractDocument d) {
@@ -96,54 +97,69 @@ public class DialogismSynergyComplexity implements IComplexityFactors {
 		return VectorAlgebra.stdev(evolution);
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Dialogism Factors (Semantic chains synergy)";
+		return LocalizationUtils.getTranslation("Dialogism Factors (Semantic chains synergy)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE] = "Average paragraph voice co-occurrence (voices with more concepts than "
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE] = LocalizationUtils.getTranslation("Average paragraph voice cooccurrence (voices with more concepts than")+" "+
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = "Standard deviation of paragraph voice co-occurrences (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of paragraph voice cooccurrences (voices with more concepts than") + " " +
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE] = "Average sentence voice co-occurrence voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE] = LocalizationUtils.getTranslation("Average sentence voice cooccurrence voices with more concepts than") + " " + 
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = "Standard deviation of sentence voice co-occurrences voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of sentence voice cooccurrences voices with more concepts than")+" "+
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
 
-		names[ComplexityIndices.AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT] = "Average paragraph voice cumulative effects voices with more concepts than "
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT] = LocalizationUtils.getTranslation("Average paragraph voice cumulative effects voices with more concepts than") + " " +
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = "Standard deviation of paragraph voice cumulative effects (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of paragraph voice cumulative effects (voices with more concepts than") + " " +
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT] = "Average sentence voice cumulative effects (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT] = LocalizationUtils.getTranslation("Average sentence voice cumulative effects (voices with more concepts than") + " " +
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = "Standard deviation of sentence cumulative effects (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of sentence cumulative effects (voices with more concepts than") + " "+
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
 
-		names[ComplexityIndices.AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION] = "Average paragraph voice mutual information (voices with more concepts than "
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION] = LocalizationUtils.getTranslation("Average paragraph voice mutual information (voices with more concepts than") + " " +
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = "Standard deviation of paragraph voice mutual information (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of paragraph voice mutual information (voices with more concepts than") + " " + 
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION] = "Average sentence voice mutual information (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION] = LocalizationUtils.getTranslation("Average sentence voice mutual information (voices with more concepts than") + " "
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
-		names[ComplexityIndices.SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = "Standard deviation of sentence voice mutual information (voices with more concepts than "
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+		descriptions[ComplexityIndices.SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = LocalizationUtils.getTranslation("Standard deviation of sentence voice mutual information (voices with more concepts than")+" "+
 				+ AbstractDocument.MIN_PERCENTAGE_CONTENT_WORDS
-				+ "% document content words)";
+				+ "% " + LocalizationUtils.getTranslation("document content words") + ")";
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_VOICE_CO_OCCURRENCE");
+		acronyms[ComplexityIndices.BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE");
+		acronyms[ComplexityIndices.SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION");
+
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT");
+		acronyms[ComplexityIndices.BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT");
+		acronyms[ComplexityIndices.SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION");
+
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION");
+		acronyms[ComplexityIndices.BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION");
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION");
+		acronyms[ComplexityIndices.SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION] = this.getComplexityIndexAcronym("SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION");
 	}
 
-	@Override
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE] = DialogismSynergyComplexity
 				.getAvgBlockVoiceCoOccurrence(d);
@@ -173,7 +189,6 @@ public class DialogismSynergyComplexity implements IComplexityFactors {
 				.getSentenceVoiceMutualInformationStandardDeviation(d);
 	}
 
-	@Override
 	public int[] getIDs() {
 		return new int[] {
 				ComplexityIndices.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE,

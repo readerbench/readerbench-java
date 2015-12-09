@@ -6,6 +6,7 @@ import java.util.Map;
 
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
+import utils.localization.LocalizationUtils;
 import data.Block;
 import data.AbstractDocument;
 import data.Sentence;
@@ -21,7 +22,7 @@ import edu.stanford.nlp.util.CoreMap;
 /***
  * @author Mihai Alexandru Ortelecan
  */
-public class CoreferenceResolutionComplexity implements IComplexityFactors {
+public class CoreferenceResolutionComplexity extends IComplexityFactors {
 
 	/**
 	 * Chains of size <= 1 are ignored
@@ -414,22 +415,30 @@ public class CoreferenceResolutionComplexity implements IComplexityFactors {
 
 	}
 
-	@Override
+	
 	public String getClassName() {
-		return "Co-reference Complexity Factors (EN only)";
+		return LocalizationUtils.getTranslation("Coreference Complexity Factors (EN only)");
 	}
 
-	@Override
-	public void setComplexityFactorNames(String[] names) {
-		names[ComplexityIndices.TOTAL_NO_COREF_CHAINS_PER_DOC] = "Total number of co-reference chains per document (EN only)";
-		names[ComplexityIndices.AVERAGE_NO_COREFS_PER_CHAIN] = "Average number of co-references per chain (EN only)";
-		names[ComplexityIndices.AVERAGE_CHAIN_SPAN] = "Average co-reference chain span (EN only)";
-		names[ComplexityIndices.NO_COREF_CHAINS_WITH_BIG_SPAN] = "Number of co-reference chains with a big span (EN only)";
-		names[ComplexityIndices.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN] = "Average inference distance per co-reference chain (EN only)";
-		names[ComplexityIndices.NO_ACTIVE_COREF_CHAINS_PER_WORD] = "Number of active co-reference chains per word (EN only)";
+	
+	public void setComplexityIndexDescription(String[] descriptions) {
+		descriptions[ComplexityIndices.TOTAL_NO_COREF_CHAINS_PER_DOC] = LocalizationUtils.getTranslation("Total number of coreference chains per document (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_NO_COREFS_PER_CHAIN] = LocalizationUtils.getTranslation("Average number of coreferences per chain (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_CHAIN_SPAN] = LocalizationUtils.getTranslation("Average coreference chain span (EN only)");
+		descriptions[ComplexityIndices.NO_COREF_CHAINS_WITH_BIG_SPAN] = LocalizationUtils.getTranslation("Number of coreference chains with a big span (EN only)");
+		descriptions[ComplexityIndices.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN] = LocalizationUtils.getTranslation("Average inference distance per coreference chain (EN only)");
+		descriptions[ComplexityIndices.NO_ACTIVE_COREF_CHAINS_PER_WORD] = LocalizationUtils.getTranslation("Number of active coreference chains per word (EN only)");
+	}
+	public void setComplexityIndexAcronym(String[] acronyms) {
+		acronyms[ComplexityIndices.TOTAL_NO_COREF_CHAINS_PER_DOC] = this.getComplexityIndexAcronym("TOTAL_NO_COREF_CHAINS_PER_DOC");
+		acronyms[ComplexityIndices.AVERAGE_NO_COREFS_PER_CHAIN] = this.getComplexityIndexAcronym("AVERAGE_NO_COREFS_PER_CHAIN");
+		acronyms[ComplexityIndices.AVERAGE_CHAIN_SPAN] = this.getComplexityIndexAcronym("AVERAGE_CHAIN_SPAN");
+		acronyms[ComplexityIndices.NO_COREF_CHAINS_WITH_BIG_SPAN] = this.getComplexityIndexAcronym("NO_COREF_CHAINS_WITH_BIG_SPAN");
+		acronyms[ComplexityIndices.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN] = this.getComplexityIndexAcronym("AVERAGE_INFERENCE_DISTANCE_PER_CHAIN");
+		acronyms[ComplexityIndices.NO_ACTIVE_COREF_CHAINS_PER_WORD] = this.getComplexityIndexAcronym("NO_ACTIVE_COREF_CHAINS_PER_WORD");
 	}
 
-	@Override
+	
 	public void computeComplexityFactors(AbstractDocument d) {
 		switch (d.getLanguage()) {
 		case fr:
@@ -458,7 +467,7 @@ public class CoreferenceResolutionComplexity implements IComplexityFactors {
 		}
 	}
 
-	@Override
+	
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.TOTAL_NO_COREF_CHAINS_PER_DOC,
 				ComplexityIndices.AVERAGE_NO_COREFS_PER_CHAIN,

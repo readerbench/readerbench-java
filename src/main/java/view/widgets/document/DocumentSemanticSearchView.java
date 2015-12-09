@@ -275,7 +275,7 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 		setClosable(true);
 		setMaximizable(true);
 		setIconifiable(true);
-		setBounds(20, 20, 819, 300);
+		setBounds(20, 20, 830, 290);
 		queryAuthorName = "";
 		queryArticleName = "";
 
