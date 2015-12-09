@@ -210,24 +210,24 @@ class ResultSemanticAnnotation {
 	
 	private ResultTopic concepts;
 	
-	private double abstractDocumentRelevance;
-	private double keywordsAbstractRelevance;
-	private double keywordsDocumentRelevance;
+	private double abstractDocumentSimilarity;
+	private double keywordsAbstractCoverage;
+	private double keywordsDocumentCoverage;
 	
 	private List<ResultKeyword> keywords;
 	private List<ResultCategory> categories;
 
 	public ResultSemanticAnnotation(
 			ResultTopic resultTopic,
-			double abstractDocumentRelevance,
-			double keywordsAbstractRelevance,
-			double keywordsDocumentRelevance,
+			double abstractDocumentSimilarity,
+			double keywordsAbstractCoverage,
+			double keywordsDocumentCoverage,
 			List<ResultKeyword> resultKeywords,
 			List<ResultCategory> resultCategories) {
 		this.concepts = resultTopic;
-		this.abstractDocumentRelevance = abstractDocumentRelevance;
-		this.keywordsAbstractRelevance = keywordsAbstractRelevance;
-		this.keywordsDocumentRelevance = keywordsDocumentRelevance;
+		this.abstractDocumentSimilarity = abstractDocumentSimilarity;
+		this.keywordsAbstractCoverage = keywordsAbstractCoverage;
+		this.keywordsDocumentCoverage = keywordsDocumentCoverage;
 		this.keywords = resultKeywords;
 		this.categories = resultCategories;
 	}
@@ -647,6 +647,20 @@ public class ReaderBenchServer {
 		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
 		List<Category> dbCategories = CategoryDAO.getInstance().findAll();
 		
+		
+		for (Category cat : dbCategories) {
+			System.out.println("bau");
+			System.out.print(cat.getLabel()+"\t");
+			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
+			StringBuilder sb = new StringBuilder();
+			for (CategoryPhrase categoryPhrase : categoryPhrases) {
+				sb.append(categoryPhrase.getLabel());
+				sb.append(", ");
+			}
+			System.out.println(sb);
+			
+		}
+		
 		for (Category cat : dbCategories) {
 			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
 			StringBuilder sb = new StringBuilder();
@@ -996,24 +1010,25 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String uri = (String) json.get("uri");
-			String url = (String) json.get("url");
+			//String url = (String) json.get("url");
 			
 			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
 			queryResult.data = getTextFromPdf(uri);
 			String result = convertToJson(queryResult);*/
 			
 			String documentContent = null;
-			if (uri != null && !uri.isEmpty()) {
-				documentContent = getTextFromPdf(uri, true).getContent();
+			if (uri == null || uri.isEmpty()) {
+				logger.error("URI an URL are empty. Aborting...");
+				System.exit(-1);
+			}
+			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
+				documentContent = getTextFromPdf(uri, false).getContent();
 			}
 			else {
-				if (url != null && !url.isEmpty()) {
-					documentContent = getTextFromPdf(url, false).getContent();
-				}
-				else {
-					logger.error("URI an URL are empty. Aborting...");
-					System.exit(-1);
-				}
+				documentContent = getTextFromPdf(uri, true).getContent();
+			}
+			if (uri != null && !uri.isEmpty()) {
+				
 			}
 			
 			String documentAbstract = (String) json.get("abstract");
