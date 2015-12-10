@@ -631,7 +631,8 @@ public class ReaderBenchServer {
 			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, sc.getCohesion()));
 		}
 		
-		Collections.sort(resultKeywords, Collections.reverseOrder());
+		Collections.sort(resultKeywords);
+		Collections.reverse(resultKeywords);
 		return resultKeywords;
 		
 	}
@@ -676,7 +677,8 @@ public class ReaderBenchServer {
 			resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion()));
 		}
 		
-		Collections.sort(resultCategories, Collections.reverseOrder());
+		Collections.sort(resultCategories);
+		Collections.reverse(resultCategories);
 		return resultCategories;
 	}
 	
