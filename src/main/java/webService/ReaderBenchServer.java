@@ -6,6 +6,7 @@ import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -149,7 +150,7 @@ class ResultTopic {
 }
 
 
-class ResultKeyword implements Comparable<ResultCategory> {
+class ResultKeyword implements Comparable<ResultKeyword> {
 	
 	private String name;
 	private int noOccurences;
@@ -174,7 +175,7 @@ class ResultKeyword implements Comparable<ResultCategory> {
 	}
 
 	@Override
-	public int compareTo(ResultCategory o) {
+	public int compareTo(ResultKeyword o) {
 		return (int) Math.signum(o.getRelevance() - this.getRelevance());
 	}
 	
@@ -614,7 +615,7 @@ public class ReaderBenchServer {
 			boolean usePOSTagging,
 			double threshold) {
 		
-		List<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
+		ArrayList<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
 		
 		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
 		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging);
@@ -630,6 +631,7 @@ public class ReaderBenchServer {
 			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, sc.getCohesion()));
 		}
 		
+		Collections.sort(resultKeywords, Collections.reverseOrder());
 		return resultKeywords;
 		
 	}
@@ -674,8 +676,8 @@ public class ReaderBenchServer {
 			resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion()));
 		}
 		
+		Collections.sort(resultCategories, Collections.reverseOrder());
 		return resultCategories;
-		
 	}
 	
 	private ResultSemanticAnnotation getSemanticAnnotation(
