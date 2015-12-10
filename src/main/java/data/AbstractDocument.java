@@ -181,6 +181,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 		// determine voice distributions & importance
 		DialogismComputations.determineVoiceDistributions(this);
+		
+		logger.info("Finished all discourse analysis processes...");
 	}
 
 	public void setDocumentTitle(String title, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {

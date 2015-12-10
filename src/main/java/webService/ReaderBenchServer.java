@@ -649,15 +649,15 @@ public class ReaderBenchServer {
 		
 		
 		for (Category cat : dbCategories) {
-			System.out.println("bau");
-			System.out.print(cat.getLabel()+"\t");
+			//System.out.println("bau");
+			//System.out.print(cat.getLabel()+"\t");
 			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
 			StringBuilder sb = new StringBuilder();
 			for (CategoryPhrase categoryPhrase : categoryPhrases) {
 				sb.append(categoryPhrase.getLabel());
 				sb.append(", ");
 			}
-			System.out.println(sb);
+			//System.out.println(sb);
 			
 		}
 		
