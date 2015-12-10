@@ -529,8 +529,7 @@ public class ConversationProcessingView extends JInternalFrame {
 								GroupLayout.PREFERRED_SIZE).addContainerGap()));
 
 		articleTextField = new CustomTextField(1);
-		articleTextField.setPlaceholder(LocalizationUtils
-				.getTranslation("Insert Conversation Name"));
+		articleTextField.setPlaceholder("Insert Conversation Name");
 		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
 		articleTextField.setPlaceholderForeground(Color.gray);
 		articleTextField.getDocument().addDocumentListener(
@@ -550,7 +549,7 @@ public class ConversationProcessingView extends JInternalFrame {
 					public void warn() {
 						queryArticleName = articleTextField.getText();
 						if (queryArticleName
-								.equalsIgnoreCase("Insert Article Name"))
+								.equalsIgnoreCase("Insert Conversation Name"))
 							queryArticleName = "";
 						newFilter();
 					}
@@ -652,13 +651,11 @@ public class ConversationProcessingView extends JInternalFrame {
 
 	public void addConversation(Conversation c) {
 		if (docTableModel != null) {
-
 			synchronized (loadedConversations) {
 				// add rows as loaded documents
 				Vector<Object> dataRow = new Vector<Object>();
 
 				dataRow.add(c.getTitleText());
-				dataRow.add("");
 
 				if (c.getLSA() != null) {
 					dataRow.add(c.getLSA().getPath());
@@ -670,7 +667,7 @@ public class ConversationProcessingView extends JInternalFrame {
 				} else {
 					dataRow.add("");
 				}
-
+				
 				docTableModel.addRow(dataRow);
 				loadedConversations.add(c);
 			}
@@ -696,32 +693,21 @@ public class ConversationProcessingView extends JInternalFrame {
 				}
 
 				synchronized (loadedConversations) {
-					for (AbstractDocument d : loadedConversations) {
+					for (Conversation c : loadedConversations) {
 						// add rows as loaded documents
-						if (d instanceof Document) {
-							String title = d.getTitleText();
-
-							if (!title.toLowerCase().contains(
-									queryArticleName.toLowerCase()))
-								continue;
+						Vector<Object> dataRow = new Vector<Object>();
+						dataRow.add(c.getTitleText());
+						if (c.getLSA() != null) {
+							dataRow.add(c.getLSA().getPath());
+						} else {
+							dataRow.add("");
 						}
-
-						if (d instanceof Conversation) {
-							Conversation c = (Conversation) d;
-							Vector<Object> dataRow = new Vector<Object>();
-							dataRow.add(c.getTitleText());
-							if (d.getLSA() != null) {
-								dataRow.add(d.getLSA().getPath());
-							} else {
-								dataRow.add("");
-							}
-							if (d.getLDA() != null) {
-								dataRow.add(d.getLDA().getPath());
-							} else {
-								dataRow.add("");
-							}
-							docTableModel.addRow(dataRow);
+						if (c.getLDA() != null) {
+							dataRow.add(c.getLDA().getPath());
+						} else {
+							dataRow.add("");
 						}
+						docTableModel.addRow(dataRow);
 					}
 
 					if (loadedConversations.size() > 0) {

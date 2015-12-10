@@ -15,7 +15,8 @@ public class ConversationManagementTableModel extends DefaultTableModel {
 	public ConversationManagementTableModel() {
 		super(new Object[][] {}, new String[] { 
 				LocalizationUtils.getTranslation("Title"),
-				LocalizationUtils.getTranslation("LSA vector space"), LocalizationUtils.getTranslation("LDA model") });
+				LocalizationUtils.getTranslation("LSA vector space"), 
+				LocalizationUtils.getTranslation("LDA model") });
 	}
 
 	@Override

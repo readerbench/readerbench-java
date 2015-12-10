@@ -478,7 +478,7 @@ public class DocumentProcessingView extends JInternalFrame {
 		panelSearch.add(splitPane);
 
 		articleTextField = new CustomTextField(1);
-		articleTextField.setPlaceholder(LocalizationUtils.getTranslation("Insert Article Name"));
+		articleTextField.setPlaceholder("Insert Article Name");
 		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
 		articleTextField.setPlaceholderForeground(Color.gray);
 		articleTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -503,7 +503,7 @@ public class DocumentProcessingView extends JInternalFrame {
 		});
 
 		authorsTextField = new CustomTextField(1);
-		authorsTextField.setPlaceholder(LocalizationUtils.getTranslation("Insert Author Name"));
+		authorsTextField.setPlaceholder("Insert Author Name");
 		authorsTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
 		authorsTextField.setPlaceholderForeground(Color.gray);
 		authorsTextField.getDocument().addDocumentListener(new DocumentListener() {
