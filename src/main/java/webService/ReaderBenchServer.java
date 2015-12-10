@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -176,8 +177,18 @@ class ResultKeyword implements Comparable<ResultKeyword> {
 
 	@Override
 	public int compareTo(ResultKeyword o) {
-		return (int) Math.signum(o.getRelevance() - this.getRelevance());
+		// Reverse order
+		return (int) Math.signum(this.getRelevance() - o.getRelevance());
 	}
+	
+	public static Comparator<ResultKeyword> ResultKeywordRelevanceComparator  = new Comparator<ResultKeyword>() {
+
+		public int compare(ResultKeyword o1, ResultKeyword o2) {
+			//descending order
+			return o2.compareTo(o1);
+		}
+
+	};
 	
 }
 
@@ -201,8 +212,18 @@ class ResultCategory implements Comparable<ResultCategory> {
 
 	@Override
 	public int compareTo(ResultCategory o) {
-		return (int) Math.signum(o.getRelevance() - this.getRelevance());
+		// Reverse order
+		return (int) Math.signum(this.getRelevance() - o.getRelevance());
 	}
+	
+	public static Comparator<ResultCategory> ResultCategoryRelevanceComparator  = new Comparator<ResultCategory>() {
+
+		public int compare(ResultCategory o1, ResultCategory o2) {
+			//descending order
+			return o2.compareTo(o1);
+		}
+
+	};
 	
 }
 
@@ -628,11 +649,10 @@ public class ReaderBenchServer {
 			if (queryDoc.getWordOccurences().containsKey(keyword)) {
 				occ = queryDoc.getWordOccurences().get(keyword).intValue();
 			}
-			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, sc.getCohesion()));
+			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, Formatting.formatNumber(sc.getCohesion())));
 		}
 		
-		Collections.sort(resultKeywords);
-		Collections.reverse(resultKeywords);
+		Collections.sort(resultKeywords, ResultKeyword.ResultKeywordRelevanceComparator);
 		return resultKeywords;
 		
 	}
@@ -674,11 +694,10 @@ public class ReaderBenchServer {
 			
 			AbstractDocument queryCategory = processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
-			resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion()));
+			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
 		}
 		
-		Collections.sort(resultCategories);
-		Collections.reverse(resultCategories);
+		Collections.sort(resultCategories, ResultCategory.ResultCategoryRelevanceComparator);
 		return resultCategories;
 	}
 	
@@ -712,9 +731,9 @@ public class ReaderBenchServer {
 		
 		ResultSemanticAnnotation rsa = new ResultSemanticAnnotation(
 				resultTopic,
-				scAbstractDocument.getCohesion(),
-				scKeywordsAbstract.getCohesion(),
-				scKeywordsDocument.getCohesion(),
+				Formatting.formatNumber(scAbstractDocument.getCohesion()),
+				Formatting.formatNumber(scKeywordsAbstract.getCohesion()),
+				Formatting.formatNumber(scKeywordsDocument.getCohesion()),
 				resultKeywords,
 				resultCategories);
 		
