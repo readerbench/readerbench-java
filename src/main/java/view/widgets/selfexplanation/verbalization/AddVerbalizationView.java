@@ -72,7 +72,7 @@ public class AddVerbalizationView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser("in");
+					fc = new JFileChooser("resources/in");
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

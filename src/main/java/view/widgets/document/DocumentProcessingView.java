@@ -114,13 +114,12 @@ public class DocumentProcessingView extends JInternalFrame {
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 				if (d instanceof Document) {
-					addDocument((Document)d);
-				}
-				else {
+					addDocument((Document) d);
+				} else {
 					JOptionPane.showMessageDialog(desktopPane, "Please load only a document!", "Information",
 							JOptionPane.INFORMATION_MESSAGE);
 				}
-				
+
 			} else {
 				JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
@@ -158,7 +157,8 @@ public class DocumentProcessingView extends JInternalFrame {
 				try {
 					addSingleDocument(f.getPath());
 				} catch (Exception e) {
-					e.printStackTrace();
+					// e.printStackTrace();
+					logger.error(f.getName() + ": " + e.getMessage());
 				}
 			}
 			return null;
@@ -431,7 +431,8 @@ public class DocumentProcessingView extends JInternalFrame {
 		JPanel panelSingleDoc = new JPanel();
 		panelSingleDoc.setBackground(Color.WHITE);
 		panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-				LocalizationUtils.getTranslation("Specific document operations"), TitledBorder.LEFT, TitledBorder.TOP, null, null));
+				LocalizationUtils.getTranslation("Specific document operations"), TitledBorder.LEFT, TitledBorder.TOP,
+				null, null));
 
 		JPanel panelSearch = new JPanel();
 		panelSearch.setBackground(Color.WHITE);
@@ -439,39 +440,31 @@ public class DocumentProcessingView extends JInternalFrame {
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(
-			gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_desktopPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(
+				Alignment.LEADING,
+				gl_desktopPane.createSequentialGroup().addContainerGap().addGroup(gl_desktopPane
+						.createParallelGroup(Alignment.LEADING)
 						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
 						.addGroup(gl_desktopPane.createSequentialGroup()
-							.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
-								.addGroup(gl_desktopPane.createSequentialGroup()
-									.addComponent(lblLanguage)
-									.addGap(2)
-									.addComponent(comboBoxLanguage, 0, 740, Short.MAX_VALUE)))
-							.addContainerGap())
-						.addGroup(gl_desktopPane.createSequentialGroup()
-							.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addGap(11))))
-		);
-		gl_desktopPane.setVerticalGroup(
-			gl_desktopPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_desktopPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
+								.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+										.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
+										.addGroup(gl_desktopPane.createSequentialGroup().addComponent(lblLanguage)
+												.addGap(2).addComponent(comboBoxLanguage, 0, 740, Short.MAX_VALUE)))
+								.addContainerGap())
+						.addGroup(gl_desktopPane.createSequentialGroup().addComponent(panelSingleDoc,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGap(11)))));
+		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
 						.addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 						.addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap())
-		);
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addContainerGap()));
 
 		JSplitPane splitPane = new JSplitPane();
 		splitPane.setBackground(Color.WHITE);
@@ -639,7 +632,7 @@ public class DocumentProcessingView extends JInternalFrame {
 				} else {
 					dataRow.add("");
 				}
-				
+
 				docTableModel.addRow(dataRow);
 				loadedDocuments.add(d);
 			}
@@ -655,7 +648,7 @@ public class DocumentProcessingView extends JInternalFrame {
 			}
 
 			docTableModel.fireTableDataChanged();
-			
+
 		}
 	}
 
@@ -680,8 +673,7 @@ public class DocumentProcessingView extends JInternalFrame {
 								continue;
 							if (!authors.toLowerCase().contains(queryAuthorName.toLowerCase()))
 								continue;
-						}
-						else {
+						} else {
 							continue;
 						}
 

@@ -62,26 +62,23 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 		authors = new LinkedList<String>();
 	}
 
-	public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa,
-			LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+	public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
+			boolean cleanInput) {
 		this(path, lsa, lda, lang);
 		this.setText(docTmp.getText());
 		setDocTmp(docTmp);
 		Parsing.parseDoc(this, usePOSTagging, cleanInput);
 	}
 
-	public static Document load(String pathToDoc, String pathToLSA,
-			String pathToLDA, Lang lang, boolean usePOSTagging,
+	public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		// load also LSA vector space and LDA model
 		LSA lsa = LSA.loadLSA(pathToLSA, lang);
 		LDA lda = LDA.loadLDA(pathToLDA, lang);
-		return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging,
-				cleanInput);
+		return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
 	}
 
-	public static Document load(File docFile, LSA lsa, LDA lda, Lang lang,
-			boolean usePOSTagging, boolean cleanInput) {
+	public static Document load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -102,7 +99,15 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 				for (int i = 0; i < nl.getLength(); i++) {
 					el = (Element) nl.item(i);
 					BlockTemplate block = contents.new BlockTemplate();
-					block.setId(Integer.parseInt(el.getAttribute("id")));
+					if (el.hasAttribute("id")) {
+						try {
+							block.setId(Integer.parseInt(el.getAttribute("id")));
+						} catch (Exception e) {
+							block.setId(i);
+						}
+					} else {
+						block.setId(i);
+					}
 					block.setRefId(0);
 					if (el.hasAttribute("verbalization_after")) {
 						block.setVerbId(noBreakPoints);
@@ -110,37 +115,36 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 					}
 					// block.setContent(StringEscapeUtils.escapeXml(el.getFirstChild()
 					// .getNodeValue()));
-					block.setContent(el.getFirstChild().getNodeValue());
-					contents.getBlocks().add(block);
+					if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null
+							&& el.getFirstChild().getNodeValue().trim().length() > 0) {
+						block.setContent(el.getFirstChild().getNodeValue());
+						contents.getBlocks().add(block);
+					}
 				}
-
 			}
-			Document d = new Document(docFile.getAbsolutePath(), contents, lsa,
-					lda, lang, usePOSTagging, cleanInput);
+			Document d = new Document(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
 			d.setNoVerbalizationBreakPoints(noBreakPoints);
 
 			// determine title
 			nl = doc.getElementsByTagName("title");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
-				d.setDocumentTitle(((Element) nl.item(0)).getFirstChild()
-						.getNodeValue(), lsa, lda, lang, usePOSTagging);
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+				d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), lsa, lda, lang,
+						usePOSTagging);
 			}
 
 			// determine meta
 			nl = doc.getElementsByTagName("meta");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
-				d.setGenre(((Element) nl.item(0)).getFirstChild()
-						.getNodeValue()); // to check with XML
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+				d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue()); // to
+																					// check
+																					// with
+																					// XML
 			}
 
 			// get source
 			nl = doc.getElementsByTagName("source");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
-				d.setSource(((Element) nl.item(0)).getFirstChild()
-						.getNodeValue());
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+				d.setSource(((Element) nl.item(0)).getFirstChild().getNodeValue());
 			}
 
 			// get authors
@@ -148,52 +152,41 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 			if (nl != null && nl.getLength() > 0) {
 				for (int i = 0; i < nl.getLength(); i++) {
 					if (((Element) nl.item(i)).getFirstChild() != null
-							&& ((Element) nl.item(i)).getFirstChild()
-									.getNodeValue() != null)
-						d.getAuthors().add(
-								((Element) nl.item(i)).getFirstChild()
-										.getNodeValue());
+							&& ((Element) nl.item(i)).getFirstChild().getNodeValue() != null)
+						d.getAuthors().add(((Element) nl.item(i)).getFirstChild().getNodeValue());
 				}
 			}
 
 			// get complexity level
 			nl = doc.getElementsByTagName("complexity_level");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
-				d.setComplexityLevel(((Element) nl.item(0)).getFirstChild()
-						.getNodeValue());
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+				d.setComplexityLevel(((Element) nl.item(0)).getFirstChild().getNodeValue());
 			}
 
 			// get genre
 			nl = doc.getElementsByTagName("genre");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
-				d.setGenre(((Element) nl.item(0)).getFirstChild()
-						.getNodeValue());
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+				d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
 			}
 
 			// get URL
 			nl = doc.getElementsByTagName("uri");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
 				d.setURI(((Element) nl.item(0)).getFirstChild().getNodeValue());
 			}
 
 			// get date
 			nl = doc.getElementsByTagName("date");
-			if (nl != null && nl.getLength() > 0
-					&& ((Element) nl.item(0)).getFirstChild() != null) {
+			if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
 				el = (Element) nl.item(0);
 				Date date = null;
 				try {
 					DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-					date = df.parse(((Element) nl.item(0)).getFirstChild()
-							.getNodeValue());
+					date = df.parse(((Element) nl.item(0)).getFirstChild().getNodeValue());
 				} catch (ParseException e) {
 					DateFormat df2 = new SimpleDateFormat("dd.mm.yyyy");
 					try {
-						date = df2.parse(((Element) nl.item(0)).getFirstChild()
-								.getNodeValue());
+						date = df2.parse(((Element) nl.item(0)).getFirstChild().getNodeValue());
 					} catch (ParseException e2) {
 					}
 				}
@@ -205,19 +198,15 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 			if (nl != null && nl.getLength() > 0) {
 				for (int i = 0; i < nl.getLength(); i++) {
 					if (((Element) nl.item(i)).getFirstChild() != null
-							&& ((Element) nl.item(i)).getFirstChild()
-									.getNodeValue() != null) {
-						String wordToAdd = ((Element) nl.item(i))
-								.getFirstChild().getNodeValue().toLowerCase();
-						d.getInitialTopics().add(
-								Word.getWordFromConcept(wordToAdd, lang));
+							&& ((Element) nl.item(i)).getFirstChild().getNodeValue() != null) {
+						String wordToAdd = ((Element) nl.item(i)).getFirstChild().getNodeValue().toLowerCase();
+						d.getInitialTopics().add(Word.getWordFromConcept(wordToAdd, lang));
 					}
 				}
 			}
 			return d;
 		} catch (Exception e) {
-			logger.error("Error evaluating input file " + docFile.getPath()
-					+ " - " + e.getMessage());
+			logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
@@ -237,8 +226,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 		}
 	}
 
-	private void readObject(ObjectInputStream stream) throws IOException,
-			ClassNotFoundException {
+	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
 		// load serialized object
 		stream.defaultReadObject();
 		String lsaPath = (String) stream.readObject();
@@ -285,8 +273,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
 			DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
 			Element dateEl = dom.createElement("date");
-			dateEl.setTextContent(new StringBuilder(formatter.format(date))
-					.toString());
+			dateEl.setTextContent(new StringBuilder(formatter.format(date)).toString());
 			metaEl.appendChild(dateEl);
 
 			Element sourceEl = dom.createElement("source");
@@ -332,8 +319,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 	 * @throws UnsupportedEncodingException
 	 */
 	protected void writeDOMforXMLexport(String path, org.w3c.dom.Document dom)
-			throws TransformerFactoryConfigurationError,
-			TransformerConfigurationException, FileNotFoundException,
+			throws TransformerFactoryConfigurationError, TransformerConfigurationException, FileNotFoundException,
 			TransformerException, UnsupportedEncodingException {
 		TransformerFactory transfac = TransformerFactory.newInstance();
 		Transformer trans = transfac.newTransformer();
@@ -344,8 +330,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 		// create string from xml tree
 		OutputStream out = new FileOutputStream(path);
 		DOMSource source = new DOMSource(dom);
-		trans.transform(source, new StreamResult((new OutputStreamWriter(out,
-				"UTF-8"))));
+		trans.transform(source, new StreamResult((new OutputStreamWriter(out, "UTF-8"))));
 	}
 
 	/**
@@ -385,8 +370,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 		return dom;
 	}
 
-	public void computeAll(String pathToComplexityModel,
-			int[] selectedComplexityFactors, boolean saveOutput) {
+	public void computeAll(String pathToComplexityModel, int[] selectedComplexityFactors, boolean saveOutput) {
 		super.computeAll(pathToComplexityModel, selectedComplexityFactors);
 		// writing exports if document
 		// if chat there are additional computations to perform
