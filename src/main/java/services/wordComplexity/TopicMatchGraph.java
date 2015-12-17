@@ -122,21 +122,33 @@ public class TopicMatchGraph {
 	}
 
 	public static void main(String args[]) {
-		TopicMatchGraph graph = new TopicMatchGraph(6);
+		TopicMatchGraph graph = new TopicMatchGraph(7);
 		graph.addEdge(0, 3, 3);
 		graph.addEdge(0, 4, 2);
 		graph.addEdge(0, 5, 1);
 
 		graph.addEdge(1, 3, 2);
 		graph.addEdge(1, 4, 1);
-		graph.addEdge(1, 5, 3);
+		graph.addEdge(1, 6, 3);
 
 		graph.addEdge(2, 3, 1);
 		graph.addEdge(2, 4, 2);
-		graph.addEdge(2, 5, 3);
+		graph.addEdge(2, 6, 3);
+		
+		System.out.println("Graf:");
+		System.out.println(graph);
 
 		Integer[] assoc = graph.computeAssociations();
 		for (int i = 0; i < assoc.length; i++)
 			System.out.println(i + "--" + assoc[i]);
 	}
+	
+	/*public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < this.nodes; i++) {
+				sb.append("(" + i + ", " + parent[i] +"): edge=" + this.edge[i][parent[i]] + "; cost=" + this.cost[i][parent[i]] + "\t");
+			sb.append("\n");
+		}
+		return sb.toString();
+	}*/
 }
