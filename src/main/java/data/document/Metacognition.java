@@ -60,6 +60,22 @@ public class Metacognition extends Document {
 		this.referredDoc = initialReadingMaterial;
 	}
 
+	public Metacognition(String initialText, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+		
+		super("", initialReadingMaterial.getLSA(), initialReadingMaterial.getLDA(),
+				initialReadingMaterial.getLanguage());
+		
+		this.referredDoc = initialReadingMaterial;
+		// build the corresponding structure of verbalizations
+		// TODO
+		/*
+		 * super(path, docTmp, initialReadingMaterial.getLSA(),
+		 * initialReadingMaterial.getLDA(),
+		 * initialReadingMaterial.getLanguage(), usePOSTagging, cleanInput);
+		 * this.referredDoc = initialReadingMaterial;
+		 */
+	}
+
 	public static Metacognition loadVerbalization(String pathToDoc, Document initialReadingMaterial,
 			boolean usePOSTagging, boolean cleanInput) {
 		// parse the XML file
@@ -122,6 +138,33 @@ public class Metacognition extends Document {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static Metacognition loadVerbalization(Document selfExplanationMaterial, Document initialReadingMaterial,
+			boolean usePOSTagging, boolean cleanInput) {
+
+		logger.info("Building internal representation");
+		Metacognition meta = new Metacognition(initialReadingMaterial.getText(), selfExplanationMaterial, usePOSTagging, cleanInput);
+
+		// add corresponding links from verbalizations to initial document
+		if (selfExplanationMaterial != null && selfExplanationMaterial.getBlocks().size() > 0) {
+			meta.setAnnotatedReadingStrategies(new int[1][ReadingStrategies.NO_READING_STRATEGIES]);
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.CONTROL] = 0;
+
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.CAUSALITY] = 0;
+
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.PARAPHRASE] = 0;
+			
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.INFERRED_KNOWLEDGE] = 0;
+
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.BRIDGING] = 0;
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.TEXT_BASED_INFERENCES] = meta
+					.getAnnotatedReadingStrategies()[0][ReadingStrategies.BRIDGING]
+					+ meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.CAUSALITY];
+		}
+
+		return meta;
+		
 	}
 
 	public void exportXML(String path) {

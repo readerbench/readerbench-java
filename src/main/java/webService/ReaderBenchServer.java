@@ -38,6 +38,7 @@ import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
+import data.document.Metacognition;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentGrid;
@@ -49,6 +50,7 @@ import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.converters.PdfToTextConverter;
 import services.discourse.topicMining.TopicModeling;
+import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
@@ -252,6 +254,20 @@ class ResultSemanticAnnotation {
 		this.keywordsDocumentCoverage = keywordsDocumentCoverage;
 		this.keywords = resultKeywords;
 		this.categories = resultCategories;
+	}
+
+}
+
+class ResultSelfExplanation {
+	
+	private String initialTextColored;
+	private List<Double> cohesionPerParagraph;
+
+	public ResultSelfExplanation(
+			String initialTextColored,
+			List<Double> cohesionPerParagraph) {
+		this.initialTextColored = initialTextColored;
+		this.cohesionPerParagraph = cohesionPerParagraph;
 	}
 
 }
@@ -740,6 +756,51 @@ public class ReaderBenchServer {
 		return rsa;
 	}
 	
+	private ResultSelfExplanation getSelfExplanation(
+			String initialText,
+			String selfExplanation,
+			String pathToLSA,
+			String pathToLDA,
+			String lang,
+			boolean usePOSTagging,
+			double threshold) {
+		
+		// concepts
+		Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
+		
+		Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
+		// path to initial file?
+		Metacognition verbalization = Metacognition.loadVerbalization("",
+				queryInitialText, usePOSTagging, true);
+		verbalization.computeAll(true);
+		
+		verbalization.getBlocks().get(0).getAlternateText().trim();
+		
+		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
+			int x = verbalization.getAutomaticReadingStrategies()[0][i];
+		}
+		
+		StringBuilder initialTextColored = new StringBuilder();
+		List<Double> cohs = new ArrayList<Double>();
+		for (int refBlockId = 0; refBlockId <= queryInitialText.getBlocks().size(); refBlockId++) {
+			SemanticCohesion coh = verbalization.getBlockSimilarities()[refBlockId];
+			// add block text
+			String text = "";
+			for (Sentence s : verbalization.getReferredDoc()
+					.getBlocks().get(refBlockId).getSentences()) {
+				text += s.getAlternateText() + " ";
+			}
+			initialTextColored.append(text);
+
+			cohs.add(Formatting.formatNumber(coh.getCohesion()));			
+		}
+		
+		return new ResultSelfExplanation(
+			initialTextColored.toString(),
+			cohs
+		);
+	}
+	
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
 		// MS_training_SE_1999
 		if (localFile) {
@@ -792,6 +853,12 @@ public class ReaderBenchServer {
 	}
 	
 	private String convertToJson(QueryResultSemanticAnnotation queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
+	private String convertToJson(QueryResultSelfExplanation queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -896,6 +963,27 @@ public class ReaderBenchServer {
 			data = new ResultSemanticAnnotation(null, 0, 0, 0, null, null);
 		}
 	}
+	
+	@Root(name = "response")
+	private static class QueryResultSelfExplanation {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultSelfExplanation data; // list of query results (urls)
+
+		private QueryResultSelfExplanation() {
+			success = true;
+			errorMsg = "";
+			data = new ResultSelfExplanation(null, null);
+		}
+	}
+	
 	
 	@Root(name = "response")
 	private static class QueryResultPdfToText {
@@ -1067,6 +1155,34 @@ public class ReaderBenchServer {
 					documentAbstract,
 					documentKeywords,
 					documentContent,
+					pathToLSA,
+					pathToLDA,
+					lang,
+					usePOSTagging,
+					threshold
+			);
+			String result = convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+			
+		});
+		Spark.post("/selfExplanation", (request, response) -> {
+			JSONObject json = (JSONObject)new JSONParser().parse(request.body());
+			
+			response.type("application/json");
+
+			String text = (String) json.get("text");
+			String explanation = (String) json.get("explanation");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			double threshold = (double) json.get("threshold");
+
+			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
+			queryResult.data = getSelfExplanation(
+					text, 
+					explanation,
 					pathToLSA,
 					pathToLDA,
 					lang,
