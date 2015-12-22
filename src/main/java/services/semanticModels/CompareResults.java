@@ -24,6 +24,7 @@ import data.Word;
 import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class CompareResults {
@@ -194,7 +195,8 @@ public class CompareResults {
 		BasicConfigurator.configure();
 		CompareResults comp = new CompareResults();
 
-		LSA lsa = LSA.loadLSA("resources/config/LSA/financial2_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_new_en", Lang.eng);
+		// LDA lsa = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
 		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
 
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
