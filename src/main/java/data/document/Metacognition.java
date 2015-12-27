@@ -60,11 +60,12 @@ public class Metacognition extends Document {
 		this.referredDoc = initialReadingMaterial;
 	}
 
-	public Metacognition(String initialText, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
-		
+	public Metacognition(String initialText, Document initialReadingMaterial, boolean usePOSTagging,
+			boolean cleanInput) {
+
 		super("", initialReadingMaterial.getLSA(), initialReadingMaterial.getLDA(),
 				initialReadingMaterial.getLanguage());
-		
+
 		this.referredDoc = initialReadingMaterial;
 		// build the corresponding structure of verbalizations
 		// TODO
@@ -108,7 +109,7 @@ public class Metacognition extends Document {
 					meta.getBlocks().get(id).setRefBlock(initialReadingMaterial.getBlocks().get(after));
 					// add annotated scores
 					try {
-						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.CONTROL] = Integer
+						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.META_COGNITION] = Integer
 								.valueOf(nl.item(i).getAttributes().getNamedItem("no_control").getNodeValue());
 
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.CAUSALITY] = Integer
@@ -139,24 +140,21 @@ public class Metacognition extends Document {
 		}
 		return null;
 	}
-	
+
 	public static Metacognition loadVerbalization(Document selfExplanationMaterial, Document initialReadingMaterial,
 			boolean usePOSTagging, boolean cleanInput) {
 
 		logger.info("Building internal representation");
-		Metacognition meta = new Metacognition(initialReadingMaterial.getText(), selfExplanationMaterial, usePOSTagging, cleanInput);
+		Metacognition meta = new Metacognition(initialReadingMaterial.getText(), selfExplanationMaterial, usePOSTagging,
+				cleanInput);
 
 		// add corresponding links from verbalizations to initial document
 		if (selfExplanationMaterial != null && selfExplanationMaterial.getBlocks().size() > 0) {
 			meta.setAnnotatedReadingStrategies(new int[1][ReadingStrategies.NO_READING_STRATEGIES]);
-			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.CONTROL] = 0;
-
+			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.META_COGNITION] = 0;
 			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.CAUSALITY] = 0;
-
 			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.PARAPHRASE] = 0;
-			
 			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.INFERRED_KNOWLEDGE] = 0;
-
 			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.BRIDGING] = 0;
 			meta.getAnnotatedReadingStrategies()[0][ReadingStrategies.TEXT_BASED_INFERENCES] = meta
 					.getAnnotatedReadingStrategies()[0][ReadingStrategies.BRIDGING]
@@ -164,7 +162,7 @@ public class Metacognition extends Document {
 		}
 
 		return meta;
-		
+
 	}
 
 	public void exportXML(String path) {
@@ -181,7 +179,8 @@ public class Metacognition extends Document {
 					Element pEl = dom.createElement("verbalization");
 					pEl.setAttribute("id", i + "");
 					pEl.setAttribute("after_p", getBlocks().get(i).getRefBlock().getIndex() + "");
-					pEl.setAttribute("no_control", getAnnotatedReadingStrategies()[i][ReadingStrategies.CONTROL] + "");
+					pEl.setAttribute("no_metacognition",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.META_COGNITION] + "");
 					pEl.setAttribute("no_causality",
 							getAnnotatedReadingStrategies()[i][ReadingStrategies.CAUSALITY] + "");
 					pEl.setAttribute("no_paraphrase",
@@ -359,7 +358,8 @@ public class Metacognition extends Document {
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.TEXT_BASED_INFERENCES];
 			indices[i + ReadingStrategies.INFERRED_KNOWLEDGE] = this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.INFERRED_KNOWLEDGE];
-			indices[i + ReadingStrategies.CONTROL] = this.getAutomaticReadingStrategies()[j][ReadingStrategies.CONTROL];
+			indices[i + ReadingStrategies.META_COGNITION] = this
+					.getAutomaticReadingStrategies()[j][ReadingStrategies.META_COGNITION];
 		}
 		i += ReadingStrategies.NO_READING_STRATEGIES;
 		indices[i++] = this.getAnnotatedFluency();

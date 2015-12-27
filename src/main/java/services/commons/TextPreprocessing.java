@@ -145,7 +145,7 @@ public class TextPreprocessing {
 		result = result.replaceAll("( mais)+", " mais");
 		for (String pattern : PatternMatching.PATTERNS_CAUSALITY_FR.getWords())
 			result = result.replaceAll("( " + pattern + ")+", " " + pattern);
-		for (String pattern : PatternMatching.PATTERNS_CONTROL_FR.getWords())
+		for (String pattern : PatternMatching.PATTERNS_METACOGNITION_FR.getWords())
 			result = result.replaceAll("( " + pattern + ")+", " " + pattern);
 
 		// frequent spell-checking errors

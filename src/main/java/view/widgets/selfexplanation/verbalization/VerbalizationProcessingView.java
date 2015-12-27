@@ -73,8 +73,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		private boolean usePOSTagging;
 		private boolean isSerialized;
 
-		public VerbalizationProcessingTask(String pathToDoc, Document d,
-				boolean usePOSTagging, boolean isSerialized) {
+		public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
 			super();
 			this.pathToDoc = pathToDoc;
 			this.referredDoc = d;
@@ -85,27 +84,22 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		public void addSingleVerbalisation(String pathToIndividualFile) {
 			Metacognition v = null;
 			if (isSerialized) {
-				v = (Metacognition) Metacognition
-						.loadSerializedDocument(pathToIndividualFile);
+				v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
 			} else {
-				v = Metacognition.loadVerbalization(pathToIndividualFile,
-						referredDoc, usePOSTagging, true);
+				v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging, true);
 				v.computeAll(true);
 			}
 
 			if (v != null) {
 				if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
 					ReaderBenchView.RUNTIME_LANGUAGE = v.getLanguage();
-					ComplexityIndicesView
-							.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
+					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
 				}
 				if (v.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-					VerbalizationProcessingView.getLoadedVervalizations()
-							.add(v);
+					VerbalizationProcessingView.getLoadedVervalizations().add(v);
 					addVerbalization(v);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Incorrect language for the loaded verbalization!",
+					JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -177,8 +171,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 					UIDefaults map = new UIDefaults();
 					Painter<JComponent> painter = new Painter<JComponent>() {
 						@Override
-						public void paint(Graphics2D g, JComponent c, int w,
-								int h) {
+						public void paint(Graphics2D g, JComponent c, int w, int h) {
 							g.setColor(Color.WHITE);
 							g.fillRect(0, 0, w, h);
 						}
@@ -198,8 +191,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
 					try {
-						JInternalFrame frame = new AddVerbalizationView(
-								VerbalizationProcessingView.this);
+						JInternalFrame frame = new AddVerbalizationView(VerbalizationProcessingView.this);
 						frame.setVisible(true);
 						desktopPane.add(frame);
 						try {
@@ -211,12 +203,10 @@ public class VerbalizationProcessingView extends JInternalFrame {
 						exception.printStackTrace();
 					}
 				} else {
-					JOptionPane
-							.showMessageDialog(
-									desktopPane,
-									LocalizationUtils.getTranslation("At least one document must be already loaded in order to be able to start processing verbalizations!"),
-									LocalizationUtils.getTranslation("Information"),
-									JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(desktopPane,
+							LocalizationUtils.getTranslation(
+									"At least one document must be already loaded in order to be able to start processing verbalizations!"),
+							LocalizationUtils.getTranslation("Information"), JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
@@ -226,14 +216,12 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		btnRemoveVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (verbalisationsTable.getSelectedRow() != -1) {
-					loadedVervalizations.remove(verbalisationsTable
-							.getSelectedRow());
+					loadedVervalizations.remove(verbalisationsTable.getSelectedRow());
 					updateContents();
 				} else {
-					JOptionPane.showMessageDialog(
-							VerbalizationProcessingView.this,
-							LocalizationUtils.getTranslation("Please select a row to be deleted!"),
-							"Information", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(VerbalizationProcessingView.this,
+							LocalizationUtils.getTranslation("Please select a row to be deleted!"), "Information",
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
@@ -243,13 +231,11 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		btnViewVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (verbalisationsTable.getSelectedRow() != -1) {
-					Metacognition v = loadedVervalizations
-							.get(verbalisationsTable.getSelectedRow());
+					Metacognition v = loadedVervalizations.get(verbalisationsTable.getSelectedRow());
 					VerbalizationView view = new VerbalizationView(v);
 					view.setVisible(true);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please select a verbalization to be viewed!",
+					JOptionPane.showMessageDialog(desktopPane, "Please select a verbalization to be viewed!",
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -259,8 +245,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 			verbalizationsTableModel = new VerbalisationManagementTableModel();
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		verbalisationsTable = new JTable(verbalizationsTableModel);
 		verbalisationsTable.setFillsViewportHeight(true);
@@ -282,13 +267,12 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
 		scrollPane.setViewportView(verbalisationsTable);
 
-		btnAddSerializedVerbalization = new JButton(
-				"Add serialized verbalization(s)");
+		btnAddSerializedVerbalization = new JButton("Add serialized verbalization(s)");
 		btnAddSerializedVerbalization.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser(new File("in"));
+					fc = new JFileChooser(new File("resources/in"));
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -304,8 +288,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 						return "Serialized document (*.ser) or directory";
 					}
 				});
-				int returnVal = fc
-						.showOpenDialog(VerbalizationProcessingView.this);
+				int returnVal = fc.showOpenDialog(VerbalizationProcessingView.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
@@ -323,8 +306,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						VerbalizationsDetailedView view = new VerbalizationsDetailedView(
-								loadedVervalizations);
+						VerbalizationsDetailedView view = new VerbalizationsDetailedView(loadedVervalizations);
 						view.setVisible(true);
 					}
 				});
@@ -332,15 +314,13 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		});
 		btnViewDetailedStatistics.setEnabled(false);
 
-		btnViewCummulativeStatistics = new JButton(
-				LocalizationUtils.getTranslation("View cummulative statistics"));
+		btnViewCummulativeStatistics = new JButton(LocalizationUtils.getTranslation("View cummulative statistics"));
 		btnViewCummulativeStatistics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(
-								loadedVervalizations);
+						VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(loadedVervalizations);
 						view.setVisible(true);
 					}
 				});
@@ -352,138 +332,55 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		btnComprehensionPrediction.setEnabled(false);
 		btnComprehensionPrediction.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				ComprehensionPredictionView view = new ComprehensionPredictionView(
-						loadedVervalizations);
+				ComprehensionPredictionView view = new ComprehensionPredictionView(loadedVervalizations);
 				view.setVisible(true);
 			}
 		});
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane
-				.setHorizontalGroup(gl_desktopPane
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_desktopPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																scrollPane,
-																GroupLayout.DEFAULT_SIZE,
-																726,
-																Short.MAX_VALUE)
-														.addGroup(
-																gl_desktopPane
-																		.createSequentialGroup()
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED,
-																				33,
-																				Short.MAX_VALUE)
-																		.addComponent(
-																				btnViewVerbalization,
-																				GroupLayout.PREFERRED_SIZE,
-																				142,
-																				GroupLayout.PREFERRED_SIZE)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addGroup(
-																				gl_desktopPane
-																						.createParallelGroup(
-																								Alignment.TRAILING,
-																								false)
-																						.addComponent(
-																								btnViewDetailedStatistics,
-																								Alignment.LEADING,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE)
-																						.addComponent(
-																								btnAddVerbalization,
-																								Alignment.LEADING,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE))
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addGroup(
-																				gl_desktopPane
-																						.createParallelGroup(
-																								Alignment.TRAILING,
-																								false)
-																						.addComponent(
-																								btnViewCummulativeStatistics,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE)
-																						.addComponent(
-																								btnAddSerializedVerbalization,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE))
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addGroup(
-																				gl_desktopPane
-																						.createParallelGroup(
-																								Alignment.LEADING,
-																								false)
-																						.addComponent(
-																								btnRemoveVerbalization,
-																								GroupLayout.PREFERRED_SIZE,
-																								184,
-																								GroupLayout.PREFERRED_SIZE)
-																						.addComponent(
-																								btnComprehensionPrediction,
-																								GroupLayout.PREFERRED_SIZE,
-																								185,
-																								GroupLayout.PREFERRED_SIZE))))
-										.addContainerGap()));
-		gl_desktopPane
-				.setVerticalGroup(gl_desktopPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_desktopPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addComponent(scrollPane,
-												GroupLayout.DEFAULT_SIZE, 339,
-												Short.MAX_VALUE)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																btnRemoveVerbalization,
-																GroupLayout.PREFERRED_SIZE,
-																27,
-																GroupLayout.PREFERRED_SIZE)
-														.addComponent(
-																btnAddSerializedVerbalization)
-														.addComponent(
-																btnAddVerbalization,
-																GroupLayout.PREFERRED_SIZE,
-																27,
-																GroupLayout.PREFERRED_SIZE)
-														.addComponent(
-																btnViewVerbalization))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																btnComprehensionPrediction)
-														.addComponent(
-																btnViewCummulativeStatistics)
-														.addComponent(
-																btnViewDetailedStatistics))
-										.addGap(8)));
+		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+						.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
+								.addGroup(gl_desktopPane.createSequentialGroup()
+										.addPreferredGap(ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+										.addComponent(btnViewVerbalization, GroupLayout.PREFERRED_SIZE, 142,
+												GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
+										.addComponent(btnViewDetailedStatistics, Alignment.LEADING,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(btnAddVerbalization, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
+										.addComponent(btnViewCummulativeStatistics, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(btnAddSerializedVerbalization, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
+										.addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 184,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(btnComprehensionPrediction, GroupLayout.PREFERRED_SIZE, 185,
+												GroupLayout.PREFERRED_SIZE))))
+						.addContainerGap()));
+		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addGroup(gl_desktopPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 27,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAddSerializedVerbalization)
+								.addComponent(btnAddVerbalization, GroupLayout.PREFERRED_SIZE, 27,
+										GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnViewVerbalization))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(
+						gl_desktopPane.createParallelGroup(Alignment.BASELINE).addComponent(btnComprehensionPrediction)
+								.addComponent(btnViewCummulativeStatistics).addComponent(btnViewDetailedStatistics))
+				.addGap(8)));
 		desktopPane.setLayout(gl_desktopPane);
 
 		updateContents();
@@ -493,8 +390,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 		return loadedVervalizations;
 	}
 
-	public static synchronized void setLoadedVervalizations(
-			List<Metacognition> loadedVervalizations) {
+	public static synchronized void setLoadedVervalizations(List<Metacognition> loadedVervalizations) {
 		VerbalizationProcessingView.loadedVervalizations = loadedVervalizations;
 	}
 

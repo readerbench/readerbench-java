@@ -52,16 +52,15 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import utils.localization.LocalizationUtils;
-import view.models.document.DocumentManagementTableModel;
-import view.widgets.ReaderBenchView;
-import view.widgets.chat.ChatView;
-import view.widgets.complexity.ComplexityIndicesView;
-import view.widgets.document.corpora.PaperSimilarityView;
 import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import utils.localization.LocalizationUtils;
+import view.models.document.DocumentManagementTableModel;
+import view.widgets.ReaderBenchView;
+import view.widgets.complexity.ComplexityIndicesView;
+import view.widgets.document.corpora.PaperSimilarityView;
 
 public class DocumentProcessingView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;
@@ -320,7 +319,7 @@ public class DocumentProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser(new File("in"));
+					fc = new JFileChooser(new File("resources/in"));
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

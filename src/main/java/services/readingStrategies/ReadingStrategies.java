@@ -14,23 +14,21 @@ import data.document.Metacognition;
 public class ReadingStrategies {
 	static Logger logger = Logger.getLogger(ReadingStrategies.class);
 
-	private static int id = 0;
-	public static final int PARAPHRASE = id++;
-	public static final int CAUSALITY = id++;
-	public static final int BRIDGING = id++;
-	public static final int TEXT_BASED_INFERENCES = id++;
-	public static final int INFERRED_KNOWLEDGE = id++;
-	public static final int CONTROL = id++;
-	public static final int NO_READING_STRATEGIES = id;
-	public static final String[] STRATEGY_NAMES = { "Paraphrase", "Causality",
-			"Text based inferences", "Bridging", "Inferred Knowledge",
-			"Control" };
+	public static final int PARAPHRASE = 0;
+	public static final int CAUSALITY = 1;
+	public static final int BRIDGING = 2;
+	public static final int TEXT_BASED_INFERENCES = 3;
+	public static final int INFERRED_KNOWLEDGE = 4;
+	public static final int META_COGNITION = 5;
+	public static final int NO_READING_STRATEGIES = 6;
+	public static final String[] STRATEGY_NAMES = { "Paraphrase", "Causality", "Text based inferences", "Bridging",
+			"Inferred Knowledge", "Metacognition" };
 
 	public static void detReadingStrategies(Metacognition metacognition) {
 		logger.info("Identifying reading strategies from verbalizations");
 
-		metacognition.setAutomaticReadingStrategies(new int[metacognition
-				.getBlocks().size()][ReadingStrategies.NO_READING_STRATEGIES]);
+		metacognition.setAutomaticReadingStrategies(
+				new int[metacognition.getBlocks().size()][ReadingStrategies.NO_READING_STRATEGIES]);
 
 		// clear references of words in initial document
 		for (Block b : metacognition.getBlocks()) {
@@ -58,19 +56,16 @@ public class ReadingStrategies {
 			List<Sentence> crtSentences = new LinkedList<Sentence>();
 			endIndex = v.getRefBlock().getIndex();
 			for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-				for (Sentence s : metacognition.getReferredDoc().getBlocks()
-						.get(refBlockId).getSentences()) {
+				for (Sentence s : metacognition.getReferredDoc().getBlocks().get(refBlockId).getSentences()) {
 					crtSentences.add(s);
 				}
 			}
 
 			// afterwards causality and control
 			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.CAUSALITY] = PatternMatching
-					.containsStrategy(crtSentences, v,
-							PatternMatching.Strategy.CAUSALITY, true);
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.CONTROL] = PatternMatching
-					.containsStrategy(crtSentences, v,
-							PatternMatching.Strategy.CONTROL, true);
+					.containsStrategy(crtSentences, v, ReadingStrategies.CAUSALITY, true);
+			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.META_COGNITION] = PatternMatching
+					.containsStrategy(crtSentences, v, ReadingStrategies.META_COGNITION, true);
 
 			// in the end determine paraphrases and inferred concepts as links
 			// to previous paragraphs
@@ -156,11 +151,9 @@ public class ReadingStrategies {
 			Block e = essay.getBlocks().get(i);
 			// causality and control
 			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.CAUSALITY] += PatternMatching
-					.containsStrategy(originalSentences, e,
-							PatternMatching.Strategy.CAUSALITY, false);
-			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.CONTROL] += PatternMatching
-					.containsStrategy(originalSentences, e,
-							PatternMatching.Strategy.CONTROL, false);
+					.containsStrategy(originalSentences, e, ReadingStrategies.CAUSALITY, false);
+			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.META_COGNITION] += PatternMatching
+					.containsStrategy(originalSentences, e, ReadingStrategies.META_COGNITION, false);
 
 			// paraphrases and inferred concepts
 			for (Sentence s : originalSentences) {
@@ -188,8 +181,8 @@ public class ReadingStrategies {
 		}
 
 		// bridging
-		essay.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING] = bridgingStg
-				.containsStrategy(essay, originalSentences);
+		essay.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING] = bridgingStg.containsStrategy(essay,
+				originalSentences);
 
 		essay.getAutomaticReadingStrategies()[0][ReadingStrategies.TEXT_BASED_INFERENCES] = essay
 				.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING]

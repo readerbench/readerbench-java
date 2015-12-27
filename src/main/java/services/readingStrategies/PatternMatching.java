@@ -2,13 +2,14 @@ package services.readingStrategies;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import services.nlp.listOfWords.ListOfWords;
 import data.AnalysisElement;
 import data.Sentence;
+import services.nlp.listOfWords.ListOfWords;
 
 /**
  * 
@@ -19,27 +20,30 @@ public class PatternMatching {
 
 	public static final ListOfWords PATTERNS_CAUSALITY_FR = new ListOfWords(
 			"resources/config/ReadingStrategies/causality_fr.txt");
-	public static final ListOfWords PATTERNS_CONTROL_FR = new ListOfWords(
-			"resources/config/ReadingStrategies/control_fr.txt");
+	public static final ListOfWords PATTERNS_METACOGNITION_FR = new ListOfWords(
+			"resources/config/ReadingStrategies/metacognition_fr.txt");
+	public static final ListOfWords PATTERNS_CAUSALITY_EN = new ListOfWords(
+			"resources/config/ReadingStrategies/causality_en.txt");
+	public static final ListOfWords PATTERNS_METACOGNITION_EN = new ListOfWords(
+			"resources/config/ReadingStrategies/metacognition_en.txt");
 	private static final Color COLOR_CAUSALITY = new Color(255, 0, 255);
-	private static final Color COLOR_CONTROL = new Color(0, 203, 255);
-
-	public static enum Strategy {
-		CAUSALITY, CONTROL
-	};
+	private static final Color COLOR_METACOGNITION = new Color(0, 203, 255);
 
 	// returns the number of occurrences
-	public static int containsStrategy(List<Sentence> sentences,
-			AnalysisElement el, Strategy strategy, boolean alreadyExistentCheck) {
+	public static int containsStrategy(List<Sentence> sentences, AnalysisElement el, int strategy,
+			boolean alreadyExistentCheck) {
 		String text = " " + el.getAlternateText() + " ";
 		int no_occurences = 0;
 		ListOfWords usedList = null;
 		String usedColor = null;
 		switch (strategy) {
-		case CAUSALITY:
+		case ReadingStrategies.CAUSALITY:
 			usedColor = Integer.toHexString(COLOR_CAUSALITY.getRGB());
 			usedColor = usedColor.substring(2, usedColor.length());
 			switch (el.getLanguage()) {
+			case eng:
+				usedList = PATTERNS_CAUSALITY_EN;
+				break;
 			case fr:
 				usedList = PATTERNS_CAUSALITY_FR;
 				break;
@@ -47,12 +51,15 @@ public class PatternMatching {
 				break;
 			}
 			break;
-		case CONTROL:
-			usedColor = Integer.toHexString(COLOR_CONTROL.getRGB());
+		case ReadingStrategies.META_COGNITION:
+			usedColor = Integer.toHexString(COLOR_METACOGNITION.getRGB());
 			usedColor = usedColor.substring(2, usedColor.length());
 			switch (el.getLanguage()) {
+			case eng:
+				usedList = PATTERNS_METACOGNITION_EN;
+				break;
 			case fr:
-				usedList = PATTERNS_CONTROL_FR;
+				usedList = PATTERNS_METACOGNITION_FR;
 				break;
 			default:
 				break;
@@ -60,60 +67,53 @@ public class PatternMatching {
 			break;
 		}
 
-		if (usedList != null && strategy.equals(Strategy.CONTROL)) {
+		if (usedList != null && strategy == ReadingStrategies.META_COGNITION) {
 			for (String pattern : usedList.getWords()) {
 				// check that the pattern does not exist in any of the previous
 				// sentences
 				boolean exists = false;
 				if (alreadyExistentCheck) {
 					for (Sentence s : sentences) {
-						if (s.getText().contains(" " + text.trim() + " ")) {
+						Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+						Matcher matcher = javaPattern.matcher(" " + s.getText() + " ");
+						if (matcher.find()) {
 							exists = true;
 							break;
 						}
 					}
 				}
 				if (!exists) {
-					no_occurences += StringUtils.countMatches(" " + text.trim()
-							+ " ", " " + pattern + " ");
+					Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+					Matcher matcher = javaPattern.matcher(" " + text.trim() + " ");
+					while (matcher.find())
+						no_occurences++;
 					text = colorText(text.trim(), pattern, usedColor);
 				}
 			}
 		}
-		if (usedList != null && strategy.equals(Strategy.CAUSALITY)) {
+		if (usedList != null && strategy == ReadingStrategies.CAUSALITY) {
 			for (String pattern : usedList.getWords()) {
-				// check that the pattern does not exist in any of the previous
-				// sentences
-				boolean exists = false;
-				if (alreadyExistentCheck) {
-					for (Sentence s : sentences) {
-						if (s.getText().contains(" " + text.trim() + " ")) {
-							exists = true;
-							break;
-						}
-					}
-				}
-				if (!exists) {
-					if (text.trim().startsWith(pattern + " ")) {
-						no_occurences += StringUtils.countMatches(" "
-								+ text.trim().substring(pattern.length() + 1)
-										.trim() + " ", " " + pattern + " ");
-						text = pattern
-								+ " "
-								+ colorText(
-										text.trim()
-												.substring(pattern.length() + 1)
-												.trim(), pattern, usedColor);
-					} else {
-						no_occurences += StringUtils.countMatches(
-								" " + text.trim() + " ", " " + pattern + " ");
-						text = colorText(text.trim(), pattern, usedColor);
-					}
-					// recheck just to be sure
-					no_occurences += StringUtils.countMatches(" " + text.trim()
-							+ " ", " " + pattern + " ");
+				if (text.trim().startsWith(pattern + " ")) {
+					Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+					Matcher matcher = javaPattern
+							.matcher(" " + text.trim().substring(pattern.length() + 1).trim() + " ");
+					while (matcher.find())
+						no_occurences++;
+					text = pattern + " "
+							+ colorText(text.trim().substring(pattern.length() + 1).trim(), pattern, usedColor);
+				} else {
+					Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+					Matcher matcher = javaPattern.matcher(" " + text.trim() + " ");
+					while (matcher.find())
+						no_occurences++;
 					text = colorText(text.trim(), pattern, usedColor);
 				}
+				// recheck just to be sure
+				Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+				Matcher matcher = javaPattern.matcher(" " + text.trim() + " ");
+				while (matcher.find())
+					no_occurences++;
+				text = colorText(text.trim(), pattern, usedColor);
 			}
 		}
 		el.setAlternateText(text.trim());
@@ -122,31 +122,26 @@ public class PatternMatching {
 
 	public static String colorText(String text, String pattern, String color) {
 		String phrase = " " + text + " ";
-		phrase = phrase.replaceAll(" " + pattern + " ", " <font color=\""
-				+ color + "\"><b>" + pattern + "</b></font> ");
+		phrase = phrase.replaceAll(" " + pattern + " ",
+				" <font color=\"" + color + "\"><b>" + pattern + "</b></font> ");
 		return phrase.trim();
 	}
 
 	public static String underlineIntalicsText(String text, String color) {
-		return " <font color=\"" + color
-				+ "\" style=\"text-decoration: underline, italics;\">"
-				+ text.trim() + "</font>";
+		return " <font color=\"" + color + "\" style=\"text-decoration: underline, italics;\">" + text.trim()
+				+ "</font>";
 	}
 
-	public static String colorTextIndex(String text, String pattern,
-			String color, int index) {
+	public static String colorTextIndex(String text, String pattern, String color, int index) {
 		String phrase = " " + text + " ";
-		String replacement = " <font color=\"" + color + "\"><b>" + pattern
-				+ "[" + index + "]</b></font> ";
+		String replacement = " <font color=\"" + color + "\"><b>" + pattern + "[" + index + "]</b></font> ";
 		phrase = phrase.replaceAll(" " + pattern + " ", replacement);
 		return phrase.trim();
 	}
 
-	public static String colorTextStar(String text, String pattern,
-			String color, String annotationText) {
+	public static String colorTextStar(String text, String pattern, String color, String annotationText) {
 		String phrase = " " + text + " ";
-		String replacement = " <font color=\"" + color + "\"><b>" + pattern
-				+ "[" + annotationText + "*]</b></font> ";
+		String replacement = " <font color=\"" + color + "\"><b>" + pattern + "[" + annotationText + "*]</b></font> ";
 		phrase = phrase.replaceAll(" " + pattern + " ", replacement);
 		return phrase.trim();
 	}

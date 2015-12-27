@@ -1,4 +1,4 @@
-package view.widgets.document;
+package view.widgets.selfexplanation.summary;
 
 import java.awt.Color;
 import java.awt.Font;
