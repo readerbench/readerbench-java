@@ -15,7 +15,7 @@ import cc.mallet.util.Maths;
  */
 public class SemanticCohesion implements Serializable {
 	private static final long serialVersionUID = 7561413289472294392L;
-	
+
 	public static final int NO_COHESION_DIMENSIONS = 6;
 
 	public static final int WINDOW_SIZE = 20;
@@ -82,7 +82,7 @@ public class SemanticCohesion implements Serializable {
 			cohesion = getCohesionMeasure(ontologySim[OntologySupport.WU_PALMER], lsaSim, ldaSim);
 		}
 	}
-	
+
 	public AnalysisElement getSource() {
 		return source;
 	}
@@ -164,6 +164,10 @@ public class SemanticCohesion implements Serializable {
 		// Normalized Leackock-Chodorow by log(2*ontology depth)
 		return new String[] { "Leackock-Chodorow", "Wu-Palmer", "Inverse path length", "LSA", "LDA",
 				"Aggregated score" };
+	}
+
+	public static String[] getSemanticDistanceAcronyms() {
+		return new String[] { "LckChodo", "WuPalmer", "InvPathLen", "LSA", "LDA", "Aggreg" };
 	}
 
 	public void setCohesion(double cohesion) {

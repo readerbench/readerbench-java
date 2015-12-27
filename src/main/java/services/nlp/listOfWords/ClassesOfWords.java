@@ -16,10 +16,12 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
+import services.commons.TextPreprocessing;
 import services.complexity.ComplexityIndices;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 
 /**
  * 
@@ -42,8 +44,7 @@ public class ClassesOfWords {
 			while ((line = in.readLine()) != null) {
 				String concept = line.toLowerCase().trim().toLowerCase();
 				if (concept.startsWith("[")) {
-					className = concept.replaceAll("\\[", "")
-							.replaceAll("\\]", "").trim();
+					className = concept.replaceAll("\\[", "").replaceAll("\\]", "").trim();
 					if (!classes.containsKey(className))
 						classes.put(className, new TreeSet<String>());
 				} else {
@@ -101,8 +102,7 @@ public class ClassesOfWords {
 		return set;
 	}
 
-	public double countAveragePatternOccurrences(AbstractDocument document,
-			String className) {
+	public double countAveragePatternOccurrences(AbstractDocument document, String className) {
 		int no_occurences = 0;
 		int no_blocks = 0;
 		for (String pattern : this.getClasses().get(className)) {
@@ -112,13 +112,10 @@ public class ClassesOfWords {
 				if (b != null) {
 					no_blocks++;
 					for (Sentence s : b.getSentences()) {
-						String text = s.getText().toLowerCase()
-								.replaceAll("[^\\-.'A-Za-z]", " ")
-								.replaceAll("\\.", " . ")
-								.replaceAll("-", " - ").replaceAll("'", " ' ")
+						String text = TextPreprocessing.cleanText(s.getText(), document.getLanguage())
+								.replaceAll("\\.", " . ").replaceAll("-", " - ").replaceAll("'", " ' ")
 								.replaceAll("( )+", " ").trim();
-						no_occurences += StringUtils.countMatches(" " + text
-								+ " ", " " + pattern.trim() + " ");
+						no_occurences += StringUtils.countMatches(" " + text + " ", " " + pattern.trim() + " ");
 					}
 				}
 			}
@@ -129,12 +126,9 @@ public class ClassesOfWords {
 	}
 
 	public static void main(String[] args) {
-		String text = "how's it going? e.g., no - one; well, but - not that well"
-				.toLowerCase().replaceAll("[^\\-.'A-Za-z]", " ")
-				.replaceAll("\\.", " . ").replaceAll("-", " - ")
-				.replaceAll("'", " ' ").replaceAll("( )+", " ").trim();
+		String text = TextPreprocessing.cleanText("C'est-à-dire que Tout va bien", Lang.fr).replaceAll("\\.", " . ")
+				.replaceAll("-", " - ").replaceAll("'", " ' ").replaceAll("( )+", " ").trim();
 		System.out.println(text);
-		System.out.println(StringUtils.countMatches(" " + text + " ", " "
-				+ "no - one".trim() + " "));
+		System.out.println(StringUtils.countMatches(" " + text + " ", " " + "c ' est - à - dire".trim() + " "));
 	}
 }

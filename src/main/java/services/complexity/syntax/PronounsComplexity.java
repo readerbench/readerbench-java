@@ -5,6 +5,9 @@ import services.complexity.IComplexityFactors;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.Pronouns;
 import utils.localization.LocalizationUtils;
+
+import org.apache.commons.lang.WordUtils;
+
 import data.AbstractDocument;
 
 public class PronounsComplexity extends IComplexityFactors {
@@ -18,24 +21,22 @@ public class PronounsComplexity extends IComplexityFactors {
 	public void setComplexityIndexDescription(String[] descriptions) {
 		int index = 0;
 		for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
-			descriptions[ComplexityIndices.PRONOUNS + index] = LocalizationUtils.getTranslation("Average number of") + " "
-					+ className.replaceAll("_", " ")
-					+ " "+ LocalizationUtils.getTranslation("pronouns per paragraph");
+			descriptions[ComplexityIndices.PRONOUNS + index] = LocalizationUtils.getTranslation("Average number of")
+					+ " " + className.replaceAll("_", " ") + " "
+					+ LocalizationUtils.getTranslation("pronouns per paragraph");
 			index++;
 		}
 	}
+
 	public void setComplexityIndexAcronym(String[] acronyms) {
 		int index = 0;
 		for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
-			String acronymClassName = className.replaceAll("_", " ");
-			acronymClassName = acronymClassName.substring(0, Math.min(3, acronymClassName.length()));
-			acronyms[ComplexityIndices.PRONOUNS + index] = "AvgNoOf" + " "
-					+ acronymClassName
-					+ " "+ "PronPerPar";
+			String acronymClassName = WordUtils.capitalizeFully(className, new char[] { '_' }).replaceAll("_", "");
+			acronyms[ComplexityIndices.PRONOUNS + index] = "Avg" + acronymClassName + "PronBl";
 			index++;
 		}
 	}
-	
+
 	@Override
 	public int[] getIDs() {
 		int[] ids = new int[Pronouns.NO_PRONOUN_TYPES];
@@ -51,16 +52,21 @@ public class PronounsComplexity extends IComplexityFactors {
 		case fr:
 			classes = Pronouns.PRONOUNS_FR;
 			break;
-		default:
+		case eng:
 			classes = Pronouns.PRONOUNS_EN;
+			break;
+		default:
+			classes = null;
 			break;
 		}
 
-		int index = 0;
-		for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
-			document.getComplexityIndices()[ComplexityIndices.PRONOUNS + index] = classes
-					.countAveragePatternOccurrences(document, className);
-			index++;
+		if (classes != null) {
+			int index = 0;
+			for (String className : Pronouns.PRONOUNS_EN.getClasses().keySet()) {
+				document.getComplexityIndices()[ComplexityIndices.PRONOUNS + index] = classes
+						.countAveragePatternOccurrences(document, className);
+				index++;
+			}
 		}
 	}
 }

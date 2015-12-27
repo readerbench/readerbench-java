@@ -28,6 +28,17 @@ public class DocumentFlow {
 				throw new IllegalArgumentException();
 			}
 		}
+
+		public String getAcronym() {
+			switch (this) {
+			case MAX_VALUE:
+				return "MaxVal";
+			case ABOVE_MEAN_PLUS_STDEV:
+				return "AbvMeanStdev";
+			default:
+				throw new IllegalArgumentException();
+			}
+		}
 	};
 
 	public DocumentFlow(AbstractDocument doc, int semanticDistanceIndex, Criteria crit) {

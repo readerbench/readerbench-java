@@ -10,10 +10,12 @@ import data.discourse.SemanticCohesion;
 public class SemanticCohesionComplexity extends IComplexityFactors {
 	private final int semanticDistIndex;
 	private final String semanticDistName;
+	private final String semanticDistAcronym;
 
 	public SemanticCohesionComplexity(int si) {
-		semanticDistIndex = si;
-		semanticDistName = SemanticCohesion.getSemanticDistanceNames()[si];
+		this.semanticDistIndex = si;
+		this.semanticDistName = SemanticCohesion.getSemanticDistanceNames()[si];
+		this.semanticDistAcronym = SemanticCohesion.getSemanticDistanceAcronyms()[si];
 	}
 
 	public static double getAvgBlockDocCohesion(AbstractDocument d, int semanticDistIndex) {
@@ -278,46 +280,51 @@ public class SemanticCohesionComplexity extends IComplexityFactors {
 	}
 
 	public void setComplexityIndexDescription(String[] descriptions) {
-		descriptions[ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION + semanticDistIndex] = LocalizationUtils.getTranslation("Average paragraph document cohesion")
-				+ " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_SENTENCE_BLOCK_COHESION
-				+ semanticDistIndex] = LocalizationUtils.getTranslation("Average sentence paragraph cohesion") + " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_INTER_BLOCK_COHESION + semanticDistIndex] = LocalizationUtils.getTranslation("Average inter paragraph cohesion")
-				+ " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_INTRA_BLOCK_COHESION + semanticDistIndex] = LocalizationUtils.getTranslation("Average intra paragraph cohesion")
-				+ " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_BLOCK_ADJACENCY_COHESION
-				+ semanticDistIndex] = LocalizationUtils.getTranslation("Average paragraph adjacency cohesion") + " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_SENTENCE_ADJACENCY_COHESION
-				+ semanticDistIndex] = LocalizationUtils.getTranslation("Average sentence adjacency cohesion") + " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_TRANSITION_COHESION + semanticDistIndex] = LocalizationUtils.getTranslation("Average transition cohesion") + " ("
-				+ semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_START_MIDDLE_COHESION
-				+ semanticDistIndex] = LocalizationUtils.getTranslation("Weighted average start middle cohesion") + " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.AVERAGE_MIDDLE_END_COHESION
-				+ semanticDistIndex] = LocalizationUtils.getTranslation("Weigthed average middle end cohesion") + " (" + semanticDistName + ")";
-		descriptions[ComplexityIndices.START_END_COHESION + semanticDistIndex] = LocalizationUtils.getTranslation("Start end cohesion") + " (" + semanticDistName
-				+ ")";
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average paragraph document cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_BLOCK_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average sentence paragraph cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_INTER_BLOCK_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average inter paragraph cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_INTRA_BLOCK_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average intra paragraph cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_BLOCK_ADJACENCY_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average paragraph adjacency cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_SENTENCE_ADJACENCY_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average sentence adjacency cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_TRANSITION_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Average transition cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_START_MIDDLE_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Weighted average start middle cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.AVERAGE_MIDDLE_END_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Weigthed average middle end cohesion") + " (" + semanticDistName + ")";
+		descriptions[ComplexityIndices.START_END_COHESION + semanticDistIndex] = LocalizationUtils
+				.getTranslation("Start end cohesion") + " (" + semanticDistName + ")";
 	}
+
 	public void setComplexityIndexAcronym(String[] acronyms) {
-		acronyms[ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION + semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_DOC_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_SENTENCE_BLOCK_COHESION + semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_BLOCK_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_INTER_BLOCK_COHESION + semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_INTER_BLOCK_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_INTRA_BLOCK_COHESION + semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_INTRA_BLOCK_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_BLOCK_ADJACENCY_COHESION
-				+ semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_BLOCK_ADJACENCY_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_SENTENCE_ADJACENCY_COHESION
-				+ semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_SENTENCE_ADJACENCY_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_TRANSITION_COHESION 
-		        + semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_TRANSITION_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_START_MIDDLE_COHESION
-				+ semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_START_MIDDLE_COHESION");
-		acronyms[ComplexityIndices.AVERAGE_MIDDLE_END_COHESION
-				+ semanticDistIndex] = this.getComplexityIndexAcronym("AVERAGE_MIDDLE_END_COHESION");
-		acronyms[ComplexityIndices.START_END_COHESION 
-		        + semanticDistIndex] = this.getComplexityIndexAcronym("START_END_COHESION");
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_BLOCK_DOC_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_BLOCK_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_SENTENCE_BLOCK_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_INTER_BLOCK_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_INTER_BLOCK_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_INTRA_BLOCK_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_INTRA_BLOCK_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_BLOCK_ADJACENCY_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_BLOCK_ADJACENCY_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_SENTENCE_ADJACENCY_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_SENTENCE_ADJACENCY_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_TRANSITION_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_TRANSITION_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_START_MIDDLE_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_START_MIDDLE_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.AVERAGE_MIDDLE_END_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("AVERAGE_MIDDLE_END_COHESION") + semanticDistAcronym;
+		acronyms[ComplexityIndices.START_END_COHESION + semanticDistIndex] = this
+				.getComplexityIndexAcronym("START_END_COHESION") + semanticDistAcronym;
 	}
-	
+
 	public void computeComplexityFactors(AbstractDocument d) {
 		d.getComplexityIndices()[ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION
 				+ semanticDistIndex] = SemanticCohesionComplexity.getAvgBlockDocCohesion(d, semanticDistIndex);
@@ -341,7 +348,6 @@ public class SemanticCohesionComplexity extends IComplexityFactors {
 				.getStartEndCohesion(d, semanticDistIndex);
 	}
 
-	
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.AVERAGE_BLOCK_DOC_COHESION + semanticDistIndex,
 				ComplexityIndices.AVERAGE_SENTENCE_BLOCK_COHESION + semanticDistIndex,

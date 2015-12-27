@@ -1,7 +1,0 @@
-eclipse.preferences.version=1
-encoding//src/DAO/AbstractDocument.java=UTF-8
-encoding//src/services/commons/TextPreprocessing.java=UTF-8
-encoding//src/services/nlp/morphalou/StaticLemmatizer.java=UTF-8
-encoding//src/services/nlp/parsing/Parsing_EN.java=UTF-8
-encoding//src/services/nlp/parsing/Parsing_FR.java=UTF-8
-encoding//src/services/nlp/parsing/Parsing_IT.java=UTF-8
