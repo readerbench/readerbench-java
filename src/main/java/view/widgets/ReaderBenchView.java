@@ -70,17 +70,17 @@ public class ReaderBenchView extends JFrame {
 	public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
 	public static final String[] TRAINED_LSA_SPACES_EN = { "resources/config/LSA/tasa_en",
-			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en" };
-	public static final String[] TRAINED_LSA_SPACES_FR = { "resources/config/LSA/lemonde_fr",
-			"resources/config/LSA/textenfants_fr" };
+			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en", "" };
+	public static final String[] TRAINED_LSA_SPACES_FR = { "none", "resources/config/LSA/lemonde_fr",
+			"resources/config/LSA/textenfants_fr", "" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
-	public static final String[] TRAINED_LSA_SPACES_ES = { "resources/config/LSA/joseantonio_es" };
+	public static final String[] TRAINED_LSA_SPACES_ES = { "resources/config/LSA/joseantonio_es", "" };
 	public static final String[] TRAINED_LDA_MODELS_EN = { "resources/config/LDA/tasa_en",
-			"resources/config/LDA/tasa_lak_en", "resources/config/LDA/tasa_smart_cities_en" };
+			"resources/config/LDA/tasa_lak_en", "resources/config/LDA/tasa_smart_cities_en", "" };
 	public static final String[] TRAINED_LDA_MODELS_FR = { "resources/config/LDA/lemonde_fr",
-			"resources/config/LDA/textenfants_fr", "resources/config/LDA/philosophy_fr" };
-	public static final String[] TRAINED_LDA_MODELS_IT = { "resources/config/LDA/paisa_it" };
-	public static final String[] TRAINED_LDA_MODELS_ES = { "resources/config/LDA/joseantonio_es" };
+			"resources/config/LDA/textenfants_fr", "resources/config/LDA/philosophy_fr", "" };
+	public static final String[] TRAINED_LDA_MODELS_IT = { "resources/config/LDA/paisa_it", "" };
+	public static final String[] TRAINED_LDA_MODELS_ES = { "resources/config/LDA/joseantonio_es", "" };
 
 	public static Lang RUNTIME_LANGUAGE = null;
 

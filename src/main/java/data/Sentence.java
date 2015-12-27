@@ -195,7 +195,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 							// add correspondingly the word association if the
 							// LSA space contains it
 							if (getLSA().getWords().containsKey(wordAssociation)) {
-								System.out.println("BAU" + wordAssociation);
 								if (getWordOccurences().containsKey(wordAssociation)) {
 									getWordOccurences().put(wordAssociation,
 											getWordOccurences().get(wordAssociation) + 1);

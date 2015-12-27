@@ -74,14 +74,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 	// inter-block cohesion values
 	private SemanticCohesion[][] blockDistances;
 	private SemanticCohesion[][] prunnedBlockDistances;
-	
+
 	// semantic relatdness between a block and the overall document
 	private SemanticRelatedness[] blockDocRelatedness;
 	// inter-block semantic relatedness values
 	private SemanticRelatedness[][] blockRelatedness;
 	private SemanticRelatedness[][] prunnedBlockRelatedness;
-		
-		
+
 	private AbstractDocumentTemplate docTmp;
 	private String genre;
 	// useful for time series analysis - 0 for documents and the difference in
@@ -181,7 +180,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 		// determine voice distributions & importance
 		DialogismComputations.determineVoiceDistributions(this);
-		
+
 		logger.info("Finished all discourse analysis processes...");
 	}
 
@@ -387,21 +386,23 @@ public abstract class AbstractDocument extends AnalysisElement {
 			}
 			out.write("\n");
 
-			out.write("\nTopics - Clusters\n");
-			Map<Integer, List<Topic>> topicClusters = new TreeMap<Integer, List<Topic>>();
-			for (Topic t : this.getTopics()) {
-				Integer probClass = LDA.findMaxResemblance(t.getWord().getLDAProbDistribution(),
-						this.getLDAProbDistribution());
-				if (!topicClusters.containsKey(probClass)) {
-					topicClusters.put(probClass, new LinkedList<Topic>());
+			if (this.getLDA() != null) {
+				out.write("\nTopics - Clusters\n");
+				Map<Integer, List<Topic>> topicClusters = new TreeMap<Integer, List<Topic>>();
+				for (Topic t : this.getTopics()) {
+					Integer probClass = LDA.findMaxResemblance(t.getWord().getLDAProbDistribution(),
+							this.getLDAProbDistribution());
+					if (!topicClusters.containsKey(probClass)) {
+						topicClusters.put(probClass, new LinkedList<Topic>());
+					}
+					topicClusters.get(probClass).add(t);
 				}
-				topicClusters.get(probClass).add(t);
-			}
-			for (Integer cluster : topicClusters.keySet()) {
-				out.write(cluster + ":,");
-				for (Topic t : topicClusters.get(cluster))
-					out.write(t.getWord().getLemma() + " (" + t.getRelevance() + "),");
-				out.write("\n");
+				for (Integer cluster : topicClusters.keySet()) {
+					out.write(cluster + ":,");
+					for (Topic t : topicClusters.get(cluster))
+						out.write(t.getWord().getLemma() + " (" + t.getRelevance() + "),");
+					out.write("\n");
+				}
 			}
 
 			if (this instanceof Conversation) {
@@ -631,7 +632,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 	public void setBlockDocDistances(SemanticCohesion[] blockDocDistances) {
 		this.blockDocDistances = blockDocDistances;
 	}
-	
+
 	public SemanticRelatedness[][] getBlockRelatedness() {
 		return blockRelatedness;
 	}
