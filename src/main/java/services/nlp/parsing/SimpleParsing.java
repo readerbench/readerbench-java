@@ -2,14 +2,9 @@ package services.nlp.parsing;
 
 import java.util.StringTokenizer;
 
-import services.nlp.lemmatizer.StaticLemmatizer;
-import services.nlp.listOfWords.Dictionary;
-import services.nlp.listOfWords.StopWords;
-import services.nlp.stemmer.Stemmer;
-import data.Block;
 import data.AbstractDocument;
+import data.Block;
 import data.Sentence;
-import data.Word;
 
 public class SimpleParsing {
 	public static Block processBlock(AbstractDocument d, int blockIndex,

@@ -177,6 +177,34 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 					se.add(new data.sentiment.SentimentValence(10000, "Stanford", "STANFORD", false), score);
 
 					setSentimentEntity(se);
+
+					// add relevant word associations if the case
+					SemanticGraph dependencies = this.getDependencies();
+					if (dependencies != null) {
+						for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
+							String dependent = edge.getDependent().word().toLowerCase();
+							Word w1 = Word.getWordFromConcept(dependent, getLanguage());
+							w1.setLemma(StaticLemmatizer.lemmaStatic(dependent, getLanguage()));
+
+							String governor = edge.getGovernor().word().toLowerCase();
+							Word w2 = Word.getWordFromConcept(governor, getLanguage());
+							w2.setLemma(StaticLemmatizer.lemmaStatic(governor, getLanguage()));
+							String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
+							Word wordAssociation = new Word(association, association, association, null, null, getLSA(),
+									getLDA(), getLanguage());
+							// add correspondingly the word association if the
+							// LSA space contains it
+							if (getLSA().getWords().containsKey(wordAssociation)) {
+								System.out.println("BAU" + wordAssociation);
+								if (getWordOccurences().containsKey(wordAssociation)) {
+									getWordOccurences().put(wordAssociation,
+											getWordOccurences().get(wordAssociation) + 1);
+								} else {
+									getWordOccurences().put(wordAssociation, 1);
+								}
+							}
+						}
+					}
 				}
 			}
 		} else {
@@ -205,34 +233,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 						getWordOccurences().put(w, getWordOccurences().get(w) + 1);
 					} else {
 						getWordOccurences().put(w, 1);
-					}
-				}
-
-				// add relevant word associations if the case
-				// TODO check if mandatory
-				SemanticGraph dependencies = this.getDependencies();
-				if (dependencies != null) {
-					for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
-						String dependent = edge.getDependent().word().toLowerCase();
-						Word w1 = Word.getWordFromConcept(dependent, getLanguage());
-						w1.setLemma(StaticLemmatizer.lemmaStatic(dependent, getLanguage()));
-
-						String governor = edge.getGovernor().word().toLowerCase();
-						Word w2 = Word.getWordFromConcept(governor, getLanguage());
-						w2.setLemma(StaticLemmatizer.lemmaStatic(governor, getLanguage()));
-						String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
-						Word wordAssociation = new Word(association, association, association, null, null,
-								getLanguage());
-
-						// add correspondingly the word association if the LSA
-						// space contains it
-						if (getLSA().getWords().containsKey(wordAssociation)) {
-							if (getWordOccurences().containsKey(wordAssociation)) {
-								getWordOccurences().put(wordAssociation, getWordOccurences().get(wordAssociation) + 1);
-							} else {
-								getWordOccurences().put(wordAssociation, 1);
-							}
-						}
 					}
 				}
 			}

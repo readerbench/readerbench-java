@@ -2,12 +2,10 @@ package services.discourse.cohesion;
 
 import org.apache.log4j.Logger;
 
-import data.Block;
 import data.AbstractDocument;
+import data.Block;
 import data.Sentence;
-import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.SemanticRelatedness;
 
 /**
  * 

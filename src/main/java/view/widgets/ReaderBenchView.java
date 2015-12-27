@@ -70,7 +70,7 @@ public class ReaderBenchView extends JFrame {
 	public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
 	public static final String[] TRAINED_LSA_SPACES_EN = { "resources/config/LSA/tasa_en",
-			"resources/config/LSA/tasa_lak_en" };
+			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en" };
 	public static final String[] TRAINED_LSA_SPACES_FR = { "resources/config/LSA/lemonde_fr",
 			"resources/config/LSA/textenfants_fr" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
@@ -538,10 +538,8 @@ public class ReaderBenchView extends JFrame {
 		// ButtonGroup for radio buttons
 		ButtonGroup languageGroup = new ButtonGroup();
 
-		rdbtnmntmEnglish = new JRadioButtonMenuItem(
-				ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-						.getString("ReaderBenchView.rdbtnmntmEnglish.text"),
-				true);
+		rdbtnmntmEnglish = new JRadioButtonMenuItem(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
+				.getString("ReaderBenchView.rdbtnmntmEnglish.text"), true);
 		rdbtnmntmEnglish.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (LOADED_LOCALE != Locale.ENGLISH) {

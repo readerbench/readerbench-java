@@ -2,11 +2,11 @@ package data.discourse;
 
 import java.text.DecimalFormat;
 
-import services.commons.VectorAlgebra;
-import services.semanticModels.WordNet.OntologySupport;
+import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
-import cc.mallet.util.Maths;
+import services.commons.VectorAlgebra;
+import services.semanticModels.WordNet.OntologySupport;
 
 /**
  * Computes a semantic relatedness value of two analysis element by combining three
