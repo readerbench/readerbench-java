@@ -767,13 +767,15 @@ public class ReaderBenchServer {
 		
 		// concepts
 		Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
+		Document querySelfExplanation = (Document) processQuery(selfExplanation, pathToLSA, pathToLDA, lang, usePOSTagging);
 		
 		Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
 		// path to initial file?
-		Metacognition verbalization = Metacognition.loadVerbalization("",
+		Metacognition verbalization = Metacognition.loadVerbalization(querySelfExplanation,
 				queryInitialText, usePOSTagging, true);
-		verbalization.computeAll(true);
+		verbalization.computeAll(false);
 		
+		System.out.println("Blocuri: " + verbalization.getBlocks().size());
 		verbalization.getBlocks().get(0).getAlternateText().trim();
 		
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
