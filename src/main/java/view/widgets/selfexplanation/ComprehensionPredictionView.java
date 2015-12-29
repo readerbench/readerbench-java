@@ -128,10 +128,8 @@ public class ComprehensionPredictionView extends JFrame {
 		@Override
 		public Void doInBackground() {
 			try {
-
 				try {
 					// Empty the output file, write header
-
 					// saving all indices
 					FileWriter fstream = new FileWriter(path);
 					BufferedWriter file = new BufferedWriter(fstream);
