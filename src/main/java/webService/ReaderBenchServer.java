@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
 import data.document.Metacognition;
+import data.document.Summary;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentGrid;
@@ -56,6 +58,7 @@ import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
 import services.semanticSearch.SemanticSearchResult;
 import spark.Spark;
+import view.widgets.selfexplanation.summary.SummaryView;
 
 class Result implements Comparable<Result> {
 
@@ -252,14 +255,40 @@ class ResultSemanticAnnotation {
 
 }
 
+class ReadingStrategy implements Comparable<ReadingStrategy> {
+
+	private String name;
+	private double score;
+
+	public ReadingStrategy(String name, double score) {
+		this.name = name;
+		this.score = score;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	@Override
+	public int compareTo(ReadingStrategy o) {
+		// Reverse order
+		return (int) Math.signum(this.getScore() - o.getScore());
+	}
+
+}
+
 class ResultSelfExplanation {
 
 	private String initialTextColored;
-	private List<Double> cohesionPerParagraph;
+	private List<ReadingStrategy> strategies;
 
-	public ResultSelfExplanation(String initialTextColored, List<Double> cohesionPerParagraph) {
+	public ResultSelfExplanation(String initialTextColored, List<ReadingStrategy> strategies) {
 		this.initialTextColored = initialTextColored;
-		this.cohesionPerParagraph = cohesionPerParagraph;
+		this.strategies = strategies;
 	}
 
 }
@@ -725,11 +754,38 @@ public class ReaderBenchServer {
 			String pathToLDA, String lang, boolean usePOSTagging, double threshold) {
 
 		// concepts
-		Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
-		Document querySelfExplanation = (Document) processQuery(selfExplanation, pathToLSA, pathToLDA, lang,
-				usePOSTagging);
+		//Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
+		
+		Document queryInitialText = new Document(null,
+				AbstractDocumentTemplate.getDocumentModel(initialText),
+				LSA.loadLSA(pathToLSA, Lang.getLang(lang)),
+				LDA.loadLDA(pathToLDA, Lang.getLang(lang)),
+				Lang.getLang(lang),
+				usePOSTagging,
+				false);
+		
+		Summary s = new Summary(
+				selfExplanation,
+				queryInitialText, true, true);
 
-		Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
+		s.computeAll(false);
+
+		SummaryView view = new SummaryView(s);
+		view.setVisible(true);
+		
+		List<ReadingStrategy> readingStrategies = new ArrayList<ReadingStrategy>();
+		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
+			System.out.println(s.getAutomaticReadingStrategies()[0][i]);
+			readingStrategies.add(new ReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
+		}
+		
+		StringBuilder summary = new StringBuilder();
+		for (Block b : s.getBlocks()) {
+			summary.append(b.getAlternateText());
+			summary.append('\n');
+		}
+
+		/*Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
 		// path to initial file?
 		Metacognition verbalization = Metacognition.loadVerbalization(querySelfExplanation, queryInitialText,
 				usePOSTagging, true);
@@ -754,9 +810,9 @@ public class ReaderBenchServer {
 			initialTextColored.append(text);
 
 			cohs.add(Formatting.formatNumber(coh.getCohesion()));
-		}
+		}*/
 
-		return new ResultSelfExplanation(initialTextColored.toString(), cohs);
+		return new ResultSelfExplanation(summary.toString(), readingStrategies);
 	}
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
