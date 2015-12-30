@@ -10,10 +10,13 @@ public class AbstractDocumentTemplate implements Serializable {
 
 	public static AbstractDocumentTemplate getDocumentModel(String text) {
 		AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
-		BlockTemplate block = docTmp.new BlockTemplate();
-		block.setId(0);
-		block.setContent(text);
-		docTmp.getBlocks().add(block);
+		String[] blocks = text.split("\n");
+		for (int i = 0; i < blocks.length; i++) {
+			BlockTemplate block = docTmp.new BlockTemplate();
+			block.setId(i);
+			block.setContent(blocks[i]);
+			docTmp.getBlocks().add(block);
+		}
 		return docTmp;
 	}
 
@@ -77,9 +80,8 @@ public class AbstractDocumentTemplate implements Serializable {
 
 		@Override
 		public String toString() {
-			return "BlockTemplate [speaker=" + speaker + ", time=" + time
-					+ ", id=" + id + ", refId=" + refId + ", verbId=" + verbId
-					+ ", content=" + content + "]";
+			return "BlockTemplate [speaker=" + speaker + ", time=" + time + ", id=" + id + ", refId=" + refId
+					+ ", verbId=" + verbId + ", content=" + content + "]";
 		}
 	}
 

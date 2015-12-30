@@ -126,7 +126,6 @@ public class Metacognition extends Document {
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.TEXT_BASED_INFERENCES] = meta
 								.getAnnotatedReadingStrategies()[id][ReadingStrategies.BRIDGING]
 								+ meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.CAUSALITY];
-
 					} catch (Exception e) {
 						logger.info("Verbalization " + id + " has no annotated reading strategies.");
 					}
@@ -340,7 +339,7 @@ public class Metacognition extends Document {
 	}
 
 	protected void determineComprehesionIndeces() {
-		logger.info("Identyfing all comprehension prediction indeces");
+		logger.info("Identyfing all comprehension prediction indices");
 		double[] indices = new double[ComplexityIndices.NO_COMPLEXITY_INDICES + ReadingStrategies.NO_READING_STRATEGIES
 				+ 1 + SemanticCohesion.NO_COHESION_DIMENSIONS];
 

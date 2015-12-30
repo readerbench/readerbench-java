@@ -31,10 +31,10 @@ import com.google.gson.GsonBuilder;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
-import data.dao.CategoryDAO;
 import data.Block;
 import data.Sentence;
 import data.Word;
+import data.dao.CategoryDAO;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
@@ -152,23 +152,22 @@ class ResultTopic {
 
 }
 
-
 class ResultKeyword implements Comparable<ResultKeyword> {
-	
+
 	private String name;
 	private int noOccurences;
 	private double relevance;
-	
+
 	public ResultKeyword(String name, int noOccurences, double relevance) {
 		this.name = name;
 		this.noOccurences = noOccurences;
 		this.relevance = relevance;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	private int getNoOccurences() {
 		return noOccurences;
 	}
@@ -182,28 +181,28 @@ class ResultKeyword implements Comparable<ResultKeyword> {
 		// Reverse order
 		return (int) Math.signum(this.getRelevance() - o.getRelevance());
 	}
-	
-	public static Comparator<ResultKeyword> ResultKeywordRelevanceComparator  = new Comparator<ResultKeyword>() {
+
+	public static Comparator<ResultKeyword> ResultKeywordRelevanceComparator = new Comparator<ResultKeyword>() {
 
 		public int compare(ResultKeyword o1, ResultKeyword o2) {
-			//descending order
+			// descending order
 			return o2.compareTo(o1);
 		}
 
 	};
-	
+
 }
 
 class ResultCategory implements Comparable<ResultCategory> {
-	
+
 	private String name;
 	private double relevance;
-	
+
 	public ResultCategory(String name, double relevance) {
 		this.name = name;
 		this.relevance = relevance;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -217,36 +216,31 @@ class ResultCategory implements Comparable<ResultCategory> {
 		// Reverse order
 		return (int) Math.signum(this.getRelevance() - o.getRelevance());
 	}
-	
-	public static Comparator<ResultCategory> ResultCategoryRelevanceComparator  = new Comparator<ResultCategory>() {
+
+	public static Comparator<ResultCategory> ResultCategoryRelevanceComparator = new Comparator<ResultCategory>() {
 
 		public int compare(ResultCategory o1, ResultCategory o2) {
-			//descending order
+			// descending order
 			return o2.compareTo(o1);
 		}
 
 	};
-	
+
 }
 
-
 class ResultSemanticAnnotation {
-	
+
 	private ResultTopic concepts;
-	
+
 	private double abstractDocumentSimilarity;
 	private double keywordsAbstractCoverage;
 	private double keywordsDocumentCoverage;
-	
+
 	private List<ResultKeyword> keywords;
 	private List<ResultCategory> categories;
 
-	public ResultSemanticAnnotation(
-			ResultTopic resultTopic,
-			double abstractDocumentSimilarity,
-			double keywordsAbstractCoverage,
-			double keywordsDocumentCoverage,
-			List<ResultKeyword> resultKeywords,
+	public ResultSemanticAnnotation(ResultTopic resultTopic, double abstractDocumentSimilarity,
+			double keywordsAbstractCoverage, double keywordsDocumentCoverage, List<ResultKeyword> resultKeywords,
 			List<ResultCategory> resultCategories) {
 		this.concepts = resultTopic;
 		this.abstractDocumentSimilarity = abstractDocumentSimilarity;
@@ -259,13 +253,11 @@ class ResultSemanticAnnotation {
 }
 
 class ResultSelfExplanation {
-	
+
 	private String initialTextColored;
 	private List<Double> cohesionPerParagraph;
 
-	public ResultSelfExplanation(
-			String initialTextColored,
-			List<Double> cohesionPerParagraph) {
+	public ResultSelfExplanation(String initialTextColored, List<Double> cohesionPerParagraph) {
 		this.initialTextColored = initialTextColored;
 		this.cohesionPerParagraph = cohesionPerParagraph;
 	}
@@ -382,15 +374,7 @@ public class ReaderBenchServer {
 	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
 			boolean posTagging) {
 		logger.info("Processign query ...");
-		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-		String[] blocks = query.split("\n");
-		logger.info("[Processing] There should be " + blocks.length + " blocks in the document");
-		for (int i = 0; i < blocks.length; i++) {
-			BlockTemplate block = contents.new BlockTemplate();
-			block.setId(i);
-			block.setContent(blocks[i]);
-			contents.getBlocks().add(block);
-		}
+		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(query);
 
 		// Lang lang = Lang.eng;
 		Lang lang = Lang.getLang(language);
@@ -416,9 +400,8 @@ public class ReaderBenchServer {
 		List<ResultEdge> links = new ArrayList<ResultEdge>();
 		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
 
-		//List<Topic> topics = queryDoc.getTopics();
-		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50,
-				false, false);
+		// List<Topic> topics = queryDoc.getTopics();
+		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 
 		// build connected graph
 		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
@@ -526,7 +509,8 @@ public class ReaderBenchServer {
 		// results.add(new Result("Document",
 		// Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
 		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-		//logger.info("There are " + rageSentimentsValues.size() + " rage setiments.");
+		// logger.info("There are " + rageSentimentsValues.size() + " rage
+		// setiments.");
 		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
 		List<Result> localResults = new ArrayList<>();
 		while (it.hasNext()) {
@@ -642,22 +626,16 @@ public class ReaderBenchServer {
 
 		return searchResults;
 	}
-	
-	public List<ResultKeyword> getKeywords(
-			String documentKeywords,
-			String documentContent,
-			String pathToLSA,
-			String pathToLDA,
-			String lang,
-			boolean usePOSTagging,
-			double threshold) {
-		
+
+	public List<ResultKeyword> getKeywords(String documentKeywords, String documentContent, String pathToLSA,
+			String pathToLDA, String lang, boolean usePOSTagging, double threshold) {
+
 		ArrayList<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
-		
+
 		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
 		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging);
 		queryKey.computeAll(null, null);
-		
+
 		for (Word keyword : queryKey.getWordOccurences().keySet()) {
 			AbstractDocument queryKeyword = processQuery(keyword.getLemma(), pathToLSA, pathToLDA, lang, usePOSTagging);
 			SemanticCohesion sc = new SemanticCohesion(queryKeyword, queryDoc);
@@ -667,39 +645,33 @@ public class ReaderBenchServer {
 			}
 			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, Formatting.formatNumber(sc.getCohesion())));
 		}
-		
+
 		Collections.sort(resultKeywords, ResultKeyword.ResultKeywordRelevanceComparator);
 		return resultKeywords;
-		
+
 	}
-	
-	public List<ResultCategory> getCategories(
-			String documentContent,
-			String pathToLSA,
-			String pathToLDA,
-			String lang,
-			boolean usePOSTagging,
-			double threshold) {
-		
+
+	public List<ResultCategory> getCategories(String documentContent, String pathToLSA, String pathToLDA, String lang,
+			boolean usePOSTagging, double threshold) {
+
 		List<ResultCategory> resultCategories = new ArrayList<ResultCategory>();
-		
+
 		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
 		List<Category> dbCategories = CategoryDAO.getInstance().findAll();
-		
-		
+
 		for (Category cat : dbCategories) {
-			//System.out.println("bau");
-			//System.out.print(cat.getLabel()+"\t");
+			// System.out.println("bau");
+			// System.out.print(cat.getLabel()+"\t");
 			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
 			StringBuilder sb = new StringBuilder();
 			for (CategoryPhrase categoryPhrase : categoryPhrases) {
 				sb.append(categoryPhrase.getLabel());
 				sb.append(", ");
 			}
-			//System.out.println(sb);
-			
+			// System.out.println(sb);
+
 		}
-		
+
 		for (Category cat : dbCategories) {
 			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
 			StringBuilder sb = new StringBuilder();
@@ -707,106 +679,91 @@ public class ReaderBenchServer {
 				sb.append(categoryPhrase.getLabel());
 				sb.append(" ");
 			}
-			
+
 			AbstractDocument queryCategory = processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
 			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
 		}
-		
+
 		Collections.sort(resultCategories, ResultCategory.ResultCategoryRelevanceComparator);
 		return resultCategories;
 	}
-	
-	private ResultSemanticAnnotation getSemanticAnnotation(
-			String documentAbstract,
-			String documentKeywords,
-			String documentContent,
-			String pathToLSA,
-			String pathToLDA,
-			String lang,
-			boolean usePOSTagging,
+
+	private ResultSemanticAnnotation getSemanticAnnotation(String documentAbstract, String documentKeywords,
+			String documentContent, String pathToLSA, String pathToLDA, String lang, boolean usePOSTagging,
 			double threshold) {
-		
+
 		// concepts
 		ResultTopic resultTopic = getTopics(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
-		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
-		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
+				usePOSTagging, threshold);
+		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
+				usePOSTagging, threshold);
 
 		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging);
 		AbstractDocument queryAbs = processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging);
 		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging);
-		
+
 		// (abstract, document) relevance
 		SemanticCohesion scAbstractDocument = new SemanticCohesion(queryAbs, queryDoc);
-		
+
 		// (abstract, keywords) relevance
 		SemanticCohesion scKeywordsAbstract = new SemanticCohesion(queryKey, queryAbs);
-		
+
 		// (keywords, document) relevance
 		SemanticCohesion scKeywordsDocument = new SemanticCohesion(queryKey, queryDoc);
-		
-		ResultSemanticAnnotation rsa = new ResultSemanticAnnotation(
-				resultTopic,
+
+		ResultSemanticAnnotation rsa = new ResultSemanticAnnotation(resultTopic,
 				Formatting.formatNumber(scAbstractDocument.getCohesion()),
 				Formatting.formatNumber(scKeywordsAbstract.getCohesion()),
-				Formatting.formatNumber(scKeywordsDocument.getCohesion()),
-				resultKeywords,
-				resultCategories);
-		
+				Formatting.formatNumber(scKeywordsDocument.getCohesion()), resultKeywords, resultCategories);
+
 		return rsa;
 	}
-	
-	private ResultSelfExplanation getSelfExplanation(
-			String initialText,
-			String selfExplanation,
-			String pathToLSA,
-			String pathToLDA,
-			String lang,
-			boolean usePOSTagging,
-			double threshold) {
-		
+
+	private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, String pathToLSA,
+			String pathToLDA, String lang, boolean usePOSTagging, double threshold) {
+
 		// concepts
 		Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
-		
+		Document querySelfExplanation = (Document) processQuery(selfExplanation, pathToLSA, pathToLDA, lang,
+				usePOSTagging);
+
 		Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
 		// path to initial file?
-		Metacognition verbalization = Metacognition.loadVerbalization("",
-				queryInitialText, usePOSTagging, true);
-		verbalization.computeAll(true);
-		
+		Metacognition verbalization = Metacognition.loadVerbalization(querySelfExplanation, queryInitialText,
+				usePOSTagging, true);
+		verbalization.computeAll(false);
+
+		System.out.println("Blocuri: " + verbalization.getBlocks().size());
 		verbalization.getBlocks().get(0).getAlternateText().trim();
-		
+
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 			int x = verbalization.getAutomaticReadingStrategies()[0][i];
 		}
-		
+
 		StringBuilder initialTextColored = new StringBuilder();
 		List<Double> cohs = new ArrayList<Double>();
 		for (int refBlockId = 0; refBlockId <= queryInitialText.getBlocks().size(); refBlockId++) {
 			SemanticCohesion coh = verbalization.getBlockSimilarities()[refBlockId];
 			// add block text
 			String text = "";
-			for (Sentence s : verbalization.getReferredDoc()
-					.getBlocks().get(refBlockId).getSentences()) {
+			for (Sentence s : verbalization.getReferredDoc().getBlocks().get(refBlockId).getSentences()) {
 				text += s.getAlternateText() + " ";
 			}
 			initialTextColored.append(text);
 
-			cohs.add(Formatting.formatNumber(coh.getCohesion()));			
+			cohs.add(Formatting.formatNumber(coh.getCohesion()));
 		}
-		
-		return new ResultSelfExplanation(
-			initialTextColored.toString(),
-			cohs
-		);
+
+		return new ResultSelfExplanation(initialTextColored.toString(), cohs);
 	}
-	
+
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
 		// MS_training_SE_1999
 		if (localFile) {
 			return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
-		}
-		else {
+		} else {
 			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, false));
 		}
 	}
@@ -845,19 +802,19 @@ public class ReaderBenchServer {
 		String json = gson.toJson(queryResult);
 		return json;
 	}
-	
+
 	private String convertToJson(QueryResultPdfToText queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
 	}
-	
+
 	private String convertToJson(QueryResultSemanticAnnotation queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
 	}
-	
+
 	private String convertToJson(QueryResultSelfExplanation queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
@@ -943,7 +900,7 @@ public class ReaderBenchServer {
 			data = new ResultTopic(null, null);
 		}
 	}
-	
+
 	@Root(name = "response")
 	private static class QueryResultSemanticAnnotation {
 
@@ -963,7 +920,7 @@ public class ReaderBenchServer {
 			data = new ResultSemanticAnnotation(null, 0, 0, 0, null, null);
 		}
 	}
-	
+
 	@Root(name = "response")
 	private static class QueryResultSelfExplanation {
 
@@ -983,8 +940,7 @@ public class ReaderBenchServer {
 			data = new ResultSelfExplanation(null, null);
 		}
 	}
-	
-	
+
 	@Root(name = "response")
 	private static class QueryResultPdfToText {
 
@@ -1096,11 +1052,13 @@ public class ReaderBenchServer {
 			String uri = request.queryParams("uri");
 			logger.info("URI primit");
 			logger.info(uri);
-			
-			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
-			queryResult.data = getTextFromPdf(uri);
-			String result = convertToJson(queryResult);*/
-			
+
+			/*
+			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
+			 * queryResult.data = getTextFromPdf(uri); String result =
+			 * convertToJson(queryResult);
+			 */
+
 			String q = getTextFromPdf(uri, true).getContent();
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
@@ -1113,20 +1071,22 @@ public class ReaderBenchServer {
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
-			
+
 		});
 		Spark.post("/semanticProcess", (request, response) -> {
-			JSONObject json = (JSONObject)new JSONParser().parse(request.body());
-			
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
 			response.type("application/json");
 
 			String uri = (String) json.get("uri");
-			//String url = (String) json.get("url");
-			
-			/*QueryResultPdfToText queryResult = new QueryResultPdfToText();
-			queryResult.data = getTextFromPdf(uri);
-			String result = convertToJson(queryResult);*/
-			
+			// String url = (String) json.get("url");
+
+			/*
+			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
+			 * queryResult.data = getTextFromPdf(uri); String result =
+			 * convertToJson(queryResult);
+			 */
+
 			String documentContent = null;
 			if (uri == null || uri.isEmpty()) {
 				logger.error("URI an URL are empty. Aborting...");
@@ -1134,14 +1094,13 @@ public class ReaderBenchServer {
 			}
 			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
 				documentContent = getTextFromPdf(uri, false).getContent();
-			}
-			else {
+			} else {
 				documentContent = getTextFromPdf(uri, true).getContent();
 			}
 			if (uri != null && !uri.isEmpty()) {
-				
+
 			}
-			
+
 			String documentAbstract = (String) json.get("abstract");
 			String documentKeywords = (String) json.get("keywords");
 			String lang = (String) json.get("lang");
@@ -1151,24 +1110,16 @@ public class ReaderBenchServer {
 			double threshold = (double) json.get("threshold");
 
 			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-			queryResult.data = getSemanticAnnotation(
-					documentAbstract,
-					documentKeywords,
-					documentContent,
-					pathToLSA,
-					pathToLDA,
-					lang,
-					usePOSTagging,
-					threshold
-			);
+			queryResult.data = getSemanticAnnotation(documentAbstract, documentKeywords, documentContent, pathToLSA,
+					pathToLDA, lang, usePOSTagging, threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
-			
+
 		});
 		Spark.post("/selfExplanation", (request, response) -> {
-			JSONObject json = (JSONObject)new JSONParser().parse(request.body());
-			
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
 			response.type("application/json");
 
 			String text = (String) json.get("text");
@@ -1180,19 +1131,12 @@ public class ReaderBenchServer {
 			double threshold = (double) json.get("threshold");
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-			queryResult.data = getSelfExplanation(
-					text, 
-					explanation,
-					pathToLSA,
-					pathToLDA,
-					lang,
-					usePOSTagging,
-					threshold
-			);
+			queryResult.data = getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging,
+					threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
-			
+
 		});
 
 	}

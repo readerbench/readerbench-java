@@ -10,6 +10,7 @@ import java.io.File;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,9 +20,9 @@ import javax.swing.ScrollPaneConstants;
 
 import org.apache.log4j.Logger;
 
-import view.widgets.document.DocumentView;
+import data.Block;
 import data.document.Summary;
-import javax.swing.JTextArea;
+import view.widgets.document.DocumentView;
 
 /**
  * 
@@ -46,87 +47,46 @@ public class SummaryView extends JFrame {
 		JPanel panelContents = new JPanel();
 		panelContents.setBackground(Color.WHITE);
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+						.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+								.addComponent(panelContents, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168,
+										Short.MAX_VALUE)
+						.addComponent(panelHeader, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE))
+				.addContainerGap()));
 		groupLayout
-				.setHorizontalGroup(groupLayout
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								groupLayout
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												groupLayout
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																panelContents,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																1168,
-																Short.MAX_VALUE)
-														.addComponent(
-																panelHeader,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																1168,
-																Short.MAX_VALUE))
+				.setVerticalGroup(
+						groupLayout.createParallelGroup(Alignment.LEADING)
+								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+										.addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 73,
+												GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 587, Short.MAX_VALUE)
 										.addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				groupLayout
-						.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(panelHeader, GroupLayout.PREFERRED_SIZE,
-								73, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelContents, GroupLayout.DEFAULT_SIZE,
-								587, Short.MAX_VALUE).addContainerGap()));
 
 		JLabel scrollPaneContent = new JLabel("Content");
 		scrollPaneContent.setFont(new Font("SansSerif", Font.BOLD, 13));
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		GroupLayout gl_panelContents = new GroupLayout(panelContents);
-		gl_panelContents
-				.setHorizontalGroup(gl_panelContents
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_panelContents
-										.createSequentialGroup()
-										.addGroup(
-												gl_panelContents
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addGroup(
-																gl_panelContents
-																		.createSequentialGroup()
-																		.addContainerGap()
-																		.addComponent(
-																				scrollPaneContent))
-														.addGroup(
-																gl_panelContents
-																		.createSequentialGroup()
-																		.addGap(10)
-																		.addComponent(
-																				scrollPane,
-																				GroupLayout.DEFAULT_SIZE,
-																				1152,
-																				Short.MAX_VALUE)))
-										.addContainerGap()));
-		gl_panelContents.setVerticalGroup(gl_panelContents.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_panelContents
-						.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(scrollPaneContent)
+		gl_panelContents.setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelContents.createSequentialGroup()
+						.addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+										.addComponent(scrollPaneContent))
+						.addGroup(gl_panelContents.createSequentialGroup().addGap(10).addComponent(scrollPane,
+								GroupLayout.DEFAULT_SIZE, 1152, Short.MAX_VALUE)))
+						.addContainerGap()));
+		gl_panelContents.setVerticalGroup(gl_panelContents.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelContents.createSequentialGroup().addContainerGap().addComponent(scrollPaneContent)
 						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE,
-								565, Short.MAX_VALUE).addContainerGap()));
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 565, Short.MAX_VALUE).addContainerGap()));
 
-		JTextArea textAreaContent = new JTextArea();
-		textAreaContent.setWrapStyleWord(true);
-		textAreaContent.setLineWrap(true);
+		JEditorPane textAreaContent = new JEditorPane();
+		// textAreaContent.sett(true);
+		textAreaContent.setContentType("text/html");
+		// textAreaContent.setLineWrap(true);
 		scrollPane.setViewportView(textAreaContent);
 		panelContents.setLayout(gl_panelContents);
 
@@ -137,24 +97,30 @@ public class SummaryView extends JFrame {
 		lblSummary.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
 		JLabel lblDocumentTitleDescription = new JLabel("");
-		lblDocumentTitleDescription.setFont(new Font("SansSerif", Font.PLAIN,
-				13));
+		lblDocumentTitleDescription.setFont(new Font("SansSerif", Font.PLAIN, 13));
 		if (summary != null && summary.getReferredDoc() != null) {
-			lblDocumentTitleDescription.setText(summary.getReferredDoc()
-					.getDescription());
+			lblDocumentTitleDescription.setText(summary.getReferredDoc().getDescription());
 		}
 
 		JLabel lblVerbalizationDescription = new JLabel("");
-		lblVerbalizationDescription.setFont(new Font("SansSerif", Font.PLAIN,
-				13));
+		lblVerbalizationDescription.setFont(new Font("SansSerif", Font.PLAIN, 13));
+		String textToRender = "";
 		if (summary != null) {
-			String authors = "";
-			for (String author : summary.getAuthors())
-				authors += author + ", ";
-			authors = authors.substring(0, authors.length() - 2);
-			lblVerbalizationDescription.setText(authors + " ("
-					+ (new File(summary.getPath()).getName()) + ")");
-			textAreaContent.setText(summary.getText());
+			String descr = "";
+			if (summary.getAuthors() != null && summary.getAuthors().size() > 0) {
+				for (String author : summary.getAuthors())
+					descr += author + ", ";
+				descr = descr.substring(0, descr.length() - 2);
+			}
+			if (summary.getPath() != null) {
+				descr += " (" + (new File(summary.getPath()).getName()) + ")";
+			}
+			lblVerbalizationDescription.setText(descr);
+
+			for (Block b : summary.getBlocks()) {
+				textToRender += b.getAlternateText() + "\n";
+			}
+			textAreaContent.setText(textToRender);
 		}
 
 		JButton btnViewDocument = new JButton("View document");
@@ -164,8 +130,7 @@ public class SummaryView extends JFrame {
 					@Override
 					public void run() {
 						if (summary.getReferredDoc() != null) {
-							DocumentView view = new DocumentView(summary
-									.getReferredDoc());
+							DocumentView view = new DocumentView(summary.getReferredDoc());
 							view.setVisible(true);
 						}
 					}
@@ -173,83 +138,32 @@ public class SummaryView extends JFrame {
 			}
 		});
 		GroupLayout gl_panelHeader = new GroupLayout(panelHeader);
-		gl_panelHeader
-				.setHorizontalGroup(gl_panelHeader
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_panelHeader
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_panelHeader
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addGroup(
-																gl_panelHeader
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblSummary)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				lblVerbalizationDescription,
-																				GroupLayout.DEFAULT_SIZE,
-																				941,
-																				Short.MAX_VALUE)
-																		.addGap(122))
-														.addGroup(
-																Alignment.TRAILING,
-																gl_panelHeader
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblDocumentTitle)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				lblDocumentTitleDescription,
-																				GroupLayout.DEFAULT_SIZE,
-																				932,
-																				Short.MAX_VALUE)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnViewDocument)))));
-		gl_panelHeader
-				.setVerticalGroup(gl_panelHeader
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_panelHeader
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_panelHeader
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblDocumentTitle)
-														.addComponent(
-																lblDocumentTitleDescription)
-														.addComponent(
-																btnViewDocument))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_panelHeader
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblSummary)
-														.addComponent(
-																lblVerbalizationDescription,
-																GroupLayout.PREFERRED_SIZE,
-																17,
-																GroupLayout.PREFERRED_SIZE))
-										.addContainerGap(29, Short.MAX_VALUE)));
+		gl_panelHeader.setHorizontalGroup(gl_panelHeader.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panelHeader.createSequentialGroup().addContainerGap()
+						.addGroup(gl_panelHeader.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblSummary)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(lblVerbalizationDescription, GroupLayout.DEFAULT_SIZE, 941,
+												Short.MAX_VALUE)
+										.addGap(122))
+						.addGroup(Alignment.TRAILING,
+								gl_panelHeader.createSequentialGroup().addComponent(lblDocumentTitle)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(lblDocumentTitleDescription, GroupLayout.DEFAULT_SIZE, 932,
+												Short.MAX_VALUE)
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnViewDocument)))));
+		gl_panelHeader.setVerticalGroup(gl_panelHeader.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelHeader.createSequentialGroup().addContainerGap()
+						.addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE).addComponent(lblDocumentTitle)
+								.addComponent(lblDocumentTitleDescription).addComponent(btnViewDocument))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE).addComponent(lblSummary).addComponent(
+						lblVerbalizationDescription, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE))
+				.addContainerGap(29, Short.MAX_VALUE)));
 		panelHeader.setLayout(gl_panelHeader);
 		getContentPane().setLayout(groupLayout);
 
 		// adjust view to desktop size
 		setBounds(50, 50, 900, 400);
-
 	}
 }

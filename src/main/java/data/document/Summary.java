@@ -9,29 +9,32 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
+import data.AbstractDocumentTemplate;
+import data.Block;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ReadingStrategies;
-import data.AbstractDocumentTemplate;
+import view.widgets.selfexplanation.summary.SummaryView;
 
 public class Summary extends Metacognition {
 
 	private static final long serialVersionUID = -3087279898902437719L;
 
-	public Summary(String path, AbstractDocumentTemplate docTmp,
-			Document initialReadingMaterial, boolean usePOSTagging,
+	public Summary(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging,
 			boolean cleanInput) {
 		super(path, docTmp, initialReadingMaterial, usePOSTagging, cleanInput);
 	}
 
-	public static Summary loadEssay(String pathToDoc,
-			Document initialReadingMaterial, boolean usePOSTagging,
+	public Summary(String content, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+		super(null, AbstractDocumentTemplate.getDocumentModel(content), initialReadingMaterial, usePOSTagging,
+				cleanInput);
+	}
+
+	public static Summary loadEssay(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging,
 			boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
-
-			InputSource input = new InputSource(new FileInputStream(new File(
-					pathToDoc)));
+			InputSource input = new InputSource(new FileInputStream(new File(pathToDoc)));
 			input.setEncoding("UTF-8");
 
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -43,14 +46,12 @@ public class Summary extends Metacognition {
 				return null;
 
 			logger.info("Building essay internal representation");
-			Summary meta = new Summary(pathToDoc, contents,
-					initialReadingMaterial, usePOSTagging, cleanInput);
+			Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging, cleanInput);
 
 			extractDocumentDescriptors(doc, meta);
 			return meta;
 		} catch (Exception e) {
-			logger.error("[Error evaluating input file: " + pathToDoc
-					+ ", error:" + e.toString() + "]");
+			logger.error("[Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "]");
 			return null;
 		}
 	}
@@ -90,5 +91,26 @@ public class Summary extends Metacognition {
 			saveSerializedDocument();
 		}
 		logger.info("Finished processing summary");
+	}
+
+	public static void main(String[] args) {
+		Document d = (Document) Document.loadSerializedDocument("resources/in/Matilda & Avaleur/Matilda.ser");
+
+		Summary s = new Summary(
+				"Y a donc quelqu'un qui qui entre et qui qui dit salut salut salut et........... (est-ce que tu as compris autre chose ? ) ben après ça recommence une deuxième fois donc après la la la petite fille de elle va éteindre la télé \n .......... après la la mère elle dit que au papa à leur papa de d’aller voir parce qu'elle croyait",
+				d, true, true);
+
+		s.computeAll(false);
+
+		SummaryView view = new SummaryView(s);
+		view.setVisible(true);
+
+		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
+			System.out.println(s.getAutomaticReadingStrategies()[0][i]);
+		}
+
+		for (Block b : s.getBlocks()) {
+			System.out.println(b.getAlternateText());
+		}
 	}
 }

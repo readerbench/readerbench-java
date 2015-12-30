@@ -152,6 +152,7 @@ public class ReadingStrategies {
 			// causality and control
 			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.CAUSALITY] += PatternMatching
 					.containsStrategy(originalSentences, e, ReadingStrategies.CAUSALITY, false);
+
 			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.META_COGNITION] += PatternMatching
 					.containsStrategy(originalSentences, e, ReadingStrategies.META_COGNITION, false);
 
