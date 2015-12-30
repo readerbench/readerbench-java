@@ -61,6 +61,8 @@ public class BridgingStrategy {
 	}
 
 	public int containsStrategy(Summary essay, List<Sentence> sentences) {
+		String usedColor = Integer.toHexString(COLOR_BRIDGING.getRGB());
+		usedColor = usedColor.substring(2, usedColor.length());
 		// determine number of bridged sentences from the initial document
 		Map<Integer, Double> sentenceIds = new TreeMap<Integer, Double>();
 		double s0 = 0, s1 = 0, mean = 0;
@@ -96,7 +98,7 @@ public class BridgingStrategy {
 		String bridgingSentences = "<br/>Bridged elements:<br/>";
 
 		for (Entry<Integer, Double> entry : sentenceIds.entrySet()) {
-			if (entry.getValue() >= mean) {
+			if (entry.getValue() >= Math.max(mean, MIN_COHESION)) {
 				bridgingSentences += sentences.get(entry.getKey()).getText() + " - Cohesion: "
 						+ Formatting.formatNumber(entry.getValue()) + ";<br/>";
 				noBridgedSentences++;
@@ -104,7 +106,8 @@ public class BridgingStrategy {
 		}
 
 		if (noBridgedSentences > 0) {
-			essay.setAlternateText(bridgingSentences);
+			// store bridged sentences in the alternate text field of each essay
+			essay.setAlternateText(PatternMatching.underlineIntalicsText(bridgingSentences, usedColor));
 		}
 		return noBridgedSentences;
 	}
