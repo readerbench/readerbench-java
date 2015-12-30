@@ -751,7 +751,7 @@ public class ReaderBenchServer {
 	}
 
 	private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, String pathToLSA,
-			String pathToLDA, String lang, boolean usePOSTagging, double threshold) {
+			String pathToLDA, String lang, boolean usePOSTagging) {
 
 		// concepts
 		//Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
@@ -1184,11 +1184,9 @@ public class ReaderBenchServer {
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
 			boolean usePOSTagging = (boolean) json.get("postagging");
-			double threshold = (double) json.get("threshold");
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-			queryResult.data = getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging,
-					threshold);
+			queryResult.data = getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
