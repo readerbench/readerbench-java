@@ -120,6 +120,8 @@ public class SummaryView extends JFrame {
 			for (Block b : summary.getBlocks()) {
 				textToRender += b.getAlternateText() + "\n";
 			}
+
+			textToRender += summaryToDisplay.getAlternateText();
 			textAreaContent.setText(textToRender);
 		}
 

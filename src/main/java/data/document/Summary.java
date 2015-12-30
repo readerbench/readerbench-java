@@ -97,7 +97,7 @@ public class Summary extends Metacognition {
 		Document d = (Document) Document.loadSerializedDocument("resources/in/Matilda & Avaleur/Matilda.ser");
 
 		Summary s = new Summary(
-				"Y a donc quelqu'un qui qui entre et qui qui dit salut salut salut et........... (est-ce que tu as compris autre chose ? ) ben après ça recommence une deuxième fois donc après la la la petite fille de elle va éteindre la télé \n .......... après la la mère elle dit que au papa à leur papa de d’aller voir parce qu'elle croyait",
+				"je crois qu'il y a donc la famille de Matilda ben ils sont en train de manger et soudain y a quelqu'un qui entre en disant salut salut salut. Après ils croient que c'étaient des voleurs alors ils prennent des armes et ils vont vers le voleur. Y en a qui croient que c'est des voleurs mais le père il croit pas. Et la femme et Matilda ils croient elles croient que c'est des voleurs. Et après Matilda elle dit que c'est un fantôme et qu'il hante la salle. Et après ils sortent tous du salon.",
 				d, true, true);
 
 		s.computeAll(false);
@@ -106,11 +106,13 @@ public class Summary extends Metacognition {
 		view.setVisible(true);
 
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			System.out.println(ReadingStrategies.STRATEGY_NAMES[i]+"\t"+s.getAutomaticReadingStrategies()[0][i]);
+			System.out.println(ReadingStrategies.STRATEGY_NAMES[i] + "\t" + s.getAutomaticReadingStrategies()[0][i]);
 		}
 
 		for (Block b : s.getBlocks()) {
 			System.out.println(b.getAlternateText());
 		}
+
+		System.out.println(s.getAlternateText());
 	}
 }

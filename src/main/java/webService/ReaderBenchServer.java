@@ -8,7 +8,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ import data.dao.CategoryDAO;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
-import data.document.Metacognition;
 import data.document.Summary;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
@@ -58,7 +56,6 @@ import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
 import services.semanticSearch.SemanticSearchResult;
 import spark.Spark;
-import view.widgets.selfexplanation.summary.SummaryView;
 
 class Result implements Comparable<Result> {
 
@@ -284,12 +281,10 @@ class ReadingStrategy implements Comparable<ReadingStrategy> {
 class ResultSelfExplanation {
 
 	private String initialTextColored;
-	private String alternateText;
 	private List<ReadingStrategy> strategies;
 
-	public ResultSelfExplanation(String initialTextColored, String alternateText, List<ReadingStrategy> strategies) {
+	public ResultSelfExplanation(String initialTextColored, List<ReadingStrategy> strategies) {
 		this.initialTextColored = initialTextColored;
-		this.alternateText = alternateText;
 		this.strategies = strategies;
 	}
 
@@ -386,7 +381,6 @@ class ResultPdfToText {
 }
 
 public class ReaderBenchServer {
-
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	public static final int PORT = 8080;
 
@@ -756,65 +750,32 @@ public class ReaderBenchServer {
 			String pathToLDA, String lang, boolean usePOSTagging) {
 
 		// concepts
-		//Document queryInitialText = (Document) processQuery(initialText, pathToLSA, pathToLDA, lang, usePOSTagging);
-		
-		Document queryInitialText = new Document(null,
-				AbstractDocumentTemplate.getDocumentModel(initialText),
-				LSA.loadLSA(pathToLSA, Lang.getLang(lang)),
-				LDA.loadLDA(pathToLDA, Lang.getLang(lang)),
-				Lang.getLang(lang),
-				usePOSTagging,
-				false);
-		
-		Summary s = new Summary(
-				selfExplanation,
-				queryInitialText, true, true);
+		// Document queryInitialText = (Document) processQuery(initialText,
+		// pathToLSA, pathToLDA, lang, usePOSTagging);
+
+		Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
+				LSA.loadLSA(pathToLSA, Lang.getLang(lang)), LDA.loadLDA(pathToLDA, Lang.getLang(lang)),
+				Lang.getLang(lang), usePOSTagging, false);
+
+		Summary s = new Summary(selfExplanation, queryInitialText, true, true);
 
 		s.computeAll(false);
 
-		SummaryView view = new SummaryView(s);
-		view.setVisible(true);
-		
 		List<ReadingStrategy> readingStrategies = new ArrayList<ReadingStrategy>();
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			System.out.println(s.getAutomaticReadingStrategies()[0][i]);
-			readingStrategies.add(new ReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
+			readingStrategies.add(
+					new ReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
 		}
-		
+
 		StringBuilder summary = new StringBuilder();
 		for (Block b : s.getBlocks()) {
 			summary.append(b.getAlternateText());
-			summary.append('\n');
+			summary.append("<br/>");
 		}
 
-		/*Metacognition mc = new Metacognition(initialText, queryInitialText, usePOSTagging, true);
-		// path to initial file?
-		Metacognition verbalization = Metacognition.loadVerbalization(querySelfExplanation, queryInitialText,
-				usePOSTagging, true);
-		verbalization.computeAll(false);
+		summary.append(s.getAlternateText());
 
-		System.out.println("Blocuri: " + verbalization.getBlocks().size());
-		verbalization.getBlocks().get(0).getAlternateText().trim();
-
-		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			int x = verbalization.getAutomaticReadingStrategies()[0][i];
-		}
-
-		StringBuilder initialTextColored = new StringBuilder();
-		List<Double> cohs = new ArrayList<Double>();
-		for (int refBlockId = 0; refBlockId <= queryInitialText.getBlocks().size(); refBlockId++) {
-			SemanticCohesion coh = verbalization.getBlockSimilarities()[refBlockId];
-			// add block text
-			String text = "";
-			for (Sentence s : verbalization.getReferredDoc().getBlocks().get(refBlockId).getSentences()) {
-				text += s.getAlternateText() + " ";
-			}
-			initialTextColored.append(text);
-
-			cohs.add(Formatting.formatNumber(coh.getCohesion()));
-		}*/
-
-		return new ResultSelfExplanation(summary.toString(), queryInitialText.getAlternateText(), readingStrategies);
+		return new ResultSelfExplanation(summary.toString(), readingStrategies);
 	}
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -995,7 +956,7 @@ public class ReaderBenchServer {
 		private QueryResultSelfExplanation() {
 			success = true;
 			errorMsg = "";
-			data = new ResultSelfExplanation(null, null, null);
+			data = new ResultSelfExplanation(null, null);
 		}
 	}
 
