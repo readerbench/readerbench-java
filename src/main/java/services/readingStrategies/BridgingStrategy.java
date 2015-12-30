@@ -93,9 +93,18 @@ public class BridgingStrategy {
 			mean = s1 / s0;
 		}
 		int noBridgedSentences = 0;
+		String bridgingSentences = "<br/>Bridged elements:<br/>";
+
 		for (Entry<Integer, Double> entry : sentenceIds.entrySet()) {
-			if (entry.getValue() > mean)
+			if (entry.getValue() >= mean) {
+				bridgingSentences += sentences.get(entry.getKey()).getText() + " - Cohesion: "
+						+ Formatting.formatNumber(entry.getValue()) + ";<br/>";
 				noBridgedSentences++;
+			}
+		}
+
+		if (noBridgedSentences > 0) {
+			essay.setAlternateText(bridgingSentences);
 		}
 		return noBridgedSentences;
 	}

@@ -106,7 +106,7 @@ public class Summary extends Metacognition {
 		view.setVisible(true);
 
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			System.out.println(s.getAutomaticReadingStrategies()[0][i]);
+			System.out.println(ReadingStrategies.STRATEGY_NAMES[i]+"\t"+s.getAutomaticReadingStrategies()[0][i]);
 		}
 
 		for (Block b : s.getBlocks()) {

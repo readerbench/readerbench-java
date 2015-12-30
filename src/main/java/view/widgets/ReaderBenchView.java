@@ -71,7 +71,7 @@ public class ReaderBenchView extends JFrame {
 
 	public static final String[] TRAINED_LSA_SPACES_EN = { "resources/config/LSA/tasa_en",
 			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en", "" };
-	public static final String[] TRAINED_LSA_SPACES_FR = { "none", "resources/config/LSA/lemonde_fr",
+	public static final String[] TRAINED_LSA_SPACES_FR = { "resources/config/LSA/lemonde_fr",
 			"resources/config/LSA/textenfants_fr", "" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
 	public static final String[] TRAINED_LSA_SPACES_ES = { "resources/config/LSA/joseantonio_es", "" };
