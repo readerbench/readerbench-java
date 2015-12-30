@@ -284,10 +284,12 @@ class ReadingStrategy implements Comparable<ReadingStrategy> {
 class ResultSelfExplanation {
 
 	private String initialTextColored;
+	private String alternateText;
 	private List<ReadingStrategy> strategies;
 
-	public ResultSelfExplanation(String initialTextColored, List<ReadingStrategy> strategies) {
+	public ResultSelfExplanation(String initialTextColored, String alternateText, List<ReadingStrategy> strategies) {
 		this.initialTextColored = initialTextColored;
+		this.alternateText = alternateText;
 		this.strategies = strategies;
 	}
 
@@ -812,7 +814,7 @@ public class ReaderBenchServer {
 			cohs.add(Formatting.formatNumber(coh.getCohesion()));
 		}*/
 
-		return new ResultSelfExplanation(summary.toString(), readingStrategies);
+		return new ResultSelfExplanation(summary.toString(), queryInitialText.getAlternateText(), readingStrategies);
 	}
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -993,7 +995,7 @@ public class ReaderBenchServer {
 		private QueryResultSelfExplanation() {
 			success = true;
 			errorMsg = "";
-			data = new ResultSelfExplanation(null, null);
+			data = new ResultSelfExplanation(null, null, null);
 		}
 	}
 
