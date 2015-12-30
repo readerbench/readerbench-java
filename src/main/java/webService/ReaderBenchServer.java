@@ -528,11 +528,11 @@ public class ReaderBenchServer {
 		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
 		//logger.info("There are " + rageSentimentsValues.size() + " rage setiments.");
 		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
-		List<Result> localResults = new ArrayList<Result>();
+		List<Result> localResults = new ArrayList<>();
 		while (it.hasNext()) {
 			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 			SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-			Double sentimentValue = (Double) pair.getValue();
+			Double sentimentValue = pair.getValue();
 			localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""),
 					Formatting.formatNumber(sentimentValue)));
 		}

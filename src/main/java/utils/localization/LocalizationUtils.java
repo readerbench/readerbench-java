@@ -35,12 +35,12 @@ public class LocalizationUtils {
 		String localeToSave = localeStringMap.get(locale);
 		
 		try {
-			FileInputStream in = new FileInputStream("src/main/java/utils/localization/settings.properties");
+			FileInputStream in = new FileInputStream("src/main/resources/utils/localization/settings.properties");
 			Properties props = new Properties();
 			props.load(in);
 			in.close();
 	
-			FileOutputStream out = new FileOutputStream("src/main/java/utils/localization/settings.properties");
+			FileOutputStream out = new FileOutputStream("src/main/resources/utils/localization/settings.properties");
 			props.setProperty("SelectedLanguage", localeToSave);
 			props.store(out, null);
 			out.close();
