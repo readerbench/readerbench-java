@@ -765,6 +765,7 @@ public class ReaderBenchServer {
 
 		StringBuilder summary = new StringBuilder();
 		for (Block b : s.getBlocks()) {
+			logger.info("Block alternate text: " + b.getAlternateText());
 			summary.append(b.getAlternateText());
 			summary.append("<br/>");
 		}
@@ -1151,7 +1152,25 @@ public class ReaderBenchServer {
 			return result;
 
 		});
+		Spark.post("/csclProcessing", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
+			response.type("application/json");
+
+			String conversation = (String) json.get("conversation");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			double threshold = (Double) json.get("threshold");
+
+			QueryResultTopic queryResult = new QueryResultTopic();
+			queryResult.data = getTopics(conversation, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			String result = convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+
+		});
 	}
 
 	private static List<AbstractDocument> setDocuments(String path) {
