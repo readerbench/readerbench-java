@@ -52,7 +52,6 @@ public class VCoPView extends JFrame {
 
 	private static File lastDirectory = null;
 
-	
 	private class CustomTextField extends JFormattedTextField {
 		private static final long serialVersionUID = 1L;
 
@@ -147,14 +146,15 @@ public class VCoPView extends JFrame {
 			setTextWrittenIn(false);
 		}
 	}
-	
+
 	JTextField frmtdtxtfldInputdatetext;
 	JTextField frmtdtxtfldFinaldatetext;
+
 	/**
 	 * Create the frame.
 	 */
 	public VCoPView() {
-		setTitle("ReaderBench - " +  LocalizationUtils.getTranslation("View virtual Communities of Practice"));
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("View virtual Communities of Practice"));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 675, 325);
@@ -190,96 +190,86 @@ public class VCoPView extends JFrame {
 
 		JPanel panelViewCommunity = new JPanel();
 		panelViewCommunity.setBackground(Color.WHITE);
-		panelViewCommunity.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), 
-				LocalizationUtils.getTranslation("View"),
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panelViewCommunity.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+				LocalizationUtils.getTranslation("View"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
+		gl_contentPane
+				.setHorizontalGroup(
+						gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+												.addGroup(gl_contentPane.createSequentialGroup()
+														.addComponent(panelViewCommunity, GroupLayout.DEFAULT_SIZE, 635,
+																Short.MAX_VALUE)
+														.addContainerGap())
+								.addGroup(
+										gl_contentPane.createSequentialGroup().addComponent(lblPath).addGap(110)
+												.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 435,
+														Short.MAX_VALUE)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
+														GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
+								.addGap(6)))));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(panelViewCommunity, GroupLayout.DEFAULT_SIZE, 635, Short.MAX_VALUE)
-							.addContainerGap())
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblPath)
-							.addGap(110)
-							.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-							.addGap(6))))
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblPath)
-						.addComponent(btnSearch)
-						.addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(27)
-					.addComponent(panelViewCommunity, GroupLayout.PREFERRED_SIZE, 214, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(64, Short.MAX_VALUE))
-		);
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
+								.addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGap(27)
+						.addComponent(panelViewCommunity, GroupLayout.PREFERRED_SIZE, 214, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap(64, Short.MAX_VALUE)));
 
 		JButton btnViewCommunity = new JButton(LocalizationUtils.getTranslation("View community"));
-		JLabel lblSpecificity = new JLabel(LocalizationUtils.getTranslation("Specificity") +":");
+		JLabel lblSpecificity = new JLabel(LocalizationUtils.getTranslation("Specificity") + ":");
 		comboBoxSpecificity = new JComboBox<String>();
 		comboBoxSpecificity.addItem("None");
 
 		for (TopicClass topicClass : TopicClass.values()) {
 			comboBoxSpecificity.addItem(topicClass.toString());
 		}
-		
+
 		JLabel lblInitialDate = new JLabel(LocalizationUtils.getTranslation("Initial Date") + ":");
 		JLabel lblFinalDate = new JLabel(LocalizationUtils.getTranslation("Final Date") + ":");
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		frmtdtxtfldInputdatetext = new CustomTextField(dateFormat);
-		((CustomTextField)frmtdtxtfldInputdatetext).setPlaceholder("dd-MM-yyyy");
-		
+		((CustomTextField) frmtdtxtfldInputdatetext).setPlaceholder("dd-MM-yyyy");
+
 		frmtdtxtfldFinaldatetext = new CustomTextField(dateFormat);
-		((CustomTextField)frmtdtxtfldFinaldatetext).setPlaceholder("dd-MM-yyyy");
+		((CustomTextField) frmtdtxtfldFinaldatetext).setPlaceholder("dd-MM-yyyy");
 
 		GroupLayout gl_panelViewCommunity = new GroupLayout(panelViewCommunity);
-		gl_panelViewCommunity.setHorizontalGroup(
-			gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelViewCommunity.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-						.addComponent(btnViewCommunity, Alignment.TRAILING)
-						.addGroup(gl_panelViewCommunity.createSequentialGroup()
-							.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING)
-								.addComponent(lblInitialDate)
-								.addComponent(lblSpecificity))
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-								.addComponent(comboBoxSpecificity, 0, 524, Short.MAX_VALUE)
-								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING, false)
-									.addComponent(frmtdtxtfldFinaldatetext, Alignment.LEADING)
-									.addComponent(frmtdtxtfldInputdatetext, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE))))
-						.addComponent(lblFinalDate))
-					.addContainerGap())
-		);
-		gl_panelViewCommunity.setVerticalGroup(
-			gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelViewCommunity.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblSpecificity)
-						.addComponent(comboBoxSpecificity, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(32)
-					.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblInitialDate)
-						.addComponent(frmtdtxtfldInputdatetext, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
-					.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblFinalDate)
-						.addComponent(frmtdtxtfldFinaldatetext, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(13)
-					.addComponent(btnViewCommunity)
-					.addContainerGap())
-		);
+		gl_panelViewCommunity.setHorizontalGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
+						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
+								.addComponent(btnViewCommunity, Alignment.TRAILING)
+								.addGroup(gl_panelViewCommunity.createSequentialGroup()
+										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING)
+												.addComponent(lblInitialDate).addComponent(lblSpecificity))
+								.addPreferredGap(ComponentPlacement.UNRELATED)
+								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
+										.addComponent(comboBoxSpecificity, 0, 524, Short.MAX_VALUE)
+										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING, false)
+												.addComponent(frmtdtxtfldFinaldatetext, Alignment.LEADING)
+												.addComponent(frmtdtxtfldInputdatetext, Alignment.LEADING,
+														GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE))))
+						.addComponent(lblFinalDate)).addContainerGap()));
+		gl_panelViewCommunity.setVerticalGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
+						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
+								.addComponent(lblSpecificity).addComponent(comboBoxSpecificity,
+										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE))
+						.addGap(32)
+						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
+								.addComponent(lblInitialDate).addComponent(frmtdtxtfldInputdatetext,
+										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+						.addGroup(
+								gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE).addComponent(lblFinalDate)
+										.addComponent(frmtdtxtfldFinaldatetext, GroupLayout.PREFERRED_SIZE,
+												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addGap(13).addComponent(btnViewCommunity).addContainerGap()));
 		panelViewCommunity.setLayout(gl_panelViewCommunity);
 		btnViewCommunity.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -288,11 +278,11 @@ public class VCoPView extends JFrame {
 					Date date1 = parseDate(date1Str);
 					String date2Str = frmtdtxtfldFinaldatetext.getText();
 					Date date2 = parseDate(date2Str);
-					
+
 					System.out.println("date1=" + date1 + ", date2=" + date2);
-					 
+
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					Community.processDocumentCollection(textFieldPath.getText(), date1, date2);
+					Community.processDocumentCollection(textFieldPath.getText(), date1, date2, 1, 0);
 					Toolkit.getDefaultToolkit().beep();
 					setCursor(null); // turn off the wait cursor
 				} else
@@ -303,12 +293,12 @@ public class VCoPView extends JFrame {
 		});
 		contentPane.setLayout(gl_contentPane);
 	}
-	
+
 	private static Date parseDate(String str) {
 		DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		try {
 			return dateFormat.parse(str);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			return null;
 		}
 	}

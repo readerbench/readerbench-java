@@ -41,6 +41,7 @@ import services.nlp.parsing.Parsing_IT;
 import services.nlp.parsing.SimpleParsing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
@@ -428,20 +429,10 @@ public abstract class AbstractDocument extends AnalysisElement {
 							"Participant name,No. contributions,Qualitative overall score,Overall personal KB,Overall social KB,Cummulative degree of voice inter-animation,Textual Complexity Level"
 									+ ",Indegree,Outdegree,Betweenness,Closeness,Eccentricity,Coverage of top 10 topics (nouns and verbs only),Number of nouns,Number of verbs\n");
 					for (Participant p : c.getParticipants()) {
-						out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + "," + p.getNoContributions()
-								+ "," + Formatting.formatNumber(p.getOverallScore()) + ","
-								+ Formatting.formatNumber(p.getPersonalKB()) + ","
-								+ Formatting.formatNumber(p.getSocialKB()) + ","
-								+ Formatting.formatNumber(p.getDegreeInterAnimation()) + ","
-								+ Formatting.formatNumber(p.getTextualComplexityLevel()) + ","
-								+ Formatting.formatNumber(p.getIndegree()) + ","
-								+ Formatting.formatNumber(p.getOutdegree()) + ","
-								+ Formatting.formatNumber(p.getBetweenness()) + ","
-								+ Formatting.formatNumber(p.getCloseness()) + ","
-								+ Formatting.formatNumber(p.getEccentricity()) + ","
-								+ Formatting.formatNumber(p.getRelevanceTop10Topics()) + ","
-								+ Formatting.formatNumber(p.getNoNouns()) + ","
-								+ Formatting.formatNumber(p.getNoVerbs()) + "\n");
+						out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
+						for (CSCLIndices index : CSCLIndices.values()) {
+							out.write("," + p.getIndices().get(index));
+						}
 					}
 					// print interaction matrix
 					out.write("Interaction matrix\n");

@@ -24,6 +24,7 @@ import org.openide.util.Lookup;
 
 import data.Block;
 import data.Word;
+import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
@@ -93,7 +94,6 @@ public class ParticipantEvaluation {
 						e.getEdgeData().setLabel("");
 					}
 				}
-
 			}
 		}
 	}
@@ -101,9 +101,7 @@ public class ParticipantEvaluation {
 	public static void evaluateInteraction(Conversation c) {
 		if (c.getParticipants().size() > 0) {
 			c.setParticipantContributions(new double[c.getParticipants().size()][c.getParticipants().size()]);
-
 			List<Participant> lsPart = getParticipantList(c);
-
 			// determine strength of links
 			for (int i = 0; i < c.getBlocks().size() - 1; i++) {
 				if (c.getBlocks().get(i) != null) {
@@ -141,10 +139,14 @@ public class ParticipantEvaluation {
 			for (Block b : c.getBlocks()) {
 				if (b != null) {
 					Utterance u = (Utterance) b;
-					u.getParticipant().setOverallScore(u.getParticipant().getOverallScore() + b.getOverallScore());
-					u.getParticipant().setPersonalKB(u.getParticipant().getPersonalKB() + u.getPersonalKB());
-					u.getParticipant().setSocialKB(u.getParticipant().getSocialKB() + u.getSocialKB());
-					u.getParticipant().setNoContributions(u.getParticipant().getNoContributions() + 1);
+					u.getParticipant().getIndices().put(CSCLIndices.OVERALL_SCORE,
+							u.getParticipant().getIndices().get(CSCLIndices.OVERALL_SCORE) + b.getOverallScore());
+					u.getParticipant().getIndices().put(CSCLIndices.PERSONAL_KB,
+							u.getParticipant().getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
+					u.getParticipant().getIndices().put(CSCLIndices.SOCIAL_KB,
+							u.getParticipant().getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
+					u.getParticipant().getIndices().put(CSCLIndices.NO_CONTRIBUTION,
+							u.getParticipant().getIndices().get(CSCLIndices.NO_CONTRIBUTION) + 1);
 				}
 			}
 		}
@@ -162,7 +164,8 @@ public class ParticipantEvaluation {
 					if (p.getInterventions().getWordOccurences().containsKey(topic.getWord())) {
 						double relevance = p.getInterventions().getWordOccurences().get(topic.getWord())
 								* topic.getRelevance();
-						p.setRelevanceTop10Topics(p.getRelevanceTop10Topics() + relevance);
+						p.getIndices().put(CSCLIndices.RELEVANCE_TOP10_TOPICS,
+								p.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS) + relevance);
 					}
 				}
 				if (noSelectedTopics == 10)
@@ -175,9 +178,11 @@ public class ParticipantEvaluation {
 			for (Entry<Word, Integer> entry : p.getInterventions().getWordOccurences().entrySet()) {
 				if (entry.getKey().getPOS() != null) {
 					if (entry.getKey().getPOS().startsWith("N"))
-						p.setNoNouns(p.getNoNouns() + entry.getValue());
+						p.getIndices().put(CSCLIndices.NO_NOUNS,
+								p.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS) + entry.getValue());
 					if (entry.getKey().getPOS().startsWith("V"))
-						p.setNoVerbs(p.getNoVerbs() + entry.getValue());
+						p.getIndices().put(CSCLIndices.NO_VERBS,
+								p.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS) + entry.getValue());
 				}
 			}
 		}
@@ -193,10 +198,12 @@ public class ParticipantEvaluation {
 
 		for (int index1 = 0; index1 < participants.size(); index1++) {
 			for (int index2 = 0; index2 < participants.size(); index2++) {
-				participants.get(index1).setOutdegree(
-						participants.get(index1).getOutdegree() + participantContributions[index1][index2]);
-				participants.get(index2)
-						.setIndegree(participants.get(index2).getIndegree() + participantContributions[index1][index2]);
+				participants.get(index1).getIndices().put(CSCLIndices.OUTDEGREE,
+						participants.get(index1).getIndices().get(CSCLIndices.OUTDEGREE)
+								+ participantContributions[index1][index2]);
+				participants.get(index2).getIndices().put(CSCLIndices.INDEGREE,
+						participants.get(index2).getIndices().get(CSCLIndices.INDEGREE)
+								+ participantContributions[index1][index2]);
 			}
 		}
 
@@ -235,9 +242,12 @@ public class ParticipantEvaluation {
 
 		for (Node n : graph.getNodes()) {
 			Participant p = mappings.get(n.getNodeData().getLabel());
-			p.setBetweenness((Double) n.getNodeData().getAttributes().getValue(betweennessColumn.getIndex()));
-			p.setCloseness((Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
-			p.setEccentricity((Double) n.getNodeData().getAttributes().getValue(eccentricityColumn.getIndex()));
+			p.getIndices().put(CSCLIndices.BETWEENNESS, p.getIndices().get(CSCLIndices.BETWEENNESS)
+					+ (Double) n.getNodeData().getAttributes().getValue(betweennessColumn.getIndex()));
+			p.getIndices().put(CSCLIndices.CLOSENESS, p.getIndices().get(CSCLIndices.CLOSENESS)
+					+ (Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
+			p.getIndices().put(CSCLIndices.ECCENTRICITY, p.getIndices().get(CSCLIndices.ECCENTRICITY)
+					+ (Double) n.getNodeData().getAttributes().getValue(eccentricityColumn.getIndex()));
 		}
 	}
 }

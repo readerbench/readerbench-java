@@ -7,10 +7,10 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,52 +54,68 @@ public class Community extends AnalysisElement {
 
 	static Logger logger = Logger.getLogger(Community.class);
 
-	private List<Participant> community;
+	private List<Participant> participants;
 	private List<Conversation> documents;
+	private List<Community> timeframeSubCommunities;
 	private double[][] participantContributions;
-	private Date startDate;
-	private Date endDate;
+	private Date startDate, endDate;
+	private Date fistContributionDate, lastContributionDate;
 	private boolean[] selectedIndices;
 
 	public Community(Date startDate, Date endDate) {
 		super(null, 0, null, null, null);
 		this.startDate = startDate;
 		this.endDate = endDate;
-		community = new LinkedList<Participant>();
-		documents = new LinkedList<Conversation>();
+		participants = new ArrayList<Participant>();
+		documents = new ArrayList<Conversation>();
+		timeframeSubCommunities = new ArrayList<Community>();
 	}
 
 	private void updateParticipantContributions() {
 		for (Conversation c : documents) {
 			// update the community correspondingly
 			for (Participant p : c.getParticipants()) {
-				int index = community.indexOf(p);
+				int index = participants.indexOf(p);
 				Participant participantToUpdate = null;
 				if (index >= 0) {
-					participantToUpdate = community.get(index);
+					participantToUpdate = participants.get(index);
 				} else {
 					participantToUpdate = new Participant(p.getName(), c);
-					community.add(participantToUpdate);
+					participants.add(participantToUpdate);
 				}
 
 				for (Block b : p.getInterventions().getBlocks()) {
 					Utterance u = (Utterance) b;
 					// select contributions in imposed timeframe
 					if (u != null && u.isEligible(startDate, endDate)) {
+						// determine first timestamp of considered contributions
+						if (fistContributionDate == null)
+							fistContributionDate = u.getTime();
+						if (u.getTime().before(fistContributionDate))
+							fistContributionDate = u.getTime();
+						if (lastContributionDate == null)
+							lastContributionDate = u.getTime();
+						if (u.getTime().after(lastContributionDate))
+							lastContributionDate = u.getTime();
 						b.setIndex(-1);
 						Block.addBlock(participantToUpdate.getInterventions(), b);
 						if (b.isSignificant()) {
 							Block.addBlock(participantToUpdate.getSignificantInterventions(), b);
 						}
 
-						participantToUpdate.setNoContributions(participantToUpdate.getNoContributions() + 1);
+						participantToUpdate.getIndices().put(CSCLIndices.NO_CONTRIBUTION,
+								participantToUpdate.getIndices().get(CSCLIndices.NO_CONTRIBUTION) + 1);
 
 						for (Entry<Word, Integer> entry : u.getWordOccurences().entrySet()) {
 							if (entry.getKey().getPOS() != null) {
 								if (entry.getKey().getPOS().startsWith("N"))
-									participantToUpdate.setNoNouns(participantToUpdate.getNoNouns() + entry.getValue());
+									participantToUpdate.getIndices().put(CSCLIndices.NO_NOUNS,
+											participantToUpdate.getIndices().get(CSCLIndices.NO_NOUNS)
+													+ entry.getValue());
 								if (entry.getKey().getPOS().startsWith("V"))
-									participantToUpdate.setNoVerbs(participantToUpdate.getNoVerbs() + entry.getValue());
+									participantToUpdate.getIndices().put(CSCLIndices.NO_VERBS,
+											participantToUpdate.getIndices().get(CSCLIndices.NO_VERBS)
+													+ entry.getValue());
 							}
 						}
 
@@ -111,8 +127,9 @@ public class Community extends AnalysisElement {
 								if (u.getWordOccurences().containsKey(topic.getWord())) {
 									double relevance = u.getWordOccurences().get(topic.getWord())
 											* topic.getRelevance();
-									participantToUpdate.setRelevanceTop10Topics(
-											participantToUpdate.getRelevanceTop10Topics() + relevance);
+									participantToUpdate.getIndices().put(CSCLIndices.RELEVANCE_TOP10_TOPICS,
+											participantToUpdate.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS)
+													+ relevance);
 								}
 								if (noSelectedTopics == 10)
 									break;
@@ -123,9 +140,9 @@ public class Community extends AnalysisElement {
 			}
 		}
 
-		participantContributions = new double[community.size()][community.size()];
+		participantContributions = new double[participants.size()][participants.size()];
 
-		for (Participant p : community) {
+		for (Participant p : participants) {
 			p.resetIndices();
 		}
 
@@ -136,20 +153,22 @@ public class Community extends AnalysisElement {
 				// select contributions in imposed timeframe
 				if (u != null && u.isEligible(startDate, endDate)) {
 					Participant p1 = u.getParticipant();
-					int index1 = community.indexOf(p1);
+					int index1 = participants.indexOf(p1);
 					if (index1 >= 0) {
 						// participantContributions[index1][index1] += d
 						// .getBlocks().get(i).getCombinedScore();
-						Participant participantToUpdate = community.get(index1);
-						participantToUpdate
-								.setOverallScore(participantToUpdate.getOverallScore() + u.getOverallScore());
-						participantToUpdate.setPersonalKB(participantToUpdate.getPersonalKB() + u.getPersonalKB());
-						participantToUpdate.setSocialKB(participantToUpdate.getSocialKB() + u.getSocialKB());
+						Participant participantToUpdate = participants.get(index1);
+						participantToUpdate.getIndices().put(CSCLIndices.OVERALL_SCORE,
+								participantToUpdate.getIndices().get(CSCLIndices.OVERALL_SCORE) + u.getOverallScore());
+						participantToUpdate.getIndices().put(CSCLIndices.PERSONAL_KB,
+								participantToUpdate.getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
+						participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
+								participantToUpdate.getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
 
 						for (int j = i + 1; j < d.getBlocks().size(); j++) {
 							if (d.getPrunnedBlockDistances()[j][i] != null) {
 								Participant p2 = ((Utterance) d.getBlocks().get(j)).getParticipant();
-								int index2 = community.indexOf(p2);
+								int index2 = participants.indexOf(p2);
 								if (index2 >= 0) {
 									// model knowledge building effect
 									double addedKB = d.getBlocks().get(j).getOverallScore()
@@ -166,8 +185,10 @@ public class Community extends AnalysisElement {
 				}
 			}
 			for (Participant p : d.getParticipants()) {
-				Participant pToUpdate = community.get(community.indexOf(p));
-				pToUpdate.setDegreeInterAnimation(pToUpdate.getDegreeInterAnimation() + p.getDegreeInterAnimation());
+				Participant participantToUpdate = participants.get(participants.indexOf(p));
+				participantToUpdate.getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
+						participantToUpdate.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)
+								+ p.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE));
 			}
 		}
 	}
@@ -195,7 +216,7 @@ public class Community extends AnalysisElement {
 		}
 
 		// determine complexity indices
-		for (Participant p : community) {
+		for (Participant p : participants) {
 			// establish minimum criteria
 			int noContentWords = 0;
 			for (Block b : p.getSignificantInterventions().getBlocks()) {
@@ -218,7 +239,7 @@ public class Community extends AnalysisElement {
 			}
 		}
 
-		ParticipantEvaluation.performSNA(community, participantContributions, true);
+		ParticipantEvaluation.performSNA(participants, participantContributions, true);
 
 		// update surface statistics
 		for (AbstractDocument d : documents) {
@@ -227,26 +248,31 @@ public class Community extends AnalysisElement {
 				if (d.getBlocks().get(i) != null) {
 					if (p == null) {
 						p = ((Utterance) d.getBlocks().get(i)).getParticipant();
-						Participant participantToUpdate = community.get(community.indexOf(p));
-						participantToUpdate.setNoNewThreads(participantToUpdate.getNoNewThreads() + 1);
-						participantToUpdate.setNewThreadsOverallScore(
-								participantToUpdate.getNewThreadsOverallScore() + d.getOverallScore());
-						participantToUpdate.setNewThreadsCumulativeInteranimation(
-								participantToUpdate.getNewThreadsCumulativeInteranimation()
-										+ VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()));
-						participantToUpdate
-								.setNewThreadsCumulativeSocialKB(participantToUpdate.getNewThreadsCumulativeSocialKB()
+						Participant participantToUpdate = participants.get(participants.indexOf(p));
+						participantToUpdate.getIndices().put(CSCLIndices.NO_NEW_THREADS,
+								participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
+						participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
+								participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_OVERALL_SCORE)
+										+ d.getOverallScore());
+						participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB,
+								participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB)
 										+ VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
-						participantToUpdate.setAverageNewThreadsLength(participantToUpdate.getAverageNewThreadsLength()
-								+ d.getBlocks().get(i).getText().length());
+						participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE,
+								participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE)
+										+ VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()));
+						participantToUpdate.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
+								participantToUpdate.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
+										+ d.getBlocks().get(i).getText().length());
 					}
 				}
 			}
 		}
 
-		for (Participant p : community) {
-			if (p.getNoNewThreads() != 0)
-				p.setAverageNewThreadsLength(p.getAverageNewThreadsLength() / p.getNoNewThreads());
+		for (Participant p : participants) {
+			if (p.getIndices().get(CSCLIndices.NO_NEW_THREADS) != 0)
+				p.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
+						p.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
+								/ p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
 		}
 	}
 
@@ -254,7 +280,7 @@ public class Community extends AnalysisElement {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ParticipantInvolvementView view = new ParticipantInvolvementView("Member", path, community,
+				ParticipantInvolvementView view = new ParticipantInvolvementView("Member", path, participants,
 						participantContributions, true, true);
 				view.setVisible(true);
 			}
@@ -279,7 +305,7 @@ public class Community extends AnalysisElement {
 					32768);
 
 			// print participant statistics
-			if (community.size() > 0) {
+			if (participants.size() > 0) {
 				out.write("Participant involvement and interaction\n");
 				out.write(
 						"Participant name,Annonized name,No. contributions,Qualitative overall score,Overall personal KB,Overall social KB,Cummulative degree of voice inter-animation"
@@ -293,28 +319,11 @@ public class Community extends AnalysisElement {
 				}
 				out.write("\n");
 
-				for (int index = 0; index < community.size(); index++) {
-					Participant p = community.get(index);
-					out.write(
-							p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index + ","
-									+ p.getNoContributions() + ","
-									+ Formatting.formatNumber(p.getOverallScore()) + "," + Formatting.formatNumber(
-											p.getPersonalKB())
-									+ "," + Formatting.formatNumber(p.getSocialKB()) + ","
-									+ Formatting.formatNumber(p.getDegreeInterAnimation()) + ","
-									+ Formatting.formatNumber(p.getIndegree()) + ","
-									+ Formatting.formatNumber(p.getOutdegree()) + ","
-									+ Formatting.formatNumber(p.getBetweenness()) + ","
-									+ Formatting.formatNumber(p.getCloseness()) + ","
-									+ Formatting.formatNumber(p.getEccentricity()) + ","
-									+ Formatting.formatNumber(p.getRelevanceTop10Topics()) + ","
-									+ Formatting.formatNumber(p.getNoNouns()) + ","
-									+ Formatting.formatNumber(p.getNoVerbs()) + ","
-									+ Formatting.formatNumber(p.getNoNewThreads()) + ","
-									+ Formatting.formatNumber(p.getAverageNewThreadsLength()) + ","
-									+ Formatting.formatNumber(p.getNewThreadsOverallScore()) + ","
-									+ Formatting.formatNumber(p.getNewThreadsCumulativeSocialKB()) + ","
-									+ Formatting.formatNumber(p.getNewThreadsCumulativeInteranimation()));
+				for (int index = 0; index < participants.size(); index++) {
+					Participant p = participants.get(index);
+					out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+					for (CSCLIndices CSCLindex : CSCLIndices.values())
+						out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
 					for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
 						if (selectedIndices[i]) {
 							out.write("," + Formatting
@@ -363,12 +372,12 @@ public class Community extends AnalysisElement {
 
 				// print interaction matrix
 				out.write("\nInteraction matrix\n");
-				for (Participant p : community)
+				for (Participant p : participants)
 					out.write("," + p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
 				out.write("\n");
-				for (int i = 0; i < community.size(); i++) {
-					out.write(community.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
-					for (int j = 0; j < community.size(); j++)
+				for (int i = 0; i < participants.size(); i++) {
+					out.write(participants.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
+					for (int j = 0; j < participants.size(); j++)
 						out.write("," + Formatting.formatNumber(participantContributions[i][j]));
 					out.write("\n");
 				}
@@ -382,7 +391,8 @@ public class Community extends AnalysisElement {
 		}
 	}
 
-	public static Community loadMultipleConversations(String rootPath, Date startDate, Date endDate) {
+	public static Community loadMultipleConversations(String rootPath, Date startDate, Date endDate, int monthIncrement,
+			int dayIncrement) {
 		logger.info("Loading all files in " + rootPath);
 
 		FileFilter filter = new FileFilter() {
@@ -391,7 +401,7 @@ public class Community extends AnalysisElement {
 			}
 		};
 
-		Community collection = new Community(startDate, endDate);
+		Community community = new Community(startDate, endDate);
 		File dir = new File(rootPath);
 		if (!dir.isDirectory())
 			return null;
@@ -400,16 +410,50 @@ public class Community extends AnalysisElement {
 			Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
 			// d.exportIM();
 			if (c != null)
-				collection.getDocuments().add(c);
+				community.getDocuments().add(c);
 		}
 
-		collection.updateParticipantContributions();
+		community.updateParticipantContributions();
 
-		return collection;
+		// create corresponding sub-communities
+		Calendar cal = Calendar.getInstance();
+		Date startSubCommunities = community.getFistContributionDate();
+		cal.setTime(startSubCommunities);
+		cal.add(Calendar.MONTH, monthIncrement);
+		cal.add(Calendar.DATE, dayIncrement);
+		Date endSubCommunities = cal.getTime();
+
+		while (endSubCommunities.before(community.getLastContributionDate())) {
+			Community subCommunity = new Community(startSubCommunities, endSubCommunities);
+			for (Conversation c : community.getDocuments())
+				subCommunity.getDocuments().add(c);
+			subCommunity.updateParticipantContributions();
+
+			community.getTimeframeSubCommunities().add(subCommunity);
+
+			// update timeStamps
+			startSubCommunities = endSubCommunities;
+			cal.add(Calendar.MONTH, monthIncrement);
+			cal.add(Calendar.DATE, dayIncrement);
+			endSubCommunities = cal.getTime();
+		}
+		// create partial community with remaining contributions
+		Community subCommunity = new Community(startSubCommunities, community.getLastContributionDate());
+		for (Conversation c : community.getDocuments())
+			subCommunity.getDocuments().add(c);
+		subCommunity.updateParticipantContributions();
+		community.getTimeframeSubCommunities().add(subCommunity);
+
+		logger.info("Finished creating " + community.getTimeframeSubCommunities().size()
+				+ " timeframe sub-communities spanning from " + community.getFistContributionDate() + " to "
+				+ community.getLastContributionDate());
+
+		return community;
 	}
 
-	public static void processDocumentCollection(String rootPath, Date startDate, Date endDate) {
-		Community dc = Community.loadMultipleConversations(rootPath, startDate, endDate);
+	public static void processDocumentCollection(String rootPath, Date startDate, Date endDate, int monthIncrement,
+			int dayIncrement) {
+		Community dc = Community.loadMultipleConversations(rootPath, startDate, endDate, monthIncrement, dayIncrement);
 		if (dc != null) {
 			dc.computeMetrics();
 			File f = new File(rootPath);
@@ -420,31 +464,31 @@ public class Community extends AnalysisElement {
 	}
 
 	public static void processAllFolders(String folder, String prefix, String pathToLSA, String pathToLDA, Lang lang,
-			boolean usePOSTagging, Date startDate, Date endDate) {
+			boolean usePOSTagging, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
 		File dir = new File(folder);
 		if (dir.isDirectory()) {
 			File[] communityFolder = dir.listFiles();
 			for (File f : communityFolder) {
 				if (f.isDirectory() && f.getName().startsWith(prefix)) {
 					// remove checkpoint file
-					// File checkpoint = new File(f + "/checkpoint.xml");
-					// if (checkpoint.exists())
-					// checkpoint.delete();
+					File checkpoint = new File(f + "/checkpoint.xml");
+					if (checkpoint.exists())
+						checkpoint.delete();
 					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
 							true, null, null, true);
-					Community.processDocumentCollection(f.getAbsolutePath(), startDate, endDate);
+					Community.processDocumentCollection(f.getAbsolutePath(), startDate, endDate, monthIncrement,
+							dayIncrement);
 				}
-
 			}
 		}
 	}
 
-	public List<Participant> getCommunity() {
-		return community;
+	public List<Participant> getParticipants() {
+		return participants;
 	}
 
-	public void setCommunity(List<Participant> community) {
-		this.community = community;
+	public void setParticipants(List<Participant> community) {
+		this.participants = community;
 	}
 
 	public List<Conversation> getDocuments() {
@@ -455,17 +499,42 @@ public class Community extends AnalysisElement {
 		this.documents = documents;
 	}
 
+	public Date getFistContributionDate() {
+		return fistContributionDate;
+	}
+
+	public void setFistContributionDate(Date fistContributionDate) {
+		this.fistContributionDate = fistContributionDate;
+	}
+
+	public Date getLastContributionDate() {
+		return lastContributionDate;
+	}
+
+	public void setLastContributionDate(Date lastContributionDate) {
+		this.lastContributionDate = lastContributionDate;
+	}
+
+	public List<Community> getTimeframeSubCommunities() {
+		return timeframeSubCommunities;
+	}
+
+	public void setTimeframeSubCommunities(List<Community> timeframeSubCommunities) {
+		this.timeframeSubCommunities = timeframeSubCommunities;
+	}
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		// processAllFolders("in/blogs_Nic/1 year", "PW", "resources/config/LSA/tasa_en",
+		// processAllFolders("in/blogs_Nic/1 year", "PW",
+		// "resources/config/LSA/tasa_en",
 		// "resources/config/LDA/tasa_en", Lang.eng, true, null,
 		// null);
 		String path = "in/MOOC/forum_posts&comments";
-		SerialCorpusAssessment.processCorpus(path, "resources/config/LSA/tasa_lak_en", "resources/config/LDA/tasa_lak_en", Lang.eng, true,
-				true, null, null, true);
+		SerialCorpusAssessment.processCorpus(path, "resources/config/LSA/tasa_lak_en",
+				"resources/config/LDA/tasa_lak_en", Lang.eng, true, true, null, null, true);
 		// Long startDate = 1383235200L;
 		Long startDate = 1383843600L;
-		Community.processDocumentCollection(path, new Date(startDate * 1000), null);
+		Community.processDocumentCollection(path, new Date(startDate * 1000), null, 0, 7);
 	}
 }

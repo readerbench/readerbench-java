@@ -1,19 +1,17 @@
 package services.discourse.CSCL;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import services.commons.Formatting;
 import data.Block;
 import data.cscl.Conversation;
 import data.cscl.Utterance;
 import data.discourse.CollaborationZone;
 import data.discourse.SemanticCohesion;
+import services.commons.Formatting;
 
 /**
  * 
@@ -30,60 +28,9 @@ public class Collaboration {
 
 	CollaborationZones collaborations;
 
-	private static double[][] computeSentimentDistances(
-			double[] sentimentDistribution) {
-		// Calculates the sentiment distances between adjacent elements from the
-		// vector; Value 0 = distance is under the threshold; 1 = above
-		System.out
-				.println("Collaboration::getCollaborationZones computeSentimentDistances");
-		int size = sentimentDistribution.length;
-		double[][] sentimentDistances = new double[size][2];
-		double distance_left = sentimentDistribution[size - 1]
-				- sentimentDistribution[size - 2];
-		double distance_right = sentimentDistribution[1]
-				- sentimentDistribution[0];
-		sentimentDistances[0][0] = INVALID_SENTIMENT_VALUE;
-		if ((sentimentDistribution[0] == INVALID_SENTIMENT_VALUE && sentimentDistribution[1] == INVALID_SENTIMENT_VALUE)
-				|| distance_right > COLLABORATION_SENTIMENT_SLACK) {
-			sentimentDistances[0][1] = 1;
-		} else {
-			sentimentDistances[0][1] = 0;
-		}
-		sentimentDistances[size - 1][1] = INVALID_SENTIMENT_VALUE;
-		if ((sentimentDistribution[size - 1] == INVALID_SENTIMENT_VALUE && sentimentDistribution[size - 2] == INVALID_SENTIMENT_VALUE)
-				|| distance_left > COLLABORATION_SENTIMENT_SLACK) {
-			sentimentDistances[size - 1][0] = 1;
-		} else {
-			sentimentDistances[size - 1][0] = 0;
-		}
-		for (int i = 1; i < size - 1; i++) {
-			distance_left = sentimentDistribution[i]
-					- sentimentDistribution[i - 1];
-			distance_right = sentimentDistribution[i + 1]
-					- sentimentDistribution[i];
-			if ((sentimentDistribution[i] == INVALID_SENTIMENT_VALUE && sentimentDistribution[i + 1] == INVALID_SENTIMENT_VALUE)
-					|| distance_right > COLLABORATION_SENTIMENT_SLACK) {
-				sentimentDistances[i][1] = 1;
-			} else {
-				sentimentDistances[i][1] = 0;
-			}
-
-			if ((sentimentDistribution[i - 1] == INVALID_SENTIMENT_VALUE && sentimentDistribution[i] == INVALID_SENTIMENT_VALUE)
-					|| distance_left > COLLABORATION_SENTIMENT_SLACK) {
-				sentimentDistances[i][0] = 1;
-			} else {
-				sentimentDistances[i][0] = 0;
-			}
-
-		}
-		return sentimentDistances;
-	}
-
-	public static List<CollaborationZone> getCollaborationZones(
-			double[] distribution) {
+	public static List<CollaborationZone> getCollaborationZones(double[] distribution) {
 		// generic method for determining intense collaboration zones
-		int maxDistance = Math.max(1,
-				(int) (COLLABORATION_ZONE_SLACK * distribution.length));
+		int maxDistance = Math.max(1, (int) (COLLABORATION_ZONE_SLACK * distribution.length));
 		double sumCollaboration = 0;
 		int noCollaboration = 0;
 		double avgCollaboration = 0;
@@ -125,8 +72,7 @@ public class Collaboration {
 				while (true) {
 					boolean expand = false;
 					for (int i = 1; i <= maxDistance; i++)
-						if (left - i >= 0
-								&& distribution[left - i] >= avgCollaboration) {
+						if (left - i >= 0 && distribution[left - i] >= avgCollaboration) {
 							left = left - i;
 							visited[left] = true;
 							expand = true;
@@ -141,8 +87,7 @@ public class Collaboration {
 				while (true) {
 					boolean expand = false;
 					for (int i = 1; i <= maxDistance; i++)
-						if (right + i < distribution.length
-								&& distribution[right + i] >= avgCollaboration) {
+						if (right + i < distribution.length && distribution[right + i] >= avgCollaboration) {
 							right = right + i;
 							visited[right] = true;
 							expand = true;
@@ -161,8 +106,7 @@ public class Collaboration {
 				if (noBlocks != 0)
 					sumValueUtterances /= noBlocks;
 				if (noBlocks >= COLLABORATION_ZONE_MIN_SPREAD)
-					zones.add(new CollaborationZone(left, right,
-							sumValueUtterances, noBlocks));
+					zones.add(new CollaborationZone(left, right, sumValueUtterances, noBlocks));
 			} else
 				break;
 		}
@@ -192,23 +136,13 @@ public class Collaboration {
 						Utterance u1 = (Utterance) c.getBlocks().get(i);
 						Utterance u2 = (Utterance) c.getBlocks().get(j);
 						SemanticCohesion coh = c.getPrunnedBlockDistances()[j][i];
-						if (u1.getParticipant() != null
-								&& u2.getParticipant() != null
-								&& coh.getCohesion() > 0) {
+						if (u1.getParticipant() != null && u2.getParticipant() != null && coh.getCohesion() > 0) {
 							if (u1.getParticipant().equals(u2.getParticipant())) {
-								u1.setPersonalKB(u1.getPersonalKB()
-										+ u2.getOverallScore()
-										* coh.getCohesion());
-								u2.setPersonalKB(u2.getPersonalKB()
-										+ u1.getOverallScore()
-										* coh.getCohesion());
+								u1.setPersonalKB(u1.getPersonalKB() + u2.getOverallScore() * coh.getCohesion());
+								u2.setPersonalKB(u2.getPersonalKB() + u1.getOverallScore() * coh.getCohesion());
 							} else {
-								u1.setSocialKB(u1.getSocialKB()
-										+ u2.getOverallScore()
-										* coh.getCohesion());
-								u2.setSocialKB(u2.getSocialKB()
-										+ u1.getOverallScore()
-										* coh.getCohesion());
+								u1.setSocialKB(u1.getSocialKB() + u2.getOverallScore() * coh.getCohesion());
+								u2.setSocialKB(u2.getSocialKB() + u1.getOverallScore() * coh.getCohesion());
 								no_diff_speaker++;
 							}
 							no_links++;
@@ -257,8 +191,7 @@ public class Collaboration {
 			double[] socialKBEvolution = new double[c.getBlocks().size()];
 			for (int i = 0; i < c.getBlocks().size(); i++) {
 				if (c.getBlocks().get(i) != null) {
-					socialKBEvolution[i] = ((Utterance) c.getBlocks().get(i))
-							.getSocialKB();
+					socialKBEvolution[i] = ((Utterance) c.getBlocks().get(i)).getSocialKB();
 				}
 			}
 			c.setSocialKBEvolution(socialKBEvolution);
@@ -268,8 +201,8 @@ public class Collaboration {
 		}
 	}
 
-	public static double[] overlapCollaborationZones(Conversation c,
-			List<CollaborationZone> l1, List<CollaborationZone> l2) {
+	public static double[] overlapCollaborationZones(Conversation c, List<CollaborationZone> l1,
+			List<CollaborationZone> l2) {
 		// evaluate precision and recall for identified collaboration zones
 		double precision = 0, recall = 0, fscore = 0;
 		if (l1 != null && l2 != null && l1.size() > 0 && l2.size() > 0) {
@@ -320,8 +253,7 @@ public class Collaboration {
 				fscore = (1 + Math.pow(BETA_FSCORE, 2)) * (precision * recall)
 						/ (Math.pow(BETA_FSCORE, 2) * precision + recall);
 
-			return new double[] { Formatting.formatNumber(precision),
-					Formatting.formatNumber(recall),
+			return new double[] { Formatting.formatNumber(precision), Formatting.formatNumber(recall),
 					Formatting.formatNumber(fscore) };
 		}
 		return new double[3];
