@@ -424,10 +424,9 @@ public abstract class AbstractDocument extends AnalysisElement {
 				// print participant statistics
 				if (c.getParticipants().size() > 0) {
 					out.write("\nParticipant involvement and interaction\n");
-
-					out.write(
-							"Participant name,No. contributions,Qualitative overall score,Overall personal KB,Overall social KB,Cummulative degree of voice inter-animation,Textual Complexity Level"
-									+ ",Indegree,Outdegree,Betweenness,Closeness,Eccentricity,Coverage of top 10 topics (nouns and verbs only),Number of nouns,Number of verbs\n");
+					out.write("Participant name");
+					for (CSCLIndices CSCLindex : CSCLIndices.values())
+						out.write(CSCLindex.getDescription());
 					for (Participant p : c.getParticipants()) {
 						out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
 						for (CSCLIndices index : CSCLIndices.values()) {

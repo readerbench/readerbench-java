@@ -307,11 +307,9 @@ public class Community extends AnalysisElement {
 			// print participant statistics
 			if (participants.size() > 0) {
 				out.write("Participant involvement and interaction\n");
-				out.write(
-						"Participant name,Annonized name,No. contributions,Qualitative overall score,Overall personal KB,Overall social KB,Cummulative degree of voice inter-animation"
-								+ ",Indegree,Outdegree,Betweenness,Closeness,Eccentricity,Coverage of top 10 topics (nouns and verbs only),Number of nouns, Number of verbs"
-								+ ",No of new threads started,Average length of started threads,Overall score of initiated threads"
-								+ ",Cummulative social knowledge-building for initiated threads,Cummulative inter-animation for initiated threads");
+				out.write("Participant name,Annonized name");
+				for (CSCLIndices CSCLindex : CSCLIndices.values())
+					out.write(CSCLindex.getDescription());
 				for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
 					if (selectedIndices[i]) {
 						out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
