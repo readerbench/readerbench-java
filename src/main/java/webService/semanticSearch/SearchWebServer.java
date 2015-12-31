@@ -100,7 +100,7 @@ public class SearchWebServer {
             return "OK";
         });
 
-        Spark.get("/query", new Route() {
+        Spark.get("/search", new Route() {
 
             @Override
             public Object handle(Request request, Response response) {
@@ -174,7 +174,7 @@ public class SearchWebServer {
         SearchWebServer server = new SearchWebServer();
         List<AbstractDocument> docs = new ArrayList<AbstractDocument>();
 
-        File dir = new File("in/test");
+        File dir = new File("resources/in/articles financial associations");
         File[] files = dir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
