@@ -280,11 +280,11 @@ class ReadingStrategy implements Comparable<ReadingStrategy> {
 
 class ResultSelfExplanation {
 
-	private String initialTextColored;
+	private String selfExplanationColored;
 	private List<ReadingStrategy> strategies;
 
-	public ResultSelfExplanation(String initialTextColored, List<ReadingStrategy> strategies) {
-		this.initialTextColored = initialTextColored;
+	public ResultSelfExplanation(String selfExplanationColored, List<ReadingStrategy> strategies) {
+		this.selfExplanationColored = selfExplanationColored;
 		this.strategies = strategies;
 	}
 
@@ -748,10 +748,6 @@ public class ReaderBenchServer {
 
 	private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, String pathToLSA,
 			String pathToLDA, String lang, boolean usePOSTagging) {
-
-		// concepts
-		// Document queryInitialText = (Document) processQuery(initialText,
-		// pathToLSA, pathToLDA, lang, usePOSTagging);
 
 		Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
 				LSA.loadLSA(pathToLSA, Lang.getLang(lang)), LDA.loadLDA(pathToLDA, Lang.getLang(lang)),
