@@ -7,9 +7,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import data.Block;
+import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
 import data.cscl.Utterance;
-import data.discourse.CollaborationZone;
 import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
 

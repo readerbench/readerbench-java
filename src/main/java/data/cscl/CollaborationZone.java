@@ -1,4 +1,4 @@
-package data.discourse;
+package data.cscl;
 
 import java.io.Serializable;
 

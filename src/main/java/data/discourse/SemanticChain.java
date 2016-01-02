@@ -5,17 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
-import services.commons.ValueComparator;
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import data.Word;
 import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
-import data.sentiment.SentimentValence;
+import services.commons.ValueComparator;
+import services.commons.VectorAlgebra;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
@@ -50,10 +48,8 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 	}
 
 	private void computeSentimentDistribution() {
-		int i = 0;
 		int counter = 0;
 		for (Word w : words) {
-			i++;
 			if (w.isNoun() || w.isVerb()) {
 				counter++;
 			}
@@ -220,58 +216,20 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		return VectorAlgebra.stdev(blockDistribution);
 	}
 
-	private double[] getRecurrenceSentence() {
-		Vector<Integer> recurrence = new Vector<Integer>();
-		int crtIndex = -1;
-		for (int i = 0; i < sentenceDistribution.length; i++) {
-			if (sentenceDistribution[i] > 0) {
-				if (crtIndex == -1)
-					crtIndex = i;
-				else {
-					recurrence.add(i - crtIndex);
-					crtIndex = i;
-				}
-			}
-		}
-		double[] results = new double[recurrence.size()];
-		for (int i = 0; i < recurrence.size(); i++)
-			results[i] = recurrence.get(i);
-		return results;
-	}
-
-	private double[] getRecurrenceBlock() {
-		Vector<Integer> recurrence = new Vector<Integer>();
-		int crtIndex = -1;
-		for (int i = 0; i < blockDistribution.length; i++) {
-			if (blockDistribution[i] > 0) {
-				if (crtIndex == -1)
-					crtIndex = i;
-				else {
-					recurrence.add(i - crtIndex);
-					crtIndex = i;
-				}
-			}
-		}
-		double[] results = new double[recurrence.size()];
-		for (int i = 0; i < recurrence.size(); i++)
-			results[i] = recurrence.get(i);
-		return results;
-	}
-
 	public double getAvgRecurrenceSentence() {
-		return VectorAlgebra.avg(getRecurrenceSentence());
+		return VectorAlgebra.avg(VectorAlgebra.getRecurrence(sentenceDistribution));
 	}
 
 	public double getAvgRecurrenceBlock() {
-		return VectorAlgebra.avg(getRecurrenceBlock());
+		return VectorAlgebra.avg(VectorAlgebra.getRecurrence(blockDistribution));
 	}
 
 	public double getStdevRecurrenceSentence() {
-		return VectorAlgebra.stdev(getRecurrenceSentence());
+		return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(sentenceDistribution));
 	}
 
 	public double getStdevRecurrenceBlock() {
-		return VectorAlgebra.stdev(getRecurrenceBlock());
+		return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(blockDistribution));
 	}
 
 	public String toString() {
@@ -346,7 +304,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 		for (Word w : words) {
 			s = s + w.getText() + " ";
 		}
-		//sre.addSentimentResultEntity(s, sentiment);
+		// sre.addSentimentResultEntity(s, sentiment);
 		this.chainSentiment = sre;
 	}
 

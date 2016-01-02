@@ -29,13 +29,13 @@ import data.document.Document;
 import data.pojo.Language;
 import data.sentiment.SentimentGrid;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.ageOfExposure.TopicMatchGraph;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.wordComplexity.TopicMatchGraph;
 
 public class ToeflVocab {
 	

@@ -63,7 +63,7 @@ public class VCoPEvaluationView extends JFrame {
 		JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
 
 		textFieldPath = new JTextField();
-		textFieldPath.setText("in/forum_Nic");
+		textFieldPath.setText("resources/in/forum_Nic");
 		textFieldPath.setColumns(10);
 
 		JButton btnSearch = new JButton("...");
@@ -71,7 +71,7 @@ public class VCoPEvaluationView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser(new File("in"));
+					fc = new JFileChooser(new File("resources/in"));
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

@@ -1,6 +1,12 @@
 package services.commons;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.math3.stat.regression.SimpleRegression;
+
+import cc.mallet.util.Maths;
 
 public class VectorAlgebra {
 	public static double[] getVector(int[][] v, int dimension) {
@@ -191,23 +197,82 @@ public class VectorAlgebra {
 		return result;
 	}
 
-	public static double avg(double[] v1) {
-		if (v1 == null)
+	public static double avg(double[] v) {
+		if (v == null)
 			return -1;
 		double sum = 0;
-		for (int i = 0; i < v1.length; i++) {
-			sum += v1[i];
+		for (int i = 0; i < v.length; i++) {
+			sum += v[i];
 		}
-		if (v1.length != 0)
-			return sum / v1.length;
+		if (v.length != 0)
+			return sum / v.length;
 		return 0;
 	}
 
-	public static double entropy(double[] v1) {
-		if (v1 == null)
+	public static double[] getRecurrence(double[] v) {
+		List<Integer> recurrence = new ArrayList<Integer>();
+		int crtIndex = -1;
+		for (int i = 0; i < v.length; i++) {
+			if (v[i] > 0) {
+				recurrence.add(i - crtIndex - 1);
+				crtIndex = i;
+			}
+		}
+		if (crtIndex == -1)
+			recurrence.add(v.length - 1);
+		else
+			recurrence.add(v.length - crtIndex - 1);
+
+		double[] results = new double[recurrence.size()];
+		for (int i = 0; i < recurrence.size(); i++)
+			results[i] = recurrence.get(i);
+		return results;
+
+	}
+
+	public static double slope(double[] v) {
+		SimpleRegression r = new SimpleRegression(false);
+		for (int i = 0; i < v.length; i++)
+			r.addData(i, v[i]);
+		return r.getSlope();
+	}
+
+	/**
+	 * Computes the p-value of a one-sample Kolmogorov-Smirnov test evaluating
+	 * the null hypothesis that v conforms to a uniform distribution of
+	 * 1/length(v).
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public static double uniformity(double[] v) {
+		if (v.length == 0)
+			return 1;
+		double[] uniformDistribution = new double[v.length];
+		for (int i = 0; i < v.length; i++)
+			uniformDistribution[i] = 1d / v.length;
+		// KolmogorovSmirnovTest test = new KolmogorovSmirnovTest();
+		// return test.kolmogorovSmirnovTest(VectorAlgebra.normalize(v),
+		// uniformDistribution);
+		return Maths.jensenShannonDivergence(normalize(v), uniformDistribution);
+	}
+
+	public static int localExtremeDetection(double[] v) {
+		List<Integer> ext = new ArrayList<Integer>();
+		for (int i = 0; i < v.length - 2; i++) {
+			// check for sign change
+			if ((!(v[i + 1] == v[i] && v[i + 2] == v[i + 1])) && (v[i + 1] - v[i]) * (v[i + 2] - v[i + 1]) <= 0) {
+				ext.add(i + 1);
+			}
+		}
+		return ext.size();
+	}
+
+	public static double entropy(double[] v) {
+		if (v == null)
 			return -1;
 		double entropy = 0;
-		double[] p = normalize(v1);
+		double[] p = normalize(v);
 		for (int i = 0; i < p.length; i++) {
 			if (p[i] != 0) {
 				entropy += -p[i] * Math.log(p[i]);

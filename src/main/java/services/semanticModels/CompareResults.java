@@ -24,7 +24,6 @@ import data.Word;
 import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
-import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class CompareResults {

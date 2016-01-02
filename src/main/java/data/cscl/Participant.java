@@ -2,6 +2,9 @@ package data.cscl;
 
 import java.io.Serializable;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import data.AbstractDocument;
 
@@ -14,6 +17,7 @@ public class Participant implements Comparable<Participant>, Serializable {
 	private double gradeAnnotator;
 	private double textualComplexityLevel;
 	private EnumMap<CSCLIndices, Double> indices;
+	private Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices;
 
 	public Participant(String name, AbstractDocument d) {
 		super();
@@ -21,6 +25,8 @@ public class Participant implements Comparable<Participant>, Serializable {
 		this.interventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
 		this.significantInterventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
 		this.indices = new EnumMap<>(CSCLIndices.class);
+		this.longitudinalIndices = new HashMap<Entry<CSCLIndices, CSCLCriteria>, Double>();
+		resetIndices();
 	}
 
 	public String getName() {
@@ -54,7 +60,7 @@ public class Participant implements Comparable<Participant>, Serializable {
 	public void setGradeAnnotator(double gradeAnnotator) {
 		this.gradeAnnotator = gradeAnnotator;
 	}
-	
+
 	public double getTextualComplexityLevel() {
 		return textualComplexityLevel;
 	}
@@ -69,6 +75,14 @@ public class Participant implements Comparable<Participant>, Serializable {
 
 	public void setIndices(EnumMap<CSCLIndices, Double> indices) {
 		this.indices = indices;
+	}
+
+	public Map<Entry<CSCLIndices, CSCLCriteria>, Double> getLongitudinalIndices() {
+		return longitudinalIndices;
+	}
+
+	public void setLongitudinalIndices(Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices) {
+		this.longitudinalIndices = longitudinalIndices;
 	}
 
 	public void resetIndices() {

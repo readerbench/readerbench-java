@@ -17,8 +17,8 @@ import java.util.Date;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -37,10 +37,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.cscl.Community;
-import services.discourse.topicMining.TopicCoverage.TopicClass;
 import utils.localization.LocalizationUtils;
-
-import javax.swing.JFormattedTextField;
 
 public class VCoPView extends JFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
@@ -48,7 +45,6 @@ public class VCoPView extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textFieldPath;
-	private JComboBox<String> comboBoxSpecificity;
 
 	private static File lastDirectory = null;
 
@@ -166,7 +162,7 @@ public class VCoPView extends JFrame {
 		JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
 
 		textFieldPath = new JTextField();
-		textFieldPath.setText("in/forum_Nic");
+		textFieldPath.setText("resources/in/MOOC/forum_posts&comments");
 		textFieldPath.setColumns(10);
 
 		JButton btnSearch = new JButton("...");
@@ -174,7 +170,7 @@ public class VCoPView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser(new File("in"));
+					fc = new JFileChooser(new File("resources/in"));
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -220,13 +216,6 @@ public class VCoPView extends JFrame {
 						.addContainerGap(64, Short.MAX_VALUE)));
 
 		JButton btnViewCommunity = new JButton(LocalizationUtils.getTranslation("View community"));
-		JLabel lblSpecificity = new JLabel(LocalizationUtils.getTranslation("Specificity") + ":");
-		comboBoxSpecificity = new JComboBox<String>();
-		comboBoxSpecificity.addItem("None");
-
-		for (TopicClass topicClass : TopicClass.values()) {
-			comboBoxSpecificity.addItem(topicClass.toString());
-		}
 
 		JLabel lblInitialDate = new JLabel(LocalizationUtils.getTranslation("Initial Date") + ":");
 		JLabel lblFinalDate = new JLabel(LocalizationUtils.getTranslation("Final Date") + ":");
@@ -244,32 +233,32 @@ public class VCoPView extends JFrame {
 								.addComponent(btnViewCommunity, Alignment.TRAILING)
 								.addGroup(gl_panelViewCommunity.createSequentialGroup()
 										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING)
-												.addComponent(lblInitialDate).addComponent(lblSpecificity))
+												.addComponent(lblInitialDate))
 								.addPreferredGap(ComponentPlacement.UNRELATED)
 								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-										.addComponent(comboBoxSpecificity, 0, 524, Short.MAX_VALUE)
 										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING, false)
 												.addComponent(frmtdtxtfldFinaldatetext, Alignment.LEADING)
 												.addComponent(frmtdtxtfldInputdatetext, Alignment.LEADING,
 														GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE))))
 						.addComponent(lblFinalDate)).addContainerGap()));
-		gl_panelViewCommunity.setVerticalGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblSpecificity).addComponent(comboBoxSpecificity,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE))
-						.addGap(32)
-						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblInitialDate).addComponent(frmtdtxtfldInputdatetext,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE))
+		gl_panelViewCommunity
+				.setVerticalGroup(
+						gl_panelViewCommunity
+								.createParallelGroup(
+										Alignment.LEADING)
+								.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
+										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE))
+										.addGap(32)
+										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblInitialDate).addComponent(frmtdtxtfldInputdatetext,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
 						.addGroup(
 								gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE).addComponent(lblFinalDate)
 										.addComponent(frmtdtxtfldFinaldatetext, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addGap(13).addComponent(btnViewCommunity).addContainerGap()));
+										.addGap(13).addComponent(btnViewCommunity).addContainerGap()));
 		panelViewCommunity.setLayout(gl_panelViewCommunity);
 		btnViewCommunity.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -282,7 +271,7 @@ public class VCoPView extends JFrame {
 					System.out.println("date1=" + date1 + ", date2=" + date2);
 
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					Community.processDocumentCollection(textFieldPath.getText(), date1, date2, 1, 0);
+					Community.processDocumentCollection(textFieldPath.getText(), false, date1, date2, 0, 7);
 					Toolkit.getDefaultToolkit().beep();
 					setCursor(null); // turn off the wait cursor
 				} else

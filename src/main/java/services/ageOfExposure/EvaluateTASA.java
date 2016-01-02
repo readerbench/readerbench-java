@@ -1,4 +1,4 @@
-package services.wordComplexity;
+package services.ageOfExposure;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

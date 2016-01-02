@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 public class LocalizationUtils {
 	private static HashMap<Locale, String> localeStringMap = new HashMap<Locale, String>();
 	private static HashMap<String, Locale> stringLocaleMap = new HashMap<String, Locale>();
+	
 	static {
 		localeStringMap.put(Locale.ENGLISH, "English");
 		localeStringMap.put(Locale.FRENCH, "French");

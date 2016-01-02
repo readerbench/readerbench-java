@@ -26,7 +26,6 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
-import data.discourse.CollaborationZone;
 import data.discourse.SemanticChain;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.VectorAlgebra;

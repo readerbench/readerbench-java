@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Vector;
 
 import data.Block;
+import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
-import data.discourse.CollaborationZone;
 
 public class CollaborationZones {
 

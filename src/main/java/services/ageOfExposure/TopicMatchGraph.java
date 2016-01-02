@@ -1,4 +1,4 @@
-package services.wordComplexity;
+package services.ageOfExposure;
 
 import java.util.LinkedList;
 import java.util.Queue;
