@@ -250,7 +250,7 @@ public class SemanticModelsTraining extends JFrame {
 		JLabel lblSelectInput = new JLabel(LocalizationUtils.getTranslation("Select input folder") + ":");
 
 		textFieldInput = new JTextField();
-		textFieldInput.setText(LocalizationUtils.getTranslation("incorpora preprocessing"));
+		textFieldInput.setText("resources/config/LSA");
 		textFieldInput.setColumns(10);
 
 		JLabel lblFormat = new JLabel(LocalizationUtils.getTranslation("Format") + ":");
@@ -264,7 +264,7 @@ public class SemanticModelsTraining extends JFrame {
 		btnBrowse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
-				fc = new JFileChooser("in");
+				fc = new JFileChooser("resources/config/LSA");
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int returnVal = fc.showOpenDialog(SemanticModelsTraining.this);
 

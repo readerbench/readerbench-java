@@ -194,7 +194,7 @@ public class CompareResults {
 		BasicConfigurator.configure();
 		CompareResults comp = new CompareResults();
 
-		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_new_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
 		// LDA lsa = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
 		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
 
