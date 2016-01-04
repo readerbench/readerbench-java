@@ -11,7 +11,7 @@ import services.nlp.stemmer.Stemmer;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import data.dao.WordDAO;
+import dao.WordDAO;
 import data.discourse.SemanticChain;
 import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;

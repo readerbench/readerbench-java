@@ -1,7 +1,7 @@
 package services.sentiment;
 
-import data.dao.DAOService;
-import data.dao.WordDAO;
+import dao.DAOService;
+import dao.WordDAO;
 import data.pojo.Word;
 
 /**

@@ -5,10 +5,10 @@
  */
 package services.sentiment;
 
-import data.dao.DAOService;
-import data.dao.EntityXValenceDAO;
-import data.dao.ValenceDAO;
-import data.dao.WordDAO;
+import dao.DAOService;
+import dao.EntityXValenceDAO;
+import dao.ValenceDAO;
+import dao.WordDAO;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;

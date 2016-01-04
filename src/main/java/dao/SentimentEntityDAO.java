@@ -1,4 +1,4 @@
-package data.dao;
+package dao;
 
 import data.pojo.SentimentEntity;
 

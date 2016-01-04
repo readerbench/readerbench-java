@@ -34,7 +34,7 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
 import data.Sentence;
 import data.Word;
-import data.dao.CategoryDAO;
+import dao.CategoryDAO;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;

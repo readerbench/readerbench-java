@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import data.dao.ValenceDAO;
-import data.dao.WeightDAO;
+import dao.ValenceDAO;
+import dao.WeightDAO;
 import data.pojo.SentimentValence;
 import webService.ReaderBenchServer;
 

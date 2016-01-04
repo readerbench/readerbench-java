@@ -5,35 +5,21 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.poi.hdf.extractor.data.LST;
-import org.apache.poi.hssf.util.HSSFColor.AQUA;
 import org.junit.Test;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
-import data.Word;
 import data.AbstractDocumentTemplate.BlockTemplate;
-import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
 import data.document.Document;
-import data.pojo.Language;
-import data.sentiment.SentimentGrid;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.ageOfExposure.TopicMatchGraph;
-import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
-import services.discourse.cohesion.CohesionGraph;
-import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 

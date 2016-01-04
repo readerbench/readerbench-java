@@ -1,6 +1,6 @@
 package data.sentiment;
 
-import data.dao.ValenceDAO;
+import dao.ValenceDAO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

@@ -1,8 +1,8 @@
 package crawlers;
 
-import data.dao.CategoryDAO;
-import data.dao.CategoryPhraseDAO;
-import data.dao.DAOService;
+import dao.CategoryDAO;
+import dao.CategoryPhraseDAO;
+import dao.DAOService;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
 import java.io.IOException;
