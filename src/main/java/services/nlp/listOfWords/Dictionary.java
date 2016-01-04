@@ -20,6 +20,7 @@ public class Dictionary {
 	public static ListOfWords dictionary_it = null;
 	public static ListOfWords dictionary_en = null;
 	public static ListOfWords dictionary_es = null;
+	public static ListOfWords dictionary_nl = null;
 
 	public static Set<String> getDictionaryWords(Lang lang) {
 		if (lang == null)
@@ -33,6 +34,8 @@ public class Dictionary {
 			return getDictionaryIt().getWords();
 		case es:
 			return getDictionaryEs().getWords();
+		case nl:
+			return getDictionaryNl().getWords();
 		default:
 			return getDictionaryEn().getWords();
 		}
@@ -68,6 +71,12 @@ public class Dictionary {
 		return dictionary_es;
 	}
 
+	public static ListOfWords getDictionaryNl() {
+		if (dictionary_nl == null)
+			dictionary_nl = new ListOfWords("resources/config/Dictionary/dict_nl.txt");
+		return dictionary_nl;
+	}
+
 	public static boolean isDictionaryWord(String s, Lang lang) {
 		if (lang == null)
 			return true;
@@ -76,10 +85,8 @@ public class Dictionary {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		System.out
-				.println(Dictionary.isDictionaryWord("abalobé", Lang.fr));
+		System.out.println(Dictionary.isDictionaryWord("abalobé", Lang.fr));
 		System.out.println(Dictionary.isDictionaryWord("cosi", Lang.it));
-		System.out.println(Dictionary.isDictionaryWord("atarugaear",
-				Lang.es));
+		System.out.println(Dictionary.isDictionaryWord("atarugaear", Lang.es));
 	}
 }

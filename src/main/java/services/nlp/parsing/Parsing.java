@@ -78,7 +78,6 @@ public abstract class Parsing {
 
 	public static void parseDoc(AbstractDocument d, boolean usePOSTagging, boolean cleanInput) {
 		try {
-			logger.info("Parsing document ...");
 			if (!d.getDocTmp().getBlocks().isEmpty()) {
 				java.util.Iterator<BlockTemplate> it = d.getDocTmp().getBlocks().iterator();
 				while (it.hasNext()) {
@@ -265,8 +264,6 @@ public abstract class Parsing {
 				// add utterance to block
 				b.getSentences().add(s);
 				b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
-
-				// add sentiment entity to the block
 			}
 		}
 

@@ -15,6 +15,8 @@ public class Stemmer {
 			return Stemmer_IT.stemWord(word);
 		case es:
 			return Stemmer_ES.stemWord(word);
+		case nl:
+			return Stemmer_NL.stemWord(word);
 		default:
 			return Stemmer_EN.stemWord(word);
 		}

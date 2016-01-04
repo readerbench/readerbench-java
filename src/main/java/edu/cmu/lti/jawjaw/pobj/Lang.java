@@ -18,9 +18,10 @@ package edu.cmu.lti.jawjaw.pobj;
 import java.io.Serializable;
 
 public enum Lang implements Serializable {
-	eng, fr, it, jpn, ro, es;
+	eng, fr, it, jpn, ro, es, nl;
 
-	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian" };
+	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian",
+			"Dutch" };
 
 	public static Lang getLang(String language) {
 		switch (language) {
@@ -32,6 +33,8 @@ public enum Lang implements Serializable {
 			return Lang.es;
 		case "Romanian":
 			return Lang.ro;
+		case "Dutch":
+			return Lang.nl;
 		default:
 			return Lang.eng;
 		}

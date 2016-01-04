@@ -93,5 +93,4 @@ public class StaticLemmatizer {
 		System.out.println(StaticLemmatizer.lemmaStatic("mangio", Lang.it));
 		System.out.println(StaticLemmatizer.lemmaStatic("armas", Lang.es));
 	}
-
 }
