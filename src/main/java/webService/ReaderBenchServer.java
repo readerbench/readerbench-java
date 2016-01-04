@@ -522,7 +522,7 @@ public class ReaderBenchServer {
 	 */
 	private List<ResultSentiment> getSentiment(String query, String pathToLSA, String pathToLDA, String lang,
 			boolean posTagging) {
-		
+
 		List<Result> results = new ArrayList<Result>();
 		List<ResultSentiment> resultsSentiments = new ArrayList<ResultSentiment>();
 		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
@@ -640,7 +640,9 @@ public class ReaderBenchServer {
 			String content = r.getDoc().getText();
 			if (content.length() > maxContentSize) {
 				content = content.substring(0, maxContentSize);
-				content = content.substring(0, content.lastIndexOf(" ")) + "...";
+				if (content.lastIndexOf(" ") != -1)
+					content = content.substring(0, content.lastIndexOf(" "));
+				content += "...";
 			}
 			searchResults
 					.add(new ResultSearch(r.getDoc().getPath(), content, Formatting.formatNumber(r.getRelevance())));
@@ -1201,11 +1203,11 @@ public class ReaderBenchServer {
 		Logger.getRootLogger().setLevel(Level.INFO); // changing log level
 
 		ReaderBenchServer server = new ReaderBenchServer();
-		
+
 		logger.info("Initialize words...");
 		WordDAO.getInstance().loadAll();
 		logger.info("Words initialization finished");
-		
+
 		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
 				+ " sentiments after initialization.");
 		SentimentWeights.initialize();
