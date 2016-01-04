@@ -38,7 +38,7 @@ public class SentimentWeights {
 	/**
 	 * Initializes the sentiments grid
 	 */
-	public SentimentWeights() {
+	public static void initialize() {
 		
 		int noPrimarySentiments = ValenceDAO.getInstance().findByRage(false).size();
 		int noRageSentiments = ValenceDAO.getInstance().findByRage(true).size();

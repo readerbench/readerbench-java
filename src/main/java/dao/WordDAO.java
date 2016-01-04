@@ -8,6 +8,10 @@ package dao;
 import java.util.List;
 import javax.persistence.TypedQuery;
 import data.pojo.Word;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -16,6 +20,8 @@ import data.pojo.Word;
 public class WordDAO extends AbstractDAO<Word>{
 	
 	private static WordDAO instance = null;
+	
+	private Map<String, Word> cache = null;
 	
 	public WordDAO() {
 		
@@ -29,6 +35,7 @@ public class WordDAO extends AbstractDAO<Word>{
 	}
 	
 	public Word findByLabel(String label) {
+		if (cache != null) return cache.get(label);
 		return dao.executeQuery(em -> {
 			TypedQuery<Word> query = em.createNamedQuery("Word.findByLabel", Word.class);
 			query.setParameter("label", label);
@@ -42,6 +49,12 @@ public class WordDAO extends AbstractDAO<Word>{
             query.setParameter("label", label + "%");
 			return query.getResultList();
 		});
+	}
+
+	public void loadAll() {
+		if (cache != null) return;
+		cache = findAll().stream().collect(
+				Collectors.toConcurrentMap(Word::getLabel, Function.identity()));
 	}
 	
 }

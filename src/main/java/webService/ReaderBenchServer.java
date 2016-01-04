@@ -35,6 +35,7 @@ import data.Block;
 import data.Sentence;
 import data.Word;
 import dao.CategoryDAO;
+import dao.WordDAO;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
@@ -521,11 +522,7 @@ public class ReaderBenchServer {
 	 */
 	private List<ResultSentiment> getSentiment(String query, String pathToLSA, String pathToLDA, String lang,
 			boolean posTagging) {
-
-		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
-				+ " sentiments after initialization.");
-		SentimentWeights sw = new SentimentWeights();
-
+		
 		List<Result> results = new ArrayList<Result>();
 		List<ResultSentiment> resultsSentiments = new ArrayList<ResultSentiment>();
 		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
@@ -1204,6 +1201,15 @@ public class ReaderBenchServer {
 		Logger.getRootLogger().setLevel(Level.INFO); // changing log level
 
 		ReaderBenchServer server = new ReaderBenchServer();
+		
+		logger.info("Initialize words...");
+		WordDAO.getInstance().loadAll();
+		logger.info("Words initialization finished");
+		
+		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
+				+ " sentiments after initialization.");
+		SentimentWeights.initialize();
+
 		server.start();
 	}
 }
