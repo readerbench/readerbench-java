@@ -1,4 +1,4 @@
-package crawlers;
+package services.crawlers;
 
 import dao.CategoryDAO;
 import dao.CategoryPhraseDAO;
