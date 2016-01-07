@@ -45,6 +45,7 @@ import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
+import view.widgets.ReaderBenchView;
 import view.widgets.chat.ParticipantInvolvementView;
 import view.widgets.document.corpora.PaperConceptView;
 
@@ -161,7 +162,7 @@ public class Community extends AnalysisElement {
 								participantToUpdate.getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
 						participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
 								participantToUpdate.getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
-						
+
 						for (int j = i + 1; j < d.getBlocks().size(); j++) {
 							if (d.getPrunnedBlockDistances()[j][i] != null) {
 								Participant p2 = ((Utterance) d.getBlocks().get(j)).getParticipant();
@@ -576,15 +577,20 @@ public class Community extends AnalysisElement {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		// processAllFolders("resources/in/blogs_Nic/1 year", "PW",
-		// "resources/config/LSA/tasa_en",
-		// "resources/config/LDA/tasa_en", Lang.eng, true, null,
-		// null);
-		String path = "resources/in/MOOC/forum_posts&comments";
-		SerialCorpusAssessment.processCorpus(path, "resources/config/LSA/tasa_lak_en",
-				"resources/config/LDA/tasa_lak_en", Lang.eng, true, false, null, null, true);
+
+		ReaderBenchView.initializeDB();
+
+		ReaderBenchView.adjustToSystemGraphics();
+		BasicConfigurator.configure();
+		processAllFolders("resources/in/blogs_Nic/1 year", "LM2", "resources/config/LSA/tasa_en",
+				"resources/config/LDA/tasa_en", Lang.eng, true, true, null, null, 0, 7);
+		// String path = "resources/in/MOOC/forum_posts&comments";
+		// SerialCorpusAssessment.processCorpus(path,
+		// "resources/config/LSA/tasa_lak_en",
+		// "resources/config/LDA/tasa_lak_en", Lang.eng, true, false, null,
+		// null, true);
 		// Long startDate = 1383235200L;
 		// Long startDate = 1383843600L; new Date(startDate * 1000)
-		Community.processDocumentCollection(path, false, null, null, 0, 7);
+		// Community.processDocumentCollection(path, false, null, null, 0, 7);
 	}
 }
