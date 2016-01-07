@@ -3,6 +3,8 @@ package services.ageOfExposure;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import services.commons.Formatting;
+
 /**
  * A bipartite graph.
  * 
@@ -134,7 +136,7 @@ public class TopicMatchGraph {
 		graph.addEdge(2, 3, 1);
 		graph.addEdge(2, 4, 2);
 		graph.addEdge(2, 6, 3);
-		
+
 		System.out.println("Graf:");
 		System.out.println(graph);
 
@@ -142,13 +144,21 @@ public class TopicMatchGraph {
 		for (int i = 0; i < assoc.length; i++)
 			System.out.println(i + "--" + assoc[i]);
 	}
-	
-	/*public String toString() {
+
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < this.nodes; i++) {
-				sb.append("(" + i + ", " + parent[i] +"): edge=" + this.edge[i][parent[i]] + "; cost=" + this.cost[i][parent[i]] + "\t");
-			sb.append("\n");
+		for (int i=0; i<this.nodes;i++) {
+			for (int j=0; j<this.nodes; j++) {
+				if (cost[i][j]>0)
+					sb.append(i+" >> "+j+": "+Formatting.formatNumber(cost[i][j])+";\n");
+			}
 		}
+		// for (int i = 0; i < this.nodes; i++) {
+		// sb.append("(" + i + ", " + parent[i] + "): edge=" +
+		// this.edge[i][parent[i]] + "; cost="
+		// + this.cost[i][parent[i]] + "\t");
+		// sb.append("\n");
+		// }
 		return sb.toString();
-	}*/
+	}
 }

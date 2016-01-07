@@ -150,7 +150,7 @@ public class RunMeasurementsView extends JFrame {
 		JButton btnSearch = new JButton("...");
 		btnSearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser(new File("in"));
+				JFileChooser fc = new JFileChooser(new File("resources/in"));
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int returnVal = fc.showOpenDialog(RunMeasurementsView.this);
 

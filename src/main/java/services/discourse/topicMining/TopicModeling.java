@@ -135,20 +135,20 @@ public class TopicModeling {
 		}
 		// save results as well
 		// create measurements.csv header
-		try {
-			FileWriter fstream = new FileWriter("out/topics_"
-					+ new Timestamp(new Date().getTime()) + ".csv", false);
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("Keyword,Relevance\n");
-			for (Topic t : topicL) {
-				out.write(t.getWord().getLemma() + "," + t.getRelevance()
-						+ "\n");
-			}
-			out.close();
-		} catch (Exception e) {
-			logger.error("Runtime error while exporting corpora topics");
-			e.printStackTrace();
-		}
+		// try {
+		// FileWriter fstream = new FileWriter("out/topics_"
+		// + new Timestamp(new Date().getTime()) + ".csv", false);
+		// BufferedWriter out = new BufferedWriter(fstream);
+		// out.write("Keyword,Relevance\n");
+		// for (Topic t : topicL) {
+		// out.write(t.getWord().getLemma() + "," + t.getRelevance()
+		// + "\n");
+		// }
+		// out.close();
+		// } catch (Exception e) {
+		// logger.error("Runtime error while exporting corpora topics");
+		// e.printStackTrace();
+		// }
 
 		return newTopicScoreMap;
 	}

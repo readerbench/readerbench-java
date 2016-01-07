@@ -98,7 +98,7 @@ public class PreProcessing {
 		// determine new concepts
 		while (st.hasMoreTokens()) {
 			String word = st.nextToken().replaceAll("[^a-z]", "").trim();
-			if (word.length() > 0 && !Dictionary.getDictionaryEn().getWords().contains(word)) {
+			if (word.length() > 0 && !Dictionary.getDictionaryWords(lang).contains(word)) {
 				if (newConcepts.containsKey(word))
 					newConcepts.put(word, newConcepts.get(word) + 1);
 				else

@@ -24,21 +24,20 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
 import services.semanticModels.LSA.ProcessSVDOutput;
 import services.semanticModels.LSA.RunSVD;
 import utils.localization.LocalizationUtils;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import view.widgets.ReaderBenchView;
 
 public class SemanticModelsTraining extends JFrame {
 
@@ -728,7 +727,9 @@ public class SemanticModelsTraining extends JFrame {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		adjustToSystemGraphics();
+		ReaderBenchView.initializeDB();
+
+		ReaderBenchView.adjustToSystemGraphics();
 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -740,23 +741,5 @@ public class SemanticModelsTraining extends JFrame {
 				}
 			}
 		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 }
