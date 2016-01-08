@@ -14,34 +14,7 @@ public class DocumentFlow {
 	private List<Integer> orderedParagraphs;
 	private double[][] graph;
 
-	public static enum Criteria {
-		MAX_VALUE, ABOVE_MEAN_PLUS_STDEV;
-
-		@Override
-		public String toString() {
-			switch (this) {
-			case MAX_VALUE:
-				return "Maximum value";
-			case ABOVE_MEAN_PLUS_STDEV:
-				return "Above mean+stdev";
-			default:
-				throw new IllegalArgumentException();
-			}
-		}
-
-		public String getAcronym() {
-			switch (this) {
-			case MAX_VALUE:
-				return "MaxVal";
-			case ABOVE_MEAN_PLUS_STDEV:
-				return "AbvMeanStdev";
-			default:
-				throw new IllegalArgumentException();
-			}
-		}
-	};
-
-	public DocumentFlow(AbstractDocument doc, int semanticDistanceIndex, Criteria crit) {
+	public DocumentFlow(AbstractDocument doc, int semanticDistanceIndex, DocFlowCriteria crit) {
 		this.graph = new double[doc.getBlocks().size()][doc.getBlocks().size()];
 
 		switch (crit) {

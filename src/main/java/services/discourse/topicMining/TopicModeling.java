@@ -1,12 +1,8 @@
 package services.discourse.topicMining;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,16 +13,16 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import services.commons.VectorAlgebra;
-import services.complexity.wordComplexity.WordComplexity;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.OntologySupport;
 import data.AbstractDocument;
 import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
+import services.commons.VectorAlgebra;
+import services.complexity.wordComplexity.WordComplexity;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
+import services.semanticModels.WordNet.OntologySupport;
 
 public class TopicModeling {
 	static Logger logger = Logger.getLogger(TopicModeling.class);

@@ -2,6 +2,7 @@ package services.complexity;
 
 import org.apache.log4j.Logger;
 
+import data.AbstractDocument;
 import services.complexity.CAF.BalancedCAF;
 import services.complexity.coreference.CoreferenceResolutionComplexity;
 import services.complexity.discourse.ConnectivesComplexity;
@@ -11,7 +12,7 @@ import services.complexity.discourse.DiscourseComplexity;
 import services.complexity.discourse.LexicalCohesionComplexity;
 import services.complexity.discourse.SemanticCohesionComplexity;
 import services.complexity.entityDensity.EntityDensityComplexity;
-import services.complexity.flow.DocumentFlow;
+import services.complexity.flow.DocFlowCriteria;
 import services.complexity.flow.DocumentFlowComplexity;
 import services.complexity.lexicalChains.LexicalChainsComplexity;
 import services.complexity.readability.Readability;
@@ -24,7 +25,6 @@ import services.complexity.syntax.TreeComplexity;
 import services.complexity.wordComplexity.WordComplexity;
 import services.nlp.listOfWords.Connectives;
 import services.nlp.listOfWords.Pronouns;
-import data.AbstractDocument;
 
 /**
  * 
@@ -214,22 +214,19 @@ public class ComplexityIndices {
 			new LexicalCohesionComplexity(), new DialogismStatisticsComplexity(), new DialogismSynergyComplexity(),
 			new DiscourseComplexity(), new SemanticCohesionComplexity(0), new SemanticCohesionComplexity(1),
 			new SemanticCohesionComplexity(2), new SemanticCohesionComplexity(3), new SemanticCohesionComplexity(4),
-			new SemanticCohesionComplexity(5),
-			new DocumentFlowComplexity(0, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(0, DocumentFlow.Criteria.MAX_VALUE),
-			new DocumentFlowComplexity(1, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(1, DocumentFlow.Criteria.MAX_VALUE),
-			new DocumentFlowComplexity(2, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(2, DocumentFlow.Criteria.MAX_VALUE),
-			new DocumentFlowComplexity(3, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(3, DocumentFlow.Criteria.MAX_VALUE),
-			new DocumentFlowComplexity(4, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(4, DocumentFlow.Criteria.MAX_VALUE),
-			new DocumentFlowComplexity(5, DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(5, DocumentFlow.Criteria.MAX_VALUE) };
+			new SemanticCohesionComplexity(5), new DocumentFlowComplexity(0, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(0, DocFlowCriteria.MAX_VALUE),
+			new DocumentFlowComplexity(1, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(1, DocFlowCriteria.MAX_VALUE),
+			new DocumentFlowComplexity(2, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(2, DocFlowCriteria.MAX_VALUE),
+			new DocumentFlowComplexity(3, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(3, DocFlowCriteria.MAX_VALUE),
+			new DocumentFlowComplexity(4, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(4, DocFlowCriteria.MAX_VALUE),
+			new DocumentFlowComplexity(5, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new DocumentFlowComplexity(5, DocFlowCriteria.MAX_VALUE) };
 
-	// public static String TEXTUAL_COMPLEXITY_INDEX_NAMES[] = new
-	// String[NO_COMPLEXITY_INDICES];
 	public static String TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[] = new String[NO_COMPLEXITY_INDICES];
 
 	static {

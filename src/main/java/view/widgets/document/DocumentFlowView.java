@@ -24,6 +24,7 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
+import services.complexity.flow.DocFlowCriteria;
 import services.complexity.flow.DocumentFlow;
 import view.models.document.DocumentFlowTable;
 import view.models.document.DocumentTableModel;
@@ -37,7 +38,7 @@ public class DocumentFlowView extends JFrame {
 	private DefaultTableModel modelContent;
 	private JTable tableContent;
 	private JComboBox<String> comboBoxSemDistance;
-	private JComboBox<DocumentFlow.Criteria> comboBoxCriteria;
+	private JComboBox<DocFlowCriteria> comboBoxCriteria;
 	private JTextArea textAreaStats;
 
 	/**
@@ -60,21 +61,21 @@ public class DocumentFlowView extends JFrame {
 			comboBoxSemDistance.addItem(SemanticCohesion.getSemanticDistanceNames()[i]);
 
 		JLabel lblCriteria = new JLabel("Criteria:");
-		comboBoxCriteria = new JComboBox<DocumentFlow.Criteria>();
-		for (DocumentFlow.Criteria crit : DocumentFlow.Criteria.values())
+		comboBoxCriteria = new JComboBox<DocFlowCriteria>();
+		for (DocFlowCriteria crit : DocFlowCriteria.values())
 			comboBoxCriteria.addItem(crit);
 
 		comboBoxSemDistance.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateContents(comboBoxSemDistance.getSelectedIndex(),
-						(DocumentFlow.Criteria) comboBoxCriteria.getSelectedItem());
+						(DocFlowCriteria) comboBoxCriteria.getSelectedItem());
 			}
 		});
 
 		comboBoxCriteria.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				updateContents(comboBoxSemDistance.getSelectedIndex(),
-						(DocumentFlow.Criteria) comboBoxCriteria.getSelectedItem());
+						(DocFlowCriteria) comboBoxCriteria.getSelectedItem());
 			}
 		});
 
@@ -146,11 +147,10 @@ public class DocumentFlowView extends JFrame {
 		scrollPaneContent.setViewportView(tableContent);
 		contentPane.setLayout(gl_contentPane);
 
-		updateContents(comboBoxSemDistance.getSelectedIndex(),
-				(DocumentFlow.Criteria) comboBoxCriteria.getSelectedItem());
+		updateContents(comboBoxSemDistance.getSelectedIndex(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
 	}
 
-	private void updateContents(int semanticDistIndex, DocumentFlow.Criteria crit) {
+	private void updateContents(int semanticDistIndex, DocFlowCriteria crit) {
 		// clean table
 		while (modelContent.getRowCount() > 0) {
 			modelContent.removeRow(0);
@@ -177,37 +177,37 @@ public class DocumentFlowView extends JFrame {
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\n");
 		textAreaStats
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\n");
 		textAreaStats
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ADJACENCY_ACCURACY
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\n");
 		textAreaStats
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_SPEARMAN_CORRELATION
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getSpearmanCorrelation()) + "\n");
 		textAreaStats
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_MAX_ORDERED_SEQUENCE
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getMaxOrderedSequence()) + "\n");
 		textAreaStats
 				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_AVERAGE_COHESION
 						+ semanticDistIndex
 						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocumentFlow.Criteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
 						+ ":\t" + Formatting.formatNumber(df.getAverageFlowCohesion()));
 	}
 }
