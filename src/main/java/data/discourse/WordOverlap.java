@@ -110,6 +110,11 @@ public class WordOverlap {
 				keywordSentenceStr += topic.getText();
 			}
 
+			if (keywordSentenceStr.trim().length() == 0) {
+				semanticCohesionScores.put(((Document) doc).getFullDescription(), 0.0d);
+				continue;
+			}
+
 			Annotation keywordDocument = new Annotation(keywordSentenceStr);
 			Parsing_EN.pipeline.annotate(keywordDocument);
 			CoreMap keywordSentence = keywordDocument.get(SentencesAnnotation.class).get(0);
