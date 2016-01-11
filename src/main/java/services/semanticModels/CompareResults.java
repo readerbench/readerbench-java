@@ -41,6 +41,7 @@ public class CompareResults {
 			InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
 			BufferedReader in = new BufferedReader(ir);
 			String line;
+			logger.info("Parsing word associations file...");
 			while ((line = in.readLine()) != null) {
 				if (line.length() > 0) {
 					StringTokenizer st = new StringTokenizer(line);
@@ -73,14 +74,14 @@ public class CompareResults {
 
 	private void compareIndividual(ISemanticModel semModel) {
 		try {
-			logger.info("Comparing all word pairs");
+			logger.info("Comparing all word pairs...");
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(semModel.getPath() + "/compare_individual.csv"), "UTF-8"));
 			simTop = new TreeMap<Word, Double>();
 			simMax = new TreeMap<Word, Double>();
 			simMaxConcept = new TreeMap<Word, Word>();
 			int no = 0;
-			
+
 			out.write("Word1,Word2,Cosine Similarity\n");
 			for (Word word1 : wordAssociations.keySet()) {
 				int sumWeights = 0;
@@ -124,10 +125,11 @@ public class CompareResults {
 
 		compareIndividual(semModel);
 
+		logger.info("Performing comparisons of word associations...");
+
 		try {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(semModel.getPath() + "/compare_aggregated.csv"), "UTF-8"));
-			logger.info("Starting to perform comparisons of word associations...");
 			out.write("Concept,Average Similarity,Max Similarity,Most similar word association\n");
 			for (Word word : wordAssociations.keySet()) {
 				out.write(word.getLemma() + "," + simTop.get(word) + "," + simMax.get(word)
@@ -148,11 +150,12 @@ public class CompareResults {
 								+ similarConcepts.get(i).getRelevance());
 					}
 				}
-				
-				System.out.println(word.getLemma());
+
 				out.write("\n");
 			}
 			out.close();
+			
+			logger.info("Finished all comparisons for word associations...");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -161,7 +164,7 @@ public class CompareResults {
 	public static void printSimilarConcepts(String path, Lang lang, int noConcepts, double minThreshold) {
 		try {
 			LSA lsa = LSA.loadLSA(path, lang);
-			logger.info("Determining most similar word pairs for each concept");
+			logger.info("Determining most similar word pairs for each concept...");
 			BufferedWriter out = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(path + "/similar_concepts.csv"), "UTF-8"));
 			out.write("Concept,Similar words\n");

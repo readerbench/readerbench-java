@@ -6,7 +6,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
@@ -29,7 +28,6 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Spark;
-import view.widgets.ReaderBenchView;
 
 class SearchResult implements Comparable<SearchResult> {
 
@@ -191,17 +189,5 @@ public class SearchWebServer {
 				return json;
 			}
 		});
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		ReaderBenchView.initializeDB();
-
-		SearchWebServer server1 = new SearchWebServer(5656, "resources/in/articles financial");
-		server1.start();
-
-		SearchWebServer server2 = new SearchWebServer(5858, "resources/in/articles financial associations");
-		server2.start();
 	}
 }
