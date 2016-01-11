@@ -25,6 +25,7 @@ import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LSA.LSA;
+import view.widgets.ReaderBenchView;
 
 public class CompareResults {
 	static Logger logger = Logger.getLogger(CompareResults.class);
@@ -78,6 +79,8 @@ public class CompareResults {
 			simTop = new TreeMap<Word, Double>();
 			simMax = new TreeMap<Word, Double>();
 			simMaxConcept = new TreeMap<Word, Word>();
+			int no = 0;
+			
 			out.write("Word1,Word2,Cosine Similarity\n");
 			for (Word word1 : wordAssociations.keySet()) {
 				int sumWeights = 0;
@@ -96,6 +99,9 @@ public class CompareResults {
 						max = sim;
 						maxSimWord = word2;
 					}
+				}
+				if ((++no) % 1000 == 0) {
+					logger.info("Finished comparing " + no + " words...");
 				}
 				if (sumWeights != 0 && maxSimWord != null) {
 					simTop.put(word1, sumSimilarities / sumWeights);
@@ -121,6 +127,7 @@ public class CompareResults {
 		try {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(semModel.getPath() + "/compare_aggregated.csv"), "UTF-8"));
+			logger.info("Starting to perform comparisons of word associations...");
 			out.write("Concept,Average Similarity,Max Similarity,Most similar word association\n");
 			for (Word word : wordAssociations.keySet()) {
 				out.write(word.getLemma() + "," + simTop.get(word) + "," + simMax.get(word)
@@ -141,9 +148,10 @@ public class CompareResults {
 								+ similarConcepts.get(i).getRelevance());
 					}
 				}
+				
+				System.out.println(word.getLemma());
 				out.write("\n");
 			}
-
 			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -157,8 +165,6 @@ public class CompareResults {
 			BufferedWriter out = new BufferedWriter(
 					new OutputStreamWriter(new FileOutputStream(path + "/similar_concepts.csv"), "UTF-8"));
 			out.write("Concept,Similar words\n");
-			int noWords = lsa.getWords().size();
-			int no = 0;
 			for (Word word : lsa.getWords().keySet()) {
 				out.write(word.getLemma());
 				// determine most similar concepts;
@@ -175,9 +181,6 @@ public class CompareResults {
 					out.write("," + similarConcepts.get(i).getWord().getLemma() + ","
 							+ similarConcepts.get(i).getRelevance());
 				}
-				if ((++no) % 1000 == 0) {
-					logger.info("Finished comparing " + no + " words out of " + noWords);
-				}
 				out.write("\n");
 			}
 			out.close();
@@ -192,11 +195,14 @@ public class CompareResults {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
+
+		ReaderBenchView.initializeDB();
+
 		CompareResults comp = new CompareResults();
 
-		LSA lsa = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_financial_word_assoc_en", Lang.eng);
 		// LDA lsa = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
+		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, false, 20, 0.3);
 
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
 		// comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3,

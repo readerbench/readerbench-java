@@ -120,6 +120,18 @@ public class CreateInputMatrix extends LSA {
 		}
 		Collections.sort(frequencies);
 
+		List<Word> wordsToRemove = new ArrayList<Word>();
+		for (Entry<Word, Double> entry : getMapIdf().entrySet()) {
+			if (entry.getValue() < PreProcessing.MIN_NO_OCCURRENCES)
+				wordsToRemove.add(entry.getKey());
+		}
+
+		for (Word w : wordsToRemove) {
+			getWords().remove(w);
+			getMapIdf().remove(w);
+			noWords--;
+		}
+
 		// select first most representative word associations
 		int noWordAssociations = (int) Math.pow(Math.E, Math.round(Math.log(noWords) + 1));
 		for (int i = 0; i < Math.min(noWordAssociations, frequencies.size()); i++) {

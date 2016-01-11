@@ -38,7 +38,7 @@ import services.semanticModels.LSA.LSA;
 public class PreProcessing {
 	static Logger logger = Logger.getLogger(PreProcessing.class);
 
-	public static final int MIN_NO_OCCURRENCES = 5;
+	public static final int MIN_NO_OCCURRENCES = 6;
 
 	private Map<String, Integer> newConcepts = new TreeMap<String, Integer>();
 
@@ -91,13 +91,14 @@ public class PreProcessing {
 
 	public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
 			boolean includeWordAssociations) {
-		AbstractDocumentTemplate docTmp = getDocumentModel(content);
+		String text = TextPreprocessing.cleanText(content, lang);
+		AbstractDocumentTemplate docTmp = getDocumentModel(text);
 
-		StringTokenizer st = new StringTokenizer(content.trim().toLowerCase(), " \\.,:;!?-+[](){}'’“”\"");
+		StringTokenizer st = new StringTokenizer(text, " \\.,:;!?-+[](){}'’“”\"");
 
 		// determine new concepts
 		while (st.hasMoreTokens()) {
-			String word = st.nextToken().replaceAll("[^a-z]", "").trim();
+			String word = st.nextToken().trim();
 			if (word.length() > 0 && !Dictionary.getDictionaryWords(lang).contains(word)) {
 				if (newConcepts.containsKey(word))
 					newConcepts.put(word, newConcepts.get(word) + 1);

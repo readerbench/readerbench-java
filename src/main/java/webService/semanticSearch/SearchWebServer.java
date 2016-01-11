@@ -15,6 +15,9 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -26,6 +29,7 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Spark;
+import view.widgets.ReaderBenchView;
 
 class SearchResult implements Comparable<SearchResult> {
 
@@ -62,9 +66,14 @@ public class SearchWebServer {
 	private static Logger logger = Logger.getLogger(SearchWebServer.class);
 	public static final double MIN_THRESHOLD = 0.2d;
 	public static final int NO_RESULTS = 20;
-	public static final int PORT = 5656;
 
+	private int port;
 	private List<AbstractDocument> documents;
+
+	public SearchWebServer(int port, String path) {
+		this.port = port;
+		setDocuments(path);
+	}
 
 	@Root(name = "response")
 	private static class QueryResult {
@@ -86,16 +95,25 @@ public class SearchWebServer {
 		}
 	}
 
-	public List<AbstractDocument> getDocuments() {
-		return documents;
-	}
+	public void setDocuments(String path) {
+		documents = new ArrayList<AbstractDocument>();
 
-	public void setDocuments(List<AbstractDocument> documents) {
-		this.documents = documents;
+		File dir = new File(path);
+		File[] files = dir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".ser");
+			}
+		});
+
+		for (File file : files) {
+			Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+			documents.add(d);
+		}
 	}
 
 	public void start() {
-		Spark.port(PORT);
+		Spark.port(port);
 		Spark.get("/", (request, response) -> {
 			return "OK";
 		});
@@ -104,7 +122,7 @@ public class SearchWebServer {
 
 			@Override
 			public Object handle(Request request, Response response) {
-				response.type("text/xml");
+				response.type("application/json");
 				String q = request.queryParams("q");
 				int maxContentSize = Integer.MAX_VALUE;
 				String maxContentSizeStr = request.queryParams("mcs");
@@ -115,7 +133,7 @@ public class SearchWebServer {
 				queryResult.success = true;
 				queryResult.errorMsg = "";
 				queryResult.data = search(q, documents, maxContentSize);
-				String result = convertToXml(queryResult);
+				String result = convertToJson(queryResult);
 				return result;
 			}
 
@@ -137,7 +155,6 @@ public class SearchWebServer {
 				AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(),
 						documents.get(0).getLDA(), documents.get(0).getLanguage(), true, false);
 				queryDoc.computeAll(null, null);
-				queryDoc.setTitleText(query);
 
 				List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD,
 						NO_RESULTS);
@@ -167,29 +184,24 @@ public class SearchWebServer {
 				}
 				return result.toString();
 			}
+
+			private String convertToJson(QueryResult queryResult) {
+				Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+				String json = gson.toJson(queryResult);
+				return json;
+			}
 		});
 	}
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		SearchWebServer server = new SearchWebServer();
-		List<AbstractDocument> docs = new ArrayList<AbstractDocument>();
+		ReaderBenchView.initializeDB();
 
-		File dir = new File("resources/in/articles financial associations");
-		File[] files = dir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".ser");
-			}
-		});
+		SearchWebServer server1 = new SearchWebServer(5656, "resources/in/articles financial");
+		server1.start();
 
-		for (File file : files) {
-			Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-			docs.add(d);
-		}
-
-		server.setDocuments(docs);
-		server.start();
+		SearchWebServer server2 = new SearchWebServer(5858, "resources/in/articles financial associations");
+		server2.start();
 	}
 }

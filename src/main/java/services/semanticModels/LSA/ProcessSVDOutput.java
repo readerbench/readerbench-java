@@ -20,6 +20,7 @@ import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 
+import services.commons.Formatting;
 import services.commons.ObjectManipulation;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
@@ -49,8 +50,7 @@ public class ProcessSVDOutput extends LSA {
 			final Configuration conf = new Configuration();
 			SequenceFile.Reader reader;
 			try {
-				reader = new SequenceFile.Reader(conf, Reader.file(new Path(f
-						.getPath())));
+				reader = new SequenceFile.Reader(conf, Reader.file(new Path(f.getPath())));
 
 				IntWritable key = new IntWritable();
 				VectorWritable vec = new VectorWritable();
@@ -76,8 +76,7 @@ public class ProcessSVDOutput extends LSA {
 			}
 		}
 
-		logger.info("The final matrix has " + (idMax + 1) + " rows and " + kMax
-				+ " columns");
+		logger.info("The final matrix has " + (idMax + 1) + " rows and " + kMax + " columns");
 
 		double[][] matrix = new double[idMax + 1][kMax];
 
@@ -87,8 +86,7 @@ public class ProcessSVDOutput extends LSA {
 
 			while (iter.hasNext()) {
 				Vector.Element element = iter.next();
-				matrix[key][element.index()] = entry.getValue().getQuick(
-						element.index());
+				matrix[key][element.index()] = entry.getValue().getQuick(element.index());
 			}
 		}
 
@@ -100,8 +98,7 @@ public class ProcessSVDOutput extends LSA {
 		double[] vector = null;
 		int no = 0;
 		try {
-			final SequenceFile.Reader reader = new SequenceFile.Reader(conf,
-					Reader.file(new Path(path)));
+			final SequenceFile.Reader reader = new SequenceFile.Reader(conf, Reader.file(new Path(path)));
 			IntWritable key = new IntWritable();
 			VectorWritable vec = new VectorWritable();
 
@@ -128,8 +125,8 @@ public class ProcessSVDOutput extends LSA {
 		return vector;
 	}
 
-	public void performPostProcessing(String path, Lang language,
-			boolean halfSigma) throws FileNotFoundException, IOException {
+	public void performPostProcessing(String path, Lang language, boolean halfSigma)
+			throws FileNotFoundException, IOException {
 		ProcessSVDOutput lsa = new ProcessSVDOutput();
 		lsa.setLanguage(language);
 		lsa.loadWordList(path);
@@ -154,6 +151,14 @@ public class ProcessSVDOutput extends LSA {
 		// determine Sigma
 		logger.info("Building Sk vector");
 		lsa.setSk(readvector(path + "/svd_out/Sigma/svalues.seq"));
+
+		for (int i = 0; i < lsa.getSk().length; i++) {
+			if (lsa.getSk()[i] < 1) {
+				logger.info("First index for Sigma_k <1: " + i + " (" + Formatting.formatNumber(lsa.getSk()[i]) + ")");
+			}
+		}
+		logger.info("Last entry in Sigma_k: " + Formatting.formatNumber(lsa.getSk()[lsa.getSk().length - 1]));
+
 		ObjectManipulation.saveObject(lsa.getSk(), path + "/S.ser");
 
 		logger.info("Finished all computations");
@@ -164,8 +169,7 @@ public class ProcessSVDOutput extends LSA {
 		try {
 			// post-process
 			ProcessSVDOutput processing = new ProcessSVDOutput();
-			processing.performPostProcessing("resources/config/LSA/joseantonion_es",
-					Lang.es, true);
+			processing.performPostProcessing("resources/config/LSA/joseantonion_es", Lang.es, true);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			logger.error("Error during learning process");
