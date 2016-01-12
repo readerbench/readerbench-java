@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,14 @@ public class Community extends AnalysisElement {
 							fistContributionDate = u.getTime();
 						if (u.getTime().before(fistContributionDate))
 							fistContributionDate = u.getTime();
+						Calendar date = new GregorianCalendar(2012, Calendar.JANUARY, 1);
+						if (u.getTime().before(date.getTime()))
+							System.err.println(
+									"Incorrect time!!! " + c.getPath() + " / " + u.getIndex() + " : " + u.getTime());
+						if (u.getTime().after(new Date()))
+							System.err.println(
+									"Incorrect time!!! " + c.getPath() + " / " + u.getIndex() + " : " + u.getTime());
+
 						if (lastContributionDate == null)
 							lastContributionDate = u.getTime();
 						if (u.getTime().after(lastContributionDate))
@@ -198,6 +208,10 @@ public class Community extends AnalysisElement {
 	}
 
 	public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		if (startDate != null && endDate != null && participants != null && participants.size() > 0)
+			logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
+					+ dateFormat.format(endDate) + " having " + participants.size() + " participants.");
 		ParticipantEvaluation.performSNA(participants, participantContributions, true);
 
 		// update surface statistics
@@ -399,7 +413,7 @@ public class Community extends AnalysisElement {
 			// print participant statistics
 			if (participants.size() > 0) {
 				out.write("Participant involvement and interaction\n");
-				out.write("Participant name,Annonized name");
+				out.write("Participant name,Anonymized name");
 				for (CSCLIndices CSCLindex : CSCLIndices.values())
 					out.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
 				for (CSCLIndices CSCLindex : CSCLIndices.values()) {

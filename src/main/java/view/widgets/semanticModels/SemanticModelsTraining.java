@@ -170,7 +170,8 @@ public class SemanticModelsTraining extends JFrame {
 				processing.performPostProcessing(input.getParent(), lang, chckbxLSAUseHalfSigma.isSelected());
 				logger.info("Finished building the LSA model");
 			} catch (Exception exc) {
-				logger.error("Error procesing " + textFieldLDADirectory.getText() + " directory: " + exc.getMessage());
+				logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+				exc.printStackTrace();
 			}
 			return null;
 		}
@@ -210,7 +211,8 @@ public class SemanticModelsTraining extends JFrame {
 				lda.processCorpus(input, noTopics, noThreads, noIterations);
 				lda.printTopics(textFieldLDADirectory.getText(), 100);
 			} catch (Exception exc) {
-				logger.error("Error procesing " + textFieldLDADirectory.getText() + " directory: " + exc.getMessage());
+				logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+				exc.printStackTrace();
 			}
 			return null;
 		}

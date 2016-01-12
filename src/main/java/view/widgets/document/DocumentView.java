@@ -5,8 +5,6 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -23,20 +21,16 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.Block;
 import data.Sentence;
 import data.discourse.Topic;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.discourse.topicMining.TopicModeling;
 import view.events.LinkMouseListener;
@@ -443,7 +437,7 @@ public class DocumentView extends JFrame {
 				chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
 		for (Topic topic : topTopics) {
 			Object[] row = { topic.getWord().getLemma(),
-					Double.valueOf(new DecimalFormat("#.##").format(topic.getRelevance())) };
+					Double.valueOf(Formatting.formatNumber(topic.getRelevance())) };
 			modelTopics.addRow(row);
 		}
 	}
@@ -513,278 +507,6 @@ public class DocumentView extends JFrame {
 					double dist = 1 / document.getBlockDistances()[index][index + 1].getCohesion();
 					tableContent.setRowHeight(2 * index + 1, MIN_ROW_HEIGHT + ((int) ((dist - 1 / maxCohesion)
 							/ (1 / minCohesion - 1 / maxCohesion) * (MAX_ROW_HEIGHT - MIN_ROW_HEIGHT))));
-				}
-			}
-		}
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				List<Document> docs = new LinkedList<Document>();
-
-				// int[] factors = new int[] {
-				// // readability
-				// ComplexityFactors.READABILITY_FLESCH,
-				// ComplexityFactors.READABILITY_FOG,
-				// ComplexityFactors.READABILITY_KINCAID,
-				// // surface factors
-				// ComplexityFactors.NORMALIZED_NO_COMMAS,
-				// ComplexityFactors.NORMALIZED_NO_BLOCKS,
-				// ComplexityFactors.AVERAGE_BLOCK_SIZE,
-				// ComplexityFactors.NORMALIZED_NO_SENTENCES,
-				// ComplexityFactors.AVERAGE_SENTENCE_LENGTH,
-				// ComplexityFactors.NORMALIZED_NO_WORDS,
-				// ComplexityFactors.AVERAGE_WORD_LENGTH,
-				// ComplexityFactors.NO_WORDS_PER_SENTENCE,
-				// ComplexityFactors.NO_SYLLABLES_PER_WORD,
-				// ComplexityFactors.PERCENT_COMPLEX_WORDS,
-				// // Entropy
-				// ComplexityFactors.WORD_ENTROPY,
-				// ComplexityFactors.CHAR_ENTROPY,
-				// // CAF
-				// ComplexityFactors.LEXICAL_DIVERSITY,
-				// ComplexityFactors.LEXICAL_SOPHISTICATION,
-				// ComplexityFactors.SYNTACTIC_DIVERSITY,
-				// ComplexityFactors.SYNTACTIC_SOPHISTICATION,
-				// ComplexityFactors.BALANCED_CAF,
-				// // Morphology
-				// ComplexityFactors.AVERAGE_NO_NOUNS,
-				// ComplexityFactors.AVERAGE_NO_PRONOUNS,
-				// ComplexityFactors.AVERAGE_NO_VERBS,
-				// ComplexityFactors.AVERAGE_NO_ADVERBS,
-				// ComplexityFactors.AVERAGE_NO_ADJECTIVES,
-				// ComplexityFactors.AVERAGE_NO_PREPOSITIONS,
-				// ComplexityFactors.AVERAGE_TREE_DEPTH,
-				// ComplexityFactors.AVERAGE_TREE_SIZE,
-				// // Entity Density
-				// ComplexityFactors.TOTAL_NO_NAMED_ENT,
-				// ComplexityFactors.TOTAL_NO_ENT_PER_DOC,
-				// ComplexityFactors.TOTAL_NO_UNIQUE_ENT_PER_DOC,
-				// ComplexityFactors.PERCENTAGE_ENT_PER_DOC,
-				// ComplexityFactors.PERCENTAGE_UNIQUE_ENT_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_ENT_PER_SENT,
-				// ComplexityFactors.AVERAGE_NO_UNIQUE_ENT_PER_SENTENCE,
-				// ComplexityFactors.PERCENTAGE_NAMED_ENT_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_NAMED_ENT_PER_SENTENCE,
-				// ComplexityFactors.PERCENTAGE_NAMED_ENT_IN_TOTAL_ENT,
-				// ComplexityFactors.PERCENTAGE_NOUNS_IN_TOTAL_ENT,
-				// ComplexityFactors.PERCENTAGE_NOUNS_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_NOUNS_PER_SENTENCE,
-				// ComplexityFactors.PERCENTAGE_REMAINING_NOUNS_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_REMAINING_NOUNS_PER_SENTENCE,
-				// ComplexityFactors.PERCENTAGE_OVERLAPPING_NOUNS_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_OVERLAPPING_NOUNS_PER_SENTENCE,
-				// // Coreference inference
-				// ComplexityFactors.TOTAL_NO_COREF_CHAINS_PER_DOC,
-				// ComplexityFactors.AVERAGE_NO_COREFS_PER_CHAIN,
-				// ComplexityFactors.AVERAGE_CHAIN_SPAN,
-				// ComplexityFactors.NO_COREF_CHAINS_WITH_BIG_SPAN,
-				// ComplexityFactors.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN,
-				// ComplexityFactors.NO_ACTIVE_COREF_CHAINS_PER_WORD,
-				// ComplexityFactors.NO_ACTIVE_COREF_CHAINS_PER_ENT,
-				// // Word complexity
-				// ComplexityFactors.WORD_DIFF_LEMMA_STEM_MEAN,
-				// ComplexityFactors.WORD_DIFF_WORD_STEM,
-				// ComplexityFactors.WORD_DISTANCE_HYPERNYM_TREE,
-				// ComplexityFactors.WORD_POLYSEMY_COUNT_MEAN,
-				// ComplexityFactors.WORD_SYLLABLE_COUNT_MEAN,
-				// // Lexical chains
-				// ComplexityFactors.LEXICAL_CHAINS_AVERAGE_SPAN,
-				// ComplexityFactors.LEXICAL_CHAINS_MAX_SPAN,
-				// ComplexityFactors.LEXICAL_CHAINS_NO_IMPORTANT,
-				// ComplexityFactors.LEXICAL_CHAINS_COVERAGE,
-				// // Discourse
-				// ComplexityFactors.AVERAGE_SCORE,
-				// ComplexityFactors.OVERALL_SCORE,
-				// ComplexityFactors.AVERAGE_BLOCK_DOC_COHESION,
-				// ComplexityFactors.AVERAGE_SENTENCE_BLOCK_COHESION,
-				// ComplexityFactors.AVERAGE_INTER_BLOCK_COHESION,
-				// ComplexityFactors.AVERAGE_INTRA_BLOCK_COHESION };
-				//
-				Document d1 = Document.load("in/NLP2012/reading_material_en.xml", "resources/config/LSA/tasa_en",
-						"resources/config/LDA/tasa_en", Lang.eng, true, true);
-				d1.computeAll(null, null, true);
-				// Document d1 = (Document) AbstractDocument
-				// .loadSerializedDocument("in/NLP2012/reading_material_en.ser");
-				docs.add(d1);
-
-				// Document d1 = (Document) AbstractDocument
-				// .loadSerializedDocument("in/Elephant Miguel/Miguel.ser");
-				// System.out.println(d1.getOverallScore());
-				// docs.add(d1);
-				//
-				// Document d2 = (Document) AbstractDocument
-				// .loadSerializedDocument("in/Elephant Miguel/Elephant.ser");
-				// System.out.println(d2.getOverallScore());
-				// docs.add(d2);
-
-				// Document d2 = Document
-				// .load("in/Matilda/Verbalization extracts AIED/MATILDA grain
-				// moyen.xml",
-				// "resources/config/LSA/lemonde_fr",
-				// "resources/config/LDA/lemonde_fr", Lang.fr, true, true);
-				// d2.computeAll(null, null, true);
-				// AbstractDocument d2 = AbstractDocument
-				// .loadSerializedDocument("in/Matilda/Verbalization extracts
-				// AIED/MATILDA grain moyen.ser");
-				// docs.add((Document) d2);
-
-				// Document d4 = Document.loadGenericDocument(
-				// "in/Avaleur_de_Nuages/L'avaleur de nuages.xml",
-				// "resources/config/LSA/lemonde_fr", "resources/config/LDA/lemonde_fr",
-				// Lang.fr, true, true);
-				// d4.computeAll(null, null, true);
-				// docs.add(d4);
-
-				// String lsaSpace = "resources/config/LSA/lemonde_fr";
-				// String ldaSpace = "resources/config/LDA/lemonde_fr";
-				// String lsaSpace = "resources/config/LSA/textenfants_fr";
-				// String ldaSpace = "resources/config/LDA/textenfants_fr";
-
-				// Document d11 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/avaleurnuages.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d11.computeAll(null, null, true);
-				// System.out.println(d11);
-				// docs.add(d11);
-				//
-				// Document d12 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/bibamboulor.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d12.computeAll(null, null, true);
-				// System.out.println(d12);
-				// docs.add(d12);
-				//
-				// Document d13 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/boudha.xml", lsaSpace,
-				// ldaSpace, Lang.fr, true, true);
-				// d13.computeAll(null, null, true);
-				// System.out.println(d13);
-				// docs.add(d13);
-				//
-				// Document d14 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/Destins_croises.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d14.computeAll(null, null, true);
-				// System.out.println(d14);
-				// docs.add(d14);
-				//
-				// Document d15 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/le_roi_crapaud.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d15.computeAll(null, null, true);
-				// System.out.println(d15);
-				// docs.add(d15);
-				//
-				// Document d16 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/maltilda.xml", lsaSpace,
-				// ldaSpace, Lang.fr, true, true);
-				// d16.computeAll(null, null, true);
-				// System.out.println(d16);
-				// docs.add(d16);
-				//
-				// Document d17 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/mondedenhaut.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d17.computeAll(null, null, true);
-				// System.out.println(d17);
-				// docs.add(d17);
-				//
-				// Document d18 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/petit_garcon.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d18.computeAll(null, null, true);
-				// System.out.println(d18);
-				// docs.add(d18);
-				//
-				// Document d19 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/sept_corbeaux.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d19.computeAll(null, null, true);
-				// System.out.println(d19);
-				// docs.add(d19);
-
-				// Document d20 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/Tom_et_Lea.xml",
-				// lsaSpace, ldaSpace, Lang.fr, true, true);
-				// d20.computeAll(null, null, true);
-				// System.out.println(d20);
-				// docs.add(d20);
-
-				// Document d21 = Document.loadGenericDocument(
-				// "in/textes jugement thematique/lorange.xml", lsaSpace,
-				// ldaSpace, Lang.fr, true, true);
-				// d21.computeAll(null, null, true);
-				// System.out.println(d21);
-				// docs.add(d21);
-				//
-				// Document d31 = Document.loadGenericDocument(
-				// "in/Textes DEPP/arbreventoiseau.xml", lsaSpace,
-				// ldaSpace, Lang.fr, true, true);
-				// d31.computeAll(null, null, true);
-				// System.out.println(d31);
-				// docs.add(d31);
-				//
-				// Document d32 = Document.loadGenericDocument(
-				// "in/Textes DEPP/archimeme.xml", lsaSpace, ldaSpace,
-				// Lang.fr, true, true);
-				// d32.computeAll(null, null, true);
-				// System.out.println(d32);
-				// docs.add(d32);
-				//
-				// Document d33 = Document.loadGenericDocument(
-				// "in/Textes DEPP/bmcDonald.xml", lsaSpace, ldaSpace,
-				// Lang.fr, true, true);
-				// d33.computeAll(null, null, true);
-				// System.out.println(d33);
-				// docs.add(d33);
-				//
-				// Document d34 = Document.loadGenericDocument(
-				// "in/Textes DEPP/lapinafricain.xml", lsaSpace, ldaSpace,
-				// Lang.fr, true, true);
-				// d34.computeAll(null, null, true);
-				// System.out.println(d34);
-				// docs.add(d34);
-				//
-				// Document d35 = Document.loadGenericDocument(
-				// "in/Textes DEPP/leséléphants.xml", lsaSpace, ldaSpace,
-				// Lang.fr, true, true);
-				// d35.computeAll(null, null, true);
-				// System.out.println(d35);
-				// docs.add(d35);
-				//
-				// Document d36 = Document.loadGenericDocument(
-				// "in/Textes DEPP/uneviedarbre.xml", lsaSpace, ldaSpace,
-				// Lang.fr, true, true);
-				// d36.computeAll(null, null, true);
-				// System.out.println(d36);
-				// docs.add(d36);
-
-				DocumentView view = new DocumentView(docs.get(0));
-				view.setVisible(true);
-			}
-		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
 				}
 			}
 		}
