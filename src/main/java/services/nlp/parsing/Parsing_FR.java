@@ -11,11 +11,24 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class Parsing_FR {
+public class Parsing_FR extends Parsing {
 
-	public static StanfordCoreNLP pipeline = new StanfordCoreNLP(
+	private static Parsing_FR instance = null;
+	
+	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(
 			new ParsingParams_FR());
 
+	private Parsing_FR() {
+		lang = Lang.fr;
+	}
+	
+	public static Parsing_FR getInstance() {
+		if (instance == null) {
+			instance = new Parsing_FR();
+		}
+		return instance;
+	}
+	
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		AbstractDocumentTemplate docTmp = getDocumentModel();
@@ -38,9 +51,43 @@ public class Parsing_FR {
 		docTmp.getBlocks().add(block);
 		return docTmp;
 	}
+
+	@Override
+	public String convertToPenn(String pos) {
+		// rename French POS according to the Pen TreeBank POSs
+		// http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html
+		if (pos.startsWith("N")) {
+			return "NN";
+		}
+		if (pos.startsWith("V")) {
+			return "VB";
+		}
+		if (pos.startsWith("CL")) {
+			return "PR";
+		}
+		if (pos.startsWith("C")) {
+			return "CC";
+		}
+		if (pos.startsWith("D")) {
+			return "IN";
+		}
+		if (pos.startsWith("ADV")) {
+			return "RB";
+		}
+		if (pos.startsWith("A")) {
+			return "JJ";
+		}
+		return pos;
+	}
+
+	@Override
+	public StanfordCoreNLP getPipeline() {
+		return pipeline;
+	}
 }
 
 class ParsingParams_FR extends Properties {
+
 	private static final long serialVersionUID = -161579346328207322L;
 
 	public ParsingParams_FR() {

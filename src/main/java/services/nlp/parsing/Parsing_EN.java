@@ -10,9 +10,23 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class Parsing_EN {
-	public static StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_EN());
+public class Parsing_EN extends Parsing{
+	
+	private static Parsing_EN instance = null;
+	
+	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_EN());
 
+	private Parsing_EN() {
+		lang = Lang.eng;
+	}
+	
+	public static Parsing_EN getInstance() {
+		if (instance == null) {
+			instance = new Parsing_EN();
+		}
+		return instance;
+	}
+	
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
@@ -64,6 +78,11 @@ public class Parsing_EN {
 		// System.out.println("\t" + clust2);
 		// }
 		// }
+	}
+
+	@Override
+	public StanfordCoreNLP getPipeline() {
+		return pipeline;
 	}
 }
 

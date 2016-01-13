@@ -151,7 +151,7 @@ public class SentimentEntity {
                 }
             }
         }
-        return normalizeValues(rageSentimentsValues);
+        return rageSentimentsValues;
     }
 
     public static Map<SentimentValence, Double> normalizeValues(Map<SentimentValence, Double> valences) {

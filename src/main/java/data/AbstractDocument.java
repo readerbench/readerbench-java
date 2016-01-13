@@ -65,6 +65,8 @@ import edu.stanford.nlp.util.CoreMap;
 public abstract class AbstractDocument extends AnalysisElement {
 	private static final long serialVersionUID = -6173684658096015060L;
 	public static final int MIN_PERCENTAGE_CONTENT_WORDS = 2;
+	
+	public static enum DocumentType {DOCUMENT, CONVERSATION, ESSAY_CREATOR, METACOGNITION, SUMMARY};
 
 	private String path;
 	private String titleText;
@@ -196,22 +198,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 				document = new Annotation(processedText.replaceAll("[\\.\\!\\?\n]", ""));
 				// run all Annotators on this text
 
-				switch (lang) {
-				case fr:
-					Parsing_FR.pipeline.annotate(document);
-					break;
-				case it:
-					Parsing_IT.pipeline.annotate(document);
-					break;
-				default:
-					Parsing_EN.pipeline.annotate(document);
-					break;
-				}
+				Parsing.getParser(lang).getPipeline().annotate(document);
 
 				CoreMap sentence = document.get(SentencesAnnotation.class).get(0);
 
 				// add corresponding block
-				setTitle(Parsing.processSentence(new Block(null, 0, "", lsa, lda, lang), 0, sentence));
+				setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", lsa, lda, lang), 0, sentence));
 			} else {
 				setTitle(SimpleParsing.processSentence(new Block(null, 0, "", lsa, lda, lang), 0, processedText));
 			}

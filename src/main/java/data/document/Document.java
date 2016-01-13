@@ -59,15 +59,15 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
 	public Document(String path, LSA lsa, LDA lda, Lang lang) {
 		super(path, lsa, lda, lang);
-		authors = new LinkedList<String>();
+		authors = new LinkedList<String>(); 
 	}
-
+	
 	public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		this(path, lsa, lda, lang);
 		this.setText(docTmp.getText());
 		setDocTmp(docTmp);
-		Parsing.parseDoc(this, usePOSTagging, cleanInput);
+		Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging, cleanInput);
 	}
 
 	public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,

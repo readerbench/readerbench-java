@@ -93,7 +93,7 @@ public class Conversation extends AbstractDocument {
 		this(path, lsa, lda, lang);
 		this.setText(contents.getText());
 		setDocTmp(contents);
-		Parsing.parseDoc(this, usePOSTagging, cleanInput);
+		Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging, cleanInput);
 		determineParticipantInterventions();
 	}
 

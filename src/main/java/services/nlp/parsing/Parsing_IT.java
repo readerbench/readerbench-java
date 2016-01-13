@@ -21,7 +21,20 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class Parsing_IT {
+public class Parsing_IT extends Parsing{
+	
+	private static Parsing_IT instance = null;
+	
+	private Parsing_IT() {
+		lang = Lang.it;
+	}
+	
+	public static Parsing_IT getInstance() {
+		if (instance == null) {
+			instance = new Parsing_IT();
+		}
+		return instance;
+	}
 
 	static Logger logger = Logger.getLogger(Parsing_IT.class);
 
@@ -128,6 +141,11 @@ public class Parsing_IT {
 		block.setContent("madre mia ha molte mele");
 		docTmp.getBlocks().add(block);
 		return docTmp;
+	}
+
+	@Override
+	public StanfordCoreNLP getPipeline() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 }
 

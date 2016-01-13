@@ -7,6 +7,7 @@ import java.util.List;
 public class AbstractDocumentTemplate implements Serializable {
 	private static final long serialVersionUID = 6486392022508461270L;
 	private String genre;
+	private List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
 
 	public static AbstractDocumentTemplate getDocumentModel(String text) {
 		AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
@@ -92,8 +93,6 @@ public class AbstractDocumentTemplate implements Serializable {
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
-
-	private List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
 
 	public List<BlockTemplate> getBlocks() {
 		return blocks;

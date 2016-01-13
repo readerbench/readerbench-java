@@ -31,6 +31,8 @@ import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.parsing.Parsing;
+import services.nlp.parsing.Parsing_ES;
+import services.nlp.parsing.Parsing_FR;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -73,7 +75,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                     Word w = null;
                     switch (getLanguage()) {
                         case fr:
-                            pos = Parsing.convertFrPenn(pos);
+                            pos = Parsing_FR.getInstance().convertToPenn(pos);
                             w = new Word(getContainer().getIndex(), getIndex(), word,
                                     StaticLemmatizerPOS.lemmaStatic(word, pos, Lang.fr),
                                     Stemmer.stemWord(word.toLowerCase(), getLanguage()), pos, ne, getLSA(), getLDA(),
@@ -90,7 +92,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                                     getLanguage());
                             break;
                         case es:
-                            pos = Parsing.convertEsPenn(pos);
+                            pos = Parsing_ES.getInstance().convertToPenn(pos);
                             String stem = Stemmer.stemWord(word.toLowerCase(), Lang.es);
                             w = new Word(getContainer().getIndex(), getIndex(), word,
                                     StaticLemmatizer.lemmaStatic(word, Lang.es), stem, pos, ne, getLSA(), getLDA(),
@@ -140,42 +142,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                 tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 if (getLanguage().equals(Lang.eng)) {
                     SentimentEntity se = new SentimentEntity();
-                    // iterate through SentimentValence.valenceMap to add all
-                    // sentiments
-                    // logger.info("There are " +
-                    // SentimentValence.getAllValences().size() + " sentiments
-                    // that should be mapped.");
-                    for (SentimentValence daoSe : SentimentValence.getAllValences()) {
-                        // System.out.println(pair.getKey() + " = " +
-                        // pair.getValue());
-
-                        // iterate through all words and get that sentiments'
-                        // value
-                        // double wordSentimentSum = 0.0;
-                        // double noWordWeights = 0;
-                        // logger.info("There are " + getWords().size() + "
-                        // words in this sentence.");
-                        double value = getWords().stream().mapToDouble(w -> {
-                            SentimentEntity e = w.getSentiment();
-                            if (e == null) {
-                                return 0.;
-                            }
-                            Double v = e.get(daoSe);
-                            return (v == null ? 0. : v);
-                        }).sum() / getWords().size();
-                        /*
-						 * for (Word w : getWords()) { logger.info("Word " + w +
-						 * " sentiments: " + w.getSentiment()); Double
-						 * wordSentimentScore = w.getSentiment().get(daoSe); if
-						 * (wordSentimentScore != null) { wordSentimentSum +=
-						 * wordSentimentScore; noWordWeights++; } }
-                         */
-                        // add sentiment entity to the sentence
-                        // logger.info("Adding sentiment " + daoSe.getName() + "
-                        // for sentence " + this.getIndex());
-                        se.add(daoSe, value);
-                    }
-
                     // Stanford Valence
                     int score = RNNCoreAnnotations.getPredictedClass(tree);
                     se.add(new data.sentiment.SentimentValence(10000, "Stanford", "STANFORD", false), score);
@@ -243,46 +209,8 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
             if (getLanguage().equals(Lang.eng)) {
                 SentimentEntity se = new SentimentEntity();
-                // iterate through SentimentValence.valenceMap to add all
-                // sentiments
-                // logger.info("There are " +
-                // SentimentValence.getAllValences().size() + " sentiments
-                // that should be mapped.");
-                for (SentimentValence daoSe : SentimentValence.getAllValences()) {
-                    // System.out.println(pair.getKey() + " = " +
-                    // pair.getValue());
-
-                    // iterate through all words and get that sentiments'
-                    // value
-                    // double wordSentimentSum = 0.0;
-                    // double noWordWeights = 0;
-                    // logger.info("There are " + getWords().size() + "
-                    // words in this sentence.");
-                    double value = getWords().stream().mapToDouble(word -> {
-                        SentimentEntity e = word.getSentiment();
-                        if (e == null) {
-                            return 0.;
-                        }
-                        Double v = e.get(daoSe);
-                        return (v == null ? 0. : v);
-                    }).sum() / getWords().size();
-                    if (getWords().isEmpty()) value = 0.;
-                    /*
-						 * for (Word w : getWords()) { logger.info("Word " + w +
-						 * " sentiments: " + w.getSentiment()); Double
-						 * wordSentimentScore = w.getSentiment().get(daoSe); if
-						 * (wordSentimentScore != null) { wordSentimentSum +=
-						 * wordSentimentScore; noWordWeights++; } }
-                     */
-                    // add sentiment entity to the sentence
-                    // logger.info("Adding sentiment " + daoSe.getName() + "
-                    // for sentence " + this.getIndex());
-                    se.add(daoSe, value);
-                }
-
                 setSentimentEntity(se);
-
-            }
+			}
         }
 
         // logger.info("There are " + getSentimentEntity().getAll().size() + "
