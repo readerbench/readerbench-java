@@ -24,23 +24,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import services.commons.Formatting;
-import services.commons.VectorAlgebra;
-import services.complexity.ComplexityIndices;
-import services.discourse.CSCL.Collaboration;
-import services.discourse.cohesion.CohesionGraph;
-import services.discourse.cohesion.DisambiguisationGraphAndLexicalChains;
-import services.discourse.cohesion.SentimentAnalysis;
-import services.discourse.dialogism.DialogismComputations;
-import services.discourse.topicMining.Scoring;
-import services.discourse.topicMining.TopicModeling;
-import services.nlp.parsing.Parsing;
-import services.nlp.parsing.Parsing_EN;
-import services.nlp.parsing.Parsing_FR;
-import services.nlp.parsing.Parsing_IT;
-import services.nlp.parsing.SimpleParsing;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import data.cscl.CSCLIndices;
 import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
@@ -57,6 +40,20 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
+import services.commons.Formatting;
+import services.commons.VectorAlgebra;
+import services.complexity.ComplexityIndices;
+import services.discourse.CSCL.Collaboration;
+import services.discourse.cohesion.CohesionGraph;
+import services.discourse.cohesion.DisambiguisationGraphAndLexicalChains;
+import services.discourse.cohesion.SentimentAnalysis;
+import services.discourse.dialogism.DialogismComputations;
+import services.discourse.topicMining.Scoring;
+import services.discourse.topicMining.TopicModeling;
+import services.nlp.parsing.Parsing;
+import services.nlp.parsing.SimpleParsing;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 
 /**
  * 

@@ -159,10 +159,6 @@ public class SemanticModelsTraining extends JFrame {
 								(int) (3 * k * 0.01
 										* Math.max(lsaTraining.getNoDocuments(), lsaTraining.getNoWords()))),
 						noReduceTasks, noPowerIterations, chckbxLSAUseHalfSigma.isSelected());
-				// RunSVD.runSSVDOnSparseVectors(input.getParent() + "/"
-				// + TERM_DOC_MATRIX_NAME, input.getParent() + "/"
-				// + SVD_FOLDER_NAME, k, 15, 200000, noReduceTasks, 1,
-				// chckbxLSAUseHalfSigma.isSelected());
 
 				logger.info("Finished performing SVD decomposition");
 				// post-process

@@ -10,23 +10,28 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class Parsing_EN extends Parsing{
-	
+public class Parsing_EN extends Parsing {
+
 	private static Parsing_EN instance = null;
-	
+
 	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_EN());
 
 	private Parsing_EN() {
 		lang = Lang.eng;
 	}
-	
+
 	public static Parsing_EN getInstance() {
 		if (instance == null) {
 			instance = new Parsing_EN();
 		}
 		return instance;
 	}
-	
+
+	@Override
+	public StanfordCoreNLP getPipeline() {
+		return pipeline;
+	}
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
@@ -37,52 +42,8 @@ public class Parsing_EN extends Parsing{
 						+ "System and human system engineering testing of EPS. "
 						+ "Relation of user perceived response time to error measurement.");
 
-		AbstractDocument d = new Document(null,
-				// "The green and brown fox didn't jump over the lazy dog's
-				// head",
-				docTmp, null, null, Lang.eng, true, false);
+		AbstractDocument d = new Document(null, docTmp, null, null, Lang.eng, true, false);
 		System.out.println(d);
-
-		// for (Map.Entry<Integer, CorefChain> entry : d.getBlocks().get(0)
-		// .getCorefs().entrySet()) {
-		// CorefChain c = entry.getValue();
-		//
-		// // this is because it prints out a lot of self references which
-		// // aren't that useful
-		// if (c.getMentionsInTextualOrder().size() <= 1)
-		// continue;
-		//
-		// CorefMention cm = c.getRepresentativeMention();
-		// String clust = "";
-		// List<CoreLabel> tks = d.getBlocks().get(0).getAnnotation()
-		// .get(SentencesAnnotation.class).get(cm.sentNum - 1)
-		// .get(TokensAnnotation.class);
-		// for (int i = cm.startIndex - 1; i < cm.endIndex - 1; i++)
-		// clust += tks.get(i).get(TextAnnotation.class) + " ";
-		// clust = clust.trim();
-		// System.out.println("representative mention: \"" + clust
-		// + "\" is mentioned by:");
-		//
-		// for (CorefMention m : c.getMentionsInTextualOrder()) {
-		// String clust2 = "";
-		// tks = d.getBlocks().get(0).getAnnotation()
-		// .get(SentencesAnnotation.class).get(m.sentNum - 1)
-		// .get(TokensAnnotation.class);
-		// for (int i = m.startIndex - 1; i < m.endIndex - 1; i++)
-		// clust2 += tks.get(i).get(TextAnnotation.class) + " ";
-		// clust2 = clust2.trim();
-		// // don't need the self mention
-		// // if (clust.equals(clust2))
-		// // continue;
-		//
-		// System.out.println("\t" + clust2);
-		// }
-		// }
-	}
-
-	@Override
-	public StanfordCoreNLP getPipeline() {
-		return pipeline;
 	}
 }
 
