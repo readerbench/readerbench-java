@@ -25,7 +25,7 @@ import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LSA.LSA;
-import view.widgets.ReaderBenchView;
+import webService.ReaderBenchServer;
 
 public class CompareResults {
 	static Logger logger = Logger.getLogger(CompareResults.class);
@@ -154,7 +154,7 @@ public class CompareResults {
 				out.write("\n");
 			}
 			out.close();
-			
+
 			logger.info("Finished all comparisons for word associations...");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -199,7 +199,7 @@ public class CompareResults {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		ReaderBenchView.initializeDB();
+		ReaderBenchServer.initializeDB();
 
 		CompareResults comp = new CompareResults();
 

@@ -38,6 +38,7 @@ import services.semanticModels.LSA.ProcessSVDOutput;
 import services.semanticModels.LSA.RunSVD;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
+import webService.ReaderBenchServer;
 
 public class SemanticModelsTraining extends JFrame {
 
@@ -725,7 +726,7 @@ public class SemanticModelsTraining extends JFrame {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		ReaderBenchView.initializeDB();
+		ReaderBenchServer.initializeDB();
 
 		ReaderBenchView.adjustToSystemGraphics();
 

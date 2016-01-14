@@ -4,14 +4,9 @@ import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.StringWriter;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -28,45 +23,44 @@ import org.simpleframework.xml.core.Persister;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
-import data.AbstractDocumentTemplate.BlockTemplate;
-import data.Block;
-import data.Sentence;
-import data.Word;
 import dao.CategoryDAO;
 import dao.WordDAO;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.Block;
+import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
 import data.document.Document;
 import data.document.Summary;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
-import data.sentiment.SentimentGrid;
-import data.sentiment.SentimentValence;
 import data.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
-import services.complexity.IComplexityFactors;
 import services.converters.PdfToTextConverter;
-import services.discourse.cohesion.SentimentAnalysis;
-import services.discourse.topicMining.TopicModeling;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticSearch.SemanticSearch;
-import services.semanticSearch.SemanticSearchResult;
 import spark.Spark;
-import webService.result.*;
+import webService.result.ResultCategory;
+import webService.result.ResultCscl;
+import webService.result.ResultKeyword;
+import webService.result.ResultPdfToText;
+import webService.result.ResultReadingStrategy;
+import webService.result.ResultSearch;
+import webService.result.ResultSelfExplanation;
+import webService.result.ResultSemanticAnnotation;
+import webService.result.ResultSentiment;
+import webService.result.ResultTopic;
+import webService.result.ResultValence;
 import webService.semanticSearch.SearchClient;
-import webService.services.*;
+import webService.services.ConceptMap;
+import webService.services.TextualComplexity;
 
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	public static final int PORT = 8080;
-
-	private static final double MAX_SIZE_INFERRED_CONCEPT = 20;
 
 	public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
 	public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
@@ -123,16 +117,12 @@ public class ReaderBenchServer {
 		List<Category> dbCategories = CategoryDAO.getInstance().findAll();
 
 		for (Category cat : dbCategories) {
-			// System.out.println("bau");
-			// System.out.print(cat.getLabel()+"\t");
 			List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
 			StringBuilder sb = new StringBuilder();
 			for (CategoryPhrase categoryPhrase : categoryPhrases) {
 				sb.append(categoryPhrase.getLabel());
 				sb.append(", ");
 			}
-			// System.out.println(sb);
-
 		}
 
 		for (Category cat : dbCategories) {
@@ -157,7 +147,8 @@ public class ReaderBenchServer {
 			double threshold) {
 
 		// concepts
-		ResultTopic resultTopic = ConceptMap.getTopics(processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
+		ResultTopic resultTopic = ConceptMap
+				.getTopics(processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
 				usePOSTagging, threshold);
 		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
@@ -197,8 +188,8 @@ public class ReaderBenchServer {
 
 		List<ResultReadingStrategy> readingStrategies = new ArrayList<ResultReadingStrategy>();
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			readingStrategies.add(
-					new ResultReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
+			readingStrategies.add(new ResultReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i],
+					s.getAutomaticReadingStrategies()[0][i]));
 		}
 
 		StringBuilder summary = new StringBuilder();
@@ -252,12 +243,6 @@ public class ReaderBenchServer {
 	}
 
 	private String convertToJson(QueryResultTopic queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultPdfToText queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -414,7 +399,7 @@ public class ReaderBenchServer {
 			data = new ResultPdfToText("");
 		}
 	}
-	
+
 	@Root(name = "response")
 	private static class QueryResultCscl {
 
@@ -456,7 +441,8 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
+			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging),
+					threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -472,7 +458,8 @@ public class ReaderBenchServer {
 
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = webService.services.SentimentAnalysis.getSentiment(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
+			queryResult.data = webService.services.SentimentAnalysis
+					.getSentiment(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -488,7 +475,8 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = TextualComplexity.getComplexityIndices(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
+			queryResult.data = TextualComplexity
+					.getComplexityIndices(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -541,7 +529,8 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
+			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging),
+					threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -623,7 +612,8 @@ public class ReaderBenchServer {
 			double threshold = (Double) json.get("threshold");
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap.getTopics(processQuery(conversation, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
+			queryResult.data = ConceptMap
+					.getTopics(processQuery(conversation, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -638,7 +628,7 @@ public class ReaderBenchServer {
 		loadedPath = path;
 		loadedDocs = new ArrayList<AbstractDocument>();
 		try {
-			File dir = new File(URLDecoder.decode("resources/in/" + path));
+			File dir = new File("resources/in/" + path);
 			File[] files = dir.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File dir, String name) {
@@ -656,20 +646,24 @@ public class ReaderBenchServer {
 
 		return loadedDocs;
 	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.INFO); // changing log level
-
-		ReaderBenchServer server = new ReaderBenchServer();
-
+	
+	public static void initializeDB() {
 		logger.info("Initialize words...");
 		WordDAO.getInstance().loadAll();
 		logger.info("Words initialization finished");
 
+		SentimentWeights.initialize();
 		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
 				+ " sentiments after initialization.");
-		SentimentWeights.initialize();
+	}
+
+	public static void main(String[] args) {
+		BasicConfigurator.configure();
+		Logger.getRootLogger().setLevel(Level.INFO); // changing log level
+		
+		ReaderBenchServer.initializeDB();
+
+		ReaderBenchServer server = new ReaderBenchServer();
 
 		server.start();
 	}
