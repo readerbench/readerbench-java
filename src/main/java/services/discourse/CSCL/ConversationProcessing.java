@@ -105,7 +105,7 @@ public class ConversationProcessing {
 											boolean sameBlock = true;
 											for (int k = block2.getIndex() + 1; k < block1.getIndex(); k++) {
 												Utterance aux = (Utterance) c.getBlocks().get(k);
-												if (aux.getParticipant() != utterance1.getParticipant()) {
+												if (aux != null && aux.getParticipant() != utterance1.getParticipant()) {
 													sameBlock = false;
 													break;
 												}
