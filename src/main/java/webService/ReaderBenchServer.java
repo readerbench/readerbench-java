@@ -50,6 +50,7 @@ import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.converters.PdfToTextConverter;
+import services.discourse.cohesion.SentimentAnalysis;
 import services.discourse.topicMining.TopicModeling;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
@@ -57,340 +58,16 @@ import services.semanticModels.LSA.LSA;
 import services.semanticSearch.SemanticSearch;
 import services.semanticSearch.SemanticSearchResult;
 import spark.Spark;
-
-class Result implements Comparable<Result> {
-
-	private String content;
-	private double score;
-
-	public Result(String content, double score) {
-		super();
-		this.content = content;
-		this.score = score;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public double getScore() {
-		return score;
-	}
-
-	@Override
-	public int compareTo(Result o) {
-		return (int) Math.signum(o.getScore() - this.getScore());
-	}
-}
-
-class ResultSentiment {
-
-	private String content;
-	private List<Result> valences;
-
-	public ResultSentiment(String content, List<Result> valences) {
-		super();
-		this.content = content;
-		this.valences = valences;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public List<Result> getValences() {
-		return valences;
-	}
-}
-
-class ResultSearch implements Comparable<ResultSearch> {
-
-	private String url;
-	private String content;
-	private double relevance;
-
-	public ResultSearch(String url, String content, double relevance) {
-		this.url = url;
-		this.content = content;
-		this.relevance = relevance;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public double getRelevance() {
-		return relevance;
-	}
-
-	@Override
-	public int compareTo(ResultSearch o) {
-		return (int) Math.signum(o.getRelevance() - this.getRelevance());
-	}
-}
-
-class ResultTopic {
-
-	private List<ResultNode> nodes;
-	private List<ResultEdge> links;
-
-	public ResultTopic(List<ResultNode> nodes, List<ResultEdge> links) {
-		this.nodes = nodes;
-		this.links = links;
-	}
-
-}
-
-class ResultKeyword implements Comparable<ResultKeyword> {
-
-	private String name;
-	private int noOccurences;
-	private double relevance;
-
-	public ResultKeyword(String name, int noOccurences, double relevance) {
-		this.name = name;
-		this.noOccurences = noOccurences;
-		this.relevance = relevance;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	private int getNoOccurences() {
-		return noOccurences;
-	}
-
-	public double getRelevance() {
-		return relevance;
-	}
-
-	@Override
-	public int compareTo(ResultKeyword o) {
-		// Reverse order
-		return (int) Math.signum(this.getRelevance() - o.getRelevance());
-	}
-
-	public static Comparator<ResultKeyword> ResultKeywordRelevanceComparator = new Comparator<ResultKeyword>() {
-
-		public int compare(ResultKeyword o1, ResultKeyword o2) {
-			// descending order
-			return o2.compareTo(o1);
-		}
-
-	};
-
-}
-
-class ResultCategory implements Comparable<ResultCategory> {
-
-	private String name;
-	private double relevance;
-
-	public ResultCategory(String name, double relevance) {
-		this.name = name;
-		this.relevance = relevance;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public double getRelevance() {
-		return relevance;
-	}
-
-	@Override
-	public int compareTo(ResultCategory o) {
-		// Reverse order
-		return (int) Math.signum(this.getRelevance() - o.getRelevance());
-	}
-
-	public static Comparator<ResultCategory> ResultCategoryRelevanceComparator = new Comparator<ResultCategory>() {
-
-		public int compare(ResultCategory o1, ResultCategory o2) {
-			// descending order
-			return o2.compareTo(o1);
-		}
-
-	};
-
-}
-
-class ResultSemanticAnnotation {
-
-	private ResultTopic concepts;
-
-	private double abstractDocumentSimilarity;
-	private double keywordsAbstractCoverage;
-	private double keywordsDocumentCoverage;
-
-	private List<ResultKeyword> keywords;
-	private List<ResultCategory> categories;
-
-	public ResultSemanticAnnotation(ResultTopic resultTopic, double abstractDocumentSimilarity,
-			double keywordsAbstractCoverage, double keywordsDocumentCoverage, List<ResultKeyword> resultKeywords,
-			List<ResultCategory> resultCategories) {
-		this.concepts = resultTopic;
-		this.abstractDocumentSimilarity = abstractDocumentSimilarity;
-		this.keywordsAbstractCoverage = keywordsAbstractCoverage;
-		this.keywordsDocumentCoverage = keywordsDocumentCoverage;
-		this.keywords = resultKeywords;
-		this.categories = resultCategories;
-	}
-
-}
-
-class ReadingStrategy implements Comparable<ReadingStrategy> {
-
-	private String name;
-	private double score;
-
-	public ReadingStrategy(String name, double score) {
-		this.name = name;
-		this.score = score;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public double getScore() {
-		return score;
-	}
-
-	@Override
-	public int compareTo(ReadingStrategy o) {
-		// Reverse order
-		return (int) Math.signum(this.getScore() - o.getScore());
-	}
-
-}
-
-class ResultSelfExplanation {
-
-	private String selfExplanationColored;
-	private List<ReadingStrategy> strategies;
-
-	public ResultSelfExplanation(String selfExplanationColored, List<ReadingStrategy> strategies) {
-		this.selfExplanationColored = selfExplanationColored;
-		this.strategies = strategies;
-	}
-
-}
-
-class ResultNode implements Comparable<ResultNode> {
-
-	private int id;
-	private String name;
-	private double value;
-	private int group;
-
-	public ResultNode(int id, String name, double value, int group) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.value = value;
-		this.group = group;
-	}
-
-	public int getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public double getValue() {
-		return value;
-	}
-
-	public double getGroup() {
-		return group;
-	}
-
-	@Override
-	public int compareTo(ResultNode o) {
-		return (int) Math.signum(o.getValue() - this.getValue());
-	}
-}
-
-class ResultEdge implements Comparable<ResultEdge> {
-
-	private int source;
-	private int target;
-	private double score;
-
-	public ResultEdge(int source, int target, double score) {
-		super();
-		this.source = source;
-		this.target = target;
-		this.score = score;
-	}
-
-	public int getSource() {
-		return source;
-	}
-
-	public int getTarget() {
-		return target;
-	}
-
-	public double getScore() {
-		return score;
-	}
-
-	@Override
-	public int compareTo(ResultEdge o) {
-		return (int) Math.signum(o.getScore() - this.getScore());
-	}
-}
-
-class ResultPdfToText {
-
-	private String content;
-
-	public ResultPdfToText(String content) {
-		super();
-		this.content = content;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-}
+import webService.result.*;
+import webService.semanticSearch.SearchClient;
+import webService.services.*;
 
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	public static final int PORT = 8080;
 
-	private static final double MIN_SIZE = 5;
-	private static final double MAX_SIZE_TOPIC = 20;
 	private static final double MAX_SIZE_INFERRED_CONCEPT = 20;
 
-	public static final double MIN_THRESHOLD = 0.2d;
-	public static final int NO_RESULTS = 20;
 	public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
 	public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
 
@@ -411,244 +88,6 @@ public class ReaderBenchServer {
 		ComplexityIndices.computeComplexityFactors(queryDoc);
 
 		return queryDoc;
-	}
-
-	/**
-	 * Get document topics
-	 *
-	 * @param query
-	 * @return List of keywords and corresponding relevance scores for results
-	 */
-	private ResultTopic getTopics(String query, String pathToLSA, String pathToLDA, String lang, boolean posTagging,
-			double threshold) {
-
-		List<ResultNode> nodes = new ArrayList<ResultNode>();
-		List<ResultEdge> links = new ArrayList<ResultEdge>();
-		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
-
-		// List<Topic> topics = queryDoc.getTopics();
-		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
-
-		// build connected graph
-		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
-		// build nodes
-		Map<Word, Double> nodeSizes = new TreeMap<Word, Double>();
-		Map<Word, Integer> nodeGroups = new TreeMap<Word, Integer>();
-		SentimentGrid<Double> edges = new SentimentGrid<>(topics.size(), topics.size());
-		Map<Word, Integer> nodeIndexes = new TreeMap<Word, Integer>();
-
-		for (Topic t : topics) {
-			visibleConcepts.put(t.getWord(), false);
-		}
-
-		// determine similarities
-		for (Word w1 : visibleConcepts.keySet()) {
-			for (Word w2 : visibleConcepts.keySet()) {
-				double lsaSim = 0;
-				double ldaSim = 0;
-				if (queryDoc.getLSA() != null)
-					lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
-				if (queryDoc.getLDA() != null)
-					ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-				if (!w1.equals(w2) && sim >= threshold) {
-					visibleConcepts.put(w1, true);
-					visibleConcepts.put(w2, true);
-				}
-			}
-		}
-
-		// determine optimal sizes
-		double min = Double.MAX_VALUE, max = Double.MIN_VALUE;
-		for (Topic t : topics) {
-			if (visibleConcepts.get(t.getWord()) && t.getRelevance() >= 0) {
-				min = Math.min(min, Math.log(1 + t.getRelevance()));
-				max = Math.max(max, Math.log(1 + t.getRelevance()));
-			}
-		}
-
-		int i = 0, j;
-		for (Topic t : topics) {
-			if (visibleConcepts.get(t.getWord())) {
-				double nodeSize = 0;
-				if (max != min && t.getRelevance() >= 0) {
-					nodeSize = (MIN_SIZE
-							+ (Math.log(1 + t.getRelevance()) - min) / (max - min) * (MAX_SIZE_TOPIC - MIN_SIZE));
-				} else {
-					nodeSize = MIN_SIZE;
-				}
-				nodeIndexes.put(t.getWord(), i);
-				nodes.add(new ResultNode(i++, t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance()), 1));
-			}
-		}
-
-		// determine similarities
-		i = 0;
-		j = 0;
-		for (Word w1 : visibleConcepts.keySet()) {
-			edges.setIndex(w1.toString(), i++);
-			for (Word w2 : visibleConcepts.keySet()) {
-				edges.setIndex(w2.toString(), j++);
-				if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
-					double lsaSim = 0;
-					double ldaSim = 0;
-					if (queryDoc.getLSA() != null) {
-						lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
-					}
-					if (queryDoc.getLDA() != null) {
-						ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-					}
-					double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-					if (sim >= threshold) {
-						double distance = Double.MAX_VALUE;
-						if (sim > .9)
-							distance = 1;
-						else
-							distance = (1f - sim) * 10;
-						links.add(new ResultEdge(nodeIndexes.get(w1), nodeIndexes.get(w2), distance));
-					}
-				}
-			}
-		}
-
-		return new ResultTopic(nodes, links);
-	}
-
-	/**
-	 * Get sentiment values for the entire document and for each paragraph
-	 *
-	 * @param query
-	 * @return List of sentiment values per entity
-	 */
-	private List<ResultSentiment> getSentiment(String query, String pathToLSA, String pathToLDA, String lang,
-			boolean posTagging) {
-
-		List<Result> results = new ArrayList<Result>();
-		List<ResultSentiment> resultsSentiments = new ArrayList<ResultSentiment>();
-		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
-
-		logger.info("Starting building sentiments...");
-		// results.add(new Result("Document",
-		// Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
-		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-		// logger.info("There are " + rageSentimentsValues.size() + " rage
-		// setiments.");
-		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
-		List<Result> localResults = new ArrayList<>();
-		while (it.hasNext()) {
-			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-			SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-			Double sentimentValue = pair.getValue();
-			localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-					Formatting.formatNumber(sentimentValue)));
-		}
-		resultsSentiments.add(new ResultSentiment("Document", localResults));
-
-		for (Block b : queryDoc.getBlocks()) {
-			/*
-			 * results.add(new Result("Paragraph " + b.getIndex(),
-			 * Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue
-			 * ())));
-			 */
-
-			rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
-			it = rageSentimentsValues.entrySet().iterator();
-			localResults = new ArrayList<Result>();
-			while (it.hasNext()) {
-				Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-				SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-				Double sentimentValue = (Double) pair.getValue();
-				localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-						Formatting.formatNumber(sentimentValue)));
-			}
-			resultsSentiments.add(new ResultSentiment("\tParagraph " + b.getIndex(), localResults));
-
-			for (Sentence s : b.getSentences()) {
-				/*
-				 * results.add(new Result("Paragraph " + b.getIndex() +
-				 * " / Sentence " + s.getIndex(),
-				 * Formatting.formatNumber(s.getSentimentEntity().
-				 * getAggregatedValue())));
-				 */
-
-				rageSentimentsValues = s.getSentimentEntity().getAggregatedValue();
-				it = rageSentimentsValues.entrySet().iterator();
-				localResults = new ArrayList<Result>();
-				while (it.hasNext()) {
-					Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-					SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-					Double sentimentValue = (Double) pair.getValue();
-					localResults.add(new Result(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-							Formatting.formatNumber(sentimentValue)));
-				}
-				resultsSentiments.add(new ResultSentiment("\t\tSentence " + s.getIndex(), localResults));
-
-			}
-		}
-
-		return resultsSentiments;
-	}
-
-	/**
-	 * Get values for all textual complexity indices applied on the entire
-	 * document
-	 *
-	 * @param query
-	 * @return List of sentiment values per entity
-	 */
-	private List<ResultSentiment> getComplexityIndices(String query, String pathToLSA, String pathToLDA, String lang,
-			boolean posTagging) {
-		List<ResultSentiment> resultsComplexity = new ArrayList<ResultSentiment>();
-		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
-
-		List<Result> localResults;
-		for (IComplexityFactors complexityClass : ComplexityIndices.TEXTUAL_COMPLEXITY_FACTORS) {
-			localResults = new ArrayList<Result>();
-			for (int id : complexityClass.getIDs()) {
-				localResults.add(new Result(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[id],
-						Formatting.formatNumber(queryDoc.getComplexityIndices()[id])));
-			}
-			resultsComplexity.add(new ResultSentiment(complexityClass.getClassName(), localResults));
-		}
-
-		return resultsComplexity;
-	}
-
-	/**
-	 * Search for query in documents
-	 *
-	 * @param documents
-	 * @param query
-	 * @return List of urls for results
-	 */
-	private List<ResultSearch> search(String query, List<AbstractDocument> documents, int maxContentSize) {
-		logger.info("Processign query:" + query);
-		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-		BlockTemplate block = contents.new BlockTemplate();
-		block.setId(0);
-		block.setContent(query);
-		contents.getBlocks().add(block);
-
-		AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(),
-				documents.get(0).getLanguage(), false, false);
-		queryDoc.computeAll(null, null);
-		queryDoc.setTitleText(query);
-
-		List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);
-		List<ResultSearch> searchResults = new ArrayList<ResultSearch>();
-		for (SemanticSearchResult r : results) {
-			String content = r.getDoc().getText();
-			if (content.length() > maxContentSize) {
-				content = content.substring(0, maxContentSize);
-				if (content.lastIndexOf(" ") != -1)
-					content = content.substring(0, content.lastIndexOf(" "));
-				content += "...";
-			}
-			searchResults
-					.add(new ResultSearch(r.getDoc().getPath(), content, Formatting.formatNumber(r.getRelevance())));
-		}
-
-		return searchResults;
 	}
 
 	public List<ResultKeyword> getKeywords(String documentKeywords, String documentContent, String pathToLSA,
@@ -718,7 +157,7 @@ public class ReaderBenchServer {
 			double threshold) {
 
 		// concepts
-		ResultTopic resultTopic = getTopics(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+		ResultTopic resultTopic = ConceptMap.getTopics(processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
 				usePOSTagging, threshold);
 		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
@@ -756,10 +195,10 @@ public class ReaderBenchServer {
 
 		s.computeAll(false);
 
-		List<ReadingStrategy> readingStrategies = new ArrayList<ReadingStrategy>();
+		List<ResultReadingStrategy> readingStrategies = new ArrayList<ResultReadingStrategy>();
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 			readingStrategies.add(
-					new ReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
+					new ResultReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i], s.getAutomaticReadingStrategies()[0][i]));
 		}
 
 		StringBuilder summary = new StringBuilder();
@@ -847,12 +286,12 @@ public class ReaderBenchServer {
 
 		@Path("data")
 		@ElementList(inline = true, entry = "result")
-		private List<Result> data; // list of query results (urls)
+		private List<ResultValence> data; // list of query results (urls)
 
 		private QueryResult() {
 			success = true;
 			errorMsg = "";
-			data = new ArrayList<Result>();
+			data = new ArrayList<ResultValence>();
 		}
 	}
 
@@ -975,6 +414,26 @@ public class ReaderBenchServer {
 			data = new ResultPdfToText("");
 		}
 	}
+	
+	@Root(name = "response")
+	private static class QueryResultCscl {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultCscl data;
+
+		private QueryResultCscl() {
+			success = true;
+			errorMsg = "";
+			data = new ResultCscl("");
+		}
+	}
 
 	public void start() {
 		Spark.port(PORT);
@@ -997,7 +456,7 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -1013,7 +472,7 @@ public class ReaderBenchServer {
 
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = getSentiment(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+			queryResult.data = webService.services.SentimentAnalysis.getSentiment(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -1029,7 +488,7 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = getComplexityIndices(q, pathToLSA, pathToLDA, lang, usePOSTagging);
+			queryResult.data = TextualComplexity.getComplexityIndices(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging));
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -1057,7 +516,7 @@ public class ReaderBenchServer {
 			// lang, usePOSTagging);
 			queryResult.success = true;
 			queryResult.errorMsg = "";
-			queryResult.data = search(q, setDocuments(path), maxContentSize);
+			queryResult.data = SearchClient.search(q, setDocuments(path), maxContentSize);
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -1082,7 +541,7 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = getTopics(q, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			queryResult.data = ConceptMap.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -1164,7 +623,7 @@ public class ReaderBenchServer {
 			double threshold = (Double) json.get("threshold");
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = getTopics(conversation, pathToLSA, pathToLDA, lang, usePOSTagging, threshold);
+			queryResult.data = ConceptMap.getTopics(processQuery(conversation, pathToLSA, pathToLDA, lang, usePOSTagging), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
