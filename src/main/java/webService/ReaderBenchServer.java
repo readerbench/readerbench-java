@@ -179,8 +179,8 @@ public class ReaderBenchServer {
 			String pathToLDA, String lang, boolean usePOSTagging) {
 
 		Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
-				LSA.loadLSA(pathToLSA, Lang.getLang(lang)), LDA.loadLDA(pathToLDA, Lang.getLang(lang)),
-				Lang.getLang(lang), usePOSTagging, false);
+				LSA.loadLSA(pathToLSA, Lang.valueOf(lang)), LDA.loadLDA(pathToLDA, Lang.valueOf(lang)),
+				Lang.valueOf(lang), usePOSTagging, false);
 
 		Summary s = new Summary(selfExplanation, queryInitialText, true, true);
 
