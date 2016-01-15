@@ -27,7 +27,7 @@ public class ConversationProcessing {
 	
 	private static int WINDOW_SIZE = 20;
 	private static String conversationsPath = "resources/in/corpus_v2/";
-	//private static String conversationsPath = "resources/in/corpus_chats/";
+	//private static String conversationsPath = "resources/in/corpus_chats/";	
 
 	public static void main(String[] args) {
 		
@@ -44,6 +44,7 @@ public class ConversationProcessing {
 				
 					Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, false,
 						true);
+					c.computeAll(null,  null, true);
 					
 					Utterance firstUtt = null;
 					for (int i = 1; i < c.getBlocks().size(); i++) {
