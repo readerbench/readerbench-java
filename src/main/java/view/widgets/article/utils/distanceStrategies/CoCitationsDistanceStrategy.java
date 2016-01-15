@@ -38,5 +38,8 @@ public class CoCitationsDistanceStrategy implements IAuthorDistanceStrategy {
 		double noOfCoCitations = firstAuthor.getNumberOfCoCitations(secondAuthor);
 		return noOfCoCitations / this.maxCoCitationsCount;
 	}
-
+	@Override
+	public String getStrategyName() {
+		return "Co-Citations Distance";
+	}
 }

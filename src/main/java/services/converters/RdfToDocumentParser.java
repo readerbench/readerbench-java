@@ -246,14 +246,14 @@ public class RdfToDocumentParser {
 	public static void main(String[] args) {
 		String rdfFile = "in/LAK_corpus/LAK-DATASET-DUMP.rdf";
 		String outputFolder = "in/LAK_corpus/parsed-documents";
-//		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
-//		parser.parseRdf();
+		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
+		parser.parseRdf();
 		
 		serializeDocuments(outputFolder);
 	}
 	private static void serializeDocuments(String dirName) {
 		File[] files;
-		files = new File("in/LAK_corpus/parsed-documents2").listFiles(new FilenameFilter() {
+		files = new File(dirName).listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".xml");

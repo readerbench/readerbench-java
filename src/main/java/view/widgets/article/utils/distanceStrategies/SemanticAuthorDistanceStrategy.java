@@ -32,6 +32,10 @@ public class SemanticAuthorDistanceStrategy implements IAuthorDistanceStrategy {
 		}
 		return 0.0;
 	}
+	@Override
+	public String getStrategyName() {
+		return "Semantic Distance";
+	}
 	private double computeDistance(AbstractDocument d1, AbstractDocument d2) {
 		double lsaSim = 0;
 		double ldaSim = 0;

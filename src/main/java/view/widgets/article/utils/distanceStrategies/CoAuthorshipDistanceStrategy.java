@@ -38,5 +38,8 @@ public class CoAuthorshipDistanceStrategy implements IAuthorDistanceStrategy {
 		double noOfCommonArticles = firstAuthor.getNumberOfCommonArticles(secondAuthor);
 		return noOfCommonArticles / this.maxCoAuthorshipCount;
 	}
-
+	@Override
+	public String getStrategyName() {
+		return "Co-Citations Distance";
+	}
 }

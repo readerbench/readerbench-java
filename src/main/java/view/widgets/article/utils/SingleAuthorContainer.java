@@ -11,6 +11,7 @@ public class SingleAuthorContainer {
 	
 	public SingleAuthorContainer(ArticleAuthor author, List<ResearchArticle> authorArticles) {
 		this.authorArticles = authorArticles;
+		this.author = author;
 	}
 	
 	@Override

@@ -45,34 +45,32 @@ public class AuthorContainer {
 		return this.authorContainers;
 	}
 
-	
-	
-	
-	public static void main(String[] args) {
-		File dir = new File("in/LAK_corpus/parsed-documents2");
+	public static AuthorContainer buildAuthorContainerFromDirectory(String dirName) {
+		List<ResearchArticle> articles = new ArrayList<ResearchArticle>();
+		
+		File dir = new File(dirName);
 		File[] files = dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".ser");
 			}
 		});
-		
-		List<ResearchArticle> articles = new ArrayList<ResearchArticle>();
 		for (File file : files) {
 			ResearchArticle d = (ResearchArticle) AbstractDocument
 					.loadSerializedDocument(file.getPath());
+			if(d.getBlocks().size() == 0) {
+				System.out.println("Omitting article " + d.getTitleText() + " because it has no abstract");
+				continue;
+			}
 			articles.add(d);
-			System.out.println("-------");
-			System.out.println(d.getTitleText());
-			System.out.println(d.getURI());
-			System.out.println(d.getArticleAuthorList());
-			System.out.println(d.getAuthors());
-			System.out.println(d.getInitialTopics());
-			System.out.println(d.getCitationURIList());
-			System.out.println(d.getDate());
-			if(d.getBlocks().size() > 0)
-				System.out.println(d.getBlocks().get(0).getText());
-			System.out.println("--------");
 		}
+		return new AuthorContainer(articles);
+	}
+	
+	
+	public static void main(String[] args) {
+		String inDir = "in/LAK_corpus/parsed-documents2";
+		AuthorContainer container = AuthorContainer.buildAuthorContainerFromDirectory(inDir);
+		System.out.println(container.authorContainers);
 	}
 }
