@@ -3,12 +3,12 @@ package view.widgets.article.utils;
 import services.commons.Formatting;
 
 
-public class TwoAuthorsDistanceContainer implements Comparable<TwoAuthorsDistanceContainer> {
+public class AuthorPairDistanceContainer implements Comparable<AuthorPairDistanceContainer> {
 	private SingleAuthorContainer firstAuthor;
 	private SingleAuthorContainer secondAuthor;
 	private double similarity;
 
-	public TwoAuthorsDistanceContainer(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor,
+	public AuthorPairDistanceContainer(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor,
 			double similarity) {
 		super();
 		this.firstAuthor = firstAuthor;
@@ -27,7 +27,7 @@ public class TwoAuthorsDistanceContainer implements Comparable<TwoAuthorsDistanc
 	}
 	
 	@Override
-	public int compareTo(TwoAuthorsDistanceContainer o) {
+	public int compareTo(AuthorPairDistanceContainer o) {
 		return (new Double(o.getSimilarity())).compareTo(new Double (this.getSimilarity()));
 		
 	}
@@ -35,7 +35,7 @@ public class TwoAuthorsDistanceContainer implements Comparable<TwoAuthorsDistanc
 	public boolean equals(Object obj) {
 		if (this == null || obj == null)
 			return false;
-		TwoAuthorsDistanceContainer o = (TwoAuthorsDistanceContainer) obj;
+		AuthorPairDistanceContainer o = (AuthorPairDistanceContainer) obj;
 		return 
 				(this.getFirstAuthor().isSameAuthor(o.getFirstAuthor().getAuthor()) && this.getSecondAuthor().isSameAuthor(o.getSecondAuthor().getAuthor())) ||
 				(this.getFirstAuthor().isSameAuthor(o.getSecondAuthor().getAuthor()) && this.getSecondAuthor().isSameAuthor(o.getFirstAuthor().getAuthor()));

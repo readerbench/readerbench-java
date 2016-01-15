@@ -69,7 +69,7 @@ import org.openide.util.Lookup;
 import processing.core.PApplet;
 import view.widgets.article.utils.AuthorContainer;
 import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
-import view.widgets.article.utils.TwoAuthorsDistanceContainer;
+import view.widgets.article.utils.AuthorPairDistanceContainer;
 import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
@@ -432,7 +432,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			}
 		}
 
-		List<TwoAuthorsDistanceContainer> similarities = new LinkedList<TwoAuthorsDistanceContainer>();
+		List<AuthorPairDistanceContainer> similarities = new LinkedList<AuthorPairDistanceContainer>();
 		// determine similarities
 		for (int i = 0; i < this.authorContainer.getAuthorContainers().size() - 1; i++) {
 			for (int j = i + 1; j < this.authorContainer.getAuthorContainers().size(); j++) {
@@ -447,7 +447,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 						e.getEdgeData().setLabel(sim + "");
 						graph.addEdge(e);
 
-						similarities.add(new TwoAuthorsDistanceContainer(a1, a2, sim));
+						similarities.add(new AuthorPairDistanceContainer(a1, a2, sim));
 					}
 				}
 			}
@@ -462,7 +462,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			}
 		}
 		NumberFormat formatter = new DecimalFormat("#0.00");
-		for (TwoAuthorsDistanceContainer sim : similarities) {
+		for (AuthorPairDistanceContainer sim : similarities) {
 			String row[] = new String[3];
 			row[0] = sim.getFirstAuthor().getAuthor().getAuthorName();
 			row[1] = sim.getSecondAuthor().getAuthor().getAuthorName();
