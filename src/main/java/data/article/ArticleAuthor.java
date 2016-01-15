@@ -13,6 +13,18 @@ public class ArticleAuthor implements java.io.Serializable {
 	public String toString() {
 		return "{" + this.authorUri + ", " + this.authorName + ", " + this.affiliationUri + ", " + this.affiliationName + "}";
 	}
+	public String getAuthorName() {
+		return this.authorName;
+	}
+	public String getAuthorUri() {
+		return this.authorUri;
+	}
+	public String getAffiliationName() {
+		return this.affiliationName;
+	}
+	public String getAffiliationUri() {
+		return this.affiliationUri;
+	}
 	
 	public boolean isSameAuthor(ArticleAuthor a) {
 		return this.authorUri.equals(a.authorUri);

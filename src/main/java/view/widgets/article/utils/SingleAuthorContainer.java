@@ -4,8 +4,9 @@ import java.util.List;
 
 import data.article.ResearchArticle;
 import data.article.ArticleAuthor;
+import data.document.Document;
 
-public class SingleAuthorContainer {
+public class SingleAuthorContainer implements Comparable<SingleAuthorContainer> {
 	ArticleAuthor author;
 	List<ResearchArticle> authorArticles;
 	
@@ -72,5 +73,11 @@ public class SingleAuthorContainer {
 			}
 		}
 		return noOfCoCitations;
+	}
+
+	@Override
+	public int compareTo(SingleAuthorContainer o) {
+		// TODO Auto-generated method stub
+		return this.author.getAuthorUri().compareTo(((SingleAuthorContainer)o).getAuthor().getAuthorUri());
 	}
 }

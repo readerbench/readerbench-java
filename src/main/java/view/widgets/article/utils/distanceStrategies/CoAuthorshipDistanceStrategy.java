@@ -40,6 +40,6 @@ public class CoAuthorshipDistanceStrategy implements IAuthorDistanceStrategy {
 	}
 	@Override
 	public String getStrategyName() {
-		return "Co-Citations Distance";
+		return "Co-Authorship Distance";
 	}
 }
