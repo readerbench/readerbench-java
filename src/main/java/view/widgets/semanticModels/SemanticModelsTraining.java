@@ -38,6 +38,7 @@ import services.semanticModels.LSA.ProcessSVDOutput;
 import services.semanticModels.LSA.RunSVD;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
+import webService.ReaderBenchServer;
 
 public class SemanticModelsTraining extends JFrame {
 
@@ -159,10 +160,6 @@ public class SemanticModelsTraining extends JFrame {
 								(int) (3 * k * 0.01
 										* Math.max(lsaTraining.getNoDocuments(), lsaTraining.getNoWords()))),
 						noReduceTasks, noPowerIterations, chckbxLSAUseHalfSigma.isSelected());
-				// RunSVD.runSSVDOnSparseVectors(input.getParent() + "/"
-				// + TERM_DOC_MATRIX_NAME, input.getParent() + "/"
-				// + SVD_FOLDER_NAME, k, 15, 200000, noReduceTasks, 1,
-				// chckbxLSAUseHalfSigma.isSelected());
 
 				logger.info("Finished performing SVD decomposition");
 				// post-process
@@ -729,7 +726,7 @@ public class SemanticModelsTraining extends JFrame {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		ReaderBenchView.initializeDB();
+		ReaderBenchServer.initializeDB();
 
 		ReaderBenchView.adjustToSystemGraphics();
 

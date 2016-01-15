@@ -2,10 +2,19 @@ package services.converters;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
@@ -18,6 +27,18 @@ import org.apache.jena.rdf.model.SimpleSelector;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileManager;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+import view.widgets.ReaderBenchView;
+import data.AbstractDocument;
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.document.Document;
+import data.document.ResearchArticle;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 
 class Author {
 	public String authorUri;
@@ -201,8 +222,8 @@ public class RdfToDocumentParser {
 				"<authors>\n";
 		for(Author author : authorList) {
 			xml += 	"<author>" + 
-						"<name>" + author.authorName + "</name>" +
-						"<uri>" + author.authorUri + "</uri>" +
+						"<authorName>" + author.authorName + "</authorName>" +
+						"<authorUri>" + author.authorUri + "</authorUri>" +
 						"<affiliationName>" + author.affiliationName + "</affiliationName>" +
 						"<affiliationUri>" + author.affiliationUri + "</affiliationUri>" +
 					"</author>\n";
@@ -219,7 +240,7 @@ public class RdfToDocumentParser {
 		xml += "</Topics>\n";
 		xml += "<Citations>";
 		for(String citationUri : citationUris) {
-			xml += "<uri>" + citationUri + "</uri>\n";
+			xml += "<citationUri>" + citationUri + "</citationUri>\n";
 		}
 		xml += "</Citations>";
 		xml += 	"</meta>\n" + 
@@ -242,7 +263,34 @@ public class RdfToDocumentParser {
 	}
 	
 	public static void main(String[] args) {
-		RdfToDocumentParser parser = new RdfToDocumentParser("in/LAK_corpus/LAK-DATASET-DUMP.rdf", "in/LAK_corpus/parsed-documents");
+		String rdfFile = "in/LAK_corpus/LAK-DATASET-DUMP.rdf";
+		String outputFolder = "in/LAK_corpus/parsed-documents";
+		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
 		parser.parseRdf();
+		
+		serializeDocuments(outputFolder);
+	}
+	private static void serializeDocuments(String dirName) {
+		File[] files;
+		files = new File("in/LAK_corpus/parsed-documents2").listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".xml");
+			}
+		});
+		
+		for (File f : files) {
+			try {
+				System.out.println("Before add > " + f.getPath());
+				addSingleDocument(f.getPath());
+				System.out.println("After add");
+			} catch (Exception e) {
+				 e.printStackTrace();
+			}
+		}
+	}
+	private static void addSingleDocument(String filePath) {
+		ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0], ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.eng, false, true);
+		d.computeAll(null, null, true);
 	}
 }

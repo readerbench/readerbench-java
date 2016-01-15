@@ -23,7 +23,6 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.SequenceFile.Writer;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -83,6 +82,7 @@ public class CreateInputMatrix extends LSA {
 		String line = "";
 
 		Map<Word, Integer> wordAssociations = new TreeMap<Word, Integer>();
+		Map<Word, Double> tempWords = new TreeMap<Word, Double>();
 
 		while ((line = in.readLine()) != null) {
 			if (line.length() > LOWER_BOUND) {
@@ -100,12 +100,9 @@ public class CreateInputMatrix extends LSA {
 
 					else {
 						// update correspondingly the heap of document
-						if (!getWords().containsKey(w)) {
-							getWords().put(w, noWords);
-							getMapIdf().put(w, 1d);
-							noWords++;
-						}
-						getMapIdf().put(w, getMapIdf().get(w) + 1);
+						if (!tempWords.containsKey(w))
+							tempWords.put(w, 0d);
+						tempWords.put(w, tempWords.get(w) + 1);
 					}
 				}
 				noDocuments++;
@@ -113,24 +110,30 @@ public class CreateInputMatrix extends LSA {
 		}
 		in.close();
 
+		// disregard words with low occurrences
+		List<Word> wordsToRemove = new ArrayList<Word>();
+		for (Entry<Word, Double> entry : tempWords.entrySet()) {
+			if (entry.getValue() < PreProcessing.MIN_NO_OCCURRENCES) {
+				wordsToRemove.add(entry.getKey());
+			}
+		}
+
+		for (Word w : wordsToRemove) {
+			tempWords.remove(w);
+		}
+
+		for (Entry<Word, Double> entry : tempWords.entrySet()) {
+			getWords().put(entry.getKey(), noWords);
+			getMapIdf().put(entry.getKey(), entry.getValue());
+			noWords++;
+		}
+
 		// select most frequent word associations only
 		List<WordAssociation> frequencies = new ArrayList<WordAssociation>();
 		for (Entry<Word, Integer> entry : wordAssociations.entrySet()) {
 			frequencies.add(new WordAssociation(entry.getKey(), entry.getValue()));
 		}
 		Collections.sort(frequencies);
-
-		List<Word> wordsToRemove = new ArrayList<Word>();
-		for (Entry<Word, Double> entry : getMapIdf().entrySet()) {
-			if (entry.getValue() < PreProcessing.MIN_NO_OCCURRENCES)
-				wordsToRemove.add(entry.getKey());
-		}
-
-		for (Word w : wordsToRemove) {
-			getWords().remove(w);
-			getMapIdf().remove(w);
-			noWords--;
-		}
 
 		// select first most representative word associations
 		int noWordAssociations = (int) Math.pow(Math.E, Math.round(Math.log(noWords) + 1));
@@ -183,15 +186,15 @@ public class CreateInputMatrix extends LSA {
 					Word w = Word.getWordFromConcept(st.nextToken(), lang);
 					// only for relevant words and associations
 					if (getWords().containsKey(w)) {
-						if (wordOccurrences.containsKey(w))
+						if (wordOccurrences.containsKey(w)) {
 							wordOccurrences.put(w, wordOccurrences.get(w) + 1);
-						else {
+						} else {
 							wordOccurrences.put(w, 1);
 						}
 					}
 				}
 				for (Entry<Word, Integer> entry : wordOccurrences.entrySet()) {
-					int wordIndex = getWords().get(entry.getKey());
+					Integer wordIndex = getWords().get(entry.getKey());
 
 					termDocVectors.get(wordIndex).set(crtDoc, entry.getValue());
 				}
@@ -272,16 +275,5 @@ public class CreateInputMatrix extends LSA {
 
 	public void setNoDocuments(int noDocuments) {
 		this.noDocuments = noDocuments;
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		try {
-			CreateInputMatrix lsaTraining = new CreateInputMatrix();
-			lsaTraining.parseCorpus("in/preprocessing", "out.txt", "matrix.svd", Lang.eng);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			logger.error("Error during learning process");
-		}
 	}
 }

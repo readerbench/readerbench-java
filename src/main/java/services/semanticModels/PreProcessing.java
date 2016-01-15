@@ -38,7 +38,7 @@ import services.semanticModels.LSA.LSA;
 public class PreProcessing {
 	static Logger logger = Logger.getLogger(PreProcessing.class);
 
-	public static final int MIN_NO_OCCURRENCES = 6;
+	public static final int MIN_NO_OCCURRENCES = 5;
 
 	private Map<String, Integer> newConcepts = new TreeMap<String, Integer>();
 

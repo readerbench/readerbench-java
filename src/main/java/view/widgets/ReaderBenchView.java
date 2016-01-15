@@ -43,10 +43,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import dao.WordDAO;
 import data.AbstractDocument;
 import data.document.Document;
-import data.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import utils.localization.LocalizationUtils;
 import view.events.TCPopupEventQueue;
@@ -65,6 +63,7 @@ import view.widgets.selfexplanation.verbalization.AnnotateVerbalizationView;
 import view.widgets.selfexplanation.verbalization.CreateVerbalizationView;
 import view.widgets.selfexplanation.verbalization.VerbalizationProcessingView;
 import view.widgets.semanticModels.SemanticModelsTraining;
+import webService.ReaderBenchServer;
 
 public class ReaderBenchView extends JFrame {
 	private static final long serialVersionUID = 4565038532352428650L;
@@ -639,23 +638,13 @@ public class ReaderBenchView extends JFrame {
 		ReaderBenchView.this.revalidate();
 	}
 
-	public static void initializeDB() {
-		logger.info("Initialize words...");
-		WordDAO.getInstance().loadAll();
-		logger.info("Words initialization finished");
-
-		SentimentWeights.initialize();
-		logger.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size()
-				+ " sentiments after initialization.");
-	}
-
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO); // changing log level
 
 		Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
 
-		initializeDB();
+		ReaderBenchServer.initializeDB();
 
 		adjustToSystemGraphics();
 

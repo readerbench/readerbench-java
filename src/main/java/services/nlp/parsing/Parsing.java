@@ -14,16 +14,35 @@ import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
 import data.Sentence;
+import data.Word;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
+import data.sentiment.SentimentEntity;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
+import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import services.commons.TextPreprocessing;
+import services.nlp.lemmatizer.StaticLemmatizer;
+import services.nlp.lemmatizer.StaticLemmatizerPOS;
+import services.nlp.listOfWords.Dictionary;
+import services.nlp.listOfWords.StopWords;
+import services.nlp.stemmer.Stemmer;
 
 /**
  *
@@ -32,23 +51,26 @@ import services.commons.TextPreprocessing;
 public abstract class Parsing {
 
 	static Logger logger = Logger.getLogger(Parsing.class);
-	
+
 	protected Lang lang;
 
 	public static Parsing getParser(Lang lang) {
 		switch (lang) {
-			case fr:
-				return Parsing_FR.getInstance();
-			case it:
-				return Parsing_IT.getInstance();
-			case es:
-				return Parsing_ES.getInstance();
-			default:
-				return Parsing_EN.getInstance();
+		case fr:
+			return Parsing_FR.getInstance();
+		case it:
+			return Parsing_IT.getInstance();
+		case es:
+			return Parsing_ES.getInstance();
+		default:
+			return Parsing_EN.getInstance();
 		}
 	}
 
 	public String convertToPenn(String pos) {
+		if (pos != null && pos.length() > 2) {
+			return pos.substring(0, 2);
+		}
 		return pos;
 	}
 
@@ -114,10 +136,7 @@ public abstract class Parsing {
 		return u;
 	}
 
-	public void parseDoc(
-			AbstractDocumentTemplate adt, 
-			AbstractDocument d,
-			boolean usePOSTagging, boolean cleanInput) {
+	public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging, boolean cleanInput) {
 		try {
 			if (!adt.getBlocks().isEmpty()) {
 				for (BlockTemplate blockTmp : adt.getBlocks()) {
@@ -166,7 +185,7 @@ public abstract class Parsing {
 						b = SimpleParsing.processBlock(d, id, text);
 					}
 					if (d instanceof Conversation) {
-						b = getUtterance((Conversation)d, blockTmp, b);
+						b = getUtterance((Conversation) d, blockTmp, b);
 					}
 					b.setFollowedByVerbalization(followedByVerbalization);
 					Block.addBlock(d, b);
@@ -184,10 +203,9 @@ public abstract class Parsing {
 					if (usePOSTagging && lang.equals(Lang.eng)) {
 						// Build the co-reference link graph
 						// Each chain stores a set of mentions that link to each
-						// other,
-						// along with a method for getting the most
-						// representative mention
-						// Both sentence and token offsets start at 1!
+						// other, along with a method for getting the most
+						// representative mention. Both sentence and token
+						// offsets start at 1!
 						b.setAnnotation(document);
 						b.setCorefs(document.get(CorefChainAnnotation.class));
 
@@ -236,10 +254,90 @@ public abstract class Parsing {
 
 	public Sentence processSentence(Block b, int utteranceIndex, CoreMap sentence) {
 		// uses Stanford Core NLP
-		Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getLSA(), b.getLDA(),
-				b.getLanguage());
+		Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getLSA(), b.getLDA(), lang);
 
-		s.finalProcessing(true, b, sentence);
+		// build the Stanford dependency graph of the current sentence
+		if (lang.equals(Lang.eng)) {
+
+		}
+
+		for (CoreLabel token : sentence.get(TokensAnnotation.class)) {
+			String word = token.get(OriginalTextAnnotation.class);
+			String pos = token.get(PartOfSpeechAnnotation.class);
+			String ne = token.get(NamedEntityTagAnnotation.class);
+
+			if (!word.matches("[,:;'\\.\\!\\?\\-]")) {
+				Word w = new Word(b.getIndex(), s.getIndex(), word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang),
+						Stemmer.stemWord(word.toLowerCase(), lang), Parsing.getParser(lang).convertToPenn(pos), ne,
+						s.getLSA(), s.getLDA(), lang);
+
+				s.getAllWords().add(w);
+				if (w.getText().length() > 1 && !StopWords.isStopWord(w.getText(), lang)
+						&& !StopWords.isStopWord(w.getLemma(), lang) && (Dictionary.isDictionaryWord(w.getText(), lang)
+								|| Dictionary.isDictionaryWord(w.getLemma(), lang))) {
+					if (w.getPOS().equals("NN") || w.getPOS().equals("VB") || w.getPOS().equals("JJ")
+							|| w.getPOS().equals("RB")) {
+						s.getWords().add(w);
+						if (s.getWordOccurences().containsKey(w)) {
+							s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
+						} else {
+							s.getWordOccurences().put(w, 1);
+						}
+					}
+				}
+
+			}
+		}
+
+		Tree tree = null;
+		if (lang.equals(Lang.eng) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
+			// this is the parse tree of the current sentence
+			tree = sentence.get(TreeAnnotation.class);
+			s.setPOSTreeDepth(tree.depth());
+			s.setPOSTreeSize(tree.size());
+			s.setParseTree(tree);
+			// TreePrint tp = new TreePrint("penn");
+			// tp.printTree(tree);
+			if (lang.equals(Lang.eng)) {
+				s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
+
+				tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+				SentimentEntity se = new SentimentEntity();
+				// Stanford Valence
+				int score = RNNCoreAnnotations.getPredictedClass(tree);
+				se.add(new data.sentiment.SentimentValence(10000, "Stanford", "STANFORD", false), score);
+				s.setSentimentEntity(se);
+
+				// add relevant word associations if the case
+				SemanticGraph dependencies = s.getDependencies();
+				if (dependencies != null) {
+					for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
+						String dependent = edge.getDependent().word().toLowerCase();
+						Word w1 = Word.getWordFromConcept(dependent, lang);
+						w1.setLemma(StaticLemmatizer.lemmaStatic(dependent, lang));
+
+						String governor = edge.getGovernor().word().toLowerCase();
+						Word w2 = Word.getWordFromConcept(governor, lang);
+						w2.setLemma(StaticLemmatizer.lemmaStatic(governor, lang));
+						String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
+						Word wordAssociation = new Word(association, association, association, null, null, s.getLSA(),
+								s.getLDA(), lang);
+						// add correspondingly the word association if the
+						// LSA space contains it
+						if (s.getLSA() != null && s.getLSA().getWords().containsKey(wordAssociation)) {
+							if (s.getWordOccurences().containsKey(wordAssociation)) {
+								s.getWordOccurences().put(wordAssociation,
+										s.getWordOccurences().get(wordAssociation) + 1);
+							} else {
+								s.getWordOccurences().put(wordAssociation, 1);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		s.finalProcessing(b, sentence);
 		return s;
 	}
 }

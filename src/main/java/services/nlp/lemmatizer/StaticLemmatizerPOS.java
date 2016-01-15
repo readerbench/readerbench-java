@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import services.nlp.lemmatizer.morphalou.Digest_FR;
 import services.nlp.lemmatizer.morphalou.Digest_IT;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import edu.stanford.nlp.process.Morphology;
 
 public class StaticLemmatizerPOS {
 	static Logger logger = Logger.getLogger(StaticLemmatizerPOS.class);
@@ -32,8 +33,7 @@ public class StaticLemmatizerPOS {
 			StringTokenizer strk;
 			while ((str_linie = in.readLine()) != null) {
 				strk = new StringTokenizer(str_linie, "|");
-				lemmas.put(strk.nextToken().toLowerCase(), strk.nextToken()
-						.toLowerCase());
+				lemmas.put(strk.nextToken().toLowerCase(), strk.nextToken().toLowerCase());
 			}
 			in.close();
 		} catch (Exception e) {
@@ -51,9 +51,15 @@ public class StaticLemmatizerPOS {
 		case it:
 			lemmas = getLemmasIt();
 			break;
+		case es:
+			return StaticLemmatizer.lemmaStatic(w, Lang.es);
+		case eng:
+			return Morphology.lemmaStatic(w, pos, true);
 		default:
 			lemmas = null;
 		}
+		if (lemmas == null)
+			return w;
 		String lemma = null;
 		if (pos != null) {
 			lemma = lemmas.get(w + "_" + pos);
@@ -61,8 +67,7 @@ public class StaticLemmatizerPOS {
 				return lemma;
 		}
 		// try each significant POS
-		String[] possiblePOSs = { "NN", "VB", "JJ", "RB", "PR", "DT", "IN",
-				"UH", "CC" };
+		String[] possiblePOSs = { "NN", "VB", "JJ", "RB", "PR", "DT", "IN", "UH", "CC" };
 		for (String possiblePOS : possiblePOSs) {
 			String concept = (w + "_" + possiblePOS).toLowerCase();
 			if (lemmas.containsKey(concept)) {
@@ -89,9 +94,7 @@ public class StaticLemmatizerPOS {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null,
-				Lang.fr));
-		System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB",
-				Lang.it));
+		System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null, Lang.fr));
+		System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB", Lang.it));
 	}
 }
