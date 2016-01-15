@@ -2,42 +2,23 @@ package services.converters;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Selector;
-import org.apache.jena.rdf.model.SimpleSelector;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileManager;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import view.widgets.ReaderBenchView;
 import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
-import data.AbstractDocumentTemplate.BlockTemplate;
-import data.document.Document;
-import data.document.ResearchArticle;
+import data.article.ResearchArticle;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 
 class Author {
@@ -265,8 +246,8 @@ public class RdfToDocumentParser {
 	public static void main(String[] args) {
 		String rdfFile = "in/LAK_corpus/LAK-DATASET-DUMP.rdf";
 		String outputFolder = "in/LAK_corpus/parsed-documents";
-		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
-		parser.parseRdf();
+//		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
+//		parser.parseRdf();
 		
 		serializeDocuments(outputFolder);
 	}
@@ -281,9 +262,7 @@ public class RdfToDocumentParser {
 		
 		for (File f : files) {
 			try {
-				System.out.println("Before add > " + f.getPath());
 				addSingleDocument(f.getPath());
-				System.out.println("After add");
 			} catch (Exception e) {
 				 e.printStackTrace();
 			}
