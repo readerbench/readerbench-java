@@ -1,5 +1,7 @@
 package webService.result;
 
+import java.util.List;
+
 public class ResultValence implements Comparable<ResultValence> {
 
 	private String content;

@@ -43,11 +43,14 @@ public class SentimentAnalysis {
 			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 			SentimentValence sentimentValence = (SentimentValence) pair.getKey();
 			Double sentimentValue = pair.getValue();
-			localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-					Formatting.formatNumber(sentimentValue)));
+			localResults.add(new ResultValence(
+				sentimentValence.getIndexLabel().replace("_RAGE", ""),
+				Formatting.formatNumber(sentimentValue)
+			));
 		}
-		resultsSentiments.add(new ResultSentiment("Document", localResults));
 
+		List<ResultSentiment> blockSentiments = new ArrayList<ResultSentiment>();
+		
 		for (Block b : queryDoc.getBlocks()) {
 			/*
 			 * results.add(new Result("Paragraph " + b.getIndex(),
@@ -65,8 +68,9 @@ public class SentimentAnalysis {
 				localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
 						Formatting.formatNumber(sentimentValue)));
 			}
-			resultsSentiments.add(new ResultSentiment("\tParagraph " + b.getIndex(), localResults));
 
+			List<ResultSentiment> sentencesSentiments = new ArrayList<ResultSentiment>();
+			
 			for (Sentence s : b.getSentences()) {
 				/*
 				 * results.add(new Result("Paragraph " + b.getIndex() +
@@ -85,10 +89,14 @@ public class SentimentAnalysis {
 					localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
 							Formatting.formatNumber(sentimentValue)));
 				}
-				resultsSentiments.add(new ResultSentiment("\t\tSentence " + s.getIndex(), localResults));
-
+				
+				sentencesSentiments.add(new ResultSentiment("\t\tSentence " + s.getIndex(), localResults, null));
 			}
+			
+			blockSentiments.add(new ResultSentiment("\tParagraph " + b.getIndex(), localResults, sentencesSentiments));
 		}
+		
+		resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments));
 
 		return resultsSentiments;
 	}

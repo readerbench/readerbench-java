@@ -6,11 +6,13 @@ public class ResultSentiment {
 
 	private String content;
 	private List<ResultValence> valences;
+	private List<ResultSentiment> innerObjects;
 
-	public ResultSentiment(String content, List<ResultValence> valences) {
+	public ResultSentiment(String content, List<ResultValence> valences, List<ResultSentiment> innerObjects) {
 		super();
 		this.content = content;
 		this.valences = valences;
+		this.innerObjects = innerObjects;
 	}
 
 	public String getContent() {
