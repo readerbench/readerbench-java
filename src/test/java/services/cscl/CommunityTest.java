@@ -8,6 +8,7 @@ import org.apache.log4j.BasicConfigurator;
 import data.cscl.Community;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import view.widgets.ReaderBenchView;
+import webService.ReaderBenchServer;
 
 /**
  * @author mihaidascalu
@@ -17,7 +18,7 @@ public class CommunityTest {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		ReaderBenchView.initializeDB();
+		ReaderBenchServer.initializeDB();
 
 		ReaderBenchView.adjustToSystemGraphics();
 
