@@ -12,6 +12,10 @@
     <class>data.pojo.Category</class>
     <properties>
       <property name="hibernate.show_sql" value="false"/>
+	  <property name="hibernate.dbcp.initialSize" value="8" />
+	  <property name="hibernate.dbcp.maxActive" value="20" />
+	  <property name="hibernate.dbcp.maxIdle" value="20" />
+	  <property name="hibernate.dbcp.minIdle" value="0" />
     </properties>
   </persistence-unit>
 </persistence>
