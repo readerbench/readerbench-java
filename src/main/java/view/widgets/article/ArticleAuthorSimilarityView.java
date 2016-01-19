@@ -68,8 +68,10 @@ import org.openide.util.Lookup;
 
 import processing.core.PApplet;
 import view.widgets.article.utils.AuthorContainer;
+import view.widgets.article.utils.AuthorParameterLogger;
 import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
 import view.widgets.article.utils.AuthorPairDistanceContainer;
+import view.widgets.article.utils.GraphMeasure;
 import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
@@ -83,6 +85,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
 	private IAuthorDistanceStrategy distanceStrategy;
 	private AuthorContainer authorContainer;
+	private AuthorParameterLogger paramLogger;
 	
 	private JSlider sliderThreshold;
 	private JPanel panelGraph;
@@ -104,9 +107,10 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		}
 	}
 
-	public ArticleAuthorSimilarityView(AuthorContainer authorContainer, IAuthorDistanceStrategy distanceStrategy) {
+	public ArticleAuthorSimilarityView(AuthorContainer authorContainer, IAuthorDistanceStrategy distanceStrategy, AuthorParameterLogger paramLogger) {
 		this.authorContainer = authorContainer;
 		this.distanceStrategy = distanceStrategy;
+		this.paramLogger = paramLogger;
 		
 		centralAuthorContainerToCompare = null;
 		corpusView = this;
@@ -503,19 +507,39 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		distance.execute(graphModel, attributeModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable()
+		AttributeColumn betwennessColumn = attributeModel.getNodeTable()
 				.getColumn(GraphDistance.BETWEENNESS);
-
+		AttributeColumn eccentricityColumn = attributeModel.getNodeTable()
+				.getColumn(GraphDistance.ECCENTRICITY);
+		AttributeColumn closenessColumn = attributeModel.getNodeTable()
+				.getColumn(GraphDistance.CLOSENESS);
+		
 		double maxCentrality = Double.NEGATIVE_INFINITY;
 		SingleAuthorContainer centralAuthor = null;
+		List<GraphMeasure> graphMeasures = new ArrayList<GraphMeasure>();
 		for (Node n : graph.getNodes()) {
-			Double centrality = (Double) n.getNodeData().getAttributes()
-					.getValue(centralityColumn.getIndex());
-			if (centrality > maxCentrality) {
-				maxCentrality = centrality;
-				centralAuthor = nodeMap.get(n.getId());
-			}
+		   Double betwenness = (Double)n.getNodeData().getAttributes().getValue(betwennessColumn.getIndex());
+		   Double eccentricity = (Double)n.getNodeData().getAttributes().getValue(eccentricityColumn.getIndex());
+		   Double closeness = (Double)n.getNodeData().getAttributes().getValue(closenessColumn.getIndex());
+		   
+		   SingleAuthorContainer currentDoc = nodeMap.get(n.getId());
+		   int degree = graph.getDegree(n);
+		   
+		   GraphMeasure graphMeasure = new GraphMeasure();
+		   graphMeasure.setAuthorUri(currentDoc.getAuthor().getAuthorUri());
+		   graphMeasure.setBetwenness(betwenness);
+		   graphMeasure.setCloseness(closeness);
+		   graphMeasure.setDegree(new Double(degree));
+		   graphMeasure.setEccentricity(eccentricity);
+		   graphMeasures.add(graphMeasure);
+		   
+		   if(betwenness > maxCentrality) {
+			   maxCentrality = betwenness;
+			   centralAuthor = nodeMap.get(n.getId());
+		   }
 		}
+		paramLogger.logGraphMeasures(this.distanceStrategy, graphMeasures, (new Double(threshold*100)).intValue());
+		
 		this.centralAuthorContainerToCompare = centralAuthor;
 		List<CompareCentralityElement> centralityList = new ArrayList<CompareCentralityElement>();
 		if (centralAuthor != null) {
@@ -553,7 +577,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		tableCentralityModel.fireTableDataChanged();
 
 		Ranking<?> centralityRanking = rankingController.getModel().getRanking(
-				Ranking.NODE_ELEMENT, centralityColumn.getId());
+				Ranking.NODE_ELEMENT, betwennessColumn.getId());
 		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController
 				.getModel().getTransformer(Ranking.NODE_ELEMENT,
 						Transformer.RENDERABLE_SIZE);
@@ -563,7 +587,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
 		// Rank label size - set a multiplier size
 		Ranking<?> centralityRanking2 = rankingController.getModel()
-				.getRanking(Ranking.NODE_ELEMENT, centralityColumn.getId());
+				.getRanking(Ranking.NODE_ELEMENT, betwennessColumn.getId());
 		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController
 				.getModel().getTransformer(Ranking.NODE_ELEMENT,
 						Transformer.LABEL_SIZE);
@@ -653,13 +677,31 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			@Override
 			public void run() {
 				String inDir = "in/LAK_corpus/parsed-documents";
-				AuthorDistanceStrategyType distanceStrategyType = AuthorDistanceStrategyType.SemanticDistance;
 				
 				AuthorContainer container = AuthorContainer.buildAuthorContainerFromDirectory(inDir);
 				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
-				IAuthorDistanceStrategy distanceStrategy = distStrategyFactory.getDistanceStrategy(distanceStrategyType);
-				CachedAuthorDistanceStrategyDecorator cachedDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, distanceStrategy);
-				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, cachedDistStrategy);
+				
+				IAuthorDistanceStrategy semanticDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance);
+				CachedAuthorDistanceStrategyDecorator cachedSemanticDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistStrategy);
+				
+				IAuthorDistanceStrategy coAuthDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance);
+				CachedAuthorDistanceStrategyDecorator cachedCoAuthDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coAuthDistStrategy);
+				
+				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
+				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
+				
+				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] {
+						cachedSemanticDistStrategy,
+						cachedCoAuthDistStrategy,
+						cachedCoCitationsDistStrategy
+				};
+				AuthorParameterLogger paramLogger = new AuthorParameterLogger(container);
+				
+				for (IAuthorDistanceStrategy strategy : allStrategies) {
+					paramLogger.logTopSimilarAuthors(strategy, allStrategies);
+				}
+				
+				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, cachedCoCitationsDistStrategy, paramLogger);
 				view.setVisible(true);
 			}
 		});

@@ -5,4 +5,5 @@ import view.widgets.article.utils.SingleAuthorContainer;
 public interface IAuthorDistanceStrategy {
 	public double computeDistanceBetween(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor);
 	public String getStrategyName();
+	public String getStrategyKey();
 }

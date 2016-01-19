@@ -42,4 +42,7 @@ public class CoCitationsDistanceStrategy implements IAuthorDistanceStrategy {
 	public String getStrategyName() {
 		return "Co-Citations Distance";
 	}
+	public String getStrategyKey() {
+		return "CoCitations";
+	}
 }

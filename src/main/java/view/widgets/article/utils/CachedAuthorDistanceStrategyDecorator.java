@@ -1,8 +1,6 @@
 package view.widgets.article.utils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
@@ -57,5 +55,7 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 		// TODO Auto-generated method stub
 		return this.distanceStrategy.getStrategyName();
 	}
-
+	public String getStrategyKey() {
+		return this.distanceStrategy.getStrategyKey();
+	}
 }
