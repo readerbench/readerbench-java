@@ -130,7 +130,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		JLabel lblThreshold = new JLabel("Threshold");
 		lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		sliderThreshold = new JSlider(0, 100, 40);
+		sliderThreshold = new JSlider(0, 100, 80);
 		sliderThreshold.setBackground(Color.WHITE);
 		sliderThreshold.setPaintTicks(true);
 		sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -652,8 +652,8 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String inDir = "in/LAK_corpus/parsed-documents2";
-				AuthorDistanceStrategyType distanceStrategyType = AuthorDistanceStrategyType.CoAuthorshipDistance;
+				String inDir = "in/LAK_corpus/parsed-documents";
+				AuthorDistanceStrategyType distanceStrategyType = AuthorDistanceStrategyType.SemanticDistance;
 				
 				AuthorContainer container = AuthorContainer.buildAuthorContainerFromDirectory(inDir);
 				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
