@@ -54,6 +54,10 @@ public class TopicMatchGraph {
 		this.cost[sourceId][sinkId] = this.cost[sinkId][end] = 0D;
 	}
 
+	public double getEdge(int start, int end) {
+		return this.cost[start][end];
+	}
+
 	public Integer[] computeAssociations() {
 		int resultSize = 0;
 		for (int i = 0; i < this.nodes; i++)
@@ -147,10 +151,10 @@ public class TopicMatchGraph {
 
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (int i=0; i<this.nodes;i++) {
-			for (int j=0; j<this.nodes; j++) {
-				if (cost[i][j]>0)
-					sb.append(i+" >> "+j+": "+Formatting.formatNumber(cost[i][j])+";\n");
+		for (int i = 0; i < this.nodes; i++) {
+			for (int j = 0; j < this.nodes; j++) {
+				if (cost[i][j] > 0)
+					sb.append(i + " >> " + j + ": " + Formatting.formatNumber(cost[i][j]) + ";\n");
 			}
 		}
 		// for (int i = 0; i < this.nodes; i++) {
