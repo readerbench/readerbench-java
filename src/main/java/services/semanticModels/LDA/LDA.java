@@ -351,6 +351,9 @@ public class LDA implements ISemanticModel, Serializable {
 			return 0;
 		if (VectorAlgebra.avg(prob1) == 0 || VectorAlgebra.avg(prob2) == 0)
 			return 0;
+		if (VectorAlgebra.dotProduct(prob1, prob2) == 0) {
+			return 0;
+		}
 		double sim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
 		if (sim >= 0 && sim <= 1)
 			return sim;
@@ -362,8 +365,7 @@ public class LDA implements ISemanticModel, Serializable {
 	}
 
 	public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-		return 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(e1.getLDAProbDistribution()),
-				VectorAlgebra.normalize(e2.getLDAProbDistribution()));
+		return getSimilarity(e1.getLDAProbDistribution(), e2.getLDAProbDistribution());
 	}
 
 	public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {

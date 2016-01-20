@@ -87,7 +87,8 @@ public class VocabularyTest {
 							TopicMatchGraph graph = new TopicMatchGraph(9);
 							for (int i = 0; i < 3; i++) {
 								for (int j = 0; j < 6; j++) {
-									graph.addEdge(i, j + lhs.length, 1 - semModel.getSimilarity(lhs[i], rhs[j]));
+									double sim = semModel.getSimilarity(lhs[i], rhs[j]);
+									graph.addEdge(i, j + lhs.length, 1 - sim);
 								}
 							}
 
@@ -116,7 +117,11 @@ public class VocabularyTest {
 					logger.info("Printed information to: " + file.getAbsolutePath());
 				}
 			}
-		} catch (Exception e) {
+		} catch (
+
+		Exception e)
+
+		{
 			e.printStackTrace();
 		}
 
