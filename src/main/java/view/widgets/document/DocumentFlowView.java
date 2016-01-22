@@ -93,13 +93,11 @@ public class DocumentFlowView extends JFrame {
 			}
 		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(Alignment.TRAILING,
-						gl_contentPane.createSequentialGroup().addContainerGap()
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-										.addComponent(scrollPaneStats, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 428,
-												Short.MAX_VALUE)
-								.addComponent(scrollPaneContent, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 428,
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+								.addComponent(scrollPaneStats, Alignment.LEADING)
+								.addComponent(scrollPaneContent, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 778,
 										Short.MAX_VALUE)
 						.addGroup(Alignment.LEADING,
 								gl_contentPane.createSequentialGroup()
@@ -107,28 +105,27 @@ public class DocumentFlowView extends JFrame {
 												.addComponent(lblSemanticDistance).addComponent(lblCriteria))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-										.addComponent(comboBoxCriteria, 0, 413, Short.MAX_VALUE)
-										.addComponent(comboBoxSemDistance, 0, 413, Short.MAX_VALUE))
+										.addComponent(comboBoxCriteria, 0, 473, Short.MAX_VALUE)
+										.addComponent(comboBoxSemDistance, 0, 473, Short.MAX_VALUE))
 								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnViewDocumentFlow)))
-						.addContainerGap()));
+				.addContainerGap()));
 		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
 										.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-												.addComponent(lblSemanticDistance)
-												.addComponent(comboBoxSemDistance, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+												.addComponent(lblSemanticDistance).addComponent(comboBoxSemDistance,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE))
 								.addPreferredGap(ComponentPlacement.RELATED).addGroup(
 										gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblCriteria)
 												.addComponent(comboBoxCriteria, GroupLayout.PREFERRED_SIZE,
 														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
 						.addGroup(gl_contentPane.createSequentialGroup().addGap(21).addComponent(btnViewDocumentFlow)))
 				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
+				.addComponent(scrollPaneContent, GroupLayout.PREFERRED_SIZE, 318, GroupLayout.PREFERRED_SIZE)
 				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(scrollPaneStats, GroupLayout.PREFERRED_SIZE, 86, GroupLayout.PREFERRED_SIZE)
-				.addContainerGap()));
+				.addComponent(scrollPaneStats, GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE).addContainerGap()));
 
 		textAreaStats = new JTextArea();
 		textAreaStats.setWrapStyleWord(true);
@@ -165,49 +162,44 @@ public class DocumentFlowView extends JFrame {
 			modelContent.addRow(row);
 		}
 
-		textAreaStats.setText("");
+		textAreaStats.setText("Edges in the cohesion graph:\n");
 		for (int i = 0; i < df.getGraph().length - 1; i++) {
 			for (int j = i + 1; j < df.getGraph().length; j++) {
 				if (df.getGraph()[i][j] > 0) {
-					textAreaStats.append(i + ">>" + j + ":\t" + Formatting.formatNumber(df.getGraph()[i][j]) + "\n");
+					textAreaStats
+							.append("\t" + i + ">>" + j + ":\t" + Formatting.formatNumber(df.getGraph()[i][j]) + "\n");
 				}
 			}
 		}
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
+		textAreaStats.append("\nCohesion flow specific indices:\n");
+		textAreaStats.append(Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\n");
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
+				+ "\n");
+		textAreaStats.append(Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\n");
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_ADJACENCY_ACCURACY
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
+				+ "\n");
+		textAreaStats.append(Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_ADJACENCY_ACCURACY
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\n");
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_SPEARMAN_CORRELATION
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
+				+ "\n");
+		textAreaStats.append(Formatting.formatNumber(df.getSpearmanCorrelation()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_SPEARMAN_CORRELATION
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getSpearmanCorrelation()) + "\n");
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_MAX_ORDERED_SEQUENCE
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
+				+ "\n");
+		textAreaStats.append(Formatting.formatNumber(df.getMaxOrderedSequence()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_MAX_ORDERED_SEQUENCE
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
 								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getMaxOrderedSequence()) + "\n");
-		textAreaStats
-				.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[ComplexityIndices.DOC_FLOW_AVERAGE_COHESION
-						+ semanticDistIndex
-						+ SemanticCohesion.NO_COHESION_DIMENSIONS
-								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]
-						+ ":\t" + Formatting.formatNumber(df.getAverageFlowCohesion()));
+				+ "\n");
+		textAreaStats.append(Formatting.formatNumber(df.getAverageFlowCohesion()) + "\t"
+				+ ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[ComplexityIndices.DOC_FLOW_AVERAGE_COHESION
+						+ semanticDistIndex + SemanticCohesion.NO_COHESION_DIMENSIONS
+								* (crit.equals(DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV) ? 0 : 1)]);
 	}
 }

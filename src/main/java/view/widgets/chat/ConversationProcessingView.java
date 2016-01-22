@@ -31,7 +31,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -52,15 +51,13 @@ import javax.swing.table.TableRowSorter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import data.AbstractDocument;
+import data.cscl.Conversation;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import utils.localization.LocalizationUtils;
 import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
-import view.widgets.chat.ChatView;
 import view.widgets.complexity.ComplexityIndicesView;
-import data.AbstractDocument;
-import data.cscl.Conversation;
-import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class ConversationProcessingView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;
@@ -90,8 +87,8 @@ public class ConversationProcessingView extends JInternalFrame {
 		private boolean usePOSTagging;
 		private boolean isSerialized;
 
-		public DocumentProcessingTask(String pathToDoc, String pathToLSA,
-				String pathToLDA, boolean usePOSTagging, boolean isSerialized) {
+		public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+				boolean isSerialized) {
 			super();
 			this.pathToDoc = pathToDoc;
 			this.pathToLSA = pathToLSA;
@@ -103,26 +100,22 @@ public class ConversationProcessingView extends JInternalFrame {
 		public void addSingleDocument(String pathToIndividualFile) {
 			AbstractDocument d = null;
 			if (isSerialized) {
-				d = AbstractDocument
-						.loadSerializedDocument(pathToIndividualFile);
+				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
 			} else {
-				d = AbstractDocument.loadGenericDocument(pathToIndividualFile,
-						pathToLSA, pathToLDA, ReaderBenchView.RUNTIME_LANGUAGE,
-						usePOSTagging, true);
+				d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
+						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 				if (d instanceof Conversation) {
 					addConversation((Conversation) d);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please load only a conversation!", "Information",
+					JOptionPane.showMessageDialog(desktopPane, "Please load only a conversation!", "Information",
 							JOptionPane.INFORMATION_MESSAGE);
 				}
 
 			} else {
-				JOptionPane.showMessageDialog(desktopPane,
-						"Incorrect language for the loaded document!",
-						"Information", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
+						JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 
@@ -264,8 +257,7 @@ public class ConversationProcessingView extends JInternalFrame {
 
 		private void customizeText(String text) {
 			setText(text);
-			setFont(new Font(getFont().getFamily(), getFont().getStyle(),
-					getFont().getSize()));
+			setFont(new Font(getFont().getFamily(), getFont().getStyle(), getFont().getSize()));
 			setForeground(getPlaceholderForeground());
 			setTextWrittenIn(false);
 		}
@@ -275,8 +267,7 @@ public class ConversationProcessingView extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public ConversationProcessingView() {
-		setTitle("ReaderBench - "
-				+ LocalizationUtils.getTranslation("Conversation Processing"));
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setResizable(true);
 		setClosable(true);
@@ -285,27 +276,21 @@ public class ConversationProcessingView extends JInternalFrame {
 		setBounds(20, 20, 950, 350);
 		queryArticleName = "";
 
-		lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language")
-				+ ":");
+		lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
 		lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblLanguage.setForeground(Color.BLACK);
 
 		comboBoxLanguage = new JComboBox<String>();
-		comboBoxLanguage.addItem("<< "
-				+ LocalizationUtils
-						.getTranslation("Please select analysis language")
-				+ " >>");
+		comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
 		for (String lang : Lang.SUPPORTED_LANGUAGES)
 			comboBoxLanguage.addItem(lang);
 
-		btnAddDocument = new JButton(
-				LocalizationUtils.getTranslation("Add conversation(s)"));
+		btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
 		btnAddDocument.setEnabled(false);
 		btnAddDocument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					JInternalFrame frame = new AddConversationView(
-							ReaderBenchView.RUNTIME_LANGUAGE,
+					JInternalFrame frame = new AddConversationView(ReaderBenchView.RUNTIME_LANGUAGE,
 							ConversationProcessingView.this);
 					frame.setVisible(true);
 					desktopPane.add(frame);
@@ -320,15 +305,13 @@ public class ConversationProcessingView extends JInternalFrame {
 			}
 		});
 
-		btnAddSerializedDocument = new JButton(
-				LocalizationUtils
-						.getTranslation("Add preprocessed conversation(s)"));
+		btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed conversation(s)"));
 		btnAddSerializedDocument.setEnabled(false);
 		btnAddSerializedDocument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fc = null;
 				if (lastDirectory == null)
-					fc = new JFileChooser(new File("in"));
+					fc = new JFileChooser(new File("resources/in"));
 				else
 					fc = new JFileChooser(lastDirectory);
 				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -344,8 +327,7 @@ public class ConversationProcessingView extends JInternalFrame {
 						return "Serialized documents (*.ser) or directory";
 					}
 				});
-				int returnVal = fc
-						.showOpenDialog(ConversationProcessingView.this);
+				int returnVal = fc.showOpenDialog(ConversationProcessingView.this);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
@@ -361,11 +343,8 @@ public class ConversationProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (comboBoxLanguage.getSelectedIndex() > 0) {
 					// set final analysis language
-					ReaderBenchView.RUNTIME_LANGUAGE = Lang
-							.getLang((String) comboBoxLanguage
-									.getSelectedItem());
-					ComplexityIndicesView
-							.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
+					ReaderBenchView.RUNTIME_LANGUAGE = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
+					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
 					comboBoxLanguage.setEnabled(false);
 					btnAddDocument.setEnabled(true);
 					btnAddSerializedDocument.setEnabled(true);
@@ -393,8 +372,7 @@ public class ConversationProcessingView extends JInternalFrame {
 		docTableModel = new ConversationManagementTableModel();
 		docTable = new JTable(docTableModel);
 		docTable.setFillsViewportHeight(true);
-		docSorter = new TableRowSorter<ConversationManagementTableModel>(
-				docTableModel);
+		docSorter = new TableRowSorter<ConversationManagementTableModel>(docTableModel);
 		docTable.setRowSorter(docSorter);
 
 		docTable.addMouseListener(new MouseAdapter() {
@@ -404,8 +382,7 @@ public class ConversationProcessingView extends JInternalFrame {
 					JTable target = (JTable) event.getSource();
 					int row = target.getSelectedRow();
 					if (row >= 0 && row < loadedConversations.size()) {
-						int modelRow = target.convertRowIndexToModel(target
-								.getSelectedRow());
+						int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
 						AbstractDocument d = loadedConversations.get(modelRow);
 						if (d instanceof Conversation) {
 							ChatView view = new ChatView((Conversation) d);
@@ -417,8 +394,7 @@ public class ConversationProcessingView extends JInternalFrame {
 		});
 
 		scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setViewportView(docTable);
 
 		desktopPane = new JDesktopPane() {
@@ -430,8 +406,7 @@ public class ConversationProcessingView extends JInternalFrame {
 					UIDefaults map = new UIDefaults();
 					Painter<JComponent> painter = new Painter<JComponent>() {
 						@Override
-						public void paint(Graphics2D g, JComponent c, int w,
-								int h) {
+						public void paint(Graphics2D g, JComponent c, int w, int h) {
 							g.setColor(Color.WHITE);
 							g.fillRect(0, 0, w, h);
 						}
@@ -446,114 +421,65 @@ public class ConversationProcessingView extends JInternalFrame {
 
 		JPanel panelSingleDoc = new JPanel();
 		panelSingleDoc.setBackground(Color.WHITE);
-		panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), LocalizationUtils
-				.getTranslation("Specific conversation operations"),
-				TitledBorder.LEFT, TitledBorder.TOP, null, null));
+		panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+				LocalizationUtils.getTranslation("Specific conversation operations"), TitledBorder.LEFT,
+				TitledBorder.TOP, null, null));
 
 		JPanel panelSearch = new JPanel();
 		panelSearch.setBackground(Color.WHITE);
-		panelSearch.setBorder(new TitledBorder(new EtchedBorder(
-				EtchedBorder.LOWERED, null, null), "Filter",
-				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59,
-						59)));
+		panelSearch.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Filter",
+				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane
-				.setHorizontalGroup(gl_desktopPane
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_desktopPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																scrollPane,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																865,
-																Short.MAX_VALUE)
-														.addComponent(
-																panelSearch,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																865,
-																Short.MAX_VALUE)
-														.addGroup(
-																Alignment.LEADING,
-																gl_desktopPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblLanguage)
-																		.addGap(2)
-																		.addComponent(
-																				comboBoxLanguage,
-																				0,
-																				804,
-																				Short.MAX_VALUE))
-														.addComponent(
-																panelSingleDoc,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																Short.MAX_VALUE))
-										.addContainerGap()));
-		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(
-				Alignment.LEADING).addGroup(
-				gl_desktopPane
-						.createSequentialGroup()
-						.addContainerGap()
-						.addGroup(
-								gl_desktopPane
-										.createParallelGroup(Alignment.LEADING,
-												false)
-										.addComponent(lblLanguage,
-												GroupLayout.PREFERRED_SIZE, 25,
-												GroupLayout.PREFERRED_SIZE)
-										.addComponent(comboBoxLanguage,
-												GroupLayout.PREFERRED_SIZE, 25,
-												GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE,
-								62, GroupLayout.PREFERRED_SIZE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE,
-								126, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelSingleDoc,
-								GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE).addContainerGap()));
+		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+						.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+								.addComponent(scrollPane, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865,
+										Short.MAX_VALUE)
+						.addComponent(panelSearch, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
+						.addGroup(Alignment.LEADING,
+								gl_desktopPane.createSequentialGroup().addComponent(lblLanguage).addGap(2)
+										.addComponent(comboBoxLanguage, 0, 804, Short.MAX_VALUE))
+						.addComponent(panelSingleDoc, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+						.addContainerGap()));
+		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+						.addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+				.addContainerGap()));
 
 		articleTextField = new CustomTextField(1);
 		articleTextField.setPlaceholder("Insert Conversation Name");
 		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
 		articleTextField.setPlaceholderForeground(Color.gray);
-		articleTextField.getDocument().addDocumentListener(
-				new DocumentListener() {
-					public void changedUpdate(DocumentEvent e) {
-						warn();
-					}
+		articleTextField.getDocument().addDocumentListener(new DocumentListener() {
+			public void changedUpdate(DocumentEvent e) {
+				warn();
+			}
 
-					public void removeUpdate(DocumentEvent e) {
-						warn();
-					}
+			public void removeUpdate(DocumentEvent e) {
+				warn();
+			}
 
-					public void insertUpdate(DocumentEvent e) {
-						warn();
-					}
+			public void insertUpdate(DocumentEvent e) {
+				warn();
+			}
 
-					public void warn() {
-						queryArticleName = articleTextField.getText();
-						if (queryArticleName
-								.equalsIgnoreCase("Insert Conversation Name"))
-							queryArticleName = "";
-						newFilter();
-					}
-				});
+			public void warn() {
+				queryArticleName = articleTextField.getText();
+				if (queryArticleName.equalsIgnoreCase("Insert Conversation Name"))
+					queryArticleName = "";
+				newFilter();
+			}
+		});
 
 		// JSplitPane splitPane = new JSplitPane();
 		// splitPane.setBackground(Color.WHITE);
@@ -561,72 +487,47 @@ public class ConversationProcessingView extends JInternalFrame {
 		// splitPane.setLeftComponent(articleTextField);
 		articleTextField.setColumns(25);
 
-		btnViewDocument = new JButton(
-				LocalizationUtils.getTranslation("View conversation"));
+		btnViewDocument = new JButton(LocalizationUtils.getTranslation("View conversation"));
 		btnViewDocument.setEnabled(false);
 		btnViewDocument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable
-							.getSelectedRow());
+					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
 					AbstractDocument d = loadedConversations.get(modelRow);
 					if (d instanceof Conversation) {
 						ChatView view = new ChatView((Conversation) d);
 						view.setVisible(true);
 					}
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please select a document to be viewed!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
 
-		btnRemoveDocument = new JButton(
-				LocalizationUtils.getTranslation("Remove conversation"));
+		btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove conversation"));
 		btnRemoveDocument.setEnabled(false);
 		GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
-		gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc
-				.createParallelGroup(Alignment.LEADING).addGroup(
-						gl_panelSingleDoc.createSequentialGroup().addGap(2)
-								.addComponent(btnViewDocument).addGap(18)
-								.addComponent(btnAddDocument).addGap(18)
-								.addComponent(btnAddSerializedDocument)
-								.addGap(18).addComponent(btnRemoveDocument)
-								.addGap(131)));
-		gl_panelSingleDoc
-				.setVerticalGroup(gl_panelSingleDoc
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_panelSingleDoc
-										.createSequentialGroup()
-										.addGap(5)
-										.addGroup(
-												gl_panelSingleDoc
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																btnViewDocument)
-														.addComponent(
-																btnAddDocument)
-														.addComponent(
-																btnAddSerializedDocument)
-														.addComponent(
-																btnRemoveDocument))));
+		gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(2).addComponent(btnViewDocument).addGap(18)
+						.addComponent(btnAddDocument).addGap(18).addComponent(btnAddSerializedDocument).addGap(18)
+						.addComponent(btnRemoveDocument).addGap(131)));
+		gl_panelSingleDoc.setVerticalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(5)
+						.addGroup(gl_panelSingleDoc.createParallelGroup(Alignment.BASELINE)
+								.addComponent(btnViewDocument).addComponent(btnAddDocument)
+								.addComponent(btnAddSerializedDocument).addComponent(btnRemoveDocument))));
 		panelSingleDoc.setLayout(gl_panelSingleDoc);
 		btnRemoveDocument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable
-							.getSelectedRow());
-					AbstractDocument toRemove = loadedConversations
-							.get(modelRow);
+					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
+					AbstractDocument toRemove = loadedConversations.get(modelRow);
 					loadedConversations.remove(toRemove);
 					docTableModel.removeRow(modelRow);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please load appropriate documents!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
@@ -638,15 +539,6 @@ public class ConversationProcessingView extends JInternalFrame {
 
 	public static List<Conversation> getLoadedConversations() {
 		return loadedConversations;
-	}
-
-	private String getStringFromList(List<String> l) {
-		String out = "";
-		for (String str : l) {
-			out += (out.length() > 0) ? " " : "";
-			out += str;
-		}
-		return out;
 	}
 
 	public void addConversation(Conversation c) {
@@ -667,7 +559,7 @@ public class ConversationProcessingView extends JInternalFrame {
 				} else {
 					dataRow.add("");
 				}
-				
+
 				docTableModel.addRow(dataRow);
 				loadedConversations.add(c);
 			}
@@ -755,8 +647,7 @@ public class ConversationProcessingView extends JInternalFrame {
 	}
 
 	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
+		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());

@@ -42,4 +42,7 @@ public class CoAuthorshipDistanceStrategy implements IAuthorDistanceStrategy {
 	public String getStrategyName() {
 		return "Co-Authorship Distance";
 	}
+	public String getStrategyKey() {
+		return "CoAuthorship";
+	}
 }

@@ -12,14 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import data.complexity.Measurement;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 
 public class DataGathering {
 	static Logger logger = Logger.getLogger(DataGathering.class);
@@ -124,34 +123,5 @@ public class DataGathering {
 			ex.printStackTrace();
 		}
 		return result;
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
-		try {
-			// DataGathering.processTexts("in/essays/essays_FYP_en/texts", -1,
-			// true, lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/essays/competition_en/texts", -1,
-			// true, lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/essays/images_en/texts", -1, true,
-			// lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/essays/DC_essays_2009_en/texts",
-			// -1,
-			// true, lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/essays/msu_timed_en/texts", -1,
-			// true, lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/SEvsTA/texts", -1, true, lsa, lda,
-			// Lang.eng, true);
-			// DataGathering.processTexts("in/essays/posttest_fall_2009/texts",
-			// -1, true, lsa, lda, Lang.eng, true);
-			// DataGathering.processTexts("in/essays/pretest_spring_2010/texts",
-			// -1, true, lsa, lda, Lang.eng, true);
-			DataGathering.processTexts("in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }

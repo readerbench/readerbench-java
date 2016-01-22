@@ -1,15 +1,16 @@
 package view.widgets.article.utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStrategy {
 	private IAuthorDistanceStrategy distanceStrategy;
-	private List<AuthorPairDistanceContainer> authorsDistanceContainer;
+	private Map<String, AuthorPairDistanceContainer> authorsDistanceContainer;
 
 	public CachedAuthorDistanceStrategyDecorator(AuthorContainer authorContainer, IAuthorDistanceStrategy distanceStrategy) {
-		this.authorsDistanceContainer = new ArrayList<AuthorPairDistanceContainer>();
+		this.authorsDistanceContainer = new HashMap<String, AuthorPairDistanceContainer>();
 		this.distanceStrategy = distanceStrategy;
 		this.computeDistances(authorContainer);
 	}
@@ -19,7 +20,10 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 				SingleAuthorContainer a1 = authorContainer.getAuthorContainers().get(i);
 				SingleAuthorContainer a2 = authorContainer.getAuthorContainers().get(j);
 				double sim = this.distanceStrategy.computeDistanceBetween(a1, a2);
-				this.authorsDistanceContainer.add(new AuthorPairDistanceContainer(a1, a2, sim));
+				AuthorPairDistanceContainer pair = new AuthorPairDistanceContainer(a1, a2, sim);
+				
+				this.authorsDistanceContainer.put(a1.getAuthor().getAuthorUri() + a2.getAuthor().getAuthorUri(), pair);
+				this.authorsDistanceContainer.put(a2.getAuthor().getAuthorUri() + a1.getAuthor().getAuthorUri(), pair);
 			}
 		}
 	}
@@ -34,11 +38,14 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 	}
 	
 	private AuthorPairDistanceContainer getAssociatedDistanceContainer(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor) {
-		AuthorPairDistanceContainer container = new AuthorPairDistanceContainer(firstAuthor, secondAuthor, 0.0);
-		for(AuthorPairDistanceContainer internalContainer : this.authorsDistanceContainer) {
-			if(internalContainer.equals(container)) {
-				return internalContainer;
-			}
+		String key1 = firstAuthor.getAuthor().getAuthorUri() + secondAuthor.getAuthor().getAuthorUri();
+		String key2 = secondAuthor.getAuthor().getAuthorUri() + firstAuthor.getAuthor().getAuthorUri();
+		
+		if(this.authorsDistanceContainer.containsKey(key1)) {
+			return this.authorsDistanceContainer.get(key1);
+		}
+		else if(this.authorsDistanceContainer.containsKey(key2)) {
+			return this.authorsDistanceContainer.get(key2);
 		}
 		return null;
 	}
@@ -48,5 +55,7 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 		// TODO Auto-generated method stub
 		return this.distanceStrategy.getStrategyName();
 	}
-
+	public String getStrategyKey() {
+		return this.distanceStrategy.getStrategyKey();
+	}
 }

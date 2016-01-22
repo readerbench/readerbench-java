@@ -4,7 +4,6 @@ import java.util.List;
 
 import data.article.ResearchArticle;
 import data.article.ArticleAuthor;
-import data.document.Document;
 
 public class SingleAuthorContainer implements Comparable<SingleAuthorContainer> {
 	ArticleAuthor author;
@@ -77,7 +76,18 @@ public class SingleAuthorContainer implements Comparable<SingleAuthorContainer> 
 
 	@Override
 	public int compareTo(SingleAuthorContainer o) {
-		// TODO Auto-generated method stub
 		return this.author.getAuthorUri().compareTo(((SingleAuthorContainer)o).getAuthor().getAuthorUri());
+	}
+	@Override
+	public int hashCode() {
+		return this.author.getAuthorUri().hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == null || obj == null)
+			return false;
+		SingleAuthorContainer d = (SingleAuthorContainer) obj;
+		return this.getAuthor().getAuthorUri().equals(d.getAuthor().getAuthorUri());
 	}
 }
