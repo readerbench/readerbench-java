@@ -11,7 +11,7 @@ import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
 
-public class ParticipantEvolution {
+public class ParticipantInteraction {
 
 	public static ResultTopic buildParticipantGraph(Conversation c) {
 

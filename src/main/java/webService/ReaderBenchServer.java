@@ -2,15 +2,11 @@ package webService;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -23,8 +19,6 @@ import org.simpleframework.xml.Path;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -35,7 +29,6 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Block;
 import data.Word;
-import data.AbstractDocumentTemplate.BlockTemplate;
 import data.cscl.Conversation;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
@@ -66,7 +59,7 @@ import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
-import webService.services.cscl.ParticipantEvolution;
+import webService.services.cscl.ParticipantInteraction;
 
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
@@ -634,7 +627,7 @@ public class ReaderBenchServer {
 					false);
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ParticipantEvolution.buildParticipantGraph(conversation);
+			queryResult.data = ParticipantInteraction.buildParticipantGraph(conversation);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;

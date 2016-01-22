@@ -39,10 +39,10 @@ import data.cscl.Participant;
 import processing.core.PApplet;
 import services.discourse.CSCL.ParticipantEvaluation;
 
-public class ParticipantInvolvementView extends JFrame {
+public class ParticipantInteractionView extends JFrame {
 	private static final long serialVersionUID = 2571577554857108582L;
 
-	static Logger logger = Logger.getLogger(ParticipantInvolvementView.class);
+	static Logger logger = Logger.getLogger(ParticipantInteractionView.class);
 
 	private List<Participant> participants;
 	private double[][] participantContributions;
@@ -50,7 +50,7 @@ public class ParticipantInvolvementView extends JFrame {
 	private String genericName;
 	private String path;
 
-	public ParticipantInvolvementView(String genericName, String path, List<Participant> participants,
+	public ParticipantInteractionView(String genericName, String path, List<Participant> participants,
 			double[][] participantContributions, boolean displayEdgeLabels, boolean isAnonymized) {
 		super();
 		setTitle("ReaderBench - Participant Interaction");

@@ -139,7 +139,7 @@ public class ChatView extends JFrame {
 							lsPart.add(part);
 						}
 
-						ParticipantInvolvementView view = new ParticipantInvolvementView("Participant", "out/graph.pdf",
+						ParticipantInteractionView view = new ParticipantInteractionView("Participant", "out/graph.pdf",
 								lsPart, chat.getParticipantContributions(), true, false);
 						view.setVisible(true);
 					}

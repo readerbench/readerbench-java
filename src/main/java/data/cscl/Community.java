@@ -46,7 +46,7 @@ import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
-import view.widgets.chat.ParticipantInvolvementView;
+import view.widgets.chat.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
 
 public class Community extends AnalysisElement {
@@ -386,7 +386,7 @@ public class Community extends AnalysisElement {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ParticipantInvolvementView view = new ParticipantInvolvementView("Member", path, participants,
+				ParticipantInteractionView view = new ParticipantInteractionView("Member", path, participants,
 						participantContributions, true, true);
 				view.setVisible(true);
 			}
