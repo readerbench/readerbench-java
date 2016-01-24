@@ -5,21 +5,33 @@ import java.util.Vector;
 
 public class ResultCscl {
 
+	private ResultTopic concepts;
 	private ResultTopic participantInteraction;
 	private String participantEvolution;
 	private List<ResultGraphPoint> socialKB;
 	private List<ResultGraphPoint> voiceOverlap;
 
-	public ResultCscl(ResultTopic participantInteraction,
+	public ResultCscl(
+			ResultTopic concepts,
+			ResultTopic participantInteraction,
 			String participantEvolution,
 			List<ResultGraphPoint> socialKB,
 			List<ResultGraphPoint> voiceOverlap
 			) {
 		super();
+		this.concepts = concepts;
 		this.participantInteraction = participantInteraction;
 		this.participantEvolution = participantEvolution;
 		this.socialKB = socialKB;
 		this.voiceOverlap = voiceOverlap;
+	}
+
+	public ResultTopic getConcepts() {
+		return concepts;
+	}
+
+	public void setConcepts(ResultTopic concepts) {
+		this.concepts = concepts;
 	}
 
 	public ResultTopic getParticipantInteraction() {

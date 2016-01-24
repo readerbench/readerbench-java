@@ -11,10 +11,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.cscl.Conversation;
 import webService.result.ResultCscl;
+import webService.services.ConceptMap;
 
 public class Cscl {
 	
@@ -97,9 +99,10 @@ public class Cscl {
 		
 	}
 	
-	public static ResultCscl getAll(Conversation c) {
+	public static ResultCscl getAll(AbstractDocument conversationDocument, Conversation c, double threshold) {
 		
 		return new ResultCscl(
+				ConceptMap.getTopics(conversationDocument, threshold),
 				ParticipantInteraction.buildParticipantGraph(c),
 				null,
 				Collaboration.buildSocialKBGraph(c),

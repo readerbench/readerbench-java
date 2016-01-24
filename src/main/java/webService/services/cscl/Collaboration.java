@@ -22,6 +22,9 @@ public class Collaboration {
 				values.add(new ResultGraphPoint(i, ((Utterance) c.getBlocks().get(i))
 						.getSocialKB()));
 			}
+			else {
+				values.add(new ResultGraphPoint(i, 0));
+			}
 		}
 		
 		return values;

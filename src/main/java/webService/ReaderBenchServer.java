@@ -425,7 +425,7 @@ public class ReaderBenchServer {
 		private QueryResultCscl() {
 			success = true;
 			errorMsg = "";
-			data = new ResultCscl(null, null, null, null);
+			data = new ResultCscl(null, null, null, null, null);
 		}
 	}
 
@@ -631,10 +631,11 @@ public class ReaderBenchServer {
 					lang,
 					usePOSTagging,
 					false);
+			AbstractDocument conversationDocument = processQuery(conversationText, pathToLSA, pathToLDA, language, usePOSTagging);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
 			//queryResult.data = ParticipantInteraction.buildParticipantGraph(conversation);
-			queryResult.data = Cscl.getAll(conversation);
+			queryResult.data = Cscl.getAll(conversationDocument, conversation, threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
