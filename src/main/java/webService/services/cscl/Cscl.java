@@ -104,7 +104,7 @@ public class Cscl {
 		return new ResultCscl(
 				ConceptMap.getTopics(conversationDocument, threshold),
 				ParticipantInteraction.buildParticipantGraph(c),
-				null,
+				ParticipantEvolution.buildParticipantEvolutionData(c),
 				Collaboration.buildSocialKBGraph(c),
 				Collaboration.buildVoiceOverlapGraph(c));
 		

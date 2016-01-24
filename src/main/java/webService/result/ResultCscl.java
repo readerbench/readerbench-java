@@ -7,14 +7,14 @@ public class ResultCscl {
 
 	private ResultTopic concepts;
 	private ResultTopic participantInteraction;
-	private String participantEvolution;
+	private List<ResultGraphPoint> participantEvolution;
 	private List<ResultGraphPoint> socialKB;
 	private List<ResultGraphPoint> voiceOverlap;
 
 	public ResultCscl(
 			ResultTopic concepts,
 			ResultTopic participantInteraction,
-			String participantEvolution,
+			List<ResultGraphPoint> participantEvolution,
 			List<ResultGraphPoint> socialKB,
 			List<ResultGraphPoint> voiceOverlap
 			) {
@@ -42,11 +42,11 @@ public class ResultCscl {
 		this.participantInteraction = participantInteraction;
 	}
 
-	public String getParticipantEvolution() {
+	public List<ResultGraphPoint> getParticipantEvolution() {
 		return participantEvolution;
 	}
 
-	public void setParticipantEvolution(String participantEvolution) {
+	public void setParticipantEvolution(List<ResultGraphPoint> participantEvolution) {
 		this.participantEvolution = participantEvolution;
 	}
 

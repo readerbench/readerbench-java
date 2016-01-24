@@ -19,11 +19,11 @@ public class Collaboration {
 		
 		for (int i = 0; i < c.getBlocks().size(); i++) {
 			if (c.getBlocks().get(i) != null) {
-				values.add(new ResultGraphPoint(i, ((Utterance) c.getBlocks().get(i))
+				values.add(new ResultGraphPoint("", i, ((Utterance) c.getBlocks().get(i))
 						.getSocialKB()));
 			}
 			else {
-				values.add(new ResultGraphPoint(i, 0));
+				values.add(new ResultGraphPoint("", i, 0));
 			}
 		}
 		
@@ -37,7 +37,7 @@ public class Collaboration {
 		double[] evolution = c.getVoicePMIEvolution();
 	
 		for (int i = 0; i < evolution.length; i++) {
-			values.add(new ResultGraphPoint(i,  evolution[i]));
+			values.add(new ResultGraphPoint("", i,  evolution[i]));
 		}
 			
 		return values;
