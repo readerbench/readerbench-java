@@ -13,6 +13,8 @@ import org.xml.sax.InputSource;
 
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.cscl.Conversation;
+import webService.result.ResultCscl;
 
 public class Cscl {
 	
@@ -92,6 +94,16 @@ public class Cscl {
 		}
 		
 		return null;
+		
+	}
+	
+	public static ResultCscl getAll(Conversation c) {
+		
+		return new ResultCscl(
+				ParticipantInteraction.buildParticipantGraph(c),
+				null,
+				Collaboration.buildSocialKBGraph(c),
+				Collaboration.buildVoiceOverlapGraph(c));
 		
 	}
 

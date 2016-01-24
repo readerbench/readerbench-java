@@ -262,6 +262,12 @@ public class ReaderBenchServer {
 		String json = gson.toJson(queryResult);
 		return json;
 	}
+	
+	private String convertToJson(QueryResultCscl queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
 
 	@Root(name = "response")
 	private static class QueryResult {
@@ -419,7 +425,7 @@ public class ReaderBenchServer {
 		private QueryResultCscl() {
 			success = true;
 			errorMsg = "";
-			data = new ResultCscl("");
+			data = new ResultCscl(null, null, null, null);
 		}
 	}
 
@@ -626,8 +632,9 @@ public class ReaderBenchServer {
 					usePOSTagging,
 					false);
 
-			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ParticipantInteraction.buildParticipantGraph(conversation);
+			QueryResultCscl queryResult = new QueryResultCscl();
+			//queryResult.data = ParticipantInteraction.buildParticipantGraph(conversation);
+			queryResult.data = Cscl.getAll(conversation);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;

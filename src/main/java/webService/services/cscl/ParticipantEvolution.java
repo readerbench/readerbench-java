@@ -1,5 +1,5 @@
 package webService.services.cscl;
 
-public class ParticipantInvolvment {
+public class ParticipantEvolution {
 
 }
