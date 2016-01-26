@@ -2,7 +2,9 @@ package webService.services.cscl;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -14,7 +16,10 @@ import org.xml.sax.InputSource;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
+import data.cscl.Participant;
+import services.commons.Formatting;
 import webService.result.ResultCscl;
 import webService.services.ConceptMap;
 
@@ -106,7 +111,50 @@ public class Cscl {
 				ParticipantInteraction.buildParticipantGraph(c),
 				ParticipantEvolution.buildParticipantEvolutionData(c),
 				Collaboration.buildSocialKBGraph(c),
-				Collaboration.buildVoiceOverlapGraph(c));
+				Collaboration.buildVoiceOverlapGraph(c),
+				Cscl.getCsclIndices(c)
+			);
+		
+	}
+	
+	public static HashMap<String, HashMap<String, Double>> getCsclIndices(Conversation c) {
+		
+		HashMap<String, HashMap<String, Double>> indices = new HashMap<String, HashMap<String, Double>>();
+		
+		// print participant statistics
+		if (c.getParticipants().size() > 0) {
+			//out.write("\nParticipant involvement and interaction\n");
+			//out.write("Participant name");
+			//for (CSCLIndices CSCLindex : CSCLIndices.values())
+				//out.write(CSCLindex.getDescription());
+			for (Participant p : c.getParticipants()) {
+				HashMap<String, Double> hm = new HashMap<String, Double>();
+				//out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
+				for (CSCLIndices index : CSCLIndices.values()) {
+					//out.write("," + p.getIndices().get(index));
+					hm.put(index.toString(), Formatting.formatNumber(p.getIndices().get(index)));
+				}
+				indices.put(p.getName(), hm);
+			}
+			// print interaction matrix
+			//out.write("Interaction matrix\n");
+			//for (Participant p : c.getParticipants())
+				//out.write("," + p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
+			//out.write("\n");
+			/*Iterator<Participant> it = c.getParticipants().iterator();
+			int i = 0;
+			while (it.hasNext()) {
+				Participant part = it.next();
+				//out.write(part.getName().replaceAll(",", "").replaceAll("\\s+", " "));
+				for (int j = 0; j < c.getParticipants().size(); j++) {
+					//out.write("," + Formatting.formatNumber(c.getParticipantContributions()[i][j]));
+				}
+				i++;
+				//out.write("\n");
+			}*/
+		}
+		
+		return indices;
 		
 	}
 

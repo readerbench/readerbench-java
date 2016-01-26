@@ -1,5 +1,6 @@
 package webService.result;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -10,13 +11,15 @@ public class ResultCscl {
 	private List<ResultGraphPoint> participantEvolution;
 	private List<ResultGraphPoint> socialKB;
 	private List<ResultGraphPoint> voiceOverlap;
+	private HashMap<String, HashMap<String, Double>> csclIndices;
 
 	public ResultCscl(
 			ResultTopic concepts,
 			ResultTopic participantInteraction,
 			List<ResultGraphPoint> participantEvolution,
 			List<ResultGraphPoint> socialKB,
-			List<ResultGraphPoint> voiceOverlap
+			List<ResultGraphPoint> voiceOverlap,
+			HashMap<String, HashMap<String, Double>> csclIndices
 			) {
 		super();
 		this.concepts = concepts;
@@ -24,6 +27,15 @@ public class ResultCscl {
 		this.participantEvolution = participantEvolution;
 		this.socialKB = socialKB;
 		this.voiceOverlap = voiceOverlap;
+		this.csclIndices = csclIndices;
+	}
+
+	public HashMap<String, HashMap<String, Double>> getCsclIndices() {
+		return csclIndices;
+	}
+
+	public void setCsclIndices(HashMap<String, HashMap<String, Double>> csclIndices) {
+		this.csclIndices = csclIndices;
 	}
 
 	public ResultTopic getConcepts() {
