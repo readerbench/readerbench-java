@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -610,28 +613,36 @@ public class ReaderBenchServer {
 		});
 		Spark.post("/csclProcessing", (request, response) -> {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
+			
 			response.type("application/json");
 
-			String conversationText = (String) json.get("conversation");
+			//String conversationText = (String) json.get("conversation");
+			String conversationPath = (String) json.get("conversationPath");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			double threshold = (Double) json.get("threshold");
 			
-			AbstractDocumentTemplate contents = Cscl.getConversationText(conversationText);
-			logger.info("Contents: blocks = " + contents.getBlocks().size());
+			//AbstractDocumentTemplate contents = Cscl.getConversationText(conversationText);
+			//logger.info("Contents: blocks = " + contents.getBlocks().size());
 			Lang lang = Lang.getLang(language);
-			Conversation conversation = new Conversation(
+			/*Conversation conversation = new Conversation(
 					null,
 					contents,
 					LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang),
 					lang,
 					usePOSTagging,
+					false);*/
+			Conversation conversation = Conversation.load(
+					new File(conversationPath),
+					LSA.loadLSA(pathToLSA, lang),
+					LDA.loadLDA(pathToLDA, lang),
+					lang,
+					usePOSTagging,
 					false);
-			AbstractDocument conversationDocument = processQuery(conversationText, pathToLSA, pathToLDA, language, usePOSTagging);
+			AbstractDocument conversationDocument = processQuery(conversation.getText(), pathToLSA, pathToLDA, language, usePOSTagging);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
 			//queryResult.data = ParticipantInteraction.buildParticipantGraph(conversation);
