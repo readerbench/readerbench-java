@@ -36,7 +36,7 @@ public class Collaboration {
 		List<ResultGraphPoint> values = new ArrayList<ResultGraphPoint>();
 		double[] evolution = c.getVoicePMIEvolution();
 	
-		for (int i = 0; i < evolution.length; i++) {
+		if (evolution != null) for (int i = 0; i < evolution.length; i++) {
 			values.add(new ResultGraphPoint("", i,  evolution[i]));
 		}
 			

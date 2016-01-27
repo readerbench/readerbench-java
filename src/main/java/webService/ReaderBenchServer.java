@@ -642,7 +642,7 @@ public class ReaderBenchServer {
 					lang,
 					usePOSTagging,
 					false);
-			conversation.computeAll(null, null);
+			conversation.computeAll(null, null, true);
 			AbstractDocument conversationDocument = processQuery(conversation.getText(), pathToLSA, pathToLDA, language, usePOSTagging);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
