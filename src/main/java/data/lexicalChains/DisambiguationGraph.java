@@ -15,7 +15,7 @@ import edu.cmu.lti.jawjaw.pobj.Sense;
  * 
  * @authors Ioana Serban, Mihai Dascalu
  */
-public class DisambiguationGraph implements Serializable{
+public class DisambiguationGraph implements Serializable {
 	private static final long serialVersionUID = 1026969873848700049L;
 
 	public static final int SAME_SENTENCE = 0;
@@ -58,25 +58,18 @@ public class DisambiguationGraph implements Serializable{
 		for (Sense senseId : nodes.keySet()) {
 			double weight = 0;
 			for (LexicalChainLink link : nodes.get(senseId)) {
-				if (!newLink.hasSameWord(link)
-						&& newLink.getWord().getPOS()
-								.equals(link.getWord().getPOS())) {
+				if (!newLink.hasSameWord(link)) {
 					// determine weight of the connection
 					if (OntologySupport.areSynonyms(newLink.getSenseId(), senseId, language)) {
 						weight = getWeightSynonyms(getDistance(newLink, link));
-					} else if (OntologySupport.areAntonyms(newLink.getSenseId(), senseId,
-							language)) {
+					} else if (OntologySupport.areAntonyms(newLink.getSenseId(), senseId, language)) {
 						weight = getWeightAntonyms(getDistance(newLink, link));
-					} else if (OntologySupport.areHypernym(newLink.getSenseId(), senseId,
-							language)) {
+					} else if (OntologySupport.areHypernym(newLink.getSenseId(), senseId, language)) {
 						weight = getWeightHypernyms(getDistance(newLink, link));
-					} else if (OntologySupport.areHyponym(newLink.getSenseId(), senseId,
-							language)) {
+					} else if (OntologySupport.areHyponym(newLink.getSenseId(), senseId, language)) {
 						weight = getWeightHyponyms(getDistance(newLink, link));
-					} else if (newLink.getWord().getBlockIndex() == link
-							.getWord().getBlockIndex()
-							&& OntologySupport.areSiblings(newLink.getSenseId(), senseId,
-									language)) {
+					} else if (newLink.getWord().getBlockIndex() == link.getWord().getBlockIndex()
+							&& OntologySupport.areSiblings(newLink.getSenseId(), senseId, language)) {
 						weight = getWeightSiblings(getDistance(newLink, link));
 					}
 

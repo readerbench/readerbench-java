@@ -32,7 +32,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 	private double[] blockMovingAverage;
 	private double averageImportanceScore;
 
-	private boolean NNVB;
 	private transient SentimentEntity chainSentiment;
 
 	public SemanticChain(LexicalChain chain, LSA lsa, LDA lda) {
@@ -43,21 +42,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 			words.add(link.getWord());
 		}
 		this.setChainSentiment(new SentimentEntity());
-		this.NNVB = false;
-		computeSentimentDistribution();
-	}
-
-	private void computeSentimentDistribution() {
-		int counter = 0;
-		for (Word w : words) {
-			if (w.isNoun() || w.isVerb()) {
-				counter++;
-			}
-		}
-		if (counter == words.size())
-			NNVB = true;
-		else
-			NNVB = false;
 	}
 
 	public static double similarity(SemanticChain chain1, SemanticChain chain2) {
@@ -310,10 +294,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
 	public double getStdevSentiment() {
 		return VectorAlgebra.stdev(getSentenceDistribution());
-	}
-
-	public boolean hasNounsVerbs() {
-		return NNVB;
 	}
 
 	@Override

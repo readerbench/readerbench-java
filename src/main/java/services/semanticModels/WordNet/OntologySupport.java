@@ -41,11 +41,9 @@ public class OntologySupport {
 	private static final int MAX_NO_HYPERNYMS = 1;
 
 	private static ILexicalDatabase wn = new NictWordNetDB();
-	private static RelatednessCalculator[] related_en = {
-			new LeacockChodorow(wn, Lang.eng), new WuPalmer(wn, Lang.eng),
+	private static RelatednessCalculator[] related_en = { new LeacockChodorow(wn, Lang.eng), new WuPalmer(wn, Lang.eng),
 			new Path(wn, Lang.eng) };
-	private static RelatednessCalculator[] related_fr = {
-			new LeacockChodorow(wn, Lang.fr), new WuPalmer(wn, Lang.fr),
+	private static RelatednessCalculator[] related_fr = { new LeacockChodorow(wn, Lang.fr), new WuPalmer(wn, Lang.fr),
 			new Path(wn, Lang.fr) };
 
 	public static POS getPOS(String posTag) {
@@ -70,8 +68,7 @@ public class OntologySupport {
 	public static double semanticSimilarity(Word w1, Word w2, int type) {
 		if (!w1.getLanguage().equals(w2.getLanguage()))
 			return 0;
-		if (w1 == null || w2 == null || w1.getPOS() == null
-				|| w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS()))
+		if (w1 == null || w2 == null || w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS()))
 			return 0;
 		String word1 = w1.getLemma() + "#" + getPOS(w1.getPOS());
 		String word2 = w2.getLemma() + "#" + getPOS(w2.getPOS());
@@ -109,14 +106,11 @@ public class OntologySupport {
 			return false;
 		if (getPOS(w1.getPOS()) == null || getPOS(w2.getPOS()) == null)
 			return false;
-		Set<String> synonyms1 = JAWJAW.findSynonyms(w1.getLemma(),
-				getPOS(w1.getPOS()), language);
+		Set<String> synonyms1 = JAWJAW.findSynonyms(w1.getLemma(), getPOS(w1.getPOS()), language);
 
-		Set<String> synonyms2 = JAWJAW.findSynonyms(w2.getLemma(),
-				getPOS(w2.getPOS()), language);
+		Set<String> synonyms2 = JAWJAW.findSynonyms(w2.getLemma(), getPOS(w2.getPOS()), language);
 
-		return synonyms1.contains(w2.getLemma())
-				|| synonyms2.contains(w1.getLemma());
+		return synonyms1.contains(w2.getLemma()) || synonyms2.contains(w1.getLemma());
 	}
 
 	public static boolean areAntonyms(Sense s1, Sense s2, Lang language) {
@@ -125,8 +119,7 @@ public class OntologySupport {
 		Set<Sense> antonyms1 = JAWJAW.findSeeAntonyms(s1, language);
 		Set<Sense> antonyms2 = JAWJAW.findSeeAntonyms(s2, language);
 
-		return haveCommonElements(synonyms1, antonyms2)
-				|| haveCommonElements(antonyms1, synonyms2);
+		return haveCommonElements(synonyms1, antonyms2) || haveCommonElements(antonyms1, synonyms2);
 		// return antonyms2.contains(s1) || antonyms1.contains(s2);
 	}
 
@@ -136,8 +129,7 @@ public class OntologySupport {
 		Set<Sense> hyponyms1 = JAWJAW.findHyponyms(s1, language);
 		Set<Sense> hypernyms2 = JAWJAW.findHypernyms(s2, language);
 
-		return haveCommonElements(synonyms1, hypernyms2)
-				|| haveCommonElements(hyponyms1, synonyms2);
+		return haveCommonElements(synonyms1, hypernyms2) || haveCommonElements(hyponyms1, synonyms2);
 		// return hypernyms2.contains(s1) || hyponyms1.contains(s2);
 	}
 
@@ -147,8 +139,7 @@ public class OntologySupport {
 		Set<Sense> hypernyms1 = JAWJAW.findHypernyms(s1, language);
 		Set<Sense> hyponyms2 = JAWJAW.findHyponyms(s2, language);
 
-		return haveCommonElements(synonyms1, hyponyms2)
-				|| haveCommonElements(hypernyms1, synonyms2);
+		return haveCommonElements(synonyms1, hyponyms2) || haveCommonElements(hypernyms1, synonyms2);
 		// return hyponyms2.contains(s1) || hypernyms1.contains(s2);
 	}
 
@@ -158,8 +149,7 @@ public class OntologySupport {
 		Set<Sense> siblingsSet1 = getSiblingSet(s1, language);
 		Set<Sense> siblingsSet2 = getSiblingSet(s2, language);
 
-		return haveCommonElements(synonyms1, siblingsSet2)
-				|| haveCommonElements(siblingsSet1, synonyms2);
+		return haveCommonElements(synonyms1, siblingsSet2) || haveCommonElements(siblingsSet1, synonyms2);
 		// return siblingsSet1.contains(s2) || siblingsSet2.contains(s1);
 	}
 
@@ -179,8 +169,7 @@ public class OntologySupport {
 	}
 
 	public static boolean exists(String word, String pos, Lang lang) {
-		List<WordJAW> words = WordDAO.findWordsByLemmaAndPos(word, getPOS(pos),
-				lang);
+		List<WordJAW> words = WordDAO.findWordsByLemmaAndPos(word, getPOS(pos), lang);
 		return (words != null && words.size() > 0);
 	}
 
@@ -188,30 +177,23 @@ public class OntologySupport {
 		if (word.getPOS() == null)
 			return null;
 		TreeMap<Word, Double> results = new TreeMap<Word, Double>();
-		Set<String> synonyms = JAWJAW.findSynonyms(word.getLemma(),
-				getPOS(word.getPOS()), word.getLanguage());
+		Set<String> synonyms = JAWJAW.findSynonyms(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
 		int no = 0;
 		for (String s : synonyms) {
-			if (!StopWords.isStopWord(s, word.getLanguage())
-					&& Dictionary.isDictionaryWord(s, word.getLanguage())) {
-				results.put(
-						new Word(s, s, Stemmer.stemWord(s.toLowerCase(),
-								word.getLanguage()), word.getPOS(), null, word
-								.getLanguage()), SYNONYM_WEIGHT);
+			if (!StopWords.isStopWord(s, word.getLanguage()) && Dictionary.isDictionaryWord(s, word.getLanguage())) {
+				results.put(new Word(s, s, Stemmer.stemWord(s.toLowerCase(), word.getLanguage()), word.getPOS(), null,
+						word.getLanguage()), SYNONYM_WEIGHT);
 				no++;
 			}
 			if (no >= MAX_NO_SYNONYMS)
 				break;
 		}
 		no = 0;
-		Set<String> hypernyms = JAWJAW.findHypernyms(word.getLemma(),
-				getPOS(word.getPOS()), word.getLanguage());
+		Set<String> hypernyms = JAWJAW.findHypernyms(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
 		for (String s : hypernyms) {
-			Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(),
-					word.getLanguage()), word.getPOS(), null,
+			Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(), word.getLanguage()), word.getPOS(), null,
 					word.getLanguage());
-			if (results.containsKey(newWord)
-					&& !StopWords.isStopWord(s, word.getLanguage())
+			if (results.containsKey(newWord) && !StopWords.isStopWord(s, word.getLanguage())
 					&& Dictionary.isDictionaryWord(s, word.getLanguage())) {
 				results.put(newWord, HYPERNYM_WEIGHT);
 				no++;
@@ -224,27 +206,25 @@ public class OntologySupport {
 	}
 
 	public static Set<Sense> getWordSenses(Word word) {
-		Set<Sense> results = new TreeSet<Sense>();
+		List<WordJAW> words = null;
 		if (getPOS(word.getPOS()) != null) {
-			List<WordJAW> words = WordDAO.findWordsByLemmaAndPos(
-					word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
-			if (words == null || words.size() == 0)
-				return null;
-			for (WordJAW w : words) {
-				List<Sense> senses = SenseDAO.findSensesByWordid(w.getWordid(),
-						w.getLang());
-				if (senses != null && senses.size() > 0)
-					results.addAll(senses);
-			}
-			return results;
+			words = WordDAO.findWordsByLemmaAndPos(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
+		} else {
+			words = WordDAO.findWordsByLemma(word.getLemma(), word.getLanguage());
 		}
-		return null;
+		if (words == null || words.size() == 0)
+			return null;
+		Set<Sense> results = new TreeSet<Sense>();
+		for (WordJAW w : words) {
+			List<Sense> senses = SenseDAO.findSensesByWordid(w.getWordid(), w.getLang());
+			if (senses != null && senses.size() > 0)
+				results.addAll(senses);
+		}
+		return results;
 	}
 
 	public static void main(String[] args) {
-		System.out.println(semanticSimilarity(
-				Word.getWordFromConcept("dog_NN", Lang.eng),
-				Word.getWordFromConcept("cat_NN", Lang.eng),
-				OntologySupport.PATH_SIM));
+		System.out.println(semanticSimilarity(Word.getWordFromConcept("dog_NN", Lang.eng),
+				Word.getWordFromConcept("cat_NN", Lang.eng), OntologySupport.PATH_SIM));
 	}
 }
