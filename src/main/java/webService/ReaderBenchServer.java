@@ -425,7 +425,7 @@ public class ReaderBenchServer {
 		private QueryResultCscl() {
 			success = true;
 			errorMsg = "";
-			data = new ResultCscl(null, null, null, null, null, null);
+			data = new ResultCscl(null, null, null, null, null, null, null);
 		}
 	}
 

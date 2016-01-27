@@ -112,7 +112,8 @@ public class Cscl {
 				ParticipantEvolution.buildParticipantEvolutionData(c),
 				Collaboration.buildSocialKBGraph(c),
 				Collaboration.buildVoiceOverlapGraph(c),
-				Cscl.getCsclIndices(c)
+				Cscl.getCsclIndices(c),
+				Cscl.getCsclIndicesDescription(c)
 			);
 		
 	}
@@ -156,6 +157,17 @@ public class Cscl {
 		
 		return indices;
 		
+	}
+	
+	public static HashMap<String, String> getCsclIndicesDescription(Conversation c) {
+		
+		HashMap<String, String> hm = new HashMap<String, String>();
+		
+		for (CSCLIndices index : CSCLIndices.values()) {
+			hm.put(index.toString(), index.getDescription());
+		}
+		
+		return hm;
 	}
 
 }

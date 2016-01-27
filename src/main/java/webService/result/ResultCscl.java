@@ -12,6 +12,7 @@ public class ResultCscl {
 	private List<ResultGraphPoint> socialKB;
 	private List<ResultGraphPoint> voiceOverlap;
 	private HashMap<String, HashMap<String, Double>> csclIndices;
+	private HashMap<String, String> csclIndicesDescription;
 
 	public ResultCscl(
 			ResultTopic concepts,
@@ -19,7 +20,8 @@ public class ResultCscl {
 			List<ResultGraphPoint> participantEvolution,
 			List<ResultGraphPoint> socialKB,
 			List<ResultGraphPoint> voiceOverlap,
-			HashMap<String, HashMap<String, Double>> csclIndices
+			HashMap<String, HashMap<String, Double>> csclIndices,
+			HashMap<String, String> csclIndicesDescription
 			) {
 		super();
 		this.concepts = concepts;
@@ -28,6 +30,15 @@ public class ResultCscl {
 		this.socialKB = socialKB;
 		this.voiceOverlap = voiceOverlap;
 		this.csclIndices = csclIndices;
+		this.csclIndicesDescription = csclIndicesDescription;
+	}
+
+	public HashMap<String, String> getCsclIndicesDescription() {
+		return csclIndicesDescription;
+	}
+
+	public void setCsclIndicesDescription(HashMap<String, String> csclIndicesDescription) {
+		this.csclIndicesDescription = csclIndicesDescription;
 	}
 
 	public HashMap<String, HashMap<String, Double>> getCsclIndices() {
