@@ -1,23 +1,12 @@
-/*
- * The author disclaims copyright to this source code.  In place of
- * a legal notice, here is a blessing:
- * 
- *    May you do good and not evil.
- *    May you find forgiveness for yourself and forgive others.
- *    May you share freely, never taking more than you give.
- *
- */
 package org.hibernate.dialect;
 
 import java.sql.Types;
 
-import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.SQLFunctionTemplate;
+import org.hibernate.dialect.function.StandardSQLFunction;
 import org.hibernate.dialect.function.VarArgsSQLFunction;
 import org.hibernate.type.IntegerType;
 import org.hibernate.type.StringType;
-import org.hibernate.Hibernate;
-
 
 public class SQLiteDialect extends Dialect {
   public SQLiteDialect() {

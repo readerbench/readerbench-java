@@ -27,8 +27,8 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
-public class CompareResults {
-	static Logger logger = Logger.getLogger(CompareResults.class);
+public class WordAssociationTest {
+	static Logger logger = Logger.getLogger(WordAssociationTest.class);
 	private Map<Word, Map<Word, Integer>> wordAssociations;
 	private Map<Word, Double> simTop;
 	private Map<Word, Double> simMax;
@@ -201,11 +201,11 @@ public class CompareResults {
 
 		ReaderBenchServer.initializeDB();
 
-		CompareResults comp = new CompareResults();
+		WordAssociationTest comp = new WordAssociationTest();
 
 		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_financial_word_assoc_en", Lang.eng);
 		// LDA lsa = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, false, 20, 0.3);
+		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
 
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
 		// comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3,

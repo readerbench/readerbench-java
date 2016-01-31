@@ -7,7 +7,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileFilter;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -29,13 +28,12 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.complexity.DataGathering;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
-import edu.cmu.lti.jawjaw.pobj.Lang;
-import edu.stanford.nlp.util.Timing;
 
 public class EssayProcessingView extends JFrame {
 	private static final long serialVersionUID = 8894652868238113117L;

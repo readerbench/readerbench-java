@@ -1,7 +1,5 @@
 package services.converters;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 public class PdfToText {

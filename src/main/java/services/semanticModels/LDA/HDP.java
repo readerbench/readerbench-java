@@ -33,6 +33,8 @@
 
 package services.semanticModels.LDA;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,6 +52,7 @@ import cc.mallet.types.IDSorter;
 import cc.mallet.types.InstanceList;
 
 public class HDP {
+	private String path;
 	private InstanceList instances;
 
 	private Random rand;
@@ -101,15 +104,16 @@ public class HDP {
 	private boolean showResult = true;
 
 	/* set parameter */
-	public HDP() {
-		this(1.0, 0.2, 1.0, 5);
+	public HDP(String path) {
+		this(path, 1.0, 0.2, 1.0, 5);
 	}
 
-	public HDP(HDP model) {
-		this(model.alpha, model.beta, model.gamma, model.K);
+	public HDP(String path, HDP model) {
+		this(path, model.alpha, model.beta, model.gamma, model.K);
 	}
 
-	public HDP(double alpha, double beta, double gamma, int initialK) {
+	public HDP(String path, double alpha, double beta, double gamma, int initialK) {
+		this.path = path;
 		this.alpha = alpha;
 		this.beta = beta;
 		this.gamma = gamma;
@@ -211,6 +215,9 @@ public class HDP {
 	}
 
 	private void estimate(int iterations, boolean printResult) {
+		// initialize file
+		writeResult("Iteration,Topics", false);
+
 		for (int iter = 0; iter < iterations; iter++) {
 			if (!initialized) {
 				throw new IllegalStateException("Initialize HDP first!");
@@ -231,16 +238,15 @@ public class HDP {
 			// print current status
 			if (iter != 0 && (iter % 50) == 0) {
 				if (!fixedK) {
-					System.out.println("Iteration=" + iter + "\tNo. topics="
-							+ K);
+					writeResult(iter + "," + K, true);
 				} else {
-					System.out.print(iter + " ");
+					writeResult(iter + " ", true);
 				}
 				if (!fixedHyper) {
 					printParameter();
 				}
 			}
-		}// end iter
+		} // end iter
 
 		if (printResult) {
 			// print a summary of estimation
@@ -249,7 +255,18 @@ public class HDP {
 			System.out.println();
 			printTopWord(topWordNum);
 		}
+	}
 
+	private void writeResult(String text, boolean append) {
+		// create measurements.csv header
+		try {
+			FileWriter fstream = new FileWriter(path + "/hdp.csv", append);
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write(text + "\n");
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	/* random initialize topics at first */
@@ -261,7 +278,6 @@ public class HDP {
 		}
 
 		for (int m = 0; m < numDocuments; m++) {
-
 			FeatureSequence fs = (FeatureSequence) instances.get(m).getData();
 			int seqLen = fs.getLength();
 			int type, token, k;
@@ -319,8 +335,7 @@ public class HDP {
 			sum = 0.0;
 			for (int kk = 0; kk < K; kk++) {
 				k = kactive.get(kk);
-				pp[kk] = (nmk[m].get(k) + alpha * tau.get(k))
-						* (nkt.get(k)[type] + beta)
+				pp[kk] = (nmk[m].get(k) + alpha * tau.get(k)) * (nkt.get(k)[type] + beta)
 						/ (nk.get(k) + numTypes * beta);
 
 				sum += pp[kk];
@@ -364,8 +379,7 @@ public class HDP {
 			if (initialized && !fixedK && nk.get(kold) == 0) {
 				kactive.remove((Integer) kold);
 				kgaps.add(kold);
-				assert (Vectors.sum(nkt.get(kold)) == 0 && nk.get(kold) == 0 && nmk[m]
-						.get(kold) == 0);
+				assert (Vectors.sum(nkt.get(kold)) == 0 && nk.get(kold) == 0 && nmk[m].get(kold) == 0);
 				K--;
 				// System.out.println("remove K="+K);
 				updateTau();
@@ -397,8 +411,7 @@ public class HDP {
 				qs += Samplers.randBernoulli(seqLen / (seqLen + alpha));
 				qw += Math.log(Samplers.randBeta(alpha + 1, seqLen));
 			}
-			alpha = Samplers.randGamma(a_alpha + tables - qs,
-					1.0 / (b_alpha - qw));
+			alpha = Samplers.randGamma(a_alpha + tables - qs, 1.0 / (b_alpha - qw));
 		}
 
 		// estimate beta
@@ -408,8 +421,7 @@ public class HDP {
 		for (int k = 0; k < K; k++) {
 			akt[k] = nkt.get(k);
 		}
-		beta = DirichletEstimation.estimateAlphaMap(akt, ak, beta, a_beta,
-				b_beta);
+		beta = DirichletEstimation.estimateAlphaMap(akt, ak, beta, a_beta, b_beta);
 	}
 
 	private void updateTau() {
@@ -422,14 +434,13 @@ public class HDP {
 
 				if (nmk[m].get(k) > 1) {
 					// sample number of tables
-					mk[kk] += Samplers.randAntoniak(alpha * tau.get(k),
-							nmk[m].get(k));
+					mk[kk] += Samplers.randAntoniak(alpha * tau.get(k), nmk[m].get(k));
 				} else // nmk[m].get(k) = 0 or 1
 				{
 					mk[kk] += nmk[m].get(k);
 				}
 			}
-		}// end outter for loop
+		} // end outter for loop
 
 		// get number of tables
 		tables = Vectors.sum(mk);
@@ -507,14 +518,12 @@ public class HDP {
 				out.append(String.format("prop:%2.4f, ", prop));
 
 				for (int i = 0; i < numWords; i++) {
-					out.append(alphabet.lookupObject(sortedTypes[i].getID())
-							+ " ");
+					out.append(alphabet.lookupObject(sortedTypes[i].getID()) + " ");
 				}
 				System.out.println(out);
 			} else {
 				if (k < kactive.size())
-					System.out.println("Topic" + k + ": matched topic "
-							+ kactive.get(k));
+					System.out.println("Topic" + k + ": matched topic " + kactive.get(k));
 				else
 					System.out.println("Topic" + k + ": empty");
 			}
@@ -523,9 +532,9 @@ public class HDP {
 	}
 
 	public void printParameter() {
-		String out = String
-				.format("Summary: Docs=%d, no topics=%d, totalWords=%d, alpha=%2.3f, beta=%2.3f, gamma=%2.3f",
-						numDocuments, K, totalWord, alpha, beta, gamma);
+		String out = String.format(
+				"Summary: Docs=%d, no topics=%d, totalWords=%d, alpha=%2.3f, beta=%2.3f, gamma=%2.3f", numDocuments, K,
+				totalWord, alpha, beta, gamma);
 		System.out.println(out);
 	}
 
@@ -585,7 +594,6 @@ public class HDP {
 		}
 
 		for (int k = 0; k < K; k++) {
-
 			// word count only
 			// distr[k] = nmk[m].get(k);
 
@@ -597,10 +605,9 @@ public class HDP {
 	}
 
 	/* n-fold cross validation */
-	public void runCrossValidation(int nfolds, int iterations) {
+	public void runCrossValidation(String path, int nfolds, int iterations) {
 
-		InstanceList.CrossValidationIterator iter = instances
-				.crossValidationIterator(nfolds);
+		InstanceList.CrossValidationIterator iter = instances.crossValidationIterator(nfolds);
 		double[] prepResult = new double[nfolds];
 		InstanceList[] splitedList;
 		InstanceList trainList, testList;
@@ -611,7 +618,7 @@ public class HDP {
 			trainList = splitedList[0];
 			testList = splitedList[1];
 
-			HDP model = new HDP(this);
+			HDP model = new HDP(path, this);
 			model.initialize(trainList);
 			model.printParameter();
 			model.estimate(iterations, false);
@@ -636,7 +643,7 @@ public class HDP {
 	/* Inferencer */
 	public HDPInferencer getInferencer() {
 		if (!initialized) {
-			throw new IllegalStateException("HDP model is not iniitalized.");
+			throw new IllegalStateException("HDP model is not initalized.");
 		}
 
 		// get phi
@@ -644,13 +651,11 @@ public class HDP {
 		for (int kk = 0; kk < K; kk++) {
 			// int k = kactive.get(kk);
 			for (int t = 0; t < numTypes; t++) {
-				phi[kk][t] = (nkt.get(kk)[t] + beta)
-						/ (nk.get(kk) + numTypes * beta);
+				phi[kk][t] = (nkt.get(kk)[t] + beta) / (nk.get(kk) + numTypes * beta);
 			}
 		}
 
-		return new HDPInferencer(alpha, K, phi, instances.getDataAlphabet(),
-				rand);
+		return new HDPInferencer(alpha, K, phi, instances.getDataAlphabet(), rand);
 	}
 
 	/* display result or not */

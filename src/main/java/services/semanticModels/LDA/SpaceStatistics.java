@@ -34,7 +34,7 @@ import org.openide.util.Lookup;
 import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
-import services.semanticModels.CompareResults;
+import services.semanticModels.WordAssociationTest;
 
 public class SpaceStatistics {
 	private static final double MINIMUM_IMPOSED_THRESHOLD = 0.3d;
@@ -268,7 +268,7 @@ public class SpaceStatistics {
 	public static void compareSpaces(String pathToInputNorms, int countMax, String pathToOutput,
 			List<SpaceStatistics> corpora) {
 		logger.info("Loading frequent word associations ...");
-		CompareResults comp = new CompareResults();
+		WordAssociationTest comp = new WordAssociationTest();
 		comp.initialLoad(pathToInputNorms, corpora.get(0).getLDA().getLanguage(), countMax);
 
 		logger.info("Writing comparisons for frequent word associations ...");

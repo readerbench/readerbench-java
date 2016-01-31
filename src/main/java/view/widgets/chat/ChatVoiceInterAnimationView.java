@@ -43,8 +43,8 @@ import data.discourse.SemanticChain;
 public class ChatVoiceInterAnimationView extends JFrame {
 
 	private static final long serialVersionUID = -7963939044051260680L;
-	private static final Color[] predefinedColors = { Color.YELLOW, Color.BLUE,
-			Color.RED, Color.GREEN, Color.ORANGE, Color.LIGHT_GRAY, Color.GRAY, Color.DARK_GRAY };
+	private static final Color[] predefinedColors = { Color.YELLOW, Color.BLUE, Color.RED, Color.GREEN, Color.ORANGE,
+			Color.LIGHT_GRAY, Color.GRAY, Color.DARK_GRAY };
 
 	private JPanel contentPane;
 
@@ -95,8 +95,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 		taskColors = new Vector<Vector<Color>>();
 		for (SemanticChain chain : chains) {
 			subTasks.put(chain, new LinkedList<Block>());
-			Task t = new Task(chain.toString(), new Date(0), new Date(chat
-					.getBlocks().size()));
+			Task t = new Task(chain.toString(), new Date(0), new Date(chat.getBlocks().size()));
 			s.add(t);
 			Vector<Color> newColors = new Vector<Color>();
 			taskColors.add(newColors);
@@ -114,13 +113,11 @@ public class ChatVoiceInterAnimationView extends JFrame {
 						text = text + " " + w.getLemma();
 					occurrences.put(blockIndex, text);
 				} else {
-					if (((Utterance) chat.getBlocks().get(blockIndex))
-							.getParticipant() != null) {
-						occurrences.put(blockIndex, ((Utterance) chat
-								.getBlocks().get(blockIndex)).getParticipant()
-								+ ": " + w.getLemma());
-						participantMapping.put(blockIndex, ((Utterance) chat
-								.getBlocks().get(blockIndex)).getParticipant());
+					if (((Utterance) chat.getBlocks().get(blockIndex)).getParticipant() != null) {
+						occurrences.put(blockIndex,
+								((Utterance) chat.getBlocks().get(blockIndex)).getParticipant() + ": " + w.getLemma());
+						participantMapping.put(blockIndex,
+								((Utterance) chat.getBlocks().get(blockIndex)).getParticipant());
 					} else {
 						occurrences.put(blockIndex, w.getLemma());
 						participantMapping.put(blockIndex, genericParticipant);
@@ -130,11 +127,9 @@ public class ChatVoiceInterAnimationView extends JFrame {
 			}
 
 			for (Integer index : occurrences.keySet()) {
-				Task subT = new Task(occurrences.get(index), new Date(index),
-						new Date(index + 1));
+				Task subT = new Task(occurrences.get(index), new Date(index), new Date(index + 1));
 				t.addSubtask(subT);
-				newColors.add(participantColors.get(participantMapping
-						.get(index)));
+				newColors.add(participantColors.get(participantMapping.get(index)));
 			}
 		}
 
@@ -151,7 +146,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 				false, // include legend
 				false, // tooltips
 				false // urls
-				);
+		);
 
 		CategoryPlot plot = (CategoryPlot) chart.getPlot();
 		DateAxis range = (DateAxis) plot.getRangeAxis();
@@ -171,8 +166,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						JFrame view = new VoiceSynergyView(
-								ChatVoiceInterAnimationView.this.chains);
+						JFrame view = new VoiceSynergyView(ChatVoiceInterAnimationView.this.chains);
 						view.setVisible(true);
 					}
 				});
@@ -185,23 +179,20 @@ public class ChatVoiceInterAnimationView extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						JFrame view = new ChatVoiceSimpleStatistics(
-								ChatVoiceInterAnimationView.this.chains);
+						JFrame view = new ChatVoiceSimpleStatistics(ChatVoiceInterAnimationView.this.chains);
 						view.setVisible(true);
 					}
 				});
 			}
 		});
 
-		JButton btnParticipantVoiceCoverage = new JButton(
-				"Visualize implicit (alien) voices");
+		JButton btnParticipantVoiceCoverage = new JButton("Visualize implicit (alien) voices");
 		btnParticipantVoiceCoverage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						JFrame view = new ParticipantVoiceCoverageView(
-								ChatVoiceInterAnimationView.this.chat,
+						JFrame view = new ParticipantVoiceCoverageView(ChatVoiceInterAnimationView.this.chat,
 								ChatVoiceInterAnimationView.this.chains,
 								ChatVoiceInterAnimationView.this.participantColors);
 						view.setVisible(true);
@@ -209,51 +200,23 @@ public class ChatVoiceInterAnimationView extends JFrame {
 				});
 			}
 		});
-		
-		JButton btnSentimentDistributionView = new JButton("Visualize sentiment distribution");
-		btnSentimentDistributionView.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						JFrame view = new SentimentDistributionView(
-								ChatVoiceInterAnimationView.this.chat,
-								ChatVoiceInterAnimationView.this.chains);
-						view.setVisible(true);
-					}
 
-				});
-			}
-		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
 						.addComponent(chartPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 978, Short.MAX_VALUE)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(btnSentimentDistributionView)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnParticipantVoiceCoverage)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnSimpleStatistics)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnCrossCorrelations)))
-					.addContainerGap())
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addComponent(chartPanel, GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(btnCrossCorrelations)
-						.addComponent(btnSimpleStatistics)
-						.addComponent(btnParticipantVoiceCoverage)
-						.addComponent(btnSentimentDistributionView)))
-		);
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(btnParticipantVoiceCoverage)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSimpleStatistics)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCrossCorrelations)))
+				.addContainerGap()));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+						.addComponent(chartPanel, GroupLayout.DEFAULT_SIZE, 527, Short.MAX_VALUE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(btnCrossCorrelations).addComponent(btnSimpleStatistics)
+								.addComponent(btnParticipantVoiceCoverage))));
 		contentPane.setLayout(gl_contentPane);
 	}
 

@@ -5,34 +5,23 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.poi.hdf.extractor.data.LST;
-import org.apache.poi.hssf.util.HSSFColor.AQUA;
 import org.junit.Test;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
-import data.Word;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
 import data.document.Document;
-import data.sentiment.SentimentGrid;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextFrenchCVs;
-import services.discourse.cohesion.CohesionGraph;
-import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -46,17 +35,24 @@ public class ToeflProcess {
 	String oldQuestion = "";
 
 	@Test
-	public void process() {
-
-		// String prependPath =
-		// "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
-		String prependPath = "/Users/Berilac/OneDrive/ReaderBench/";
+	public void process(String path, ISemanticModel semModel) {
 		logger.info("Starting toefl tests processing...");
-		String lsaPath = "resources/config/LSA/tasa_en";
-		String ldaPath = "resources/config/LDA/tasa_en";
+
+		final LSA lsa;
+		final LDA lda;
+		if (semModel instanceof LSA) {
+			lsa = (LSA) semModel;
+			lda = null;
+		} else if (semModel instanceof LDA) {
+			lsa = null;
+			lda = (LDA) semModel;
+		} else {
+			logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
+			return;
+		}
 
 		try {
-			Files.walk(Paths.get(prependPath + "toefl")).forEach(filePath -> {
+			Files.walk(Paths.get(path)).forEach(filePath -> {
 				StringBuilder sb = new StringBuilder();
 				sb.append("sep=,\nq,a,%,b,%,c,%,d,%\n");
 
@@ -79,24 +75,24 @@ public class ToeflProcess {
 					list.forEach((line) -> {
 						logger.info("Processing line " + line);
 						if (line.contains("a. ")) {
-							aAnswer = processQuery(line, lsaPath, ldaPath, "eng", true);
+							aAnswer = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 							SemanticCohesion sc = new SemanticCohesion(queryQuestion, aAnswer);
 							sb.append("a," + Formatting.formatNumber(sc.getCohesion()) + ",");
 						} else if (line.contains("b. ")) {
-							bAnswer = processQuery(line, lsaPath, ldaPath, "eng", true);
+							bAnswer = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 							SemanticCohesion sc = new SemanticCohesion(queryQuestion, bAnswer);
 							sb.append("b," + Formatting.formatNumber(sc.getCohesion()) + ",");
 						} else if (line.contains("c. ")) {
-							cAnswer = processQuery(line, lsaPath, ldaPath, "eng", true);
+							cAnswer = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 							SemanticCohesion sc = new SemanticCohesion(queryQuestion, cAnswer);
 							sb.append("c," + Formatting.formatNumber(sc.getCohesion()) + ",");
 						} else if (line.contains("d. ")) {
-							dAnswer = processQuery(line, lsaPath, ldaPath, "eng", true);
+							dAnswer = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 							SemanticCohesion sc = new SemanticCohesion(queryQuestion, dAnswer);
 							sb.append("d," + Formatting.formatNumber(sc.getCohesion()) + "\n");
 						} else {
 							question = line;
-							queryQuestion = processQuery(line, lsaPath, ldaPath, "eng", true);
+							queryQuestion = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 
 							String[] parts = line.split("\\.");
 							sb.append(parts[0] + ",");
@@ -109,7 +105,6 @@ public class ToeflProcess {
 					try {
 						FileUtils.writeStringToFile(file, sb.toString());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					logger.info("Printed information to: " + file.getAbsolutePath());

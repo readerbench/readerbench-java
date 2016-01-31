@@ -10,22 +10,19 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
-import data.Word;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
-import data.sentiment.SentimentGrid;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
-import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -125,7 +122,6 @@ public class PdfToTextFrenchCVs {
 			}
 		}
 
-		int i = 0;
 		for (Topic t : topics) {
 			if (visibleConcepts.get(t.getWord())) {
 				nodes.add(new ResultNode(t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance())));

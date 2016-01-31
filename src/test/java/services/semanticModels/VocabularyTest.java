@@ -127,7 +127,7 @@ public class VocabularyTest {
 
 	}
 
-	public Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
+	public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
 		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.substring(2).trim());
 		Document doc = new Document(null, contents, lsa, lda, lang, true, true);
 		return doc;

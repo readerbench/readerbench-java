@@ -21,11 +21,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import data.AnalysisElement;
-import data.Word;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.CharSequenceLowercase;
 import cc.mallet.pipe.Pipe;
@@ -39,6 +36,8 @@ import cc.mallet.types.IDSorter;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
+import data.AnalysisElement;
+import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -174,7 +173,7 @@ public class LDA implements ISemanticModel, Serializable {
 				+ " iterations");
 		readDirectory(new File(path));
 
-		HDP hdp = new HDP(1.0, 0.01, 1D, initialTopics);
+		HDP hdp = new HDP(path, 1.0, 0.01, 1D, initialTopics);
 		hdp.initialize(instances);
 
 		// set number of iterations, and display result or not
@@ -514,96 +513,5 @@ public class LDA implements ISemanticModel, Serializable {
 
 	public void setWordProbDistributions(Map<Word, double[]> wordProbDistributions) {
 		this.wordProbDistributions = wordProbDistributions;
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		try {
-			// LDA lda = new LDA(Lang.eng);
-			// System.out
-			// .println(lda.createHDPModel("in/LOWE1/class11", 5, 10000));
-			String path = "resources/config/LDA/tasa_en";
-			Lang lang = Lang.eng;
-
-			LDA lda = new LDA(path, lang);
-
-			// lda.printTopics(path, 300);
-			Word w1 = Word.getWordFromConcept("mailman", lang);
-			Word w2 = Word.getWordFromConcept("man", lang);
-			System.out.println(lda.getSimilarity(w2, w1));
-
-			lda.findDeepLearningRules(w1, w2, 0.5);
-			// MathArrays.convolve(prob1, prob1);
-			// System.out.println(lda.getSimilarity("god", "church"));
-			// double[] prob1 =
-			// lda.getProbDistribution(Word.getWordFromConcept(
-			// "educational data mining", Lang.eng), 1);
-			// double[] prob2 = lda.getProbDistribution(
-			// Word.getWordFromConcept("learning analytics", Lang.eng),
-			// 1);
-			//
-			// double[] prob3 = lda.getProbDistribution(
-			// Word.getWordFromConcept("educational", Lang.eng), 1);
-			// double[] prob4 = lda.getProbDistribution(
-			// Word.getWordFromConcept("learning", Lang.eng), 1);
-			//
-			// System.out.println(LDA.getSimilarity(prob1, prob2));
-			// System.out.println(LDA.getSimilarity(prob3, prob4));
-			//
-			// TreeMap<Word, Double> closest =
-			// lda.getSimilarConcepts(prob3,
-			// 0.6);
-			// for (Word w : closest.keySet())
-			// System.out.println(w.getLemma() + " "
-			// + Formatting.formatNumber(closest.get(w)));
-			// double[] prob3 = lda.getWordProbDistribution(Word
-			// .getWordFromConcept("animal", Lang.eng));
-			// double[] prob4 = lda.getWordProbDistribution(Word
-			// .getWordFromConcept("bird", Lang.eng));
-			// double[] prob5 = lda.getProbDistribution(
-			// Word.getWordFromConcept("animal", Lang.eng), 1);
-			// double[] prob6 = new
-			// double[lda.getModel().getNumTopics()];
-			//
-			// double sum1 = 0, sum2 = 0, sum3 = 0;
-			// for (int i = 0; i < prob1.length; i++) {
-			// prob6[i] = prob3[i] + prob4[i] - prob3[i] * prob4[i];
-			// sum1 += prob6[i];
-			// sum2 += prob3[i];
-			// sum3 += prob4[i];
-			// // System.out.println(prob2[i] + " - " + prob3[i]);
-			// }
-			// System.out.println(sum1 + " " + sum2 + " " + sum3);
-			//
-			// lda.printSimilarities("1-2", prob1, prob2);
-			// lda.printSimilarities("2-3", prob2, prob3);
-			// lda.printSimilarities("3-4", prob3, prob4);
-			// lda.printSimilarities("2-5", prob2, prob5);
-			//
-			// System.out.println("Sim "
-			// + lda.getSimilarity(
-			// Word.getWordFromConcept("riche", Lang.fr),
-			// Word.getWordFromConcept("argenterie", Lang.fr)));
-			// System.out
-			// .println(LDA.getSimilarity(lda.getProbDistribution(
-			// Word.getWordFromConcept("riche", Lang.fr), 1), lda
-			// .getProbDistribution(Word.getWordFromConcept(
-			// "argenterie", Lang.fr), 1)));
-			//
-			// TreeMap<Word, Double> closest = lda.getSimilarConcepts(
-			// Word.getWordFromConcept("riche", Lang.fr), 0.5);
-			// for (Word w : closest.keySet())
-			// System.out.println(w);
-
-			// System.out.println(lda.compareTerms("bird", "animal"));
-			// System.out.println(lda.compareTerms("mother", "father"));
-			// System.out.println(lda.compareTerms("black", "slave"));
-			// System.out.println(lda.compareTerms("war", "soldier"));
-			// System.out.println(lda.compareTerms("ugly", "bad"));
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			logger.error("Error during learning process");
-		}
 	}
 }
