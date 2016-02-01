@@ -42,7 +42,7 @@ public class TestDataGathering {
 			// true);
 			// DataGathering.processTexts("resources/in/texts 2 for
 			// familiarity", -1, true, lsa, lda, Lang.eng, true);
-			DataGathering.processTexts("resources/in/essays/nursery_fr", -1, true, lsa, lda, Lang.fr, true);
+			DataGathering.processTexts("resources/in/essays/nursery_fr", -1, true, lsa, lda, Lang.fr, true, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

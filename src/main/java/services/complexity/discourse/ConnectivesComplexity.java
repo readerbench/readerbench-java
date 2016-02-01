@@ -53,6 +53,9 @@ public class ConnectivesComplexity extends IComplexityFactors {
 	}
 
 	public void computeComplexityFactors(AbstractDocument document) {
+		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR; i++)
+			document.getComplexityIndices()[ComplexityIndices.CONNECTIVES_EN + i] = ComplexityIndices.IDENTITY;
+
 		ClassesOfWords classes = null;
 		int index = 0;
 		switch (document.getLanguage()) {

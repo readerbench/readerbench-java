@@ -40,7 +40,7 @@ public class Txt2XmlConverter {
 		d.exportXML(path);
 	}
 
-	public static void parseTxtFiles(String name, String path, String encoding) {
+	public static void parseTxtFiles(String prefix, String path, String encoding) {
 		// determine number of documents
 		if (!new File(path).isDirectory())
 			return;
@@ -81,7 +81,7 @@ public class Txt2XmlConverter {
 				if ((++current_doc_to_process) % 1000 == 0)
 					logger.info("Finished processing " + (current_doc_to_process) + " documents of "
 							+ total_docs_to_process);
-				processContent(name + " essay - " + f.getName().replaceAll("\\.txt", ""),
+				processContent(prefix + f.getName().replaceAll("\\.txt", ""),
 						new String(content.getBytes("UTF-8"), "UTF-8"), f.getPath().replace(".txt", ".xml"));
 				in.close();
 			} catch (FileNotFoundException e) {
@@ -97,27 +97,28 @@ public class Txt2XmlConverter {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		// Txt2XmlConverter.parseTxtFiles("Think aloud",
+		// Txt2XmlConverter.parseTxtFiles("Think aloud ",
 		// "in/SEvsTA/Class1/TA","UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("Self-explanation",
+		// Txt2XmlConverter.parseTxtFiles("Self-explanation ",
 		// "in/SEvsTA/Class1/SE","UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("Competition",
+		// Txt2XmlConverter.parseTxtFiles("Competition essay - ",
 		// "in/essays/competition_en/texts", "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("FYP",
+		// Txt2XmlConverter.parseTxtFiles("FYP essay - ",
 		// "in/essays/essays_FYP_en/texts",
 		// "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("Images", "in/essays/images_en/texts",
+		// Txt2XmlConverter.parseTxtFiles("Images essay - ",
+		// "in/essays/images_en/texts",
 		// "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("Competition",
+		// Txt2XmlConverter.parseTxtFiles("Competition essay - ",
 		// "in/essays/competition_en/texts", "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("DC 2009",
+		// Txt2XmlConverter.parseTxtFiles("DC 2009 essay - ",
 		// "in/essays/DC_essays_2009_en/texts", "windows-1250");
-		// Txt2XmlConverter.parseTxtFiles("MSU Timed",
+		// Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
 		// "in/essays/msu_timed_en/texts", "windows-1250");
-		// Txt2XmlConverter.parseTxtFiles("MSU Timed",
+		// Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
 		// "in/essays/posttest_fall_2009/texts", "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("MSU Timed",
+		// Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
 		// "in/essays/pretest_spring_2010/texts", "UTF-8");
-		Txt2XmlConverter.parseTxtFiles("Familiarity", "in/texts 2 for familiarity", "UTF-8");
+		Txt2XmlConverter.parseTxtFiles("Familiarity essay - ", "in/texts 2 for familiarity", "UTF-8");
 	}
 }

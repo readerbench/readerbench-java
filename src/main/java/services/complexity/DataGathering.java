@@ -41,7 +41,7 @@ public class DataGathering {
 	}
 
 	public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang,
-			boolean usePOSTagging) throws IOException {
+			boolean usePOSTagging, boolean computeDialogism) throws IOException {
 		File dir = new File(path);
 
 		if (!dir.exists()) {
@@ -57,19 +57,18 @@ public class DataGathering {
 		});
 
 		if (writeHeader) {
-			writeHeader(dir.getParent());
+			writeHeader(dir.getPath());
 		}
 
 		int noProcessedFiles = 0;
 		for (File file : files) {
-			//
 			logger.info("Processing " + file.getName() + " file");
 			// Create file
 
 			Document d = null;
 			try {
 				d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
-				d.computeAll(usePOSTagging, null, null, false);
+				d.computeAll(computeDialogism, null, null, false);
 				ComplexityIndices.computeComplexityFactors(d);
 			} catch (Exception e) {
 				logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
@@ -77,7 +76,7 @@ public class DataGathering {
 			}
 
 			if (d != null) {
-				FileWriter fstream = new FileWriter(dir.getParent() + "/measurements.csv", true);
+				FileWriter fstream = new FileWriter(dir.getPath() + "/measurements.csv", true);
 				BufferedWriter out = new BufferedWriter(fstream);
 
 				out.write("\n" + gradeLevel + "," + file.getName().replaceAll(",", "") + ","

@@ -153,9 +153,6 @@ public abstract class AbstractDocument extends AnalysisElement {
 	 * 
 	 */
 	public void computeDiscourseAnalysis(boolean computeDialogism) {
-		// build coherence graph
-		CohesionGraph.buildCohesionGraph(this);
-
 		if (computeDialogism) {
 			// build disambiguisation graph and lexical chains
 			DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
@@ -172,7 +169,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 			// determine semantic chains / voices
 			DialogismComputations.determineVoices(this);
+
+			// determine voice distributions & importance
+			DialogismComputations.determineVoiceDistributions(this);
 		}
+
+		// build coherence graph
+		CohesionGraph.buildCohesionGraph(this);
 
 		// determine topics
 		TopicModeling.determineTopics(this, this);
@@ -181,9 +184,6 @@ public abstract class AbstractDocument extends AnalysisElement {
 		Scoring.score(this);
 		// assign sentiment values
 		SentimentAnalysis.weightSemanticValences(this);
-
-		// determine voice distributions & importance
-		DialogismComputations.determineVoiceDistributions(this);
 
 		logger.info("Finished all discourse analysis processes...");
 	}
@@ -198,9 +198,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 				// create an empty Annotation just with the given text
 				document = new Annotation(processedText.replaceAll("[\\.\\!\\?\n]", ""));
 				// run all Annotators on this text
-
 				Parsing.getParser(lang).getPipeline().annotate(document);
-
 				CoreMap sentence = document.get(SentencesAnnotation.class).get(0);
 
 				// add corresponding block

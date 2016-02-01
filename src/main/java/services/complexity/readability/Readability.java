@@ -85,8 +85,7 @@ public class Readability extends IComplexityFactors {
 	 * @return Flesch reading ease score.
 	 */
 	public static float calcFlesch(final Stats stats) {
-		return 206.835f - (1.015f * wordsPerSentence(stats))
-				- (84.6f * syllablesPerWords(stats));
+		return 206.835f - (1.015f * wordsPerSentence(stats)) - (84.6f * syllablesPerWords(stats));
 	}
 
 	public static String meaningFlesh(double val) {
@@ -123,8 +122,7 @@ public class Readability extends IComplexityFactors {
 	 * @return Flesch-Kincaid score.
 	 */
 	public static float calcKincaid(final Stats stats) {
-		return (11.8f * syllablesPerWords(stats))
-				+ (0.39f * wordsPerSentence(stats)) - 15.59f;
+		return (11.8f * syllablesPerWords(stats)) + (0.39f * wordsPerSentence(stats)) - 15.59f;
 	}
 
 	public static String meaningKincaid(double val) {
@@ -151,13 +149,16 @@ public class Readability extends IComplexityFactors {
 	public String getClassName() {
 		return LocalizationUtils.getTranslation("Readability Formulas (EN only)");
 	}
-	
+
 	@Override
 	public void setComplexityIndexDescription(String[] descriptions) {
-		descriptions[ComplexityIndices.READABILITY_FLESCH] = LocalizationUtils.getTranslation("Readability Flesh (EN only)");
+		descriptions[ComplexityIndices.READABILITY_FLESCH] = LocalizationUtils
+				.getTranslation("Readability Flesh (EN only)");
 		descriptions[ComplexityIndices.READABILITY_FOG] = LocalizationUtils.getTranslation("Readability FOG (EN only)");
-		descriptions[ComplexityIndices.READABILITY_KINCAID] = LocalizationUtils.getTranslation("Readability Kincaid (EN only)");
+		descriptions[ComplexityIndices.READABILITY_KINCAID] = LocalizationUtils
+				.getTranslation("Readability Kincaid (EN only)");
 	}
+
 	@Override
 	public void setComplexityIndexAcronym(String[] acronyms) {
 		acronyms[ComplexityIndices.READABILITY_FLESCH] = this.getComplexityIndexAcronym("READABILITY_FLESCH");
@@ -168,27 +169,23 @@ public class Readability extends IComplexityFactors {
 	@Override
 	public void computeComplexityFactors(AbstractDocument d) {
 		switch (d.getLanguage()) {
-		case fr:
+		case eng:
+			Stats stats = Fathom.analyze(d.getProcessedText());
+			d.getComplexityIndices()[ComplexityIndices.READABILITY_FLESCH] = Readability.calcFlesch(stats);
+			d.getComplexityIndices()[ComplexityIndices.READABILITY_FOG] = Readability.calcFog(stats);
+			d.getComplexityIndices()[ComplexityIndices.READABILITY_KINCAID] = Readability.calcKincaid(stats);
+			break;
+		default:
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FLESCH] = ComplexityIndices.IDENTITY;
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FOG] = ComplexityIndices.IDENTITY;
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_KINCAID] = ComplexityIndices.IDENTITY;
-			break;
-		default:
-			Stats stats = Fathom.analyze(d.getProcessedText());
-			d.getComplexityIndices()[ComplexityIndices.READABILITY_FLESCH] = Readability
-					.calcFlesch(stats);
-			d.getComplexityIndices()[ComplexityIndices.READABILITY_FOG] = Readability
-					.calcFog(stats);
-			d.getComplexityIndices()[ComplexityIndices.READABILITY_KINCAID] = Readability
-					.calcKincaid(stats);
 			break;
 		}
 	}
 
 	@Override
 	public int[] getIDs() {
-		return new int[] { ComplexityIndices.READABILITY_FLESCH,
-				ComplexityIndices.READABILITY_FOG,
+		return new int[] { ComplexityIndices.READABILITY_FLESCH, ComplexityIndices.READABILITY_FOG,
 				ComplexityIndices.READABILITY_KINCAID };
 	}
 }

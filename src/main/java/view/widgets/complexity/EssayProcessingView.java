@@ -57,15 +57,17 @@ public class EssayProcessingView extends JFrame {
 		private String pathToLDA;
 		private Lang lang;
 		private boolean usePOSTagging;
+		private boolean computeDialogism;
 
-		public Task(String path, String pathToLSA, String pathToLDA, Lang lang,
-				boolean usePOSTagging) {
+		public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+				boolean computeDialogism) {
 			super();
 			this.path = path;
 			this.pathToLSA = pathToLSA;
 			this.pathToLDA = pathToLDA;
 			this.lang = lang;
 			this.usePOSTagging = usePOSTagging;
+			this.computeDialogism = computeDialogism;
 		}
 
 		public Void doInBackground() {
@@ -75,7 +77,7 @@ public class EssayProcessingView extends JFrame {
 					LSA lsa = LSA.loadLSA(pathToLSA, lang);
 					LDA lda = LDA.loadLDA(pathToLDA, lang);
 
-					DataGathering.processTexts(path, -1, true, lsa, lda, lang, usePOSTagging);
+					DataGathering.processTexts(path, -1, true, lsa, lda, lang, usePOSTagging, computeDialogism);
 				} catch (Exception e) {
 					System.err.println("Error: " + e.getMessage());
 					e.printStackTrace();
@@ -141,19 +143,17 @@ public class EssayProcessingView extends JFrame {
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!textFieldPath.getText().equals("")) {
-					Task task = new Task(textFieldPath.getText(),
-							(String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(),
-							EssayProcessingView.this.lang, chckbxUsePosTagging
-									.isSelected());
+					Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+							(String) comboBoxLDA.getSelectedItem(), EssayProcessingView.this.lang,
+							chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected());
 					btnRun.setEnabled(false);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					task.execute();
 				} else
 					JOptionPane
-							.showMessageDialog(
-									EssayProcessingView.this,
-									LocalizationUtils.getTranslation("Please select an appropriate directory to be analysed") + "!",
+							.showMessageDialog(EssayProcessingView.this,
+									LocalizationUtils.getTranslation(
+											"Please select an appropriate directory to be analysed") + "!",
 									"Error", JOptionPane.WARNING_MESSAGE);
 			}
 		});
@@ -172,8 +172,7 @@ public class EssayProcessingView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (comboBoxLanguage.getSelectedIndex() > 0) {
 					// set final analysis language
-					lang = Lang.getLang((String) comboBoxLanguage
-							.getSelectedItem());
+					lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
 
 					comboBoxLSA.removeAllItems();
 					comboBoxLDA.removeAllItems();
@@ -213,61 +212,64 @@ public class EssayProcessingView extends JFrame {
 		});
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblPath)
-								.addComponent(lblLsaVectorSpace)
-								.addComponent(lblLdaModel))
-							.addGap(13)
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-								.addComponent(comboBoxLDA, 0, 420, Short.MAX_VALUE)
-								.addGroup(gl_contentPane.createSequentialGroup()
-									.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE))
-								.addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE)
-								.addComponent(comboBoxLanguage, Alignment.LEADING, 0, 420, Short.MAX_VALUE))
-							.addGap(6))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(chckbxUsePosTagging)
-							.addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
-							.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 242, GroupLayout.PREFERRED_SIZE)
-							.addContainerGap())
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblLanguage)
-							.addContainerGap(482, Short.MAX_VALUE))))
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblLanguage)
-						.addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblPath)
-						.addComponent(btnSearch)
-						.addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblLsaVectorSpace)
-						.addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+		gl_contentPane
+				.setHorizontalGroup(
+						gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(
+										gl_contentPane.createSequentialGroup().addContainerGap()
+												.addGroup(gl_contentPane
+														.createParallelGroup(
+																Alignment.LEADING)
+														.addGroup(
+																gl_contentPane.createSequentialGroup()
+																		.addGroup(
+																				gl_contentPane
+																						.createParallelGroup(
+																								Alignment.LEADING)
+																						.addComponent(lblPath)
+																						.addComponent(
+																								lblLsaVectorSpace)
+																		.addComponent(lblLdaModel)).addGap(
+																				13)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+										.addComponent(comboBoxLDA, 0, 420, Short.MAX_VALUE)
+										.addGroup(gl_contentPane.createSequentialGroup()
+												.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 372,
+														Short.MAX_VALUE)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
+														GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE))
+										.addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE)
+										.addComponent(comboBoxLanguage, Alignment.LEADING, 0, 420, Short.MAX_VALUE))
+								.addGap(6))
+						.addGroup(
+								gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+										.addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
+										.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 242,
+												GroupLayout.PREFERRED_SIZE)
+										.addContainerGap())
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage).addContainerGap(482,
+								Short.MAX_VALUE)))));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
+						comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
+						.addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
+						.addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblLdaModel))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(chckbxUsePosTagging)
-						.addComponent(btnRun))
-					.addContainerGap(38, Short.MAX_VALUE))
-		);
+				.addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
+						.createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
+				.addContainerGap(38, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}
 
@@ -292,8 +294,7 @@ public class EssayProcessingView extends JFrame {
 	}
 
 	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
+		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());

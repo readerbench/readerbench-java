@@ -60,8 +60,7 @@ public class RunMeasurementsView extends JFrame {
 		private Lang lang;
 		private boolean usePOSTagging;
 
-		public Task(String path, String pathToLSA, String pathToLDA, Lang lang,
-				boolean usePOSTagging) {
+		public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
 			super();
 			this.path = path;
 			this.pathToLSA = pathToLSA;
@@ -93,14 +92,13 @@ public class RunMeasurementsView extends JFrame {
 					DataGathering.writeHeader(path);
 
 					for (int gradeLevel = 1; gradeLevel <= noGrades; gradeLevel++) {
-						DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME
-								+ gradeLevel, gradeLevel, false, lsa, lda,
-								lang, usePOSTagging);
+						DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, gradeLevel, false, lsa,
+								lda, lang, usePOSTagging, usePOSTagging);
 					}
 
 					logger.info("Finished processing all documents");
-					logger.info("Time elasped:" + totalTiming.report() / 1000
-							+ "s (" + totalTiming.report() / 1000 / 60 + "min)");
+					logger.info("Time elasped:" + totalTiming.report() / 1000 + "s (" + totalTiming.report() / 1000 / 60
+							+ "min)");
 				} catch (Exception e) {
 					System.err.println("Error: " + e.getMessage());
 					e.printStackTrace();
@@ -123,7 +121,8 @@ public class RunMeasurementsView extends JFrame {
 	 * Create the frame.
 	 */
 	public RunMeasurementsView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Corpus Assessment in terms of Textual Complexity"));
+		setTitle("ReaderBench - "
+				+ LocalizationUtils.getTranslation("Corpus Assessment in terms of Textual Complexity"));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 560, 220);
@@ -166,19 +165,17 @@ public class RunMeasurementsView extends JFrame {
 		btnRun.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!textFieldPath.getText().equals("")) {
-					Task task = new Task(textFieldPath.getText(),
-							(String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(),
-							RunMeasurementsView.this.lang, chckbxUsePosTagging
-									.isSelected());
+					Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+							(String) comboBoxLDA.getSelectedItem(), RunMeasurementsView.this.lang,
+							chckbxUsePosTagging.isSelected());
 					btnRun.setEnabled(false);
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					task.execute();
 				} else
 					JOptionPane
-							.showMessageDialog(
-									RunMeasurementsView.this,
-									LocalizationUtils.getTranslation("Please select an appropriate directory to be analysed") + "!",
+							.showMessageDialog(RunMeasurementsView.this,
+									LocalizationUtils.getTranslation(
+											"Please select an appropriate directory to be analysed") + "!",
 									"Error", JOptionPane.WARNING_MESSAGE);
 			}
 		});
@@ -197,8 +194,7 @@ public class RunMeasurementsView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (comboBoxLanguage.getSelectedIndex() > 0) {
 					// set final analysis language
-					lang = Lang.getLang((String) comboBoxLanguage
-							.getSelectedItem());
+					lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
 
 					comboBoxLSA.removeAllItems();
 					comboBoxLDA.removeAllItems();
@@ -239,159 +235,63 @@ public class RunMeasurementsView extends JFrame {
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
-				.setHorizontalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_contentPane
+				.setHorizontalGroup(
+						gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(
+										gl_contentPane.createSequentialGroup().addContainerGap()
+												.addGroup(gl_contentPane
 														.createParallelGroup(
 																Alignment.TRAILING)
 														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
+																gl_contentPane.createSequentialGroup()
 																		.addGroup(
 																				gl_contentPane
 																						.createParallelGroup(
 																								Alignment.LEADING)
-																						.addComponent(
-																								lblPath)
+																						.addComponent(lblPath)
 																						.addComponent(
 																								lblLsaVectorSpace)
-																						.addComponent(
-																								lblLdaModel))
-																		.addGap(13)
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.TRAILING)
-																						.addComponent(
-																								comboBoxLDA,
-																								0,
-																								404,
-																								Short.MAX_VALUE)
-																						.addGroup(
-																								gl_contentPane
-																										.createSequentialGroup()
-																										.addComponent(
-																												textFieldPath,
-																												GroupLayout.DEFAULT_SIZE,
-																												357,
-																												Short.MAX_VALUE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btnSearch,
-																												GroupLayout.PREFERRED_SIZE,
-																												41,
-																												GroupLayout.PREFERRED_SIZE))
-																						.addComponent(
-																								comboBoxLSA,
-																								0,
-																								404,
-																								Short.MAX_VALUE)
-																						.addComponent(
-																								comboBoxLanguage,
-																								Alignment.LEADING,
-																								0,
-																								404,
-																								Short.MAX_VALUE))
-																		.addGap(6))
-														.addGroup(
-																Alignment.LEADING,
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				chckbxUsePosTagging)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED,
-																				319,
-																				Short.MAX_VALUE)
-																		.addComponent(
-																				btnRun,
-																				GroupLayout.PREFERRED_SIZE,
-																				73,
-																				GroupLayout.PREFERRED_SIZE)
-																		.addContainerGap())
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblLanguage)
-																		.addContainerGap(
-																				469,
-																				Short.MAX_VALUE)))));
-		gl_contentPane
-				.setVerticalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblLanguage)
-														.addComponent(
-																comboBoxLanguage,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(lblPath)
-														.addComponent(btnSearch)
-														.addComponent(
-																textFieldPath,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblLsaVectorSpace)
-														.addComponent(
-																comboBoxLSA,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																comboBoxLDA,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE)
-														.addComponent(
-																lblLdaModel))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																chckbxUsePosTagging)
-														.addComponent(btnRun))
-										.addContainerGap(
-												GroupLayout.DEFAULT_SIZE,
-												Short.MAX_VALUE)));
+																		.addComponent(lblLdaModel)).addGap(
+																				13)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+										.addComponent(comboBoxLDA, 0, 404, Short.MAX_VALUE)
+										.addGroup(gl_contentPane.createSequentialGroup()
+												.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 357,
+														Short.MAX_VALUE)
+												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
+														GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE))
+										.addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE)
+										.addComponent(comboBoxLanguage, Alignment.LEADING, 0, 404, Short.MAX_VALUE))
+								.addGap(6))
+						.addGroup(Alignment.LEADING,
+								gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+										.addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
+										.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 73,
+												GroupLayout.PREFERRED_SIZE)
+										.addContainerGap())
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage).addContainerGap(469,
+								Short.MAX_VALUE)))));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
+						comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
+						.addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
+								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
+						.addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblLdaModel))
+				.addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
+						.createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
+				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}
 
@@ -416,8 +316,7 @@ public class RunMeasurementsView extends JFrame {
 	}
 
 	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
+		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());

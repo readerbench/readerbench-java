@@ -136,68 +136,70 @@ public class DialogismComputations {
 		}
 
 		// determine spread
-		for (SemanticChain chain : d.getVoices()) {
-			chain.setSentenceDistribution(new double[noSentences]);
-			chain.setBlockDistribution(new double[d.getBlocks().size()]);
-			Map<String, Integer> voiceOccurrences = new TreeMap<String, Integer>();
-			for (Word w : chain.getWords()) {
-				int blockIndex = w.getBlockIndex();
-				int sentenceIndex = w.getUtteranceIndex();
-				// determine spread as 1+log(no_occurences) per sentence
-				chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
-				chain.getBlockDistribution()[blockIndex] += 1;
+		if (d.getVoices() != null) {
+			for (SemanticChain chain : d.getVoices()) {
+				chain.setSentenceDistribution(new double[noSentences]);
+				chain.setBlockDistribution(new double[d.getBlocks().size()]);
+				Map<String, Integer> voiceOccurrences = new TreeMap<String, Integer>();
+				for (Word w : chain.getWords()) {
+					int blockIndex = w.getBlockIndex();
+					int sentenceIndex = w.getUtteranceIndex();
+					// determine spread as 1+log(no_occurences) per sentence
+					chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
+					chain.getBlockDistribution()[blockIndex] += 1;
 
-				// build cumulative importance in terms of sentences in
-				// which occurrences have been spotted
-				if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
-					voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
-							voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
-				} else {
-					voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
+					// build cumulative importance in terms of sentences in
+					// which occurrences have been spotted
+					if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
+						voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
+								voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
+					} else {
+						voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
+					}
+
 				}
 
-			}
+				for (String key : voiceOccurrences.keySet()) {
+					Integer blockIndex = Integer.valueOf(key.substring(0, key.indexOf("_")));
+					Integer sentenceIndex = Integer.valueOf(key.substring(key.indexOf("_") + 1));
+					Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
 
-			for (String key : voiceOccurrences.keySet()) {
-				Integer blockIndex = Integer.valueOf(key.substring(0, key.indexOf("_")));
-				Integer sentenceIndex = Integer.valueOf(key.substring(key.indexOf("_") + 1));
-				Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
-
-				if (s.getWords().size() > 0) {
-					chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getOverallScore()
-					// * (1 + Math.log(voiceOccurrences.get(key)))
-					);
+					if (s.getWords().size() > 0) {
+						chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getOverallScore()
+						// * (1 + Math.log(voiceOccurrences.get(key)))
+						);
+					}
 				}
-			}
-			// normalize
-			if (voiceOccurrences.size() > 0) {
-				chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
+				// normalize
+				if (voiceOccurrences.size() > 0) {
+					chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
+				}
+
+				// normalize occurrences
+				// at sentence level
+				for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
+					if (chain.getSentenceDistribution()[i] > 0)
+						chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
+				}
+				// at block level
+				for (int i = 0; i < chain.getBlockDistribution().length; i++) {
+					if (chain.getBlockDistribution()[i] > 0)
+						chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
+				}
+				// define moving average at block level, relevant for chat
+				// conversations
+				chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
+						d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
 			}
 
-			// normalize occurrences
-			// at sentence level
-			for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
-				if (chain.getSentenceDistribution()[i] > 0)
-					chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
-			}
-			// at block level
-			for (int i = 0; i < chain.getBlockDistribution().length; i++) {
-				if (chain.getBlockDistribution()[i] > 0)
-					chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
-			}
-			// define moving average at block level, relevant for chat
-			// conversations
-			chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
-					d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
-		}
+			// sort semantic chains (voices) by importance
+			Collections.sort(d.getVoices());
 
-		// sort semantic chains (voices) by importance
-		Collections.sort(d.getVoices());
-
-		// build voice distribution vectors for each block
-		for (Block b : d.getBlocks()) {
-			if (b != null) {
-				determineVoiceDistribution(b, d);
+			// build voice distribution vectors for each block
+			for (Block b : d.getBlocks()) {
+				if (b != null) {
+					determineVoiceDistribution(b, d);
+				}
 			}
 		}
 	}
