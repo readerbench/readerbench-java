@@ -18,10 +18,8 @@ public class CorpusAssessmentWorker extends Worker {
 
 	public CorpusAssessmentWorker() {
 		// load also LSA vector space and LDA model
-		lsa = LSA.loadLSA(CorpusAssessmentMaster.PATH_TO_LSA,
-				CorpusAssessmentMaster.PROCESSING_LANGUAGE);
-		lda = LDA.loadLDA(CorpusAssessmentMaster.PATH_TO_LDA,
-				CorpusAssessmentMaster.PROCESSING_LANGUAGE);
+		lsa = LSA.loadLSA(CorpusAssessmentMaster.PATH_TO_LSA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
+		lda = LDA.loadLDA(CorpusAssessmentMaster.PATH_TO_LDA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
 	}
 
 	public void performTask(Serializable task) throws Exception {
@@ -34,26 +32,23 @@ public class CorpusAssessmentWorker extends Worker {
 
 		// Map<String, Integer> wordOccurences = new TreeMap<String, Integer>();
 		try {
-			send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE,
-					new String[] { taskMsg.getArgs()[0].toString() }, null));
+			send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
+					null));
 
-			Conversation d = Conversation.load(
-					new File(taskMsg.getArgs()[0].toString()), lsa, lda,
-					CorpusAssessmentMaster.PROCESSING_LANGUAGE,
-					CorpusAssessmentMaster.USE_POS_TAGGING,
+			Conversation d = Conversation.load(new File(taskMsg.getArgs()[0].toString()), lsa, lda,
+					CorpusAssessmentMaster.PROCESSING_LANGUAGE, CorpusAssessmentMaster.USE_POS_TAGGING,
 					CorpusAssessmentMaster.CLEAN_INPUT);
 			if (CorpusAssessmentMaster.PROCESS_INPUT) {
-				d.computeAll(CorpusAssessmentMaster.PATH_TO_COMPLEXITY_MODEL,
-						CorpusAssessmentMaster.SELECTED_COMPLEXITY_FACTORS,
-						CorpusAssessmentMaster.SAVE_OUTPUT);
+				d.computeAll(CorpusAssessmentMaster.COMPUTE_DIALOGISM, CorpusAssessmentMaster.PATH_TO_COMPLEXITY_MODEL,
+						CorpusAssessmentMaster.SELECTED_COMPLEXITY_FACTORS, CorpusAssessmentMaster.SAVE_OUTPUT);
 			}
 
-			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE,
-					new String[] { taskMsg.getArgs()[0].toString() }, null));
+			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
+					null));
 		} catch (Exception e) {
 			e.printStackTrace();
-			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE,
-					new String[] { taskMsg.getArgs()[0].toString() }, null));
+			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
+					null));
 		}
 
 		logger.info("Finished analysing " + taskMsg.getArgs()[0].toString());

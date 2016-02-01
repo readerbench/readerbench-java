@@ -24,12 +24,12 @@ import webService.ReaderBenchServer;
 import webService.result.ResultSearch;
 
 public class SearchClient {
-	
+
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
-	
+
 	public static final double MIN_THRESHOLD = 0.2d;
 	public static final int NO_RESULTS = 20;
-	
+
 	/**
 	 * Search for query in documents
 	 *
@@ -47,7 +47,7 @@ public class SearchClient {
 
 		AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(),
 				documents.get(0).getLanguage(), false, false);
-		queryDoc.computeAll(null, null);
+		queryDoc.computeAll(true, null, null);
 		queryDoc.setTitleText(query);
 
 		List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);
@@ -87,8 +87,8 @@ public class SearchClient {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-		performQuery("money",5656);
-		performQuery("financial",5858);
+		performQuery("money", 5656);
+		performQuery("financial", 5858);
 	}
 
 }

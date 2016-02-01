@@ -14,10 +14,9 @@ import webService.result.ResultTopic;
 public class ParticipantInteraction {
 
 	public static ResultTopic buildParticipantGraph(Conversation c) {
-
 		List<Participant> participants = new ArrayList<Participant>();
 		participants.addAll(c.getParticipants());
-		c.computeAll(null, null, false);
+		c.computeAll(true, null, null, false);
 		double[][] participantContributions = c.getParticipantContributions();
 
 		DecimalFormat formatter = new DecimalFormat("#.##");

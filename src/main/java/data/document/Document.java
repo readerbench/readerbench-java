@@ -59,9 +59,9 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
 	public Document(String path, LSA lsa, LDA lda, Lang lang) {
 		super(path, lsa, lda, lang);
-		authors = new LinkedList<String>(); 
+		authors = new LinkedList<String>();
 	}
-	
+
 	public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
 			boolean cleanInput) {
 		this(path, lsa, lda, lang);
@@ -370,8 +370,9 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 		return dom;
 	}
 
-	public void computeAll(String pathToComplexityModel, int[] selectedComplexityFactors, boolean saveOutput) {
-		super.computeAll(pathToComplexityModel, selectedComplexityFactors);
+	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
+			boolean saveOutput) {
+		super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
 		// writing exports if document
 		// if chat there are additional computations to perform
 		if (saveOutput) {

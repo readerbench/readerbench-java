@@ -62,8 +62,10 @@ import services.semanticModels.LSA.LSA;
 public abstract class AbstractDocument extends AnalysisElement {
 	private static final long serialVersionUID = -6173684658096015060L;
 	public static final int MIN_PERCENTAGE_CONTENT_WORDS = 2;
-	
-	public static enum DocumentType {DOCUMENT, CONVERSATION, ESSAY_CREATOR, METACOGNITION, SUMMARY};
+
+	public static enum DocumentType {
+		DOCUMENT, CONVERSATION, ESSAY_CREATOR, METACOGNITION, SUMMARY
+	};
 
 	private String path;
 	private String titleText;
@@ -138,8 +140,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 		}
 	}
 
-	public void computeAll(String pathToComplexityModel, int[] selectedComplexityFactors) {
-		computeDiscourseAnalysis();
+	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors) {
+		computeDiscourseAnalysis(computeDialogism);
 
 		// compute all textual complexity factors
 		if (pathToComplexityModel != null && selectedComplexityFactors != null) {
@@ -150,25 +152,27 @@ public abstract class AbstractDocument extends AnalysisElement {
 	/**
 	 * 
 	 */
-	public void computeDiscourseAnalysis() {
+	public void computeDiscourseAnalysis(boolean computeDialogism) {
 		// build coherence graph
 		CohesionGraph.buildCohesionGraph(this);
 
-		// build disambiguisation graph and lexical chains
-		DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
-		DisambiguisationGraphAndLexicalChains.pruneDisambiguationGraph(this);
-		// System.out.println(d.disambiguationGraph);
+		if (computeDialogism) {
+			// build disambiguisation graph and lexical chains
+			DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
+			DisambiguisationGraphAndLexicalChains.pruneDisambiguationGraph(this);
+			// System.out.println(d.disambiguationGraph);
 
-		DisambiguisationGraphAndLexicalChains.buildLexicalChains(this);
-		// for (LexicalChain chain : lexicalChains) {
-		// System.out.println(chain);
-		// }
+			DisambiguisationGraphAndLexicalChains.buildLexicalChains(this);
+			// for (LexicalChain chain : lexicalChains) {
+			// System.out.println(chain);
+			// }
 
-		DisambiguisationGraphAndLexicalChains.computeWordDistances(this);
-		// System.out.println(LexicalCohesion.getDocumentCohesion(this));
+			DisambiguisationGraphAndLexicalChains.computeWordDistances(this);
+			// System.out.println(LexicalCohesion.getDocumentCohesion(this));
 
-		// determine semantic chains / voices
-		DialogismComputations.determineVoices(this);
+			// determine semantic chains / voices
+			DialogismComputations.determineVoices(this);
+		}
 
 		// determine topics
 		TopicModeling.determineTopics(this, this);
@@ -208,7 +212,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 	}
 
 	public static AbstractDocument loadGenericDocument(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
-			boolean usePOSTagging, boolean cleanInput) {
+			boolean usePOSTagging, boolean computeDialogism, boolean cleanInput) {
 		// load also LSA vector space and LDA model
 		LSA lsa = null;
 		LDA lda = null;
@@ -216,11 +220,11 @@ public abstract class AbstractDocument extends AnalysisElement {
 			lsa = LSA.loadLSA(pathToLSA, lang);
 		if (pathToLDA != null && pathToLDA.length() > 0 && new File(pathToLDA).isDirectory())
 			lda = LDA.loadLDA(pathToLDA, lang);
-		return loadGenericDocument(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+		return loadGenericDocument(new File(pathToDoc), lsa, lda, lang, computeDialogism, usePOSTagging, cleanInput);
 	}
 
 	public static AbstractDocument loadGenericDocument(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-			boolean cleanInput) {
+			boolean computeDialogism, boolean cleanInput) {
 		// parse the XML file
 		logger.info("Loading " + docFile.getPath() + " file for processing");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -255,12 +259,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 			if (isDocument) {
 				Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-				d.computeAll(null, null, true);
+				d.computeAll(computeDialogism, null, null, true);
 				return d;
 			}
 			if (isChat) {
 				Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-				c.computeAll(null, null, true);
+				c.computeAll(computeDialogism, null, null, true);
 				return c;
 			}
 		} catch (Exception e) {

@@ -28,75 +28,70 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class PdfToTextFrenchCVs {
-	
+
 	static Logger logger = Logger.getLogger(PdfToTextFrenchCVs.class);
-	
+
 	@Test
 	public void process() {
-		
-		//String prependPath = "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
+
+		// String prependPath =
+		// "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
 		String prependPath = "/Users/Berilac/OneDrive/ReaderBench/";
 		logger.info("Starting French CVs processing...");
 		StringBuilder sb = new StringBuilder();
 		sb.append("sep=\t\nfile\tconcepts\n");
-		
+
 		try {
 			Files.walk(Paths.get(prependPath + "cv")).forEach(filePath -> {
 				String filePathString = filePath.toString();
-			    if (filePathString.contains(".pdf")) {
-			        
-			    	logger.info("Processing file: " + filePathString);
-			    	
-			    	// read PDF file contents
-			    	String documentContent = PdfToTextConverter.pdftoText(filePathString, true);
-			        
-			    	// process file
-			    	List<ResultNode> nodes = getTopics(
-			    			documentContent,
-			    			"resources/config/LSA/lemonde_fr",
-			    			"resources/config/LDA/lemonde_fr",
-			    			"fr",
-			    			false,
-			    			0.3
-			    			);
-			    	
-			    	StringBuilder sbNode = new StringBuilder();
-			    	for (ResultNode node : nodes) {
-			    		sbNode.append(node.name + " (" + node.value + "), ");
-			    	}
-			    	// delete last comma
-			    	if (sbNode.length() > 2) sbNode.setLength(sbNode.length() - 2);
-			        sbNode.append("\n");
-			    	
-			        sb.append(filePath.getFileName().toString() + "\t" + sbNode.toString());
-			        
-			        logger.info("Finished processing file: " + filePathString);
+				if (filePathString.contains(".pdf")) {
 
-			    }
+					logger.info("Processing file: " + filePathString);
+
+					// read PDF file contents
+					String documentContent = PdfToTextConverter.pdftoText(filePathString, true);
+
+					// process file
+					List<ResultNode> nodes = getTopics(documentContent, "resources/config/LSA/lemonde_fr",
+							"resources/config/LDA/lemonde_fr", "fr", false, false, 0.3);
+
+					StringBuilder sbNode = new StringBuilder();
+					for (ResultNode node : nodes) {
+						sbNode.append(node.name + " (" + node.value + "), ");
+					}
+					// delete last comma
+					if (sbNode.length() > 2)
+						sbNode.setLength(sbNode.length() - 2);
+					sbNode.append("\n");
+
+					sb.append(filePath.getFileName().toString() + "\t" + sbNode.toString());
+
+					logger.info("Finished processing file: " + filePathString);
+
+				}
 			});
-			
-			//System.out.println(sb.toString());
+
+			// System.out.println(sb.toString());
 			File file = new File("frenchcvs.csv");
-			FileUtils.writeStringToFile(file,sb.toString());
+			FileUtils.writeStringToFile(file, sb.toString());
 			logger.info("Printed information to: " + file.getAbsolutePath());
-			
+
 		} catch (IOException e) {
 			logger.info("Error opening path.");
 			e.printStackTrace();
 		}
-		
+
 		logger.info("French CVs processing ended...");
-		
+
 	}
-	
-	private List<ResultNode> getTopics(String query, String pathToLSA, String pathToLDA, String lang, boolean posTagging,
-			double threshold) {
+
+	private List<ResultNode> getTopics(String query, String pathToLSA, String pathToLDA, String lang,
+			boolean posTagging, boolean computeDialogism, double threshold) {
 
 		List<ResultNode> nodes = new ArrayList<ResultNode>();
-		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging);
+		AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism);
 
-		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50,
-				false, false);
+		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 
 		// build connected graph
 		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
@@ -130,9 +125,9 @@ public class PdfToTextFrenchCVs {
 
 		return nodes;
 	}
-	
+
 	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
-			boolean posTagging) {
+			boolean posTagging, boolean computeDialogism) {
 		logger.info("Processign query ...");
 		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
 		String[] blocks = query.split("\n");
@@ -149,12 +144,12 @@ public class PdfToTextFrenchCVs {
 		AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
 				LDA.loadLDA(pathToLDA, lang), lang, posTagging, false);
 		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-		queryDoc.computeAll(null, null);
+		queryDoc.computeAll(computeDialogism, null, null);
 		ComplexityIndices.computeComplexityFactors(queryDoc);
 
 		return queryDoc;
 	}
-	
+
 	class ResultNode implements Comparable<ResultNode> {
 
 		private String name;

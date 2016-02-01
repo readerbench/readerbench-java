@@ -88,8 +88,8 @@ public class Conversation extends AbstractDocument {
 	 * @param usePOSTagging
 	 * @param cleanInput
 	 */
-	public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-			boolean cleanInput) {
+	public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang,
+			boolean usePOSTagging, boolean cleanInput) {
 		this(path, lsa, lda, lang);
 		this.setText(contents.getText());
 		setDocTmp(contents);
@@ -106,8 +106,8 @@ public class Conversation extends AbstractDocument {
 	 * @param cleanInput
 	 * @return
 	 */
-	public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-			boolean cleanInput) {
+	public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
+			boolean usePOSTagging, boolean cleanInput) {
 		// load also LSA vector space and LDA model
 		LSA lsa = LSA.loadLSA(pathToLSA, lang);
 		LDA lda = LDA.loadLDA(pathToLDA, lang);
@@ -116,6 +116,7 @@ public class Conversation extends AbstractDocument {
 
 	/**
 	 * Load a conversation
+	 * 
 	 * @param docFile
 	 * @param lsa
 	 * @param lda
@@ -124,19 +125,20 @@ public class Conversation extends AbstractDocument {
 	 * @param cleanInput
 	 * @return
 	 */
-	public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+	public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
+			boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		Conversation c = null;
 		// determine contents
 		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
 		List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
-		
+
 		try {
-			
+
 			InputSource input = new InputSource(new FileInputStream(docFile));
 			input.setEncoding("UTF-8");
-			
+
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			org.w3c.dom.Document dom = null;
 			try {
@@ -144,7 +146,7 @@ public class Conversation extends AbstractDocument {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			
+
 			Element doc = dom.getDocumentElement();
 			Element el = null;
 			NodeList nl1 = null, nl2 = null;
@@ -160,7 +162,7 @@ public class Conversation extends AbstractDocument {
 					} else {
 						block.setSpeaker("unregistered member");
 					}
-					
+
 					nl2 = el.getElementsByTagName("Utterance");
 					if (nl2 != null && nl2.getLength() > 0) {
 						for (int j = 0; j < nl2.getLength(); j++) {
@@ -194,7 +196,7 @@ public class Conversation extends AbstractDocument {
 					}
 				}
 			}
-			
+
 			contents.setBlocks(blocks);
 			c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
 			// set title as a concatenation of topics
@@ -207,7 +209,7 @@ public class Conversation extends AbstractDocument {
 				}
 				c.setDocumentTitle(title, lsa, lda, lang, usePOSTagging);
 			}
-			
+
 			if (title.length() == 0) {
 				c.setDocumentTitle(docFile.getName(), lsa, lda, lang, usePOSTagging);
 			}
@@ -335,8 +337,9 @@ public class Conversation extends AbstractDocument {
 	 * @param selectedComplexityFactors
 	 * @param saveOutput
 	 */
-	public void computeAll(String pathToComplexityModel, int[] selectedComplexityFactors, boolean saveOutput) {
-		super.computeAll(pathToComplexityModel, selectedComplexityFactors);
+	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
+			boolean saveOutput) {
+		super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
 
 		for (Participant p : this.getParticipants()) {
 			TopicModeling.determineTopics(p.getInterventions(), this);

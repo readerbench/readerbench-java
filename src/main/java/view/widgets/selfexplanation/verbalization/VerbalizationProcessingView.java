@@ -87,7 +87,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 				v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
 			} else {
 				v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging, true);
-				v.computeAll(true);
+				v.computeAll(true, true);
 			}
 
 			if (v != null) {

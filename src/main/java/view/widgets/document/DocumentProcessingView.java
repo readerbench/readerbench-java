@@ -90,16 +90,18 @@ public class DocumentProcessingView extends JInternalFrame {
 		private String pathToDoc;
 		private String pathToLSA;
 		private String pathToLDA;
+		private boolean computeDialogism;
 		private boolean usePOSTagging;
 		private boolean isSerialized;
 
 		public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-				boolean isSerialized) {
+				boolean computeDialogism, boolean isSerialized) {
 			super();
 			this.pathToDoc = pathToDoc;
 			this.pathToLSA = pathToLSA;
 			this.pathToLDA = pathToLDA;
 			this.usePOSTagging = usePOSTagging;
+			this.computeDialogism = computeDialogism;
 			this.isSerialized = isSerialized;
 		}
 
@@ -109,7 +111,7 @@ public class DocumentProcessingView extends JInternalFrame {
 				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
 			} else {
 				d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
-						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true);
+						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, true);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 				if (d instanceof Document) {
@@ -118,7 +120,6 @@ public class DocumentProcessingView extends JInternalFrame {
 					JOptionPane.showMessageDialog(desktopPane, "Please load only a document!", "Information",
 							JOptionPane.INFORMATION_MESSAGE);
 				}
-
 			} else {
 				JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
 						JOptionPane.INFORMATION_MESSAGE);
@@ -341,7 +342,7 @@ public class DocumentProcessingView extends JInternalFrame {
 					File file = fc.getSelectedFile();
 					lastDirectory = file.getParentFile();
 					DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(
-							file.getPath(), null, null, false, true);
+							file.getPath(), null, null, false, false, true);
 					task.execute();
 				}
 			}

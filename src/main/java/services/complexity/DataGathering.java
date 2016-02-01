@@ -69,7 +69,7 @@ public class DataGathering {
 			Document d = null;
 			try {
 				d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
-				d.computeAll(null, null, false);
+				d.computeAll(usePOSTagging, null, null, false);
 				ComplexityIndices.computeComplexityFactors(d);
 			} catch (Exception e) {
 				logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());

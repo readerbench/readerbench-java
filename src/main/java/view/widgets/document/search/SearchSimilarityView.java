@@ -216,7 +216,7 @@ public class SearchSimilarityView extends JFrame {
 
 		this.query = new Document(null, contents, docs.get(0).getLSA(), docs.get(0).getLDA(), docs.get(0).getLanguage(),
 				true, false);
-		this.query.computeAll(null, null);
+		this.query.computeAll(true, null, null);
 		this.query.setTitleText(query);
 
 		this.computeSimilarTopics();

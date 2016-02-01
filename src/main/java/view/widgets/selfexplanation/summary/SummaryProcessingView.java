@@ -60,8 +60,7 @@ public class SummaryProcessingView extends JInternalFrame {
 	private DefaultTableModel summariesTableModel = null;
 	private static File lastDirectory = null;
 
-	private static List<Summary> loadedSummaries = Collections
-			.synchronizedList(new LinkedList<Summary>());
+	private static List<Summary> loadedSummaries = Collections.synchronizedList(new LinkedList<Summary>());
 	private JButton btnAddSerializedSummary;
 
 	public class EssayProcessingTask extends SwingWorker<Void, Void> {
@@ -70,8 +69,7 @@ public class SummaryProcessingView extends JInternalFrame {
 		private boolean usePOSTagging;
 		private boolean isSerialized;
 
-		public EssayProcessingTask(String pathToDoc, Document d,
-				boolean usePOSTagging, boolean isSerialized) {
+		public EssayProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
 			super();
 			this.pathToDoc = pathToDoc;
 			this.referredDoc = d;
@@ -82,27 +80,23 @@ public class SummaryProcessingView extends JInternalFrame {
 		public void addSingleEssay(String pathToIndividualFile) {
 			Summary e = null;
 			if (isSerialized) {
-				e = (Summary) Summary
-						.loadSerializedDocument(pathToIndividualFile);
+				e = (Summary) Summary.loadSerializedDocument(pathToIndividualFile);
 			} else {
-				e = Summary.loadEssay(pathToIndividualFile, referredDoc,
-						usePOSTagging, true);
+				e = Summary.loadEssay(pathToIndividualFile, referredDoc, usePOSTagging, true);
 				if (e != null)
-					e.computeAll(true);
+					e.computeAll(usePOSTagging, true);
 			}
 
 			if (e != null) {
 				if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
 					ReaderBenchView.RUNTIME_LANGUAGE = e.getLanguage();
-					ComplexityIndicesView
-							.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
+					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
 				}
 				if (e.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 					SummaryProcessingView.getLoadedSummaries().add(e);
 					addSummary(e);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Incorrect language for the loaded verbalization!",
+					JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -174,8 +168,7 @@ public class SummaryProcessingView extends JInternalFrame {
 					UIDefaults map = new UIDefaults();
 					Painter<JComponent> painter = new Painter<JComponent>() {
 						@Override
-						public void paint(Graphics2D g, JComponent c, int w,
-								int h) {
+						public void paint(Graphics2D g, JComponent c, int w, int h) {
 							g.setColor(Color.WHITE);
 							g.fillRect(0, 0, w, h);
 						}
@@ -195,8 +188,7 @@ public class SummaryProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
 					try {
-						JInternalFrame frame = new AddSummaryView(
-								SummaryProcessingView.this);
+						JInternalFrame frame = new AddSummaryView(SummaryProcessingView.this);
 						frame.setVisible(true);
 						desktopPane.add(frame);
 						try {
@@ -208,12 +200,9 @@ public class SummaryProcessingView extends JInternalFrame {
 						exception.printStackTrace();
 					}
 				} else {
-					JOptionPane
-							.showMessageDialog(
-									desktopPane,
-									"At least one document must be already loaded in order to be able to start loading summaries!",
-									"Information",
-									JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(desktopPane,
+							"At least one document must be already loaded in order to be able to start loading summaries!",
+							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
@@ -224,11 +213,9 @@ public class SummaryProcessingView extends JInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (summariesTable.getSelectedRow() != -1) {
 					loadedSummaries.remove(summariesTable.getSelectedRow());
-					summariesTableModel.removeRow(summariesTable
-							.getSelectedRow());
+					summariesTableModel.removeRow(summariesTable.getSelectedRow());
 				} else {
-					JOptionPane.showMessageDialog(SummaryProcessingView.this,
-							"Please select a row to be deleted!",
+					JOptionPane.showMessageDialog(SummaryProcessingView.this, "Please select a row to be deleted!",
 							"Information", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -238,8 +225,7 @@ public class SummaryProcessingView extends JInternalFrame {
 			summariesTableModel = new VerbalisationManagementTableModel();
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		summariesTable = new JTable(summariesTableModel);
 		summariesTable.setFillsViewportHeight(true);
@@ -251,8 +237,7 @@ public class SummaryProcessingView extends JInternalFrame {
 					JTable target = (JTable) event.getSource();
 					int row = target.getSelectedRow();
 					if (row >= 0 && row < loadedSummaries.size()) {
-						Summary summary = loadedSummaries.get(summariesTable
-								.getSelectedRow());
+						Summary summary = loadedSummaries.get(summariesTable.getSelectedRow());
 						SummaryView view = new SummaryView(summary);
 						view.setVisible(true);
 					}
@@ -288,8 +273,8 @@ public class SummaryProcessingView extends JInternalFrame {
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 					lastDirectory = file.getParentFile();
-					EssayProcessingTask task = SummaryProcessingView.this.new EssayProcessingTask(
-							file.getPath(), null, false, true);
+					EssayProcessingTask task = SummaryProcessingView.this.new EssayProcessingTask(file.getPath(), null,
+							false, true);
 					task.execute();
 				}
 			}
@@ -301,8 +286,7 @@ public class SummaryProcessingView extends JInternalFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						ComprehensionPredictionView view = new ComprehensionPredictionView(
-								loadedSummaries);
+						ComprehensionPredictionView view = new ComprehensionPredictionView(loadedSummaries);
 						view.setVisible(true);
 					}
 				});
@@ -315,84 +299,49 @@ public class SummaryProcessingView extends JInternalFrame {
 		btnViewSummary.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (summariesTable.getSelectedRow() != -1) {
-					Summary s = loadedSummaries.get(summariesTable
-							.getSelectedRow());
+					Summary s = loadedSummaries.get(summariesTable.getSelectedRow());
 					SummaryView view = new SummaryView(s);
 					view.setVisible(true);
 				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							"Please select a summary to be viewed!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(desktopPane, "Please select a summary to be viewed!", "Information",
+							JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
 		});
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
 		gl_desktopPane
-				.setHorizontalGroup(gl_desktopPane
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_desktopPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																scrollPane,
-																GroupLayout.DEFAULT_SIZE,
-																876,
-																Short.MAX_VALUE)
-														.addGroup(
-																gl_desktopPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				btnViewSummary)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnAddSummary)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnAddSerializedSummary)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnRemoveSummary)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnComprehensionPrediction)))
-										.addContainerGap()));
-		gl_desktopPane
-				.setVerticalGroup(gl_desktopPane
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(
-								gl_desktopPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addComponent(scrollPane,
-												GroupLayout.DEFAULT_SIZE, 374,
-												Short.MAX_VALUE)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_desktopPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																btnComprehensionPrediction)
-														.addComponent(
-																btnRemoveSummary)
-														.addComponent(
-																btnAddSerializedSummary)
-														.addComponent(
-																btnAddSummary)
-														.addComponent(
-																btnViewSummary))
-										.addContainerGap()));
+				.setHorizontalGroup(
+						gl_desktopPane
+								.createParallelGroup(
+										Alignment.TRAILING)
+								.addGroup(
+										gl_desktopPane.createSequentialGroup().addContainerGap()
+												.addGroup(
+														gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+																.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 876,
+																		Short.MAX_VALUE)
+																.addGroup(
+																		gl_desktopPane.createSequentialGroup()
+																				.addComponent(btnViewSummary)
+																				.addPreferredGap(
+																						ComponentPlacement.RELATED)
+																		.addComponent(btnAddSummary)
+																		.addPreferredGap(ComponentPlacement.RELATED)
+																		.addComponent(btnAddSerializedSummary)
+																		.addPreferredGap(ComponentPlacement.RELATED)
+																		.addComponent(btnRemoveSummary)
+																		.addPreferredGap(ComponentPlacement.RELATED)
+																		.addComponent(btnComprehensionPrediction)))
+						.addContainerGap()));
+		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(gl_desktopPane
+				.createSequentialGroup().addContainerGap()
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_desktopPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(btnComprehensionPrediction).addComponent(btnRemoveSummary)
+						.addComponent(btnAddSerializedSummary).addComponent(btnAddSummary).addComponent(btnViewSummary))
+				.addContainerGap()));
 		desktopPane.setLayout(gl_desktopPane);
 
 		updateContents();
@@ -402,8 +351,7 @@ public class SummaryProcessingView extends JInternalFrame {
 		return loadedSummaries;
 	}
 
-	public static synchronized void setLoadedSummaries(
-			List<Summary> loadedVervalizations) {
+	public static synchronized void setLoadedSummaries(List<Summary> loadedVervalizations) {
 		SummaryProcessingView.loadedSummaries = loadedVervalizations;
 	}
 

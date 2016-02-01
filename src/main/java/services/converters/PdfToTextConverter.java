@@ -2,14 +2,10 @@ package services.converters;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.sql.Timestamp;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;

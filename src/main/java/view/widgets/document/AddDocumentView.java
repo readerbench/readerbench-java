@@ -23,8 +23,8 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
-import view.widgets.ReaderBenchView;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import view.widgets.ReaderBenchView;
 
 public class AddDocumentView extends JInternalFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
@@ -131,7 +131,8 @@ public class AddDocumentView extends JInternalFrame {
 				if (!textFieldPath.getText().equals("")) {
 					DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
 							textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(), false);
+							(String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
+							chckbxUsePosTagging.isSelected(), false);
 					task.execute();
 					AddDocumentView.this.dispose();
 				} else

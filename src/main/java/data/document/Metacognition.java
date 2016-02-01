@@ -455,11 +455,11 @@ public class Metacognition extends Document {
 		}
 	}
 
-	public void computeAll(boolean saveOutput) {
+	public void computeAll(boolean computeDialogism, boolean saveOutput) {
 		VerbalizationAssessment.detRefBlockSimilarities(this);
 		ReadingStrategies.detReadingStrategies(this);
 
-		computeDiscourseAnalysis();
+		computeDiscourseAnalysis(computeDialogism);
 		ComplexityIndices.computeComplexityFactors(this);
 		determineComprehesionIndeces();
 

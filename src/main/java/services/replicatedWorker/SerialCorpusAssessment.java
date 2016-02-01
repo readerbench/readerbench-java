@@ -30,15 +30,13 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 public class SerialCorpusAssessment {
 	static Logger logger = Logger.getLogger(SerialCorpusAssessment.class);
 
-	private static void checkpoint(File checkpoint, File newFile,
-			long processingTime) {
+	private static void checkpoint(File checkpoint, File newFile, long processingTime) {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			org.w3c.dom.Document dom = db.parse(checkpoint);
 
-			Element completedFiles = (Element) dom.getElementsByTagName(
-					"completedFiles").item(0);
+			Element completedFiles = (Element) dom.getElementsByTagName("completedFiles").item(0);
 			if (completedFiles == null) {
 				completedFiles = dom.createElement("completedFiles");
 			}
@@ -69,17 +67,15 @@ public class SerialCorpusAssessment {
 		}
 	}
 
-	public static void processCorpus(String rootPath, String pathToLSA,
-			String pathToLDA, Lang lang, boolean usePOSTagging,
-			boolean cleanInput, String pathToComplexityModel,
-			int[] selectedComplexityFactors, boolean saveOutput) {
+	public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
+			boolean usePOSTagging, boolean cleanInput, String pathToComplexityModel, int[] selectedComplexityFactors,
+			boolean saveOutput) {
 		logger.info("Analysing all files in \"" + rootPath + "\"");
 		List<File> files = new LinkedList<File>();
 
 		FileFilter filter = new FileFilter() {
 			public boolean accept(File f) {
-				return f.getName().endsWith(".xml")
-						&& !f.getName().equals("checkpoint.xml");
+				return f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
 			}
 		};
 
@@ -89,8 +85,7 @@ public class SerialCorpusAssessment {
 		if (!checkpoint.exists()) {
 			try {
 				checkpoint.createNewFile();
-				BufferedWriter in = new BufferedWriter(new FileWriter(
-						checkpoint));
+				BufferedWriter in = new BufferedWriter(new FileWriter(checkpoint));
 				in.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<completedFiles/>");
 				in.close();
 			} catch (IOException e) {
@@ -134,16 +129,13 @@ public class SerialCorpusAssessment {
 			try {
 				logger.info("Processing file " + f.getName());
 				Long start = System.currentTimeMillis();
-				Conversation c = Conversation
-						.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
-				c.computeAll(pathToComplexityModel, selectedComplexityFactors,
-						saveOutput);
+				Conversation c = Conversation.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
+				c.computeAll(usePOSTagging, pathToComplexityModel, selectedComplexityFactors, saveOutput);
 				Long end = System.currentTimeMillis();
 
 				// update checkpoint
 				checkpoint(checkpoint, f, end - start);
-				logger.info("Successfully finished processing file "
-						+ f.getName());
+				logger.info("Successfully finished processing file " + f.getName());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -153,8 +145,7 @@ public class SerialCorpusAssessment {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		SerialCorpusAssessment.processCorpus("in/forum_Nic",
-				"resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
-				false, null, null, true);
+		SerialCorpusAssessment.processCorpus("in/forum_Nic", "resources/config/LSA/tasa_en",
+				"resources/config/LDA/tasa_en", Lang.eng, true, false, null, null, true);
 	}
 }

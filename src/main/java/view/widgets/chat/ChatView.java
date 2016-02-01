@@ -5,13 +5,10 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileFilter;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.GroupLayout;
@@ -29,15 +26,17 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import data.Block;
+import data.cscl.Conversation;
+import data.cscl.Participant;
+import data.cscl.Utterance;
+import data.discourse.Topic;
 import services.commons.Formatting;
 import services.discourse.topicMining.TopicModeling;
 import view.models.document.ChatTable;
@@ -45,12 +44,6 @@ import view.models.document.DocumentTableModel;
 import view.models.document.TopicsTableModel;
 import view.widgets.document.ConceptView;
 import view.widgets.document.VoiceSelectionView;
-import data.Block;
-import data.cscl.Conversation;
-import data.cscl.Participant;
-import data.cscl.Utterance;
-import data.discourse.Topic;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 
 /**
  * 
@@ -554,85 +547,6 @@ public class ChatView extends JFrame {
 					Object[] row = { index + "", text + " ["
 							+ Formatting.formatNumber(chat.getBlocks().get(index).getOverallScore()) + "]" };
 					modelContent.addRow(row);
-				}
-			}
-		}
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				List<Conversation> chats = new LinkedList<Conversation>();
-
-				Conversation c1 = Conversation.load("in/cscl/echipa4.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
-						true);
-				c1.computeAll(null, null, true);
-				chats.add(c1);
-
-				Conversation c2 = Conversation.load("in/cscl/echipa34.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
-						true);
-				c2.computeAll(null, null, true);
-				chats.add(c2);
-
-				Conversation c3 = Conversation.load("in/cscl/echipa36.xml", "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.eng, true,
-						true);
-				c3.computeAll(null, null, true);
-				// Chat c3 = (Chat) AbstractDocument
-				// .loadSerializedDocument("in/cscl/echipa4.ser");
-				// DialogismComputations.determineVoiceDistributions(c3);
-				// DialogismComputations.implicitLinksCohesion(c3);
-				// DialogismMeasures.getParticipantCollaboration(c3);
-				chats.add(c3);
-
-				// process all files
-				File dir = new File("in/CoP-Annick-Philippe");
-
-				File[] files = dir.listFiles(new FileFilter() {
-					public boolean accept(File pathname) {
-						if (pathname.getName().toLowerCase().endsWith(".xml"))
-							return true;
-						return false;
-					}
-				});
-
-				for (File file : files) {
-					try {
-						logger.info("Processing " + file.getPath() + " file");
-						Conversation c = Conversation.load(file.getPath(), "resources/config/LSA/lemonde_fr", "resources/config/LDA/lemonde_fr", Lang.fr,
-								true, true);
-						c.computeAll(null, null, true);
-						chats.add(c);
-					} catch (Exception e) {
-						logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
-						e.printStackTrace();
-						throw e;
-					}
-				}
-
-				ChatView view = new ChatView(chats.get(0));
-				view.setVisible(true);
-			}
-		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
 				}
 			}
 		}

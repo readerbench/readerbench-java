@@ -81,9 +81,9 @@ public class Summary extends Metacognition {
 		}
 	}
 
-	public void computeAll(boolean saveOutput) {
+	public void computeAll(boolean computeDialogism, boolean saveOutput) {
 		ReadingStrategies.detReadingStrategies(this);
-		computeDiscourseAnalysis();
+		computeDiscourseAnalysis(computeDialogism);
 		ComplexityIndices.computeComplexityFactors(this);
 		determineComprehesionIndeces();
 
@@ -100,7 +100,7 @@ public class Summary extends Metacognition {
 				"je crois qu'il y a donc la famille de Matilda ben ils sont en train de manger et soudain y a quelqu'un qui entre en disant salut salut salut. Après ils croient que c'étaient des voleurs alors ils prennent des armes et ils vont vers le voleur. Y en a qui croient que c'est des voleurs mais le père il croit pas. Et la femme et Matilda ils croient elles croient que c'est des voleurs. Et après Matilda elle dit que c'est un fantôme et qu'il hante la salle. Et après ils sortent tous du salon.",
 				d, true, true);
 
-		s.computeAll(false);
+		s.computeAll(true, false);
 
 		SummaryView view = new SummaryView(s);
 		view.setVisible(true);

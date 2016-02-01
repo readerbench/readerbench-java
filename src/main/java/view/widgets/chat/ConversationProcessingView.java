@@ -103,7 +103,7 @@ public class ConversationProcessingView extends JInternalFrame {
 				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
 			} else {
 				d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
-						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true);
+						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, true);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 				if (d instanceof Conversation) {

@@ -152,7 +152,7 @@ public class SearchWebServer {
 
 				AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(),
 						documents.get(0).getLDA(), documents.get(0).getLanguage(), true, false);
-				queryDoc.computeAll(null, null);
+				queryDoc.computeAll(true, null, null);
 
 				List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD,
 						NO_RESULTS);

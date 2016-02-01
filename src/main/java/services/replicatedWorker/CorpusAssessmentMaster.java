@@ -34,6 +34,7 @@ public class CorpusAssessmentMaster extends Master {
 	public static final String PATH_TO_LDA = "resources/config/LDA/tasa_en";
 	public static final Lang PROCESSING_LANGUAGE = Lang.eng;
 	public static final boolean USE_POS_TAGGING = true;
+	public static final boolean COMPUTE_DIALOGISM = true;
 	public static final boolean CLEAN_INPUT = true;
 	public static final boolean PROCESS_INPUT = true;
 	public static final String PATH_TO_COMPLEXITY_MODEL = null;// "in/corpus_complexity_tasa_en";

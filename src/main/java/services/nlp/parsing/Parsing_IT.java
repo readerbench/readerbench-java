@@ -21,14 +21,14 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-public class Parsing_IT extends Parsing{
-	
+public class Parsing_IT extends Parsing {
+
 	private static Parsing_IT instance = null;
-	
+
 	private Parsing_IT() {
 		lang = Lang.it;
 	}
-	
+
 	public static Parsing_IT getInstance() {
 		if (instance == null) {
 			instance = new Parsing_IT();
@@ -70,8 +70,7 @@ public class Parsing_IT extends Parsing{
 					} else if (pos.startsWith("ADV")) {
 						// adverbs
 						outputLine += word + "_RB" + " ";
-					} else if (pos.startsWith("ART") || pos.startsWith("CON")
-							|| pos.startsWith("PRE")) {
+					} else if (pos.startsWith("ART") || pos.startsWith("CON") || pos.startsWith("PRE")) {
 						// prepositions or subordinating conjunctions
 						outputLine += word + "_IN" + " ";
 					} else if (pos.startsWith("DET")) {
@@ -113,8 +112,7 @@ public class Parsing_IT extends Parsing{
 		}
 	}
 
-	public static StanfordCoreNLP pipeline = new StanfordCoreNLP(
-			new ParsingParams_IT());
+	public static StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_IT());
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
@@ -122,12 +120,9 @@ public class Parsing_IT extends Parsing{
 		// "resources/config/POSmodels/train_PENN_it.txt");
 
 		AbstractDocumentTemplate docTmp = getDocumentModel();
-		AbstractDocument d = new Document(
-				null,
-				docTmp,
-				null, LDA.loadLDA("resources/config/LDA/paisa1_it", Lang.it), Lang.it,
-				true, false);
-		d.computeAll(null, null);
+		AbstractDocument d = new Document(null, docTmp, null, LDA.loadLDA("resources/config/LDA/paisa1_it", Lang.it),
+				Lang.it, true, false);
+		d.computeAll(false, null, null);
 		System.out.println(d);
 	}
 
@@ -145,7 +140,16 @@ public class Parsing_IT extends Parsing{
 
 	@Override
 	public StanfordCoreNLP getPipeline() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+		throw new UnsupportedOperationException("Not supported yet."); // To
+																		// change
+																		// body
+																		// of
+																		// generated
+																		// methods,
+																		// choose
+																		// Tools
+																		// |
+																		// Templates.
 	}
 }
 

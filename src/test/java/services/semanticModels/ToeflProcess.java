@@ -14,13 +14,8 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
-import data.AbstractDocumentTemplate.BlockTemplate;
 import data.discourse.SemanticCohesion;
-import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
-import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextFrenchCVs;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -122,30 +117,6 @@ public class ToeflProcess {
 
 		logger.info("Toefl questions processing ended...");
 
-	}
-
-	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
-			boolean posTagging) {
-		logger.info("Processign query ...");
-		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-		String[] blocks = query.split("\n");
-		logger.info("[Processing] There should be " + blocks.length + " blocks in the document");
-		for (int i = 0; i < blocks.length; i++) {
-			BlockTemplate block = contents.new BlockTemplate();
-			block.setId(i);
-			block.setContent(blocks[i]);
-			contents.getBlocks().add(block);
-		}
-
-		// Lang lang = Lang.eng;
-		Lang lang = Lang.getLang(language);
-		AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
-				LDA.loadLDA(pathToLDA, lang), lang, posTagging, false);
-		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-		queryDoc.computeAll(null, null);
-		ComplexityIndices.computeComplexityFactors(queryDoc);
-
-		return queryDoc;
 	}
 
 	class ResultNode implements Comparable<ResultNode> {
