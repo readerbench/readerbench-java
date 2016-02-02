@@ -215,7 +215,6 @@ public class ReaderBenchServer {
 	}
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
-		// MS_training_SE_1999
 		if (localFile) {
 			return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
 		} else {

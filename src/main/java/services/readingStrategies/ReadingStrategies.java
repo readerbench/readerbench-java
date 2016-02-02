@@ -25,7 +25,7 @@ public class ReadingStrategies {
 			"Inferred Knowledge", "Metacognition" };
 
 	public static void detReadingStrategies(Metacognition metacognition) {
-		logger.info("Identifying reading strategies from verbalizations");
+		logger.info("Identifying reading strategies from verbalization...");
 
 		metacognition.setAutomaticReadingStrategies(
 				new int[metacognition.getBlocks().size()][ReadingStrategies.NO_READING_STRATEGIES]);
@@ -121,7 +121,7 @@ public class ReadingStrategies {
 	}
 
 	public static void detReadingStrategies(Summary essay) {
-		logger.info("Identifying reading strategies from essay");
+		logger.info("Identifying reading strategies from essay...");
 
 		essay.setAutomaticReadingStrategies(new int[1][ReadingStrategies.NO_READING_STRATEGIES]);
 

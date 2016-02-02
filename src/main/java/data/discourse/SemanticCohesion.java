@@ -1,13 +1,13 @@
 package data.discourse;
 
 import java.io.Serializable;
-import java.text.DecimalFormat;
 
-import services.commons.VectorAlgebra;
-import services.semanticModels.WordNet.OntologySupport;
+import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
-import cc.mallet.util.Maths;
+import services.commons.Formatting;
+import services.commons.VectorAlgebra;
+import services.semanticModels.WordNet.OntologySupport;
 
 /**
  * @author Mihai Dascalu
@@ -184,18 +184,18 @@ public class SemanticCohesion implements Serializable {
 
 	@Override
 	public String toString() {
-		DecimalFormat formatter = new DecimalFormat("#.##");
-		return "Cohesion [ Leacock-Chodorow=" + formatter.format(ontologySim[OntologySupport.LEACOCK_CHODOROW])
-				+ "; WU-Palmer=" + formatter.format(ontologySim[OntologySupport.WU_PALMER]) + "; Path="
-				+ formatter.format(ontologySim[OntologySupport.PATH_SIM]) + "; cos(LSA)=" + formatter.format(lsaSim)
-				+ "; sim(LDA)=" + formatter.format(ldaSim) + "]=" + formatter.format(cohesion);
+		return "Cohesion [ Leacock-Chodorow=" + Formatting.formatNumber(ontologySim[OntologySupport.LEACOCK_CHODOROW])
+				+ "; WU-Palmer=" + Formatting.formatNumber(ontologySim[OntologySupport.WU_PALMER]) + "; Path="
+				+ Formatting.formatNumber(ontologySim[OntologySupport.PATH_SIM]) + "; cos(LSA)="
+				+ Formatting.formatNumber(lsaSim) + "; sim(LDA)=" + Formatting.formatNumber(ldaSim) + "]="
+				+ Formatting.formatNumber(cohesion);
 	}
 
 	public String print() {
-		DecimalFormat formatter = new DecimalFormat("#.######");
-		return formatter.format(lsaSim) + "," + formatter.format(ldaSim) + ","
-				+ formatter.format(ontologySim[OntologySupport.LEACOCK_CHODOROW]) + ","
-				+ formatter.format(ontologySim[OntologySupport.WU_PALMER]) + ","
-				+ formatter.format(ontologySim[OntologySupport.PATH_SIM]) + "," + formatter.format(cohesion);
+		return Formatting.formatNumber(lsaSim) + "," + Formatting.formatNumber(ldaSim) + ","
+				+ Formatting.formatNumber(ontologySim[OntologySupport.LEACOCK_CHODOROW]) + ","
+				+ Formatting.formatNumber(ontologySim[OntologySupport.WU_PALMER]) + ","
+				+ Formatting.formatNumber(ontologySim[OntologySupport.PATH_SIM]) + ","
+				+ Formatting.formatNumber(cohesion);
 	}
 }
