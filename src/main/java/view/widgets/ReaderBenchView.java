@@ -47,6 +47,7 @@ import data.AbstractDocument;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import utils.localization.LocalizationUtils;
+import utils.settings.SettingsUtils;
 import view.events.TCPopupEventQueue;
 import view.widgets.chat.ConversationProcessingView;
 import view.widgets.chat.VCoPEvaluationView;
@@ -133,7 +134,7 @@ public class ReaderBenchView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setBackground(Color.WHITE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
-		setTitle("ReaderBench");
+		setTitle("ReaderBench " + SettingsUtils.getReaderBenchVersion());
 		setIconImage(Toolkit.getDefaultToolkit().getImage("resources/config/Logos/reader_bench_icon.png"));
 		Locale.setDefault(LOADED_LOCALE);
 
