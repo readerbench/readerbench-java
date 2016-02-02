@@ -449,7 +449,7 @@ public class ReaderBenchServer {
 		Spark.get("/getTopics", (request, response) -> {
 			response.type("application/json");
 
-			String q = request.queryParams("q");
+			String text = request.queryParams("text");
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
@@ -459,7 +459,7 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.data = ConceptMap
-					.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
+					.getTopics(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -467,7 +467,7 @@ public class ReaderBenchServer {
 		Spark.get("/getSentiment", (request, response) -> {
 			response.type("application/json");
 
-			String q = request.queryParams("q");
+			String text = request.queryParams("text");
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
@@ -477,16 +477,14 @@ public class ReaderBenchServer {
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
 			queryResult.data = webService.services.SentimentAnalysis
-					.getSentiment(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
+					.getSentiment(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
 			String result = convertToJson(queryResult);
 			return result;
 		});
 		Spark.get("/getComplexity", (request, response) -> {
 			response.type("application/json");
 
-			String q = request.queryParams("q");
-			logger.info("Text primit");
-			logger.info(q);
+			String text = request.queryParams("text");
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
@@ -495,7 +493,7 @@ public class ReaderBenchServer {
 
 			QueryResultSentiment queryResult = new QueryResultSentiment();
 			queryResult.data = TextualComplexity
-					.getComplexityIndices(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
+					.getComplexityIndices(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
 			String result = convertToJson(queryResult);
 			return result;
 		});
@@ -503,7 +501,7 @@ public class ReaderBenchServer {
 
 			response.type("application/json");
 
-			String q = request.queryParams("q");
+			String text = request.queryParams("text");
 			String path = request.queryParams("path");
 			/*
 			 * String pathToLSA = request.queryParams("lsa"); String pathToLDA =
@@ -523,7 +521,7 @@ public class ReaderBenchServer {
 			// lang, usePOSTagging);
 			queryResult.success = true;
 			queryResult.errorMsg = "";
-			queryResult.data = SearchClient.search(q, setDocuments(path), maxContentSize);
+			queryResult.data = SearchClient.search(text, setDocuments(path), maxContentSize);
 			String result = convertToJson(queryResult);
 			return result;
 		});
