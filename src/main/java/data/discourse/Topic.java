@@ -22,6 +22,9 @@ public class Topic implements Comparable<Topic>, Serializable {
 
 	private Word word;
 	private double relevance;
+	private double termFrequency;
+	private double lsaSim;
+	private double ldaSim;
 
 	public Topic(Word word, AnalysisElement e, AbstractDocument document) {
 		this.word = word;
@@ -29,7 +32,7 @@ public class Topic implements Comparable<Topic>, Serializable {
 	}
 
 	public void updateRelevance(AnalysisElement e, AbstractDocument document) {
-		double termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
+		termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
 
 		// double inverseDocumentFrequency = word.getIdf(); //eliminated Idf in
 		// order to limit corpus specificity
@@ -49,48 +52,46 @@ public class Topic implements Comparable<Topic>, Serializable {
 			SemanticChain semanticChain = word.getSemanticChain();
 			double semanticChainLength = 0;
 			if (semanticChain != null && semanticChain.getWords().size() > 0) {
-				semanticChainLength = 1 + Math.log(semanticChain.getWords()
-						.size());
-				lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(),
-						semanticChain.getLSAVector());
-				lda = LDA.getSimilarity(probDistrib,
-						semanticChain.getLDAProbDistribution());
-				relevanceSemanticChain = termFrequency
-						* SemanticCohesion.getAggregatedSemanticMeasure(lsa,
-								lda);
+				semanticChainLength = 1 + Math.log(semanticChain.getWords().size());
+				lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), semanticChain.getLSAVector());
+				lda = LDA.getSimilarity(probDistrib, semanticChain.getLDAProbDistribution());
+				relevanceSemanticChain = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
 
 				// use also semantic chain proximity to the overall document
-				lsa = VectorAlgebra.cosineSimilarity(
-						semanticChain.getLSAVector(), document.getLSAVector());
-				lda = LDA.getSimilarity(semanticChain.getLDAProbDistribution(),
-						document.getLDAProbDistribution());
-				relevanceSemanticChain *= semanticChainLength
-						* SemanticCohesion.getAggregatedSemanticMeasure(lsa,
-								lda);
+				lsa = VectorAlgebra.cosineSimilarity(semanticChain.getLSAVector(), document.getLSAVector());
+				lda = LDA.getSimilarity(semanticChain.getLDAProbDistribution(), document.getLDAProbDistribution());
+				relevanceSemanticChain *= semanticChainLength * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
 			}
 		}
 
 		// determine importance within analysis element
-		lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(),
-				e.getLSAVector());
-		lda = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
-		double relevanceAnalysisElement = termFrequency
-				* SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
+		lsaSim = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
+		ldaSim = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
+		double relevanceAnalysisElement = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 
 		// determine importance within the document
+		double tf;
 		if (document.getWordOccurences().get(word) == null)
-			termFrequency = 0;
+			tf = 0;
 		else
-			termFrequency = 1 + Math
-					.log(document.getWordOccurences().get(word));
-		lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(),
-				document.getLSAVector());
+			tf = 1 + Math.log(document.getWordOccurences().get(word));
+		lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), document.getLSAVector());
 		lda = LDA.getSimilarity(probDistrib, document.getLDAProbDistribution());
-		double relevanceDocument = termFrequency
-				* SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
+		double relevanceDocument = tf * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
 
-		this.relevance += relevanceSemanticChain + relevanceAnalysisElement
-				+ relevanceDocument;
+		this.relevance += relevanceSemanticChain + relevanceAnalysisElement + relevanceDocument;
+	}
+
+	public double getTermFrequency() {
+		return termFrequency;
+	}
+
+	public double getLSASim() {
+		return lsaSim;
+	}
+
+	public double getLDASim() {
+		return ldaSim;
 	}
 
 	public Topic(Word word, double relevance) {
