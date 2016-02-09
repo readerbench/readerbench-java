@@ -8,6 +8,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -24,12 +26,17 @@ public class ConversationProcessing {
 	public static Logger logger = Logger.getLogger(ConversationProcessing.class);
 
 	private static int WINDOW_SIZE = 20;
-	private static String conversationsPath = "resources/in/corpus_v2/";
+	private static String conversationsPath = "resources/in/corpus_v2_sample/";
 	// private static String conversationsPath = "resources/in/corpus_chats/";
 
 	public static void main(String[] args) {
 
-		Map<Integer, DistanceStats> blockDistances = new HashMap<Integer, DistanceStats>();
+		Map<Integer, DistanceStats> blockDistances = new TreeMap<Integer, DistanceStats>(new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o2.compareTo(o1);
+			}
+		});
 		Map<String, ChatStats> chatStats = new HashMap<String, ChatStats>();
 
 		try {
@@ -253,7 +260,7 @@ public class ConversationProcessing {
 		try {
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("sep=,\ndistance,total,same speaker,different speaker,same speaker first\n");
+			sb.append("sep=,\ndistance,total,same speaker,different speaker,same speaker first (d=1)\n");
 
 			Iterator it = blockDistances.entrySet().iterator();
 			while (it.hasNext()) {
