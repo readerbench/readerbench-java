@@ -371,10 +371,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 			List<Topic> topics = null;
 
 			topics = TopicModeling.getSublist(getTopics(), 100, false, false);
-			out.write("Entire document:");
+			out.write("Keyword, Relevance,Tf,LSA Sim, LDA Sim\n");
 			for (Topic t : topics) {
-				out.write("," + t.getWord().getLemma() + " (" + t.getWord().getPOS() + ") - "
-						+ Formatting.formatNumber(t.getRelevance()));
+				out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
+						+ Formatting.formatNumber(t.getRelevance()) + ","
+						+ Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getLSASim())
+						+ "," + Formatting.formatNumber(t.getLDASim()) + "\n");
 			}
 			out.write("\n");
 

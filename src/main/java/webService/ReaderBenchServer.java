@@ -70,7 +70,7 @@ public class ReaderBenchServer {
 	private static List<AbstractDocument> loadedDocs;
 	private static String loadedPath;
 
-	public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
+	public static AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
 			boolean posTagging, boolean computeDialogism) {
 		logger.info("Processign query ...");
 		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(query);
@@ -457,8 +457,8 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap
-					.getTopics(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
+			queryResult.data = ConceptMap.getTopics(
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -491,8 +491,8 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = TextualComplexity
-					.getComplexityIndices(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
+			queryResult.data = TextualComplexity.getComplexityIndices(
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
 			String result = convertToJson(queryResult);
 			return result;
 		});
