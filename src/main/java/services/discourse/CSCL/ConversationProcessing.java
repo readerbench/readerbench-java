@@ -112,10 +112,11 @@ public class ConversationProcessing {
 
 									// global information for the conversation
 									// corpus
+									DistanceStats ds;
 									if (blockDistances.get(distance) != null) {
 										// blockDistances.put(distance,
 										// blockDistances.get(distance) + 1);
-										DistanceStats ds = blockDistances.get(distance);
+										ds = blockDistances.get(distance);
 										ds.setTotal(ds.getTotal() + 1);
 										if (utterance1.getParticipant() == utterance2.getParticipant()) {
 											ds.setSameSpeaker(ds.getSameSpeaker() + 1);
@@ -139,9 +140,7 @@ public class ConversationProcessing {
 										} else {
 											ds.setDifferentSpeaker(ds.getDifferentSpeaker() + 1);
 										}
-
 									} else {
-										DistanceStats ds;
 										if (utterance1.getParticipant() == utterance2.getParticipant()) {
 											ds = new DistanceStats(1, 1, 0, 0);
 											if (distance == 1)
@@ -161,8 +160,8 @@ public class ConversationProcessing {
 										} else {
 											ds = new DistanceStats(1, 0, 1, 0);
 										}
-										blockDistances.put(distance, ds);
 									}
+									blockDistances.put(distance, ds);
 
 									// local information for the conversation
 									// file stats
