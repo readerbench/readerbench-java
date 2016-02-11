@@ -17,9 +17,8 @@ import services.converters.SplitTASA;
 public class SplitTASAincrementalFiles {
 	static Logger logger = Logger.getLogger(SplitTASAincrementalFiles.class);
 
-	public static void parseTasaFromSingleFile(String input, String path,
-			boolean usePOStagging, boolean annotateWithPOS)
-			throws FileNotFoundException, IOException {
+	public static void parseTasaFromSingleFile(String input, String path, boolean usePOStagging,
+			boolean annotateWithPOS) throws FileNotFoundException, IOException {
 		createFolders(path);
 		List<GenericTasaDocument> docs = SplitTASA.getTASAdocs(input, path);
 
@@ -32,11 +31,9 @@ public class SplitTASAincrementalFiles {
 		StringBuilder content;
 
 		for (GenericTasaDocument doc : docs) {
-			complexityClass = GenericTasaDocument.get13GradeLevel(doc
-					.getDRPscore());
+			complexityClass = GenericTasaDocument.get13GradeLevel(doc.getDRPscore());
 			if (complexityClass >= 1 && complexityClass <= SplitTASA.NO_GRADE_LEVELS) {
-				content = doc.getProcessedContent(usePOStagging,
-						annotateWithPOS);
+				content = doc.getProcessedContent(usePOStagging, annotateWithPOS);
 				for (int i = complexityClass - 1; i < SplitTASA.NO_GRADE_LEVELS; i++) {
 					if (content != null)
 						outputs[i].append(content + "\n");
@@ -47,8 +44,7 @@ public class SplitTASAincrementalFiles {
 		// write all files
 		for (int i = 0; i < SplitTASA.NO_GRADE_LEVELS; i++) {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File(path + "/grade" + i
-							+ "/alltexts[1-" + (i + 1) + "].txt")), "UTF-8"),
+					new FileOutputStream(new File(path + "/grade" + i + "/alltexts[1-" + (i + 1) + "].txt")), "UTF-8"),
 					32768);
 			out.write(outputs[i].toString());
 			out.close();
@@ -72,8 +68,7 @@ public class SplitTASAincrementalFiles {
 		BasicConfigurator.configure();
 
 		try {
-			SplitTASAincrementalFiles.parseTasaFromSingleFile("tasa.txt",
-					"in/word complexity", true, false);
+			SplitTASAincrementalFiles.parseTasaFromSingleFile("tasa.txt", "resources/in/AoE", false, false);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

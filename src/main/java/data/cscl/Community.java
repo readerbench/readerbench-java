@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
@@ -526,27 +528,77 @@ public class Community extends AnalysisElement {
 		}
 	}
 
-	public static void processAllFolders(String folder, String prefix, boolean restartProcessing, String pathToLSA,
-			String pathToLDA, Lang lang, boolean usePOSTagging, boolean useTextualComplexity, Date startDate,
-			Date endDate, int monthIncrement, int dayIncrement) {
+	private static class RunCommunity implements Runnable {
+		private boolean restartProcessing;
+		private String pathToLSA;
+		private String pathToLDA;
+		private Lang lang;
+		private boolean usePOSTagging;
+		private boolean useTextualComplexity;
+		private Date startDate;
+		private Date endDate;
+		private int monthIncrement;
+		private int dayIncrement;
+		private File path;
+
+		public RunCommunity(boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang,
+				boolean usePOSTagging, boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement,
+				int dayIncrement, File path) {
+			this.restartProcessing = restartProcessing;
+			this.pathToLSA = pathToLSA;
+			this.pathToLDA = pathToLDA;
+			this.lang = lang;
+			this.usePOSTagging = usePOSTagging;
+			this.useTextualComplexity = useTextualComplexity;
+			this.startDate = startDate;
+			this.endDate = endDate;
+			this.monthIncrement = monthIncrement;
+			this.dayIncrement = dayIncrement;
+			this.path = path;
+		}
+
+		@Override
+		public void run() {
+			try {
+				if (restartProcessing) {
+					// remove checkpoint file
+					File checkpoint = new File(path + "/checkpoint.xml");
+					if (checkpoint.exists())
+						checkpoint.delete();
+				}
+				SerialCorpusAssessment.processCorpus(path.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+						true, null, null, true);
+				Community.processDocumentCollection(path.getAbsolutePath(), useTextualComplexity, startDate, endDate,
+						monthIncrement, dayIncrement);
+			} catch (Exception e) {
+				logger.error("Error processing community " + path.getName() + ": " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static void processAllFolders(String folder, int noThreads, String prefix, boolean restartProcessing,
+			String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging, boolean useTextualComplexity,
+			Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
 		File dir = new File(folder);
+
+		ExecutorService executor = Executors.newFixedThreadPool(noThreads);
+
 		if (dir.isDirectory()) {
 			File[] communityFolder = dir.listFiles();
 			for (File f : communityFolder) {
 				if (f.isDirectory() && f.getName().startsWith(prefix)) {
-					if (restartProcessing) {
-						// remove checkpoint file
-						File checkpoint = new File(f + "/checkpoint.xml");
-						if (checkpoint.exists())
-							checkpoint.delete();
-					}
-					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
-							true, null, null, true);
-					Community.processDocumentCollection(f.getAbsolutePath(), useTextualComplexity, startDate, endDate,
-							monthIncrement, dayIncrement);
+					RunCommunity task = new RunCommunity(restartProcessing, pathToLSA, pathToLDA, lang, usePOSTagging,
+							useTextualComplexity, startDate, endDate, monthIncrement, dayIncrement, f);
+					executor.execute(task);
 				}
 			}
 		}
+		executor.shutdown();
+
+		while (!executor.isTerminated()) {
+		}
+		System.out.println("Finished all threads");
 	}
 
 	public List<Participant> getParticipants() {

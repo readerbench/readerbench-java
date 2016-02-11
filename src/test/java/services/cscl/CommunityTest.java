@@ -22,7 +22,7 @@ public class CommunityTest {
 
 		ReaderBenchView.adjustToSystemGraphics();
 
-		Community.processAllFolders("resources/in/blogs_Nic/1 year", "KB38", false, "resources/config/LSA/tasa_en",
+		Community.processAllFolders("resources/in/blogs_Nic/1 year", 10, "", false, "resources/config/LSA/tasa_en",
 				"resources/config/LDA/tasa_en", Lang.eng, true, true, null, null, 0, 7);
 		// String path = "resources/in/MOOC/forum_posts&comments";
 		// SerialCorpusAssessment.processCorpus(path,
