@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.knowceans.util.ArrayUtils;
 import org.knowceans.util.DirichletEstimation;
@@ -53,7 +52,6 @@ import cc.mallet.types.IDSorter;
 import cc.mallet.types.InstanceList;
 
 public class HDP {
-	private static ReentrantLock lock = new ReentrantLock();
 	private String path;
 	private InstanceList instances;
 
@@ -435,9 +433,7 @@ public class HDP {
 			for (int m = 0; m < numDocuments; m++) {
 				if (nmk[m].get(k) > 1) {
 					// sample number of tables
-					lock.lock();
 					mk[kk] += Samplers.randAntoniak(alpha * tau.get(k), nmk[m].get(k));
-					lock.unlock();
 				} else // nmk[m].get(k) = 0 or 1
 				{
 					mk[kk] += nmk[m].get(k);
@@ -449,9 +445,7 @@ public class HDP {
 		tables = Vectors.sum(mk);
 		mk[K] = gamma;
 
-		lock.lock();
 		double[] tt = Samplers.randDir(mk);
-		lock.unlock();
 
 		for (int kk = 0; kk < K; kk++) {
 

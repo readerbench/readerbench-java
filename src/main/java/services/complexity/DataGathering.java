@@ -30,7 +30,7 @@ public class DataGathering {
 		try {
 			FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
 			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("Grade Level,File name,Genre,Complexity");
+			out.write("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
 			for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
 				out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
 			out.close();
@@ -82,6 +82,10 @@ public class DataGathering {
 				out.write("\n" + gradeLevel + "," + file.getName().replaceAll(",", "") + ","
 						+ (d.getGenre() != null ? d.getGenre().trim() : "") + ","
 						+ (d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
+				out.write("," + d.getNoBlocks());
+				out.write("," + d.getNoSentences());
+				out.write("," + d.getNoWords());
+				out.write("," + d.getNoContentWords());
 				for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
 					out.write("," + d.getComplexityIndices()[i]);
 				// Close the output stream

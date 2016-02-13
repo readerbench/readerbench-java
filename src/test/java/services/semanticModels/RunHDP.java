@@ -14,8 +14,8 @@ public class RunHDP {
 
 		try {
 			LDA lda = new LDA(Lang.eng);
-			String path = "resources/in/AoE/grade0";
-			int noTopics = lda.createHDPModel(path, 5, 200000);
+			String path = "resources/in/AoE/grade" + 0;
+			int noTopics = lda.createHDPModel(path, 100, 20000);
 			logger.info("Inferred optimal number of topics is for " + path + " is " + noTopics);
 
 			// lda.printTopics(path, 300);

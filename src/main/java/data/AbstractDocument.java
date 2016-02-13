@@ -727,6 +727,51 @@ public abstract class AbstractDocument extends AnalysisElement {
 		return importantVoices;
 	}
 
+	public int getNoBlocks() {
+		int noBlocks = 0;
+		for (Block b : getBlocks()) {
+			if (b != null) {
+				noBlocks++;
+			}
+		}
+		return noBlocks;
+	}
+
+	public int getNoSentences() {
+		int noSentences = 0;
+		for (Block b : getBlocks()) {
+			if (b != null) {
+				noSentences += b.getSentences().size();
+			}
+		}
+		return noSentences;
+	}
+
+	public int getNoWords() {
+		int noWords = 0;
+		for (Block b : getBlocks()) {
+			if (b != null) {
+				for (Sentence s : b.getSentences()) {
+					noWords += s.getAllWords().size();
+				}
+			}
+		}
+		return noWords;
+	}
+
+	public int getNoContentWords() {
+		int noWords = 0;
+		for (Block b : getBlocks()) {
+			if (b != null) {
+				for (Sentence s : b.getSentences()) {
+					for (Entry<Word, Integer> entry : s.getWordOccurences().entrySet())
+						noWords += entry.getValue();
+				}
+			}
+		}
+		return noWords;
+	}
+
 	public String getGenre() {
 		return genre;
 	}
