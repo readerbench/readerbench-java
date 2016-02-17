@@ -1,4 +1,4 @@
-package services.semanticModels.LDA;
+package services.semanticModels;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,6 +34,7 @@ import org.openide.util.Lookup;
 import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
+import services.semanticModels.LDA.LDA;
 import services.semanticModels.WordAssociationTest;
 
 public class SpaceStatistics {
