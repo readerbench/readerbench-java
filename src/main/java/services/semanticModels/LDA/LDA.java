@@ -341,7 +341,7 @@ public class LDA implements ISemanticModel, Serializable {
 		return getProbDistribution(e.getProcessedText());
 	}
 
-	public int getNumTopics() {
+	public int getNoTopics() {
 		return model.getNumTopics();
 	}
 
@@ -354,7 +354,10 @@ public class LDA implements ISemanticModel, Serializable {
 			return 0;
 		}
 		double sim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
-		if (sim >= 0 && sim <= 1)
+//		double sim = VectorAlgebra.cosineSimilarity(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
+//		double sim = 1.0
+//				/ VectorAlgebra.mutualInformation(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
+		if (sim >= 0)
 			return sim;
 		return 0;
 	}
@@ -444,9 +447,9 @@ public class LDA implements ISemanticModel, Serializable {
 	public void findDeepLearningRules(Word w1, Word w2, double minThreshold) {
 		double[] prob1 = getWordProbDistribution(w1);
 		double[] prob2 = getWordProbDistribution(w2);
-		double[] sum = new double[getNumTopics()];
-		double[] difference = new double[getNumTopics()];
-		for (int i = 0; i < getNumTopics(); i++) {
+		double[] sum = new double[getNoTopics()];
+		double[] difference = new double[getNoTopics()];
+		for (int i = 0; i < getNoTopics(); i++) {
 			sum[i] = prob1[i] + prob2[i];
 			difference[i] = Math.max(prob1[i] - prob2[i], 0);
 		}

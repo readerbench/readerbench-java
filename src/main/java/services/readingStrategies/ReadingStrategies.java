@@ -52,7 +52,7 @@ public class ReadingStrategies {
 
 		for (int i = 0; i < metacognition.getBlocks().size(); i++) {
 			Block v = metacognition.getBlocks().get(i);
-			// build list of previous blocks
+			// build list of previous sentences
 			List<Sentence> crtSentences = new LinkedList<Sentence>();
 			endIndex = v.getRefBlock().getIndex();
 			for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
@@ -89,14 +89,15 @@ public class ReadingStrategies {
 				}
 			}
 
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.INFERRED_KNOWLEDGE] += KIStg
-					.getInferredConcepts(v, crtSentences);
-			// lastly perform bridging
-
 			if (prevSentences == null)
 				prevSentences = crtSentences;
 			else
 				prevSentences.addAll(crtSentences);
+
+			// check to all previous sentences
+			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.INFERRED_KNOWLEDGE] += KIStg
+					.getInferredConcepts(v, prevSentences);
+
 			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.BRIDGING] = bridgingStg
 					.containsStrategy(v, prevSentences, threshold);
 

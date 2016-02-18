@@ -23,15 +23,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import data.AbstractDocumentTemplate;
+import data.AbstractDocumentTemplate.BlockTemplate;
+import data.discourse.SemanticCohesion;
 import services.commons.TextPreprocessing;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import data.AbstractDocumentTemplate;
-import data.AbstractDocumentTemplate.BlockTemplate;
-import data.discourse.SemanticCohesion;
 
 public class Metacognition extends Document {
 
@@ -297,30 +297,29 @@ public class Metacognition extends Document {
 		}
 	}
 
-	protected void determineComprehesionIndeces() {
+	public void determineComprehesionIndices() {
 		logger.info("Identyfing all comprehension prediction indices");
 		double[] indices = new double[ComplexityIndices.NO_COMPLEXITY_INDICES + ReadingStrategies.NO_READING_STRATEGIES
-				+ 1 + SemanticCohesion.NO_COHESION_DIMENSIONS];
+				+ SemanticCohesion.NO_COHESION_DIMENSIONS];
 
 		int i = 0;
 		for (; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
 			indices[i] = this.getComplexityIndices()[i];
-		for (int j = 0; j < this.getAutomaticReadingStrategies().length; j++) {
-			indices[i + ReadingStrategies.PARAPHRASE] = this
+		for (int j = 0; j < this.getBlocks().size(); j++) {
+			indices[i + ReadingStrategies.PARAPHRASE] += this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.PARAPHRASE];
-			indices[i + ReadingStrategies.CAUSALITY] = this
+			indices[i + ReadingStrategies.CAUSALITY] += this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.CAUSALITY];
-			indices[i
-					+ ReadingStrategies.BRIDGING] = this.getAutomaticReadingStrategies()[j][ReadingStrategies.BRIDGING];
-			indices[i + ReadingStrategies.TEXT_BASED_INFERENCES] = this
+			indices[i + ReadingStrategies.BRIDGING] += this
+					.getAutomaticReadingStrategies()[j][ReadingStrategies.BRIDGING];
+			indices[i + ReadingStrategies.TEXT_BASED_INFERENCES] += this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.TEXT_BASED_INFERENCES];
-			indices[i + ReadingStrategies.INFERRED_KNOWLEDGE] = this
+			indices[i + ReadingStrategies.INFERRED_KNOWLEDGE] += this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.INFERRED_KNOWLEDGE];
-			indices[i + ReadingStrategies.META_COGNITION] = this
+			indices[i + ReadingStrategies.META_COGNITION] += this
 					.getAutomaticReadingStrategies()[j][ReadingStrategies.META_COGNITION];
 		}
 		i += ReadingStrategies.NO_READING_STRATEGIES;
-		indices[i++] = this.getAnnotatedFluency();
 
 		// add average cohesion
 		if (this instanceof Summary) {
@@ -376,7 +375,6 @@ public class Metacognition extends Document {
 				endIndex = getBlocks().get(index).getRefBlock().getIndex();
 				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
 					// add rows as blocks within the document
-
 					SemanticCohesion coh = getBlockSimilarities()[refBlockId];
 					// add block text
 					out.write(getReferredDoc().getBlocks().get(refBlockId).getText().replaceAll(",", "") + ",");
@@ -420,7 +418,7 @@ public class Metacognition extends Document {
 
 		computeDiscourseAnalysis(computeDialogism);
 		ComplexityIndices.computeComplexityFactors(this);
-		determineComprehesionIndeces();
+		determineComprehesionIndices();
 
 		if (saveOutput) {
 			saveSerializedDocument();
@@ -443,6 +441,16 @@ public class Metacognition extends Document {
 		// rebuild LSA / LDA
 		rebuildSemanticSpaces(lsa, lda);
 		referredDoc.rebuildSemanticSpaces(lsa, lda);
+	}
+
+	public int[] getAnnotatedStrategies() {
+		int[] annotatedRS = new int[ReadingStrategies.NO_READING_STRATEGIES];
+		for (int i = 0; i < this.getBlocks().size(); i++) {
+			for (int j = 0; j < ReadingStrategies.NO_READING_STRATEGIES; j++) {
+				annotatedRS[j] += this.getAnnotatedReadingStrategies()[i][j];
+			}
+		}
+		return annotatedRS;
 	}
 
 	public Document getReferredDoc() {

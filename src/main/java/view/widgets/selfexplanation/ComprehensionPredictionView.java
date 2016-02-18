@@ -94,13 +94,10 @@ public class ComprehensionPredictionView extends JFrame {
 		public void RunTests() {
 			// run measurements, if selected, for each selected factor
 			if (chckbxIndividual.isSelected()) {
-				for (int index : ComplexityIndicesView
-						.getSelectedMeasurements()) {
-					Test(new int[] { index },
-							ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[index]);
+				for (int index : ComplexityIndicesView.getSelectedMeasurements()) {
+					Test(new int[] { index }, ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[index]);
 				}
-				for (int index : ReadingStrategiesIndicesView
-						.getSelectedMeasurements()) {
+				for (int index : ReadingStrategiesIndicesView.getSelectedMeasurements()) {
 					Test(new int[] { ComplexityIndices.NO_COMPLEXITY_INDICES + index },
 							ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES[index]);
 				}
@@ -109,19 +106,15 @@ public class ComprehensionPredictionView extends JFrame {
 			// run measurements, if selected, by including all selected textual
 			// complexity factors
 			if (chckbxAllSelected.isSelected()) {
-				int no_indices = ComplexityIndicesView
-						.getSelectedMeasurements().length
-						+ ReadingStrategiesIndicesView
-								.getSelectedMeasurements().length;
+				int no_indices = ComplexityIndicesView.getSelectedMeasurements().length
+						+ ReadingStrategiesIndicesView.getSelectedMeasurements().length;
 				int[] selectedIndices = new int[no_indices];
 				int index = 0;
 				for (int i : ComplexityIndicesView.getSelectedMeasurements())
 					selectedIndices[index++] = i;
-				for (int i : ReadingStrategiesIndicesView
-						.getSelectedMeasurements())
+				for (int i : ReadingStrategiesIndicesView.getSelectedMeasurements())
 					selectedIndices[index++] = ComplexityIndices.NO_COMPLEXITY_INDICES + i;
-				Test(ComplexityIndicesView.getSelectedMeasurements(),
-						"All Selected Factors Combined");
+				Test(ComplexityIndicesView.getSelectedMeasurements(), "All Selected Factors Combined");
 			}
 		}
 
@@ -134,27 +127,28 @@ public class ComprehensionPredictionView extends JFrame {
 					FileWriter fstream = new FileWriter(path);
 					BufferedWriter file = new BufferedWriter(fstream);
 
-					file.write("Filename,Comprehension score,Comprehension class");
+					file.write("Filename,Comprehension score,Comprehension class,Fluency");
+					for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES)
+						file.write(",Annotated " + s);
 					for (String s : ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS)
 						file.write("," + s);
 					for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES)
-						file.write("," + s);
+						file.write(",Automated " + s);
 					for (Metacognition v : selfExplanations) {
 						String authors = "";
 						for (String author : v.getAuthors())
 							authors += author + "; ";
-						authors = authors.substring(0, authors.length() - 2)
-								+ " (" + v.getReferredDoc().getTitleText()
+						authors = authors.substring(0, authors.length() - 2) + " (" + v.getReferredDoc().getTitleText()
 								+ ")";
-						file.write("\n" + authors + ","
-								+ v.getAnnotatedComprehensionScore() + ","
-								+ v.getComprehensionClass());
+						file.write("\n" + authors + "," + v.getAnnotatedComprehensionScore() + ","
+								+ v.getComprehensionClass() + "," + v.getAnnotatedFluency());
+						for (double value : v.getAnnotatedStrategies())
+							file.write("," + value);
 						for (double value : v.getComprehensionIndices())
 							file.write("," + value);
 					}
 
-					logger.info("Started to train SVM models on "
-							+ ComprehensionPrediction.NO_COMPREHENSION_CLASSES
+					logger.info("Started to train SVM models on " + ComprehensionPrediction.NO_COMPREHENSION_CLASSES
 							+ " classes");
 					// Create file
 
@@ -224,17 +218,14 @@ public class ComprehensionPredictionView extends JFrame {
 		}
 	}
 
-	public ComprehensionPredictionView(
-			List<? extends Metacognition> loadedSelfExplanations) {
-		if (loadedSelfExplanations == null
-				|| loadedSelfExplanations.size() == 0) {
+	public ComprehensionPredictionView(List<? extends Metacognition> loadedSelfExplanations) {
+		if (loadedSelfExplanations == null || loadedSelfExplanations.size() == 0) {
 			return;
 		}
 		setTitle("ReaderBench - Comprehension Prediction");
 		this.selfExplanations = loadedSelfExplanations;
 		this.svm = new ComprehensionPrediction(selfExplanations);
-		this.path = "out/comprehension_prediction_"
-				+ System.currentTimeMillis() + ".csv";
+		this.path = "out/comprehension_prediction_" + System.currentTimeMillis() + ".csv";
 		setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(50, 50, 700, 600);
@@ -246,12 +237,10 @@ public class ComprehensionPredictionView extends JFrame {
 		lblSelectiveMeasurements = new JLabel("Selective measurements");
 		lblSelectiveMeasurements.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		chckbxIndividual = new JCheckBox(
-				"Perform measurements for each individually selected factor");
+		chckbxIndividual = new JCheckBox("Perform measurements for each individually selected factor");
 		chckbxIndividual.setSelected(true);
 
-		chckbxAllSelected = new JCheckBox(
-				"Perform measurements for all selected factors combined");
+		chckbxAllSelected = new JCheckBox("Perform measurements for all selected factors combined");
 		chckbxAllSelected.setSelected(true);
 
 		lblResults = new JLabel("Results");
@@ -278,17 +267,14 @@ public class ComprehensionPredictionView extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				int noFolds = 0;
 				try {
-					noFolds = Integer.valueOf(textFieldCrossValidation
-							.getText());
+					noFolds = Integer.valueOf(textFieldCrossValidation.getText());
 				} catch (Exception exception) {
 					noFolds = 0;
 				}
 				if (noFolds < 2 || noFolds > 10) {
-					JOptionPane
-							.showMessageDialog(
-									contentPane,
-									"Specified number of k cross-validation folds should be a number in the [2; 10] interval!",
-									"Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(contentPane,
+							"Specified number of k cross-validation folds should be a number in the [2; 10] interval!",
+							"Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -301,16 +287,14 @@ public class ComprehensionPredictionView extends JFrame {
 		});
 
 		scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		table = new JTable();
 		table.setFillsViewportHeight(true);
 		scrollPane.setViewportView(table);
 
 		lblComments = new JLabel("* EA - Exact Agreement");
 
-		JButton btnSelectReadingStrategyIndices = new JButton(
-				"Select reading strategy indices");
+		JButton btnSelectReadingStrategyIndices = new JButton("Select reading strategy indices");
 		btnSelectReadingStrategyIndices.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ReadingStrategiesIndicesView view = new ReadingStrategiesIndicesView();
@@ -319,144 +303,52 @@ public class ComprehensionPredictionView extends JFrame {
 		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
-				.setHorizontalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addComponent(
-																lblSelectiveMeasurements)
-														.addGroup(
-																Alignment.TRAILING,
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblComments)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED,
-																				322,
-																				Short.MAX_VALUE)
-																		.addComponent(
-																				btnPerformMeasurements,
-																				GroupLayout.PREFERRED_SIZE,
-																				214,
-																				GroupLayout.PREFERRED_SIZE))
-														.addComponent(
-																lblResults)
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addContainerGap()
-																		.addComponent(
-																				scrollPane,
-																				GroupLayout.DEFAULT_SIZE,
-																				678,
-																				Short.MAX_VALUE))
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addComponent(
-																								chckbxIndividual)
-																						.addComponent(
-																								chckbxAllSelected)
-																						.addGroup(
-																								gl_contentPane
-																										.createSequentialGroup()
-																										.addContainerGap()
-																										.addComponent(
-																												lblKCrossValidation)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												textFieldCrossValidation,
-																												GroupLayout.PREFERRED_SIZE,
-																												56,
-																												GroupLayout.PREFERRED_SIZE)))
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED,
-																				42,
-																				Short.MAX_VALUE)
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.LEADING,
-																								false)
-																						.addComponent(
-																								btnSelectComplexityIndices,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE)
-																						.addComponent(
-																								btnSelectReadingStrategyIndices,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE))))
-										.addContainerGap()));
-		gl_contentPane
-				.setVerticalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
+				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_contentPane.createSequentialGroup()
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 										.addComponent(lblSelectiveMeasurements)
-										.addGap(5)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																chckbxAllSelected)
-														.addComponent(
-																btnSelectComplexityIndices))
-										.addGap(5)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																chckbxIndividual)
-														.addComponent(
-																btnSelectReadingStrategyIndices))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblKCrossValidation)
-														.addComponent(
-																textFieldCrossValidation,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
+										.addGroup(Alignment.TRAILING,
+												gl_contentPane.createSequentialGroup().addComponent(lblComments)
+														.addPreferredGap(ComponentPlacement.RELATED, 322,
+																Short.MAX_VALUE)
+														.addComponent(btnPerformMeasurements,
+																GroupLayout.PREFERRED_SIZE, 214,
 																GroupLayout.PREFERRED_SIZE))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(lblResults)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(scrollPane,
-												GroupLayout.DEFAULT_SIZE, 383,
-												Short.MAX_VALUE)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																btnPerformMeasurements)
-														.addComponent(
-																lblComments))
-										.addGap(1)));
+						.addComponent(lblResults)
+						.addGroup(gl_contentPane.createSequentialGroup().addContainerGap().addComponent(scrollPane,
+								GroupLayout.DEFAULT_SIZE, 678, Short.MAX_VALUE))
+						.addGroup(gl_contentPane.createSequentialGroup().addGroup(gl_contentPane
+								.createParallelGroup(Alignment.LEADING).addComponent(chckbxIndividual)
+								.addComponent(chckbxAllSelected)
+								.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+										.addComponent(lblKCrossValidation).addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(textFieldCrossValidation, GroupLayout.PREFERRED_SIZE, 56,
+												GroupLayout.PREFERRED_SIZE)))
+								.addPreferredGap(ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING, false)
+										.addComponent(btnSelectComplexityIndices, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+										.addComponent(btnSelectReadingStrategyIndices, GroupLayout.DEFAULT_SIZE,
+												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+								.addContainerGap()));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblSelectiveMeasurements).addGap(5)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(chckbxAllSelected)
+								.addComponent(btnSelectComplexityIndices))
+				.addGap(5)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(chckbxIndividual)
+						.addComponent(btnSelectReadingStrategyIndices))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblKCrossValidation)
+						.addComponent(textFieldCrossValidation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblResults)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+								.addComponent(btnPerformMeasurements).addComponent(lblComments))
+						.addGap(1)));
 		contentPane.setLayout(gl_contentPane);
 	}
 }

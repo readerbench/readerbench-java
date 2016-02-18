@@ -47,7 +47,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 	// all reading strategies, plus cohesion and fluency
 	private static boolean[] selectedFactors = new boolean[ReadingStrategies.NO_READING_STRATEGIES + 2];
 	public static String[] READING_STRATEGY_INDEX_NAMES = new String[ReadingStrategies.NO_READING_STRATEGIES
-			+ 1 + SemanticCohesion.NO_COHESION_DIMENSIONS];
+			+ SemanticCohesion.NO_COHESION_DIMENSIONS];
 
 	static {
 		int i;
@@ -57,10 +57,8 @@ public class ReadingStrategiesIndicesView extends JFrame {
 		for (i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 			READING_STRATEGY_INDEX_NAMES[i] = ReadingStrategies.STRATEGY_NAMES[i];
 		}
-		READING_STRATEGY_INDEX_NAMES[i++] = "Fluency";
 		for (int k = 0; k < SemanticCohesion.getSemanticDistanceNames().length; k++)
-			READING_STRATEGY_INDEX_NAMES[i + k] = "Cohesion ("
-					+ SemanticCohesion.getSemanticDistanceNames()[k] + ")";
+			READING_STRATEGY_INDEX_NAMES[i + k] = "Cohesion (" + SemanticCohesion.getSemanticDistanceNames()[k] + ")";
 	}
 
 	public ReadingStrategiesIndicesView() {
@@ -76,9 +74,8 @@ public class ReadingStrategiesIndicesView extends JFrame {
 		JScrollPane scrollPane = new JScrollPane();
 
 		if (readingStrategiesTableModel == null)
-			readingStrategiesTableModel = new DefaultTableModel(
-					new Object[][] {}, new Object[] { "ID", "Index name",
-							Status.INDETERMINATE }) {
+			readingStrategiesTableModel = new DefaultTableModel(new Object[][] {},
+					new Object[] { "ID", "Index name", Status.INDETERMINATE }) {
 				private static final long serialVersionUID = 6850181164110466483L;
 
 				private Class<?>[] columnTypes = new Class[] { Integer.class, // identifier
@@ -112,8 +109,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			}
 
 			@Override
-			public Component prepareEditor(TableCellEditor editor, int row,
-					int column) {
+			public Component prepareEditor(TableCellEditor editor, int row, int column) {
 				Component c = super.prepareEditor(editor, row, column);
 				if (c instanceof JCheckBox) {
 					JCheckBox b = (JCheckBox) c;
@@ -128,52 +124,39 @@ public class ReadingStrategiesIndicesView extends JFrame {
 		for (int i = 0; i < editableCells.length; i++)
 			editableCells[i] = true;
 
-		TableCellRenderer renderer = new HeaderRenderer(
-				readingStrategiesTable.getTableHeader(), modelColumnIndex,
+		TableCellRenderer renderer = new HeaderRenderer(readingStrategiesTable.getTableHeader(), modelColumnIndex,
 				selectedFactors, editableCells);
-		readingStrategiesTable.getColumnModel().getColumn(modelColumnIndex)
-				.setHeaderRenderer(renderer);
+		readingStrategiesTable.getColumnModel().getColumn(modelColumnIndex).setHeaderRenderer(renderer);
 
-		readingStrategiesTableModel
-				.addTableModelListener(new HeaderCheckBoxHandler(
-						readingStrategiesTable, modelColumnIndex,
-						selectedFactors));
+		readingStrategiesTableModel.addTableModelListener(
+				new HeaderCheckBoxHandler(readingStrategiesTable, modelColumnIndex, selectedFactors));
 		readingStrategiesTable.setFillsViewportHeight(true);
 
 		// set width for ID and selected
 		readingStrategiesTable.getColumnModel().getColumn(0).setMinWidth(40);
 		readingStrategiesTable.getColumnModel().getColumn(0).setMaxWidth(40);
-		readingStrategiesTable.getColumnModel().getColumn(0)
-				.setPreferredWidth(40);
+		readingStrategiesTable.getColumnModel().getColumn(0).setPreferredWidth(40);
 
 		readingStrategiesTable.getColumnModel().getColumn(2).setMinWidth(70);
 		readingStrategiesTable.getColumnModel().getColumn(2).setMaxWidth(70);
-		readingStrategiesTable.getColumnModel().getColumn(2)
-				.setPreferredWidth(70);
+		readingStrategiesTable.getColumnModel().getColumn(2).setPreferredWidth(70);
 
-		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(
-				readingStrategiesTable.getModel());
+		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(readingStrategiesTable.getModel());
 		sorter.setSortable(modelColumnIndex, false);
 		readingStrategiesTable.setRowSorter(sorter);
 
 		scrollPane.setViewportView(readingStrategiesTable);
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(
-				Alignment.TRAILING).addGroup(
-				Alignment.LEADING,
-				gl_contentPane
-						.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE,
-								778, Short.MAX_VALUE).addContainerGap()));
-		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(
-				Alignment.TRAILING).addGroup(
-				Alignment.LEADING,
-				gl_contentPane
-						.createSequentialGroup()
-						.addContainerGap()
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE,
-								356, Short.MAX_VALUE).addContainerGap()));
+		gl_contentPane
+				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
+						gl_contentPane.createSequentialGroup().addContainerGap()
+								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 778, Short.MAX_VALUE)
+								.addContainerGap()));
+		gl_contentPane
+				.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
+						gl_contentPane.createSequentialGroup().addContainerGap()
+								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
+								.addContainerGap()));
 		contentPane.setLayout(gl_contentPane);
 
 		updateContents();
@@ -197,19 +180,12 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			}
 			dataRow = new Vector<Object>();
 			dataRow.add(index);
-			dataRow.add("Fluency");
-			dataRow.add(selectedFactors[index]);
-			readingStrategiesTableModel.addRow(dataRow);
-			index++;
-			dataRow = new Vector<Object>();
-			dataRow.add(index);
 			dataRow.add("Cohesion with initial text");
 			dataRow.add(selectedFactors[index]);
 			readingStrategiesTableModel.addRow(dataRow);
 			index++;
 
-			HeaderCheckBoxHandler.updateHeader(readingStrategiesTable,
-					modelColumnIndex);
+			HeaderCheckBoxHandler.updateHeader(readingStrategiesTable, modelColumnIndex);
 		}
 	}
 
@@ -224,8 +200,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			for (int j = 0; j < SemanticCohesion.NO_COHESION_DIMENSIONS; j++)
 				selected.add(i + j);
 		}
-		return ArrayUtils.toPrimitive(selected.toArray(new Integer[selected
-				.size()]));
+		return ArrayUtils.toPrimitive(selected.toArray(new Integer[selected.size()]));
 	}
 
 	public static void main(String[] args) {
@@ -246,8 +221,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 	}
 
 	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
+		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());

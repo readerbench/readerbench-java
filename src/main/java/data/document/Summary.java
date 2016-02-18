@@ -85,7 +85,7 @@ public class Summary extends Metacognition {
 		ReadingStrategies.detReadingStrategies(this);
 		computeDiscourseAnalysis(computeDialogism);
 		ComplexityIndices.computeComplexityFactors(this);
-		determineComprehesionIndeces();
+		determineComprehesionIndices();
 
 		if (saveOutput) {
 			saveSerializedDocument();

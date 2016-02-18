@@ -61,7 +61,7 @@ public class TASAAnalyzer {
 			String classPath = path + "/grade" + i;
 			logger.info("Loading model " + classPath + "...");
 			models.put(i, LDA.loadLDA(classPath, Lang.eng));
-			logger.info("Loaded model with " + models.get(i).getNumTopics()
+			logger.info("Loaded model with " + models.get(i).getNoTopics()
 					+ " topics.");
 		}
 	}
@@ -71,24 +71,24 @@ public class TASAAnalyzer {
 				+ "...");
 
 		/* Find best topic matches */
-		TopicMatchGraph graph = new TopicMatchGraph(modelA.getNumTopics()
-				+ modelB.getNumTopics());
+		TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoTopics()
+				+ modelB.getNoTopics());
 		int i, j, x, y;
 		double distance = 0D;
 
-		for (i = 0; i < modelA.getNumTopics(); i++) {
-			for (j = 0; j < modelB.getNumTopics(); j++) {
+		for (i = 0; i < modelA.getNoTopics(); i++) {
+			for (j = 0; j < modelB.getNoTopics(); j++) {
 				distance = LDASupport.topicDistance(modelA, i, modelB, j);
 				// logger.info(" topic "+i+" topic "+j+" = "+distance);
 				x = i;
-				y = j + modelA.getNumTopics();
+				y = j + modelA.getNoTopics();
 				graph.addEdge(x, y, distance);
 			}
 		}
 		/* Compute Matches */
 		Integer[] matches = graph.computeAssociations();
 		for (i = 0; i < matches.length; i++) {
-			matches[i] -= modelA.getNumTopics();
+			matches[i] -= modelA.getNoTopics();
 		}
 
 		return matches;
@@ -135,7 +135,7 @@ public class TASAAnalyzer {
 			Map<Integer, Map<Word, Double>> intermediateModelDistrib = new TreeMap<Integer, Map<Word, Double>>();
 			Map<Integer, Map<Word, Double>> matureModelDistrib = new TreeMap<Integer, Map<Word, Double>>();
 
-			for (int i = 0; i < intermediateModel.getNumTopics(); i++) {
+			for (int i = 0; i < intermediateModel.getNoTopics(); i++) {
 				intermediateModelDistrib.put(i,
 						LDASupport.getWordWeights(intermediateModel, i));
 				matureModelDistrib.put(i,
@@ -150,9 +150,9 @@ public class TASAAnalyzer {
 			for (Word analyzedWord : matureModel.getWordProbDistributions()
 					.keySet()) {
 				double intermediateTopicDistr[] = new double[intermediateModel
-						.getNumTopics()];
+						.getNoTopics()];
 				double matureTopicDistr[] = new double[intermediateModel
-						.getNumTopics()];
+						.getNoTopics()];
 
 				double sumI = 0, sumM = 0, noI = 0, noM = 0;
 				for (int i = 0; i < intermediateTopicDistr.length; i++) {

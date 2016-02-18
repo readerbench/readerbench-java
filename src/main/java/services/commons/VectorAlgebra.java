@@ -330,8 +330,9 @@ public class VectorAlgebra {
 
 	public static void main(String[] args) {
 		double[] v = { 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-		double[] v1 = { 0, 0, 1, 1, 1, 1, 1, 1 };
-		double[] v2 = { 0, 0, 0, 0, 0, 0, 1, 1 };
+		double[] v1 = { 1, 3, 1, 3, 1, 7, 1, 1 };
+		double[] v2 = { 3, 3, 3, 3, 3, 3, 3, 3 };
+		// double[] v2 = { 0, 0, 0, 0, 0, 0, 1, 1 };
 
 		System.out.println(cosineSimilarity(v1, v2));
 		long[] t = { 2, 2, 2, 2, 2, 1, 2, 2 };
@@ -343,5 +344,7 @@ public class VectorAlgebra {
 		System.out.println(entropy(VectorAlgebra.movingAverage(v, 2, t, 1)));
 		System.out.println(mutualInformation(v, v));
 		System.out.println(entropy(normalize(v)));
+		System.out.println(entropy(v1));
+		System.out.println(entropy(v2));
 	}
 }

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,6 @@ import data.Word;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
-import services.semanticModels.WordAssociationTest;
 
 public class SpaceStatistics {
 	private static final double MINIMUM_IMPOSED_THRESHOLD = 0.3d;
@@ -258,6 +258,132 @@ public class SpaceStatistics {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Determine word linkage power corpora
+	 * 
+	 * The first space is the baseline
+	 * 
+	 * @param baseline
+	 * @param corpora
+	 */
+
+	private enum SNAIndices {
+		DEGREE, BETWEENNESS, CLOSENESS, ECCENTRICITY
+	}
+
+	public static void determineWLP(String pathToOutput, SpaceStatistics space, LDA referenceSpace) {
+		logger.info("Writing word linkage power statistics based on baseline corpus ...");
+		File output = new File(pathToOutput);
+
+		try {
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
+					32768);
+			out.write("Word");
+			for (SNAIndices index : SNAIndices.values())
+				out.write("," + index.name() + "(" + space.getLDA().getPath() + ")");
+			for (SNAIndices index : SNAIndices.values())
+				out.write(",NORM_" + index.name() + "(" + space.getLDA().getPath() + ")");
+
+			Map<String, EnumMap<SNAIndices, Double>> wlps = new TreeMap<String, EnumMap<SNAIndices, Double>>();
+			for (Word w : space.getLDA().getWordSet()) {
+				EnumMap<SNAIndices, Double> scores = new EnumMap<SNAIndices, Double>(SNAIndices.class);
+				scores.put(SNAIndices.DEGREE, 0d);
+				wlps.put(w.getLemma(), scores);
+			}
+
+			ProjectController pc;
+			GraphModel graphModel;
+			AttributeModel attributeModel;
+			DirectedGraph graph;
+			Map<String, Node> associations;
+			AttributeColumn betweennessColumn, closenessColumn, eccentricityColumn;
+			GraphDistance distance;
+
+			logger.info("Processing SNA indices for " + space.getLDA().getPath() + "...");
+			space.buildWordDistances();
+			pc = Lookup.getDefault().lookup(ProjectController.class);
+			pc.newProject();
+
+			// get models
+			graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
+			attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+			graph = graphModel.getDirectedGraph();
+			associations = new TreeMap<String, Node>();
+
+			// build all nodes
+			for (Word w : space.getLDA().getWordProbDistributions().keySet()) {
+				Node wordNode = graphModel.factory().newNode(w.getLemma());
+				wordNode.getNodeData().setLabel(w.getLemma());
+				associations.put(w.getLemma(), wordNode);
+				graph.addNode(wordNode);
+			}
+
+			for (Connection c : space.getRelevantSimilarities()) {
+				graph.addEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
+				Edge e = graph.getEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
+				e.setWeight((float) (c.getSimilarity()));
+
+				wlps.get(c.getWord1()).put(SNAIndices.DEGREE,
+						wlps.get(c.getWord1()).get(SNAIndices.DEGREE) + c.getSimilarity());
+				wlps.get(c.getWord2()).put(SNAIndices.DEGREE,
+						wlps.get(c.getWord2()).get(SNAIndices.DEGREE) + c.getSimilarity());
+			}
+
+			logger.info("Computing SNA indices...");
+			distance = new GraphDistance();
+			distance.setDirected(false);
+			distance.execute(graphModel, attributeModel);
+
+			// Determine various metrics
+			betweennessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+			closenessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+			eccentricityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
+
+			for (Node n : graph.getNodes()) {
+				double betweennessScore = ((Double) n.getNodeData().getAttributes()
+						.getValue(betweennessColumn.getIndex()));
+				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.BETWEENNESS, betweennessScore);
+
+				double closenessScore = ((Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
+				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.CLOSENESS, closenessScore);
+
+				double eccentricityScore = ((Double) n.getNodeData().getAttributes()
+						.getValue(eccentricityColumn.getIndex()));
+				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.ECCENTRICITY, eccentricityScore);
+			}
+
+			logger.info("Writing final results...");
+			// print results
+			for (Word w : referenceSpace.getWordSet()) {
+				out.write("\n" + w.getLemma());
+				if (wlps.containsKey(w.getLemma())) {
+					for (SNAIndices index : SNAIndices.values()) {
+						out.write("," + wlps.get(w.getLemma()).get(index));
+					}
+					for (SNAIndices index : SNAIndices.values()) {
+						out.write("," + wlps.get(w.getLemma()).get(index) / space.getLDA().getWordSet().size());
+					}
+				} else {
+					out.write(",,,,");
+				}
+			}
+
+			out.close();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e)
+
+		{
+			e.printStackTrace();
+		} catch (
+
+		IOException e)
+
+		{
+			e.printStackTrace();
+		}
 
 	}
 
@@ -309,7 +435,6 @@ public class SpaceStatistics {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private class Connection {
@@ -344,18 +469,27 @@ public class SpaceStatistics {
 		// Lang.eng));
 		// ss.buildWordDistances();
 		// ss.computeGraphStatistics();
-		int initialGrade = 12;
-		SpaceStatistics baseline = new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + initialGrade, Lang.eng));
-		List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
+		// int initialGrade = 2;
+		// SpaceStatistics baseline = new
+		// SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + initialGrade,
+		// Lang.eng));
+		// List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
+		//
+		// corpora.add(baseline);
+		// for (int i = initialGrade - 1; i > 0; i--) {
+		// corpora.add(new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade"
+		// + i, Lang.eng)));
+		// }
 
-		corpora.add(baseline);
-		for (int i = initialGrade - 1; i > 0; i--) {
-			corpora.add(new SpaceStatistics(LDA.loadLDA("in/HDP/grade" + i, Lang.eng)));
-		}
+		// compareSpaces("resources/in/HDP/comparison HDP 12-.csv", corpora);
+		//
+		// compareSpaces("resources/config/LSA/word_associations_en.txt", 3,
+		// "resources/in/HDP/comparison HDP Nelson.csv", corpora);
 
-		compareSpaces("in/HDP/comparison HDP 12-.csv", corpora);
-
-		compareSpaces("resources/config/LSA/word_associations_en.txt", 3, "in/HDP/comparison HDP Nelson.csv", corpora);
+		int gradeLevel = 0;
+		LDA matureSpace = LDA.loadLDA("resources/in/HDP/grade12", Lang.eng);
+		determineWLP("resources/in/HDP/WLP HDP " + gradeLevel + ".csv",
+				new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + gradeLevel, Lang.eng)), matureSpace);
 	}
 
 }

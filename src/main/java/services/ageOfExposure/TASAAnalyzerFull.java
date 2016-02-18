@@ -69,18 +69,18 @@ public class TASAAnalyzerFull {
 		logger.info("Matching " + modelA.getPath() + " to " + modelB.getPath()
 				+ "...");
 		/* Compute Matches */
-		Double[][] matches = new Double[modelA.getNumTopics()][modelB
-				.getNumTopics()];
+		Double[][] matches = new Double[modelA.getNoTopics()][modelB
+				.getNoTopics()];
 
-		for (int i = 0; i < modelA.getNumTopics(); i++) {
+		for (int i = 0; i < modelA.getNoTopics(); i++) {
 			double sum = 0;
-			for (int j = 0; j < modelB.getNumTopics(); j++) {
+			for (int j = 0; j < modelB.getNoTopics(); j++) {
 				matches[i][j] = 1 - LDASupport.topicDistance(modelA, i, modelB,
 						j);
 				sum += matches[i][j];
 			}
 			if (sum != 0) {
-				for (int j = 0; j < modelB.getNumTopics(); j++) {
+				for (int j = 0; j < modelB.getNoTopics(); j++) {
 					matches[i][j] /= sum;
 				}
 			}
@@ -130,7 +130,7 @@ public class TASAAnalyzerFull {
 			Map<Integer, Map<Word, Double>> intermediateModelDistrib = new TreeMap<Integer, Map<Word, Double>>();
 			Map<Integer, Map<Word, Double>> matureModelDistrib = new TreeMap<Integer, Map<Word, Double>>();
 
-			for (int i = 0; i < intermediateModel.getNumTopics(); i++) {
+			for (int i = 0; i < intermediateModel.getNoTopics(); i++) {
 				intermediateModelDistrib.put(i,
 						LDASupport.getWordWeights(intermediateModel, i));
 				matureModelDistrib.put(i,
@@ -145,9 +145,9 @@ public class TASAAnalyzerFull {
 			for (Word analyzedWord : matureModel.getWordProbDistributions()
 					.keySet()) {
 				double intermediateTopicDistr[] = new double[intermediateModel
-						.getNumTopics()];
+						.getNoTopics()];
 				double matureTopicDistr[] = new double[intermediateModel
-						.getNumTopics()];
+						.getNoTopics()];
 
 				double sumI = 0, sumM = 0, noI = 0, noM = 0;
 				for (int i = 0; i < intermediateTopicDistr.length; i++) {

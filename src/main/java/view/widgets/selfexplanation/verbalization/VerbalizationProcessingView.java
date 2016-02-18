@@ -10,8 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -37,14 +35,14 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
 
+import data.document.Document;
+import data.document.Metacognition;
 import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
 import view.widgets.document.DocumentProcessingView;
 import view.widgets.selfexplanation.ComprehensionPredictionView;
-import data.document.Document;
-import data.document.Metacognition;
 
 public class VerbalizationProcessingView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;
@@ -63,8 +61,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 	private JButton btnComprehensionPrediction = null;
 	private static File lastDirectory = null;
 
-	private static List<Metacognition> loadedVervalizations = Collections
-			.synchronizedList(new LinkedList<Metacognition>());
+	private static List<Metacognition> loadedVervalizations = new Vector<Metacognition>();
 	private JButton btnAddSerializedVerbalization;
 
 	public class VerbalizationProcessingTask extends SwingWorker<Void, Void> {

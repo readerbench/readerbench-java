@@ -14,20 +14,19 @@ import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.ageOfExposure.TopicMatchGraph;
 import services.commons.Formatting;
-import services.converters.PdfToTextFrenchCVs;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class VocabularyTest {
 
-	static Logger logger = Logger.getLogger(PdfToTextFrenchCVs.class);
+	static Logger logger = Logger.getLogger(VocabularyTest.class);
 
 	int questionId;
 
 	@Test
 	public void process(String path, ISemanticModel semModel) {
-		logger.info("Starting toefl vocabulary tests processing...");
+		logger.info("Starting vocabulary tests processing...");
 
 		LSA lsa = null;
 		LDA lda = null;
@@ -45,7 +44,6 @@ public class VocabularyTest {
 				return;
 			for (File f : new File(path).listFiles()) {
 				if (f.getName().endsWith(".txt")) {
-
 					questionId = 1;
 					StringBuilder sb = new StringBuilder();
 					sb.append("sep=,\nid,a,sim,b,sim,c,sim\n");
@@ -138,10 +136,10 @@ public class VocabularyTest {
 
 		VocabularyTest test = new VocabularyTest();
 
-		ISemanticModel lsa1 = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-		test.process("resources/in/vocabulary_test/", lsa1);
-		ISemanticModel lsa2 = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
-		test.process("resources/in/vocabulary_test/", lsa2);
+//		ISemanticModel lsa1 = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+//		test.process("resources/in/vocabulary_test/", lsa1);
+//		ISemanticModel lsa2 = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
+//		test.process("resources/in/vocabulary_test/", lsa2);
 		ISemanticModel lda1 = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
 		test.process("resources/in/vocabulary_test/", lda1);
 		ISemanticModel lda2 = LDA.loadLDA("resources/config/LDA/coca_en/text_newspaper_lsp", Lang.eng);

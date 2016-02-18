@@ -17,15 +17,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import data.cscl.Conversation;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 
 public class SerialCorpusAssessment {
 	static Logger logger = Logger.getLogger(SerialCorpusAssessment.class);
@@ -140,12 +139,5 @@ public class SerialCorpusAssessment {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		SerialCorpusAssessment.processCorpus("in/forum_Nic", "resources/config/LSA/tasa_en",
-				"resources/config/LDA/tasa_en", Lang.eng, true, false, null, null, true);
 	}
 }

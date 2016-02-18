@@ -5,21 +5,19 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.OntologySupport;
 import data.AnalysisElement;
 import data.Block;
 import data.Sentence;
 import data.Word;
-import data.discourse.SemanticCohesion;
+import services.commons.Formatting;
+import services.commons.VectorAlgebra;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
+import services.semanticModels.WordNet.OntologySupport;
 
 public class InferredKnowledgeStrategy {
 	private static final Color COLOR_INFERRED_CONCEPTS = new Color(255, 102, 0);
-	private static double SIMILARITY_THRESHOLD_KI = 0.33;
-	private static final double INTER_WORD_SIMILARITY_WEIGHT = 2;
-	private static final double WORD_DOCUMENT_SIMILARITY_WEIGHT = 1;
+	private static double SIMILARITY_THRESHOLD_KI = 0.7;
 
 	private int addAssociations(Word word, AnalysisElement e, String usedColor, String annotationText) {
 		word.getReadingStrategies()[ReadingStrategies.INFERRED_KNOWLEDGE] = true;
@@ -43,16 +41,18 @@ public class InferredKnowledgeStrategy {
 		int noOccur = 0;
 
 		// determine vectors for collections of sentences
-		String textSentences = "";
 		double[] vectorSentences = new double[LSA.K];
+		double[] probDistribSentences = new double[v.getLDA().getNoTopics()];
 
 		for (Sentence s : sentences) {
 			for (int i = 0; i < LSA.K; i++) {
 				vectorSentences[i] += s.getLSAVector()[i];
 			}
-			textSentences += s.getProcessedText() + " ";
+			for (int i = 0; i < v.getLDA().getNoTopics(); i++) {
+				probDistribSentences[i] += s.getLDAProbDistribution()[i];
+			}
 		}
-		double[] probDistribSentences = v.getLDA().getProbDistribution(textSentences);
+		probDistribSentences = VectorAlgebra.normalize(probDistribSentences);
 
 		for (Word w1 : v.getWordOccurences().keySet()) {
 			// only for words that have not been previously marked as
@@ -77,44 +77,32 @@ public class InferredKnowledgeStrategy {
 					double maxSim = 0;
 					double[] probDistrib1 = w1.getLDAProbDistribution();
 					double[] vector1 = v.getLSA().getWordVector(w1);
-					Word maxSimWord = null;
+					Word closestWord = null;
 
 					// add similarity to sentences as a measure of importance of
-					// the
-					// word
+					// the word
 					double simLSASentences = VectorAlgebra.cosineSimilarity(vector1, vectorSentences);
 					double simLDASentences = LDA.getSimilarity(probDistrib1, probDistribSentences);
-					double simSentences = SemanticCohesion.getAggregatedSemanticMeasure(simLSASentences,
-							simLDASentences);
+					double simMaxSentence = Math.max(simLSASentences, simLDASentences);
 
 					for (Sentence s : sentences) {
 						for (Word w2 : s.getWordOccurences().keySet()) {
 							// determine semantic proximity
-							double simLSAWord1 = VectorAlgebra.cosineSimilarity(vector1, v.getLSA().getWordVector(w2));
-							double simLDAWord1 = LDA.getSimilarity(probDistrib1, w2.getLDAProbDistribution());
-							double simWMWord1 = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.WU_PALMER);
+							double simLSAWord = VectorAlgebra.cosineSimilarity(vector1, v.getLSA().getWordVector(w2));
+							double simLDAWord = LDA.getSimilarity(probDistrib1, w2.getLDAProbDistribution());
+							double simWNWord = OntologySupport.semanticSimilarity(w1, w2, OntologySupport.WU_PALMER);
+							double simMaxWord = Math.max(simWNWord, Math.max(simLSAWord, simLDAWord));
 
-							double simWord1 = SemanticCohesion.getCohesionMeasure(simWMWord1, simLSAWord1, simLDAWord1);
-
-							// determine importance of counterpart word
-							double simLSAWord2 = VectorAlgebra.cosineSimilarity(v.getLSA().getWordVector(w2),
-									vectorSentences);
-							double simLDAWord2 = LDA.getSimilarity(w2.getLDAProbDistribution(), probDistribSentences);
-							double simWord2 = SemanticCohesion.getAggregatedSemanticMeasure(simLSAWord2, simLDAWord2);
-
-							double sim = 1.0 / (INTER_WORD_SIMILARITY_WEIGHT + 2 * WORD_DOCUMENT_SIMILARITY_WEIGHT)
-									* (INTER_WORD_SIMILARITY_WEIGHT * simWord1
-											+ WORD_DOCUMENT_SIMILARITY_WEIGHT * simWord2
-											+ WORD_DOCUMENT_SIMILARITY_WEIGHT * simSentences);
-							if (maxSim < sim) {
-								maxSim = sim;
-								maxSimWord = w2;
+							if (maxSim < simMaxWord) {
+								maxSim = simMaxWord;
+								closestWord = w2;
 							}
 						}
 					}
 
-					if (maxSim >= SIMILARITY_THRESHOLD_KI) {
-						noOccur += addAssociations(w1, v, usedColor, maxSimWord.getLemma());
+					if (Math.max(maxSim, simMaxSentence) >= SIMILARITY_THRESHOLD_KI) {
+						noOccur += addAssociations(w1, v, usedColor, Formatting.formatNumber(simMaxSentence) + "; "
+								+ closestWord.getLemma() + "-" + Formatting.formatNumber(maxSim));
 					}
 				}
 			}
