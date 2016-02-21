@@ -12,32 +12,30 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.Node;
 import org.gephi.io.exporter.api.ExportController;
-import org.gephi.layout.plugin.force.StepDisplacement;
-import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
+import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.cscl.Participant;
-import processing.core.PApplet;
 import services.discourse.CSCL.ParticipantEvaluation;
+import view.models.PreviewSketch;
 
 public class ParticipantInteractionView extends JFrame {
 	private static final long serialVersionUID = 2571577554857108582L;
@@ -78,80 +76,73 @@ public class ParticipantInteractionView extends JFrame {
 	}
 
 	private void generateGraph(boolean displayEdgeLabels, boolean isAnonymized) {
+		logger.info("Generating participant interaction view");
 		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		ParticipantEvaluation.buildParticipantGraph(genericName, graph, graphModel, this.participants,
 				this.participantContributions, displayEdgeLabels, isAnonymized);
 
-		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		// run ForceAtlas 2 layout
+		ForceAtlas2 layout = new ForceAtlas2(null);
 		layout.setGraphModel(graphModel);
-		layout.initAlgo();
 		layout.resetPropertiesValues();
-		layout.setOptimalDistance(500f);
 
-		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-			layout.goAlgo();
-		}
-		layout.endAlgo();
-
-		layout.setGraphModel(graphModel);
-
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
+		layout.setOutboundAttractionDistribution(false);
+		layout.setEdgeWeightInfluence(1.5d);
+		layout.setGravity(10d);
+		layout.setJitterTolerance(.02);
+		layout.setScalingRatio(15.0);
+		layout.initAlgo();
 
 		// Get centrality
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.execute(graphModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(3);
+		centralityTransformer.setMaxSize(10);
+		appearanceController.transform(centralityRanking);
 
-		// if all scores are 0, change centrality measure
-		boolean allZero = true;
-		for (Node n : graph.getNodes()) {
-			allZero = allZero && ((Double) n.getNodeData().getAttributes().getValue(centralityColumn.getIndex()) == 0);
-		}
-		if (allZero) {
-			centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
-		}
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(3);
-		sizeTransformer.setMaxSize(20);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		// Rank label size - set a multiplier size
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
+		labelSizeTransformer.setMinSize(1);
+		labelSizeTransformer.setMaxSize(3);
+		appearanceController.transform(centralityRanking2);
 
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+				new DependantOriginalColor(Color.BLACK));
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
-		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
 
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
-		panelGraph.add(applet, BorderLayout.CENTER);
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 		panelGraph.validate();
 		panelGraph.repaint();
 

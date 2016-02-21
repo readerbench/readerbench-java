@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com</groupId>
 	<artifactId>ReaderBench</artifactId>
@@ -34,35 +34,15 @@
 								<file>${project.basedir}/resources/lib/knowceans-tools.jar</file>
 							</configuration>
 						</execution>
-						<execution>
-							<id>2</id>
-							<phase>clean</phase>
-							<goals>
-								<goal>install-file</goal>
-							</goals>
-							<configuration>
-								<groupId>org</groupId>
-								<artifactId>gephi-toolkit</artifactId>
-								<version>0.8.7</version>
-								<packaging>jar</packaging>
-								<file>${project.basedir}/resources/lib/gephi-toolkit-0.8.7.jar</file>
-							</configuration>
-						</execution>
-						<execution>
-							<id>3</id>
-							<phase>clean</phase>
-							<goals>
-								<goal>install-file</goal>
-							</goals>
-							<configuration>
-								<groupId>edu.stanford.nlp</groupId>
-								<artifactId>stanford-corenlp-caseless</artifactId>
-								<version>3.5.2</version>
-								<packaging>jar</packaging>
-								<file>${project.basedir}/resources/lib/stanford-corenlp-caseless-2015-04-20-models.jar</file>
-							</configuration>
-						</execution>
-                        
+						<!-- <execution> <id>2</id> <phase>clean</phase> <goals> <goal>install-file</goal> 
+							</goals> <configuration> <groupId>org</groupId> <artifactId>gephi-toolkit</artifactId> 
+							<version>0.9.1</version> <packaging>jar</packaging> <file>${project.basedir}/resources/lib/gephi-toolkit-0.9.1-all.jar</file> 
+							</configuration> </execution> -->
+						<!-- <execution> <id>3</id> <phase>clean</phase> <goals> <goal>install-file</goal> 
+							</goals> <configuration> <groupId>edu.stanford.nlp</groupId> <artifactId>stanford-corenlp-caseless</artifactId> 
+							<version>3.5.2</version> <packaging>jar</packaging> <file>${project.basedir}/resources/lib/stanford-corenlp-caseless-2015-04-20-models.jar</file> 
+							</configuration> </execution> -->
+
 					</executions>
 				</plugin>
 			</plugins>
@@ -118,19 +98,28 @@
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
-			<version>3.5.2</version>
+			<version>3.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
-			<version>3.5.2</version>
-			<classifier>models</classifier>
+			<version>3.6.0</version>
+			<classifier>models-english</classifier>
 		</dependency>
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
-			<artifactId>stanford-corenlp-caseless</artifactId>
-			<version>3.5.2</version>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.6.0</version>
+			<classifier>models-french</classifier>
 		</dependency>
+		<dependency>
+			<groupId>edu.stanford.nlp</groupId>
+			<artifactId>stanford-corenlp</artifactId>
+			<version>3.6.0</version>
+			<classifier>models-spanish</classifier>
+		</dependency>
+		<!--<dependency> <groupId>edu.stanford.nlp</groupId> <artifactId>stanford-corenlp-caseless</artifactId> 
+			<version>3.5.2</version> </dependency> -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-io</artifactId>
@@ -174,9 +163,9 @@
 			<classifier>job</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org</groupId>
+			<groupId>org.gephi</groupId>
 			<artifactId>gephi-toolkit</artifactId>
-			<version>0.8.7</version>
+			<version>0.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -192,7 +181,7 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>4.3.8.Final</version>
-		 <type>jar</type>
+			<type>jar</type>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
@@ -210,12 +199,8 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.37</version>
 		</dependency>
-		<dependency>
-			<groupId>edu.stanford.nlp</groupId>
-			<artifactId>stanford-parser</artifactId>
-			<version>3.5.2</version>
-			<classifier>models</classifier>
-		</dependency>
+		<!--<dependency> <groupId>edu.stanford.nlp</groupId> <artifactId>stanford-parser</artifactId> 
+			<version>3.5.2</version> <classifier>models</classifier> </dependency> -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -226,11 +211,8 @@
 			<artifactId>pdfbox</artifactId>
 			<version>1.8.10</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.apache.pdfbox</groupId>
-			<artifactId>pdfbox</artifactId>
-			<version>2.0.0-RC2</version>
-		</dependency>-->
+		<!--<dependency> <groupId>org.apache.pdfbox</groupId> <artifactId>pdfbox</artifactId> 
+			<version>2.0.0-RC2</version> </dependency> -->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -272,39 +254,54 @@
 			<version>3.8.11.2</version>
 		</dependency>
 		<dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-nlp</artifactId>
-            <version>0.4-rc3.8</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-ui</artifactId>
-            <version>0.4-rc3.8</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>canova-api</artifactId>
-            <version>0.0.0.14</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-x86</artifactId>
-            <version>0.4-rc3.8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j</artifactId>
-            <version>0.4-rc3.7</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-api</artifactId>
-            <version>0.4-rc3.8</version>
-        </dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-nlp</artifactId>
+			<version>0.4-rc3.8</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.deeplearning4j</groupId>
+			<artifactId>deeplearning4j-ui</artifactId>
+			<version>0.4-rc3.8</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>canova-api</artifactId>
+			<version>0.0.0.14</version>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-x86</artifactId>
+			<version>0.4-rc3.8</version>
+		</dependency>
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j</artifactId>
+			<version>0.4-rc3.7</version>
+			<type>pom</type>
+		</dependency>
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-api</artifactId>
+			<version>0.4-rc3.8</version>
+		</dependency>
+		<dependency>
+			<groupId> org.apache.cassandra</groupId>
+			<artifactId>cassandra-all</artifactId>
+			<version>0.8.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

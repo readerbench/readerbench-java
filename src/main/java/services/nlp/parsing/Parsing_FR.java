@@ -14,28 +14,24 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 public class Parsing_FR extends Parsing {
 
 	private static Parsing_FR instance = null;
-	
-	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(
-			new ParsingParams_FR());
+
+	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_FR());
 
 	private Parsing_FR() {
 		lang = Lang.fr;
 	}
-	
+
 	public static Parsing_FR getInstance() {
 		if (instance == null) {
 			instance = new Parsing_FR();
 		}
 		return instance;
 	}
-	
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		AbstractDocumentTemplate docTmp = getDocumentModel();
-		AbstractDocument d = new Document(
-				null,
-				docTmp,
-				null, null, Lang.fr, true, false);
+		AbstractDocument d = new Document(null, docTmp, null, null, Lang.fr, true, false);
 		System.out.println(d);
 	}
 
@@ -91,13 +87,18 @@ class ParsingParams_FR extends Properties {
 	private static final long serialVersionUID = -161579346328207322L;
 
 	public ParsingParams_FR() {
-		super();
 		this.put("tokenize.language", "fr");
-		this.put("pos.model", "resources/config/POSmodels/french.tagger");
+		this.put("pos.model", "edu/stanford/nlp/models/pos-tagger/french/french.tagger");
 		this.put("parse.model", "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
-		this.put("parse.flags", "");
-		this.put("parse.buildgraphs", "false");
 		this.put("annotators", "tokenize, ssplit, pos, parse");
-		this.put("numThreads", "8");
+
+		/*
+		 * this.put("pos.model", "resources/config/POSmodels/french.tagger");
+		 * this.put("parse.model",
+		 * "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
+		 * this.put("parse.flags", ""); this.put("parse.buildgraphs", "false");
+		 * this.put("annotators", "tokenize, ssplit, pos, parse");
+		 * this.put("numThreads", "8");
+		 */
 	}
 }

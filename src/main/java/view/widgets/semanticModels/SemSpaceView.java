@@ -25,33 +25,35 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingElementColorTransformer;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
+import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractColorTransformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import edu.cmu.lti.jawjaw.pobj.Lang;
-import processing.core.PApplet;
 import services.semanticModels.GenerateSpace;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
+import view.models.PreviewSketch;
 
 public class SemSpaceView extends JFrame {
 
@@ -109,13 +111,15 @@ public class SemSpaceView extends JFrame {
 		double threshold = ((double) thresholdSlider.getValue()) / 10;
 		int depth = depthSlider.getValue();
 
+		// Init a project - and therefore a workspace
 		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
 		pc.newProject();
 
-		// Get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		// Get a graph model - it exists because we have a workspace
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		if (wordTextField.getText().length() == 0) {
 			JOptionPane.showMessageDialog(viewSplitPane, "Please enter a word!", "Error", JOptionPane.WARNING_MESSAGE);
@@ -127,76 +131,96 @@ public class SemSpaceView extends JFrame {
 					wordTextField.getText() + " - nodes: " + graph.getNodeCount() + " edges: " + graph.getEdgeCount());
 		}
 
+		// Run YifanHuLayout for 100 passes
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(1000f);
+
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
+
+		// ForceAtlas2 layout = new ForceAtlas2(null);
+		// layout.setGraphModel(graphModel);
+		// layout.resetPropertiesValues();
+		//
+		// layout.setOutboundAttractionDistribution(false);
+		// layout.setEdgeWeightInfluence(1.5d);
+		// layout.setGravity(10d);
+		// layout.setJitterTolerance(.02);
+		// layout.setScalingRatio(15.0);
+		// layout.initAlgo();
+
 		// Rank color by Degree
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
-		Ranking<?> degreeRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				Ranking.DEGREE_RANKING);
-		AbstractColorTransformer<?> colorTransformer = (AbstractColorTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_COLOR);
+		Function degreeRanking = appearanceModel.getNodeFunction(graph, AppearanceModel.GraphFunction.NODE_DEGREE,
+				RankingElementColorTransformer.class);
+		RankingElementColorTransformer degreeTransformer = (RankingElementColorTransformer) degreeRanking
+				.getTransformer();
+		degreeTransformer.setColors(new Color[] { new Color(0x9C9C9C), new Color(0xEDEDED) });
+		degreeTransformer.setColorPositions(new float[] { 0f, 1f });
+		appearanceController.transform(degreeRanking);
 
-		colorTransformer.setColors(new Color[] { new Color(0x9C9C9C), new Color(0xEDEDED) });
-		rankingController.transform(degreeRanking, colorTransformer);
-
-		// Get Centrality
+		logger.info("Performing SNA...");
+		// Perform SNA
 		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.setDirected(false);
+		distance.execute(graphModel);
 
+		logger.info("Ranking size...");
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(MIN_NODE_SIZE);
-		sizeTransformer.setMaxSize(MAX_NODE_SIZE);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(MIN_NODE_SIZE);
+		centralityTransformer.setMaxSize(MAX_NODE_SIZE);
+		appearanceController.transform(centralityRanking);
 
-		//augment the central node and make it more visible
+		// augment the central node and make it more visible
 		for (Node n : graph.getNodes()) {
-			if (n.getNodeData().getLabel().equals(wordTextField.getText())) {
-				n.getNodeData().setSize(MAX_NODE_SIZE);
-				n.getNodeData().setColor((float) (COLOR_ORIGINAL_CONCEPT.getRed()) / 256,
+			if (n.getLabel().equals(wordTextField.getText())) {
+				n.setSize(MAX_NODE_SIZE);
+				n.setColor(new Color((float) (COLOR_ORIGINAL_CONCEPT.getRed()) / 256,
 						(float) (COLOR_ORIGINAL_CONCEPT.getGreen()) / 256,
-						(float) (COLOR_ORIGINAL_CONCEPT.getBlue()) / 256);
+						(float) (COLOR_ORIGINAL_CONCEPT.getBlue()) / 256));
 				break;
 			}
 		}
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(MIN_LABEL_SIZE);
 		labelSizeTransformer.setMaxSize(MAX_LABEL_SIZE);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
+		logger.info("Generating preview...");
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+				new DependantOriginalColor(Color.BLACK));
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
+		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
-		previewController.refreshPreview();
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
-		networkPanel.add(applet, BorderLayout.CENTER);
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
+		networkPanel.add(previewSketch, BorderLayout.CENTER);
 
 		// Export
+		logger.info("Saving export...");
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
 		try {
 			ec.exportFile(new File(
@@ -420,7 +444,7 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("in/HDP/grade0", Lang.eng));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade0", Lang.eng));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);

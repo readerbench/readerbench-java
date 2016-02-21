@@ -65,7 +65,7 @@ public class LDA implements ISemanticModel, Serializable {
 	private LDA(String path, Lang language) {
 		this(language);
 		this.path = path;
-		logger.info("Loading LDA model");
+		logger.info("Loading LDA model " + path + "...");
 		try {
 			model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
 			buildWordVectors();
@@ -109,11 +109,9 @@ public class LDA implements ISemanticModel, Serializable {
 				Reader fileReader;
 				try {
 					fileReader = new InputStreamReader(new FileInputStream(f), "UTF-8");
+					// data, label, name fields
 					instances.addThruPipe(
-							new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1)); // data,
-																														// label,
-																														// name
-																														// fields
+							new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -224,13 +222,9 @@ public class LDA implements ISemanticModel, Serializable {
 
 		model.addInstances(instances);
 
-		// Use two parallel samplers, which each look at one half the corpus and
-		// combine
-		// statistics after every iteration.
 		model.setNumThreads(noThreads);
 
-		// Run the model for 50 iterations and stop (this is for testing only,
-		// for real applications, use 1000 to 2000 iterations)
+		// Run the model for X iterations and stop
 		model.setNumIterations(noIterations);
 		model.estimate();
 
@@ -241,55 +235,16 @@ public class LDA implements ISemanticModel, Serializable {
 	public void buildWordVectors() {
 		ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
 		wordProbDistributions = new TreeMap<Word, double[]>();
-		// TreeMap<Word, Double> concepts = new TreeMap<Word, Double>();
 
 		for (int topic = 0; topic < model.getNumTopics(); topic++) {
-			// double max = 0;
-			// for (IDSorter idCountPair : topicSortedWords.get(topic)) {
-			// max = Math.max(idCountPair.getWeight(), max);
-			// }
-			// System.out.println("Topic " + topic + ": sum weights = " + sum);
 			for (IDSorter idCountPair : topicSortedWords.get(topic)) {
 				Word concept = Word.getWordFromConcept(model.getAlphabet().lookupObject(idCountPair.getID()).toString(),
 						language);
 				if (!wordProbDistributions.containsKey(concept))
 					wordProbDistributions.put(concept, new double[model.getNumTopics()]);
-				// if (!concepts.containsKey(concept))
-				// concepts.put(concept, idCountPair.getWeight());
-				// else
-				// concepts.put(concept,
-				// concepts.get(concept) + idCountPair.getWeight());
-				// normalize results to maximum weight per topic
 				wordProbDistributions.get(concept)[topic] = idCountPair.getWeight();
-				// / max;
 			}
 		}
-
-		// ValueComparator<Word> kcvc = new ValueComparator<Word>(concepts);
-		// TreeMap<Word, Double> sortedConcepts = new TreeMap<Word,
-		// Double>(kcvc);
-
-		// for (Word c : wordProbDistributions.keySet()) {
-		// double sum = 0;
-		// for (int i = 0; i < model.getNumTopics(); i++) {
-		// sum += wordProbDistributions.get(c)[i];
-		// }
-		//
-		// // normalize vector to resemble a probability distribution
-		// if (sum != 0) {
-		// for (int i = 0; i < model.getNumTopics(); i++) {
-		// wordProbDistributions.get(c)[i] /= sum;
-		// }
-		// }
-		// }
-		//
-		// sortedConcepts.putAll(concepts);
-
-		// System.out
-		// .println("--Sorted concepts in terms of specificity with LDA--");
-		// for (Object key : sortedConcepts.keySet()) {
-		// System.out.print(key + " / " + sortedConcepts.get(key) + "\n");
-		// }
 	}
 
 	public double[] getWordProbDistribution(Word word) {
@@ -354,9 +309,12 @@ public class LDA implements ISemanticModel, Serializable {
 			return 0;
 		}
 		double sim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
-//		double sim = VectorAlgebra.cosineSimilarity(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
-//		double sim = 1.0
-//				/ VectorAlgebra.mutualInformation(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
+		// double sim =
+		// VectorAlgebra.cosineSimilarity(VectorAlgebra.normalize(prob1),
+		// VectorAlgebra.normalize(prob2));
+		// double sim = 1.0
+		// / VectorAlgebra.mutualInformation(VectorAlgebra.normalize(prob1),
+		// VectorAlgebra.normalize(prob2));
 		if (sim >= 0)
 			return sim;
 		return 0;
@@ -387,7 +345,6 @@ public class LDA implements ISemanticModel, Serializable {
 		double sim;
 		for (Word c : wordProbDistributions.keySet()) {
 			prob2 = getWordProbDistribution(c);
-			// sim = VectorAlgebra.cosineSimilarity(prob1, prob2);
 			sim = getSimilarity(VectorAlgebra.normalize(probDistribution), VectorAlgebra.normalize(prob2));
 			if (sim >= minThreshold) {
 				similarConcepts.put(c, sim);

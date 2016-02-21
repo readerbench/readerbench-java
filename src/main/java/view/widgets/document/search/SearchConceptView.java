@@ -10,8 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,25 +34,26 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
@@ -63,9 +62,10 @@ import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
-import processing.core.PApplet;
+import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
+import view.models.PreviewSketch;
 
 public class SearchConceptView extends JFrame {
 	public static final double INITIAL_DOC_THRESHOLD = 0.4;
@@ -124,9 +124,7 @@ public class SearchConceptView extends JFrame {
 	private double computeDistanceFromRefDoc(Word word, AnalysisElement e) {
 		try {
 			double lsa, lda;
-
 			double[] probDistrib = e.getLDA().getWordProbDistribution(word);
-
 			// determine importance within analysis element
 			lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
 			lda = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
@@ -264,7 +262,6 @@ public class SearchConceptView extends JFrame {
 			};
 		};
 		try {
-			// 1.6+
 			tableCentrality.setAutoCreateRowSorter(true);
 		} catch (Exception continuewithNoSort) {
 		}
@@ -284,7 +281,7 @@ public class SearchConceptView extends JFrame {
 								"<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2
 										+ "<br> <b>Semantic Distance:</b> " + score + "</html>");
 					} catch (Exception e) {
-						// e.printStackTrace();
+						e.printStackTrace();
 					}
 				}
 			}
@@ -330,9 +327,6 @@ public class SearchConceptView extends JFrame {
 		if (currentLevel > this.graphDepthLevel)
 			return;
 
-		// referenceWordL
-		// similarWordL
-
 		TreeMap<Word, Boolean> visibleWords = new TreeMap<Word, Boolean>();
 
 		for (Word d : referenceWordL) {
@@ -343,15 +337,9 @@ public class SearchConceptView extends JFrame {
 		}
 
 		logger.info("Starting to build the concept graph");
-		// build connected graph
-
-		// determine similarities in order to determine eligible candidates for
-		// visualisation
-
 		scoresList = new ArrayList<WordDiffContainer>();
 
 		for (Word wSim : similarWordL) {
-
 			for (Word wRef : referenceWordL) {
 				System.out.println(wRef + " vs. " + wSim);
 				double similarity = calculateScore(wRef, wSim);
@@ -371,11 +359,14 @@ public class SearchConceptView extends JFrame {
 					text += w.getLemma();
 				text = (text.length() > 40) ? (text.substring(0, 40) + "..") : text;
 				if (nodes.get(w) == null) {
-					nodes.put(w, graphModel.factory().newNode(text));
-					nodes.get(w).getNodeData().setLabel(text);
-					nodes.get(w).getNodeData().setSize(10);
-					nodes.get(w).getNodeData().setColor(1.0f, 0.0f, 0.0f);
+					Node n = graphModel.factory().newNode(text);
+					n.setLabel(text);
+					n.setSize(10);
+					n.setColor(new Color(1.0f, 0.0f, 0.0f));
+					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+					n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 					graph.addNode(nodes.get(w));
+					nodes.put(w, n);
 				}
 			}
 		}
@@ -387,33 +378,32 @@ public class SearchConceptView extends JFrame {
 					text += w.getLemma();
 				text = (text.length() > 40) ? (text.substring(0, 40) + "..") : text;
 				if (nodes.get(w) == null) {
-					nodes.put(w, graphModel.factory().newNode(text));
-					nodes.get(w).getNodeData().setLabel(text);
-					nodes.get(w).getNodeData().setSize(10);
-					nodes.get(w).getNodeData().setColor(0.0f, 1.0f, 0.0f);
+					Node n = graphModel.factory().newNode(text);
+					n.setLabel(text);
+					n.setSize(10);
+					n.setColor(new Color(0.0f, 1.0f, 0.0f));
+					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+					n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 					graph.addNode(nodes.get(w));
+					nodes.put(w, n);
 				}
 			}
 		}
 		computeMinMax(scoresList, visibleWords);
-		System.out.println("min=" + scoreMin + ", max=" + scoreMax);
 		for (Word wSim : similarWordL) {
 			for (Word wRef : referenceWordL) {
 				if (visibleWords.get(wSim) && visibleWords.get(wRef)) {
 					double sim = WordDiffContainer.getScore(scoresList, wRef, wSim);
 					if (sim >= threshold && sim <= MAX_COHESION) {
-						Edge e = graphModel.factory().newEdge(nodes.get(wRef), nodes.get(wSim));
-						float currentSim = (float) ((sim - scoreMin) / (scoreMax - scoreMin));
-						System.out.print(currentSim + " ");
-						e.setWeight(currentSim);
-						e.getEdgeData().setLabel(sim + "");
+						Edge e = graphModel.factory().newEdge(nodes.get(wRef), nodes.get(wSim), 0,
+								(sim - scoreMin) / (scoreMax - scoreMin), false);
+						e.setLabel(sim + "");
 						graph.addEdge(e);
 					}
 				}
 			}
 		}
 		logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
-
 	}
 
 	private void generateGraph() {
@@ -423,9 +413,10 @@ public class SearchConceptView extends JFrame {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		// build nodes
 		Map<Word, Node> nodes = new TreeMap<Word, Node>();
@@ -433,52 +424,59 @@ public class SearchConceptView extends JFrame {
 		// visibleDocs.put(this.referenceDoc, true);
 		buildConceptGraph(graph, graphModel, threshold, 1, this.referenceDoc, nodes);
 
-		/* similarity to the reference concepts */
+		// Run YifanHuLayout for 100 passes - The layout always takes the
+		// current visible view
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(200f);
 
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
+		
+		// similarity to the reference concepts
 		Collections.sort(scoresList);
-
 		if (tableCentralityModel.getRowCount() > 0) {
 			for (int i = tableCentralityModel.getRowCount() - 1; i > -1; i--) {
 				tableCentralityModel.removeRow(i);
 			}
 		}
 
-		NumberFormat formatter = new DecimalFormat("#0.00");
 		for (WordDiffContainer sim : scoresList) {
 			String row[] = new String[3];
 			row[0] = sim.getWRef().getLemma();
 			row[1] = sim.getWSim().getLemma();
-			row[2] = formatter.format(sim.getSimilarity());
+			row[2] = Formatting.formatNumber(sim.getSimilarity()) + "";
 			tableCentralityModel.addRow(row);
 		}
 		tableCentralityModel.fireTableDataChanged();
-		/* end similarity to central article */
-
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.setDirected(false);
+		distance.execute(graphModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(5);
+		centralityTransformer.setMaxSize(40);
+		appearanceController.transform(centralityRanking);
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
@@ -491,26 +489,15 @@ public class SearchConceptView extends JFrame {
 		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
 		if (panelGraph.getComponents().length > 0) {
 			panelGraph.removeAll();
 			panelGraph.revalidate();
 		}
-		panelGraph.add(applet, BorderLayout.CENTER);
-		panelGraph.validate();
-		panelGraph.repaint();
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
 		// Export
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);

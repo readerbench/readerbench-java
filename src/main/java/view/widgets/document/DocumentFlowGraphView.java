@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.text.DecimalFormat;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -12,33 +11,34 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
+import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.MixedGraph;
 import org.gephi.graph.api.Node;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
+import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.AbstractDocument;
 import data.Block;
-import processing.core.PApplet;
+import services.commons.Formatting;
 import services.complexity.flow.DocumentFlow;
+import view.models.PreviewSketch;
 
 public class DocumentFlowGraphView extends JFrame {
 	static Logger logger = Logger.getLogger(ConceptView.class);
@@ -77,9 +77,7 @@ public class DocumentFlowGraphView extends JFrame {
 		generateGraph();
 	}
 
-	public void buildUtteranceGraph(MixedGraph graph, GraphModel graphModel, AbstractDocument d) {
-		DecimalFormat formatter = new DecimalFormat("#.###");
-
+	public void buildUtteranceGraph(DirectedGraph graph, GraphModel graphModel, AbstractDocument d) {
 		Node[] blockNodes = new Node[d.getBlocks().size()];
 
 		Color colorBlock = new Color(204, 204, 204); // silver
@@ -94,9 +92,11 @@ public class DocumentFlowGraphView extends JFrame {
 					content = content.substring(0, MAX_CONTENT_SIZE);
 					content = content.substring(0, content.lastIndexOf(" ")) + "...";
 				}
-				block.getNodeData().setLabel("P" + b.getIndex() + ": " + content);
-				block.getNodeData().setColor((float) (colorBlock.getRed()) / 256, (float) (colorBlock.getGreen()) / 256,
-						(float) (colorBlock.getBlue()) / 256);
+				block.setLabel("P" + b.getIndex() + ": " + content);
+				block.setColor(new Color((float) (colorBlock.getRed()) / 256, (float) (colorBlock.getGreen()) / 256,
+						(float) (colorBlock.getBlue()) / 256));
+				block.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				block.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 				graph.addNode(block);
 				blockNodes[b.getIndex()] = block;
 			}
@@ -107,10 +107,10 @@ public class DocumentFlowGraphView extends JFrame {
 			for (int j = i + 1; j < d.getBlocks().size(); j++) {
 				if (df.getGraph()[i][j] > 0) {
 					double dist = df.getGraph()[i][j];
-					graph.addEdge(blockNodes[i], blockNodes[j], true);
-					Edge e = graph.getEdge(blockNodes[i], blockNodes[j]);
-					e.setWeight((float) dist);
-					e.getEdgeData().setLabel(formatter.format(dist));
+
+					Edge e = graphModel.factory().newEdge(blockNodes[i], blockNodes[j], 0, dist, true);
+					e.setLabel(Formatting.formatNumber(dist) + "");
+					graph.addEdge(e);
 				}
 			}
 		}
@@ -123,9 +123,10 @@ public class DocumentFlowGraphView extends JFrame {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
-		MixedGraph graph = graphModel.getMixedGraph();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+		DirectedGraph graph = graphModel.getDirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		buildUtteranceGraph(graph, graphModel, doc);
 
@@ -133,7 +134,7 @@ public class DocumentFlowGraphView extends JFrame {
 		layout.setGraphModel(graphModel);
 		layout.initAlgo();
 		layout.resetPropertiesValues();
-		layout.setOptimalDistance(200f);
+		layout.setOptimalDistance(100f);
 
 		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
 			layout.goAlgo();
@@ -142,58 +143,50 @@ public class DocumentFlowGraphView extends JFrame {
 
 		layout.setGraphModel(graphModel);
 
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
-
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.execute(graphModel);
 
+		logger.info("Ranking size...");
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(5);
+		centralityTransformer.setMaxSize(40);
+		appearanceController.transform(centralityRanking);
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
+		logger.info("Generating preview...");
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+				new DependantOriginalColor(Color.BLACK));
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
-		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
-		panelGraph.add(applet, BorderLayout.CENTER);
-		panelGraph.validate();
-		panelGraph.repaint();
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
 		// Export
 		// ExportController ec = Lookup.getDefault()

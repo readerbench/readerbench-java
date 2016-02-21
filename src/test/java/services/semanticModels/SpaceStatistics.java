@@ -16,9 +16,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
@@ -127,64 +125,60 @@ public class SpaceStatistics {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
 		Map<String, Node> associations = new TreeMap<String, Node>();
 
 		// build all nodes
 		for (Word w : lda.getWordProbDistributions().keySet()) {
 			Node wordNode = graphModel.factory().newNode(w.getLemma());
-			wordNode.getNodeData().setLabel(w.getLemma());
+			wordNode.setLabel(w.getLemma());
 			associations.put(w.getLemma(), wordNode);
 			graph.addNode(wordNode);
 		}
 
 		for (Connection c : relevantSimilarities) {
-			graph.addEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
-			Edge e = graph.getEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
+			Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
 			e.setWeight((float) (c.getSimilarity()));
+			graph.addEdge(e);
 		}
 
 		GraphDensity density = new GraphDensity();
 		density.setDirected(false);
-		density.execute(graphModel, attributeModel);
+		density.execute(graphModel);
 		System.out.println("Semantic model density:\t" + Formatting.formatNumber(density.getDensity()));
 
 		Modularity modularity = new Modularity();
-		modularity.execute(graphModel, attributeModel);
+		modularity.execute(graphModel);
 		System.out
 				.println("Semantic model average modularity:\t" + Formatting.formatNumber(modularity.getModularity()));
 
 		ConnectedComponents connectedComponents = new ConnectedComponents();
 		connectedComponents.setDirected(false);
-		connectedComponents.execute(graphModel, attributeModel);
+		connectedComponents.execute(graphModel);
 		System.out.println("No connected components within semantic model:\t"
 				+ Formatting.formatNumber(connectedComponents.getConnectedComponentsCount()));
 
 		ClusteringCoefficient clusteringCoefficient = new ClusteringCoefficient();
 		clusteringCoefficient.setDirected(false);
-		clusteringCoefficient.execute(graphModel, attributeModel);
+		clusteringCoefficient.execute(graphModel);
 		System.out.println("Semantic model average clustering coefficient:\t"
 				+ Formatting.formatNumber(clusteringCoefficient.getAverageClusteringCoefficient()));
 
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(false);
-		distance.execute(graphModel, attributeModel);
+		distance.execute(graphModel);
 
 		// Determine various metrics
-		AttributeColumn betweennessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-
-		AttributeColumn closenessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
-
-		AttributeColumn eccentricityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
-
 		double avgBetweenness = 0, avgCloseness = 0, avgEccentricity = 0;
+		Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+		Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
 
 		for (Node n : graph.getNodes()) {
-			avgBetweenness += ((Double) n.getNodeData().getAttributes().getValue(betweennessColumn.getIndex()));
-			avgCloseness += ((Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
-			avgEccentricity += ((Double) n.getNodeData().getAttributes().getValue(eccentricityColumn.getIndex()));
+			avgBetweenness += (Double) n.getAttribute(betweeennessColumn);
+			avgCloseness += (Double) n.getAttribute(closenessColumn);
+			avgEccentricity += (Double) n.getAttribute(eccentricityColumn);
 		}
 		if (graph.getNodeCount() != 0) {
 			System.out.println(
@@ -270,7 +264,7 @@ public class SpaceStatistics {
 	 */
 
 	private enum SNAIndices {
-		DEGREE, BETWEENNESS, CLOSENESS, ECCENTRICITY
+		DEGREE, SIM_DEGREE, BETWEENNESS, CLOSENESS, ECCENTRICITY
 	}
 
 	public static void determineWLP(String pathToOutput, SpaceStatistics space, LDA referenceSpace) {
@@ -289,16 +283,14 @@ public class SpaceStatistics {
 			Map<String, EnumMap<SNAIndices, Double>> wlps = new TreeMap<String, EnumMap<SNAIndices, Double>>();
 			for (Word w : space.getLDA().getWordSet()) {
 				EnumMap<SNAIndices, Double> scores = new EnumMap<SNAIndices, Double>(SNAIndices.class);
-				scores.put(SNAIndices.DEGREE, 0d);
+				scores.put(SNAIndices.SIM_DEGREE, 0d);
 				wlps.put(w.getLemma(), scores);
 			}
 
 			ProjectController pc;
 			GraphModel graphModel;
-			AttributeModel attributeModel;
 			DirectedGraph graph;
 			Map<String, Node> associations;
-			AttributeColumn betweennessColumn, closenessColumn, eccentricityColumn;
 			GraphDistance distance;
 
 			logger.info("Processing SNA indices for " + space.getLDA().getPath() + "...");
@@ -307,51 +299,51 @@ public class SpaceStatistics {
 			pc.newProject();
 
 			// get models
-			graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-			attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+			graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 			graph = graphModel.getDirectedGraph();
 			associations = new TreeMap<String, Node>();
 
 			// build all nodes
 			for (Word w : space.getLDA().getWordProbDistributions().keySet()) {
 				Node wordNode = graphModel.factory().newNode(w.getLemma());
-				wordNode.getNodeData().setLabel(w.getLemma());
+				wordNode.setLabel(w.getLemma());
 				associations.put(w.getLemma(), wordNode);
 				graph.addNode(wordNode);
 			}
 
 			for (Connection c : space.getRelevantSimilarities()) {
-				graph.addEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
-				Edge e = graph.getEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
-				e.setWeight((float) (c.getSimilarity()));
+				Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()), 0,
+						c.getSimilarity(), false);
+				graph.addEdge(e);
 
-				wlps.get(c.getWord1()).put(SNAIndices.DEGREE,
-						wlps.get(c.getWord1()).get(SNAIndices.DEGREE) + c.getSimilarity());
-				wlps.get(c.getWord2()).put(SNAIndices.DEGREE,
-						wlps.get(c.getWord2()).get(SNAIndices.DEGREE) + c.getSimilarity());
+				wlps.get(c.getWord1()).put(SNAIndices.SIM_DEGREE,
+						wlps.get(c.getWord1()).get(SNAIndices.SIM_DEGREE) + c.getSimilarity());
+				wlps.get(c.getWord2()).put(SNAIndices.SIM_DEGREE,
+						wlps.get(c.getWord2()).get(SNAIndices.SIM_DEGREE) + c.getSimilarity());
 			}
 
 			logger.info("Computing SNA indices...");
 			distance = new GraphDistance();
 			distance.setDirected(false);
-			distance.execute(graphModel, attributeModel);
+			distance.execute(graphModel);
 
 			// Determine various metrics
-			betweennessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-			closenessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
-			eccentricityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
+			Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+			Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+			Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
 
 			for (Node n : graph.getNodes()) {
-				double betweennessScore = ((Double) n.getNodeData().getAttributes()
-						.getValue(betweennessColumn.getIndex()));
-				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.BETWEENNESS, betweennessScore);
+				double degree = graph.getDegree(n);
+				wlps.get(n.getLabel()).put(SNAIndices.DEGREE, degree);
 
-				double closenessScore = ((Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
-				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.CLOSENESS, closenessScore);
+				double betweennessScore = (Double) n.getAttribute(betweeennessColumn);
+				wlps.get(n.getLabel()).put(SNAIndices.BETWEENNESS, betweennessScore);
 
-				double eccentricityScore = ((Double) n.getNodeData().getAttributes()
-						.getValue(eccentricityColumn.getIndex()));
-				wlps.get(n.getNodeData().getLabel()).put(SNAIndices.ECCENTRICITY, eccentricityScore);
+				double closenessScore = (Double) n.getAttribute(closenessColumn);
+				wlps.get(n.getLabel()).put(SNAIndices.CLOSENESS, closenessScore);
+
+				double eccentricityScore = (Double) n.getAttribute(eccentricityColumn);
+				wlps.get(n.getLabel()).put(SNAIndices.ECCENTRICITY, eccentricityScore);
 			}
 
 			logger.info("Writing final results...");
@@ -373,18 +365,11 @@ public class SpaceStatistics {
 			out.close();
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e)
-
-		{
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (
-
-		IOException e)
-
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**

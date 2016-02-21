@@ -34,7 +34,9 @@ public class GenerateSpace {
 		depthNodes.put(word, 0);
 		// add starting point
 		Node node = graphModel.factory().newNode(word.getLemma());
-		node.getNodeData().setLabel(word.getLemma());
+		node.setLabel(word.getLemma());
+		node.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+		node.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 		graph.addNode(node);
 		addedNodes.add(node);
 		existingNodes.put(word, addedNodes.size() - 1);
@@ -47,12 +49,14 @@ public class GenerateSpace {
 				Word crt = currentProcessing.remove(0);
 				if (depthNodes.get(crt) < maxDepth) {
 					for (Word to : semSpace.getWordSet()) {
-						float dist = (float) semSpace.getSimilarity(crt, to);
-						if (!to.equals(crt) && dist >= threshold) {
+						float sim = (float) semSpace.getSimilarity(crt, to);
+						if (!to.equals(crt) && sim >= threshold) {
 							// the node does not already exist
 							if (!existingNodes.containsKey(to) && !currentProcessing.contains(to)) {
 								node = graphModel.factory().newNode(to.getLemma());
-								node.getNodeData().setLabel(to.getLemma());
+								node.setLabel(to.getLemma());
+								node.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+								node.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 								graph.addNode(node);
 								addedNodes.add(node);
 								currentProcessing.add(to);
@@ -62,14 +66,13 @@ public class GenerateSpace {
 							}
 							// add edge
 							Edge e = graphModel.factory().newEdge(addedNodes.get(existingNodes.get(crt)),
-									addedNodes.get(existingNodes.get(to)));
-							e.setWeight(1.0f - dist);
-							e.getEdgeData().setLabel(dist + "");
+									addedNodes.get(existingNodes.get(to)), 0, 1.0d - sim, false);
+							e.setLabel(Formatting.formatNumber(sim) + "");
 							if (!graph.contains(e)) {
 								graph.addEdge(e);
 								s0++;
-								s1 += dist;
-								s2 += Math.pow(dist, 2);
+								s1 += sim;
+								s2 += Math.pow(sim, 2);
 							}
 						}
 					}
@@ -77,21 +80,20 @@ public class GenerateSpace {
 					// add solely remaining edges to build the final graph
 					for (Word to : semSpace.getWordSet()) {
 						if (!crt.equals(to)) {
-							float dist = (float) semSpace.getSimilarity(crt, to);
-							if (dist >= threshold) {
+							float sim = (float) semSpace.getSimilarity(crt, to);
+							if (sim >= threshold) {
 								// the node exists within our generated graph
 								if (existingNodes.containsKey(to)) {
 									// add edge
 									Edge e = graphModel.factory().newEdge(addedNodes.get(existingNodes.get(crt)),
-											addedNodes.get(existingNodes.get(to)));
-									e.setWeight(1.0f - dist);
-									e.getEdgeData().setLabel(dist + "");
+											addedNodes.get(existingNodes.get(to)), 0, 1.0d - sim, false);
+									e.setLabel(Formatting.formatNumber(sim) + "");
 
 									if (!graph.contains(e)) {
 										graph.addEdge(e);
 										s0++;
-										s1 += dist;
-										s2 += Math.pow(dist, 2);
+										s1 += sim;
+										s2 += Math.pow(sim, 2);
 									}
 								}
 							}

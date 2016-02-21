@@ -14,8 +14,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,28 +43,30 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
+import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -75,11 +75,10 @@ import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
-import cc.mallet.util.Maths;
-import processing.core.PApplet;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
+import view.models.PreviewSketch;
 import view.widgets.ReaderBenchView;
 
 public class SearchSimilarityView extends JFrame {
@@ -165,13 +164,11 @@ public class SearchSimilarityView extends JFrame {
 			topicL.add(new Topic(entry.getKey(), entry.getValue()));
 		}
 		Collections.sort(topicL);
-		System.out.println("--------------------------------------------");
 		for (Topic t : topicL) {
 			double relevance = this.computeDistanceFromRefDoc(t.getWord(), this.query);
 			t.setRelevance(relevance);
 			System.out.print(relevance + " ");
 		}
-		System.out.println();
 		Collections.sort(topicL, new Comparator<Topic>() {
 			public int compare(Topic t1, Topic t2) {
 				return -Double.compare(t1.getRelevance(), t2.getRelevance());
@@ -181,7 +178,6 @@ public class SearchSimilarityView extends JFrame {
 		for (Topic t : topicL) {
 			System.out.print(t.getWord().getText() + "->" + t.getRelevance() + " ");
 		}
-		System.out.println("\n--------------------------------------------");
 
 		for (Topic t : this.query.getTopics()) {
 			System.out.println("-> " + t.getWord());
@@ -288,7 +284,7 @@ public class SearchSimilarityView extends JFrame {
 								"<html><b>Query:</b> " + docC + "<br> <b>Selected document:</b> " + doc2
 										+ "<br> <b>Semantic Distance:</b> " + score + "</html>");
 					} catch (Exception e) {
-						// e.printStackTrace();
+						e.printStackTrace();
 					}
 				}
 			}
@@ -446,20 +442,12 @@ public class SearchSimilarityView extends JFrame {
 							d.getLDAProbDistribution());
 				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 				if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-					Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d));
-					e.setWeight((float) sim);
-					e.getEdgeData().setLabel(sim + "");
+					Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
+					e.setLabel(sim + "");
 					graph.addEdge(e);
 				}
 			}
 		}
-
-		// System.out.println("Most similar articles with "
-		// + new File(referenceDoc.getPath()).getName() + ":\n\t"
-		// + referenceDoc.getText() + "\n");
-		// for (CompareDocsSim sim : similarities) {
-		// System.out.println(sim);
-		// }
 
 		logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
 
@@ -482,12 +470,14 @@ public class SearchSimilarityView extends JFrame {
 			Map<AbstractDocument, Node> nodes, AbstractDocument d, boolean isQuery) {
 		if (!nodes.containsKey(d)) {
 			if (isQuery) {
-				nodes.put(d, graphModel.factory().newNode(d.getTitleText()));
-				nodes.get(d).getNodeData().setLabel(d.getTitleText());
-				// nodes.get(d).getNodeData()
-				nodes.get(d).getNodeData().setSize(20);
-				nodes.get(d).getNodeData().setColor(1.0f, 0.0f, 0.0f);
-				graph.addNode(nodes.get(d));
+				Node n = graphModel.factory().newNode(d.getTitleText());
+				n.setLabel(d.getTitleText());
+				n.setSize(20);
+				n.setColor(new Color(1.0f, 0.0f, 0.0f));
+				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+				graph.addNode(n);
+				nodes.put(d, n);
 			} else {
 				String text = "";
 				if (d.getTitleText() != null)
@@ -495,15 +485,16 @@ public class SearchSimilarityView extends JFrame {
 				text += "(" + d.getText();
 				text = ((text.length() > 40) ? (text.substring(0, 40) + "...") : text) + ")";
 
-				nodes.put(d, graphModel.factory().newNode(text));
-				nodes.get(d).getNodeData().setLabel(text);
-				// nodes.get(d).getNodeData()
-				nodes.get(d).getNodeData().setSize(10);
-				nodes.get(d).getNodeData().setColor(
-						1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * (currentLevel + 1))),
+				Node n = graphModel.factory().newNode(text);
+				n.setLabel(text);
+				n.setSize(10);
+				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+				n.setColor(new Color(1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * (currentLevel + 1))),
 						1.0f - ((float) (COLOR_CONCEPT.getGreen()) / (256 * (currentLevel + 1))),
-						1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * (currentLevel + 1))));
+						1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * (currentLevel + 1)))));
 				graph.addNode(nodes.get(d));
+				nodes.put(d, n);
 			}
 		}
 	}
@@ -515,9 +506,10 @@ public class SearchSimilarityView extends JFrame {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		// build nodes
 		Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
@@ -526,6 +518,19 @@ public class SearchSimilarityView extends JFrame {
 		createGraphNode(graph, graphModel, 0, nodes, this.query, true);
 		// visibleDocs.put(this.referenceDoc, true);
 		buildConceptGraph(graph, graphModel, threshold, 1, this.query, nodes);
+
+		// Run YifanHuLayout for 100 passes - The layout always takes the
+		// current visible view
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(200f);
+
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
 
 		/* similarity to the central article */
 		List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
@@ -551,41 +556,38 @@ public class SearchSimilarityView extends JFrame {
 				tableCentralityModel.removeRow(i);
 			}
 		}
-		NumberFormat formatter = new DecimalFormat("#0.00");
 		for (CompareDocsSim sim : similarities) {
 			String row[] = new String[2];
 			row[0] = sim.doc.getTitleText();
-			row[1] = formatter.format(sim.sim);
+			row[1] = Formatting.formatNumber(sim.sim) + "";
 			tableCentralityModel.addRow(row);
 		}
 		tableCentralityModel.fireTableDataChanged();
 		/* end similarity to central article */
 
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
-
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(false);
-		distance.execute(graphModel, attributeModel);
+		distance.execute(graphModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(5);
+		centralityTransformer.setMaxSize(40);
+		appearanceController.transform(centralityRanking);
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
@@ -600,26 +602,15 @@ public class SearchSimilarityView extends JFrame {
 		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
 		if (panelGraph.getComponents().length > 0) {
 			panelGraph.removeAll();
 			panelGraph.revalidate();
 		}
-		panelGraph.add(applet, BorderLayout.CENTER);
-		panelGraph.validate();
-		panelGraph.repaint();
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
 		// Export
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);

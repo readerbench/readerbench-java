@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -14,33 +13,34 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.MixedGraph;
 import org.gephi.graph.api.Node;
+import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
+import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import processing.core.PApplet;
-import data.Block;
 import data.AbstractDocument;
+import data.Block;
 import data.discourse.SemanticCohesion;
+import services.commons.Formatting;
+import view.models.PreviewSketch;
 
 public class CohesionGraphView extends JFrame {
 	private static final long serialVersionUID = -5991280949453890249L;
@@ -74,9 +74,7 @@ public class CohesionGraphView extends JFrame {
 		generateGraph();
 	}
 
-	public void buildUtteranceGraph(MixedGraph graph, GraphModel graphModel, AbstractDocument d) {
-		DecimalFormat formatter = new DecimalFormat("#.###");
-
+	public void buildUtteranceGraph(UndirectedGraph graph, GraphModel graphModel, AbstractDocument d) {
 		Node[] blockNodes = new Node[d.getBlocks().size()];
 		Map<Integer, Node[]> sentenceNodes = new TreeMap<Integer, Node[]>();
 
@@ -84,11 +82,18 @@ public class CohesionGraphView extends JFrame {
 		Color colorBlock = new Color(204, 204, 204); // silver
 		Color colorDocument = new Color(170, 17, 17); // red tamarillor
 
+		int hierachicalLbl = graphModel.addEdgeType("hierachical");
+		int transitionLbl = graphModel.addEdgeType("transition");
+		int interBlockLbl = graphModel.addEdgeType("inter-block");
+		int interSentenceLbl = graphModel.addEdgeType("inter-sentence");
+
 		// build document
 		Node document = graphModel.factory().newNode("Document");
-		document.getNodeData().setLabel("Document");
-		document.getNodeData().setColor((float) (colorDocument.getRed()) / 256,
-				(float) (colorDocument.getGreen()) / 256, (float) (colorDocument.getBlue()) / 256);
+		document.setLabel("Document");
+		document.setColor(new Color((float) (colorDocument.getRed()) / 256, (float) (colorDocument.getGreen()) / 256,
+				(float) (colorDocument.getBlue()) / 256));
+		document.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+		document.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 		graph.addNode(document);
 
 		// build all nodes
@@ -97,9 +102,11 @@ public class CohesionGraphView extends JFrame {
 			if (b != null) {
 				// build block element
 				Node block = graphModel.factory().newNode("Block " + b.getIndex());
-				block.getNodeData().setLabel("Block " + b.getIndex());
-				block.getNodeData().setColor((float) (colorBlock.getRed()) / 256, (float) (colorBlock.getGreen()) / 256,
-						(float) (colorBlock.getBlue()) / 256);
+				block.setLabel("Block " + b.getIndex());
+				block.setColor(new Color((float) (colorBlock.getRed()) / 256, (float) (colorBlock.getGreen()) / 256,
+						(float) (colorBlock.getBlue()) / 256));
+				block.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				block.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 				graph.addNode(block);
 				blockNodes[b.getIndex()] = block;
 
@@ -108,10 +115,12 @@ public class CohesionGraphView extends JFrame {
 				// add utterances
 				for (int i = 0; i < b.getSentences().size(); i++) {
 					Node sentence = graphModel.factory().newNode("S " + globalIndex);
-					sentence.getNodeData().setLabel("S " + globalIndex);
+					sentence.setLabel("S " + globalIndex);
+					sentence.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+					sentence.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 					globalIndex++;
-					sentence.getNodeData().setColor((float) (colorSentence.getRed()) / 256,
-							(float) (colorSentence.getGreen()) / 256, (float) (colorSentence.getBlue()) / 256);
+					sentence.setColor(new Color((float) (colorSentence.getRed()) / 256,
+							(float) (colorSentence.getGreen()) / 256, (float) (colorSentence.getBlue()) / 256));
 					graph.addNode(sentence);
 					sentenceNodes.get(b.getIndex())[i] = sentence;
 				}
@@ -122,10 +131,9 @@ public class CohesionGraphView extends JFrame {
 		for (int i = 0; i < d.getBlocks().size(); i++) {
 			// add edge to block
 			SemanticCohesion coh = d.getBlockDocDistances()[i];
-			graph.addEdge(blockNodes[i], document, false);
-			Edge e = graph.getEdge(blockNodes[i], document);
-			e.setWeight((float) coh.getCohesion());
-			e.getEdgeData().setLabel(formatter.format(coh.getCohesion()));
+			Edge e = graphModel.factory().newEdge(blockNodes[i], document, hierachicalLbl, coh.getCohesion(), false);
+			e.setLabel(Formatting.formatNumber(coh.getCohesion()) + "");
+			graph.addEdge(e);
 		}
 
 		// add all edges between blocks
@@ -133,56 +141,50 @@ public class CohesionGraphView extends JFrame {
 			for (int j = i + 1; j < d.getBlocks().size(); j++) {
 				if (d.getPrunnedBlockDistances()[i][j] != null) {
 					double dist = d.getPrunnedBlockDistances()[i][j].getCohesion();
-					graph.addEdge(blockNodes[i], blockNodes[j], true);
-					Edge e = graph.getEdge(blockNodes[i], blockNodes[j]);
-					e.setWeight((float) dist);
-					e.getEdgeData().setLabel(formatter.format(dist));
+					Edge e = graphModel.factory().newEdge(blockNodes[i], blockNodes[j], interBlockLbl, dist, false);
+					e.setLabel(Formatting.formatNumber(dist) + "");
+					graph.addEdge(e);
 				}
 			}
 		}
 
 		for (Block b : d.getBlocks()) {
 			if (b != null) {
-				// add all edges between utterances
+				// add edges to corresponding blocks
+				for (int i = 0; i < b.getSentences().size(); i++) {
+					SemanticCohesion coh = b.getSentenceBlockDistances()[i];
+					Edge e = graphModel.factory().newEdge(blockNodes[b.getIndex()], sentenceNodes.get(b.getIndex())[i],
+							hierachicalLbl, coh.getCohesion(), false);
+					e.setLabel(Formatting.formatNumber(coh.getCohesion()) + "");
+					graph.addEdge(e);
+				}
+				// add all edges between sentences
 				for (int i = 0; i < b.getSentences().size() - 1; i++) {
 					for (int j = i + 1; j < b.getSentences().size(); j++) {
 						if (b.getPrunnedSentenceDistances()[i][j] != null) {
 							double dist = b.getPrunnedSentenceDistances()[i][j].getCohesion();
-							graph.addEdge(sentenceNodes.get(b.getIndex())[i], sentenceNodes.get(b.getIndex())[j], true);
-							Edge e = graph.getEdge(sentenceNodes.get(b.getIndex())[i],
-									sentenceNodes.get(b.getIndex())[j]);
-							e.setWeight((float) dist);
-							e.getEdgeData().setLabel(formatter.format(dist));
+							Edge e = graphModel.factory().newEdge(sentenceNodes.get(b.getIndex())[i],
+									sentenceNodes.get(b.getIndex())[j], interSentenceLbl, dist, false);
+							e.setLabel(Formatting.formatNumber(dist) + "");
+							graph.addEdge(e);
 						}
 					}
-				}
-				//
-				// add edges to corresponding blocks
-				for (int i = 0; i < b.getSentences().size(); i++) {
-					SemanticCohesion coh = b.getSentenceBlockDistances()[i];
-					graph.addEdge(blockNodes[b.getIndex()], sentenceNodes.get(b.getIndex())[i], false);
-					Edge e = graph.getEdge(blockNodes[b.getIndex()], sentenceNodes.get(b.getIndex())[i]);
-					e.setWeight((float) coh.getCohesion());
-					e.getEdgeData().setLabel(formatter.format(coh.getCohesion()));
 				}
 				// add edges to previous or next block
 				if (b.getPrevSentenceBlockDistance() != null && b.getSentences().size() > 0) {
 					SemanticCohesion coh = b.getPrevSentenceBlockDistance();
-					graph.addEdge(blockNodes[coh.getDestination().getIndex()], sentenceNodes.get(b.getIndex())[0],
-							false);
-					Edge e = graph.getEdge(blockNodes[coh.getDestination().getIndex()],
-							sentenceNodes.get(b.getIndex())[0]);
-					e.setWeight((float) coh.getCohesion());
-					e.getEdgeData().setLabel(formatter.format(coh.getCohesion()));
+					Edge e = graphModel.factory().newEdge(blockNodes[coh.getDestination().getIndex()],
+							sentenceNodes.get(b.getIndex())[0], transitionLbl, coh.getCohesion(), false);
+					e.setLabel(Formatting.formatNumber(coh.getCohesion()) + "");
+					graph.addEdge(e);
 				}
 				if (b.getNextSentenceBlockDistance() != null && b.getSentences().size() > 0) {
 					SemanticCohesion coh = b.getNextSentenceBlockDistance();
-					graph.addEdge(blockNodes[coh.getSource().getIndex()],
-							sentenceNodes.get(b.getIndex())[b.getSentences().size() - 1], false);
-					Edge e = graph.getEdge(blockNodes[coh.getSource().getIndex()],
-							sentenceNodes.get(b.getIndex())[b.getSentences().size() - 1]);
-					e.setWeight((float) coh.getCohesion());
-					e.getEdgeData().setLabel(formatter.format(coh.getCohesion()));
+					Edge e = graphModel.factory().newEdge(blockNodes[coh.getSource().getIndex()],
+							sentenceNodes.get(b.getIndex())[b.getSentences().size() - 1], transitionLbl,
+							coh.getCohesion(), false);
+					e.setLabel(Formatting.formatNumber(coh.getCohesion()) + "");
+					graph.addEdge(e);
 				}
 			}
 		}
@@ -195,9 +197,10 @@ public class CohesionGraphView extends JFrame {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
-		MixedGraph graph = graphModel.getMixedGraph();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+		UndirectedGraph graph = graphModel.getUndirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
 		buildUtteranceGraph(graph, graphModel, doc);
 
@@ -205,7 +208,7 @@ public class CohesionGraphView extends JFrame {
 		layout.setGraphModel(graphModel);
 		layout.initAlgo();
 		layout.resetPropertiesValues();
-		layout.setOptimalDistance(200f);
+		layout.setOptimalDistance(100f);
 
 		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
 			layout.goAlgo();
@@ -214,69 +217,47 @@ public class CohesionGraphView extends JFrame {
 
 		layout.setGraphModel(graphModel);
 
-		RankingController rankingController = Lookup.getDefault().lookup(RankingController.class);
-
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.setDirected(false);
+		distance.execute(graphModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(5);
+		centralityTransformer.setMaxSize(40);
+		appearanceController.transform(centralityRanking);
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel().getRanking(Ranking.NODE_ELEMENT,
-				centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController.getModel()
-				.getTransformer(Ranking.NODE_ELEMENT, Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+				new DependantOriginalColor(Color.BLACK));
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
-		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
-		panelGraph.add(applet, BorderLayout.CENTER);
-		panelGraph.validate();
-		panelGraph.repaint();
-
-		// Export
-		// ExportController ec = Lookup.getDefault()
-		// .lookup(ExportController.class);
-		// try {
-		// ec.exportFile(new File("out/graph.pdf"));
-		// } catch (IOException ex) {
-		// ex.printStackTrace();
-		// return;
-		// }
-		// this.pack();
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 	}
-
 }

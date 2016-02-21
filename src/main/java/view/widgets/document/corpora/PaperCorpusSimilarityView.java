@@ -45,35 +45,36 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
-import org.gephi.preview.api.ProcessingTarget;
 import org.gephi.preview.api.RenderTarget;
 import org.gephi.project.api.ProjectController;
-import org.gephi.ranking.api.Ranking;
-import org.gephi.ranking.api.RankingController;
-import org.gephi.ranking.api.Transformer;
-import org.gephi.ranking.plugin.transformer.AbstractSizeTransformer;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import processing.core.PApplet;
-import services.commons.Formatting;
-import services.commons.VectorAlgebra;
+import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
-import cc.mallet.util.Maths;
+import services.commons.Formatting;
+import services.commons.VectorAlgebra;
+import view.models.PreviewSketch;
 
 public class PaperCorpusSimilarityView extends JFrame {
 	static PaperCorpusSimilarityView corpusView;
@@ -96,8 +97,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 		double centrality;
 		AbstractDocument document;
 
-		public CompareCentralityElement(AbstractDocument document,
-				double centrality) {
+		public CompareCentralityElement(AbstractDocument document, double centrality) {
 			this.document = document;
 			this.centrality = centrality;
 		}
@@ -108,8 +108,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 		private AbstractDocument doc2;
 		private double sim;
 
-		public CompareDocsSim(AbstractDocument doc1, AbstractDocument doc2,
-				double sim) {
+		public CompareDocsSim(AbstractDocument doc1, AbstractDocument doc2, double sim) {
 			super();
 			this.doc1 = doc1;
 			this.doc2 = doc2;
@@ -150,18 +149,14 @@ public class PaperCorpusSimilarityView extends JFrame {
 			if (this == null || obj == null)
 				return false;
 			CompareDocsSim o = (CompareDocsSim) obj;
-			return (this.getDoc1().equals(o.getDoc1()) && this.getDoc2()
-					.equals(o.getDoc2()))
-					|| (this.getDoc1().equals(o.getDoc2()) && this.getDoc2()
-							.equals(o.getDoc1()));
+			return (this.getDoc1().equals(o.getDoc1()) && this.getDoc2().equals(o.getDoc2()))
+					|| (this.getDoc1().equals(o.getDoc2()) && this.getDoc2().equals(o.getDoc1()));
 		}
 
 		@Override
 		public String toString() {
-			return Formatting.formatNumber(this.getSim()) + ":\n\t- "
-					+ new File(this.getDoc1().getPath()).getName() + ": "
-					+ this.getDoc1().getText() + "\n\t- "
-					+ new File(this.getDoc2().getPath()).getName() + ": "
+			return Formatting.formatNumber(this.getSim()) + ":\n\t- " + new File(this.getDoc1().getPath()).getName()
+					+ ": " + this.getDoc1().getText() + "\n\t- " + new File(this.getDoc2().getPath()).getName() + ": "
 					+ this.getDoc2().getText() + "\n";
 		}
 	}
@@ -177,8 +172,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 		// adjust view to desktop size
 		int margin = 50;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setBounds(margin, margin, screenSize.width - margin * 2,
-				screenSize.height - margin * 2);
+		setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
 
 		generateLayout();
 		generateGraph();
@@ -208,15 +202,13 @@ public class PaperCorpusSimilarityView extends JFrame {
 		});
 
 		panelGraph = new JPanel();
-		panelGraph
-				.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panelGraph.setBackground(Color.WHITE);
 		panelGraph.setLayout(new BorderLayout());
 
 		JLabel lblTopSimilarArticles = new JLabel("Top Similar Articles");
 		lblTopSimilarArticles.setFont(new Font("SansSerif", Font.BOLD, 14));
-		String[] header = { "Article 1", "Article 2",
-				"Semantic Similarity Score" };
+		String[] header = { "Article 1", "Article 2", "Semantic Similarity Score" };
 		String[][] data = new String[0][3];
 
 		tableSimilarityModel = new DefaultTableModel(data, header);
@@ -227,16 +219,15 @@ public class PaperCorpusSimilarityView extends JFrame {
 				return false;
 			};
 		};
-		tableSimilarity.getSelectionModel().addListSelectionListener(
-				new ListSelectionListener() {
-					public void valueChanged(ListSelectionEvent event) {
-						if (!event.getValueIsAdjusting())
-							return;
-						// do some actions here, for example
-						// print first column value from selected row
+		tableSimilarity.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent event) {
+				if (!event.getValueIsAdjusting())
+					return;
+				// do some actions here, for example
+				// print first column value from selected row
 
-					}
-				});
+			}
+		});
 
 		tableSimilarity.addMouseListener(new MouseAdapter() {
 			public void mousePressed(MouseEvent me) {
@@ -246,13 +237,9 @@ public class PaperCorpusSimilarityView extends JFrame {
 				if (me.getClickCount() == 2) {
 					String doc1 = tableSimilarity.getValueAt(row, 0).toString();
 					String doc2 = tableSimilarity.getValueAt(row, 1).toString();
-					String score = tableSimilarity.getValueAt(row, 2)
-							.toString();
-					JOptionPane.showMessageDialog(corpusView,
-							"<html><b>Article 1:</b> " + doc1
-									+ "<br> <b>Article 2:</b> " + doc2
-									+ "<br> <b>Score:  </b> " + score
-									+ "</html>");
+					String score = tableSimilarity.getValueAt(row, 2).toString();
+					JOptionPane.showMessageDialog(corpusView, "<html><b>Article 1:</b> " + doc1
+							+ "<br> <b>Article 2:</b> " + doc2 + "<br> <b>Score:  </b> " + score + "</html>");
 				}
 			}
 		});
@@ -265,8 +252,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 		}
 		JScrollPane tableScroll = new JScrollPane(tableSimilarity);
 		Dimension tablePreferred = tableScroll.getPreferredSize();
-		tableScroll.setPreferredSize(new Dimension(tablePreferred.width,
-				tablePreferred.height / 3));
+		tableScroll.setPreferredSize(new Dimension(tablePreferred.width, tablePreferred.height / 3));
 
 		JLabel lblCentrality = new JLabel("Distance to Central Document");
 		lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -289,167 +275,78 @@ public class PaperCorpusSimilarityView extends JFrame {
 				Point p = me.getPoint();
 				int row = table.rowAtPoint(p);
 				if (me.getClickCount() == 2) {
-					String docC = (centralDocumentToCompare == null) ? ""
-							: centralDocumentToCompare.getTitleText();
+					String docC = (centralDocumentToCompare == null) ? "" : centralDocumentToCompare.getTitleText();
 					String doc2 = tableCentrality.getValueAt(row, 0).toString();
-					String score = tableCentrality.getValueAt(row, 1)
-							.toString();
+					String score = tableCentrality.getValueAt(row, 1).toString();
 
 					JOptionPane.showMessageDialog(corpusView,
-							"<html><b>Central Article:</b> " + docC
-									+ "<br> <b>Current Article:</b> " + doc2
-									+ "<br> <b>Semantic Distance:</b> " + score
-									+ "</html>");
+							"<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2
+									+ "<br> <b>Semantic Distance:</b> " + score + "</html>");
 				}
 			}
 		});
 
 		try {
-			// 1.6+
 			tableCentrality.setAutoCreateRowSorter(true);
 		} catch (Exception continuewithNoSort) {
 		}
 		JScrollPane tableScrollCentrality = new JScrollPane(tableCentrality);
-		Dimension tablePreferredCentrality = tableScrollCentrality
-				.getPreferredSize();
-		tableScrollCentrality.setPreferredSize(new Dimension(
-				tablePreferredCentrality.width / 2,
-				tablePreferredCentrality.height / 2));
+		Dimension tablePreferredCentrality = tableScrollCentrality.getPreferredSize();
+		tableScrollCentrality.setPreferredSize(
+				new Dimension(tablePreferredCentrality.width / 2, tablePreferredCentrality.height / 2));
 
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout
-				.setHorizontalGroup(groupLayout
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								groupLayout
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												groupLayout
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addGroup(
-																groupLayout
-																		.createSequentialGroup()
-																		.addComponent(
-																				tableScroll,
-																				GroupLayout.DEFAULT_SIZE,
-																				1020,
-																				Short.MAX_VALUE)
-																		.addContainerGap())
-														.addGroup(
-																groupLayout
-																		.createSequentialGroup()
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addGroup(
-																												groupLayout
-																														.createParallelGroup(
-																																Alignment.LEADING)
-																														.addComponent(
-																																lblThreshold)
-																														.addComponent(
-																																sliderThreshold,
-																																GroupLayout.PREFERRED_SIZE,
-																																GroupLayout.DEFAULT_SIZE,
-																																GroupLayout.PREFERRED_SIZE))
-																										.addGap(10))
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addComponent(
-																												panelGraph,
-																												GroupLayout.DEFAULT_SIZE,
-																												774,
-																												Short.MAX_VALUE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)))
-																		.addGroup(
-																				groupLayout
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addComponent(
-																												lblCentrality)
-																										.addGap(27))
-																						.addGroup(
-																								groupLayout
-																										.createSequentialGroup()
-																										.addComponent(
-																												tableScrollCentrality,
-																												GroupLayout.DEFAULT_SIZE,
-																												236,
-																												Short.MAX_VALUE)
-																										.addContainerGap())))
-														.addGroup(
-																groupLayout
-																		.createSequentialGroup()
-																		.addComponent(
-																				lblTopSimilarArticles)
-																		.addContainerGap(
-																				896,
-																				Short.MAX_VALUE)))));
+				.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+										.addGroup(groupLayout.createSequentialGroup()
+												.addComponent(tableScroll, GroupLayout.DEFAULT_SIZE, 1020,
+														Short.MAX_VALUE)
+												.addContainerGap())
+						.addGroup(groupLayout.createSequentialGroup()
+								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+										.addGroup(groupLayout.createSequentialGroup()
+												.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+														.addComponent(lblThreshold).addComponent(sliderThreshold,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE))
+												.addGap(10))
+										.addGroup(groupLayout.createSequentialGroup()
+												.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 774,
+														Short.MAX_VALUE)
+												.addPreferredGap(ComponentPlacement.RELATED)))
+								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+										.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality)
+												.addGap(27))
+										.addGroup(groupLayout.createSequentialGroup()
+												.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 236,
+														Short.MAX_VALUE)
+												.addContainerGap())))
+						.addGroup(groupLayout.createSequentialGroup().addComponent(lblTopSimilarArticles)
+								.addContainerGap(896, Short.MAX_VALUE)))));
 		groupLayout
-				.setVerticalGroup(groupLayout
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								groupLayout
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												groupLayout
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblThreshold)
-														.addComponent(
-																lblCentrality))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(sliderThreshold,
-												GroupLayout.PREFERRED_SIZE, 52,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												groupLayout
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addComponent(
-																tableScrollCentrality,
-																GroupLayout.DEFAULT_SIZE,
-																581,
-																Short.MAX_VALUE)
-														.addComponent(
-																panelGraph,
-																GroupLayout.DEFAULT_SIZE,
-																581,
-																Short.MAX_VALUE))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(lblTopSimilarArticles)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(tableScroll,
-												GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE)
-										.addContainerGap()));
-		// groupLayout.createParallelGroup().addComponent(tableScrollCentrality);
-		// .addComponent(tableScrollCentrality)
+				.setVerticalGroup(
+						groupLayout.createParallelGroup(Alignment.LEADING)
+								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblThreshold).addComponent(lblCentrality))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 52,
+										GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
+						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTopSimilarArticles)
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(tableScroll, GroupLayout.PREFERRED_SIZE,
+						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
 		getContentPane().setLayout(groupLayout);
 	}
 
-	public HashMap<Integer, AbstractDocument> buildConceptGraph(
-			UndirectedGraph graph, GraphModel graphModel, double threshold) {
-		HashMap<Integer, AbstractDocument> outMap = new HashMap<Integer, AbstractDocument>();
+	public HashMap<Node, AbstractDocument> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel,
+			double threshold) {
+		HashMap<Node, AbstractDocument> outMap = new HashMap<Node, AbstractDocument>();
 		logger.info("Starting to build the document graph");
 		// build connected graph
 		Map<AbstractDocument, Boolean> visibleDocs = new TreeMap<AbstractDocument, Boolean>();
@@ -458,7 +355,6 @@ public class PaperCorpusSimilarityView extends JFrame {
 		List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
 
 		for (AbstractDocument d : docs) {
-
 			visibleDocs.put(d, false);
 		}
 
@@ -471,14 +367,11 @@ public class PaperCorpusSimilarityView extends JFrame {
 				double lsaSim = 0;
 				double ldaSim = 0;
 				if (d1.getLSA() != null && d2.getLSA() != null)
-					lsaSim = VectorAlgebra.cosineSimilarity(d1.getLSAVector(),
-							d2.getLSAVector());
+					lsaSim = VectorAlgebra.cosineSimilarity(d1.getLSAVector(), d2.getLSAVector());
 				if (d1.getLDA() != null && d2.getLDA() != null)
-					ldaSim = 1 - Maths.jensenShannonDivergence(
-							d1.getLDAProbDistribution(),
-							d2.getLDAProbDistribution());
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(
-						lsaSim, ldaSim);
+					ldaSim = 1
+							- Maths.jensenShannonDivergence(d1.getLDAProbDistribution(), d2.getLDAProbDistribution());
+				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 				if (sim >= threshold) {
 					visibleDocs.put(d1, true);
 					visibleDocs.put(d2, true);
@@ -492,17 +385,16 @@ public class PaperCorpusSimilarityView extends JFrame {
 				if (d.getTitleText() != null)
 					text += d.getTitleText();
 				text += "(" + new File(d.getPath()).getName() + ")";
-				text = (text.length() > 20) ? (text.substring(0, 20) + "..")
-						: text;
-				nodes.put(d, graphModel.factory().newNode(text));
-				nodes.get(d).getNodeData().setLabel(text);
-				nodes.get(d)
-						.getNodeData()
-						.setColor((float) (COLOR_CONCEPT.getRed()) / 256,
-								(float) (COLOR_CONCEPT.getGreen()) / 256,
-								(float) (COLOR_CONCEPT.getBlue()) / 256);
-				graph.addNode(nodes.get(d));
-				outMap.put(nodes.get(d).getId(), d);
+				text = (text.length() > 20) ? (text.substring(0, 20) + "..") : text;
+				Node n = graphModel.factory().newNode(text);
+				n.setLabel(text);
+				n.setColor(new Color((float) (COLOR_CONCEPT.getRed()) / 256, (float) (COLOR_CONCEPT.getGreen()) / 256,
+						(float) (COLOR_CONCEPT.getBlue()) / 256));
+				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+				graph.addNode(n);
+				nodes.put(d, n);
+				outMap.put(n, d);
 			}
 		}
 
@@ -515,21 +407,15 @@ public class PaperCorpusSimilarityView extends JFrame {
 					double lsaSim = 0;
 					double ldaSim = 0;
 					if (d1.getLSA() != null && d2.getLSA() != null)
-						lsaSim = VectorAlgebra.cosineSimilarity(
-								d1.getLSAVector(), d2.getLSAVector());
+						lsaSim = VectorAlgebra.cosineSimilarity(d1.getLSAVector(), d2.getLSAVector());
 					if (d1.getLDA() != null && d2.getLDA() != null)
-						ldaSim = 1 - Maths.jensenShannonDivergence(
-								d1.getLDAProbDistribution(),
+						ldaSim = 1 - Maths.jensenShannonDivergence(d1.getLDAProbDistribution(),
 								d2.getLDAProbDistribution());
-					double sim = SemanticCohesion.getAggregatedSemanticMeasure(
-							lsaSim, ldaSim);
+					double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 					if (sim >= threshold) {
-						Edge e = graphModel.factory().newEdge(nodes.get(d1),
-								nodes.get(d2));
-						e.setWeight((float) sim);
-						e.getEdgeData().setLabel(sim + "");
+						Edge e = graphModel.factory().newEdge(nodes.get(d1), nodes.get(d2), 0, sim, false);
+						e.setLabel(sim + "");
 						graph.addEdge(e);
-
 						similarities.add(new CompareDocsSim(d1, d2, sim));
 					}
 				}
@@ -555,45 +441,48 @@ public class PaperCorpusSimilarityView extends JFrame {
 		}
 		tableSimilarityModel.fireTableDataChanged();
 
-		logger.info("Generated graph with " + graph.getNodeCount()
-				+ " nodes and " + graph.getEdgeCount() + " edges");
+		logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
 		return outMap;
 	}
 
 	private void generateGraph() {
 		double threshold = ((double) sliderThreshold.getValue()) / 100;
 
-		ProjectController pc = Lookup.getDefault().lookup(
-				ProjectController.class);
+		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault()
-				.lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault()
-				.lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
+		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+		AppearanceModel appearanceModel = appearanceController.getModel();
 
-		HashMap<Integer, AbstractDocument> nodeMap = buildConceptGraph(graph,
-				graphModel, threshold);
+		HashMap<Node, AbstractDocument> nodeMap = buildConceptGraph(graph, graphModel, threshold);
 
-		RankingController rankingController = Lookup.getDefault().lookup(
-				RankingController.class);
+		// Run YifanHuLayout for 100 passes - The layout always takes the
+		// current visible view
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(200f);
+
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.setDirected(false);
+		distance.execute(graphModel);
 
 		// Rank size by centrality
-		AttributeColumn centralityColumn = attributeModel.getNodeTable()
-				.getColumn(GraphDistance.BETWEENNESS);
-
 		double maxCentrality = Double.NEGATIVE_INFINITY;
 		AbstractDocument centralDocument = null;
+		Column betweennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
 		for (Node n : graph.getNodes()) {
-			Double centrality = (Double) n.getNodeData().getAttributes()
-					.getValue(centralityColumn.getIndex());
+			Double centrality = (Double) n.getAttribute(betweennessColumn);
 			if (centrality > maxCentrality) {
 				maxCentrality = centrality;
 				centralDocument = nodeMap.get(n.getId());
@@ -603,34 +492,28 @@ public class PaperCorpusSimilarityView extends JFrame {
 		List<CompareCentralityElement> centralityList = new ArrayList<CompareCentralityElement>();
 		if (centralDocument != null) {
 			for (Node n : graph.getNodes()) {
-				AbstractDocument doc = nodeMap.get(n.getId());
+				AbstractDocument doc = nodeMap.get(n);
 				if (doc.equals(centralDocument))
 					continue;
 				AbstractDocument d1 = centralDocument, d2 = doc;
-
 				double lsaSim = 0;
 				double ldaSim = 0;
 				if (d1.getLSA() != null && d2.getLSA() != null)
-					lsaSim = VectorAlgebra.cosineSimilarity(d1.getLSAVector(),
-							d2.getLSAVector());
+					lsaSim = VectorAlgebra.cosineSimilarity(d1.getLSAVector(), d2.getLSAVector());
 				if (d1.getLDA() != null && d2.getLDA() != null)
-					ldaSim = 1 - Maths.jensenShannonDivergence(
-							d1.getLDAProbDistribution(),
-							d2.getLDAProbDistribution());
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(
-						lsaSim, ldaSim);
+					ldaSim = 1
+							- Maths.jensenShannonDivergence(d1.getLDAProbDistribution(), d2.getLDAProbDistribution());
+				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 
 				centralityList.add(new CompareCentralityElement(doc, sim));
 			}
 		}
 
-		Collections.sort(centralityList,
-				new Comparator<CompareCentralityElement>() {
-					public int compare(CompareCentralityElement d1,
-							CompareCentralityElement d2) {
-						return -Double.compare(d1.centrality, d2.centrality);
-					}
-				});
+		Collections.sort(centralityList, new Comparator<CompareCentralityElement>() {
+			public int compare(CompareCentralityElement d1, CompareCentralityElement d2) {
+				return -Double.compare(d1.centrality, d2.centrality);
+			}
+		});
 
 		// recreate table similarity model
 		if (tableCentralityModel.getRowCount() > 0) {
@@ -638,72 +521,53 @@ public class PaperCorpusSimilarityView extends JFrame {
 				tableCentralityModel.removeRow(i);
 			}
 		}
-		NumberFormat formatter = new DecimalFormat("#0.00");
 		for (CompareCentralityElement sim : centralityList) {
 			String row[] = new String[2];
 			row[0] = sim.document.getTitleText();
-			row[1] = formatter.format(sim.centrality);
+			row[1] = Formatting.formatNumber(sim.centrality) + "";
 			tableCentralityModel.addRow(row);
 		}
 		tableCentralityModel.fireTableDataChanged();
 
-		Ranking<?> centralityRanking = rankingController.getModel().getRanking(
-				Ranking.NODE_ELEMENT, centralityColumn.getId());
-		AbstractSizeTransformer<?> sizeTransformer = (AbstractSizeTransformer<?>) rankingController
-				.getModel().getTransformer(Ranking.NODE_ELEMENT,
-						Transformer.RENDERABLE_SIZE);
-		sizeTransformer.setMinSize(5);
-		sizeTransformer.setMaxSize(40);
-		rankingController.transform(centralityRanking, sizeTransformer);
+		// Rank size by centrality
+		Function centralityRanking = appearanceModel.getNodeFunction(graph, betweennessColumn,
+				RankingNodeSizeTransformer.class);
+		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+				.getTransformer();
+		centralityTransformer.setMinSize(5);
+		centralityTransformer.setMaxSize(40);
+		appearanceController.transform(centralityRanking);
 
 		// Rank label size - set a multiplier size
-		Ranking<?> centralityRanking2 = rankingController.getModel()
-				.getRanking(Ranking.NODE_ELEMENT, centralityColumn.getId());
-		AbstractSizeTransformer<?> labelSizeTransformer = (AbstractSizeTransformer<?>) rankingController
-				.getModel().getTransformer(Ranking.NODE_ELEMENT,
-						Transformer.LABEL_SIZE);
+		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, betweennessColumn,
+				RankingLabelSizeTransformer.class);
+		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+				.getTransformer();
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
-		rankingController.transform(centralityRanking2, labelSizeTransformer);
+		appearanceController.transform(centralityRanking2);
 
 		// Preview configuration
-		PreviewController previewController = Lookup.getDefault().lookup(
-				PreviewController.class);
+		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS,
-				Boolean.TRUE);
-		previewModel.getProperties().putValue(
-				PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED,
-				Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
 		previewController.refreshPreview();
 
 		// New Processing target, get the PApplet
-		ProcessingTarget target = (ProcessingTarget) previewController
-				.getRenderTarget(RenderTarget.PROCESSING_TARGET);
-		PApplet applet = target.getApplet();
-		applet.init();
-		try {
-			Thread.sleep(100);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage());
-		}
-
-		// Refresh the preview and reset the zoom
-		previewController.render(target);
-		target.refresh();
-		target.resetZoom();
+		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+		PreviewSketch previewSketch = new PreviewSketch(target);
+		previewController.refreshPreview();
+		previewSketch.resetZoom();
 		if (panelGraph.getComponents().length > 0) {
 			panelGraph.removeAll();
 			panelGraph.revalidate();
 		}
-		panelGraph.add(applet, BorderLayout.CENTER);
-		panelGraph.validate();
-		panelGraph.repaint();
+		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
 		// Export
-		ExportController ec = Lookup.getDefault()
-				.lookup(ExportController.class);
+		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
 		try {
 			ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
 		} catch (IOException ex) {
@@ -721,8 +585,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 	}
 
 	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
+		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());
@@ -758,13 +621,11 @@ public class PaperCorpusSimilarityView extends JFrame {
 				});
 
 				for (File file : files) {
-					Document d = (Document) AbstractDocument
-							.loadSerializedDocument(file.getPath());
+					Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
 					docs.add(d);
 				}
 
-				PaperCorpusSimilarityView view = new PaperCorpusSimilarityView(
-						docs);
+				PaperCorpusSimilarityView view = new PaperCorpusSimilarityView(docs);
 				view.setVisible(true);
 			}
 		});

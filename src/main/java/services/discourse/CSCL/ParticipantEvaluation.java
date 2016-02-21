@@ -10,14 +10,14 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.gephi.data.attributes.api.AttributeColumn;
-import org.gephi.data.attributes.api.AttributeController;
-import org.gephi.data.attributes.api.AttributeModel;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
@@ -54,13 +54,15 @@ public class ParticipantEvaluation {
 			Node participant = null;
 			if (isAnonymized) {
 				participant = graphModel.factory().newNode(genericName + " " + i);
-				participant.getNodeData().setLabel(genericName + " " + i);
+				participant.setLabel(genericName + " " + i);
 			} else {
 				participant = graphModel.factory().newNode(participants.get(i).getName());
-				participant.getNodeData().setLabel(participants.get(i).getName());
+				participant.setLabel(participants.get(i).getName());
 			}
-			participant.getNodeData().setColor((float) (colorParticipant.getRed()) / 256,
-					(float) (colorParticipant.getGreen()) / 256, (float) (colorParticipant.getBlue()) / 256);
+			participant.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+			participant.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+			participant.setColor(new Color((float) (colorParticipant.getRed()) / 256,
+					(float) (colorParticipant.getGreen()) / 256, (float) (colorParticipant.getBlue()) / 256));
 			graph.addNode(participant);
 			participantNodes[i] = participant;
 			// } else {
@@ -85,14 +87,14 @@ public class ParticipantEvaluation {
 				// && !namesToIgnore.contains(participants.get(i).getName())
 				// && !namesToIgnore.contains(participants.get(j).getName())
 				) {
-					graph.addEdge(participantNodes[i], participantNodes[j]);
-					Edge e = graph.getEdge(participantNodes[i], participantNodes[j]);
-					e.setWeight((float) (participantContributions[i][j] / maxVal));
+					Edge e = graphModel.factory().newEdge(participantNodes[i], participantNodes[j], 0,
+							participantContributions[i][j] / maxVal, true);
 					if (displayEdgeLabels) {
-						e.getEdgeData().setLabel(formatter.format(participantContributions[i][j]));
+						e.setLabel(formatter.format(participantContributions[i][j]));
 					} else {
-						e.getEdgeData().setLabel("");
+						e.setLabel("");
 					}
+					graph.addEdge(e);
 				}
 			}
 		}
@@ -213,26 +215,31 @@ public class ParticipantEvaluation {
 		pc.newProject();
 
 		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getModel();
-		AttributeModel attributeModel = Lookup.getDefault().lookup(AttributeController.class).getModel();
+		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
 
 		ParticipantEvaluation.buildParticipantGraph("Member", graph, graphModel, participants, participantContributions,
 				true, isAnonymized);
 
+		// Run YifanHuLayout for 100 passes - The layout always takes the
+		// current visible view
+		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(100f);
+
+		layout.initAlgo();
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
+
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
-		distance.execute(graphModel, attributeModel);
+		distance.execute(graphModel);
 
 		// Determine various metrics
-		AttributeColumn betweennessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-
-		AttributeColumn closenessColumn = attributeModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
-
-		AttributeColumn eccentricityColumn = attributeModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
-
 		Map<String, Participant> mappings = new TreeMap<String, Participant>();
-
 		for (int index = 0; index < participants.size(); index++) {
 			if (isAnonymized)
 				mappings.put("Member " + index, participants.get(index));
@@ -240,14 +247,17 @@ public class ParticipantEvaluation {
 				mappings.put(participants.get(index).getName(), participants.get(index));
 		}
 
+		Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+		Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+		Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
 		for (Node n : graph.getNodes()) {
-			Participant p = mappings.get(n.getNodeData().getLabel());
-			p.getIndices().put(CSCLIndices.BETWEENNESS, p.getIndices().get(CSCLIndices.BETWEENNESS)
-					+ (Double) n.getNodeData().getAttributes().getValue(betweennessColumn.getIndex()));
-			p.getIndices().put(CSCLIndices.CLOSENESS, p.getIndices().get(CSCLIndices.CLOSENESS)
-					+ (Double) n.getNodeData().getAttributes().getValue(closenessColumn.getIndex()));
-			p.getIndices().put(CSCLIndices.ECCENTRICITY, p.getIndices().get(CSCLIndices.ECCENTRICITY)
-					+ (Double) n.getNodeData().getAttributes().getValue(eccentricityColumn.getIndex()));
+			Participant p = mappings.get(n.getLabel());
+			p.getIndices().put(CSCLIndices.BETWEENNESS,
+					p.getIndices().get(CSCLIndices.BETWEENNESS) + (Double) n.getAttribute(betweeennessColumn));
+			p.getIndices().put(CSCLIndices.CLOSENESS,
+					p.getIndices().get(CSCLIndices.CLOSENESS) + (Double) n.getAttribute(closenessColumn));
+			p.getIndices().put(CSCLIndices.ECCENTRICITY,
+					p.getIndices().get(CSCLIndices.ECCENTRICITY) + (Double) n.getAttribute(eccentricityColumn));
 		}
 	}
 }

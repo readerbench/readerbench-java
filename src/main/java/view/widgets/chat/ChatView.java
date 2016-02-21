@@ -119,7 +119,7 @@ public class ChatView extends JFrame {
 		JScrollPane scrollPaneConcept = new JScrollPane();
 		scrollPaneConcept.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		JButton btnParticipantInvolvement = new JButton("Participant involvement");
+		JButton btnParticipantInvolvement = new JButton("Participant interaction");
 		btnParticipantInvolvement.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				EventQueue.invokeLater(new Runnable() {

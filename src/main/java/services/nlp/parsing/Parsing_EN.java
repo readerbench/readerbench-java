@@ -56,25 +56,7 @@ class ParsingParams_EN extends Properties {
 
 	public ParsingParams_EN() {
 		super();
-		this.put("tokenize.options", "normalizeCurrency=false");
-		this.put("pos.model", "edu/stanford/nlp/models/pos-tagger/english-caseless-left3words-distsim.tagger");
-		this.put("parse.model", "edu/stanford/nlp/models/lexparser/englishPCFG.caseless.ser.gz");
-		// this.put("depparse.model",
-		// "edu/stanford/nlp/models/parser/nndep/english_SD.gz");
-		this.put("ner.model",
-				"edu/stanford/nlp/models/ner/english.all.3class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.muc.7class.caseless.distsim.crf.ser.gz,edu/stanford/nlp/models/ner/english.conll.4class.caseless.distsim.crf.ser.gz");
 
-		this.put("dcoref.sievePasses",
-				"MarkRole, DiscourseMatch, ExactStringMatch, RelaxedExactStringMatch, PreciseConstructs, StrictHeadMatch1, StrictHeadMatch2, StrictHeadMatch3, StrictHeadMatch4, RelaxedHeadMatch, PronounMatch");
-		this.put("dcoref.score", "false");
-		this.put("dcoref.postprocessing", "true");
-		this.put("dcoref.maxdist", "-1");
-		this.put("dcoref.use.big.gender.number", "false");
-		this.put("dcoref.replicate.conll", "false");
-		this.put("numThreads", "8");
-
-		this.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, gender, sentiment");
-		// this.put("annotators", "tokenize, ssplit, pos, lemma, ner, depparse,
-		// dcoref, gender, sentiment");
+		this.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, gender, depparse, sentiment");
 	}
 }

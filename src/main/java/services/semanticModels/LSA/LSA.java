@@ -55,7 +55,7 @@ public class LSA implements ISemanticModel {
 				}
 			}
 
-			logger.info("Loading LSA semantic space");
+			logger.info("Loading LSA semantic space " + path + "...");
 			LSA lsaLoad = new LSA();
 			lsaLoad.setLanguage(language);
 			lsaLoad.setPath(path);
