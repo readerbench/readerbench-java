@@ -27,12 +27,12 @@ import services.nlp.listOfWords.Connectives;
 import services.nlp.listOfWords.Pronouns;
 
 /**
+ * Class used to define all factors to be used within the complexity evaluation
+ * model
  * 
  * @author Mihai Dascalu
  */
 
-// class used to define all factors to be used within the complexity evaluation
-// model
 public class ComplexityIndices {
 	static Logger logger = Logger.getLogger(ComplexityIndices.class);
 

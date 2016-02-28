@@ -63,7 +63,6 @@ public class PaperConceptView extends JFrame {
 	private static final long serialVersionUID = -8582615231233815258L;
 	static Logger logger = Logger.getLogger(PaperConceptView.class);
 	public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
-	public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
 	private static final int MIN_SIZE = 5;
 	private static final int MAX_SIZE_TOPIC = 20;
 
@@ -213,7 +212,6 @@ public class PaperConceptView extends JFrame {
 			Iterator<Word> wordIt2 = wordRelevanceMap.keySet().iterator();
 			while (wordIt2.hasNext()) {
 				Word w2 = wordIt2.next();
-
 				double lsaSim = 0;
 				double ldaSim = 0;
 				if (w1.getLSA() != null)
@@ -249,15 +247,16 @@ public class PaperConceptView extends JFrame {
 
 			if (visibleConcepts.get(w)) {
 				Node n = graphModel.factory().newNode(w.getLemma());
-				nodes.get(w).setLabel(w.getLemma());
+				n.setLabel(w.getLemma());
+				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 				if (max != min && relevance >= 0) {
 					n.setSize((float) (MIN_SIZE
 							+ (Math.log(1 + relevance) - min) / (max - min) * (MAX_SIZE_TOPIC - MIN_SIZE)));
 				} else {
 					n.setSize(MIN_SIZE);
 				}
-				n.setColor(new Color((float) (COLOR_TOPIC.getRed()) / 256, (float) (COLOR_TOPIC.getGreen()) / 256,
-						(float) (COLOR_TOPIC.getBlue()) / 256));
+				n.setColor(COLOR_TOPIC);
 				graph.addNode(n);
 				nodes.put(w, n);
 				outMap.put(n, w);
@@ -321,7 +320,7 @@ public class PaperConceptView extends JFrame {
 
 		List<CompareCentralityWord> wordList = new ArrayList<CompareCentralityWord>();
 		for (Node n : graph.getNodes()) {
-			Word w = nodeMap.get(n.getId());
+			Word w = nodeMap.get(n);
 			Double centrality = wordRelevanceMap.get(w);
 			wordList.add(new CompareCentralityWord(w, centrality));
 		}

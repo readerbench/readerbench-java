@@ -1,7 +1,8 @@
 package services.discourse.CSCL;
 
 import java.awt.Color;
-import java.text.DecimalFormat;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -10,14 +11,24 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
+import org.gephi.io.exporter.api.ExportController;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.gephi.preview.api.PreviewController;
+import org.gephi.preview.api.PreviewModel;
+import org.gephi.preview.api.PreviewProperty;
+import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
@@ -30,6 +41,7 @@ import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
+import services.commons.Formatting;
 
 public class ParticipantEvaluation {
 	static Logger logger = Logger.getLogger(ParticipantEvaluation.class);
@@ -37,7 +49,6 @@ public class ParticipantEvaluation {
 	public static void buildParticipantGraph(String genericName, DirectedGraph graph, GraphModel graphModel,
 			List<Participant> participants, double[][] participantContributions, boolean displayEdgeLabels,
 			boolean isAnonymized) {
-		DecimalFormat formatter = new DecimalFormat("#.##");
 
 		Node[] participantNodes = new Node[participants.size()];
 
@@ -61,8 +72,7 @@ public class ParticipantEvaluation {
 			}
 			participant.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 			participant.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-			participant.setColor(new Color((float) (colorParticipant.getRed()) / 256,
-					(float) (colorParticipant.getGreen()) / 256, (float) (colorParticipant.getBlue()) / 256));
+			participant.setColor(colorParticipant);
 			graph.addNode(participant);
 			participantNodes[i] = participant;
 			// } else {
@@ -90,7 +100,7 @@ public class ParticipantEvaluation {
 					Edge e = graphModel.factory().newEdge(participantNodes[i], participantNodes[j], 0,
 							participantContributions[i][j] / maxVal, true);
 					if (displayEdgeLabels) {
-						e.setLabel(formatter.format(participantContributions[i][j]));
+						e.setLabel(Formatting.formatNumber(participantContributions[i][j]) + "");
 					} else {
 						e.setLabel("");
 					}
@@ -192,11 +202,11 @@ public class ParticipantEvaluation {
 
 	public static void performSNA(Conversation c) {
 		List<Participant> lsPart = getParticipantList(c);
-		performSNA(lsPart, c.getParticipantContributions(), true);
+		performSNA(lsPart, c.getParticipantContributions(), true, null);
 	}
 
 	public static void performSNA(List<Participant> participants, double[][] participantContributions,
-			boolean isAnonymized) {
+			boolean isAnonymized, String exportPath) {
 
 		for (int index1 = 0; index1 < participants.size(); index1++) {
 			for (int index2 = 0; index2 < participants.size(); index2++) {
@@ -221,8 +231,7 @@ public class ParticipantEvaluation {
 		ParticipantEvaluation.buildParticipantGraph("Member", graph, graphModel, participants, participantContributions,
 				true, isAnonymized);
 
-		// Run YifanHuLayout for 100 passes - The layout always takes the
-		// current visible view
+		// Run YifanHuLayout for 100 passes
 		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
 		layout.setGraphModel(graphModel);
 		layout.resetPropertiesValues();
@@ -258,6 +267,51 @@ public class ParticipantEvaluation {
 					p.getIndices().get(CSCLIndices.CLOSENESS) + (Double) n.getAttribute(closenessColumn));
 			p.getIndices().put(CSCLIndices.ECCENTRICITY,
 					p.getIndices().get(CSCLIndices.ECCENTRICITY) + (Double) n.getAttribute(eccentricityColumn));
+		}
+
+		if (exportPath != null) {
+			AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+			AppearanceModel appearanceModel = appearanceController.getModel();
+
+			// Rank size by centrality
+			Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+			Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+					RankingNodeSizeTransformer.class);
+			RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+					.getTransformer();
+			centralityTransformer.setMinSize(5);
+			centralityTransformer.setMaxSize(40);
+			appearanceController.transform(centralityRanking);
+
+			// Rank label size - set a multiplier size
+			Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+					RankingLabelSizeTransformer.class);
+			RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+					.getTransformer();
+			labelSizeTransformer.setMinSize(1);
+			labelSizeTransformer.setMaxSize(5);
+			appearanceController.transform(centralityRanking2);
+
+			// Preview configuration
+			PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
+			PreviewModel previewModel = previewController.getModel();
+			previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+			previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+					new DependantOriginalColor(Color.BLACK));
+			previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+			previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
+			previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
+			previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+
+			// Export
+			logger.info("Exporting pdf: " + exportPath);
+			ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+			try {
+				ec.exportFile(new File(exportPath));
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				return;
+			}
 		}
 	}
 }

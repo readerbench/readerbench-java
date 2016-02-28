@@ -208,11 +208,13 @@ public class Community extends AnalysisElement {
 	}
 
 	public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 		if (startDate != null && endDate != null && participants != null && participants.size() > 0)
 			logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
 					+ dateFormat.format(endDate) + " having " + participants.size() + " participants.");
-		ParticipantEvaluation.performSNA(participants, participantContributions, true);
+
+		ParticipantEvaluation.performSNA(participants, participantContributions, true,
+				"out/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate) + ".pdf");
 
 		// update surface statistics
 		for (AbstractDocument d : documents) {
@@ -308,7 +310,7 @@ public class Community extends AnalysisElement {
 							values[i] = timeframeSubCommunities.get(i).getParticipants().get(localParticipantIndex)
 									.getIndices().get(index);
 					}
-					if (++no % 10 == 0)
+					if (++no % 100 == 0)
 						logger.info("Finished evaluating the time evolution of " + no + " participants");
 					for (CSCLCriteria crit : CSCLCriteria.values()) {
 						p.getLongitudinalIndices().put(
