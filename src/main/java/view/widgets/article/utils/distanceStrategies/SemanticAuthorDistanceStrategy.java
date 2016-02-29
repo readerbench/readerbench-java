@@ -1,5 +1,7 @@
 package view.widgets.article.utils.distanceStrategies;
 
+import java.util.List;
+
 import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.article.ResearchArticle;
@@ -18,12 +20,7 @@ public class SemanticAuthorDistanceStrategy implements IAuthorDistanceStrategy {
 		
 		for(ResearchArticle firstAuthorArticle : firstAuthor.getAuthorArticles()) {
 			for(ResearchArticle secondAuthorArticle : secondAuthor.getAuthorArticles()) {
-				if(firstAuthorArticle.getURI().equals(secondAuthorArticle.getURI())) {
-					aggregatedScore += 1.0;
-				}
-				else {
-					aggregatedScore += computeDistance(firstAuthorArticle, secondAuthorArticle);
-				}
+				aggregatedScore += this.computeDistanceBetween(firstAuthorArticle, secondAuthorArticle);
 				noOfArticles += 1.0;
 			}
 		}
@@ -33,9 +30,31 @@ public class SemanticAuthorDistanceStrategy implements IAuthorDistanceStrategy {
 		return 0.0;
 	}
 	@Override
+	public double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		if(firstArticle.getURI().equals(secondArticle.getURI())) {
+			return 1.0;
+		}
+		else {
+			return computeDistance(firstArticle, secondArticle);
+		}
+	}
+	@Override
+	public double computeDistanceBetween(SingleAuthorContainer author, ResearchArticle article) {
+		if(author.getAuthorArticles().size() == 0) {
+			return 0.0;
+		}
+		List<ResearchArticle> authorArticleList = author.getAuthorArticles();
+		double totalDistance = 0.0;
+		for(ResearchArticle authorArticle : authorArticleList) {
+			totalDistance += this.computeDistanceBetween(authorArticle, article);
+		}
+		return totalDistance / ((double)author.getAuthorArticles().size());
+	}
+	@Override
 	public String getStrategyName() {
 		return "Semantic Distance";
 	}
+	@Override
 	public String getStrategyKey() {
 		return "Semantic";
 	}

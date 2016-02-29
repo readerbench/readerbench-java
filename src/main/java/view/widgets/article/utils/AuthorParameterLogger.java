@@ -13,9 +13,9 @@ public class AuthorParameterLogger {
 	public static String OUT_DIRECTORY = "out/LAK_corpus";
 	public static int NO_TOP_SIMILAR = 5000;
 	
-	private AuthorContainer authorContainer;
+	private ArticleContainer authorContainer;
 	
-	public AuthorParameterLogger(AuthorContainer authorContainer) {
+	public AuthorParameterLogger(ArticleContainer authorContainer) {
 		this.authorContainer = authorContainer;
 	}
 	

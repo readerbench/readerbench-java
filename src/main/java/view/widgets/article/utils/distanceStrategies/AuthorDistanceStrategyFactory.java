@@ -1,10 +1,10 @@
 package view.widgets.article.utils.distanceStrategies;
 
-import view.widgets.article.utils.AuthorContainer;
+import view.widgets.article.utils.ArticleContainer;
 
 public class AuthorDistanceStrategyFactory {
-	private AuthorContainer authorContainer;
-	public AuthorDistanceStrategyFactory(AuthorContainer authorContainer) {
+	private ArticleContainer authorContainer;
+	public AuthorDistanceStrategyFactory(ArticleContainer authorContainer) {
 		this.authorContainer = authorContainer;
 	}
 	public IAuthorDistanceStrategy getDistanceStrategy(AuthorDistanceStrategyType strategyType) {

@@ -19,6 +19,7 @@ import org.xml.sax.InputSource;
 
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import view.widgets.article.utils.SingleAuthorContainer;
 import data.AbstractDocumentTemplate;
 import data.Word;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -229,6 +230,16 @@ public class ResearchArticle extends Document {
 	public void setArticleAuthorList(List<ArticleAuthor> articleAuthorList) {
 		this.articleAuthorList = articleAuthorList;
 	}
+	@Override
+	public int hashCode() {
+		return this.getURI().hashCode();
+	}
 
-	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == null || obj == null)
+			return false;
+		ResearchArticle a = (ResearchArticle) obj;
+		return this.getURI().equals(a.getURI());
+	}
 }

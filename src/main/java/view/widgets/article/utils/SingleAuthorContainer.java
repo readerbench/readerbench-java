@@ -61,13 +61,18 @@ public class SingleAuthorContainer implements Comparable<SingleAuthorContainer> 
 	public double getNumberOfCoCitations(SingleAuthorContainer otherAuthorContainer) {
 		double noOfCoCitations = 0.0;
 		for(ResearchArticle article : this.authorArticles) {
-			for(String citationUri : article.getCitationURIList()) {
-				for(ResearchArticle otherAuthorArticle : otherAuthorContainer.getAuthorArticles()) {
-					for(String otherCitationUri : otherAuthorArticle.getCitationURIList()) {
-						if(citationUri.equals(otherCitationUri)) {
-							noOfCoCitations += 1.0;
-						}
-					}
+			for(ResearchArticle otherAuthorArticle : otherAuthorContainer.getAuthorArticles()) {
+				noOfCoCitations += SingleAuthorContainer.getNoOfCoCitationsBetweenArticles(article, otherAuthorArticle);
+			}
+		}
+		return noOfCoCitations;
+	}
+	public static double getNoOfCoCitationsBetweenArticles(ResearchArticle a1, ResearchArticle a2) {
+		double noOfCoCitations = 0.0;
+		for(String citationUri : a1.getCitationURIList()) {
+			for(String otherCitationUri : a2.getCitationURIList()) {
+				if(citationUri.equals(otherCitationUri)) {
+					noOfCoCitations += 1.0;
 				}
 			}
 		}

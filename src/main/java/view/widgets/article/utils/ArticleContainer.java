@@ -9,14 +9,15 @@ import data.AbstractDocument;
 import data.article.ArticleAuthor;
 import data.article.ResearchArticle;
 
-public class AuthorContainer {
+public class ArticleContainer {
 	private List<SingleAuthorContainer> authorContainers;
+	private List<ResearchArticle> articles;
 	
-	public AuthorContainer(List<ResearchArticle> articles) {
-		this.indexAuthorsFromArticles(articles);
-		
+	public ArticleContainer(List<ResearchArticle> articles) {
+		this.articles = articles;
+		this.indexAuthorsFromArticles();
 	}
-	private void indexAuthorsFromArticles(List<ResearchArticle> articles) {
+	private void indexAuthorsFromArticles() {
 		this.authorContainers = new ArrayList<SingleAuthorContainer>();
 		for(ResearchArticle article : articles) {
 			List<ArticleAuthor> authorsForArticle = article.getArticleAuthorList();
@@ -44,8 +45,11 @@ public class AuthorContainer {
 	public List<SingleAuthorContainer> getAuthorContainers() { 
 		return this.authorContainers;
 	}
+	public List<ResearchArticle> getArticles() {
+		return this.articles;
+	}
 
-	public static AuthorContainer buildAuthorContainerFromDirectory(String dirName) {
+	public static ArticleContainer buildAuthorContainerFromDirectory(String dirName) {
 		List<ResearchArticle> articles = new ArrayList<ResearchArticle>();
 		
 		File dir = new File(dirName);
@@ -64,13 +68,13 @@ public class AuthorContainer {
 			}
 			articles.add(d);
 		}
-		return new AuthorContainer(articles);
+		return new ArticleContainer(articles);
 	}
 	
 	
 	public static void main(String[] args) {
 		String inDir = "in/LAK_corpus/parsed-documents2";
-		AuthorContainer container = AuthorContainer.buildAuthorContainerFromDirectory(inDir);
+		ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
 		System.out.println(container.authorContainers);
 	}
 }

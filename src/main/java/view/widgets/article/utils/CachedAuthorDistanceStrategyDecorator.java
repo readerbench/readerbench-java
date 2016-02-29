@@ -3,51 +3,65 @@ package view.widgets.article.utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import data.article.ResearchArticle;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStrategy {
 	private IAuthorDistanceStrategy distanceStrategy;
-	private Map<String, AuthorPairDistanceContainer> authorsDistanceContainer;
-
-	public CachedAuthorDistanceStrategyDecorator(AuthorContainer authorContainer, IAuthorDistanceStrategy distanceStrategy) {
-		this.authorsDistanceContainer = new HashMap<String, AuthorPairDistanceContainer>();
+	private Map<String, Double> singleAuthorContainerDistanceCache;
+	private Map<String, Double> researchArticleDistanceCache;
+	private Map<String, Double> authorToArticleDistanceCache;
+	
+	public CachedAuthorDistanceStrategyDecorator(ArticleContainer authorContainer, IAuthorDistanceStrategy distanceStrategy) {
 		this.distanceStrategy = distanceStrategy;
-		this.computeDistances(authorContainer);
-	}
-	private void computeDistances(AuthorContainer authorContainer) {
-		for (int i = 0; i < authorContainer.getAuthorContainers().size() - 1; i++) {
-			for (int j = i + 1; j < authorContainer.getAuthorContainers().size(); j++) {
-				SingleAuthorContainer a1 = authorContainer.getAuthorContainers().get(i);
-				SingleAuthorContainer a2 = authorContainer.getAuthorContainers().get(j);
-				double sim = this.distanceStrategy.computeDistanceBetween(a1, a2);
-				AuthorPairDistanceContainer pair = new AuthorPairDistanceContainer(a1, a2, sim);
-				
-				this.authorsDistanceContainer.put(a1.getAuthor().getAuthorUri() + a2.getAuthor().getAuthorUri(), pair);
-				this.authorsDistanceContainer.put(a2.getAuthor().getAuthorUri() + a1.getAuthor().getAuthorUri(), pair);
-			}
-		}
+		this.singleAuthorContainerDistanceCache = new HashMap<String, Double>();
+		this.researchArticleDistanceCache = new HashMap<String, Double>();
+		this.authorToArticleDistanceCache = new HashMap<String, Double>();
 	}
 	
 	@Override
 	public double computeDistanceBetween(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor) {
-		AuthorPairDistanceContainer distContainer = this.getAssociatedDistanceContainer(firstAuthor, secondAuthor);
-		if(distContainer != null) {
-			return distContainer.getSimilarity();
+		String key1 = firstAuthor.getAuthor().getAuthorUri() + secondAuthor.getAuthor().getAuthorUri();
+		if(singleAuthorContainerDistanceCache.containsKey(key1)) {
+			return singleAuthorContainerDistanceCache.get(key1);
 		}
-		return this.distanceStrategy.computeDistanceBetween(firstAuthor, secondAuthor);
+		
+		String key2 = secondAuthor.getAuthor().getAuthorUri() + firstAuthor.getAuthor().getAuthorUri();
+		if(singleAuthorContainerDistanceCache.containsKey(key2)) {
+			return singleAuthorContainerDistanceCache.get(key2);
+		}
+		
+		Double distance = this.distanceStrategy.computeDistanceBetween(firstAuthor, secondAuthor);
+		singleAuthorContainerDistanceCache.put(key1, distance);
+		return distance;
 	}
 	
-	private AuthorPairDistanceContainer getAssociatedDistanceContainer(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor) {
-		String key1 = firstAuthor.getAuthor().getAuthorUri() + secondAuthor.getAuthor().getAuthorUri();
-		String key2 = secondAuthor.getAuthor().getAuthorUri() + firstAuthor.getAuthor().getAuthorUri();
+	@Override 
+	public double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		String key1 = firstArticle.getURI() + secondArticle.getURI();
+		if(this.researchArticleDistanceCache.containsKey(key1)) {
+			return this.researchArticleDistanceCache.get(key1);
+		}
 		
-		if(this.authorsDistanceContainer.containsKey(key1)) {
-			return this.authorsDistanceContainer.get(key1);
+		String key2 = secondArticle.getURI() + firstArticle.getURI();
+		if(this.researchArticleDistanceCache.containsKey(key2)) {
+			return this.researchArticleDistanceCache.get(key2);
 		}
-		else if(this.authorsDistanceContainer.containsKey(key2)) {
-			return this.authorsDistanceContainer.get(key2);
+		
+		Double distance = this.distanceStrategy.computeDistanceBetween(firstArticle, secondArticle);
+		researchArticleDistanceCache.put(key1, distance);
+		return distance;
+	}
+	
+	public double computeDistanceBetween(SingleAuthorContainer author, ResearchArticle article) {
+		String key = author.getAuthor().getAuthorUri() + article.getURI();
+		if(this.authorToArticleDistanceCache.containsKey(key)) {
+			return this.authorToArticleDistanceCache.get(key);
 		}
-		return null;
+		
+		Double distance = this.distanceStrategy.computeDistanceBetween(author, article);
+		authorToArticleDistanceCache.put(key, distance);
+		return distance;
 	}
 
 	@Override

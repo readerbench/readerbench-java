@@ -6,42 +6,26 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.gephi.appearance.api.AppearanceController;
@@ -62,17 +46,19 @@ import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
 import org.gephi.preview.api.RenderTarget;
 import org.gephi.preview.types.DependantOriginalColor;
+import org.gephi.preview.types.DependantOriginalColor.Mode;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
+import data.article.ResearchArticle;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
-import view.widgets.article.utils.AuthorContainer;
-import view.widgets.article.utils.AuthorPairDistanceContainer;
+import view.widgets.article.utils.ArticleContainer;
 import view.widgets.article.utils.AuthorParameterLogger;
 import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
 import view.widgets.article.utils.GraphMeasure;
+import view.widgets.article.utils.GraphNodeItem;
 import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
@@ -82,41 +68,24 @@ public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
 	private static final long serialVersionUID = -8582615231233815258L;
 	static Logger logger = Logger.getLogger(ArticleAuthorSimilarityView.class);
-	public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
+	public static final Color COLOR_AUTHOR = new Color(10, 255, 0); // silver
+	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
 
-	private IAuthorDistanceStrategy distanceStrategy;
-	private AuthorContainer authorContainer;
+	private IAuthorDistanceStrategy[] distanceStrategyList;
+	private ArticleContainer authorContainer;
 	private AuthorParameterLogger paramLogger;
 
 	private JSlider sliderThreshold;
 	private JPanel panelGraph;
 
-	JTable tableSimilarity;
-	DefaultTableModel tableSimilarityModel;
-	JTable tableCentrality;
-	DefaultTableModel tableCentralityModel;
-
-	SingleAuthorContainer centralAuthorContainerToCompare;
-
-	class CompareCentralityElement {
-		double centrality;
-		SingleAuthorContainer author;
-
-		public CompareCentralityElement(SingleAuthorContainer author, double centrality) {
-			this.author = author;
-			this.centrality = centrality;
-		}
-	}
-
-	public ArticleAuthorSimilarityView(AuthorContainer authorContainer, IAuthorDistanceStrategy distanceStrategy,
+	public ArticleAuthorSimilarityView(ArticleContainer authorContainer, IAuthorDistanceStrategy[] distanceStrategyList,
 			AuthorParameterLogger paramLogger) {
 		this.authorContainer = authorContainer;
-		this.distanceStrategy = distanceStrategy;
+		this.distanceStrategyList = distanceStrategyList;
 		this.paramLogger = paramLogger;
 
-		centralAuthorContainerToCompare = null;
 		corpusView = this;
-		setTitle("Author View - " + this.distanceStrategy.getStrategyName());
+		setTitle("Author & Document View");
 		getContentPane().setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -157,104 +126,12 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		panelGraph.setBackground(Color.WHITE);
 		panelGraph.setLayout(new BorderLayout());
 
-		JLabel lblTopSimilarArticles = new JLabel("Top Similar Authors");
-		lblTopSimilarArticles.setFont(new Font("SansSerif", Font.BOLD, 14));
-		String[] header = { "Author 1", "Author 2", this.distanceStrategy.getStrategyName() + " Score" };
-		String[][] data = new String[0][3];
-
-		tableSimilarityModel = new DefaultTableModel(data, header);
-		tableSimilarity = new JTable(tableSimilarityModel) {
-			private static final long serialVersionUID = 1L;
-
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			};
-		};
-		tableSimilarity.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent event) {
-				if (!event.getValueIsAdjusting())
-					return;
-				// do some actions here, for example
-				// print first column value from selected row
-
-			}
-		});
-
-		tableSimilarity.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent me) {
-				JTable table = (JTable) me.getSource();
-				Point p = me.getPoint();
-				int row = table.rowAtPoint(p);
-				if (me.getClickCount() == 2) {
-					String doc1 = tableSimilarity.getValueAt(row, 0).toString();
-					String doc2 = tableSimilarity.getValueAt(row, 1).toString();
-					String score = tableSimilarity.getValueAt(row, 2).toString();
-					JOptionPane.showMessageDialog(corpusView, "<html><b>Article 1:</b> " + doc1
-							+ "<br> <b>Article 2:</b> " + doc2 + "<br> <b>Score:  </b> " + score + "</html>");
-				}
-			}
-		});
-		tableSimilarity.setFillsViewportHeight(true);
-
-		try {
-			// 1.6+
-			tableSimilarity.setAutoCreateRowSorter(true);
-		} catch (Exception continuewithNoSort) {
-		}
-		JScrollPane tableScroll = new JScrollPane(tableSimilarity);
-		Dimension tablePreferred = tableScroll.getPreferredSize();
-		tableScroll.setPreferredSize(new Dimension(tablePreferred.width, tablePreferred.height / 3));
-
-		JLabel lblCentrality = new JLabel("Distance to Central Document");
-		lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
-		String[] header2 = { "Document", "Distance" };
-
-		String[][] data2 = new String[0][2];
-		tableCentralityModel = new DefaultTableModel(data2, header2);
-		tableCentrality = new JTable(tableCentralityModel) {
-			private static final long serialVersionUID = 1L;
-
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			};
-		};
-		tableCentrality.setFillsViewportHeight(true);
-
-		tableCentrality.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent me) {
-				JTable table = (JTable) me.getSource();
-				Point p = me.getPoint();
-				int row = table.rowAtPoint(p);
-				if (me.getClickCount() == 2) {
-					String docC = (centralAuthorContainerToCompare == null) ? ""
-							: centralAuthorContainerToCompare.getAuthor().getAuthorName();
-					String doc2 = tableCentrality.getValueAt(row, 0).toString();
-					String score = tableCentrality.getValueAt(row, 1).toString();
-
-					JOptionPane.showMessageDialog(corpusView, "<html><b>Central Author:</b> " + docC
-							+ "<br> <b>Current Author:</b> " + doc2 + "<br> <b>Distance:</b> " + score + "</html>");
-				}
-			}
-		});
-
-		try {
-			// 1.6+
-			tableCentrality.setAutoCreateRowSorter(true);
-		} catch (Exception continuewithNoSort) {
-		}
-		JScrollPane tableScrollCentrality = new JScrollPane(tableCentrality);
-		Dimension tablePreferredCentrality = tableScrollCentrality.getPreferredSize();
-		tableScrollCentrality.setPreferredSize(
-				new Dimension(tablePreferredCentrality.width / 2, tablePreferredCentrality.height / 2));
-
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout
 				.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
 								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(tableScroll, GroupLayout.DEFAULT_SIZE, 1020,
-														Short.MAX_VALUE)
 												.addContainerGap())
 						.addGroup(groupLayout.createSequentialGroup()
 								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
@@ -265,123 +142,109 @@ public class ArticleAuthorSimilarityView extends JFrame {
 																GroupLayout.PREFERRED_SIZE))
 												.addGap(10))
 										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 774,
+												.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE,
 														Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.RELATED)))
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality)
-												.addGap(27))
-										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 236,
-														Short.MAX_VALUE)
-												.addContainerGap())))
-						.addGroup(groupLayout.createSequentialGroup().addComponent(lblTopSimilarArticles)
-								.addContainerGap(896, Short.MAX_VALUE)))));
+								))
+						));
 		groupLayout
 				.setVerticalGroup(
 						groupLayout.createParallelGroup(Alignment.LEADING)
 								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
 										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(lblThreshold).addComponent(lblCentrality))
+												.addComponent(lblThreshold))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 52,
 										GroupLayout.PREFERRED_SIZE)
 				.addPreferredGap(ComponentPlacement.RELATED)
 				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
 						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
-				.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTopSimilarArticles)
-				.addPreferredGap(ComponentPlacement.RELATED).addComponent(tableScroll, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
-		// groupLayout.createParallelGroup().addComponent(tableScrollCentrality);
-		// .addComponent(tableScrollCentrality)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addPreferredGap(ComponentPlacement.RELATED)));
 		getContentPane().setLayout(groupLayout);
 	}
 
-	public HashMap<Node, SingleAuthorContainer> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel,
+	public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel,
 			double threshold) {
-		HashMap<Node, SingleAuthorContainer> outMap = new HashMap<Node, SingleAuthorContainer>();
+		HashMap<Node, GraphNodeItem> outMap = new HashMap<Node, GraphNodeItem>();
 		logger.info("Starting to build the author graph");
 		// build connected graph
-		Map<SingleAuthorContainer, Boolean> visibleDocs = new TreeMap<SingleAuthorContainer, Boolean>();
+		Map<GraphNodeItem, Boolean> visibleDocs = new TreeMap<GraphNodeItem, Boolean>();
 		// build nodes
-		Map<SingleAuthorContainer, Node> nodes = new TreeMap<SingleAuthorContainer, Node>();
-
+		Map<GraphNodeItem, Node> nodes = new TreeMap<GraphNodeItem, Node>();
+		
+		List<GraphNodeItem> nodeItemList = new ArrayList<GraphNodeItem>();
+		
 		for (SingleAuthorContainer author : this.authorContainer.getAuthorContainers()) {
-			visibleDocs.put(author, false);
+			GraphNodeItem nodeItem = new GraphNodeItem(author);
+			visibleDocs.put(nodeItem, false);
+			nodeItemList.add(nodeItem);
 		}
-
-		// determine similarities in order to determine eligible candidates for
-		// visualisation
-		for (int i = 0; i < this.authorContainer.getAuthorContainers().size() - 1; i++) {
-			for (int j = i + 1; j < this.authorContainer.getAuthorContainers().size(); j++) {
-				SingleAuthorContainer a1 = this.authorContainer.getAuthorContainers().get(i);
-				SingleAuthorContainer a2 = this.authorContainer.getAuthorContainers().get(j);
-				double sim = this.distanceStrategy.computeDistanceBetween(a1, a2);
-				if (sim >= threshold) {
-					visibleDocs.put(a1, true);
-					visibleDocs.put(a2, true);
+		for (ResearchArticle article : this.authorContainer.getArticles()) {
+			GraphNodeItem nodeItem = new GraphNodeItem(article);
+			visibleDocs.put(nodeItem, false);
+			nodeItemList.add(nodeItem);
+		}
+		
+		for(IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
+			int distanceLbl = graphModel.addEdgeType(distanceStrategy.getStrategyKey());
+			// determine similarities in order to determine eligible candidates for vizualization
+			for (int i = 0; i < nodeItemList.size() - 1; i++) {
+				for (int j = i + 1; j < nodeItemList.size(); j++) {
+					GraphNodeItem firstNodeItem = nodeItemList.get(i);
+					GraphNodeItem secondNodeItem = nodeItemList.get(j);
+					
+					double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
+					if (sim >= threshold) {
+						visibleDocs.put(firstNodeItem, true);
+						visibleDocs.put(secondNodeItem, true);
+					}
 				}
 			}
-		}
-
-		for (SingleAuthorContainer d : this.authorContainer.getAuthorContainers()) {
-			if (visibleDocs.get(d)) {
-				String text = d.getAuthor().getAuthorName();
-				text = (text.length() > 20) ? (text.substring(0, 20) + "..") : text;
-				Node n = graphModel.factory().newNode(text);
-				n.setLabel(text);
-				n.setColor(new Color((float) (COLOR_CONCEPT.getRed()) / 256, (float) (COLOR_CONCEPT.getGreen()) / 256,
-						(float) (COLOR_CONCEPT.getBlue()) / 256));
-				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
-				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-				graph.addNode(n);
-				nodes.put(d, n);
-				outMap.put(n, d);
+			for (GraphNodeItem o : nodeItemList) {
+				if (visibleDocs.get(o) && ! nodes.containsKey(o)) {
+					String text = o.getName();
+					Color c = null;
+					if(o.isArticle()) {
+						c = new Color((float) (COLOR_ARTICLE.getRed()) / 256, (float) (COLOR_ARTICLE.getGreen()) / 256,
+								(float) (COLOR_ARTICLE.getBlue()) / 256);
+					}
+					else {
+						c = new Color((float) (COLOR_AUTHOR.getRed()) / 256, (float) (COLOR_AUTHOR.getGreen()) / 256,
+								(float) (COLOR_AUTHOR.getBlue()) / 256);
+					}
+					text = (text.length() > 25) ? (text.substring(0, 25) + "..") : text;
+					Node n = graphModel.factory().newNode(text);
+					n.setLabel(text);
+					n.setColor(c);
+					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+					n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+					
+					graph.addNode(n);
+					nodes.put(o, n);
+					outMap.put(n, o);
+					
+				}
 			}
-		}
-
-		List<AuthorPairDistanceContainer> similarities = new LinkedList<AuthorPairDistanceContainer>();
-		// determine similarities
-		for (int i = 0; i < this.authorContainer.getAuthorContainers().size() - 1; i++) {
-			for (int j = i + 1; j < this.authorContainer.getAuthorContainers().size(); j++) {
-				SingleAuthorContainer a1 = this.authorContainer.getAuthorContainers().get(i);
-				SingleAuthorContainer a2 = this.authorContainer.getAuthorContainers().get(j);
-				if (visibleDocs.get(a1) && visibleDocs.get(a2)) {
-					double sim = this.distanceStrategy.computeDistanceBetween(a1, a2);
-					if (sim >= threshold) {
-						Edge e = graphModel.factory().newEdge(nodes.get(a1), nodes.get(a2), 0, sim, false);
-						e.setLabel(Formatting.formatNumber(sim) + "");
-						graph.addEdge(e);
-
-						similarities.add(new AuthorPairDistanceContainer(a1, a2, sim));
+			// determine similarities
+			for (int i = 0; i < nodeItemList.size() - 1; i++) {
+				for (int j = i + 1; j < nodeItemList.size(); j++) {
+					GraphNodeItem firstNodeItem = nodeItemList.get(i);
+					GraphNodeItem secondNodeItem = nodeItemList.get(j);
+					if (visibleDocs.get(firstNodeItem) && visibleDocs.get(secondNodeItem)) {
+						double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
+						if (sim >= threshold) {
+							Edge e = graphModel.factory().newEdge(nodes.get(firstNodeItem), nodes.get(secondNodeItem), distanceLbl, sim, false);
+							e.setLabel(Formatting.formatNumber(sim) + "");
+							graph.addEdge(e);
+						}
 					}
 				}
 			}
 		}
-
-		Collections.sort(similarities);
-
-		// recreate table similarity model
-		if (tableSimilarityModel.getRowCount() > 0) {
-			for (int i = tableSimilarityModel.getRowCount() - 1; i > -1; i--) {
-				tableSimilarityModel.removeRow(i);
-			}
-		}
-		for (AuthorPairDistanceContainer sim : similarities) {
-			String row[] = new String[3];
-			row[0] = sim.getFirstAuthor().getAuthor().getAuthorName();
-			row[1] = sim.getSecondAuthor().getAuthor().getAuthorName();
-			row[2] = Formatting.formatNumber(sim.getSimilarity()) + "";
-			tableSimilarityModel.addRow(row);
-
-		}
-		tableSimilarityModel.fireTableDataChanged();
-
-		logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
 		return outMap;
 	}
-
+	
 	private void generateGraph() {
 		double threshold = ((double) sliderThreshold.getValue()) / 100;
 
@@ -394,7 +257,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
 		AppearanceModel appearanceModel = appearanceController.getModel();
 
-		HashMap<Node, SingleAuthorContainer> nodeMap = buildConceptGraph(graph, graphModel, threshold);
+		HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel, threshold);
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
@@ -405,18 +268,17 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
 		Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
 		Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
-		SingleAuthorContainer centralAuthor = null;
 		List<GraphMeasure> graphMeasures = new ArrayList<GraphMeasure>();
 		for (Node n : graph.getNodes()) {
 			Double betwenness = (Double) n.getAttribute(betweeennessColumn);
 			Double eccentricity = (Double) n.getAttribute(eccentricityColumn);
 			Double closeness = (Double) n.getAttribute(closenessColumn);
 
-			SingleAuthorContainer currentDoc = nodeMap.get(n);
+			GraphNodeItem currentDoc = nodeMap.get(n);
 			int degree = graph.getDegree(n);
 
 			GraphMeasure graphMeasure = new GraphMeasure();
-			graphMeasure.setAuthorUri(currentDoc.getAuthor().getAuthorUri());
+			graphMeasure.setAuthorUri(currentDoc.getURI());
 			graphMeasure.setBetwenness(betwenness);
 			graphMeasure.setCloseness(closeness);
 			graphMeasure.setDegree(new Double(degree));
@@ -425,44 +287,9 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
 			if (betwenness > maxCentrality) {
 				maxCentrality = betwenness;
-				centralAuthor = nodeMap.get(n);
 			}
 		}
-		paramLogger.logGraphMeasures(this.distanceStrategy, graphMeasures, (new Double(threshold * 100)).intValue());
-
-		this.centralAuthorContainerToCompare = centralAuthor;
-		List<CompareCentralityElement> centralityList = new ArrayList<CompareCentralityElement>();
-		if (centralAuthor != null) {
-			for (Node n : graph.getNodes()) {
-				SingleAuthorContainer doc = nodeMap.get(n.getLabel());
-				if (doc.isSameAuthor(centralAuthor.getAuthor()))
-					continue;
-				SingleAuthorContainer d1 = centralAuthor, d2 = doc;
-				double sim = this.distanceStrategy.computeDistanceBetween(d1, d2);
-				centralityList.add(new CompareCentralityElement(doc, sim));
-			}
-		}
-
-		Collections.sort(centralityList, new Comparator<CompareCentralityElement>() {
-			public int compare(CompareCentralityElement d1, CompareCentralityElement d2) {
-				return -Double.compare(d1.centrality, d2.centrality);
-			}
-		});
-
-		// recreate table similarity model
-		if (tableCentralityModel.getRowCount() > 0) {
-			for (int i = tableCentralityModel.getRowCount() - 1; i > -1; i--) {
-				tableCentralityModel.removeRow(i);
-			}
-		}
-		NumberFormat formatter = new DecimalFormat("#0.00");
-		for (CompareCentralityElement sim : centralityList) {
-			String row[] = new String[2];
-			row[0] = sim.author.getAuthor().getAuthorName();
-			row[1] = formatter.format(sim.centrality);
-			tableCentralityModel.addRow(row);
-		}
-		tableCentralityModel.fireTableDataChanged();
+		//paramLogger.logGraphMeasures(this.distanceStrategy, graphMeasures, (new Double(threshold * 100)).intValue());
 
 		// run ForceAtlas 2 layout
 		ForceAtlas2 layout = new ForceAtlas2(null);
@@ -491,7 +318,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-				new DependantOriginalColor(Color.WHITE));
+				new DependantOriginalColor(Mode.ORIGINAL));
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 50);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
@@ -549,42 +376,32 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
-
 		adjustToSystemGraphics();
-
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String inDir = "in/LAK_corpus/parsed-documents";
+				String inDir = "in/LAK_corpus/parsed-documents2";
 
-				AuthorContainer container = AuthorContainer.buildAuthorContainerFromDirectory(inDir);
+				ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
 				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
 
-				IAuthorDistanceStrategy semanticDistStrategy = distStrategyFactory
-						.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance);
-				CachedAuthorDistanceStrategyDecorator cachedSemanticDistStrategy = new CachedAuthorDistanceStrategyDecorator(
-						container, semanticDistStrategy);
+				IAuthorDistanceStrategy semanticDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance);
+				CachedAuthorDistanceStrategyDecorator cachedSemanticDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistStrategy);
 
-				IAuthorDistanceStrategy coAuthDistStrategy = distStrategyFactory
-						.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoAuthDistStrategy = new CachedAuthorDistanceStrategyDecorator(
-						container, coAuthDistStrategy);
+				IAuthorDistanceStrategy coAuthDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance);
+				CachedAuthorDistanceStrategyDecorator cachedCoAuthDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coAuthDistStrategy);
 
-				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory
-						.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(
-						container, coCitationsDistStrategy);
+				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
+				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
 
-				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy,
-						cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
+				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				AuthorParameterLogger paramLogger = new AuthorParameterLogger(container);
 
 				for (IAuthorDistanceStrategy strategy : allStrategies) {
 					paramLogger.logTopSimilarAuthors(strategy, allStrategies);
 				}
 
-				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container,
-						cachedCoCitationsDistStrategy, paramLogger);
+				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger);
 				view.setVisible(true);
 			}
 		});
