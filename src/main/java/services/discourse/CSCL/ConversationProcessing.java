@@ -34,7 +34,7 @@ public class ConversationProcessing {
 		Map<Integer, DistanceStats> blockDistances = new TreeMap<Integer, DistanceStats>(new Comparator<Integer>() {
 			@Override
 			public int compare(Integer o1, Integer o2) {
-				return o2.compareTo(o1);
+				return o1.compareTo(o2);
 			}
 		});
 		Map<String, ChatStats> chatStats = new HashMap<String, ChatStats>();

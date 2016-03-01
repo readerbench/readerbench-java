@@ -111,7 +111,7 @@ public class ConceptMap {
 							distance = 1;
 						else
 							distance = (1f - sim) * 10;
-						links.add(new ResultEdge("", nodeIndexes.get(w1), nodeIndexes.get(w2), distance));
+						links.add(new ResultEdge("", nodeIndexes.get(w1), nodeIndexes.get(w2), Formatting.formatNumber(distance)));
 					}
 				}
 			}
