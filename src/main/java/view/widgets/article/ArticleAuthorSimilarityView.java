@@ -214,7 +214,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 								(float) (COLOR_AUTHOR.getBlue()) / 256);
 					}
 					text = (text.length() > 25) ? (text.substring(0, 25) + "..") : text;
-					Node n = graphModel.factory().newNode(text);
+					Node n = graphModel.factory().newNode(o.getURI());
 					n.setLabel(text);
 					n.setColor(c);
 					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
@@ -380,7 +380,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String inDir = "in/LAK_corpus/parsed-documents2";
+				String inDir = "in/LAK_corpus/parsed-documents";
 
 				ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
 				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
