@@ -1,4 +1,4 @@
-package services.discourse.CSCL;
+package services.cscl;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +21,9 @@ import data.cscl.Utterance;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 
-public class ConversationProcessing {
+public class CSCLStats {
 
-	public static Logger logger = Logger.getLogger(ConversationProcessing.class);
+	public static Logger logger = Logger.getLogger(CSCLStats.class);
 
 	private static int WINDOW_SIZE = 20;
 	private static String conversationsPath = "resources/in/corpus_v2_sample/";
@@ -40,7 +40,7 @@ public class ConversationProcessing {
 		Map<String, ChatStats> chatStats = new HashMap<String, ChatStats>();
 
 		try {
-			Files.walk(Paths.get(ConversationProcessing.conversationsPath)).forEach(filePath -> {
+			Files.walk(Paths.get(CSCLStats.conversationsPath)).forEach(filePath -> {
 				String filePathString = filePath.toString();
 				if (filePathString.contains("in.xml")) {
 					// if (filePathString.contains(".xml")) {
