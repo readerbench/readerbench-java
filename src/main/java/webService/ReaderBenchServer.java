@@ -53,6 +53,7 @@ import webService.result.ResultSearch;
 import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
 import webService.result.ResultSentiment;
+import webService.result.ResultTextCategorization;
 import webService.result.ResultTopic;
 import webService.result.ResultValence;
 import webService.semanticSearch.SearchClient;
@@ -238,6 +239,12 @@ public class ReaderBenchServer {
 		String json = gson.toJson(queryResult);
 		return json;
 	}
+	
+	private String convertToJson(QueryResultTextCategorization queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
 
 	private String convertToJson(QueryResultSentiment queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
@@ -372,6 +379,26 @@ public class ReaderBenchServer {
 			success = true;
 			errorMsg = "";
 			data = new ResultSemanticAnnotation(null, 0, 0, 0, null, null);
+		}
+	}
+	
+	@Root(name = "response")
+	private static class QueryResultTextCategorization {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultTextCategorization data; // list of query results (urls)
+
+		private QueryResultTextCategorization() {
+			success = true;
+			errorMsg = "";
+			data = new ResultTextCategorization(null, null);
 		}
 	}
 
@@ -652,6 +679,57 @@ public class ReaderBenchServer {
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			queryResult.data = Cscl.getAll(conversationDocument, conversation, threshold);
+			String result = convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+
+		});
+		Spark.post("/textCategorization", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+
+			String uri = (String) json.get("uri");
+			// String url = (String) json.get("url");
+
+			/*
+			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
+			 * queryResult.data = getTextFromPdf(uri); String result =
+			 * convertToJson(queryResult);
+			 */
+
+			String documentContent = null;
+			if (uri == null || uri.isEmpty()) {
+				logger.error("URI an URL are empty. Aborting...");
+				System.exit(-1);
+			}
+			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
+				documentContent = getTextFromPdf(uri, false).getContent();
+			} else {
+				documentContent = getTextFromPdf(uri, true).getContent();
+			}
+			if (uri != null && !uri.isEmpty()) {
+
+			}
+			
+			List<ResultKeyword> resultKeywords = null;
+			List<ResultCategory> resultCategories = null;
+
+			String documentKeywords = (String) json.get("keywords");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			double threshold = (double) json.get("threshold");
+			
+			if (documentKeywords != "") resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism, threshold);
+			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism, threshold);
+
+			QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
+			queryResult.data = new ResultTextCategorization(resultKeywords, resultCategories);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
