@@ -254,6 +254,11 @@
 			<version>3.8.11.2</version>
 		</dependency>
 		<dependency>
+			<groupId>jaxen</groupId>
+			<artifactId>jaxen</artifactId>
+			<version>1.1.6</version>
+		</dependency>
+		<dependency>
 			<groupId>org.deeplearning4j</groupId>
 			<artifactId>deeplearning4j-nlp</artifactId>
 			<version>0.4-rc3.8</version>

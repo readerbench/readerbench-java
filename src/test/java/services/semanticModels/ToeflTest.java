@@ -21,8 +21,7 @@ public class ToeflTest {
 	static Logger logger = Logger.getLogger(ToeflTest.class);
 
 	int questionId;
-
-	@Test
+	
 	public void process(String path, ISemanticModel semModel) {
 		logger.info("Starting vocabulary tests processing...");
 

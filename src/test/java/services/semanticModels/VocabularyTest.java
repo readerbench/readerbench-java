@@ -24,7 +24,6 @@ public class VocabularyTest {
 
 	int questionId;
 
-	@Test
 	public void process(String path, ISemanticModel semModel) {
 		logger.info("Starting vocabulary tests processing...");
 

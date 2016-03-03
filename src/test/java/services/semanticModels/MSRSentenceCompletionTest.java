@@ -22,7 +22,6 @@ public class MSRSentenceCompletionTest {
 
 	int questionId;
 
-	@Test
 	public void process(String path, ISemanticModel semModel) {
 		logger.info("Starting sentence completion test...");
 
