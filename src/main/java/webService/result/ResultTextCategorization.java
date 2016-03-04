@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ResultTextCategorization {
 
-	private List<ResultKeyword> keywords;
+	private ResultTopic concepts;
 	private List<ResultCategory> categories;
 
 	public ResultTextCategorization(
-			List<ResultKeyword> resultKeywords,
+			ResultTopic concepts,
 			List<ResultCategory> resultCategories
 	) {
-		this.keywords = resultKeywords;
+		this.concepts = concepts;
 		this.categories = resultCategories;
 	}
 

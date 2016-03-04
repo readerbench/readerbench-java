@@ -711,11 +711,10 @@ public class ReaderBenchServer {
 			if (uri != null && !uri.isEmpty()) {
 
 			}
-			
-			List<ResultKeyword> resultKeywords = null;
+
+			ResultTopic resultTopic = null;
 			List<ResultCategory> resultCategories = null;
 
-			String documentKeywords = (String) json.get("keywords");
 			String lang = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
@@ -723,13 +722,13 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
 			
-			if (documentKeywords != "") resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
-					usePOSTagging, computeDialogism, threshold);
+			resultTopic = ConceptMap.getTopics(
+					processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
 			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism, threshold);
 
 			QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
-			queryResult.data = new ResultTextCategorization(resultKeywords, resultCategories);
+			queryResult.data = new ResultTextCategorization(resultTopic, resultCategories);
 			String result = convertToJson(queryResult);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
