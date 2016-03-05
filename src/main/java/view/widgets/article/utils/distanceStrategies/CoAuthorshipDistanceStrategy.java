@@ -66,7 +66,9 @@ public class CoAuthorshipDistanceStrategy extends AAuthorDistanceStrategy {
 		}
 		return 0.0;
 	}
-	
+	public double getThreshold() {
+		return 0.000000000001;
+	}
 	@Override
 	public String getStrategyName() {
 		return "Co-Authorship Distance";

@@ -7,6 +7,7 @@ public interface IAuthorDistanceStrategy {
 	public double computeDistanceBetween(SingleAuthorContainer firstAuthor, SingleAuthorContainer secondAuthor);
 	public double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle);
 	public double computeDistanceBetween(SingleAuthorContainer author, ResearchArticle article);
+	public double getThreshold();
 	public String getStrategyName();
 	public String getStrategyKey();
 }

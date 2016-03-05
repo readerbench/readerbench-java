@@ -9,13 +9,13 @@ import java.util.List;
 
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
-public class AuthorParameterLogger {
+public class ArticleAuthorParameterLogger {
 	public static String OUT_DIRECTORY = "out/LAK_corpus";
 	public static int NO_TOP_SIMILAR = 5000;
 	
 	private ArticleContainer authorContainer;
 	
-	public AuthorParameterLogger(ArticleContainer authorContainer) {
+	public ArticleAuthorParameterLogger(ArticleContainer authorContainer) {
 		this.authorContainer = authorContainer;
 	}
 	
@@ -31,8 +31,8 @@ public class AuthorParameterLogger {
 			}
 		}
 		Collections.sort(authorList);
-		this.createOutDirIfNotExists(AuthorParameterLogger.OUT_DIRECTORY);
-		String outputFile = AuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey() + "_TopSimilar.csv";
+		this.createOutDirIfNotExists(ArticleAuthorParameterLogger.OUT_DIRECTORY);
+		String outputFile = ArticleAuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey() + "_TopSimilar.csv";
 		try {
 			FileWriter fwrt = new FileWriter(outputFile);
 			BufferedWriter bfwrt = new BufferedWriter(fwrt);
@@ -78,18 +78,16 @@ public class AuthorParameterLogger {
 		return out.substring(0, out.length() - 1);
 	}
 	
-	public void logGraphMeasures(IAuthorDistanceStrategy referenceStrategy, List<GraphMeasure> graphMeasures, int threshold) {
-		this.createOutDirIfNotExists(AuthorParameterLogger.OUT_DIRECTORY);
-		String strategyDir = AuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey();
-		this.createOutDirIfNotExists(strategyDir);
+	public void logGraphMeasures(List<GraphMeasure> graphMeasures) {
+		this.createOutDirIfNotExists(ArticleAuthorParameterLogger.OUT_DIRECTORY);
 		try {
-			FileWriter fwrt = new FileWriter(strategyDir + "/" + threshold + ".csv");
+			FileWriter fwrt = new FileWriter(OUT_DIRECTORY + "/ArticleAuthorMeasures.csv");
 			BufferedWriter bfwrt = new BufferedWriter(fwrt);
-			bfwrt.write("Author,Betwenness,Eccentricity,Closeness,Degree" );
+			bfwrt.write("Type,Uri,Betwenness,Eccentricity,Closeness,Degree" );
 			
 			for(GraphMeasure measure : graphMeasures) {
 				bfwrt.newLine();
-				bfwrt.write(measure.getAuthorUri() + "," + measure.getBetwenness() + "," +
+				bfwrt.write(measure.getNodeTypeString() + "," + measure.getUri() + "," + measure.getBetwenness() + "," +
 						measure.getEccentricity() + "," + measure.getCloseness() + "," +
 						measure.getDegree());
 			}

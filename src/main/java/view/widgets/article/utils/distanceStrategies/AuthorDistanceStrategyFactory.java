@@ -10,7 +10,7 @@ public class AuthorDistanceStrategyFactory {
 	public IAuthorDistanceStrategy getDistanceStrategy(AuthorDistanceStrategyType strategyType) {
 		switch (strategyType) {
 		case SemanticDistance:
-			return new SemanticAuthorDistanceStrategy();
+			return new SemanticAuthorDistanceStrategy(this.authorContainer);
 		case CoAuthorshipDistance:
 			return new CoAuthorshipDistanceStrategy(this.authorContainer);
 		case CoCitationsDistance:

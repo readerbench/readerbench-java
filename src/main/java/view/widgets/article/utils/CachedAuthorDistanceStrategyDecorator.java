@@ -63,7 +63,9 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 		authorToArticleDistanceCache.put(key, distance);
 		return distance;
 	}
-
+	public double getThreshold() {
+		return this.distanceStrategy.getThreshold();
+	}
 	@Override
 	public String getStrategyName() {
 		// TODO Auto-generated method stub

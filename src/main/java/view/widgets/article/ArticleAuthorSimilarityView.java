@@ -7,8 +7,6 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +36,6 @@ import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
-import org.gephi.io.exporter.api.ExportController;
 import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2;
 import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
@@ -55,7 +52,7 @@ import data.article.ResearchArticle;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 import view.widgets.article.utils.ArticleContainer;
-import view.widgets.article.utils.AuthorParameterLogger;
+import view.widgets.article.utils.ArticleAuthorParameterLogger;
 import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
 import view.widgets.article.utils.GraphMeasure;
 import view.widgets.article.utils.GraphNodeItem;
@@ -68,18 +65,18 @@ public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
 	private static final long serialVersionUID = -8582615231233815258L;
 	static Logger logger = Logger.getLogger(ArticleAuthorSimilarityView.class);
-	public static final Color COLOR_AUTHOR = new Color(10, 255, 0); // silver
+	public static final Color COLOR_AUTHOR = new Color(10, 255, 0);
 	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
 
 	private IAuthorDistanceStrategy[] distanceStrategyList;
 	private ArticleContainer authorContainer;
-	private AuthorParameterLogger paramLogger;
+	private ArticleAuthorParameterLogger paramLogger;
 
 	private JSlider sliderThreshold;
 	private JPanel panelGraph;
 
 	public ArticleAuthorSimilarityView(ArticleContainer authorContainer, IAuthorDistanceStrategy[] distanceStrategyList,
-			AuthorParameterLogger paramLogger) {
+			ArticleAuthorParameterLogger paramLogger) {
 		this.authorContainer = authorContainer;
 		this.distanceStrategyList = distanceStrategyList;
 		this.paramLogger = paramLogger;
@@ -164,8 +161,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		getContentPane().setLayout(groupLayout);
 	}
 
-	public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel,
-			double threshold) {
+	public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
 		HashMap<Node, GraphNodeItem> outMap = new HashMap<Node, GraphNodeItem>();
 		logger.info("Starting to build the author graph");
 		// build connected graph
@@ -188,6 +184,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		
 		for(IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
 			int distanceLbl = graphModel.addEdgeType(distanceStrategy.getStrategyKey());
+			double threshold = distanceStrategy.getThreshold();
 			// determine similarities in order to determine eligible candidates for vizualization
 			for (int i = 0; i < nodeItemList.size() - 1; i++) {
 				for (int j = i + 1; j < nodeItemList.size(); j++) {
@@ -246,8 +243,6 @@ public class ArticleAuthorSimilarityView extends JFrame {
 	}
 	
 	private void generateGraph() {
-		double threshold = ((double) sliderThreshold.getValue()) / 100;
-
 		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
 		pc.newProject();
 
@@ -257,7 +252,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
 		AppearanceModel appearanceModel = appearanceController.getModel();
 
-		HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel, threshold);
+		HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel);
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
@@ -278,7 +273,8 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			int degree = graph.getDegree(n);
 
 			GraphMeasure graphMeasure = new GraphMeasure();
-			graphMeasure.setAuthorUri(currentDoc.getURI());
+			graphMeasure.setUri(currentDoc.getURI());
+			graphMeasure.setNodeType(currentDoc.getNodeType());
 			graphMeasure.setBetwenness(betwenness);
 			graphMeasure.setCloseness(closeness);
 			graphMeasure.setDegree(new Double(degree));
@@ -289,7 +285,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				maxCentrality = betwenness;
 			}
 		}
-		//paramLogger.logGraphMeasures(this.distanceStrategy, graphMeasures, (new Double(threshold * 100)).intValue());
+		paramLogger.logGraphMeasures(graphMeasures);
 
 		// run ForceAtlas 2 layout
 		ForceAtlas2 layout = new ForceAtlas2(null);
@@ -337,16 +333,6 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		}
 		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
-		// Export
-		logger.info("Saving export...");
-		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-		try {
-			ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return;
-		}
-		this.pack();
 		logger.info("Finished building the graph");
 	}
 
@@ -395,7 +381,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
 
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
-				AuthorParameterLogger paramLogger = new AuthorParameterLogger(container);
+				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
 
 				for (IAuthorDistanceStrategy strategy : allStrategies) {
 					paramLogger.logTopSimilarAuthors(strategy, allStrategies);

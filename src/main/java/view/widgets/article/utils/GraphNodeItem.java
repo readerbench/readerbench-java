@@ -22,7 +22,9 @@ public class GraphNodeItem implements Comparable<GraphNodeItem> {
 		this.nodeType = GraphNodeItemType.Author;
 		this.author = author;
 	}
-	
+	public GraphNodeItemType getNodeType() {
+		return this.nodeType;
+	}
 	public String getURI() {
 		switch (this.nodeType) {
 		case Article:
