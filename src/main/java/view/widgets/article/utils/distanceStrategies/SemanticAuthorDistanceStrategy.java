@@ -39,7 +39,7 @@ public class SemanticAuthorDistanceStrategy extends AAuthorDistanceStrategy {
 		if (numCompared != 0) {
 			double avg = totalDist / numCompared;
 			double stddev = Math.sqrt(numCompared * stddevPartial - Math.pow(totalDist, 2)) / numCompared;
-			this.threshold = avg - stddev;
+			this.threshold = avg + stddev;
 		}
 	}
 	

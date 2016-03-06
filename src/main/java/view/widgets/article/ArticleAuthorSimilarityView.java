@@ -383,10 +383,6 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
 
-				for (IAuthorDistanceStrategy strategy : allStrategies) {
-					paramLogger.logTopSimilarAuthors(strategy, allStrategies);
-				}
-
 				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger);
 				view.setVisible(true);
 			}
