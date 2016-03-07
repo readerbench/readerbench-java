@@ -63,6 +63,10 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 		authorToArticleDistanceCache.put(key, distance);
 		return distance;
 	}
+	
+	public boolean pruneArticlePair(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		return this.distanceStrategy.pruneArticlePair(firstArticle, secondArticle);
+	}
 	public double getThreshold() {
 		return this.distanceStrategy.getThreshold();
 	}

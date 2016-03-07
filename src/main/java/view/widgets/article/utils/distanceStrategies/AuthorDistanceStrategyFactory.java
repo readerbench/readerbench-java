@@ -11,6 +11,8 @@ public class AuthorDistanceStrategyFactory {
 		switch (strategyType) {
 		case SemanticDistance:
 			return new SemanticAuthorDistanceStrategy(this.authorContainer);
+		case SemanticPrunnedByCoCitOrCoAuth:
+			return new SemanticAuthorPruneByCocitOrCuAuthDistanceStrategy(this.authorContainer);
 		case CoAuthorshipDistance:
 			return new CoAuthorshipDistanceStrategy(this.authorContainer);
 		case CoCitationsDistance:

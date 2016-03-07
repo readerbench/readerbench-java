@@ -379,6 +379,9 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
 				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
 				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
+				
+				IAuthorDistanceStrategy semanticDistPrunnedByCoCitOrCuAuthStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticPrunnedByCoCitOrCoAuth);
+				CachedAuthorDistanceStrategyDecorator cachedSemanticDistPrunnedByCoCitOrCuAuthStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistPrunnedByCoCitOrCuAuthStrategy);
 
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);

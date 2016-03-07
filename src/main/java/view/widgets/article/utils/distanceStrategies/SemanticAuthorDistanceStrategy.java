@@ -12,7 +12,7 @@ import view.widgets.article.utils.ArticleContainer;
 public class SemanticAuthorDistanceStrategy extends AAuthorDistanceStrategy {
 	private static double MinSemanticDistance = 0.3;
 	
-	private ArticleContainer authorContainer;
+	protected ArticleContainer authorContainer;
 	
 	private double threshold = 0.3;
 	
@@ -43,10 +43,18 @@ public class SemanticAuthorDistanceStrategy extends AAuthorDistanceStrategy {
 		}
 	}
 	
+	public boolean pruneArticlePair(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		return false;
+	}
+	
 	@Override
 	public double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle) {
 		if(firstArticle.getURI().equals(secondArticle.getURI())) {
 			return 1.0;
+		}
+		boolean pruneFlag = this.pruneArticlePair(firstArticle, secondArticle);
+		if(pruneFlag) {
+			return 0.0;
 		}
 		return computeDistance(firstArticle, secondArticle);
 	}
