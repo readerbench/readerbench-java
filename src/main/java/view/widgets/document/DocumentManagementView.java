@@ -22,6 +22,7 @@ import java.util.Vector;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,12 +44,11 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
-import services.converters.Txt2XmlConverter;
-import utils.localization.LocalizationUtils;
 import data.Block;
 import data.document.Document;
-
-import javax.swing.JCheckBox;
+import services.converters.Txt2XmlConverter;
+import utils.localization.LocalizationUtils;
+import view.widgets.ReaderBenchView;
 
 public class DocumentManagementView extends JFrame {
 
@@ -96,8 +96,7 @@ public class DocumentManagementView extends JFrame {
 					@Override
 					public void run() {
 						DocumentManagementView view = new DocumentManagementView();
-						view.setLocation(
-								DocumentManagementView.this.getLocation().x + 50,
+						view.setLocation(DocumentManagementView.this.getLocation().x + 50,
 								DocumentManagementView.this.getLocation().y + 50);
 						view.setVisible(true);
 					}
@@ -120,8 +119,7 @@ public class DocumentManagementView extends JFrame {
 						if (f.isDirectory()) {
 							return true;
 						}
-						return f.getName().endsWith(".xml")
-								|| f.getName().endsWith(".txt");
+						return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
 					}
 
 					public String getDescription() {
@@ -134,19 +132,15 @@ public class DocumentManagementView extends JFrame {
 					File file = fc.getSelectedFile();
 					lastDirectory = file.getParentFile();
 					if (file.getName().endsWith(".xml")) {
-						loadedDocument = Document.load(file, null, null, null,
-								false, false);
+						loadedDocument = Document.load(file, null, null, null, false, false);
 						loadDocument();
 					} else if (file.getName().endsWith(".txt")) {
-						textFieldTitle.setText(file.getName().replace(".txt",
-								""));
+						textFieldTitle.setText(file.getName().replace(".txt", ""));
 
 						// read txt content
 						try {
-							FileInputStream inputFile = new FileInputStream(
-									file);
-							InputStreamReader ir = new InputStreamReader(
-									inputFile, "UTF-8");
+							FileInputStream inputFile = new FileInputStream(file);
+							InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
 							BufferedReader in = new BufferedReader(ir);
 							String line;
 							String content = "";
@@ -202,11 +196,12 @@ public class DocumentManagementView extends JFrame {
 			}
 		});
 		mnFile.add(mntmQuit);
-		
+
 		JMenu mnTools = new JMenu(LocalizationUtils.getTranslation("Tools"));
 		menuBar.add(mnTools);
-		
-		JMenuItem mntmConvert = new JMenuItem(LocalizationUtils.getTranslation("Convert text files from folder to xml"));
+
+		JMenuItem mntmConvert = new JMenuItem(
+				LocalizationUtils.getTranslation("Convert text files from folder to xml"));
 		mntmConvert.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openTextDocumentDialogue();
@@ -248,7 +243,7 @@ public class DocumentManagementView extends JFrame {
 		txtComplexityLevel.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtComplexityLevel.setColumns(10);
 
-		JLabel lblSource = new JLabel(LocalizationUtils.getTranslation("Source")+ ":");
+		JLabel lblSource = new JLabel(LocalizationUtils.getTranslation("Source") + ":");
 		lblSource.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		textFieldSource = new JTextField();
@@ -257,8 +252,7 @@ public class DocumentManagementView extends JFrame {
 		JLabel lblText = new JLabel(LocalizationUtils.getTranslation("Text"));
 		lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		btnVerbalizationBreakpoint = new JButton(
-				LocalizationUtils.getTranslation("Insert verbalization breakpoint"));
+		btnVerbalizationBreakpoint = new JButton(LocalizationUtils.getTranslation("Insert verbalization breakpoint"));
 		btnVerbalizationBreakpoint.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int pos = textAreaContent.getCaretPosition();
@@ -269,91 +263,74 @@ public class DocumentManagementView extends JFrame {
 		JSeparator separator = new JSeparator();
 
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		JLabel lblByDefault = new JLabel(
-				"* " + LocalizationUtils.getTranslation("by default a verbalization breakpoint is inserted at the end of each file, after the first save operation"));
-		
+		JLabel lblByDefault = new JLabel("* " + LocalizationUtils.getTranslation(
+				"by default a verbalization breakpoint is inserted at the end of each file, after the first save operation"));
+
 		chckbxIsEssay = new JCheckBox(LocalizationUtils.getTranslation("Is Essay"));
 		chckbxIsEssay.addItemListener(new ItemListener() {
-		      public void itemStateChanged(ItemEvent e) {
-		    	  btnVerbalizationBreakpoint.setEnabled(!chckbxIsEssay.isSelected());
-		      }
+			public void itemStateChanged(ItemEvent e) {
+				btnVerbalizationBreakpoint.setEnabled(!chckbxIsEssay.isSelected());
+			}
 		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane)
-						.addComponent(separator, GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblTitle)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textFieldTitle, GroupLayout.DEFAULT_SIZE, 611, Short.MAX_VALUE))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblAuthors)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textFieldAuthors, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE))
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addComponent(scrollPane)
+								.addComponent(separator, GroupLayout.DEFAULT_SIZE, 648, Short.MAX_VALUE)
+								.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblTitle)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(textFieldTitle, GroupLayout.DEFAULT_SIZE, 611, Short.MAX_VALUE))
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblAuthors)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(textFieldAuthors, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE))
 						.addComponent(lblAuthorsComment)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblUri)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textFieldURI, GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblComplexityLevel)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(txtComplexityLevel, GroupLayout.PREFERRED_SIZE, 53, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(lblSource)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textFieldSource, GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblText)
-							.addPreferredGap(ComponentPlacement.RELATED, 287, Short.MAX_VALUE)
-							.addComponent(chckbxIsEssay)
-							.addGap(18)
-							.addComponent(btnVerbalizationBreakpoint))
-						.addComponent(lblByDefault))
-					.addContainerGap())
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblTitle)
-						.addComponent(textFieldTitle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblAuthors)
-						.addComponent(textFieldAuthors, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblAuthorsComment)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(textFieldURI, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblUri)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(textFieldURI, GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE))
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblComplexityLevel)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(txtComplexityLevel, GroupLayout.PREFERRED_SIZE, 53,
+										GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblSource)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(textFieldSource,
+										GroupLayout.DEFAULT_SIZE, 441, Short.MAX_VALUE))
+								.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblText)
+										.addPreferredGap(ComponentPlacement.RELATED, 287, Short.MAX_VALUE)
+										.addComponent(chckbxIsEssay).addGap(18)
+										.addComponent(btnVerbalizationBreakpoint))
+								.addComponent(lblByDefault))
+						.addContainerGap()));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblTitle).addComponent(
+						textFieldTitle, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.UNRELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblAuthors).addComponent(
+						textFieldAuthors, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+						GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblAuthorsComment)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(textFieldURI, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblUri))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(txtComplexityLevel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblComplexityLevel)
-						.addComponent(lblSource)
-						.addComponent(textFieldSource, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblText)
-						.addComponent(btnVerbalizationBreakpoint)
-						.addComponent(chckbxIsEssay))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(separator, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblByDefault))
-		);
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(txtComplexityLevel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+								GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblComplexityLevel).addComponent(lblSource).addComponent(textFieldSource,
+								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblText)
+						.addComponent(btnVerbalizationBreakpoint).addComponent(chckbxIsEssay))
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(separator, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
+				.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblByDefault)));
 
 		textAreaContent = new JTextArea();
 		textAreaContent.setLineWrap(true);
@@ -369,8 +346,7 @@ public class DocumentManagementView extends JFrame {
 		String authors = "";
 		for (String author : loadedDocument.getAuthors())
 			authors += author + ", ";
-		textFieldAuthors.setText(authors.length() > 2 ? authors.substring(0,
-				authors.length() - 2) : "");
+		textFieldAuthors.setText(authors.length() > 2 ? authors.substring(0, authors.length() - 2) : "");
 
 		textFieldURI.setText(loadedDocument.getURI());
 
@@ -410,14 +386,12 @@ public class DocumentManagementView extends JFrame {
 
 		int index = 0;
 		loadedDocument.setBlocks(new Vector<Block>());
-		for (String blocks : textAreaContent.getText().trim()
-				.split(VERBALIZATION_TAG)) {
+		for (String blocks : textAreaContent.getText().trim().split(VERBALIZATION_TAG)) {
 			Block b = null;
 			for (String block : blocks.split("(\n)+")) {
 				if (block.trim().length() > 0) {
-					b = new Block(loadedDocument, index++, block.trim(),
-							loadedDocument.getLSA(), loadedDocument.getLDA(),
-							loadedDocument.getLanguage());
+					b = new Block(loadedDocument, index++, block.trim(), loadedDocument.getLSA(),
+							loadedDocument.getLDA(), loadedDocument.getLanguage());
 					loadedDocument.getBlocks().add(b);
 				}
 			}
@@ -460,8 +434,8 @@ public class DocumentManagementView extends JFrame {
 			}
 		}
 	}
-	
-	public void openTextDocumentDialogue() { 
+
+	public void openTextDocumentDialogue() {
 		JFileChooser fc = null;
 		if (lastDirectory == null)
 			fc = new JFileChooser(new File("in"));
@@ -489,15 +463,16 @@ public class DocumentManagementView extends JFrame {
 	}
 
 	public void convertTextFilesToXml(File file) {
-		Txt2XmlConverter.parseTxtFiles("Converted", file.getAbsolutePath(), "UTF-8");
+		Txt2XmlConverter.parseTxtFiles("Converted", file.getAbsolutePath(), ReaderBenchView.RUNTIME_LANGUAGE, "UTF-8");
 	}
-	
+
 	public void quitFormDialogue() {
-		Object[] options = { LocalizationUtils.getTranslation("Yes"), LocalizationUtils.getTranslation("No"), LocalizationUtils.getTranslation("Cancel") };
+		Object[] options = { LocalizationUtils.getTranslation("Yes"), LocalizationUtils.getTranslation("No"),
+				LocalizationUtils.getTranslation("Cancel") };
 		int value = JOptionPane.showOptionDialog(this,
-				LocalizationUtils.getTranslation("Do you want to save changes") +"?", LocalizationUtils.getTranslation("Save"),
-				JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
-				null, options, options[0]);
+				LocalizationUtils.getTranslation("Do you want to save changes") + "?",
+				LocalizationUtils.getTranslation("Save"), JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 		if (value == JOptionPane.YES_OPTION) {
 			if (loadedDocument == null) {
 				updateDocument();

@@ -6,11 +6,8 @@ import java.io.FileReader;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
-import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -21,7 +18,7 @@ public class ToeflTest {
 	static Logger logger = Logger.getLogger(ToeflTest.class);
 
 	int questionId;
-	
+
 	public void process(String path, ISemanticModel semModel) {
 		logger.info("Starting vocabulary tests processing...");
 
@@ -55,7 +52,7 @@ public class ToeflTest {
 						for (int i = 0; i < 5; i++) {
 							if ((line = br.readLine()) == null)
 								break outer;
-							concepts[i] = processDoc(line, lsa, lda, semModel.getLanguage());
+							concepts[i] = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
 						}
 
 						// read blank line
@@ -97,12 +94,6 @@ public class ToeflTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
-		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-		Document doc = new Document(null, contents, lsa, lda, lang, true, true);
-		return doc;
 	}
 
 	public static void main(String[] args) {

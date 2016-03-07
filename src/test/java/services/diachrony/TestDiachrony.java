@@ -26,7 +26,7 @@ public class TestDiachrony {
 		for (String period : periods) {
 			for (String region : regions) {
 				String localPath = path + "/" + period + "/" + region;
-				Txt2XmlConverter.parseTxtFiles("", localPath, "UTF-8");
+				Txt2XmlConverter.parseTxtFiles("", localPath, Lang.ro, "UTF-8");
 				try {
 					DataGathering.processTexts(localPath, -1, true, lsa, lda, Lang.ro, false, false);
 				} catch (IOException e) {

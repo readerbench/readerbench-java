@@ -18,24 +18,33 @@ import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
 import data.Word;
 import data.discourse.Topic;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class WordAssociationTest {
 	static Logger logger = Logger.getLogger(WordAssociationTest.class);
-	private Map<Word, Map<Word, Integer>> wordAssociations;
-	private Map<Word, Double> simTop;
-	private Map<Word, Double> simMax;
-	private Map<Word, Word> simMaxConcept;
+	private Map<Document, Map<Document, Double>> wordAssociations;
+	private Map<Document, Double> simTop;
+	private Map<Document, Double> simMax;
+	private Map<Document, Document> simMaxConcept;
 
-	public void initialLoad(String pathToFile, Lang lang, int countMax) {
-		wordAssociations = new TreeMap<Word, Map<Word, Integer>>();
+	public void initialLoad(String pathToFile, ISemanticModel semModel, int countMax) {
+		wordAssociations = new TreeMap<Document, Map<Document, Double>>();
+		LSA lsa = null;
+		LDA lda = null;
+		if (semModel instanceof LSA) {
+			lsa = (LSA) semModel;
+		} else if (semModel instanceof LDA) {
+			lda = (LDA) semModel;
+		} else {
+			logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
+			return;
+		}
 		try {
 			FileInputStream inputFile = new FileInputStream(pathToFile);
 			InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
@@ -44,22 +53,18 @@ public class WordAssociationTest {
 			logger.info("Parsing word associations file...");
 			while ((line = in.readLine()) != null) {
 				if (line.length() > 0) {
-					StringTokenizer st = new StringTokenizer(line);
+					StringTokenizer st = new StringTokenizer(line, ",");
 					try {
-						AbstractDocumentTemplate docTmp = AbstractDocumentTemplate
-								.getDocumentModel(st.nextToken() + " " + st.nextToken());
+						Document doc1 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
+						Document doc2 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
 
-						AbstractDocument d = new Document(null, docTmp, null, null, lang, false, false);
-						Word word1 = d.getBlocks().get(0).getSentences().get(0).getAllWords().get(0);
-						Word word2 = d.getBlocks().get(0).getSentences().get(0).getAllWords().get(1);
-
-						Integer noOccurences = Integer.valueOf(st.nextToken());
-						if (!wordAssociations.containsKey(word1)) {
-							wordAssociations.put(word1, new TreeMap<Word, Integer>());
+						Double no = Double.valueOf(st.nextToken());
+						if (!wordAssociations.containsKey(doc1)) {
+							wordAssociations.put(doc1, new TreeMap<Document, Double>());
 						}
 						if (countMax != -1) {
-							if (wordAssociations.get(word1).size() < countMax)
-								wordAssociations.get(word1).put(word2, noOccurences);
+							if (wordAssociations.get(doc1).size() < countMax)
+								wordAssociations.get(doc1).put(doc2, no);
 						}
 					} catch (Exception e) {
 					}
@@ -77,40 +82,41 @@ public class WordAssociationTest {
 			logger.info("Comparing all word pairs...");
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(semModel.getPath() + "/compare_individual.csv"), "UTF-8"));
-			simTop = new TreeMap<Word, Double>();
-			simMax = new TreeMap<Word, Double>();
-			simMaxConcept = new TreeMap<Word, Word>();
+			simTop = new TreeMap<Document, Double>();
+			simMax = new TreeMap<Document, Double>();
+			simMaxConcept = new TreeMap<Document, Document>();
 			int no = 0;
 
-			out.write("Word1,Word2,Cosine Similarity\n");
-			for (Word word1 : wordAssociations.keySet()) {
+			out.write("Word1,Word2,Similarity\n");
+			for (Document doc1 : wordAssociations.keySet()) {
 				int sumWeights = 0;
 				double sumSimilarities = 0;
 				double max = 0;
-				Word maxSimWord = null;
-				for (Word word2 : wordAssociations.get(word1).keySet()) {
-					double sim = semModel.getSimilarity(word1, word2);
+				Document maxSim = null;
+				for (Document doc2 : wordAssociations.get(doc1).keySet()) {
+
+					double sim = semModel.getSimilarity(doc1, doc2);
 					// sumWeights += wordAssociations.get(word1).get(word2);
 					// sumSimilarities += wordAssociations.get(word1).get(word2)
 					// * sim;
 					sumWeights++;
 					sumSimilarities += sim;
-					out.write(word1.getLemma() + "," + word2.getLemma() + "," + sim + "\n");
+					out.write(doc1.getText().trim() + "," + doc2.getText().trim() + "," + sim + "\n");
 					if (sim > max) {
 						max = sim;
-						maxSimWord = word2;
+						maxSim = doc2;
 					}
 				}
 				if ((++no) % 1000 == 0) {
 					logger.info("Finished comparing " + no + " words...");
 				}
-				if (sumWeights != 0 && maxSimWord != null) {
-					simTop.put(word1, sumSimilarities / sumWeights);
-					simMax.put(word1, max);
-					simMaxConcept.put(word1, maxSimWord);
+				if (sumWeights != 0 && maxSim != null) {
+					simTop.put(doc1, sumSimilarities / sumWeights);
+					simMax.put(doc1, max);
+					simMaxConcept.put(doc1, maxSim);
 				} else {
-					simTop.put(word1, new Double(0));
-					simMax.put(word1, new Double(0));
+					simTop.put(doc1, new Double(0));
+					simMax.put(doc1, new Double(0));
 				}
 			}
 			out.close();
@@ -121,7 +127,7 @@ public class WordAssociationTest {
 
 	public void compare(String pathToFile, ISemanticModel semModel, int countMax, boolean printSimilarConcepts,
 			int noConcepts, double minThreshold) {
-		initialLoad(pathToFile, semModel.getLanguage(), countMax);
+		initialLoad(pathToFile, semModel, countMax);
 
 		compareIndividual(semModel);
 
@@ -131,17 +137,21 @@ public class WordAssociationTest {
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(semModel.getPath() + "/compare_aggregated.csv"), "UTF-8"));
 			out.write("Concept,Average Similarity,Max Similarity,Most similar word association\n");
-			for (Word word : wordAssociations.keySet()) {
-				out.write(word.getLemma() + "," + simTop.get(word) + "," + simMax.get(word)
-						+ (simMaxConcept.containsKey(word) ? (",(" + simMaxConcept.get(word).getLemma() + ")") : ","));
+			for (Document doc : wordAssociations.keySet()) {
+				out.write(doc.getText().trim() + "," + simTop.get(doc) + "," + simMax.get(doc)
+						+ (simMaxConcept.containsKey(doc) ? (",(" + simMaxConcept.get(doc).getText().trim() + ")")
+								: ","));
 				if (printSimilarConcepts) {
 					// determine most similar concepts;
 					List<Topic> similarConcepts = new LinkedList<Topic>();
-					TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(word, minThreshold);
+					TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(doc, minThreshold);
 					for (Entry<Word, Double> entry : listLSA.entrySet()) {
-						if (!entry.getKey().getLemma().equals(word.getLemma())
-								&& !entry.getKey().getStem().equals(word.getStem()))
-							similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+						for (Word word : doc.getWordOccurences().keySet()) {
+							if (!entry.getKey().getLemma().equals(word.getLemma())
+									&& !entry.getKey().getStem().equals(word.getStem())) {
+								similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+							}
+						}
 					}
 					Collections.sort(similarConcepts);
 					// output top 5 concepts
@@ -150,7 +160,6 @@ public class WordAssociationTest {
 								+ similarConcepts.get(i).getRelevance());
 					}
 				}
-
 				out.write("\n");
 			}
 			out.close();
@@ -161,38 +170,7 @@ public class WordAssociationTest {
 		}
 	}
 
-	public static void printSimilarConcepts(String path, Lang lang, int noConcepts, double minThreshold) {
-		try {
-			LSA lsa = LSA.loadLSA(path, lang);
-			logger.info("Determining most similar word pairs for each concept...");
-			BufferedWriter out = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(path + "/similar_concepts.csv"), "UTF-8"));
-			out.write("Concept,Similar words\n");
-			for (Word word : lsa.getWords().keySet()) {
-				out.write(word.getLemma());
-				// determine most similar concepts;
-				List<Topic> similarConcepts = new LinkedList<Topic>();
-				TreeMap<Word, Double> listLSA = lsa.getSimilarConcepts(word, minThreshold);
-				for (Entry<Word, Double> entry : listLSA.entrySet()) {
-					if (!entry.getKey().getLemma().equals(word.getLemma())
-							&& !entry.getKey().getStem().equals(word.getStem()))
-						similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
-				}
-				Collections.sort(similarConcepts);
-				// output top concepts
-				for (int i = 0; i < Math.min(noConcepts, similarConcepts.size()); i++) {
-					out.write("," + similarConcepts.get(i).getWord().getLemma() + ","
-							+ similarConcepts.get(i).getRelevance());
-				}
-				out.write("\n");
-			}
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public Map<Word, Map<Word, Integer>> getWordAssociations() {
+	public Map<Document, Map<Document, Double>> getWordAssociations() {
 		return wordAssociations;
 	}
 
@@ -203,17 +181,23 @@ public class WordAssociationTest {
 
 		WordAssociationTest comp = new WordAssociationTest();
 
-		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_financial_word_assoc_en", Lang.eng);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
 		// LDA lsa = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		comp.compare("resources/config/LSA/word_associations_en.txt", lsa, 3, true, 20, 0.3);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/joseantonio_es",
+		// Lang.es);
+
+		// comp.compare("resources/config/LSA/Nelson norms_en.csv", lsa, 3,
+		// true, 20, 0.3);
+		// comp.compare("resources/config/LSA/Normas Palabras C4819_es.csv",
+		// lsa, 3, true, 20, 0.3);
 
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_new_en", Lang.eng);
-		// comp.compare("resources/config/LSA/word_associations_en.txt", lda, 3,
+		LDA lda = LDA.loadLDA("resources/config/LDA/joseantonio_es", Lang.es);
+		comp.compare("resources/config/LSA/Normas Palabras C4819_es.csv", lda, 3, true, 20, 0.3);
+		// comp.compare("resources/config/LSA/Nelson norms_en.csv", lda, 3,
 		// false, 20, 0.3);
-		// printSimilarConcepts("resources/config/LSA/joseantonion_es", Lang.es,
-		// 20, 0.3);
 		// comp.compare("resources/config/LSA/tasa_lak_en",
-		// "word_associations_en.txt",
+		// "resources/config/LSA/Nelson norms_en.csv",
 		// Lang.en, 0.3);
 	}
 }

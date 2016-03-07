@@ -16,24 +16,30 @@ public class TestDataGathering {
 
 		ReaderBenchServer.initializeDB();
 
-		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
+		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/lemonde_nursery_fr",
 		// Lang.fr);
 		// LDA lda = LDA.loadLDA("resources/config/LDA/lemonde_nursery_fr",
 		// Lang.fr);
 		try {
-			DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.eng, true,
-					true);
-			DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, lsa, lda, Lang.eng, true,
-					true);
-			DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
+			// DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts",
+			// -1, true, lsa, lda, Lang.eng, true,
+			// true);
+			// DataGathering.processTexts("resources/in/essays/competition_en/texts",
+			// -1, true, lsa, lda, Lang.eng, true,
+			// true);
+			// DataGathering.processTexts("resources/in/essays/images_en/texts",
+			// -1, true, lsa, lda, Lang.eng, true, true);
 			// DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts",
 			// -1, true, lsa, lda, Lang.eng,
 			// true, true);
 			// DataGathering.processTexts("resources/in/essays/msu_timed_en/texts",
 			// -1, true, lsa, lda, Lang.eng, true, true);
-			DataGathering.processTexts("resources/in/SEvsTA/texts", -1, true, lsa, lda, Lang.eng, true, true);
+			// DataGathering.processTexts("resources/in/SEvsTA/texts", -1, true,
+			// lsa, lda, Lang.eng, true, true);
 			// DataGathering.processTexts("resources/in/essays/posttest_fall_2009/texts",
 			// -1, true, lsa, lda, Lang.eng,
 			// true, true);
@@ -44,6 +50,12 @@ public class TestDataGathering {
 			// familiarity", -1, true, lsa, lda, Lang.eng, true, true);
 			// DataGathering.processTexts("resources/in/essays/nursery_fr", -1,
 			// true, lsa, lda, Lang.fr, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2010", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2011", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2012", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2013", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2014", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/Elvira/users 2015", -1, true, lsa, lda, Lang.eng, true, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

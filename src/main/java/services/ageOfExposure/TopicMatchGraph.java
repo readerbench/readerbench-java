@@ -129,19 +129,23 @@ public class TopicMatchGraph {
 
 	public static void main(String args[]) {
 		TopicMatchGraph graph = new TopicMatchGraph(7);
-		graph.addEdge(0, 3, 3);
-		graph.addEdge(0, 4, 2);
-		graph.addEdge(0, 5, 1);
+		graph.addEdge(0, 6, 0.3);
+		graph.addEdge(0, 4, 0.2);
+		graph.addEdge(0, 5, 0.2);
 
-		graph.addEdge(1, 3, 2);
-		graph.addEdge(1, 4, 1);
-		graph.addEdge(1, 6, 3);
+		graph.addEdge(1, 5, 0.2);
+		graph.addEdge(1, 4, 0.1);
+		graph.addEdge(1, 6, 0.3);
 
-		graph.addEdge(2, 3, 1);
-		graph.addEdge(2, 4, 2);
-		graph.addEdge(2, 6, 3);
+		graph.addEdge(2, 5, 0.1);
+		graph.addEdge(2, 4, 0.2);
+		graph.addEdge(2, 6, 0.3);
+		
+		graph.addEdge(3, 4, 0.1);
+		graph.addEdge(3, 5, 0.1);
+		graph.addEdge(3, 6, 0.1);
 
-		System.out.println("Graf:");
+		System.out.println("Graph:");
 		System.out.println(graph);
 
 		Integer[] assoc = graph.computeAssociations();
