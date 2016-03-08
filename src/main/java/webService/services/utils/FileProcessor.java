@@ -1,0 +1,66 @@
+package webService.services.utils;
+
+import java.io.File;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
+
+import java.awt.Color;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.Path;
+import org.simpleframework.xml.Root;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import webService.ReaderBenchServer;
+
+import org.apache.commons.io.FileUtils;
+
+public class FileProcessor {
+	
+	private static Logger logger = Logger.getLogger(FileProcessor.class);
+	
+	private static FileProcessor instance = null;
+	protected FileProcessor() {
+		
+	}
+	public static FileProcessor getInstnace() {
+		if (instance == null) {
+			instance = new FileProcessor();
+		}
+		return instance;
+	}
+	
+	public String saveFile(Part submitedFile) {
+		File targetFile = new File("tmp/" + System.currentTimeMillis() + '_' + submitedFile.getSubmittedFileName());
+		try {
+			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
+		} catch (IOException e) {
+			logger.error("Can't save uploaded file!");
+		}
+		return targetFile.getName();
+	}
+
+}

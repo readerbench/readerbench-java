@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.Part;
+
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -60,6 +64,7 @@ import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
+import webService.services.utils.FileProcessor;
 
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
@@ -733,6 +738,13 @@ public class ReaderBenchServer {
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
+		});
+		// File Upload - send file as multipart form-data to be accepted
+		Spark.post("/fileUpload", (request, response) -> {
+			MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
+			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+			Part file = request.raw().getPart("file"); //file is name of the input in the upload form
+			return FileProcessor.getInstnace().saveFile(file);
 		});
 	}
 
