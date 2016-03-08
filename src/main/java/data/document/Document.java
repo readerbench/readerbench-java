@@ -448,6 +448,9 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 			for (String author : this.getAuthors())
 				descr += author + "_";
 		}
+		if (this.getText() != null) {
+			descr += this.getText() + "_";
+		}
 		return descr;
 	}
 
@@ -488,6 +491,10 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 				compare1 += author + "_";
 			for (String author : d.getAuthors())
 				compare2 += author + "_";
+		}
+		if (this.getText() != null && d.getText() != null) {
+			compare1 += this.getText() + "_";
+			compare2 += d.getText() + "_";
 		}
 		return compare1.compareTo(compare2);
 	}

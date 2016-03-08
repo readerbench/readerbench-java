@@ -16,13 +16,12 @@ import org.junit.Test;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
-import services.converters.PdfToTextFrenchCVs;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class ToeflProcess {
 
-	static Logger logger = Logger.getLogger(PdfToTextFrenchCVs.class);
+	static Logger logger = Logger.getLogger(ToeflProcess.class);
 
 	AbstractDocument queryQuestion;
 	AbstractDocument aAnswer, bAnswer, cAnswer, dAnswer;

@@ -31,6 +31,7 @@ import org.gephi.statistics.plugin.Modularity;
 import org.openide.util.Lookup;
 
 import data.Word;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
@@ -381,7 +382,7 @@ public class SpaceStatistics {
 			List<SpaceStatistics> corpora) {
 		logger.info("Loading frequent word associations ...");
 		WordAssociationTest comp = new WordAssociationTest();
-		comp.initialLoad(pathToInputNorms, corpora.get(0).getLDA().getLanguage(), countMax);
+		comp.initialLoad(pathToInputNorms, corpora.get(0).getLDA(), countMax);
 
 		logger.info("Writing comparisons for frequent word associations ...");
 		File output = new File(pathToOutput);
@@ -394,12 +395,12 @@ public class SpaceStatistics {
 				out.write("," + space.getLDA().getPath());
 			}
 
-			for (Word word1 : comp.getWordAssociations().keySet()) {
-				for (Word word2 : comp.getWordAssociations().get(word1).keySet()) {
-					String outputString = "\n" + word1.getLemma() + "," + word2.getLemma();
+			for (Document doc1 : comp.getWordAssociations().keySet()) {
+				for (Document doc2 : comp.getWordAssociations().get(doc1).keySet()) {
+					String outputString = "\n" + doc1.getProcessedText() + "," + doc2.getProcessedText();
 					boolean viableEntry = true;
 					for (SpaceStatistics space : corpora) {
-						double similarity = space.getLDA().getSimilarity(word1, word2);
+						double similarity = space.getLDA().getSimilarity(doc1, doc2);
 						if (similarity > 0) {
 							outputString += "," + similarity;
 						} else {

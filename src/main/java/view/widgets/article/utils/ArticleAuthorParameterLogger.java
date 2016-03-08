@@ -7,15 +7,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import data.article.ResearchArticle;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
-public class AuthorParameterLogger {
+public class ArticleAuthorParameterLogger {
 	public static String OUT_DIRECTORY = "out/LAK_corpus";
 	public static int NO_TOP_SIMILAR = 5000;
 	
 	private ArticleContainer authorContainer;
 	
-	public AuthorParameterLogger(ArticleContainer authorContainer) {
+	public ArticleAuthorParameterLogger(ArticleContainer authorContainer) {
 		this.authorContainer = authorContainer;
 	}
 	
@@ -31,8 +32,8 @@ public class AuthorParameterLogger {
 			}
 		}
 		Collections.sort(authorList);
-		this.createOutDirIfNotExists(AuthorParameterLogger.OUT_DIRECTORY);
-		String outputFile = AuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey() + "_TopSimilar.csv";
+		this.createOutDirIfNotExists(ArticleAuthorParameterLogger.OUT_DIRECTORY);
+		String outputFile = ArticleAuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey() + "_TopSimilar.csv";
 		try {
 			FileWriter fwrt = new FileWriter(outputFile);
 			BufferedWriter bfwrt = new BufferedWriter(fwrt);
@@ -78,20 +79,27 @@ public class AuthorParameterLogger {
 		return out.substring(0, out.length() - 1);
 	}
 	
-	public void logGraphMeasures(IAuthorDistanceStrategy referenceStrategy, List<GraphMeasure> graphMeasures, int threshold) {
-		this.createOutDirIfNotExists(AuthorParameterLogger.OUT_DIRECTORY);
-		String strategyDir = AuthorParameterLogger.OUT_DIRECTORY + "/" + referenceStrategy.getStrategyKey();
-		this.createOutDirIfNotExists(strategyDir);
+	public void logGraphMeasures(List<GraphMeasure> graphMeasures) {
+		this.createOutDirIfNotExists(ArticleAuthorParameterLogger.OUT_DIRECTORY);
 		try {
-			FileWriter fwrt = new FileWriter(strategyDir + "/" + threshold + ".csv");
+			FileWriter fwrt = new FileWriter(OUT_DIRECTORY + "/ArticleAuthorMeasures.csv");
 			BufferedWriter bfwrt = new BufferedWriter(fwrt);
-			bfwrt.write("Author,Betwenness,Eccentricity,Closeness,Degree" );
+			bfwrt.write("Type,Uri,Betwenness,Eccentricity,Closeness,Degree,Published Articles,Co-Authorship Count" );
 			
 			for(GraphMeasure measure : graphMeasures) {
 				bfwrt.newLine();
-				bfwrt.write(measure.getAuthorUri() + "," + measure.getBetwenness() + "," +
+				String lineText = measure.getNodeTypeString() + "," + measure.getUri() + "," + measure.getBetwenness() + "," +
 						measure.getEccentricity() + "," + measure.getCloseness() + "," +
-						measure.getDegree());
+						measure.getDegree() + ",";
+				
+				if(measure.getNodeType() == GraphNodeItemType.Author) {
+					lineText += this.getNoPublishedArticles(measure.getUri()) + "," + this.getAuthorNoOffReferences(measure.getUri());
+				}
+				else if(measure.getNodeType() == GraphNodeItemType.Article) {
+					lineText += "," + this.getArticleNoOfReferences(measure.getUri());
+				}
+				
+				bfwrt.write(lineText);
 			}
 			
 			bfwrt.close();
@@ -99,5 +107,50 @@ public class AuthorParameterLogger {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	private int getNoPublishedArticles(String authorUri) {
+		for(SingleAuthorContainer authorContainer : this.authorContainer.getAuthorContainers()) {
+			if(authorContainer.getAuthor().getAuthorUri().equals(authorUri)) {
+				return authorContainer.getAuthorArticles().size();
+			}
+		}
+		return 0;
+	}
+	private int getArticleNoOfReferences(String articleUri) {
+		int count = 0;
+		for(ResearchArticle article : this.authorContainer.getArticles()) {
+			for(String citationUri : article.getCitationURIList()) {
+				if(citationUri.equals(articleUri)) {
+					count ++;
+				}
+			}
+		}
+		return count;
+	}
+	private int getAuthorNoOffReferences(String authorUri) {
+		int count = 0;
+		for(ResearchArticle article : this.authorContainer.getArticles()) {
+			for(String citationUri : article.getCitationURIList()) {
+				ResearchArticle citedArticle = this.getArticleByUri(citationUri);
+				if(citedArticle != null) {
+					for(data.article.ArticleAuthor author : citedArticle.getArticleAuthorList()) {
+						if(author.getAuthorUri().equals(authorUri)) {
+							count ++;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return count;
+	}
+	private ResearchArticle getArticleByUri(String articleUri) {
+		for(ResearchArticle article : this.authorContainer.getArticles()) {
+			if(article.getURI().equals(articleUri)) {
+				return article;
+			}
+		}
+		return null;
 	}
 }

@@ -10,8 +10,12 @@ public abstract class AAuthorDistanceStrategy implements IAuthorDistanceStrategy
 		double totalScore = 0.0, totalArticles = 0.0;
 		for(ResearchArticle firstAuthorArticle : firstAuthor.getAuthorArticles()) {
 			for(ResearchArticle secondAuthorArticle : secondAuthor.getAuthorArticles()) {
-				totalScore += this.computeDistanceBetween(firstAuthorArticle, secondAuthorArticle);
-				totalArticles ++;
+				double score = this.computeDistanceBetween(firstAuthorArticle, secondAuthorArticle);
+				boolean pruneFlag = this.pruneArticlePair(firstAuthorArticle, secondAuthorArticle);
+				if(score > this.getThreshold() && !pruneFlag) {
+					totalScore += score;
+					totalArticles ++;
+				}
 			}
 		}
 		if(totalArticles == 0) {
@@ -24,13 +28,23 @@ public abstract class AAuthorDistanceStrategy implements IAuthorDistanceStrategy
 			return 0.0;
 		}
 		List<ResearchArticle> authorArticleList = author.getAuthorArticles();
-		double totalDistance = 0.0;
+		double totalScore = 0.0, totalArticles = 0.0;
 		for(ResearchArticle authorArticle : authorArticleList) {
-			totalDistance += this.computeDistanceBetween(authorArticle, article);
+			double score = this.computeDistanceBetween(authorArticle, article);
+			boolean pruneFlag = this.pruneArticlePair(authorArticle, article);
+			if(score > this.getThreshold() && !pruneFlag) {
+				totalScore += score;
+				totalArticles ++;
+			}
 		}
-		return totalDistance / ((double)author.getAuthorArticles().size());
+		if(totalArticles == 0) {
+			return 0.0;
+		}
+		return (totalScore / totalArticles);
 	}
 	public abstract double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle);
+	public abstract boolean pruneArticlePair(ResearchArticle firstArticle, ResearchArticle secondArticle);
+	public abstract double getThreshold();
 	public abstract String getStrategyName();
 	public abstract String getStrategyKey();
 }

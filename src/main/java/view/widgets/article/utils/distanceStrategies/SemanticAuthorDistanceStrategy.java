@@ -1,18 +1,66 @@
 package view.widgets.article.utils.distanceStrategies;
 
+import java.util.List;
+
 import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.article.ResearchArticle;
 import data.discourse.SemanticCohesion;
 import services.commons.VectorAlgebra;
+import view.widgets.article.utils.ArticleContainer;
 
 public class SemanticAuthorDistanceStrategy extends AAuthorDistanceStrategy {
+	private static double MinSemanticDistance = 0.3;
+	
+	protected ArticleContainer authorContainer;
+	
+	private double threshold = 0.3;
+	
+	public SemanticAuthorDistanceStrategy(ArticleContainer authorContainer) {
+		this.authorContainer = authorContainer;
+		this.computeTreshold();
+	}
+	private void computeTreshold() {
+		double totalDist = 0.0, numCompared = 0, stddevPartial = 0.0;
+		
+		List<ResearchArticle> articleList = authorContainer.getArticles();
+		for(int i = 0; i < articleList.size(); i++) {
+			for(int j = i+1; j < articleList.size(); j ++) {
+				ResearchArticle a1 = articleList.get(i);
+				ResearchArticle a2 = articleList.get(j);
+				double distance = this.computeDistance(a1, a2);
+				if(distance >= MinSemanticDistance) {
+					numCompared ++;
+					totalDist += distance;
+					stddevPartial += Math.pow(distance, 2);
+				}
+			}
+		}
+		if (numCompared != 0) {
+			double avg = totalDist / numCompared;
+			double stddev = Math.sqrt(numCompared * stddevPartial - Math.pow(totalDist, 2)) / numCompared;
+			this.threshold = avg + stddev;
+		}
+	}
+	
+	public boolean pruneArticlePair(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		return false;
+	}
+	
 	@Override
 	public double computeDistanceBetween(ResearchArticle firstArticle, ResearchArticle secondArticle) {
 		if(firstArticle.getURI().equals(secondArticle.getURI())) {
 			return 1.0;
 		}
+		boolean pruneFlag = this.pruneArticlePair(firstArticle, secondArticle);
+		if(pruneFlag) {
+			return 0.0;
+		}
 		return computeDistance(firstArticle, secondArticle);
+	}
+	
+	public double getThreshold() {
+		return this.threshold;
 	}
 	@Override
 	public String getStrategyName() {

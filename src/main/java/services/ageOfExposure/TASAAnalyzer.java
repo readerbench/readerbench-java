@@ -38,7 +38,7 @@ public class TASAAnalyzer {
 	private Map<Integer, LDA> models;
 	private LDA matureModel;
 	private int noGrades;
-	private Map<Word, List<Double>> loweEvolution;
+	private Map<Word, List<Double>> aoeEvolution;
 
 	public TASAAnalyzer(String path, int noThreads) {
 		super();
@@ -61,18 +61,15 @@ public class TASAAnalyzer {
 			String classPath = path + "/grade" + i;
 			logger.info("Loading model " + classPath + "...");
 			models.put(i, LDA.loadLDA(classPath, Lang.eng));
-			logger.info("Loaded model with " + models.get(i).getNoTopics()
-					+ " topics.");
+			logger.info("Loaded model with " + models.get(i).getNoTopics() + " topics.");
 		}
 	}
 
 	public Integer[] computeMatchTask(LDA modelA, LDA modelB) {
-		logger.info("Matching " + modelA.getPath() + " to " + modelB.getPath()
-				+ "...");
+		logger.info("Matching " + modelA.getPath() + " to " + modelB.getPath() + "...");
 
 		/* Find best topic matches */
-		TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoTopics()
-				+ modelB.getNoTopics());
+		TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoTopics() + modelB.getNoTopics());
 		int i, j, x, y;
 		double distance = 0D;
 
@@ -94,8 +91,7 @@ public class TASAAnalyzer {
 		return matches;
 	}
 
-	public void performMatching() throws InterruptedException,
-			ExecutionException {
+	public void performMatching() throws InterruptedException, ExecutionException {
 		/* Load "Mature" Model = Last complexity level */
 		matureModel = models.get(noGrades - 1);
 		LDA intermediateModel;
@@ -112,8 +108,7 @@ public class TASAAnalyzer {
 
 			Callable<Integer[]> task = new Callable<Integer[]>() {
 				public Integer[] call() throws Exception {
-					return computeMatchTask(finalIntermediateModel,
-							finalMatureModel);
+					return computeMatchTask(finalIntermediateModel, finalMatureModel);
 				}
 			};
 			asyncResults.add(taskPool.submit(task));
@@ -121,14 +116,12 @@ public class TASAAnalyzer {
 
 		Integer[] matches;
 		List<Double> stats;
-		loweEvolution = new HashMap<Word, List<Double>>();
-		for (Word analyzedWord : matureModel.getWordProbDistributions()
-				.keySet())
-			loweEvolution.put(analyzedWord, new LinkedList<Double>());
+		aoeEvolution = new HashMap<Word, List<Double>>();
+		for (Word analyzedWord : matureModel.getWordProbDistributions().keySet())
+			aoeEvolution.put(analyzedWord, new LinkedList<Double>());
 
 		for (int cLevel = 0; cLevel < noGrades - 1; cLevel++) {
-			logger.info("Building word distributions for grade level " + cLevel
-					+ "...");
+			logger.info("Building word distributions for grade level " + cLevel + "...");
 			intermediateModel = models.get(cLevel);
 			matches = asyncResults.remove(0).get();
 
@@ -136,10 +129,8 @@ public class TASAAnalyzer {
 			Map<Integer, Map<Word, Double>> matureModelDistrib = new TreeMap<Integer, Map<Word, Double>>();
 
 			for (int i = 0; i < intermediateModel.getNoTopics(); i++) {
-				intermediateModelDistrib.put(i,
-						LDASupport.getWordWeights(intermediateModel, i));
-				matureModelDistrib.put(i,
-						LDASupport.getWordWeights(matureModel, matches[i]));
+				intermediateModelDistrib.put(i, LDASupport.getWordWeights(intermediateModel, i));
+				matureModelDistrib.put(i, LDASupport.getWordWeights(matureModel, matches[i]));
 			}
 
 			/*
@@ -147,25 +138,19 @@ public class TASAAnalyzer {
 			 * distribution
 			 */
 			logger.info("Matching all words for grade level " + cLevel + "...");
-			for (Word analyzedWord : matureModel.getWordProbDistributions()
-					.keySet()) {
-				double intermediateTopicDistr[] = new double[intermediateModel
-						.getNoTopics()];
-				double matureTopicDistr[] = new double[intermediateModel
-						.getNoTopics()];
+			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+				double intermediateTopicDistr[] = new double[intermediateModel.getNoTopics()];
+				double matureTopicDistr[] = new double[intermediateModel.getNoTopics()];
 
 				double sumI = 0, sumM = 0, noI = 0, noM = 0;
 				for (int i = 0; i < intermediateTopicDistr.length; i++) {
-					if (intermediateModelDistrib.get(i).containsKey(
-							analyzedWord)) {
-						intermediateTopicDistr[i] = intermediateModelDistrib
-								.get(i).get(analyzedWord);
+					if (intermediateModelDistrib.get(i).containsKey(analyzedWord)) {
+						intermediateTopicDistr[i] = intermediateModelDistrib.get(i).get(analyzedWord);
 						if (intermediateTopicDistr[i] > 0)
 							noI++;
 					}
 					if (matureModelDistrib.get(i).containsKey(analyzedWord)) {
-						matureTopicDistr[i] = matureModelDistrib.get(i).get(
-								analyzedWord);
+						matureTopicDistr[i] = matureModelDistrib.get(i).get(analyzedWord);
 						if (matureTopicDistr[i] > 0)
 							noM++;
 					}
@@ -180,11 +165,10 @@ public class TASAAnalyzer {
 				// matureTopicDistr[i] /= sumM;
 				// }
 
-				stats = loweEvolution.get(analyzedWord);
+				stats = aoeEvolution.get(analyzedWord);
 				double similarity = 0;
 				if (sumI != 0 && sumM != 0)
-					similarity = VectorAlgebra.cosineSimilarity(
-							intermediateTopicDistr, matureTopicDistr);
+					similarity = VectorAlgebra.cosineSimilarity(intermediateTopicDistr, matureTopicDistr);
 				if (similarity == 1 && noI == 1 && noM == 1) {
 					similarity = (sumM + sumI) / 2;
 				}
@@ -203,8 +187,8 @@ public class TASAAnalyzer {
 		String line;
 		String word;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(
-					"resources/config/WordLists/age_of_acquisition_en/" + normFile));
+			BufferedReader br = new BufferedReader(
+					new FileReader("resources/config/WordLists/age_of_acquisition_en/" + normFile));
 			while ((line = br.readLine()) != null) {
 				tokens = line.split(",");
 				word = tokens[0].trim().replaceAll(" ", "");
@@ -232,11 +216,9 @@ public class TASAAnalyzer {
 
 		try {
 			BufferedWriter loweStats = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path
-							+ "/stats.csv")), "UTF-8"), 32768);
+					new OutputStreamWriter(new FileOutputStream(new File(path + "/stats.csv")), "UTF-8"), 32768);
 			BufferedWriter loweValues = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path
-							+ "/words.csv")), "UTF-8"), 32768);
+					new OutputStreamWriter(new FileOutputStream(new File(path + "/words.csv")), "UTF-8"), 32768);
 			// create header
 			String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
 			loweStats.write(content);
@@ -256,9 +238,8 @@ public class TASAAnalyzer {
 			loweValues.write(content);
 			List<Double> stats;
 
-			for (Word analyzedWord : matureModel.getWordProbDistributions()
-					.keySet()) {
-				stats = loweEvolution.get(analyzedWord);
+			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+				stats = aoeEvolution.get(analyzedWord);
 				content = analyzedWord.getExtendedLemma() + ",";
 				// AoA indices
 				if (birdAoA.containsKey(analyzedWord.getLemma())) {
@@ -286,14 +267,10 @@ public class TASAAnalyzer {
 					loweStats.write("," + Formatting.formatNumber(d));
 				double value = WordComplexityIndices.getInverseAverage(stats);
 				if (Math.round(value * 100) / 100 != 1) {
-					content = ","
-							+ WordComplexityIndices.getInverseAverage(stats);
-					content += ","
-							+ WordComplexityIndices
-									.getInverseLinearRegressionSlope(stats);
+					content = "," + WordComplexityIndices.getInverseAverage(stats);
+					content += "," + WordComplexityIndices.getInverseLinearRegressionSlope(stats);
 					for (double i = MIN_THRESHOLD; i <= MAX_THRESHOLD; i += THRESHOLD_INCREMENT) {
-						value = WordComplexityIndices.getIndexAboveThreshold(
-								stats, i);
+						value = WordComplexityIndices.getIndexAboveThreshold(stats, i);
 						if (value != -1) {
 							content += "," + value;
 						} else {
@@ -302,17 +279,14 @@ public class TASAAnalyzer {
 					}
 
 					for (double i = MIN_THRESHOLD; i <= MAX_THRESHOLD; i += THRESHOLD_INCREMENT) {
-						value = WordComplexityIndices
-								.getIndexPolynomialFitAboveThreshold(stats, i);
+						value = WordComplexityIndices.getIndexPolynomialFitAboveThreshold(stats, i);
 						if (value != -1) {
 							content += "," + value;
 						} else {
 							content += ",";
 						}
 					}
-					content += ","
-							+ WordComplexityIndices
-									.getInflectionPointPolynomial(stats);
+					content += "," + WordComplexityIndices.getInflectionPointPolynomial(stats);
 					loweStats.write(content);
 					loweValues.write(content);
 				}
@@ -330,7 +304,7 @@ public class TASAAnalyzer {
 	public static void main(String args[]) throws Exception {
 		BasicConfigurator.configure();
 
-		TASAAnalyzer ta = new TASAAnalyzer("in/word complexity", 6);
+		TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE", 6);
 		ta.loadModels();
 		ta.performMatching();
 		ta.writeResults();

@@ -6,7 +6,6 @@ import java.io.FileReader;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -62,23 +61,23 @@ public class VocabularyTest {
 							if (questionId != id)
 								logger.error("Manual indexing corrupted at question " + questionId + "/" + id);
 						} else if (line.startsWith("1.")) {
-							rhs[0] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[0] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("2.")) {
-							rhs[1] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[1] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("3.")) {
-							rhs[2] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[2] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("4.")) {
-							rhs[3] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[3] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("5.")) {
-							rhs[4] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[4] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("6.")) {
-							rhs[5] = processDoc(line, lsa, lda, semModel.getLanguage());
+							rhs[5] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("a.")) {
-							lhs[0] = processDoc(line, lsa, lda, semModel.getLanguage());
+							lhs[0] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("b.")) {
-							lhs[1] = processDoc(line, lsa, lda, semModel.getLanguage());
+							lhs[1] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 						} else if (line.startsWith("c.")) {
-							lhs[2] = processDoc(line, lsa, lda, semModel.getLanguage());
+							lhs[2] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
 
 							// process current question
 							TopicMatchGraph graph = new TopicMatchGraph(9);
@@ -125,7 +124,7 @@ public class VocabularyTest {
 	}
 
 	public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
-		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.substring(2).trim());
+		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
 		Document doc = new Document(null, contents, lsa, lda, lang, true, true);
 		return doc;
 	}
@@ -135,10 +134,13 @@ public class VocabularyTest {
 
 		VocabularyTest test = new VocabularyTest();
 
-//		ISemanticModel lsa1 = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-//		test.process("resources/in/vocabulary_test/", lsa1);
-//		ISemanticModel lsa2 = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
-//		test.process("resources/in/vocabulary_test/", lsa2);
+		// ISemanticModel lsa1 = LSA.loadLSA("resources/config/LSA/tasa_en",
+		// Lang.eng);
+		// test.process("resources/in/vocabulary_test/", lsa1);
+		// ISemanticModel lsa2 =
+		// LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp",
+		// Lang.eng);
+		// test.process("resources/in/vocabulary_test/", lsa2);
 		ISemanticModel lda1 = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
 		test.process("resources/in/vocabulary_test/", lda1);
 		ISemanticModel lda2 = LDA.loadLDA("resources/config/LDA/coca_en/text_newspaper_lsp", Lang.eng);

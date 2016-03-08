@@ -40,6 +40,12 @@ public class CoCitationsDistanceStrategy extends AAuthorDistanceStrategy {
 		double noOfCoCitations = SingleAuthorContainer.getNoOfCoCitationsBetweenArticles(firstArticle, secondArticle);
 		return noOfCoCitations / this.maxCoCitationsBetweenArticles;
 	}
+	public boolean pruneArticlePair(ResearchArticle firstArticle, ResearchArticle secondArticle) {
+		return false;
+	}
+	public double getThreshold() {
+		return 0.000000000001;
+	}
 	@Override
 	public String getStrategyName() {
 		return "Co-Citations Distance";

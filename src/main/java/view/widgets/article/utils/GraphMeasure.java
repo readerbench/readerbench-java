@@ -5,7 +5,8 @@ public class GraphMeasure {
 	private Double eccentricity;
 	private Double closeness;
 	private Double degree;
-	private String authorUri;
+	private String uri;
+	private GraphNodeItemType nodeType;
 	
 	public Double getBetwenness() {
 		return betwenness;
@@ -31,10 +32,25 @@ public class GraphMeasure {
 	public void setEccentricity(Double eccentricity) {
 		this.eccentricity = eccentricity;
 	}
-	public String getAuthorUri() {
-		return authorUri;
+	public String getUri() {
+		return uri;
 	}
-	public void setAuthorUri(String authorUri) {
-		this.authorUri = authorUri;
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	public void setNodeType(GraphNodeItemType nodeType) {
+		this.nodeType = nodeType;
+	}
+	public GraphNodeItemType getNodeType() {
+		return this.nodeType;
+	}
+	public String getNodeTypeString() {
+		switch(this.nodeType) {
+		case Article:
+			return "Article";
+		case Author:
+			return "Author";
+		}
+		return "";
 	}
 }

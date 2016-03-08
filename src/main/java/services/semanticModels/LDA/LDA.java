@@ -387,6 +387,21 @@ public class LDA implements ISemanticModel, Serializable {
 		logger.info("Successfully finished writing topics");
 	}
 
+	public String printTopic(int topic, int noWordsPerTopic) {
+		String result = topic + ":";
+		// Get an array of sorted sets of word ID/count pairs
+		ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+		Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
+
+		int rank = 0;
+		while (iterator.hasNext() && rank < noWordsPerTopic) {
+			IDSorter idCountPair = iterator.next();
+			result += model.getAlphabet().lookupObject(idCountPair.getID()) + "(" + idCountPair.getWeight() + ") ";
+			rank++;
+		}
+		return result;
+	}
+
 	public static int findMaxResemblance(double[] v1, double[] v2) {
 		double max = Double.MIN_VALUE;
 		int maxIndex = -1;
