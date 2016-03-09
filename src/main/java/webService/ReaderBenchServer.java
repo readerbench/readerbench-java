@@ -50,6 +50,8 @@ import services.semanticModels.LSA.LSA;
 import spark.Spark;
 import webService.result.ResultCategory;
 import webService.result.ResultCscl;
+import webService.result.ResultCvCover;
+import webService.result.ResultCvOrCover;
 import webService.result.ResultKeyword;
 import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
@@ -222,7 +224,8 @@ public class ReaderBenchServer {
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
 		if (localFile) {
-			return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
+			//return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
+			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, true));
 		} else {
 			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, false));
 		}
@@ -282,6 +285,12 @@ public class ReaderBenchServer {
 	}
 
 	private String convertToJson(QueryResultCscl queryResult) {
+		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+		String json = gson.toJson(queryResult);
+		return json;
+	}
+	
+	private String convertToJson(QueryResultCvCover queryResult) {
 		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 		String json = gson.toJson(queryResult);
 		return json;
@@ -464,6 +473,26 @@ public class ReaderBenchServer {
 			success = true;
 			errorMsg = "";
 			data = new ResultCscl(null, null, null, null, null, null, null);
+		}
+	}
+	
+	@Root(name = "response")
+	private static class QueryResultCvCover {
+
+		@Element
+		private boolean success;
+
+		@Element(name = "errormsg")
+		private String errorMsg; // custom error message (optional)
+
+		@Path("data")
+		@ElementList(inline = true, entry = "result")
+		private ResultCvCover data;
+
+		private QueryResultCvCover() {
+			success = true;
+			errorMsg = "";
+			data = new ResultCvCover(null, null);
 		}
 	}
 
@@ -739,12 +768,76 @@ public class ReaderBenchServer {
 			return result;
 
 		});
+		Spark.post("/cvCoverProcessing", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+
+			String cvFile = (String) json.get("cvFile");
+			String coverFile = (String) json.get("coverFile");
+			String language = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			double threshold = (Double) json.get("threshold");
+
+			// AbstractDocumentTemplate contents =
+			// Cscl.getConversationText(conversationText);
+			// logger.info("Contents: blocks = " + contents.getBlocks().size());
+			Lang lang = Lang.getLang(language);
+			/*
+			 * Conversation conversation = new Conversation( null, contents,
+			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
+			 * usePOSTagging, false);
+			 */
+			/*Document cvContent = Document.load(new File(cvContent), LSA.loadLSA(pathToLSA, lang),
+					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
+			cvContent.computeAll(computeDialogism, null, null, true);*/
+			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);*/
+			
+			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
+			
+			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
+					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
+			coverContent.computeAll(computeDialogism, null, null, true);*/
+			
+			String coverContent = getTextFromPdf("tmp/" + cvFile, true).getContent();			
+
+			QueryResultCvCover queryResult = new QueryResultCvCover();
+			// queryResult.data =
+			// ParticipantInteraction.buildParticipantGraph(conversation);
+			ResultCvCover result = new ResultCvCover(null, null);
+			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
+			ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
+			
+			resultCv.setConcepts(ConceptMap.getTopics(
+					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+			resultCv.setSentiments(webService.services.SentimentAnalysis
+					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+			resultCover.setConcepts(ConceptMap.getTopics(
+					processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+			resultCv.setSentiments(webService.services.SentimentAnalysis
+					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+			
+			result.setCv(resultCv);
+			result.setCover(resultCover);
+			queryResult.data = result;
+			
+			return convertToJson(queryResult);
+			// return Charset.forName("UTF-8").encode(result);
+
+		});
 		// File Upload - send file as multipart form-data to be accepted
 		Spark.post("/fileUpload", (request, response) -> {
 			MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
 			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
 			Part file = request.raw().getPart("file"); //file is name of the input in the upload form
 			return FileProcessor.getInstnace().saveFile(file);
+		});
+		Spark.options("/fileUpload", (request, response) -> {
+			return "";
 		});
 	}
 
