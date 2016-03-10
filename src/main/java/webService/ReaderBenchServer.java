@@ -803,26 +803,27 @@ public class ReaderBenchServer {
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			coverContent.computeAll(computeDialogism, null, null, true);*/
 			
-			String coverContent = getTextFromPdf("tmp/" + cvFile, true).getContent();			
-
 			QueryResultCvCover queryResult = new QueryResultCvCover();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			ResultCvCover result = new ResultCvCover(null, null);
 			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-			ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-			
 			resultCv.setConcepts(ConceptMap.getTopics(
 					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
 			resultCv.setSentiments(webService.services.SentimentAnalysis
 					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
-			resultCover.setConcepts(ConceptMap.getTopics(
-					processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
-			resultCv.setSentiments(webService.services.SentimentAnalysis
-					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
-			
 			result.setCv(resultCv);
-			result.setCover(resultCover);
+			
+			if (coverFile != null) {
+				String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
+				ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
+				resultCover.setConcepts(ConceptMap.getTopics(
+						processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+				resultCover.setSentiments(webService.services.SentimentAnalysis
+						.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+				result.setCover(resultCover);
+			}
+			
 			queryResult.data = result;
 			
 			return convertToJson(queryResult);
