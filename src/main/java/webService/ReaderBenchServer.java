@@ -510,9 +510,9 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String text = request.queryParams("text");
-			String pathToLSA = request.queryParams("lsa");
-			String pathToLDA = request.queryParams("lda");
 			String lang = request.queryParams("lang");
+			String pathToLSA = request.queryParams("lsa");
+			String pathToLDA = request.queryParams("lda");			
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
@@ -528,9 +528,9 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String text = request.queryParams("text");
+			String lang = request.queryParams("lang");
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
-			String lang = request.queryParams("lang");
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
@@ -545,9 +545,9 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String text = request.queryParams("text");
+			String lang = request.queryParams("lang");
 			String pathToLSA = request.queryParams("lsa");
 			String pathToLDA = request.queryParams("lda");
-			String lang = request.queryParams("lang");
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
@@ -618,29 +618,9 @@ public class ReaderBenchServer {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
 			response.type("application/json");
-
-			String uri = (String) json.get("uri");
-			// String url = (String) json.get("url");
-
-			/*
-			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
-			 * queryResult.data = getTextFromPdf(uri); String result =
-			 * convertToJson(queryResult);
-			 */
-
-			String documentContent = null;
-			if (uri == null || uri.isEmpty()) {
-				logger.error("URI an URL are empty. Aborting...");
-				System.exit(-1);
-			}
-			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
-				documentContent = getTextFromPdf(uri, false).getContent();
-			} else {
-				documentContent = getTextFromPdf(uri, true).getContent();
-			}
-			if (uri != null && !uri.isEmpty()) {
-
-			}
+			
+			String file = (String) json.get("file");
+			String documentContent = getTextFromPdf("tmp/" + file, true).getContent();
 
 			String documentAbstract = (String) json.get("abstract");
 			String documentKeywords = (String) json.get("keywords");
@@ -686,7 +666,8 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			// String conversationText = (String) json.get("conversation");
-			String conversationPath = (String) json.get("conversationPath");
+			//String conversationPath = (String) json.get("conversationPath");
+			String csclFile = (String) json.get("csclFile");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
@@ -703,7 +684,8 @@ public class ReaderBenchServer {
 			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
 			 * usePOSTagging, false);
 			 */
-			Conversation conversation = Conversation.load(new File(conversationPath), LSA.loadLSA(pathToLSA, lang),
+			
+			Conversation conversation = Conversation.load(new File("tmp/" + csclFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			conversation.computeAll(computeDialogism, null, null, true);
 			AbstractDocument conversationDocument = processQuery(conversation.getText(), pathToLSA, pathToLDA, language,
