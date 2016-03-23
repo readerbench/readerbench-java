@@ -440,6 +440,7 @@ public class PaperSimilarityView extends JFrame {
 		distance.execute(graphModel);
 
 		// Rank size by centrality
+		/*
 		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
 		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
 				RankingNodeSizeTransformer.class);
@@ -457,6 +458,7 @@ public class PaperSimilarityView extends JFrame {
 		labelSizeTransformer.setMinSize(1);
 		labelSizeTransformer.setMaxSize(5);
 		appearanceController.transform(centralityRanking2);
+		*/
 
 		logger.info("Generating preview...");
 		// Preview configuration
@@ -527,7 +529,7 @@ public class PaperSimilarityView extends JFrame {
 			public void run() {
 				List<Document> docs = new LinkedList<Document>();
 
-				File dir = new File("resources/in/EducMap/AbstractAnalyzer2");
+				File dir = new File("D:\\PhdWorkspace\\Workspace\\ReaderBenchDev2\\in\\chaprou_fr\\chaprou_posttest_fr");
 				File[] files = dir.listFiles(new FilenameFilter() {
 					@Override
 					public boolean accept(File dir, String name) {
@@ -541,7 +543,7 @@ public class PaperSimilarityView extends JFrame {
 				}
 
 				Document refDoc = (Document) AbstractDocument.loadSerializedDocument(
-						"in\\AbstractAnalyzer2\\AbstractAnalyzer2\\0_0_Thesymbioticrolesofempiricalexperim.ser");
+						"D:\\PhdWorkspace\\Workspace\\ReaderBenchDev2\\in\\chaprou_fr\\chaprou_posttest_fr\\109 PERUGI-LANDRE Adrien.ser");
 				docs.add(refDoc);
 
 				PaperSimilarityView view = new PaperSimilarityView(docs, refDoc);

@@ -365,7 +365,9 @@ public class SummaryProcessingView extends JInternalFrame {
 					String authors = "";
 					for (String author : e.getAuthors())
 						authors += author + ", ";
-					authors = authors.substring(0, authors.length() - 2);
+					if(authors.length() >= 2) {
+						authors = authors.substring(0, authors.length() - 2);
+					}
 					dataRow.add(authors);
 					dataRow.add(e.getReferredDoc().getTitleText());
 					dataRow.add(e.getReferredDoc().getLSA().getPath());

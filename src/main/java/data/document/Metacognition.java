@@ -20,6 +20,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -52,16 +53,19 @@ public class Metacognition extends Document {
 	private double[] comprehensionIndices;
 	private List<String> teachers = new LinkedList<String>();
 
-	public Metacognition(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial,
-			boolean usePOSTagging, boolean cleanInput) {
+	public Metacognition(String path, AbstractDocumentTemplate docTmp,
+			Document initialReadingMaterial, boolean usePOSTagging,
+			boolean cleanInput) {
 		// build the corresponding structure of verbalizations
-		super(path, docTmp, initialReadingMaterial.getLSA(), initialReadingMaterial.getLDA(),
-				initialReadingMaterial.getLanguage(), usePOSTagging, cleanInput);
+		super(path, docTmp, initialReadingMaterial.getLSA(),
+				initialReadingMaterial.getLDA(), initialReadingMaterial
+						.getLanguage(), usePOSTagging, cleanInput);
 		this.referredDoc = initialReadingMaterial;
 	}
 
-	public static Metacognition loadVerbalization(String pathToDoc, Document initialReadingMaterial,
-			boolean usePOSTagging, boolean cleanInput) {
+	public static Metacognition loadVerbalization(String pathToDoc,
+			Document initialReadingMaterial, boolean usePOSTagging,
+			boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
@@ -76,10 +80,12 @@ public class Metacognition extends Document {
 			Element doc = dom.getDocumentElement();
 			NodeList nl;
 			// determine contents
-			AbstractDocumentTemplate tmp = extractDocumentContent(doc, "verbalization");
+			AbstractDocumentTemplate tmp = extractDocumentContent(doc,
+					"verbalization");
 
 			logger.info("Building internal representation");
-			Metacognition meta = new Metacognition(pathToDoc, tmp, initialReadingMaterial, usePOSTagging, cleanInput);
+			Metacognition meta = new Metacognition(pathToDoc, tmp,
+					initialReadingMaterial, usePOSTagging, cleanInput);
 			extractDocumentDescriptors(doc, meta);
 
 			// add corresponding links from verbalizations to initial document
@@ -87,30 +93,48 @@ public class Metacognition extends Document {
 			if (nl != null && nl.getLength() > 0) {
 				meta.setAnnotatedReadingStrategies(new int[nl.getLength()][ReadingStrategies.NO_READING_STRATEGIES]);
 				for (int i = 0; i < nl.getLength(); i++) {
-					Integer after = Integer.valueOf(nl.item(i).getAttributes().getNamedItem("after_p").getNodeValue());
-					Integer id = Integer.valueOf(nl.item(i).getAttributes().getNamedItem("id").getNodeValue());
-					meta.getBlocks().get(id).setRefBlock(initialReadingMaterial.getBlocks().get(after));
+					Integer after = Integer.valueOf(nl.item(i).getAttributes()
+							.getNamedItem("after_p").getNodeValue());
+					Integer id = Integer.valueOf(nl.item(i).getAttributes()
+							.getNamedItem("id").getNodeValue());
+					meta.getBlocks()
+							.get(id)
+							.setRefBlock(
+									initialReadingMaterial.getBlocks().get(
+											after));
 					// add annotated scores
 					try {
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.META_COGNITION] = Integer
-								.valueOf(nl.item(i).getAttributes().getNamedItem("no_control").getNodeValue());
+								.valueOf(nl.item(i).getAttributes()
+										.getNamedItem("no_control")
+										.getNodeValue());
 
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.CAUSALITY] = Integer
-								.valueOf(nl.item(i).getAttributes().getNamedItem("no_causality").getNodeValue());
+								.valueOf(nl.item(i).getAttributes()
+										.getNamedItem("no_causality")
+										.getNodeValue());
 
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.PARAPHRASE] = Integer
-								.valueOf(nl.item(i).getAttributes().getNamedItem("no_paraphrase").getNodeValue());
+								.valueOf(nl.item(i).getAttributes()
+										.getNamedItem("no_paraphrase")
+										.getNodeValue());
 
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.INFERRED_KNOWLEDGE] = Integer
-								.valueOf(nl.item(i).getAttributes().getNamedItem("no_inferred").getNodeValue());
+								.valueOf(nl.item(i).getAttributes()
+										.getNamedItem("no_inferred")
+										.getNodeValue());
 
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.BRIDGING] = Integer
-								.valueOf(nl.item(i).getAttributes().getNamedItem("no_bridging").getNodeValue());
+								.valueOf(nl.item(i).getAttributes()
+										.getNamedItem("no_bridging")
+										.getNodeValue());
 						meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.TEXT_BASED_INFERENCES] = meta
 								.getAnnotatedReadingStrategies()[id][ReadingStrategies.BRIDGING]
 								+ meta.getAnnotatedReadingStrategies()[id][ReadingStrategies.CAUSALITY];
 					} catch (Exception e) {
-						logger.info("Verbalization " + id + " has no annotated reading strategies.");
+						e.printStackTrace();
+						logger.info("Verbalization " + id
+								+ " has no annotated reading strategies.");
 					}
 				}
 			}
@@ -136,17 +160,29 @@ public class Metacognition extends Document {
 				if (getBlocks().get(i) != null) {
 					Element pEl = dom.createElement("verbalization");
 					pEl.setAttribute("id", i + "");
-					pEl.setAttribute("after_p", getBlocks().get(i).getRefBlock().getIndex() + "");
-					pEl.setAttribute("no_metacognition",
-							getAnnotatedReadingStrategies()[i][ReadingStrategies.META_COGNITION] + "");
-					pEl.setAttribute("no_causality",
-							getAnnotatedReadingStrategies()[i][ReadingStrategies.CAUSALITY] + "");
-					pEl.setAttribute("no_paraphrase",
-							getAnnotatedReadingStrategies()[i][ReadingStrategies.PARAPHRASE] + "");
-					pEl.setAttribute("no_inferred",
-							getAnnotatedReadingStrategies()[i][ReadingStrategies.INFERRED_KNOWLEDGE] + "");
-					pEl.setAttribute("no_bridging",
-							getAnnotatedReadingStrategies()[i][ReadingStrategies.BRIDGING] + "");
+					pEl.setAttribute("after_p", getBlocks().get(i)
+							.getRefBlock().getIndex()
+							+ "");
+					pEl.setAttribute(
+							"no_metacognition",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.META_COGNITION]
+									+ "");
+					pEl.setAttribute(
+							"no_causality",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.CAUSALITY]
+									+ "");
+					pEl.setAttribute(
+							"no_paraphrase",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.PARAPHRASE]
+									+ "");
+					pEl.setAttribute(
+							"no_inferred",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.INFERRED_KNOWLEDGE]
+									+ "");
+					pEl.setAttribute(
+							"no_bridging",
+							getAnnotatedReadingStrategies()[i][ReadingStrategies.BRIDGING]
+									+ "");
 
 					pEl.setTextContent(getBlocks().get(i).getText());
 					bodyEl.appendChild(pEl);
@@ -222,7 +258,8 @@ public class Metacognition extends Document {
 	 * @param contents
 	 * @return
 	 */
-	protected static AbstractDocumentTemplate extractDocumentContent(Element doc, String tag) {
+	protected static AbstractDocumentTemplate extractDocumentContent(
+			Element doc, String tag) {
 		Element el;
 		NodeList nl;
 		AbstractDocumentTemplate tmp = new AbstractDocumentTemplate();
@@ -234,7 +271,8 @@ public class Metacognition extends Document {
 				BlockTemplate block = tmp.new BlockTemplate();
 				block.setId(Integer.parseInt(el.getAttribute("id")));
 				block.setRefId(0);
-				block.setContent(TextPreprocessing.doubleCleanVerbalization(el.getFirstChild().getNodeValue()));
+				block.setContent(TextPreprocessing.doubleCleanVerbalization(el
+						.getFirstChild().getNodeValue()));
 				tmp.getBlocks().add(block);
 			}
 		}
@@ -246,7 +284,8 @@ public class Metacognition extends Document {
 	 * @param meta
 	 * @throws ParseException
 	 */
-	protected static void extractDocumentDescriptors(Element doc, Metacognition meta) throws ParseException {
+	protected static void extractDocumentDescriptors(Element doc,
+			Metacognition meta) throws ParseException {
 		Element el;
 		NodeList nl;
 		// get author
@@ -261,7 +300,9 @@ public class Metacognition extends Document {
 		if (nl != null && nl.getLength() > 0) {
 			for (int i = 0; i < nl.getLength(); i++) {
 				if (((Element) nl.item(i)).getFirstChild() != null)
-					meta.getTeachers().add(((Element) nl.item(i)).getFirstChild().getNodeValue());
+					meta.getTeachers().add(
+							((Element) nl.item(i)).getFirstChild()
+									.getNodeValue());
 			}
 		}
 
@@ -269,37 +310,48 @@ public class Metacognition extends Document {
 		nl = doc.getElementsByTagName("source");
 		if (nl != null && nl.getLength() > 0) {
 			el = (Element) nl.item(0);
-			meta.setSource(el.getFirstChild().getNodeValue());
+			Node firstChild = el.getFirstChild();
+			if (firstChild != null && firstChild.getNodeValue() != null) {
+				meta.setSource(firstChild.getNodeValue());
+			}
 		}
 
 		nl = doc.getElementsByTagName("uri");
-		if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+		if (nl != null && nl.getLength() > 0
+				&& ((Element) nl.item(0)).getFirstChild() != null) {
 			meta.setURI(((Element) nl.item(0)).getFirstChild().getNodeValue());
 		}
 
 		nl = doc.getElementsByTagName("comprehension_score");
-		if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-			meta.setAnnotatedComprehensionScore(Double.valueOf(((Element) nl.item(0)).getFirstChild().getNodeValue()));
+		if (nl != null && nl.getLength() > 0
+				&& ((Element) nl.item(0)).getFirstChild() != null) {
+			meta.setAnnotatedComprehensionScore(Double.valueOf(((Element) nl
+					.item(0)).getFirstChild().getNodeValue()));
 		}
 
 		nl = doc.getElementsByTagName("fluency");
-		if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-			meta.setAnnotatedFluency(Double.valueOf(((Element) nl.item(0)).getFirstChild().getNodeValue()));
+		if (nl != null && nl.getLength() > 0
+				&& ((Element) nl.item(0)).getFirstChild() != null) {
+			meta.setAnnotatedFluency(Double.valueOf(((Element) nl.item(0))
+					.getFirstChild().getNodeValue()));
 		}
 
 		// get date
 		nl = doc.getElementsByTagName("date_of_transcription");
-		if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+		if (nl != null && nl.getLength() > 0
+				&& ((Element) nl.item(0)).getFirstChild() != null) {
 			el = (Element) nl.item(0);
 			DateFormat formatter = new SimpleDateFormat("dd-mm-yyyy");
-			Date date = (Date) formatter.parse(((Element) nl.item(0)).getFirstChild().getNodeValue());
+			Date date = (Date) formatter.parse(((Element) nl.item(0))
+					.getFirstChild().getNodeValue());
 			meta.setDate(date);
 		}
 	}
 
 	public void determineComprehesionIndices() {
 		logger.info("Identyfing all comprehension prediction indices");
-		double[] indices = new double[ComplexityIndices.NO_COMPLEXITY_INDICES + ReadingStrategies.NO_READING_STRATEGIES
+		double[] indices = new double[ComplexityIndices.NO_COMPLEXITY_INDICES
+				+ ReadingStrategies.NO_READING_STRATEGIES
 				+ SemanticCohesion.NO_COHESION_DIMENSIONS];
 
 		int i = 0;
@@ -322,30 +374,25 @@ public class Metacognition extends Document {
 		i += ReadingStrategies.NO_READING_STRATEGIES;
 
 		// add average cohesion
-		if (this instanceof Summary) {
-			// for summaries
-			SemanticCohesion coh = new SemanticCohesion(this, this.getReferredDoc());
-			for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
-				indices[i + k] = coh.getSemanticDistances()[k];
-		} else {
-			// average value for verbalizations
-			int startIndex = 0, endIndex = 0, noSimilarities = 0;
-			double[] meanCohesion = new double[SemanticCohesion.NO_COHESION_DIMENSIONS];
-			for (int j = 0; j < this.getBlocks().size(); j++) {
-				endIndex = this.getBlocks().get(j).getRefBlock().getIndex();
-				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-					SemanticCohesion coh = this.getBlockSimilarities()[refBlockId];
-					for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
-						meanCohesion[k] += coh.getSemanticDistances()[k];
-					noSimilarities++;
-				}
-				startIndex = endIndex + 1;
-			}
-			if (noSimilarities != 0) {
+
+		// average value for verbalizations
+		int startIndex = 0, endIndex = 0, noSimilarities = 0;
+		double[] meanCohesion = new double[SemanticCohesion.NO_COHESION_DIMENSIONS];
+		for (int j = 0; j < this.getBlocks().size(); j++) {
+			endIndex = this.getBlocks().get(j).getRefBlock().getIndex();
+			for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
+				SemanticCohesion coh = this.getBlockSimilarities()[refBlockId];
 				for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
-					indices[i + k] = meanCohesion[k] / noSimilarities;
+					meanCohesion[k] += coh.getSemanticDistances()[k];
+				noSimilarities++;
 			}
+			startIndex = endIndex + 1;
 		}
+		if (noSimilarities != 0) {
+			for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
+				indices[i + k] = meanCohesion[k] / noSimilarities;
+		}
+
 		this.setComprehensionIndices(indices);
 	}
 
@@ -353,10 +400,11 @@ public class Metacognition extends Document {
 		try {
 			logger.info("Writing advanced document export");
 			File output = new File(getPath().replace(".xml", ".csv"));
-			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
-					32768);
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(output), "UTF-8"), 32768);
 
-			out.write("Referred document:," + getReferredDoc().getTitleText() + "\n");
+			out.write("Referred document:," + getReferredDoc().getTitleText()
+					+ "\n");
 			out.write("Author:");
 			for (String author : getAuthors())
 				out.write("," + author);
@@ -364,8 +412,7 @@ public class Metacognition extends Document {
 			out.write("LSA space:," + getLSA().getPath() + "\n");
 			out.write("LDA model:," + getLDA().getPath() + "\n");
 
-			out.write(
-					"Text,Paraphrasing,Causality,Bridging,Text-based Inferences,Knowledge-based Inferences,Control,Cos Sim LSA,JSH Sim LDA,Leacok Chodorow,Wu Palmer,Path Sim,Distance,Cohesion\n");
+			out.write("Text,Paraphrasing,Causality,Bridging,Text-based Inferences,Knowledge-based Inferences,Control,Cos Sim LSA,JSH Sim LDA,Leacok Chodorow,Wu Palmer,Path Sim,Distance,Cohesion\n");
 
 			int[] cummulativeStrategies = new int[ReadingStrategies.NO_READING_STRATEGIES];
 
@@ -377,7 +424,9 @@ public class Metacognition extends Document {
 					// add rows as blocks within the document
 					SemanticCohesion coh = getBlockSimilarities()[refBlockId];
 					// add block text
-					out.write(getReferredDoc().getBlocks().get(refBlockId).getText().replaceAll(",", "") + ",");
+					out.write(getReferredDoc().getBlocks().get(refBlockId)
+							.getText().replaceAll(",", "")
+							+ ",");
 					for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 						out.write(",");
 					}
@@ -387,7 +436,8 @@ public class Metacognition extends Document {
 				startIndex = endIndex + 1;
 
 				// add corresponding verbalization
-				out.write(getBlocks().get(index).getText().replaceAll(",", "") + ",");
+				out.write(getBlocks().get(index).getText().replaceAll(",", "")
+						+ ",");
 
 				for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 					out.write(getAutomaticReadingStrategies()[index][i] + ",");
@@ -405,7 +455,8 @@ public class Metacognition extends Document {
 			out.write(",,,,,\n");
 
 			out.close();
-			logger.info("Successfully finished writing file " + output.getName());
+			logger.info("Successfully finished writing file "
+					+ output.getName());
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			e.printStackTrace();
@@ -433,7 +484,8 @@ public class Metacognition extends Document {
 		stream.writeObject(this.getLDA().getPath());
 	}
 
-	private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream stream) throws IOException,
+			ClassNotFoundException {
 		// load serialized object - and rebuild LSA / LDA
 		stream.defaultReadObject();
 		LSA lsa = LSA.loadLSA((String) stream.readObject(), this.getLanguage());
@@ -505,7 +557,8 @@ public class Metacognition extends Document {
 		return annotatedComprehensionScore;
 	}
 
-	public void setAnnotatedComprehensionScore(double annotatedComprehensionScore) {
+	public void setAnnotatedComprehensionScore(
+			double annotatedComprehensionScore) {
 		this.annotatedComprehensionScore = annotatedComprehensionScore;
 	}
 

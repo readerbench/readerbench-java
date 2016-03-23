@@ -11,6 +11,7 @@ import org.xml.sax.InputSource;
 
 import data.AbstractDocumentTemplate;
 import data.Block;
+import data.discourse.SemanticCohesion;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ReadingStrategies;
 import view.widgets.selfexplanation.summary.SummaryView;
@@ -19,22 +20,26 @@ public class Summary extends Metacognition {
 
 	private static final long serialVersionUID = -3087279898902437719L;
 
-	public Summary(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging,
+	public Summary(String path, AbstractDocumentTemplate docTmp,
+			Document initialReadingMaterial, boolean usePOSTagging,
 			boolean cleanInput) {
 		super(path, docTmp, initialReadingMaterial, usePOSTagging, cleanInput);
 	}
 
-	public Summary(String content, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
-		super(null, AbstractDocumentTemplate.getDocumentModel(content), initialReadingMaterial, usePOSTagging,
-				cleanInput);
+	public Summary(String content, Document initialReadingMaterial,
+			boolean usePOSTagging, boolean cleanInput) {
+		super(null, AbstractDocumentTemplate.getDocumentModel(content),
+				initialReadingMaterial, usePOSTagging, cleanInput);
 	}
 
-	public static Summary loadEssay(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging,
+	public static Summary loadEssay(String pathToDoc,
+			Document initialReadingMaterial, boolean usePOSTagging,
 			boolean cleanInput) {
 		// parse the XML file
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
-			InputSource input = new InputSource(new FileInputStream(new File(pathToDoc)));
+			InputSource input = new InputSource(new FileInputStream(new File(
+					pathToDoc)));
 			input.setEncoding("UTF-8");
 
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -46,12 +51,15 @@ public class Summary extends Metacognition {
 				return null;
 
 			logger.info("Building essay internal representation");
-			Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging, cleanInput);
+			Summary meta = new Summary(pathToDoc, contents,
+					initialReadingMaterial, usePOSTagging, cleanInput);
 
 			extractDocumentDescriptors(doc, meta);
 			return meta;
 		} catch (Exception e) {
-			logger.error("[Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "]");
+			e.printStackTrace();
+			logger.error("[Error evaluating input file: " + pathToDoc
+					+ ", error:" + e.toString() + "]");
 			return null;
 		}
 	}
@@ -93,8 +101,44 @@ public class Summary extends Metacognition {
 		logger.info("Finished processing summary");
 	}
 
+	public void determineComprehesionIndices() {
+		logger.info("Identyfing all comprehension prediction indices");
+		double[] indices = new double[ComplexityIndices.NO_COMPLEXITY_INDICES
+				+ ReadingStrategies.NO_READING_STRATEGIES
+				+ SemanticCohesion.NO_COHESION_DIMENSIONS];
+
+		int i = 0;
+		for (; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
+			indices[i] = this.getComplexityIndices()[i];
+
+		indices[i + ReadingStrategies.PARAPHRASE] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.PARAPHRASE];
+		indices[i + ReadingStrategies.CAUSALITY] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.CAUSALITY];
+		indices[i + ReadingStrategies.BRIDGING] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING];
+		indices[i + ReadingStrategies.TEXT_BASED_INFERENCES] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.TEXT_BASED_INFERENCES];
+		indices[i + ReadingStrategies.INFERRED_KNOWLEDGE] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.INFERRED_KNOWLEDGE];
+		indices[i + ReadingStrategies.META_COGNITION] += this
+				.getAutomaticReadingStrategies()[0][ReadingStrategies.META_COGNITION];
+
+		i += ReadingStrategies.NO_READING_STRATEGIES;
+
+		// add average cohesion
+
+		// for summaries
+		SemanticCohesion coh = new SemanticCohesion(this, this.getReferredDoc());
+		for (int k = 0; k < SemanticCohesion.NO_COHESION_DIMENSIONS; k++)
+			indices[i + k] = coh.getSemanticDistances()[k];
+
+		this.setComprehensionIndices(indices);
+	}
+
 	public static void main(String[] args) {
-		Document d = (Document) Document.loadSerializedDocument("resources/in/Matilda & Avaleur/Matilda.ser");
+		Document d = (Document) Document
+				.loadSerializedDocument("resources/in/Matilda & Avaleur/Matilda.ser");
 
 		Summary s = new Summary(
 				"je crois qu'il y a donc la famille de Matilda ben ils sont en train de manger et soudain y a quelqu'un qui entre en disant salut salut salut. Après ils croient que c'étaient des voleurs alors ils prennent des armes et ils vont vers le voleur. Y en a qui croient que c'est des voleurs mais le père il croit pas. Et la femme et Matilda ils croient elles croient que c'est des voleurs. Et après Matilda elle dit que c'est un fantôme et qu'il hante la salle. Et après ils sortent tous du salon.",
@@ -106,7 +150,8 @@ public class Summary extends Metacognition {
 		view.setVisible(true);
 
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-			System.out.println(ReadingStrategies.STRATEGY_NAMES[i] + "\t" + s.getAutomaticReadingStrategies()[0][i]);
+			System.out.println(ReadingStrategies.STRATEGY_NAMES[i] + "\t"
+					+ s.getAutomaticReadingStrategies()[0][i]);
 		}
 
 		for (Block b : s.getBlocks()) {
