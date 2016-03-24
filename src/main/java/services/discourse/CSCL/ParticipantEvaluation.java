@@ -271,26 +271,30 @@ public class ParticipantEvaluation {
 
 		if (exportPath != null) {
 			AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-			AppearanceModel appearanceModel = appearanceController.getModel();
-
-			// Rank size by centrality
-			Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-			Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
-					RankingNodeSizeTransformer.class);
-			RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-					.getTransformer();
-			centralityTransformer.setMinSize(5);
-			centralityTransformer.setMaxSize(40);
-			appearanceController.transform(centralityRanking);
-
-			// Rank label size - set a multiplier size
-			Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
-					RankingLabelSizeTransformer.class);
-			RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
-					.getTransformer();
-			labelSizeTransformer.setMinSize(1);
-			labelSizeTransformer.setMaxSize(5);
-			appearanceController.transform(centralityRanking2);
+			/*
+			 * AppearanceModel appearanceModel =
+			 * appearanceController.getModel();
+			 * 
+			 * // Rank size by centrality Column centralityColumn =
+			 * graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+			 * Function centralityRanking =
+			 * appearanceModel.getNodeFunction(graph, centralityColumn,
+			 * RankingNodeSizeTransformer.class); RankingNodeSizeTransformer
+			 * centralityTransformer = (RankingNodeSizeTransformer)
+			 * centralityRanking .getTransformer();
+			 * centralityTransformer.setMinSize(5);
+			 * centralityTransformer.setMaxSize(40);
+			 * appearanceController.transform(centralityRanking);
+			 * 
+			 * // Rank label size - set a multiplier size Function
+			 * centralityRanking2 = appearanceModel.getNodeFunction(graph,
+			 * centralityColumn, RankingLabelSizeTransformer.class);
+			 * RankingLabelSizeTransformer labelSizeTransformer =
+			 * (RankingLabelSizeTransformer) centralityRanking2
+			 * .getTransformer(); labelSizeTransformer.setMinSize(1);
+			 * labelSizeTransformer.setMaxSize(5);
+			 * appearanceController.transform(centralityRanking2);
+			 */
 
 			// Preview configuration
 			PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);

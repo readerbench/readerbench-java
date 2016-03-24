@@ -30,7 +30,7 @@ import services.semanticModels.LDA.LDA;
 //test matching with all-to-all matchings
 public class TASAAnalyzerFull {
 	private static Logger logger = Logger.getLogger("TASAAnalyzerFull");
-	private final double MIN_THRESHOLD = 0.3;
+	private final double MIN_THRESHOLD = 0.2;
 	private final double MAX_THRESHOLD = 0.7;
 	private final double THRESHOLD_INCREMENT = 0.1;
 
@@ -327,7 +327,7 @@ public class TASAAnalyzerFull {
 	public static void main(String args[]) throws Exception {
 		BasicConfigurator.configure();
 
-		TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE", 6);
+		TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE copy 2", 5);
 		ta.loadModels();
 		ta.performMatching();
 		ta.writeResults();

@@ -213,9 +213,12 @@ public class Community extends AnalysisElement {
 			logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
 					+ dateFormat.format(endDate) + " having " + participants.size() + " participants.");
 
-		ParticipantEvaluation.performSNA(participants, participantContributions, true,
-				"out/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate) + ".pdf");
-
+		if (startDate != null && endDate != null)
+			ParticipantEvaluation.performSNA(participants, participantContributions, true,
+					"out/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate) + ".pdf");
+		else
+			ParticipantEvaluation.performSNA(participants, participantContributions, true,
+					"out/graph_" + System.currentTimeMillis() + ".pdf");
 		// update surface statistics
 		for (AbstractDocument d : documents) {
 			Participant p = null;
