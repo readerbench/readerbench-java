@@ -25,7 +25,7 @@ public class TextualComplexity {
 		for (IComplexityFactors complexityClass : ComplexityIndices.TEXTUAL_COMPLEXITY_FACTORS) {
 			localResults = new ArrayList<ResultValence>();
 			for (int id : complexityClass.getIDs()) {
-				localResults.add(new ResultValence(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[id],
+				localResults.add(new ResultValence(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[id],
 						Formatting.formatNumber(queryDoc.getComplexityIndices()[id])));
 			}
 			resultsComplexity.add(new ResultSentiment(complexityClass.getClassName(), localResults, null));
