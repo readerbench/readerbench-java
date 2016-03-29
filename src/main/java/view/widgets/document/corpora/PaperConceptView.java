@@ -18,7 +18,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -240,12 +242,14 @@ public class PaperConceptView extends JFrame {
 		}
 
 		mapRelevanceIter = wordRelevanceMap.entrySet().iterator();
+		Set<String> labels = new TreeSet<String>();
 		while (mapRelevanceIter.hasNext()) {
 			Map.Entry<Word, Double> entry = mapRelevanceIter.next();
 			Word w = entry.getKey();
 			double relevance = entry.getValue();
 
-			if (visibleConcepts.get(w)) {
+			if (visibleConcepts.get(w) && !labels.contains(w.getLemma())) {
+				labels.add(w.getLemma());
 				Node n = graphModel.factory().newNode(w.getLemma());
 				n.setLabel(w.getLemma());
 				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
