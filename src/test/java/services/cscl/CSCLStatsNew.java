@@ -23,27 +23,27 @@ import data.cscl.Utterance;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
 
-public class CSCLStats {
+public class CSCLStatsNew {
 
-	public static Logger logger = Logger.getLogger(CSCLStats.class);
+	public static Logger logger = Logger.getLogger(CSCLStatsNew.class);
 
 	private static int WINDOW_SIZE = 20;
-	private static String conversationsPath = "resources/in/corpus_v2_sample/";
+	private static String conversationsPath = "resources/in/corpus_v2/";
 	// private static String conversationsPath = "resources/in/corpus_chats/";
 	private static int no_references = 0;
 
 	public static void main(String[] args) {
 
-		Map<Integer, DistanceStats> blockDistances = new TreeMap<Integer, DistanceStats>(new Comparator<Integer>() {
+		Map<Integer, DistanceStatsNew> blockDistances = new TreeMap<Integer, DistanceStatsNew>(new Comparator<Integer>() {
 			@Override
 			public int compare(Integer o1, Integer o2) {
 				return o1.compareTo(o2);
 			}
 		});
-		Map<String, ChatStats> chatStats = new HashMap<String, ChatStats>();
+		Map<String, ChatStatsNew> chatStats = new HashMap<String, ChatStatsNew>();
 
 		try {
-			Files.walk(Paths.get(CSCLStats.conversationsPath)).forEach(filePath -> {
+			Files.walk(Paths.get(CSCLStatsNew.conversationsPath)).forEach(filePath -> {
 				String filePathString = filePath.toString();
 				if (filePathString.contains("in.xml")) {
 					// if (filePathString.contains(".xml")) {
@@ -77,7 +77,7 @@ public class CSCLStats {
 					}
 					// save conversation info
 					chatStats.put(filePath.getFileName().toString(),
-							new ChatStats(c.getBlocks().size(), // contributions
+							new ChatStatsNew(c.getBlocks().size(), // contributions
 									c.getParticipants().size(), // participants
 									timp, // duration
 									0, // explicitLinks
@@ -128,7 +128,7 @@ public class CSCLStats {
 
 									// global information for the conversation
 									// corpus
-									DistanceStats ds;
+									DistanceStatsNew ds;
 									if (blockDistances.get(distance) != null) {
 										// blockDistances.put(distance,
 										// blockDistances.get(distance) + 1);
@@ -164,7 +164,7 @@ public class CSCLStats {
 										}
 									} else {
 										if (utterance1.getParticipant() == utterance2.getParticipant()) {
-											ds = new DistanceStats(1, 1, 0, 0, 0);
+											ds = new DistanceStatsNew(1, 1, 0, 0, 0);
 											if (distance == 1)
 												ds.setSameSpeakerFirst(ds.getSameSpeakerFirst() + 1);
 											boolean sameBlock = true;
@@ -183,7 +183,7 @@ public class CSCLStats {
 														chatStats.get(filePath.getFileName().toString()).getSameBlock()
 																+ 1);
 										} else {
-											ds = new DistanceStats(1, 0, 1, 0, 0);
+											ds = new DistanceStatsNew(1, 0, 1, 0, 0);
 										}
 									}
 									blockDistances.put(distance, ds);
@@ -235,7 +235,7 @@ public class CSCLStats {
 
 	}
 
-	private static void printConversationStatsToCSVFile(Map<String, ChatStats> chatStats) {
+	private static void printConversationStatsToCSVFile(Map<String, ChatStatsNew> chatStats) {
 
 		try {
 
@@ -246,7 +246,7 @@ public class CSCLStats {
 			Iterator it = chatStats.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry) it.next();
-				ChatStats cs = (ChatStats) pair.getValue();
+				ChatStatsNew cs = (ChatStatsNew) pair.getValue();
 				sb.append(
 						pair.getKey() + "," +
 						cs.getContributions() + ", " +
@@ -286,7 +286,7 @@ public class CSCLStats {
 
 	}
 
-	private static void printDistancesToCSVFile(Map<Integer, DistanceStats> blockDistances, int no_references) {
+	private static void printDistancesToCSVFile(Map<Integer, DistanceStatsNew> blockDistances, int no_references) {
 		// String prependPath =
 		// "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
 
@@ -298,7 +298,7 @@ public class CSCLStats {
 			Iterator it = blockDistances.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry) it.next();
-				DistanceStats ds = (DistanceStats) pair.getValue();
+				DistanceStatsNew ds = (DistanceStatsNew) pair.getValue();
 				sb.append(
 						pair.getKey() + "," +
 						ds.getTotal() + ", " +
@@ -338,7 +338,7 @@ public class CSCLStats {
 
 }
 
-class DistanceStats {
+class DistanceStatsNew {
 
 	private int total;
 	private int sameSpeaker;
@@ -346,7 +346,7 @@ class DistanceStats {
 	private int sameSpeakerFirst;
 	private int differentSpeakerFirst;
 
-	public DistanceStats(int total, int sameSpeaker, int differentSpeaker, int sameSpeakerFirst, int differentSpeakerFirst) {
+	public DistanceStatsNew(int total, int sameSpeaker, int differentSpeaker, int sameSpeakerFirst, int differentSpeakerFirst) {
 		super();
 		this.total = total;
 		this.sameSpeaker = sameSpeaker;
@@ -397,7 +397,7 @@ class DistanceStats {
 
 }
 
-class ChatStats {
+class ChatStatsNew {
 
 	private int contributions;
 	private int participants;
@@ -411,7 +411,7 @@ class ChatStats {
 	private Map<Integer, Integer> references; // number of references to
 												// distance 1, 2, ... 5
 
-	public ChatStats(
+	public ChatStatsNew(
 			int contributions,
 			int participants,
 			int duration,
