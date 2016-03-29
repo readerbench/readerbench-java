@@ -303,7 +303,8 @@ public class CSCLStats {
 						ds.getSameSpeaker() + "," +
 						ds.getDifferentSpeaker() + "," +
 						(ds.getTotal() / no_references) + "," +
-						ds.getSameSpeakerFirst()
+						ds.getSameSpeakerFirst() + ", " + 
+						ds.getDifferentSpeakerFirst()
 				);
 				sb.append("\n");
 			}
