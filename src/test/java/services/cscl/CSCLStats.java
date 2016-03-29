@@ -90,6 +90,9 @@ public class CSCLStats {
 					));
 
 					Map<Integer, Integer> references = new HashMap<Integer, Integer>();
+					for (int i = 1; i < 5; i++) {
+						references.put(i, 0);
+					}
 
 					// first parameter = distance
 					// second parameter = number of links
@@ -255,7 +258,6 @@ public class CSCLStats {
 						cs.getDifferentSpeakerFirst() + "," +
 						cs.getSameBlock() + "," + 
 						cs.getDifferentBlock() + ","
-						
 				);
 
 				logger.info("References for " + pair.getKey() + " file: " + cs.getReferences().size());
