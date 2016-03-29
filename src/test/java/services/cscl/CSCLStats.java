@@ -9,10 +9,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
 import data.Block;
@@ -28,6 +30,7 @@ public class CSCLStats {
 	private static int WINDOW_SIZE = 20;
 	private static String conversationsPath = "resources/in/corpus_v2_sample/";
 	// private static String conversationsPath = "resources/in/corpus_chats/";
+	private static int no_references = 0;
 
 	public static void main(String[] args) {
 
@@ -66,16 +69,23 @@ public class CSCLStats {
 
 					int timp = 0;
 					if (firstUtt != null && lastUtt != null) {
+						// add 24 hours if last utterance's time is lower then first utterance's time (midnight passed)
+						if (firstUtt.getTime().after(lastUtt.getTime())) {
+							DateUtils.addHours(lastUtt.getTime(), 24);
+						}
 						timp = (int) getDateDiff(firstUtt.getTime(), lastUtt.getTime(), TimeUnit.MINUTES);
 					}
 					// save conversation info
 					chatStats.put(filePath.getFileName().toString(),
 							new ChatStats(c.getBlocks().size(), // contributions
 									c.getParticipants().size(), // participants
-									timp, // durations
+									timp, // duration
 									0, // explicitLinks
-									0, // same block
 									0, // coverage
+									0, // same speaker first
+									0, // different speaker first
+									0, // same block
+									0, // different block
 									null // references
 					));
 
@@ -94,6 +104,9 @@ public class CSCLStats {
 							if (block1.getRefBlock() != null && block1.getRefBlock().getIndex() != 0) {
 								Block block2 = c.getBlocks().get(block1.getRefBlock().getIndex());
 								if (block2 != null) {
+									
+									// count new reference
+									no_references++;
 									Utterance utterance2 = (Utterance) block2;
 									chatStats.get(filePath.getFileName().toString()).setExplicitLinks(
 											chatStats.get(filePath.getFileName().toString()).getExplicitLinks() + 1);
@@ -120,8 +133,10 @@ public class CSCLStats {
 										ds.setTotal(ds.getTotal() + 1);
 										if (utterance1.getParticipant() == utterance2.getParticipant()) {
 											ds.setSameSpeaker(ds.getSameSpeaker() + 1);
-											if (distance == 1)
+											if (distance == 1) {
 												ds.setSameSpeakerFirst(ds.getSameSpeakerFirst() + 1);
+												chatStats.get(filePath.getFileName().toString()).setSameSpeakerFirst(chatStats.get(filePath.getFileName().toString()).getSameSpeakerFirst() + 1);
+											}
 											// check if same block
 											boolean sameBlock = true;
 											for (int k = block2.getIndex() + 1; k < block1.getIndex(); k++) {
@@ -139,10 +154,14 @@ public class CSCLStats {
 											// end check if same block
 										} else {
 											ds.setDifferentSpeaker(ds.getDifferentSpeaker() + 1);
+											if (distance == 1) {
+												ds.setDifferentSpeakerFirst(ds.getDifferentSpeakerFirst() + 1);
+												chatStats.get(filePath.getFileName().toString()).setDifferentSpeakerFirst(chatStats.get(filePath.getFileName().toString()).getDifferentSpeakerFirst() + 1);
+											}
 										}
 									} else {
 										if (utterance1.getParticipant() == utterance2.getParticipant()) {
-											ds = new DistanceStats(1, 1, 0, 0);
+											ds = new DistanceStats(1, 1, 0, 0, 0);
 											if (distance == 1)
 												ds.setSameSpeakerFirst(ds.getSameSpeakerFirst() + 1);
 											boolean sameBlock = true;
@@ -150,6 +169,9 @@ public class CSCLStats {
 												Utterance aux = (Utterance) c.getBlocks().get(k);
 												if (aux.getParticipant() != utterance1.getParticipant()) {
 													sameBlock = false;
+													chatStats.get(filePath.getFileName().toString()).setDifferentBlock(
+															chatStats.get(filePath.getFileName().toString()).getDifferentBlock()
+																	+ 1);
 													break;
 												}
 											}
@@ -158,7 +180,7 @@ public class CSCLStats {
 														chatStats.get(filePath.getFileName().toString()).getSameBlock()
 																+ 1);
 										} else {
-											ds = new DistanceStats(1, 0, 1, 0);
+											ds = new DistanceStats(1, 0, 1, 0, 0);
 										}
 									}
 									blockDistances.put(distance, ds);
@@ -205,7 +227,7 @@ public class CSCLStats {
 			logger.info(pair.getKey() + " = " + pair.getValue());
 		}
 
-		printDistancesToCSVFile(blockDistances);
+		printDistancesToCSVFile(blockDistances, no_references);
 		printConversationStatsToCSVFile(chatStats);
 
 	}
@@ -216,15 +238,25 @@ public class CSCLStats {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(
-					"sep=,\nchat id,contrubtions,participants,duration,explicit links,same block,coverage,d1,d2,d3,d4,d5\n");
+					"sep=,\nchat id,contrubtions,participants,duration,explicit links,coverage,same speaker first,different speaker first,same block,different block,d1,d2,d3,d4,d5\n");
 
 			Iterator it = chatStats.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry) it.next();
 				ChatStats cs = (ChatStats) pair.getValue();
-				sb.append(pair.getKey() + "," + cs.getContributions() + ", " + cs.getParticipants() + ","
-						+ cs.getDurations() + "," + cs.getExplicitLinks() + "," + cs.getSameBlock() + ","
-						+ Formatting.formatNumber(cs.getCoverage()) + ",");
+				sb.append(
+						pair.getKey() + "," +
+						cs.getContributions() + ", " +
+						cs.getParticipants() + "," + 
+						cs.getDuration() + "," +
+						cs.getExplicitLinks() + "," +
+						Formatting.formatNumber(cs.getCoverage()) + "," +
+						cs.getSameSpeakerFirst() + "," +
+						cs.getDifferentSpeakerFirst() + "," +
+						cs.getSameBlock() + "," + 
+						cs.getDifferentBlock() + ","
+						
+				);
 
 				logger.info("References for " + pair.getKey() + " file: " + cs.getReferences().size());
 				Iterator itReferences = cs.getReferences().entrySet().iterator();
@@ -252,21 +284,27 @@ public class CSCLStats {
 
 	}
 
-	private static void printDistancesToCSVFile(Map<Integer, DistanceStats> blockDistances) {
+	private static void printDistancesToCSVFile(Map<Integer, DistanceStats> blockDistances, int no_references) {
 		// String prependPath =
 		// "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
 
 		try {
 
 			StringBuilder sb = new StringBuilder();
-			sb.append("sep=,\ndistance,total,same speaker,different speaker,same speaker first (d=1)\n");
+			sb.append("sep=,\ndistance,total,same speaker,different speaker,%,same speaker first,different speaker first\n");
 
 			Iterator it = blockDistances.entrySet().iterator();
 			while (it.hasNext()) {
 				Map.Entry pair = (Map.Entry) it.next();
 				DistanceStats ds = (DistanceStats) pair.getValue();
-				sb.append(pair.getKey() + "," + ds.getTotal() + ", " + ds.getSameSpeaker() + ","
-						+ ds.getDifferentSpeaker() + "," + ds.getSameSpeakerFirst());
+				sb.append(
+						pair.getKey() + "," +
+						ds.getTotal() + ", " +
+						ds.getSameSpeaker() + "," +
+						ds.getDifferentSpeaker() + "," +
+						(ds.getTotal() / no_references) + "," +
+						ds.getSameSpeakerFirst()
+				);
 				sb.append("\n");
 			}
 
@@ -303,13 +341,15 @@ class DistanceStats {
 	private int sameSpeaker;
 	private int differentSpeaker;
 	private int sameSpeakerFirst;
+	private int differentSpeakerFirst;
 
-	public DistanceStats(int total, int sameSpeaker, int differentSpeaker, int sameSpeakerFirst) {
+	public DistanceStats(int total, int sameSpeaker, int differentSpeaker, int sameSpeakerFirst, int differentSpeakerFirst) {
 		super();
 		this.total = total;
 		this.sameSpeaker = sameSpeaker;
 		this.differentSpeaker = differentSpeaker;
 		this.sameSpeakerFirst = sameSpeakerFirst;
+		this.differentSpeaker = differentSpeaker;
 	}
 
 	public int getTotal() {
@@ -343,6 +383,14 @@ class DistanceStats {
 	public void setSameSpeakerFirst(int sameSpeakerFirst) {
 		this.sameSpeakerFirst = sameSpeakerFirst;
 	}
+	
+	public int getDifferentSpeakerFirst() {
+		return differentSpeakerFirst;
+	}
+
+	public void setDifferentSpeakerFirst(int differentSpeakerFirst) {
+		this.differentSpeakerFirst = differentSpeakerFirst;
+	}
 
 }
 
@@ -350,23 +398,63 @@ class ChatStats {
 
 	private int contributions;
 	private int participants;
-	private int durations; // timestamp
+	private int duration; // timestamp
 	private int explicitLinks;
+	private int sameSpeakerFirst;
+	private int differentSpeakerFirst;
 	private int sameBlock;
+	private int differentBlock;
 	private double coverage;
 	private Map<Integer, Integer> references; // number of references to
 												// distance 1, 2, ... 5
 
-	public ChatStats(int contributions, int participants, int durations, int explicitLinks, int sameBlock,
-			double coverage, Map<Integer, Integer> references) {
+	public ChatStats(
+			int contributions,
+			int participants,
+			int duration,
+			int explicitLinks,
+			double coverage,
+			int sameSpeakerFirst,
+			int differentSpeakerFirst,
+			int sameBlock,
+			int differentBlock,
+			Map<Integer, Integer> references
+		) {
 		super();
 		this.contributions = contributions;
 		this.participants = participants;
-		this.durations = durations;
+		this.duration = duration;
 		this.explicitLinks = explicitLinks;
-		this.sameBlock = sameBlock;
 		this.coverage = coverage;
+		this.sameSpeakerFirst = sameSpeakerFirst;
+		this.differentSpeakerFirst = differentSpeakerFirst;
+		this.sameBlock = sameBlock;
+		this.differentBlock = sameBlock;
 		this.references = references;
+	}
+
+	public int getSameSpeakerFirst() {
+		return sameSpeakerFirst;
+	}
+
+	public void setSameSpeakerFirst(int sameSpeakerFirst) {
+		this.sameSpeakerFirst = sameSpeakerFirst;
+	}
+
+	public int getDifferentSpeakerFirst() {
+		return differentSpeakerFirst;
+	}
+
+	public void setDifferentSpeakerFirst(int differentSpeakerFirst) {
+		this.differentSpeakerFirst = differentSpeakerFirst;
+	}
+
+	public int getDifferentBlock() {
+		return differentBlock;
+	}
+
+	public void setDifferentBlock(int differentBlock) {
+		this.differentBlock = differentBlock;
 	}
 
 	public int getContributions() {
@@ -385,12 +473,12 @@ class ChatStats {
 		this.participants = participants;
 	}
 
-	public int getDurations() {
-		return durations;
+	public int getDuration() {
+		return duration;
 	}
 
-	public void setDurations(int durations) {
-		this.durations = durations;
+	public void setDuration(int duration) {
+		this.duration = duration;
 	}
 
 	public int getExplicitLinks() {
