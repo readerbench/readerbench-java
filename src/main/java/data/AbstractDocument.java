@@ -273,13 +273,30 @@ public abstract class AbstractDocument extends AnalysisElement {
 	}
 
 	public void saveSerializedDocument() {
-		logger.info("Saving serialized document");
+		logger.info("Saving serialized document...");
 		FileOutputStream fos = null;
 		ObjectOutputStream out = null;
 		try {
 			fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
 			out = new ObjectOutputStream(fos);
 			out.writeObject(this);
+			out.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public void saveTxtDocument() {
+		logger.info("Saving plain text document...");
+		try {
+			File output = new File(path.replace(".xml", ".txt"));
+			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
+					32768);
+			for (Block block : this.getBlocks()) {
+				if (block != null) {
+					out.write(block.getText() + "\n");
+				}
+			}
 			out.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();

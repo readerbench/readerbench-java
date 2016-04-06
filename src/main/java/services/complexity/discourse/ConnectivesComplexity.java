@@ -28,6 +28,12 @@ public class ConnectivesComplexity extends IComplexityFactors {
 					+ className.replaceAll("_", " ") + " selon un bloc (FR)";
 			index++;
 		}
+		index = 0;
+		for (String className : Connectives.CONNECTIVES_RO.getClasses().keySet()) {
+			descriptions[ComplexityIndices.CONNECTIVES_RO + index] = "Număr mediu de conectori"
+					+ className.replaceAll("_", " ") + " conectori per paragraf (RO)";
+			index++;
+		}
 	}
 
 	public void setComplexityIndexAcronym(String[] acronyms) {
@@ -43,17 +49,26 @@ public class ConnectivesComplexity extends IComplexityFactors {
 			acronyms[ComplexityIndices.CONNECTIVES_FR + index] = "Avg" + classNameAcronym + "BlFr";
 			index++;
 		}
+		index = 0;
+		for (String className : Connectives.CONNECTIVES_RO.getClasses().keySet()) {
+			String classNameAcronym = WordUtils.capitalizeFully(className, new char[] { '_' }).replaceAll("_", "");
+			acronyms[ComplexityIndices.CONNECTIVES_RO + index] = "Avg" + classNameAcronym + "BlRo";
+			index++;
+		}
 	}
 
 	public int[] getIDs() {
-		int[] ids = new int[Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR];
-		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR; i++)
+		int[] ids = new int[Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR
+				+ Connectives.NO_CONNECTIVE_TYPES_RO];
+		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR
+				+ Connectives.NO_CONNECTIVE_TYPES_RO; i++)
 			ids[i] = ComplexityIndices.CONNECTIVES_EN + i;
 		return ids;
 	}
 
 	public void computeComplexityFactors(AbstractDocument document) {
-		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR; i++)
+		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR
+				+ Connectives.NO_CONNECTIVE_TYPES_RO; i++)
 			document.getComplexityIndices()[ComplexityIndices.CONNECTIVES_EN + i] = ComplexityIndices.IDENTITY;
 
 		ClassesOfWords classes = null;
@@ -66,6 +81,10 @@ public class ConnectivesComplexity extends IComplexityFactors {
 		case fr:
 			classes = Connectives.CONNECTIVES_FR;
 			index = ComplexityIndices.CONNECTIVES_FR;
+			break;
+		case ro:
+			classes = Connectives.CONNECTIVES_RO;
+			index = ComplexityIndices.CONNECTIVES_RO;
 			break;
 		default:
 			classes = null;

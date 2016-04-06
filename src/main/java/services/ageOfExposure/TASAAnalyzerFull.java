@@ -91,7 +91,6 @@ public class TASAAnalyzerFull {
 			stdev = Math.sqrt(s0 * s2 - Math.pow(s1, 2)) / s0;
 		}
 
-
 		for (int i = 0; i < modelA.getNoTopics(); i++) {
 			for (int j = 0; j < modelB.getNoTopics(); j++) {
 				if (matches[i][j] < mean - stdev) {
@@ -99,16 +98,18 @@ public class TASAAnalyzerFull {
 				}
 			}
 		}
-//		int noMatch = 0;
-//		logger.info("Mean: " + mean + "; Stdev:" + stdev + "; Number of matches: " + noMatch);
-//		for (int i = 0; i < modelA.getNoTopics(); i++) {
-//			System.out.println(modelA.printTopic(i, 50));
-//			for (int j = 0; j < modelB.getNoTopics(); j++) {
-//				if (matches[i][j] > 0) {
-//					System.out.println("\t" + Formatting.formatNumber(matches[i][j]) + " " + modelA.printTopic(j, 50));
-//				}
-//			}
-//		}
+		// int noMatch = 0;
+		// logger.info("Mean: " + mean + "; Stdev:" + stdev + "; Number of
+		// matches: " + noMatch);
+		// for (int i = 0; i < modelA.getNoTopics(); i++) {
+		// System.out.println(modelA.printTopic(i, 50));
+		// for (int j = 0; j < modelB.getNoTopics(); j++) {
+		// if (matches[i][j] > 0) {
+		// System.out.println("\t" + Formatting.formatNumber(matches[i][j]) + "
+		// " + modelA.printTopic(j, 50));
+		// }
+		// }
+		// }
 		return matches;
 	}
 
@@ -327,7 +328,7 @@ public class TASAAnalyzerFull {
 	public static void main(String args[]) throws Exception {
 		BasicConfigurator.configure();
 
-		TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE copy 2", 5);
+		TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE 100", 6);
 		ta.loadModels();
 		ta.performMatching();
 		ta.writeResults();

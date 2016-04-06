@@ -130,9 +130,10 @@ public class ComplexityIndices {
 	// Connectives
 	public static final int CONNECTIVES_EN = (id += 1);
 	public static final int CONNECTIVES_FR = (id += Connectives.NO_CONNECTIVE_TYPES_EN);
+	public static final int CONNECTIVES_RO = (id += Connectives.NO_CONNECTIVE_TYPES_FR);
 
 	// Cohesion (Lexical chains)
-	public static final int LEXICAL_CHAINS_AVERAGE_SPAN = (id += Connectives.NO_CONNECTIVE_TYPES_FR);
+	public static final int LEXICAL_CHAINS_AVERAGE_SPAN = (id += Connectives.NO_CONNECTIVE_TYPES_RO);
 	public static final int LEXICAL_CHAINS_MAX_SPAN = (id += 1);
 	public static final int AVERAGE_NO_LEXICAL_CHAINS = (id += 1);
 	public static final int PERCENTAGE_LEXICAL_CHAINS_COVERAGE = (id += 1);

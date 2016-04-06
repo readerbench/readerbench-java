@@ -7,6 +7,8 @@ public class Pronouns {
 			"resources/config/WordLists/pronouns_en.txt");
 	public static final ClassesOfWords PRONOUNS_FR = new ClassesOfWords(
 			"resources/config/WordLists/pronouns_fr.txt");
+	public static final ClassesOfWords PRONOUNS_RO = new ClassesOfWords(
+			"resources/config/WordLists/pronouns_ro.txt");
 	public static final int NO_PRONOUN_TYPES = PRONOUNS_EN.getClasses().size();
 
 	public static boolean isConnective(String s, Lang lang) {
@@ -15,6 +17,8 @@ public class Pronouns {
 		switch (lang) {
 		case fr:
 			return PRONOUNS_FR.getAllWords().contains(s);
+		case ro:
+			return PRONOUNS_RO.getAllWords().contains(s);
 		default:
 			return PRONOUNS_EN.getAllWords().contains(s);
 		}

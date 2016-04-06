@@ -188,6 +188,12 @@ public class Txt2XmlConverter {
 		// "in/essays/pretest_spring_2010/texts", Lang.eng, "UTF-8");
 		// Txt2XmlConverter.parseTxtFiles("Familiarity essay - ", "in/texts 2
 		// for familiarity", Lang.eng, "UTF-8");
-		Txt2XmlConverter.parseMergedTxtFiles("resources/in/essays/chaprou_fr", Lang.fr, "UTF-8");
+		// Txt2XmlConverter.parseMergedTxtFiles("resources/in/essays/chaprou_fr",
+		// Lang.fr, "UTF-8");
+		Txt2XmlConverter.parseTxtFiles("Eminescu - ", "resources/in/Eminescu vs Bratianu/Eminescu 1877 - 1880", Lang.ro,
+				"UTF-8");
+		Txt2XmlConverter.parseTxtFiles("Bratianu - ", "resources/in/Eminescu vs Bratianu/Bratianu 1857 - 1875", Lang.ro,
+				"UTF-8");
+
 	}
 }
