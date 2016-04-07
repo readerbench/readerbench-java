@@ -726,7 +726,7 @@ public class SemanticModelsTraining extends JFrame {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 
-		ReaderBenchServer.initializeDB();
+		//ReaderBenchServer.initializeDB();
 
 		ReaderBenchView.adjustToSystemGraphics();
 

@@ -25,8 +25,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "Word.findAll", query = "SELECT w FROM Word w"),
     @NamedQuery(name = "Word.findById", query = "SELECT w FROM Word w WHERE w.id = :id"),
-    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.label = :label"),
-    @NamedQuery(name = "Word.findByPrefix", query = "SELECT w FROM Word w WHERE w.label like :label")})
+    @NamedQuery(name = "Word.findByLabel", query = "SELECT w FROM Word w WHERE w.fkLanguage = :lang and w.label = :label"),
+    @NamedQuery(name = "Word.findByLang", query = "SELECT w FROM Word w WHERE w.fkLanguage = :lang"),
+    @NamedQuery(name = "Word.findByPrefix", query = "SELECT w FROM Word w WHERE w.fkLanguage = :lang and w.label like :label")})
 public class Word implements Serializable {
     @JoinColumn(name = "fk_language", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

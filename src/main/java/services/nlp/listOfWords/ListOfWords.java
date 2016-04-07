@@ -77,12 +77,12 @@ public class ListOfWords {
 
 	public static void main(String[] args) {
 
-		ListOfWords dict1 = new ListOfWords("resources/config/Dictionary/dict_en.txt");
-		ListOfWords dict2 = new ListOfWords("resources/config/Dictionary/EN/names_en.txt");
+		ListOfWords dict1 = new ListOfWords("resources/config/Dictionary/dict_fr.txt");
+		//ListOfWords dict2 = new ListOfWords("resources/config/Dictionary/EN/names_en.txt");
 
-		Set<String> finalWords = new TreeSet<String>();
-		finalWords.addAll(dict1.getWords());
-		finalWords.addAll(dict2.getWords());
+		//Set<String> finalWords = new TreeSet<String>();
+		//finalWords.addAll(dict1.getWords());
+		//finalWords.addAll(dict2.getWords());
 
 		// for (String w : dict1.getWords()) {
 		// if (!dict2.getWords().contains(w))
@@ -92,7 +92,7 @@ public class ListOfWords {
 		// if (w.matches("[a-z].*"))
 		// finalWords.add(w);
 		// }
-		dict1.setWords(finalWords);
-		dict1.writeListOfWords("resources/config/Dictionary/dict2_en.txt");
+		//dict1.setWords(finalWords);
+		dict1.writeListOfWords("resources/config/Dictionary/dict_fr_full.txt");
 	}
 }

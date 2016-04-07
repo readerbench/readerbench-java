@@ -1,7 +1,11 @@
 package data.pojo;
 
+import dao.LanguageDAO;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -31,6 +35,17 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Language.findByShortLabel", query = "SELECT l FROM Language l WHERE l.shortLabel = :shortLabel"),
     @NamedQuery(name = "Language.findByLabel", query = "SELECT l FROM Language l WHERE l.label = :label")})
 public class Language implements Serializable {
+    private static final Map<Lang, Language> convertion = new HashMap<>();
+    static {
+        convertion.put(Lang.eng, LanguageDAO.getInstance().findById(1));
+        convertion.put(Lang.es, LanguageDAO.getInstance().findById(2));
+        convertion.put(Lang.fr, LanguageDAO.getInstance().findById(3));
+        convertion.put(Lang.it, LanguageDAO.getInstance().findById(4));
+        convertion.put(Lang.jpn, LanguageDAO.getInstance().findById(5));
+        convertion.put(Lang.nl, LanguageDAO.getInstance().findById(6));
+        convertion.put(Lang.ro, LanguageDAO.getInstance().findById(7));
+    }
+    
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,6 +66,10 @@ public class Language implements Serializable {
 
     public Language(Integer id) {
         this.id = id;
+    }
+    
+    public static Language fromLang(Lang lang) {
+        return convertion.get(lang);
     }
 
     public Language(Integer id, String shortLabel, String label) {
