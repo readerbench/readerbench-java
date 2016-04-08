@@ -11,6 +11,9 @@ public class TestWebServiceLSA {
 
 		ReaderBenchServer.initializeDB();
 
+//		SerialCorpusAssessment.processCorpus("resources/in/articles financial",
+//		"resources/confing/LSA/financial_simple_en", null, Lang.eng, true, true, null, null, true);
+		
 		SearchWebServer server1 = new SearchWebServer(5656, "resources/in/articles financial");
 		server1.start();
 	}

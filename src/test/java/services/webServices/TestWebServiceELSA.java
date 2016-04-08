@@ -11,6 +11,9 @@ public class TestWebServiceELSA {
 
 		ReaderBenchServer.initializeDB();
 
+//		SerialCorpusAssessment.processCorpus("resources/in/articles financial associations",
+//				"resources/confing/LSA/financial_en", null, Lang.eng, true, true, null, null, true);
+
 		SearchWebServer server2 = new SearchWebServer(5858, "resources/in/articles financial associations");
 		server2.start();
 	}

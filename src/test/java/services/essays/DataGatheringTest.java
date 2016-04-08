@@ -93,8 +93,8 @@ public class DataGatheringTest {
 			// DataGathering.processTexts("resources/in/Elvira/users 2015", -1,
 			// true, lsa, lda, Lang.eng, true, true);
 			
-			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro, true, true);
-			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro, true, true);
+			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro, false, false);
+			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro, false, false);
 
 			/*
 			 * exportPlainTexts("resources/in/Elvira/users 2010");
