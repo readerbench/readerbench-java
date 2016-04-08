@@ -24,10 +24,6 @@ import edu.cmu.lti.ws4j.RelatednessCalculator;
 import edu.cmu.lti.ws4j.impl.LeacockChodorow;
 import edu.cmu.lti.ws4j.impl.Path;
 import edu.cmu.lti.ws4j.impl.WuPalmer;
-import java.util.Iterator;
-import net.sf.extjwnl.JWNLException;
-import net.sf.extjwnl.data.IndexWord;
-import org.openide.util.Exceptions;
 
 public class OntologySupport {
 
@@ -240,16 +236,16 @@ public class OntologySupport {
     }
 
     public static void main(String[] args) {
-        try {
-            //System.out.println(semanticSimilarity(Word.getWordFromConcept("dog_NN", Lang.eng),
-            //        Word.getWordFromConcept("cat_NN", Lang.eng), OntologySupport.PATH_SIM));
-            net.sf.extjwnl.dictionary.Dictionary dictionary = net.sf.extjwnl.dictionary.Dictionary.getDatabaseBackedInstance("jdbc:sqlite:resources/config/WN/wnrom.db");
-            Iterator<IndexWord> it = dictionary.getIndexWordIterator(net.sf.extjwnl.data.POS.NOUN);
-            while (it.hasNext()) {
-                System.out.println(it.next());
-            }
-        } catch (JWNLException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+//        try {
+//            //System.out.println(semanticSimilarity(Word.getWordFromConcept("dog_NN", Lang.eng),
+//            //        Word.getWordFromConcept("cat_NN", Lang.eng), OntologySupport.PATH_SIM));
+//            net.sf.extjwnl.dictionary.Dictionary dictionary = net.sf.extjwnl.dictionary.Dictionary.getDatabaseBackedInstance("jdbc:sqlite:resources/config/WN/wnrom.db");
+//            Iterator<IndexWord> it = dictionary.getIndexWordIterator(net.sf.extjwnl.data.POS.NOUN);
+//            while (it.hasNext()) {
+//                System.out.println(it.next());
+//            }
+//        } catch (JWNLException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
     }
 }
