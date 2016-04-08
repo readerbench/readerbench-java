@@ -51,7 +51,7 @@ public class VCoPEvaluationView extends JFrame {
 	 * Create the frame.
 	 */
 	public VCoPEvaluationView() {
-		setTitle("ReaderBench - " +  LocalizationUtils.getTranslation("Evaluate virtual Communities of Practice"));
+		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Evaluate virtual Communities of Practice"));
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 675, 275);
@@ -87,38 +87,36 @@ public class VCoPEvaluationView extends JFrame {
 
 		JPanel panelEvaluate = new JPanel();
 		panelEvaluate.setBackground(Color.WHITE);
-		panelEvaluate.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), 
-				LocalizationUtils.getTranslation("Evaluate"),
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panelEvaluate.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+				LocalizationUtils.getTranslation("Evaluate"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
+		gl_contentPane
+				.setHorizontalGroup(
+						gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(
+										gl_contentPane.createSequentialGroup().addContainerGap()
+												.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+														.addGroup(gl_contentPane.createSequentialGroup()
+																.addComponent(lblPath).addGap(110)
+																.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE,
+																		435, Short.MAX_VALUE)
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
+																		GroupLayout.PREFERRED_SIZE)
+																.addGap(6))
+														.addGroup(gl_contentPane
+																.createSequentialGroup().addComponent(panelEvaluate,
+																		GroupLayout.DEFAULT_SIZE, 635, Short.MAX_VALUE)
+																.addContainerGap()))));
+		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblPath)
-							.addGap(110)
-							.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-							.addGap(6))
-						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(panelEvaluate, GroupLayout.DEFAULT_SIZE, 635, Short.MAX_VALUE)
-							.addContainerGap())))
-		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblPath)
-						.addComponent(btnSearch)
-						.addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addComponent(panelEvaluate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(114, Short.MAX_VALUE))
-		);
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
+								.addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
+										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(panelEvaluate,
+								GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap(114, Short.MAX_VALUE)));
 
 		JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
 
@@ -159,9 +157,11 @@ public class VCoPEvaluationView extends JFrame {
 				} else {
 					lang = null;
 					comboBoxLSA.removeAllItems();
-					comboBoxLSA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
+					comboBoxLSA.addItem(
+							LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
 					comboBoxLDA.removeAllItems();
-					comboBoxLDA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
+					comboBoxLDA.addItem(
+							LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
 				}
 			}
 		});
@@ -184,7 +184,7 @@ public class VCoPEvaluationView extends JFrame {
 					if (comboBoxLanguage.getSelectedIndex() > 0) {
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-						SerialCorpusAssessment.processCorpus(textFieldPath.getText(),
+						SerialCorpusAssessment.processCorpus(false, textFieldPath.getText(),
 								(String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(), lang,
 								chckbxUsePosTagging.isSelected(), true, null, null, true);
 
@@ -203,34 +203,26 @@ public class VCoPEvaluationView extends JFrame {
 			}
 		});
 		GroupLayout gl_panelEvaluate = new GroupLayout(panelEvaluate);
-		gl_panelEvaluate
-				.setHorizontalGroup(
-						gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
-								.addGroup(
-										gl_panelEvaluate.createSequentialGroup().addContainerGap()
-												.addGroup(gl_panelEvaluate
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addGroup(
-																gl_panelEvaluate.createSequentialGroup()
-																		.addGroup(
-																				gl_panelEvaluate
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addComponent(lblLsaVectorSpace)
-																						.addComponent(lblLanguage)
-																						.addComponent(lblLdaModel))
-																		.addPreferredGap(
-																				ComponentPlacement.UNRELATED)
-								.addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_panelEvaluate.createSequentialGroup()
-												.addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
-														.addComponent(comboBoxLanguage, 0, GroupLayout.DEFAULT_SIZE,
-																Short.MAX_VALUE)
-														.addComponent(comboBoxLSA, 0, 495, Short.MAX_VALUE))
-												.addGap(7))
-										.addGroup(gl_panelEvaluate.createSequentialGroup()
-												.addComponent(comboBoxLDA, 0, 496, Short.MAX_VALUE).addContainerGap())))
+		gl_panelEvaluate.setHorizontalGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelEvaluate.createSequentialGroup().addContainerGap().addGroup(gl_panelEvaluate
+						.createParallelGroup(Alignment.LEADING).addGroup(
+								gl_panelEvaluate
+										.createSequentialGroup()
+										.addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
+												.addComponent(lblLsaVectorSpace).addComponent(lblLanguage)
+												.addComponent(lblLdaModel))
+										.addPreferredGap(ComponentPlacement.UNRELATED)
+										.addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
+												.addGroup(gl_panelEvaluate.createSequentialGroup()
+														.addGroup(gl_panelEvaluate
+																.createParallelGroup(Alignment.LEADING)
+																.addComponent(comboBoxLanguage, 0,
+																		GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+																.addComponent(comboBoxLSA, 0, 495, Short.MAX_VALUE))
+														.addGap(7))
+												.addGroup(gl_panelEvaluate.createSequentialGroup()
+														.addComponent(comboBoxLDA, 0, 496, Short.MAX_VALUE)
+														.addContainerGap())))
 						.addGroup(gl_panelEvaluate.createSequentialGroup().addComponent(chckbxUsePosTagging)
 								.addPreferredGap(ComponentPlacement.RELATED, 247, Short.MAX_VALUE)
 								.addComponent(btnEvaluateCorpus).addContainerGap()))));

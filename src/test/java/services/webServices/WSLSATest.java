@@ -5,7 +5,7 @@ import org.apache.log4j.BasicConfigurator;
 import webService.ReaderBenchServer;
 import webService.semanticSearch.SearchWebServer;
 
-public class TestWebServiceLSA {
+public class WSLSATest {
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 

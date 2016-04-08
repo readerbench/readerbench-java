@@ -22,6 +22,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import data.cscl.Conversation;
+import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -66,7 +67,7 @@ public class SerialCorpusAssessment {
 		}
 	}
 
-	public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
+	public static void processCorpus(boolean isDocument, String rootPath, String pathToLSA, String pathToLDA, Lang lang,
 			boolean usePOSTagging, boolean cleanInput, String pathToComplexityModel, int[] selectedComplexityFactors,
 			boolean saveOutput) {
 		logger.info("Analysing all files in \"" + rootPath + "\"");
@@ -119,17 +120,29 @@ public class SerialCorpusAssessment {
 			if (!alreadyAnalysedFiles.contains(f.getName()))
 				files.add(f);
 		}
-
-		LSA lsa = LSA.loadLSA(pathToLSA, lang);
-		LDA lda = LDA.loadLDA(pathToLDA, lang);
+		LSA lsa = null;
+		LDA lda = null;
+		if (pathToLSA != null)
+			lsa = LSA.loadLSA(pathToLSA, lang);
+		if (pathToLDA != null)
+			LDA.loadLDA(pathToLDA, lang);
 
 		// process all remaining files
 		for (File f : files) {
 			try {
 				logger.info("Processing file " + f.getName());
 				Long start = System.currentTimeMillis();
-				Conversation c = Conversation.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
-				c.computeAll(usePOSTagging, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+				if (isDocument) {
+					Document d = Document.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
+					d.computeAll(true, pathToComplexityModel, selectedComplexityFactors);
+					// writing exports
+					if (saveOutput) {
+						d.saveSerializedDocument();
+					}
+				} else {
+					Conversation c = Conversation.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
+					c.computeAll(usePOSTagging, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+				}
 				Long end = System.currentTimeMillis();
 
 				// update checkpoint

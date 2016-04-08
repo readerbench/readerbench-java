@@ -488,14 +488,16 @@ public class Community extends AnalysisElement {
 						}
 					}
 
-					out.write(new File(d.getPath()).getName() + "," + noBlocks + ","
-							+ ((Conversation) d).getParticipants().size() + ","
-							+ Formatting.formatNumber(d.getOverallScore()) + ","
-							+ Formatting
-									.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-							+ "," + Formatting.formatNumber(
-									VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-							+ "\n");
+					out.write(
+							new File(d.getPath()).getName() + "," + noBlocks + ","
+									+ ((Conversation) d).getParticipants().size() + ","
+									+ Formatting.formatNumber(d.getOverallScore()) + ","
+									+ Formatting.formatNumber(
+											VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+									+ ","
+									+ Formatting.formatNumber(
+											VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+									+ "\n");
 				}
 
 				// print interaction matrix
@@ -546,8 +548,8 @@ public class Community extends AnalysisElement {
 						if (checkpoint.exists())
 							checkpoint.delete();
 					}
-					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
-							true, null, null, true);
+					SerialCorpusAssessment.processCorpus(false, f.getAbsolutePath(), pathToLSA, pathToLDA, lang,
+							usePOSTagging, true, null, null, true);
 					Community.processDocumentCollection(f.getAbsolutePath(), useTextualComplexity, startDate, endDate,
 							monthIncrement, dayIncrement);
 				}
