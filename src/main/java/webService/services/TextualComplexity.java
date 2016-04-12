@@ -18,8 +18,8 @@ public class TextualComplexity {
 	 * @param query
 	 * @return List of sentiment values per entity
 	 */
-	public static List<ResultSentiment> getComplexityIndices(AbstractDocument queryDoc) {
-		List<ResultSentiment> resultsComplexity = new ArrayList<ResultSentiment>();
+	public static List<ResultTextualComplexity> getComplexityIndices(AbstractDocument queryDoc) {
+		List<ResultTextualComplexity> resultsComplexity = new ArrayList<ResultTextualComplexity>();
 
 		List<ResultValence> localResults;
 		for (IComplexityFactors complexityClass : ComplexityIndices.TEXTUAL_COMPLEXITY_FACTORS) {
@@ -28,7 +28,7 @@ public class TextualComplexity {
 				localResults.add(new ResultValence(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[id],
 						Formatting.formatNumber(queryDoc.getComplexityIndices()[id])));
 			}
-			resultsComplexity.add(new ResultSentiment(complexityClass.getClassName(), localResults, null));
+			resultsComplexity.add(new ResultTextualComplexity(complexityClass.getClassName(), localResults));
 		}
 
 		return resultsComplexity;

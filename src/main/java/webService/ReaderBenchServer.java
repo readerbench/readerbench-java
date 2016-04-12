@@ -68,6 +68,8 @@ import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
 import webService.services.utils.FileProcessor;
 
+import webService.queryResult.*;
+
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 	public static final int PORT = 8080;
@@ -231,211 +233,6 @@ public class ReaderBenchServer {
 		}
 	}
 
-	private String convertToXml(QueryResult queryResult) {
-		Serializer serializer = new Persister();
-		StringWriter result = new StringWriter();
-		try {
-			serializer.write(queryResult, result);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return result.toString();
-	}
-
-	private String convertToJson(QueryResult queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-	
-	private String convertToJson(QueryResultTextCategorization queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultSentiment queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultSearch queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultTopic queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultSemanticAnnotation queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultSelfExplanation queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	private String convertToJson(QueryResultCscl queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-	
-	private String convertToJson(QueryResultCvCover queryResult) {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(queryResult);
-		return json;
-	}
-
-	@Root(name = "response")
-	private static class QueryResult {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private List<ResultValence> data; // list of query results (urls)
-
-		private QueryResult() {
-			success = true;
-			errorMsg = "";
-			data = new ArrayList<ResultValence>();
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultSentiment {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private List<ResultSentiment> data; // list of query results (urls)
-
-		private QueryResultSentiment() {
-			success = true;
-			errorMsg = "";
-			data = new ArrayList<ResultSentiment>();
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultSearch {
-
-		@Element
-		public boolean success;
-
-		@Element(name = "errormsg")
-		public String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		public List<ResultSearch> data; // list of query results (urls)
-
-		QueryResultSearch() {
-			success = true;
-			errorMsg = "";
-			data = new ArrayList<ResultSearch>();
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultTopic {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultTopic data; // list of query results (urls)
-
-		private QueryResultTopic() {
-			success = true;
-			errorMsg = "";
-			data = new ResultTopic(null, null);
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultSemanticAnnotation {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultSemanticAnnotation data; // list of query results (urls)
-
-		private QueryResultSemanticAnnotation() {
-			success = true;
-			errorMsg = "";
-			data = new ResultSemanticAnnotation(null, 0, 0, 0, null, null);
-		}
-	}
-	
-	@Root(name = "response")
-	private static class QueryResultTextCategorization {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultTextCategorization data; // list of query results (urls)
-
-		private QueryResultTextCategorization() {
-			success = true;
-			errorMsg = "";
-			data = new ResultTextCategorization(null, null);
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultSelfExplanation {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultSelfExplanation data; // list of query results (urls)
-
-		private QueryResultSelfExplanation() {
-			success = true;
-			errorMsg = "";
-			data = new ResultSelfExplanation(null, null);
-		}
-	}
-
 	@Root(name = "response")
 	private static class QueryResultPdfToText {
 
@@ -453,46 +250,6 @@ public class ReaderBenchServer {
 			success = true;
 			errorMsg = "";
 			data = new ResultPdfToText("");
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultCscl {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultCscl data;
-
-		private QueryResultCscl() {
-			success = true;
-			errorMsg = "";
-			data = new ResultCscl(null, null, null, null, null, null, null);
-		}
-	}
-	
-	@Root(name = "response")
-	private static class QueryResultCvCover {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultCvCover data;
-
-		private QueryResultCvCover() {
-			success = true;
-			errorMsg = "";
-			data = new ResultCvCover(null, null);
 		}
 	}
 
@@ -518,9 +275,9 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap.getTopics(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
-			String result = convertToJson(queryResult);
+			queryResult.setData(ConceptMap.getTopics(
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 		});
@@ -536,10 +293,9 @@ public class ReaderBenchServer {
 
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = webService.services.SentimentAnalysis
-					.getSentiment(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
-			String result = convertToJson(queryResult);
-			return result;
+			queryResult.setData(webService.services.SentimentAnalysis
+					.getSentiment(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+			return queryResult.convertToJson();
 		});
 		Spark.get("/getComplexity", (request, response) -> {
 			response.type("application/json");
@@ -551,11 +307,10 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
-			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.data = TextualComplexity.getComplexityIndices(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
-			String result = convertToJson(queryResult);
-			return result;
+			QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
+			queryResult.setData(TextualComplexity.getComplexityIndices(
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+			return queryResult.convertToJson();
 		});
 		Spark.get("/search", (request, response) -> {
 
@@ -563,12 +318,6 @@ public class ReaderBenchServer {
 
 			String text = request.queryParams("text");
 			String path = request.queryParams("path");
-			/*
-			 * String pathToLSA = request.queryParams("lsa"); String pathToLDA =
-			 * request.queryParams("lda"); String lang =
-			 * request.queryParams("lang"); boolean usePOSTagging =
-			 * Boolean.parseBoolean(request.queryParams("postagging"));
-			 */
 
 			int maxContentSize = Integer.MAX_VALUE;
 			String maxContentSizeStr = request.queryParams("mcs");
@@ -577,13 +326,8 @@ public class ReaderBenchServer {
 			}
 
 			QueryResultSearch queryResult = new QueryResultSearch();
-			// queryResult.data = getComplexityIndices(q, pathToLSA, pathToLDA,
-			// lang, usePOSTagging);
-			queryResult.success = true;
-			queryResult.errorMsg = "";
-			queryResult.data = SearchClient.search(text, setDocuments(path), maxContentSize);
-			String result = convertToJson(queryResult);
-			return result;
+			queryResult.setData(SearchClient.search(text, setDocuments(path), maxContentSize));
+			return queryResult.convertToJson();
 		});
 		Spark.get("/getTopicsFromPdf", (request, response) -> {
 			response.type("application/json");
@@ -607,9 +351,9 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.data = ConceptMap
-					.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
-			String result = convertToJson(queryResult);
+			queryResult.setData(ConceptMap
+					.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -632,9 +376,9 @@ public class ReaderBenchServer {
 			double threshold = (double) json.get("threshold");
 
 			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-			queryResult.data = getSemanticAnnotation(documentAbstract, documentKeywords, documentContent, pathToLSA,
-					pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
-			String result = convertToJson(queryResult);
+			queryResult.setData(getSemanticAnnotation(documentAbstract, documentKeywords, documentContent, pathToLSA,
+					pathToLDA, lang, usePOSTagging, computeDialogism, threshold));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -653,9 +397,9 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-			queryResult.data = getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			String result = convertToJson(queryResult);
+			queryResult.setData(getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging,
+					computeDialogism));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -694,8 +438,8 @@ public class ReaderBenchServer {
 			QueryResultCscl queryResult = new QueryResultCscl();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			queryResult.data = Cscl.getAll(conversationDocument, conversation, threshold);
-			String result = convertToJson(queryResult);
+			queryResult.setData(Cscl.getAll(conversationDocument, conversation, threshold));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -744,8 +488,8 @@ public class ReaderBenchServer {
 					usePOSTagging, computeDialogism, threshold);
 
 			QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
-			queryResult.data = new ResultTextCategorization(resultTopic, resultCategories);
-			String result = convertToJson(queryResult);
+			queryResult.setData(new ResultTextCategorization(resultTopic, resultCategories));
+			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -806,9 +550,61 @@ public class ReaderBenchServer {
 				result.setCover(resultCover);
 			}
 			
-			queryResult.data = result;
+			queryResult.setData(result);
 			
-			return convertToJson(queryResult);
+			return queryResult.convertToJson();
+			// return Charset.forName("UTF-8").encode(result);
+
+		});
+		Spark.post("/cvProcessing", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+
+			String cvFile = (String) json.get("cvFile");
+			String language = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			double threshold = (Double) json.get("threshold");
+
+			// AbstractDocumentTemplate contents =
+			// Cscl.getConversationText(conversationText);
+			// logger.info("Contents: blocks = " + contents.getBlocks().size());
+			Lang lang = Lang.getLang(language);
+			/*
+			 * Conversation conversation = new Conversation( null, contents,
+			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
+			 * usePOSTagging, false);
+			 */
+			/*Document cvContent = Document.load(new File(cvContent), LSA.loadLSA(pathToLSA, lang),
+					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
+			cvContent.computeAll(computeDialogism, null, null, true);*/
+			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);*/
+			
+			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
+			
+			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
+					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
+			coverContent.computeAll(computeDialogism, null, null, true);*/
+			
+			QueryResultCvCover queryResult = new QueryResultCvCover();
+			// queryResult.data =
+			// ParticipantInteraction.buildParticipantGraph(conversation);
+			ResultCvCover result = new ResultCvCover(null, null);
+			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
+			resultCv.setConcepts(ConceptMap.getTopics(
+					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+			resultCv.setSentiments(webService.services.SentimentAnalysis
+					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+			result.setCv(resultCv);
+			
+
+			queryResult.setData(result);
+			
+			return queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 
 		});
