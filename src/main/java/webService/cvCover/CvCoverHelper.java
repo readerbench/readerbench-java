@@ -7,7 +7,7 @@ import services.commons.VectorAlgebra;
 
 public class CvCoverHelper {
 
-	public static double search(
+	public static double computeSemanticSimilarity(
 			AbstractDocument document1,
 			AbstractDocument document2
 		) {

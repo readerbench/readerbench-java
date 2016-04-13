@@ -70,7 +70,7 @@ import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
 import webService.services.utils.FileProcessor;
-
+import webService.cvCover.CvCoverHelper;
 import webService.queryResult.*;
 
 public class ReaderBenchServer {
@@ -575,6 +575,10 @@ public class ReaderBenchServer {
 			    }
 			//}
 			result.setWordOccurences(commonWords);
+			
+			// semantic similarity between Cover Letter & CV
+			SemanticCohesion sc = new SemanticCohesion(cvDocument, coverDocument);
+			result.setSimilarity(Formatting.formatNumber(sc.getCohesion()));
 			
 			queryResult.setData(result);
 			
