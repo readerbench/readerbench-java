@@ -27,11 +27,18 @@ public class ResultCvCover {
 	}
 	public ResultCvOrCover cv;
 	public ResultCvOrCover cover;
-	private Map<Word, Integer> wordOccurences;
-	public Map<Word, Integer> getWordOccurences() {
+	private Map<String, Integer> wordOccurences;
+	private double similarity;
+	public double getSimilarity() {
+		return similarity;
+	}
+	public void setSimilarity(double similarity) {
+		this.similarity = similarity;
+	}
+	public Map<String, Integer> getWordOccurences() {
 		return wordOccurences;
 	}
-	public void setWordOccurences(Map<Word, Integer> wordOccurences) {
+	public void setWordOccurences(Map<String, Integer> wordOccurences) {
 		this.wordOccurences = wordOccurences;
 	}
 	

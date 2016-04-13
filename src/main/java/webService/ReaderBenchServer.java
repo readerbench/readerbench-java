@@ -526,7 +526,7 @@ public class ReaderBenchServer {
 			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);*/
 			
-			Map<Word, Integer> commonWords = new HashMap<Word, Integer>();
+			Map<String, Integer> commonWords = new HashMap<String, Integer>();
 			
 			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
 			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
@@ -569,7 +569,7 @@ public class ReaderBenchServer {
 			        Word cvWord = (Word)cvPair.getKey();
 			        Integer cvWordOccurences = (Integer)cvPair.getValue();
 			        if (coverWords.containsKey(cvWord)) {
-			        	commonWords.put(cvWord, cvWordOccurences + coverWords.get(cvWord));
+			        	commonWords.put(cvWord.getLemma(), cvWordOccurences + coverWords.get(cvWord));
 			        }
 			        itCvWords.remove(); // avoids a ConcurrentModificationException
 			    }

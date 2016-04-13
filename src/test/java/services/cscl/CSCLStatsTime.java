@@ -70,7 +70,7 @@ public class CSCLStatsTime {
 									if (utterance1.getTime().after(utterance2.getTime())) {
 										DateUtils.addHours(utterance2.getTime(), 24);
 									}
-									int timp = (int) getDateDiff(utterance1.getTime(), utterance2.getTime(), TimeUnit.SECONDS);
+									int timp = (int) getDateDiff(utterance2.getTime(), utterance1.getTime(), TimeUnit.SECONDS);
 									logger.info("Difference in seconds: " + timp);
 									if (timeStatsGlobal.get(timp) == null) {
 										timeStatsGlobal.put(
