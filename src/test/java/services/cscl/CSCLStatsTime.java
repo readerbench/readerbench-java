@@ -28,7 +28,7 @@ public class CSCLStatsTime {
 
 	public static Logger logger = Logger.getLogger(CSCLStatsTime.class);
 
-	private static String conversationsPath = "resources/in/corpus_v2_sample/";
+	private static String conversationsPath = "resources/in/corpus_v2/";
 	// private static String conversationsPath = "resources/in/corpus_chats/";
 	private static int no_references = 0;
 
