@@ -28,7 +28,7 @@ public class CSCLStatsTime {
 
 	public static Logger logger = Logger.getLogger(CSCLStatsTime.class);
 
-	private static String conversationsPath = "resources/in/corpus_v2/";
+	private static String conversationsPath = "resources/in/corpus_v2_sample/";
 	// private static String conversationsPath = "resources/in/corpus_chats/";
 	private static int no_references = 0;
 
@@ -52,37 +52,6 @@ public class CSCLStatsTime {
 							Lang.eng, false, true);
 					c.computeAll(true, null, null, true);
 
-					Utterance firstUtt = null;
-					for (int i = 1; i < c.getBlocks().size(); i++) {
-						firstUtt = (Utterance) c.getBlocks().get(i);
-						if (firstUtt != null)
-							break;
-					}
-					Utterance lastUtt = null;
-					for (int i = c.getBlocks().size() - 1; i > 0; i--) {
-						lastUtt = (Utterance) c.getBlocks().get(i);
-						if (lastUtt != null)
-							break;
-					}
-
-					int timp = 0;
-					if (firstUtt != null && lastUtt != null) {
-						// add 24 hours if last utterance's time is lower then first utterance's time (midnight passed)
-						if (firstUtt.getTime().after(lastUtt.getTime())) {
-							DateUtils.addHours(lastUtt.getTime(), 24);
-						}
-						timp = (int) getDateDiff(firstUtt.getTime(), lastUtt.getTime(), TimeUnit.SECONDS);
-					}
-					// save conversation info
-					timeStatsGlobal.put(
-							//filePath.getFileName().toString(),
-							timp,
-							new TimeStats(
-									0, // references
-									0, // same speaker references
-									0 // different speaker references
-					));
-
 					logger.info("Conversation has " + c.getBlocks().size() + " blocks.");
 
 					for (int i = 0; i < c.getBlocks().size(); i++) {
@@ -93,10 +62,25 @@ public class CSCLStatsTime {
 							if (block1.getRefBlock() != null && block1.getRefBlock().getIndex() != 0) {
 								Block block2 = c.getBlocks().get(block1.getRefBlock().getIndex());
 								if (block2 != null) {
-									
 									// count new reference
 									no_references++;
+									
 									Utterance utterance2 = (Utterance) block2;
+									logger.info("First utt time: " + utterance1.getTime() + "; second utt time: " + utterance2.getTime());
+									if (utterance1.getTime().after(utterance2.getTime())) {
+										DateUtils.addHours(utterance2.getTime(), 24);
+									}
+									int timp = (int) getDateDiff(utterance1.getTime(), utterance2.getTime(), TimeUnit.SECONDS);
+									logger.info("Difference in seconds: " + timp);
+									if (timeStatsGlobal.get(timp) == null) {
+										timeStatsGlobal.put(
+												timp,
+												new TimeStats(
+														0, // references
+														0, // same speaker references
+														0 // different speaker references
+										));
+									}
 									timeStatsGlobal.get(timp).setExplicitLinks(
 											timeStatsGlobal.get(timp).getExplicitLinks() + 1);
 									logger.info("Processing refered contribution " + block2.getText());
@@ -114,15 +98,6 @@ public class CSCLStatsTime {
 							}
 						}
 					}
-
-					//logger.info("Printing contribution distances for chat " + c.getPath());
-					//logger.info("Max distance for chat: " + blockDistances.size());
-					/*Iterator it = blockDistances.entrySet().iterator();
-					while (it.hasNext()) {
-						Map.Entry pair = (Map.Entry) it.next();
-						logger.info(pair.getKey() + " = " + pair.getValue());
-					}*/
-
 				}
 
 			});
@@ -133,12 +108,6 @@ public class CSCLStatsTime {
 		}
 
 		logger.info("Printing final contribution times for conversations.");
-		//logger.info("Max times for all conersations: " + Collections.max(timeStatsGlobal.values()));
-		/*Iterator it = blockDistances.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			logger.info(pair.getKey() + " = " + pair.getValue());
-		}*/
 
 		//printTimesToCSVFile(timeStatsGlobal, no_references);
 		printConversationStatsToCSVFile(timeStatsGlobal);

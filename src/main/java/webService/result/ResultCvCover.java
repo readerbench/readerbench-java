@@ -2,6 +2,9 @@ package webService.result;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import data.Word;
 
 public class ResultCvCover {
 
@@ -24,5 +27,12 @@ public class ResultCvCover {
 	}
 	public ResultCvOrCover cv;
 	public ResultCvOrCover cover;
+	private Map<Word, Integer> wordOccurences;
+	public Map<Word, Integer> getWordOccurences() {
+		return wordOccurences;
+	}
+	public void setWordOccurences(Map<Word, Integer> wordOccurences) {
+		this.wordOccurences = wordOccurences;
+	}
 	
 }

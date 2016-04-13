@@ -6,7 +6,10 @@ import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Iterator;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
@@ -523,7 +526,12 @@ public class ReaderBenchServer {
 			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);*/
 			
+			Map<Word, Integer> commonWords = new HashMap<Word, Integer>();
+			
 			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
+			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);
+			Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
 			
 			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
@@ -540,15 +548,33 @@ public class ReaderBenchServer {
 					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
 			result.setCv(resultCv);
 			
-			if (coverFile != null) {
+			//if (coverFile != null) {
 				String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
+				AbstractDocument coverDocument = processQuery(coverContent, pathToLSA, pathToLDA, language,
+						usePOSTagging, computeDialogism);
+				
 				ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
 				resultCover.setConcepts(ConceptMap.getTopics(
 						processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
 				resultCover.setSentiments(webService.services.SentimentAnalysis
 						.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
 				result.setCover(resultCover);
-			}
+				
+				Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
+			    
+			    Iterator itCvWords = cvWords.entrySet().iterator();
+			    while (itCvWords.hasNext()) {
+			        Map.Entry cvPair = (Map.Entry)itCvWords.next();
+			        //System.out.println(pair.getKey() + " = " + pair.getValue());
+			        Word cvWord = (Word)cvPair.getKey();
+			        Integer cvWordOccurences = (Integer)cvPair.getValue();
+			        if (coverWords.containsKey(cvWord)) {
+			        	commonWords.put(cvWord, cvWordOccurences + coverWords.get(cvWord));
+			        }
+			        itCvWords.remove(); // avoids a ConcurrentModificationException
+			    }
+			//}
+			result.setWordOccurences(commonWords);
 			
 			queryResult.setData(result);
 			

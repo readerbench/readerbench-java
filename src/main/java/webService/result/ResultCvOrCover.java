@@ -1,6 +1,9 @@
 package webService.result;
 
 import java.util.List;
+import java.util.Map;
+
+import data.Word;
 
 public class ResultCvOrCover {
 
@@ -23,5 +26,5 @@ public class ResultCvOrCover {
 	}
 	private ResultTopic concepts;
 	private List<ResultSentiment> sentiments;
-	
+		
 }
