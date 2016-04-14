@@ -168,6 +168,7 @@ public class PreProcessing {
 				new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"),
 				32768);
 		for (File f : filesToProcess) {
+			logger.info("Processing file: " + f.getName());
 			BufferedReader in = new BufferedReader(new FileReader(f));
 
 			String line = "";
