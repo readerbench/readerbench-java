@@ -46,7 +46,7 @@ import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
-import view.widgets.chat.ParticipantInteractionView;
+import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
 
 public class Community extends AnalysisElement {
@@ -95,7 +95,7 @@ public class Community extends AnalysisElement {
 							fistContributionDate = u.getTime();
 						if (u.getTime().before(fistContributionDate))
 							fistContributionDate = u.getTime();
-						Calendar date = new GregorianCalendar(2012, Calendar.JANUARY, 1);
+						Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
 						if (u.getTime().before(date.getTime()))
 							System.err.println(
 									"Incorrect time!!! " + c.getPath() + " / " + u.getIndex() + " : " + u.getTime());
@@ -171,18 +171,14 @@ public class Community extends AnalysisElement {
 						participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
 								participantToUpdate.getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
 
-						for (int j = i + 1; j < d.getBlocks().size(); j++) {
-							if (d.getPrunnedBlockDistances()[j][i] != null) {
+						for (int j = 0; j < i; j++) {
+							if (d.getPrunnedBlockDistances()[i][j] != null) {
 								Participant p2 = ((Utterance) d.getBlocks().get(j)).getParticipant();
 								int index2 = participants.indexOf(p2);
 								if (index2 >= 0) {
 									// model knowledge building effect
-									double addedKB = d.getBlocks().get(j).getOverallScore()
-											* d.getPrunnedBlockDistances()[j][i].getCohesion();
-									participantContributions[index2][index1] += addedKB;
-
-									addedKB = d.getBlocks().get(i).getOverallScore()
-											* d.getPrunnedBlockDistances()[j][i].getCohesion();
+									double addedKB = d.getBlocks().get(i).getIndividualScore()
+											* d.getPrunnedBlockDistances()[i][j].getCohesion();
 									participantContributions[index1][index2] += addedKB;
 								}
 							}
@@ -241,6 +237,7 @@ public class Community extends AnalysisElement {
 						participantToUpdate.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
 								participantToUpdate.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
 										+ d.getBlocks().get(i).getText().length());
+						break;
 					}
 				}
 			}
@@ -351,7 +348,6 @@ public class Community extends AnalysisElement {
 		File[] filesTODO = dir.listFiles(filter);
 		for (File f : filesTODO) {
 			Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
-			// d.exportIM();
 			if (c != null)
 				community.getDocuments().add(c);
 		}

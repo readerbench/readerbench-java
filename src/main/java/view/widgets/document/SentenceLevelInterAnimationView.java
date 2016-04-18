@@ -31,8 +31,8 @@ import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
 
 import view.models.document.CustomToolTipGeneratorVoice;
-import view.widgets.chat.ChatVoiceSimpleStatistics;
-import view.widgets.chat.VoiceSynergyView;
+import view.widgets.cscl.ChatVoiceSimpleStatistics;
+import view.widgets.cscl.VoiceSynergyView;
 import data.Block;
 import data.Word;
 import data.discourse.SemanticChain;

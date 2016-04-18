@@ -6,12 +6,10 @@ package data.discourse;
 
 import java.io.Serializable;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.AnalysisElement;
+import data.Word;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
-import data.AnalysisElement;
-import data.AbstractDocument;
-import data.Word;
 
 /**
  * 
@@ -26,60 +24,24 @@ public class Topic implements Comparable<Topic>, Serializable {
 	private double lsaSim;
 	private double ldaSim;
 
-	public Topic(Word word, AnalysisElement e, AbstractDocument document) {
+	public Topic(Word word, AnalysisElement e) {
 		this.word = word;
-		updateRelevance(e, document);
+		updateRelevance(e);
 	}
 
-	public void updateRelevance(AnalysisElement e, AbstractDocument document) {
+	public void updateRelevance(AnalysisElement e) {
 		termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
-
-		// double inverseDocumentFrequency = word.getIdf(); //eliminated Idf in
-		// order to limit corpus specificity
-		double lsa, lda;
-
+		// do not consider Idf in order to limit corpus specificity
+		// double inverseDocumentFrequency = word.getIdf();
 		if (e.getLDA() == null && e.getLSA() == null) {
 			this.relevance = termFrequency;
 			return;
 		}
 
-		double[] probDistrib = word.getLDAProbDistribution();
-
-		// determine importance within semantic chain
-		double relevanceSemanticChain = 0;
-
-		if (e.getLanguage().equals(Lang.eng) || e.getLanguage().equals(Lang.fr)) {
-			SemanticChain semanticChain = word.getSemanticChain();
-			double semanticChainLength = 0;
-			if (semanticChain != null && semanticChain.getWords().size() > 0) {
-				semanticChainLength = 1 + Math.log(semanticChain.getWords().size());
-				lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), semanticChain.getLSAVector());
-				lda = LDA.getSimilarity(probDistrib, semanticChain.getLDAProbDistribution());
-				relevanceSemanticChain = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
-
-				// use also semantic chain proximity to the overall document
-				lsa = VectorAlgebra.cosineSimilarity(semanticChain.getLSAVector(), document.getLSAVector());
-				lda = LDA.getSimilarity(semanticChain.getLDAProbDistribution(), document.getLDAProbDistribution());
-				relevanceSemanticChain *= semanticChainLength * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
-			}
-		}
-
 		// determine importance within analysis element
 		lsaSim = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
-		ldaSim = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
-		double relevanceAnalysisElement = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-
-		// determine importance within the document
-		double tf;
-		if (document.getWordOccurences().get(word) == null)
-			tf = 0;
-		else
-			tf = 1 + Math.log(document.getWordOccurences().get(word));
-		lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), document.getLSAVector());
-		lda = LDA.getSimilarity(probDistrib, document.getLDAProbDistribution());
-		double relevanceDocument = tf * SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
-
-		this.relevance += relevanceSemanticChain + relevanceAnalysisElement + relevanceDocument;
+		ldaSim = LDA.getSimilarity(word.getLDAProbDistribution(), e.getLDAProbDistribution());
+		this.relevance = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 	}
 
 	public double getTermFrequency() {

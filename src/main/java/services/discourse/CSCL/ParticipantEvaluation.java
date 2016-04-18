@@ -11,11 +11,6 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.gephi.appearance.api.AppearanceController;
-import org.gephi.appearance.api.AppearanceModel;
-import org.gephi.appearance.api.Function;
-import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
-import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
@@ -39,7 +34,6 @@ import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
-import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import services.commons.Formatting;
 
@@ -56,7 +50,7 @@ public class ParticipantEvaluation {
 		// Set<String> namesToIgnore = new TreeSet<String>(Arrays.asList(new
 		// String[] { "2093911", "1516180", "90343" }));
 
-		Color colorParticipant = Color.LIGHT_GRAY;
+		Color colorParticipant = Color.DARK_GRAY;
 
 		// build all nodes
 		for (int i = 0; i < participants.size(); i++) {
@@ -98,7 +92,7 @@ public class ParticipantEvaluation {
 				// && !namesToIgnore.contains(participants.get(j).getName())
 				) {
 					Edge e = graphModel.factory().newEdge(participantNodes[i], participantNodes[j], 0,
-							participantContributions[i][j] / maxVal, true);
+							participantContributions[i][j], true);
 					if (displayEdgeLabels) {
 						e.setLabel(Formatting.formatNumber(participantContributions[i][j]) + "");
 					} else {
@@ -115,20 +109,16 @@ public class ParticipantEvaluation {
 			c.setParticipantContributions(new double[c.getParticipants().size()][c.getParticipants().size()]);
 			List<Participant> lsPart = getParticipantList(c);
 			// determine strength of links
-			for (int i = 0; i < c.getBlocks().size() - 1; i++) {
+			for (int i = 0; i < c.getBlocks().size(); i++) {
 				if (c.getBlocks().get(i) != null) {
 					Participant p1 = ((Utterance) c.getBlocks().get(i)).getParticipant();
 					int index1 = lsPart.indexOf(p1);
-					// c.getParticipantContributions()[index1][index1] += c
-					// .getBlocks().get(i).getOverallScore();
-					for (int j = i + 1; j < Math.min(c.getBlocks().size(), i + SemanticCohesion.WINDOW_SIZE + 1); j++) {
-						if (c.getPrunnedBlockDistances()[j][i] != null) {
+					for (int j = 0; j < i; j++) {
+						if (c.getPrunnedBlockDistances()[i][j] != null) {
 							Participant p2 = ((Utterance) c.getBlocks().get(j)).getParticipant();
 							int index2 = lsPart.indexOf(p2);
-							c.getParticipantContributions()[index2][index1] += c.getBlocks().get(j).getOverallScore()
-									* c.getPrunnedBlockDistances()[j][i].getCohesion();
-							c.getParticipantContributions()[index1][index2] += c.getBlocks().get(i).getOverallScore()
-									* c.getPrunnedBlockDistances()[j][i].getCohesion();
+							c.getParticipantContributions()[index1][index2] += c.getBlocks().get(i).getIndividualScore()
+									* c.getPrunnedBlockDistances()[i][j].getCohesion();
 						}
 					}
 				}
@@ -165,7 +155,7 @@ public class ParticipantEvaluation {
 	}
 
 	public static void evaluateUsedConcepts(Conversation c) {
-		// determine cumulated effect of top 10 topics (nouns and verbs only)
+		// determine cumulative effect of top 10 topics (nouns and verbs only)
 		int noSelectedTopics = 0;
 		for (Topic topic : c.getTopics()) {
 			if (topic.getWord().getPOS() == null
@@ -191,10 +181,10 @@ public class ParticipantEvaluation {
 				if (entry.getKey().getPOS() != null) {
 					if (entry.getKey().getPOS().startsWith("N"))
 						p.getIndices().put(CSCLIndices.NO_NOUNS,
-								p.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS) + entry.getValue());
+								p.getIndices().get(CSCLIndices.NO_NOUNS) + entry.getValue());
 					if (entry.getKey().getPOS().startsWith("V"))
 						p.getIndices().put(CSCLIndices.NO_VERBS,
-								p.getIndices().get(CSCLIndices.RELEVANCE_TOP10_TOPICS) + entry.getValue());
+								p.getIndices().get(CSCLIndices.NO_VERBS) + entry.getValue());
 				}
 			}
 		}
@@ -231,18 +221,6 @@ public class ParticipantEvaluation {
 		ParticipantEvaluation.buildParticipantGraph("Member", graph, graphModel, participants, participantContributions,
 				true, isAnonymized);
 
-		// Run YifanHuLayout for 100 passes
-		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
-		layout.setGraphModel(graphModel);
-		layout.resetPropertiesValues();
-		layout.setOptimalDistance(100f);
-
-		layout.initAlgo();
-		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-			layout.goAlgo();
-		}
-		layout.endAlgo();
-
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
 		distance.execute(graphModel);
@@ -270,31 +248,26 @@ public class ParticipantEvaluation {
 		}
 
 		if (exportPath != null) {
-			AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-			/*
-			 * AppearanceModel appearanceModel =
-			 * appearanceController.getModel();
-			 * 
-			 * // Rank size by centrality Column centralityColumn =
-			 * graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-			 * Function centralityRanking =
-			 * appearanceModel.getNodeFunction(graph, centralityColumn,
-			 * RankingNodeSizeTransformer.class); RankingNodeSizeTransformer
-			 * centralityTransformer = (RankingNodeSizeTransformer)
-			 * centralityRanking .getTransformer();
-			 * centralityTransformer.setMinSize(5);
-			 * centralityTransformer.setMaxSize(40);
-			 * appearanceController.transform(centralityRanking);
-			 * 
-			 * // Rank label size - set a multiplier size Function
-			 * centralityRanking2 = appearanceModel.getNodeFunction(graph,
-			 * centralityColumn, RankingLabelSizeTransformer.class);
-			 * RankingLabelSizeTransformer labelSizeTransformer =
-			 * (RankingLabelSizeTransformer) centralityRanking2
-			 * .getTransformer(); labelSizeTransformer.setMinSize(1);
-			 * labelSizeTransformer.setMaxSize(5);
-			 * appearanceController.transform(centralityRanking2);
-			 */
+			// Run YifanHuLayout for 100 passes
+			YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+			layout.setGraphModel(graphModel);
+			layout.resetPropertiesValues();
+			// determine max weight
+			float max = 0;
+			for (Edge e : graph.getEdges()) {
+				max = (float) Math.max(max, e.getWeight());
+			}
+			for (Edge e : graph.getEdges()) {
+				e.setWeight(e.getWeight() / max);
+			}
+			layout.setOptimalDistance(max * 10);
+			// layout.setOptimalDistance(100f);
+
+			layout.initAlgo();
+			for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+				layout.goAlgo();
+			}
+			layout.endAlgo();
 
 			// Preview configuration
 			PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);

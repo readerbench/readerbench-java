@@ -17,14 +17,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import view.widgets.article.utils.SingleAuthorContainer;
 import data.AbstractDocumentTemplate;
-import data.Word;
 import data.AbstractDocumentTemplate.BlockTemplate;
+import data.Word;
 import data.document.Document;
 import edu.cmu.lti.jawjaw.pobj.Lang;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 
 public class ResearchArticle extends Document {
 	private static final long serialVersionUID = 9219491499980439567L;
