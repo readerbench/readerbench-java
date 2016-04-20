@@ -48,9 +48,11 @@ public class TextPreprocessing {
 		case es:
 			result = result.replaceAll("[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
+		case nl:
+			// TODO: add dutch special characters
+			result = result.replaceAll("[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]", " ");
+			break;
 		default:
-			// TODO add more tokenization rules
-			result = result.replaceAll("n't", " not");
 			result = result.replaceAll("[^a-z ,:;'\\-\\.\\!\\?\n]", " ");
 			break;
 		}

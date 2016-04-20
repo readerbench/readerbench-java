@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -12,13 +14,36 @@ import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdfviewer.PageDrawer;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
+import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.util.ResourceLoader;
 
 public class PdfToTextConverter {
+	
+	// number of pages
+	private Integer pages;
+	
+	// number of images
+	private Integer images;
+	
+	// number of colors
+	private Integer colors;
+
+	public Integer getColors() {
+		return colors;
+	}
+
+	public void setColors(Integer colors) {
+		this.colors = colors;
+	}
 
 	// Extract text from PDF Document
-	public static String pdftoText(String fileName, boolean isFile) {
+	public String pdftoText(String fileName, boolean isFile) {
 		PDFParser parser;
 		String parsedText = null;;
 		PDFTextStripper pdfStripper = null;
@@ -73,6 +98,34 @@ public class PdfToTextConverter {
 				pdfStripper = new PDFTextStripper();
 				pdDoc = new PDDocument(cosDoc);
 				
+				// get number of pages
+				this.pages = pdDoc.getNumberOfPages();
+				
+				// get number of images
+				// get number of colors
+				List<PDPage> list = pdDoc.getDocumentCatalog().getAllPages();
+				//PDFStreamEngine engine = new PDFStreamEngine(ResourceLoader.loadProperties("org/apache/pdfbox/resources/PDFStreamEngine.properties", false));
+				//PageDrawer pd = new PageDrawer();
+				//PDGraphicsState graphicState = engine.getGraphicsState();
+				//PDGraphicsState graphicState = pd.getGraphicsState();
+				List<Float> colors = new ArrayList<Float> ();
+				for (PDPage page : list) {
+					PDResources pdResources = page.getResources();
+					this.images = pdResources.getImages().size();
+					
+					//engine.processStream(page, page.findResources(), page.getContents().getStream());
+					/*float colorSpaceValues[] = graphicState.getStrokingColor().getColorSpaceValue();
+					for (int i = 0; i < colorSpaceValues.length; i++) {
+						Float f = new Float(colorSpaceValues[i]);
+						if (!colors.contains(f)) {
+							colors.add(f);
+						}
+					}*/
+				}
+				this.colors = colors.size();
+				
+			    
+				
 				//pdfStripper.setStartPage(1);
 				//pdfStripper.setEndPage(5);
 				parsedText = pdfStripper.getText(pdDoc);
@@ -97,6 +150,22 @@ public class PdfToTextConverter {
 		}
 		
 		return parsedText;
+	}
+
+	public Integer getPages() {
+		return pages;
+	}
+
+	public void setPages(Integer pages) {
+		this.pages = pages;
+	}
+
+	public Integer getImages() {
+		return images;
+	}
+
+	public void setImages(Integer images) {
+		this.images = images;
 	}
 
 }

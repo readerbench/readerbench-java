@@ -42,6 +42,8 @@ import data.document.Document;
 import data.document.Summary;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
+import data.sentiment.SentimentEntity;
+import data.sentiment.SentimentValence;
 import data.sentiment.SentimentWeights;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.commons.Formatting;
@@ -53,6 +55,7 @@ import services.semanticModels.LSA.LSA;
 import spark.Spark;
 import webService.result.ResultCategory;
 import webService.result.ResultCscl;
+import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
 import webService.result.ResultKeyword;
@@ -228,11 +231,12 @@ public class ReaderBenchServer {
 	}
 
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
+		PdfToTextConverter pdfConverter = new PdfToTextConverter();
 		if (localFile) {
 			//return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
-			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, true));
+			return new ResultPdfToText(pdfConverter.pdftoText(uri, true));
 		} else {
-			return new ResultPdfToText(PdfToTextConverter.pdftoText(uri, false));
+			return new ResultPdfToText(pdfConverter.pdftoText(uri, false));
 		}
 	}
 
@@ -575,10 +579,20 @@ public class ReaderBenchServer {
 			    }
 			//}
 			result.setWordOccurences(commonWords);
+			Map<String, Double> similarity = new HashMap<String, Double>();
 			
 			// semantic similarity between Cover Letter & CV
-			SemanticCohesion sc = new SemanticCohesion(cvDocument, coverDocument);
-			result.setSimilarity(Formatting.formatNumber(sc.getCohesion()));
+			/*SemanticCohesion sc = new SemanticCohesion(cvDocument, coverDocument);
+			similarity.put(sc.getSemanticDistances()[1], Formatting.formatNumber(sc.getLSASim()));
+			similarity.put("LDA", Formatting.formatNumber(sc.getLDASim()));
+			sc.getSemanticDistances()[0]=0;
+			for(int i = 0; i < sc.getOntologySim().length; i++)
+				similarity.put("LDA", Formatting.formatNumber(sc.getOntologySim()[i]));
+			result.setSimilarity(similarity);
+			1
+			3
+			4
+			*/
 			
 			queryResult.setData(result);
 			
@@ -611,26 +625,137 @@ public class ReaderBenchServer {
 			/*Document cvContent = Document.load(new File(cvContent), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			cvContent.computeAll(computeDialogism, null, null, true);*/
-			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
-					usePOSTagging, computeDialogism);*/
 			
-			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
+			PdfToTextConverter pdfConverter = new PdfToTextConverter();
+			String cvContent = pdfConverter.pdftoText("tmp/" + cvFile, true);
+			
+			logger.info("Continut cv: " + cvContent);
+			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);
 			
 			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			coverContent.computeAll(computeDialogism, null, null, true);*/
 			
-			QueryResultCvCover queryResult = new QueryResultCvCover();
+			QueryResultCv queryResult = new QueryResultCv();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			ResultCvCover result = new ResultCvCover(null, null);
-			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-			resultCv.setConcepts(ConceptMap.getTopics(
+			ResultCv result = new ResultCv(
+					null, // topic extraction
+					null, // word occurrences
+					null, // textual complexity
+					0,    // number of images
+					0,    // number of colors
+					0,    // number of pages
+					null, // positive words
+					null, // negative words
+					null  // LIWC emotions
+			);
+
+			// topic extraction
+			result.setConcepts(ConceptMap.getTopics(
 					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
-			resultCv.setSentiments(webService.services.SentimentAnalysis
-					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
-			result.setCv(resultCv);
 			
+			// word occurrences
+			Map<String, Integer> wordOccurences = new HashMap<String, Integer>();
+			List<String> positiveWords = new ArrayList<String>();
+			List<String> negativeWords = new ArrayList<String>();
+			Map<String, List<String>> liwcEmotions = new HashMap<String, List<String>>();
+			liwcEmotions.put(SentimentValence.get("Affect_LIWC").getName(), new ArrayList<String>());
+			liwcEmotions.put(SentimentValence.get("Posemo_LIWC").getName(), new ArrayList<String>());
+			liwcEmotions.put(SentimentValence.get("Negemo_LIWC").getName(), new ArrayList<String>());
+			liwcEmotions.put(SentimentValence.get("Anx_LIWC").getName(), new ArrayList<String>());
+			liwcEmotions.put(SentimentValence.get("Anger_LIWC").getName(), new ArrayList<String>());
+			liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());
+			for (Map.Entry<Word, Integer> entry : cvDocument.getWordOccurences().entrySet()) {
+				Word word = entry.getKey();
+				Integer occurrences = entry.getValue();
+				wordOccurences.put(word.getLemma(), occurrences);
+				SentimentEntity se = word.getSentiment();
+				if (se == null) continue;
+				
+				// FAN (ANEW FR)
+				SentimentValence sv = SentimentValence.get("Valence_ANEW");
+				if (sv != null) {
+					Double fanValence = se.get(sv);
+					if (fanValence != null) {
+						if (fanValence >= 0.5) positiveWords.add(word.getLemma());
+						else negativeWords.add(word.getLemma());
+					}
+				}
+				
+				// LIWC
+				Double liwcSentimnet; 
+				// 125 - affect
+				sv = SentimentValence.get("Affect_LIWC");
+				if (sv != null) {
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+				// 126 - emopos
+				sv = SentimentValence.get("Posemo_LIWC");
+				if (sv != null) {
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+				// 127 - emoneg
+				if (sv != null) {
+					sv = SentimentValence.get("Negemo_LIWC");
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+				// 128 - anxiete
+				if (sv != null) {
+					sv = SentimentValence.get("Anx_LIWC");
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+				// 129 - colere
+				sv = SentimentValence.get("Anger_LIWC");
+				if (sv != null) {
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+				// 130 - tristesse
+				if (sv != null) {
+					sv = SentimentValence.get("Sad_LIWC");
+					liwcSentimnet = se.get(sv);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(sv.getName()).add(word.getLemma());
+				}
+				
+			}
+			
+			// textual complexity
+			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument));
+			
+			// number of images
+			result.setImages(pdfConverter.getImages());
+			
+			// number of colors
+			result.setColors(pdfConverter.getColors());
+			
+			// number of pages
+			result.setPages(pdfConverter.getPages());
+			
+			// positive words
+			result.setPositiveWords(positiveWords);
+			
+			// negative words
+			result.setNegativeWords(negativeWords);
+			
+			// LIWC emotions
+			result.setLiwcEmotions(liwcEmotions);
 
 			queryResult.setData(result);
 			

@@ -49,7 +49,8 @@ public class PdfToTextFrenchCVs {
 					logger.info("Processing file: " + filePathString);
 
 					// read PDF file contents
-					String documentContent = PdfToTextConverter.pdftoText(filePathString, true);
+					PdfToTextConverter pdfConverter = new PdfToTextConverter();
+					String documentContent = pdfConverter.pdftoText(filePathString, true);
 
 					// process file
 					List<ResultNode> nodes = getTopics(documentContent, "resources/config/LSA/lemonde_fr",
