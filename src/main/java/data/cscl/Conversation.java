@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -342,7 +343,7 @@ public class Conversation extends AbstractDocument {
 		super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
 
 		for (Participant p : this.getParticipants()) {
-			TopicModeling.determineTopics(p.getInterventions(), this);
+			TopicModeling.determineTopics(p.getInterventions());
 		}
 
 		Collaboration.evaluateSocialKB(this);
@@ -380,10 +381,13 @@ public class Conversation extends AbstractDocument {
 			File output = new File(getPath().replace(".xml", "_IM.txt"));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
 					32768);
-
+			out.write("ID\tReference ID\tID\tName\tTime\tText\n");
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm");
 			for (Block b : getBlocks()) {
 				if (b != null) {
-					out.write(((Utterance) b).getParticipant().getName() + ":\t" + b.getText() + "\n");
+					out.write(b.getIndex() + "\t" + ((Utterance) b).getRefBlock().getIndex() + "\t"
+							+ ((Utterance) b).getParticipant().getName() + "\t" + df.format(((Utterance) b).getTime())
+							+ "\t" + b.getText() + "\n");
 				}
 			}
 			out.close();
@@ -434,7 +438,7 @@ public class Conversation extends AbstractDocument {
 		determineParticipantInterventions();
 		// determine topics for each participant
 		for (Participant p : participants) {
-			TopicModeling.determineTopics(p.getInterventions(), this);
+			TopicModeling.determineTopics(p.getInterventions());
 		}
 
 		for (Participant p : getParticipants()) {

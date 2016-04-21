@@ -288,8 +288,8 @@ public class LDA implements ISemanticModel, Serializable {
 		if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
 			double[] distrib = new double[model.getNumTopics()];
 			for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
-				distrib = VectorAlgebra.sum(distrib,
-						VectorAlgebra.scalarProduct(entry.getKey().getLDAProbDistribution(), entry.getValue()));
+				distrib = VectorAlgebra.sum(distrib, VectorAlgebra
+						.scalarProduct(entry.getKey().getLDAProbDistribution(), (1 + Math.log(entry.getValue()))));
 			}
 			return VectorAlgebra.normalize(distrib);
 		}

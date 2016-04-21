@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import services.nlp.parsing.Parsing;
-import services.nlp.parsing.Parsing_EN;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
@@ -17,6 +15,7 @@ import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
+import services.nlp.parsing.Parsing_EN;
 
 public class WordOverlap {
 	public static final float WORD_OVERLAP_ALPHA = 0.3f;
@@ -40,7 +39,7 @@ public class WordOverlap {
 	}
 
 	public List<Document> computeWordOverlaps() {
-		// the max number of word occurrencies
+		// the max number of word occurrences
 		double maxScore = 1.0d;
 
 		for (Document doc : documents) {
@@ -48,14 +47,14 @@ public class WordOverlap {
 			// continue;
 
 			// STEP 1 : word overlap distance
-			// for each keyword create a number of occurency equal to 0
+			// for each keyword create a number of occurrence equal to 0
 			HashMap<String, Integer> topicOccurency = new HashMap<String, Integer>();
 			List<Word> wordList = ((Document) doc).getInitialTopics();
 			for (Word topic : wordList) {
 				topicOccurency.put(topic.getText(), new Integer(0));
 			}
 
-			// compute the number of occurencies for each word
+			// compute the number of occurrences for each word
 			for (Block block : doc.getBlocks()) {
 				if (block == null)
 					continue;
@@ -119,9 +118,8 @@ public class WordOverlap {
 			Parsing_EN.getInstance().getPipeline().annotate(keywordDocument);
 			CoreMap keywordSentence = keywordDocument.get(SentencesAnnotation.class).get(0);
 
-			Sentence docKeywords = Parsing_EN.getInstance().processSentence(
-					new Block(null, 0, "", doc.getLSA(), doc.getLDA(), Lang.eng),
-					0, keywordSentence);
+			Sentence docKeywords = Parsing_EN.getInstance()
+					.processSentence(new Block(null, 0, "", doc.getLSA(), doc.getLDA(), Lang.eng), 0, keywordSentence);
 
 			SemanticCohesion semanticCohesion = new SemanticCohesion(docAbstract, docKeywords);
 			double cohesionVal = (float) semanticCohesion.getCohesion();

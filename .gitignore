@@ -40,3 +40,5 @@ Thumbs.db
 !/src/main/resources/META-INF/persistence.xml
 /db.properties
 /tmp/
+pathToSaveModel.txt
+resources

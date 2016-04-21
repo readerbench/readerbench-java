@@ -178,7 +178,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 		CohesionGraph.buildCohesionGraph(this);
 
 		// determine topics
-		TopicModeling.determineTopics(this, this);
+		TopicModeling.determineTopics(this);
 		// TopicModel.determineTopicsLDA(this);
 
 		Scoring.score(this);
@@ -436,12 +436,14 @@ public abstract class AbstractDocument extends AnalysisElement {
 					out.write("\nParticipant involvement and interaction\n");
 					out.write("Participant name");
 					for (CSCLIndices CSCLindex : CSCLIndices.values())
-						out.write(CSCLindex.getDescription());
+						out.write("," + CSCLindex.getDescription());
+					out.write("\n");
 					for (Participant p : c.getParticipants()) {
 						out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
 						for (CSCLIndices index : CSCLIndices.values()) {
 							out.write("," + p.getIndices().get(index));
 						}
+						out.write("\n");
 					}
 					// print interaction matrix
 					out.write("Interaction matrix\n");

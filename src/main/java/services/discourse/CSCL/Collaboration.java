@@ -125,28 +125,24 @@ public class Collaboration {
 					Utterance u = (Utterance) b;
 					u.setPersonalKB(b.getOverallScore());
 					u.setSocialKB(0);
-					u.setKB(u.getPersonalKB() + u.getSocialKB());
 				}
 			}
 
 			// use pruned inter-block graph
-			for (int i = 0; i < c.getBlocks().size() - 1; i++) {
-				for (int j = i + 1; j < c.getBlocks().size(); j++) {
+			for (int i = 0; i < c.getBlocks().size(); i++) {
+				for (int j = 0; j < i; j++) {
 					if (c.getPrunnedBlockDistances()[j][i] != null) {
-						Utterance u1 = (Utterance) c.getBlocks().get(i);
-						Utterance u2 = (Utterance) c.getBlocks().get(j);
-						SemanticCohesion coh = c.getPrunnedBlockDistances()[j][i];
+						Utterance u1 = (Utterance) c.getBlocks().get(j);
+						Utterance u2 = (Utterance) c.getBlocks().get(i);
+						SemanticCohesion coh = c.getPrunnedBlockDistances()[i][j];
 						if (u1.getParticipant() != null && u2.getParticipant() != null && coh.getCohesion() > 0) {
 							if (u1.getParticipant().equals(u2.getParticipant())) {
-								u1.setPersonalKB(u1.getPersonalKB() + u2.getOverallScore() * coh.getCohesion());
-								u2.setPersonalKB(u2.getPersonalKB() + u1.getOverallScore() * coh.getCohesion());
+								u2.setPersonalKB(u2.getPersonalKB() + u2.getIndividualScore() * coh.getCohesion());
 							} else {
-								u1.setSocialKB(u1.getSocialKB() + u2.getOverallScore() * coh.getCohesion());
-								u2.setSocialKB(u2.getSocialKB() + u1.getOverallScore() * coh.getCohesion());
-								no_diff_speaker++;
+								u2.setSocialKB(u2.getSocialKB() + u2.getIndividualScore() * coh.getCohesion());
+ 								no_diff_speaker++;
 							}
 							no_links++;
-							u1.setKB(u1.getPersonalKB() + u1.getSocialKB());
 							u2.setKB(u2.getPersonalKB() + u2.getSocialKB());
 						}
 					}

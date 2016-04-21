@@ -7,7 +7,6 @@ package data;
 import java.util.LinkedList;
 import java.util.List;
 
-import data.discourse.SemanticCohesion;
 import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.Tree;
@@ -20,7 +19,6 @@ import services.semanticModels.LSA.LSA;
  * @author Mihai Dascalu
  */
 public class Sentence extends AnalysisElement implements Comparable<Sentence> {
-
 	private static final long serialVersionUID = 6612571737695007151L;
 
 	private List<Word> words;
@@ -29,7 +27,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 	private int POSTreeSize;
 	private transient Tree parseTree;
 	private transient SemanticGraph dependencies;
-	private SemanticCohesion titleSimilarity;
 
 	public Sentence(Block b, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(b, index, text.replaceAll("\\s", " ").trim(), lsa, lda, lang);
@@ -95,14 +92,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
 	public void setAllWords(List<Word> allWords) {
 		this.allWords = allWords;
-	}
-
-	public SemanticCohesion getTitleSimilarity() {
-		return titleSimilarity;
-	}
-
-	public void setTitleSimilarity(SemanticCohesion titleSimilarity) {
-		this.titleSimilarity = titleSimilarity;
 	}
 
 	@Override

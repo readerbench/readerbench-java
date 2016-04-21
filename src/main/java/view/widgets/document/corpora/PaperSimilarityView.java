@@ -44,12 +44,6 @@ import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.gephi.appearance.api.AppearanceController;
-import org.gephi.appearance.api.AppearanceModel;
-import org.gephi.appearance.api.Function;
-import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
-import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
-import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -264,16 +258,16 @@ public class PaperSimilarityView extends JFrame {
 				.addContainerGap()));
 		groupLayout
 				.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addContainerGap().addComponent(lblThreshold)
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 40,
-										GroupLayout.PREFERRED_SIZE)
+						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+								.addComponent(lblThreshold).addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(sliderThreshold,
+										GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE)
 								.addContainerGap(650, Short.MAX_VALUE))
-				.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup()
-										.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-												.addComponent(lblComboBox).addComponent(docLevelsCombo,
+				.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10).addGroup(
+						groupLayout.createParallelGroup(Alignment.LEADING).addGroup(
+								groupLayout.createSequentialGroup().addGroup(groupLayout
+										.createParallelGroup(Alignment.LEADING)
+										.addComponent(lblComboBox).addComponent(docLevelsCombo,
 														GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
 								.addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
 								.addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
@@ -391,9 +385,7 @@ public class PaperSimilarityView extends JFrame {
 		// get models
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
-		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-		AppearanceModel appearanceModel = appearanceController.getModel();
-
+		
 		// build nodes
 		Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
 
@@ -438,27 +430,6 @@ public class PaperSimilarityView extends JFrame {
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(false);
 		distance.execute(graphModel);
-
-		// Rank size by centrality
-		/*
-		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingNodeSizeTransformer.class);
-		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-				.getTransformer();
-		centralityTransformer.setMinSize(5);
-		centralityTransformer.setMaxSize(40);
-		appearanceController.transform(centralityRanking);
-
-		// Rank label size - set a multiplier size
-		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingLabelSizeTransformer.class);
-		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
-				.getTransformer();
-		labelSizeTransformer.setMinSize(1);
-		labelSizeTransformer.setMaxSize(5);
-		appearanceController.transform(centralityRanking2);
-		*/
 
 		logger.info("Generating preview...");
 		// Preview configuration
@@ -529,7 +500,8 @@ public class PaperSimilarityView extends JFrame {
 			public void run() {
 				List<Document> docs = new LinkedList<Document>();
 
-				File dir = new File("D:\\PhdWorkspace\\Workspace\\ReaderBenchDev2\\in\\chaprou_fr\\chaprou_posttest_fr");
+				File dir = new File(
+						"D:\\PhdWorkspace\\Workspace\\ReaderBenchDev2\\in\\chaprou_fr\\chaprou_posttest_fr");
 				File[] files = dir.listFiles(new FilenameFilter() {
 					@Override
 					public boolean accept(File dir, String name) {
