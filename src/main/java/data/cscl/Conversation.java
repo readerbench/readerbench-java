@@ -381,7 +381,7 @@ public class Conversation extends AbstractDocument {
 			File output = new File(getPath().replace(".xml", "_IM.txt"));
 			BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
 					32768);
-			out.write("ID\tReference ID\tID\tName\tTime\tText\n");
+			out.write("ID\tReference ID\tName\tTime\tText\n");
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm");
 			for (Block b : getBlocks()) {
 				if (b != null) {
