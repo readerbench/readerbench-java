@@ -3,6 +3,7 @@ package services.complexity;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
+import edu.cmu.lti.jawjaw.pobj.Lang;
 import services.complexity.CAF.BalancedCAF;
 import services.complexity.coreference.CoreferenceResolutionComplexity;
 import services.complexity.discourse.ConnectivesComplexity;
@@ -211,7 +212,8 @@ public class ComplexityIndices {
 	public static final IComplexityFactors[] TEXTUAL_COMPLEXITY_FACTORS = { new Readability(), new LengthComplexity(),
 			new SurfaceStatisticsComplexity(), new EntropyComplexity(), new BalancedCAF(), new POSComplexity(),
 			new PronounsComplexity(), new TreeComplexity(), new WordComplexity(), new EntityDensityComplexity(),
-			new CoreferenceResolutionComplexity(), new ConnectivesComplexity(), new LexicalChainsComplexity(),
+			new CoreferenceResolutionComplexity(), new ConnectivesComplexity(Lang.eng),
+			new ConnectivesComplexity(Lang.fr), new ConnectivesComplexity(Lang.ro), new LexicalChainsComplexity(),
 			new LexicalCohesionComplexity(), new DialogismStatisticsComplexity(), new DialogismSynergyComplexity(),
 			new DiscourseComplexity(), new SemanticCohesionComplexity(0), new SemanticCohesionComplexity(1),
 			new SemanticCohesionComplexity(2), new SemanticCohesionComplexity(3), new SemanticCohesionComplexity(4),

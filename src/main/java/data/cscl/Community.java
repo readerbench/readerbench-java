@@ -255,7 +255,7 @@ public class Community extends AnalysisElement {
 
 			IComplexityFactors[] complexityFactors = { new LengthComplexity(), new SurfaceStatisticsComplexity(),
 					new EntropyComplexity(), new POSComplexity(), new PronounsComplexity(), new TreeComplexity(),
-					new EntityDensityComplexity(), new ConnectivesComplexity(), new DiscourseComplexity(),
+					new EntityDensityComplexity(), new ConnectivesComplexity(getLanguage()), new DiscourseComplexity(),
 					new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(3),
 					new SemanticCohesionComplexity(4) };
 			for (IComplexityFactors f : complexityFactors) {
