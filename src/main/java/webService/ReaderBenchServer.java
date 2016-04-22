@@ -316,7 +316,8 @@ public class ReaderBenchServer {
 
 			QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
 			queryResult.setData(TextualComplexity.getComplexityIndices(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), 
+					Lang.getLang(lang), usePOSTagging, computeDialogism));
 			return queryResult.convertToJson();
 		});
 		Spark.get("/search", (request, response) -> {
@@ -647,6 +648,10 @@ public class ReaderBenchServer {
 					0,    // number of images
 					0,    // number of colors
 					0,    // number of pages
+					0,    // number of paragraphs
+					0,    // number of sentences
+					0,    // number of words
+					0,    // number of content words
 					null, // positive words
 					null, // negative words
 					null  // LIWC emotions
@@ -679,7 +684,7 @@ public class ReaderBenchServer {
 				if (sv != null) {
 					Double fanValence = se.get(sv);
 					if (fanValence != null) {
-						if (fanValence >= 0.5) positiveWords.add(word.getLemma());
+						if (fanValence >= 5) positiveWords.add(word.getLemma());
 						else negativeWords.add(word.getLemma());
 					}
 				}
@@ -737,16 +742,28 @@ public class ReaderBenchServer {
 			}
 			
 			// textual complexity
-			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument));
+			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument, lang, usePOSTagging, computeDialogism));
 			
 			// number of images
 			result.setImages(pdfConverter.getImages());
 			
 			// number of colors
-			result.setColors(pdfConverter.getColors());
+			result.setColors(pdfConverter.getColors() + 1);
 			
 			// number of pages
 			result.setPages(pdfConverter.getPages());
+			
+			// number of paragraphs
+			result.setParagraphs(cvDocument.getNoBlocks());
+			
+			// number of sentences
+			result.setSentences(cvDocument.getNoSentences());
+			
+			// number of words
+			result.setWords(cvDocument.getNoWords());
+			
+			// number of content words
+			result.setContentWords(cvDocument.getNoContentWords());
 			
 			// positive words
 			result.setPositiveWords(positiveWords);

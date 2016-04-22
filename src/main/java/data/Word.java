@@ -68,6 +68,7 @@ public class Word implements Comparable<Word>, Serializable {
 	}
 
 	private void loadSentimentEntity() {
+		logger.info("Language cuvant: " + language.toString());
 		data.pojo.Word word = WordDAO.getInstance().findByLabel(text, language);
 		if (word == null)
 			return; // sentiment entity gol - nu avem info despre cuvant
