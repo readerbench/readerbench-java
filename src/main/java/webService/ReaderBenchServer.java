@@ -607,6 +607,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String cvFile = (String) json.get("cvFile");
+			String keywords = (String) json.get("keywords");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
@@ -633,6 +634,9 @@ public class ReaderBenchServer {
 			logger.info("Continut cv: " + cvContent);
 			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
+			AbstractDocument keywordsDocument = processQuery(keywords, pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);
+			
 			
 			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
@@ -654,7 +658,9 @@ public class ReaderBenchServer {
 					0,    // number of content words
 					null, // positive words
 					null, // negative words
-					null  // LIWC emotions
+					null, // LIWC emotions
+					null, // specific keywords
+					0	  // (keywords, document) relevance
 			);
 
 			// topic extraction
@@ -773,6 +779,15 @@ public class ReaderBenchServer {
 			
 			// LIWC emotions
 			result.setLiwcEmotions(liwcEmotions);
+			
+			// specific keywords
+			result.setKeywords(getKeywords(keywords, cvDocument.toString(), 
+					pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism, threshold));
+			
+			// (keywords, document) relevance
+			SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, cvDocument);
+			result.setKeywordsDocumentRelevance(Formatting.formatNumber(scKeywordsDocument.getCohesion()));
 
 			queryResult.setData(result);
 			

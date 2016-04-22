@@ -3,6 +3,8 @@ package webService.result;
 import java.util.List;
 import java.util.Map;
 
+import data.discourse.SemanticCohesion;
+
 public class ResultCv {
 	
 	private ResultTopic concepts;
@@ -18,7 +20,9 @@ public class ResultCv {
 	private List<String> positiveWords;
 	private List<String> negativeWords;
 	private Map<String, List<String>> liwcEmotions;
-
+	private List<ResultKeyword> keywords;
+	private double keywordsDocumentRelevance;
+	
 	public ResultCv() {
 	}
 
@@ -60,7 +64,13 @@ public class ResultCv {
 			List<String> positiveWords, List<String> negativeWords,
 
 			// LIWC emotions
-			Map<String, List<String>> liwcEmotions
+			Map<String, List<String>> liwcEmotions,
+			
+			// specific keywords
+			List<ResultKeyword> keywords,
+			
+			// (specific keywords, document) relevance
+			double keywordsDocumentRelevance
 
 	) {
 
@@ -77,6 +87,25 @@ public class ResultCv {
 		this.positiveWords = positiveWords;
 		this.negativeWords = negativeWords;
 		this.liwcEmotions = liwcEmotions;
+		this.keywords = keywords;
+		this.keywordsDocumentRelevance = keywordsDocumentRelevance;
+		
+	}
+
+	public List<ResultKeyword> getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(List<ResultKeyword> keywords) {
+		this.keywords = keywords;
+	}
+
+	public double getKeywordsDocumentRelevance() {
+		return keywordsDocumentRelevance;
+	}
+
+	public void setKeywordsDocumentRelevance(double keywordsDocumentRelevance) {
+		this.keywordsDocumentRelevance = keywordsDocumentRelevance;
 	}
 
 	public Integer getParagraphs() {
