@@ -366,6 +366,43 @@ public class ReaderBenchServer {
 			return result;
 
 		});
+		Spark.post("/semanticProcessUri", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+			
+			String uri = (String) json.get("uri");
+			String documentContent = null;
+			if (uri == null || uri.isEmpty()) {
+				logger.error("URI an URL are empty. Aborting...");
+				System.exit(-1);
+			}
+			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
+				documentContent = getTextFromPdf(uri, false).getContent();
+			} else {
+				documentContent = getTextFromPdf(uri, true).getContent();
+			}
+			if (uri != null && !uri.isEmpty()) {
+
+			}
+
+			String documentAbstract = (String) json.get("abstract");
+			String documentKeywords = (String) json.get("keywords");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			double threshold = (double) json.get("threshold");
+
+			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+			queryResult.setData(getSemanticAnnotation(documentAbstract, documentKeywords, documentContent, pathToLSA,
+					pathToLDA, lang, usePOSTagging, computeDialogism, threshold));
+			String result = queryResult.convertToJson();
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+
+		});
 		Spark.post("/semanticProcess", (request, response) -> {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
