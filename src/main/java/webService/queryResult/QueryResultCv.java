@@ -24,7 +24,7 @@ public class QueryResultCv extends QueryResult {
 
 	public QueryResultCv() {
 		super();
-		data = new ResultCv(null, null, null, 0, 0, 0, null, null, null);
+		data = new ResultCv();
 	}
 
 }

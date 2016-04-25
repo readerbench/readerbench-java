@@ -3,7 +3,6 @@ package webService;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Iterator;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -24,11 +22,6 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
 import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import dao.CategoryDAO;
 import dao.WordDAO;
@@ -54,26 +47,21 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import spark.Spark;
 import webService.result.ResultCategory;
-import webService.result.ResultCscl;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
 import webService.result.ResultKeyword;
 import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
-import webService.result.ResultSearch;
 import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
-import webService.result.ResultSentiment;
 import webService.result.ResultTextCategorization;
 import webService.result.ResultTopic;
-import webService.result.ResultValence;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
 import webService.services.utils.FileProcessor;
-import webService.cvCover.CvCoverHelper;
 import webService.queryResult.*;
 
 public class ReaderBenchServer {
@@ -316,7 +304,8 @@ public class ReaderBenchServer {
 
 			QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
 			queryResult.setData(TextualComplexity.getComplexityIndices(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), 
+					Lang.getLang(lang), usePOSTagging, computeDialogism));
 			return queryResult.convertToJson();
 		});
 		Spark.get("/search", (request, response) -> {
@@ -360,6 +349,43 @@ public class ReaderBenchServer {
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.setData(ConceptMap
 					.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
+			String result = queryResult.convertToJson();
+			// return Charset.forName("UTF-8").encode(result);
+			return result;
+
+		});
+		Spark.post("/semanticProcessUri", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+			
+			String uri = (String) json.get("uri");
+			String documentContent = null;
+			if (uri == null || uri.isEmpty()) {
+				logger.error("URI an URL are empty. Aborting...");
+				System.exit(-1);
+			}
+			if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
+				documentContent = getTextFromPdf(uri, false).getContent();
+			} else {
+				documentContent = getTextFromPdf(uri, true).getContent();
+			}
+			if (uri != null && !uri.isEmpty()) {
+
+			}
+
+			String documentAbstract = (String) json.get("abstract");
+			String documentKeywords = (String) json.get("keywords");
+			String lang = (String) json.get("lang");
+			String pathToLSA = (String) json.get("lsa");
+			String pathToLDA = (String) json.get("lda");
+			boolean usePOSTagging = (boolean) json.get("postagging");
+			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			double threshold = (double) json.get("threshold");
+
+			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+			queryResult.setData(getSemanticAnnotation(documentAbstract, documentKeywords, documentContent, pathToLSA,
+					pathToLDA, lang, usePOSTagging, computeDialogism, threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -606,6 +632,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String cvFile = (String) json.get("cvFile");
+			String keywords = (String) json.get("keywords");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
@@ -632,6 +659,9 @@ public class ReaderBenchServer {
 			logger.info("Continut cv: " + cvContent);
 			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
+			AbstractDocument keywordsDocument = processQuery(keywords, pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism);
+			
 			
 			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
@@ -647,9 +677,15 @@ public class ReaderBenchServer {
 					0,    // number of images
 					0,    // number of colors
 					0,    // number of pages
+					0,    // number of paragraphs
+					0,    // number of sentences
+					0,    // number of words
+					0,    // number of content words
 					null, // positive words
 					null, // negative words
-					null  // LIWC emotions
+					null, // LIWC emotions
+					null, // specific keywords
+					0	  // (keywords, document) relevance
 			);
 
 			// topic extraction
@@ -679,7 +715,7 @@ public class ReaderBenchServer {
 				if (sv != null) {
 					Double fanValence = se.get(sv);
 					if (fanValence != null) {
-						if (fanValence >= 0.5) positiveWords.add(word.getLemma());
+						if (fanValence >= 5) positiveWords.add(word.getLemma());
 						else negativeWords.add(word.getLemma());
 					}
 				}
@@ -737,16 +773,28 @@ public class ReaderBenchServer {
 			}
 			
 			// textual complexity
-			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument));
+			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument, lang, usePOSTagging, computeDialogism));
 			
 			// number of images
 			result.setImages(pdfConverter.getImages());
 			
 			// number of colors
-			result.setColors(pdfConverter.getColors());
+			result.setColors(pdfConverter.getColors() + 1);
 			
 			// number of pages
 			result.setPages(pdfConverter.getPages());
+			
+			// number of paragraphs
+			result.setParagraphs(cvDocument.getNoBlocks());
+			
+			// number of sentences
+			result.setSentences(cvDocument.getNoSentences());
+			
+			// number of words
+			result.setWords(cvDocument.getNoWords());
+			
+			// number of content words
+			result.setContentWords(cvDocument.getNoContentWords());
 			
 			// positive words
 			result.setPositiveWords(positiveWords);
@@ -756,6 +804,15 @@ public class ReaderBenchServer {
 			
 			// LIWC emotions
 			result.setLiwcEmotions(liwcEmotions);
+			
+			// specific keywords
+			result.setKeywords(getKeywords(keywords, cvDocument.toString(), 
+					pathToLSA, pathToLDA, language,
+					usePOSTagging, computeDialogism, threshold));
+			
+			// (keywords, document) relevance
+			SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, cvDocument);
+			result.setKeywordsDocumentRelevance(Formatting.formatNumber(scKeywordsDocument.getCohesion()));
 
 			queryResult.setData(result);
 			
