@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import data.document.Document;
 import data.document.Metacognition;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;

@@ -22,7 +22,7 @@ import data.AbstractDocumentTemplate;
 import data.Word;
 import data.discourse.Topic;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;

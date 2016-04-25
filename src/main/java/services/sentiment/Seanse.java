@@ -22,7 +22,7 @@ import java.util.Scanner;
 import org.openide.util.Exceptions;
 import data.pojo.SentimentValence;
 import data.pojo.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;

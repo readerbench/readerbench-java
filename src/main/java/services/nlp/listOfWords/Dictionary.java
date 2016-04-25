@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.apache.log4j.BasicConfigurator;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 /**
  * 

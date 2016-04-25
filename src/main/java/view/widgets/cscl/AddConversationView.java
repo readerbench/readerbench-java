@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class AddConversationView extends JInternalFrame {
 	private static final long serialVersionUID = 8894652868238113117L;

@@ -34,7 +34,7 @@ import utils.localization.LocalizationUtils;
 import view.models.complexity.HeaderCheckBoxHandler;
 import view.models.complexity.HeaderRenderer;
 import view.models.complexity.Status;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class ComplexityIndicesView extends JFrame {
 	private static final long serialVersionUID = -3120119620693209906L;

@@ -8,7 +8,7 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 public class Parsing_ES extends Parsing {

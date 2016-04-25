@@ -20,7 +20,7 @@ import data.Block;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 	static Logger logger = Logger.getLogger(GenericTasaDocument.class);

@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.log4j.BasicConfigurator;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.complexity.DataGathering;
 import services.converters.Txt2XmlConverter;
 import services.semanticModels.LDA.LDA;

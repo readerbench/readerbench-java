@@ -36,7 +36,6 @@ import data.discourse.Topic;
 import data.document.Document;
 import data.lexicalChains.DisambiguationGraph;
 import data.lexicalChains.LexicalChain;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;

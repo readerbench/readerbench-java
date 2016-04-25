@@ -7,7 +7,6 @@ package data;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;

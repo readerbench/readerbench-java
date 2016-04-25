@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class Txt2XmlConverter {
 	static Logger logger = Logger.getLogger(Txt2XmlConverter.class);

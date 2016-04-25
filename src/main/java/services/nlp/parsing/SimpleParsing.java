@@ -7,7 +7,7 @@ import data.Block;
 import data.Sentence;
 import data.Word;
 import data.sentiment.SentimentEntity;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.nlp.lemmatizer.StaticLemmatizer;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;

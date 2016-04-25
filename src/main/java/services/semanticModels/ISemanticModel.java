@@ -5,7 +5,7 @@ import java.util.TreeMap;
 
 import data.AnalysisElement;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public interface ISemanticModel {
 	public double getSimilarity(Word w1, Word w2);

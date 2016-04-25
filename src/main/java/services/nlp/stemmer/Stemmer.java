@@ -1,6 +1,6 @@
 package services.nlp.stemmer;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class Stemmer {
 	public static String stemWord(String word, Lang lang) {

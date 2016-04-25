@@ -13,7 +13,7 @@ import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class LDAWordComplexity {
 	static Logger logger = Logger.getLogger(LDAWordComplexity.class);

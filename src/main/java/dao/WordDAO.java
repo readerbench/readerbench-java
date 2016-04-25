@@ -9,7 +9,7 @@ import data.pojo.Language;
 import java.util.List;
 import javax.persistence.TypedQuery;
 import data.pojo.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

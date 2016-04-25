@@ -3,7 +3,7 @@ package runtime.semanticModels;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.LDA.LDA;
 
 public class RunHDP {

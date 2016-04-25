@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 
 import data.complexity.Measurement;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 

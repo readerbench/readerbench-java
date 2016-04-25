@@ -5,75 +5,75 @@ import java.util.HashMap;
 import java.util.Map;
 
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Sense;
 
 /**
- * 
+ *
  * @authors Ioana Serban, Mihai Dascalu
  */
-public class LexicalChainLink implements Serializable{
-	private static final long serialVersionUID = 63732297667987014L;
+public class LexicalChainLink implements Serializable {
 
-	private Word word;
-	private Sense senseId;
-	private LexicalChain lexicalChain;
-	private HashMap<LexicalChainLink, Double> connections;
-	private double value = 0;
+    private static final long serialVersionUID = 63732297667987014L;
 
-	public LexicalChainLink(Word word, Sense senseId) {
-		this.word = word;
-		this.senseId = senseId;
-		this.connections = new HashMap<LexicalChainLink, Double>();
-	}
+    private Word word;
+    private String senseId;
+    private LexicalChain lexicalChain;
+    private HashMap<LexicalChainLink, Double> connections;
+    private double value = 0;
 
-	public void addConnection(LexicalChainLink link, double weight) {
-		connections.put(link, weight);
-		value += weight;
-	}
+    public LexicalChainLink(Word word, String senseId) {
+        this.word = word;
+        this.senseId = senseId;
+        this.connections = new HashMap<LexicalChainLink, Double>();
+    }
 
-	public void removeConnection(LexicalChainLink link) {
-		double weight = connections.remove(link);
-		value -= weight;
-	}
+    public void addConnection(LexicalChainLink link, double weight) {
+        connections.put(link, weight);
+        value += weight;
+    }
 
-	public boolean hasSameWord(LexicalChainLink link) {
-		return word.equals(link.getWord());
-		// return word.equals(link.getWord()) &&
-		// senseId.equals(link.getSenseId());
-	}
+    public void removeConnection(LexicalChainLink link) {
+        double weight = connections.remove(link);
+        value -= weight;
+    }
 
-	public Word getWord() {
-		return word;
-	}
+    public boolean hasSameWord(LexicalChainLink link) {
+        return word.equals(link.getWord());
+        // return word.equals(link.getWord()) &&
+        // senseId.equals(link.getSenseId());
+    }
 
-	public Sense getSenseId() {
-		return senseId;
-	}
+    public Word getWord() {
+        return word;
+    }
 
-	public HashMap<LexicalChainLink, Double> getConnections() {
-		return connections;
-	}
+    public String getSenseId() {
+        return senseId;
+    }
 
-	public double getValue() {
-		return value;
-	}
+    public HashMap<LexicalChainLink, Double> getConnections() {
+        return connections;
+    }
 
-	public LexicalChain getLexicalChain() {
-		return lexicalChain;
-	}
+    public double getValue() {
+        return value;
+    }
 
-	public void setLexicalChain(LexicalChain lexicalChain) {
-		this.lexicalChain = lexicalChain;
-	}
+    public LexicalChain getLexicalChain() {
+        return lexicalChain;
+    }
 
-	public String toString() {
-		String s = "";
-		s += getWord().getText() + "[" + getSenseId() + "]: ";
-		for (Map.Entry<LexicalChainLink, Double> e : connections.entrySet()) {
-			s += "(" + e.getKey().getSenseId() + "["
-					+ e.getKey().getWord().getText() + "], " + e.getValue()
-					+ ") ";
-		}
-		return s;
-	}
+    public void setLexicalChain(LexicalChain lexicalChain) {
+        this.lexicalChain = lexicalChain;
+    }
+
+    public String toString() {
+        String s = "";
+        s += getWord().getText() + "[" + getSenseId() + "]: ";
+        for (Map.Entry<LexicalChainLink, Double> e : connections.entrySet()) {
+            s += "(" + e.getKey().getSenseId() + "["
+                    + e.getKey().getWord().getText() + "], " + e.getValue()
+                    + ") ";
+        }
+        return s;
+    }
 }

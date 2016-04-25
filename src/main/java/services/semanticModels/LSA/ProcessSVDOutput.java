@@ -22,7 +22,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import services.commons.Formatting;
 import services.commons.ObjectManipulation;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class ProcessSVDOutput extends LSA {
 	private static Logger logger = Logger.getLogger(ProcessSVDOutput.class);

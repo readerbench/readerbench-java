@@ -8,210 +8,210 @@ import java.util.TreeMap;
 
 import services.semanticModels.WordNet.OntologySupport;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
-import edu.cmu.lti.jawjaw.pobj.Sense;
+import data.Lang;
 
 /**
- * 
+ *
  * @authors Ioana Serban, Mihai Dascalu
  */
 public class DisambiguationGraph implements Serializable {
-	private static final long serialVersionUID = 1026969873848700049L;
 
-	public static final int SAME_SENTENCE = 0;
-	public static final int THREE_SENTENCES = 1;
-	public static final int SAME_PARAGRAPH = 2;
-	public static final int OTHER = 3;
+    private static final long serialVersionUID = 1026969873848700049L;
 
-	private Lang language;
-	private Map<Sense, List<LexicalChainLink>> nodes = new TreeMap<Sense, List<LexicalChainLink>>();
+    public static final int SAME_SENTENCE = 0;
+    public static final int THREE_SENTENCES = 1;
+    public static final int SAME_PARAGRAPH = 2;
+    public static final int OTHER = 3;
 
-	public DisambiguationGraph(Lang language) {
-		this.language = language;
-	}
+    private Lang language;
+    private Map<String, List<LexicalChainLink>> nodes = new TreeMap<>();
 
-	public LexicalChainLink getLink(Sense senseId, Word word) {
-		if (nodes.get(senseId) != null)
-			for (LexicalChainLink link : nodes.get(senseId)) {
-				if (link.getWord() == word) {
-					return link;
-				}
-			}
-		return null;
-	}
+    public DisambiguationGraph(Lang language) {
+        this.language = language;
+    }
 
-	public void addToGraph(Sense senseId, LexicalChainLink newLink) {
-		// build connections between the link and the other nodes in the graph
-		buildConnections(newLink);
+    public LexicalChainLink getLink(String senseId, Word word) {
+        if (nodes.get(senseId) != null) {
+            for (LexicalChainLink link : nodes.get(senseId)) {
+                if (link.getWord() == word) {
+                    return link;
+                }
+            }
+        }
+        return null;
+    }
 
-		// adds new link to the disambiguation graph
-		if (!nodes.containsKey(senseId)) {
-			LinkedList<LexicalChainLink> newList = new LinkedList<LexicalChainLink>();
-			newList.add(newLink);
-			nodes.put(senseId, newList);
-		} else {
-			nodes.get(senseId).add(newLink);
-		}
-	}
+    public void addToGraph(String senseId, LexicalChainLink newLink) {
+        // build connections between the link and the other nodes in the graph
+        buildConnections(newLink);
 
-	private void buildConnections(LexicalChainLink newLink) {
-		for (Sense senseId : nodes.keySet()) {
-			double weight = 0;
-			for (LexicalChainLink link : nodes.get(senseId)) {
-				if (!newLink.hasSameWord(link)) {
-					// determine weight of the connection
-					if (OntologySupport.areSynonyms(newLink.getSenseId(), senseId, language)) {
-						weight = getWeightSynonyms(getDistance(newLink, link));
-					} else if (OntologySupport.areAntonyms(newLink.getSenseId(), senseId, language)) {
-						weight = getWeightAntonyms(getDistance(newLink, link));
-					} else if (OntologySupport.areHypernym(newLink.getSenseId(), senseId, language)) {
-						weight = getWeightHypernyms(getDistance(newLink, link));
-					} else if (OntologySupport.areHyponym(newLink.getSenseId(), senseId, language)) {
-						weight = getWeightHyponyms(getDistance(newLink, link));
-					} else if (newLink.getWord().getBlockIndex() == link.getWord().getBlockIndex()
-							&& OntologySupport.areSiblings(newLink.getSenseId(), senseId, language)) {
-						weight = getWeightSiblings(getDistance(newLink, link));
-					}
+        // adds new link to the disambiguation graph
+        if (!nodes.containsKey(senseId)) {
+            LinkedList<LexicalChainLink> newList = new LinkedList<LexicalChainLink>();
+            newList.add(newLink);
+            nodes.put(senseId, newList);
+        } else {
+            nodes.get(senseId).add(newLink);
+        }
+    }
 
-					// if the two word senses are related add the connection
-					// between their respective chain links
-					if (weight > 0) {
-						link.addConnection(newLink, weight);
-						newLink.addConnection(link, weight);
-					}
-				}
-			}
-		}
-	}
+    private void buildConnections(LexicalChainLink newLink) {
+        for (String senseId : nodes.keySet()) {
+            double weight = 0;
+            for (LexicalChainLink link : nodes.get(senseId)) {
+                if (!newLink.hasSameWord(link)) {
+                    // determine weight of the connection
+                    if (OntologySupport.areSynonyms(newLink.getSenseId(), senseId, language)) {
+                        weight = getWeightSynonyms(getDistance(newLink, link));
+                    } else if (OntologySupport.areHypernym(newLink.getSenseId(), senseId, language)) {
+                        weight = getWeightHypernyms(getDistance(newLink, link));
+                    } else if (OntologySupport.areHyponym(newLink.getSenseId(), senseId, language)) {
+                        weight = getWeightHyponyms(getDistance(newLink, link));
+                    } else if (newLink.getWord().getBlockIndex() == link.getWord().getBlockIndex()
+                            && OntologySupport.areSiblings(newLink.getSenseId(), senseId, language)) {
+                        weight = getWeightSiblings(getDistance(newLink, link));
+                    }
 
-	public void removeFromGraph(Sense senseId, LexicalChainLink remLink) {
-		// remove connections
-		removeConnections(remLink);
+                    // if the two word senses are related add the connection
+                    // between their respective chain links
+                    if (weight > 0) {
+                        link.addConnection(newLink, weight);
+                        newLink.addConnection(link, weight);
+                    }
+                }
+            }
+        }
+    }
 
-		// remove from list
-		List<LexicalChainLink> senseList = nodes.get(senseId);
-		senseList.remove(remLink);
+    public void removeFromGraph(String senseId, LexicalChainLink remLink) {
+        // remove connections
+        removeConnections(remLink);
 
-		// if sense list is now empty, remove the node from the graph
-		if (senseList.isEmpty()) {
-			nodes.remove(senseId);
-		}
-	}
+        // remove from list
+        List<LexicalChainLink> senseList = nodes.get(senseId);
+        senseList.remove(remLink);
 
-	private void removeConnections(LexicalChainLink remLink) {
-		for (LexicalChainLink link : remLink.getConnections().keySet()) {
-			link.removeConnection(remLink);
-		}
-	}
+        // if sense list is now empty, remove the node from the graph
+        if (senseList.isEmpty()) {
+            nodes.remove(senseId);
+        }
+    }
 
-	private double getWeightSynonyms(int distance) {
-		double weight = 0;
-		switch (distance) {
-		case SAME_SENTENCE:
-			weight = 1.0;
-			break;
-		case THREE_SENTENCES:
-			weight = 1.0;
-			break;
-		case SAME_PARAGRAPH:
-			weight = 0.5;
-			break;
-		case OTHER:
-			weight = 0.5;
-			break;
-		}
-		return weight;
-	}
+    private void removeConnections(LexicalChainLink remLink) {
+        for (LexicalChainLink link : remLink.getConnections().keySet()) {
+            link.removeConnection(remLink);
+        }
+    }
 
-	private double getWeightAntonyms(int distance) {
-		return getWeightSynonyms(distance);
-	}
+    private double getWeightSynonyms(int distance) {
+        double weight = 0;
+        switch (distance) {
+            case SAME_SENTENCE:
+                weight = 1.0;
+                break;
+            case THREE_SENTENCES:
+                weight = 1.0;
+                break;
+            case SAME_PARAGRAPH:
+                weight = 0.5;
+                break;
+            case OTHER:
+                weight = 0.5;
+                break;
+        }
+        return weight;
+    }
 
-	private double getWeightHypernyms(int distance) {
-		double weight = 0;
-		switch (distance) {
-		case SAME_SENTENCE:
-			weight = 1.0;
-			break;
-		case THREE_SENTENCES:
-			weight = 0.5;
-			break;
-		case SAME_PARAGRAPH:
-			weight = 0.3;
-			break;
-		case OTHER:
-			weight = 0.3;
-			break;
-		}
-		return weight;
-	}
+    private double getWeightAntonyms(int distance) {
+        return getWeightSynonyms(distance);
+    }
 
-	private double getWeightHyponyms(int distance) {
-		return getWeightHypernyms(distance);
-	}
+    private double getWeightHypernyms(int distance) {
+        double weight = 0;
+        switch (distance) {
+            case SAME_SENTENCE:
+                weight = 1.0;
+                break;
+            case THREE_SENTENCES:
+                weight = 0.5;
+                break;
+            case SAME_PARAGRAPH:
+                weight = 0.3;
+                break;
+            case OTHER:
+                weight = 0.3;
+                break;
+        }
+        return weight;
+    }
 
-	private double getWeightSiblings(int distance) {
-		double weight = 0;
-		switch (distance) {
-		case SAME_SENTENCE:
-			weight = 1.0;
-			break;
-		case THREE_SENTENCES:
-			weight = 0.3;
-			break;
-		case SAME_PARAGRAPH:
-			weight = 0.2;
-			break;
-		case OTHER:
-			weight = 0.0;
-			break;
-		}
-		return weight;
-	}
+    private double getWeightHyponyms(int distance) {
+        return getWeightHypernyms(distance);
+    }
 
-	private int getDistance(LexicalChainLink link1, LexicalChainLink link2) {
-		Word w1 = link1.getWord();
-		Word w2 = link2.getWord();
-		if (w1.getBlockIndex() == w2.getBlockIndex()) {
-			int i1 = w1.getUtteranceIndex();
-			int i2 = w2.getUtteranceIndex();
-			if (i1 == i2) {
-				return SAME_SENTENCE;
-			} else if (Math.abs(i1 - i2) <= 3) {
-				return THREE_SENTENCES;
-			}
+    private double getWeightSiblings(int distance) {
+        double weight = 0;
+        switch (distance) {
+            case SAME_SENTENCE:
+                weight = 1.0;
+                break;
+            case THREE_SENTENCES:
+                weight = 0.3;
+                break;
+            case SAME_PARAGRAPH:
+                weight = 0.2;
+                break;
+            case OTHER:
+                weight = 0.0;
+                break;
+        }
+        return weight;
+    }
 
-			return SAME_PARAGRAPH;
-		}
-		return OTHER;
-	}
+    private int getDistance(LexicalChainLink link1, LexicalChainLink link2) {
+        Word w1 = link1.getWord();
+        Word w2 = link2.getWord();
+        if (w1.getBlockIndex() == w2.getBlockIndex()) {
+            int i1 = w1.getUtteranceIndex();
+            int i2 = w2.getUtteranceIndex();
+            if (i1 == i2) {
+                return SAME_SENTENCE;
+            } else if (Math.abs(i1 - i2) <= 3) {
+                return THREE_SENTENCES;
+            }
 
-	public List<LexicalChainLink> extractFromGraph(Sense senseId) {
-		if (nodes.isEmpty()) {
-			return null;
-		}
-		// if senseId = null, extract the first element
-		if (senseId == null) {
-			Sense fisrstKey = nodes.keySet().iterator().next();
-			return nodes.remove(fisrstKey);
-		}
+            return SAME_PARAGRAPH;
+        }
+        return OTHER;
+    }
 
-		return nodes.remove(senseId);
-	}
+    public List<LexicalChainLink> extractFromGraph(String senseId) {
+        if (nodes.isEmpty()) {
+            return null;
+        }
+        // if senseId = null, extract the first element
+        if (senseId == null) {
+            String firstKey = nodes.keySet().iterator().next();
+            return nodes.remove(firstKey);
+        }
 
-	public Map<Sense, List<LexicalChainLink>> getNodes() {
-		return nodes;
-	}
+        return nodes.remove(senseId);
+    }
 
-	public String toString() {
-		String s = "";
+    public Map<String, List<LexicalChainLink>> getNodes() {
+        return nodes;
+    }
 
-		for (Map.Entry<Sense, List<LexicalChainLink>> e : nodes.entrySet()) {
-			s += e.getKey() + ":\n";
-			for (LexicalChainLink link : e.getValue()) {
-				s += "\t" + link.toString() + "\n";
-			}
-		}
-		return s;
-	}
+    @Override
+    public String toString() {
+        String s = "";
+
+        for (Map.Entry<String, List<LexicalChainLink>> e : nodes.entrySet()) {
+            s += e.getKey() + ":\n";
+            for (LexicalChainLink link : e.getValue()) {
+                s += "\t" + link.toString() + "\n";
+            }
+        }
+        return s;
+    }
 }

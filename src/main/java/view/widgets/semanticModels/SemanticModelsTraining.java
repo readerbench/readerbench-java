@@ -30,7 +30,7 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;

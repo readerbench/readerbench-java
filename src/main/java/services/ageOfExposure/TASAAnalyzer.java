@@ -25,7 +25,7 @@ import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class TASAAnalyzer {
 	private static Logger logger = Logger.getLogger("TASAAnalyzer");

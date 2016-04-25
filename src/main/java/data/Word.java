@@ -17,7 +17,6 @@ import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
-import edu.cmu.lti.jawjaw.pobj.Lang;
 import data.pojo.EntityXValence;
 
 import org.apache.log4j.Logger;

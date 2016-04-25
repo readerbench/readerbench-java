@@ -25,7 +25,7 @@ import services.semanticModels.LSA.LSA;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class EssayCreator extends Document {
 	private static final long serialVersionUID = 9219491499980439568L;

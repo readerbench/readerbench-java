@@ -1,6 +1,6 @@
 package services.nlp.listOfWords;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class Pronouns {
 	public static final ClassesOfWords PRONOUNS_EN = new ClassesOfWords(

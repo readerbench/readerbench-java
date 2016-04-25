@@ -27,7 +27,7 @@ import data.Block;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import services.commons.TextPreprocessing;
@@ -179,7 +179,7 @@ public class PreProcessing {
 					// toWrite = processContent(
 					// TextPreprocessing.replaceFrCorpusAdnotations(StringEscapeUtils.escapeXml(line)),
 					// lang, usePOSTagging, noMinWordPerDoc);
-					toWrite = processContent(TextPreprocessing.replaceFrCorpusAdnotations(line, lang), lang,
+					toWrite = processContent(line, lang,
 							usePOSTagging, noMinWordPerDoc, includeWordAssociations);
 
 					if (toWrite.length() > 0)

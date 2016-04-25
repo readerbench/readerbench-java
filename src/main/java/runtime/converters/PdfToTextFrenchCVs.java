@@ -20,7 +20,7 @@ import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Topic;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;

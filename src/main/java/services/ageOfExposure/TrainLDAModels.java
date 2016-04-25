@@ -5,7 +5,7 @@ import java.io.FileFilter;
 import java.io.IOException;
 
 import services.semanticModels.LDA.LDA;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class TrainLDAModels {
 

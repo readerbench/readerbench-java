@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 import org.apache.log4j.BasicConfigurator;
 
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;

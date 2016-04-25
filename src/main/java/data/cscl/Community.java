@@ -27,7 +27,7 @@ import data.AnalysisElement;
 import data.Block;
 import data.Word;
 import data.discourse.Topic;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;

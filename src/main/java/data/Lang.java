@@ -13,17 +13,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package edu.cmu.lti.jawjaw.pobj;
+package data;
 
-/**
- * Enum class for the POS (Part of Speech) that is one of Noun, Verb, Adjective and Adverb.
- * 
- * @author Hideki Shima
- *
- */
-public enum POS {
-	a, // adjective 
-	r, // adverb
-	n, // noun
-	v; // verb
+import java.io.Serializable;
+
+public enum Lang implements Serializable {
+	eng, fr, it, jpn, ro, es, nl;
+
+	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian",
+			"Dutch" };
+
+	public static Lang getLang(String language) {
+		switch (language) {
+		case "French":
+			return Lang.fr;
+		case "Italian":
+			return Lang.it;
+		case "Spanish":
+			return Lang.es;
+		case "Romanian":
+			return Lang.ro;
+		case "Dutch":
+			return Lang.nl;
+		default:
+			return Lang.eng;
+		}
+	}
 }

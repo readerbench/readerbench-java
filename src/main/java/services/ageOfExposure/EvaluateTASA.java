@@ -21,7 +21,7 @@ import services.converters.SplitTASA;
 import data.AbstractDocument;
 import data.Word;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class EvaluateTASA {
 	private static Logger logger = Logger.getLogger("EvaluateTASA");

@@ -43,7 +43,7 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 

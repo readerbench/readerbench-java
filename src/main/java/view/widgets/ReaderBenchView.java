@@ -45,7 +45,7 @@ import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import utils.localization.LocalizationUtils;
 import utils.settings.SettingsUtils;
 import view.events.TCPopupEventQueue;

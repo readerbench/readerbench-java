@@ -23,7 +23,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import view.widgets.ReaderBenchView;
 
 public class AddDocumentView extends JInternalFrame {

@@ -8,7 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;

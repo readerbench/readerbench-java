@@ -1,7 +1,7 @@
 package data.pojo;
 
 import dao.LanguageDAO;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;

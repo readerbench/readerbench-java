@@ -49,7 +49,7 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.GenerateSpace;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;

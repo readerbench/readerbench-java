@@ -3,7 +3,6 @@ package services.semanticModels.WordNet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -11,41 +10,65 @@ import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
 import data.Word;
-import edu.cmu.lti.jawjaw.JAWJAW;
-import edu.cmu.lti.jawjaw.db.SenseDAO;
-import edu.cmu.lti.jawjaw.db.WordDAO;
-import edu.cmu.lti.jawjaw.pobj.Lang;
-import edu.cmu.lti.jawjaw.pobj.POS;
-import edu.cmu.lti.jawjaw.pobj.Sense;
-import edu.cmu.lti.jawjaw.pobj.WordJAW;
-import edu.cmu.lti.lexical_db.ILexicalDatabase;
-import edu.cmu.lti.lexical_db.NictWordNetDB;
-import edu.cmu.lti.ws4j.RelatednessCalculator;
-import edu.cmu.lti.ws4j.impl.LeacockChodorow;
-import edu.cmu.lti.ws4j.impl.Path;
-import edu.cmu.lti.ws4j.impl.WuPalmer;
+import data.Lang;
+import data.POS;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.openide.util.Exceptions;
+import vu.wntools.wnsimilarity.main.WordSim;
+import vu.wntools.wordnet.WordnetData;
+import vu.wntools.wordnet.WordnetLmfSaxParser;
 
 public class OntologySupport {
 
     static Logger logger = Logger.getLogger(OntologySupport.class);
     private static int id = 0;
 
-    public static final int LEACOCK_CHODOROW = id++;
-    public static final int WU_PALMER = id++;
-    public static final int PATH_SIM = id++;
-    public static final int NO_SIMILARITIES = id;
-
     public static final double SYNONYM_WEIGHT = 1.0;
     public static final double HYPERNYM_WEIGHT = 1.0;
-    private static final double[] THRESHOLDS = {1, 1, 1};
+    private static final EnumMap<SimilarityType, Double> THRESHOLDS = new EnumMap<>(SimilarityType.class);
+
+    static {
+        THRESHOLDS.put(SimilarityType.LEACOCK_CHODOROW, 1.);
+        THRESHOLDS.put(SimilarityType.WU_PALMER, 1.);
+        THRESHOLDS.put(SimilarityType.PATH_SIM, 1.);
+    }
     private static final int MAX_NO_SYNONYMS = 2;
     private static final int MAX_NO_HYPERNYMS = 1;
 
-    private static ILexicalDatabase wn = new NictWordNetDB();
-    private static RelatednessCalculator[] related_en = {new LeacockChodorow(wn, Lang.eng), new WuPalmer(wn, Lang.eng),
-        new Path(wn, Lang.eng)};
-    private static RelatednessCalculator[] related_fr = {new LeacockChodorow(wn, Lang.fr), new WuPalmer(wn, Lang.fr),
-        new Path(wn, Lang.fr)};
+    private static final Map<Lang, WordnetPOSData> dictionaries = new EnumMap<>(Lang.class);
+    private static final Map<Lang, String> wordnetFiles = new EnumMap<>(Lang.class);
+
+    static {
+        wordnetFiles.put(Lang.ro, "resources/config/WN/wn-ron-lmf.xml");
+        wordnetFiles.put(Lang.eng, "resources/config/WN/wn-eng-lmf.xml");
+        wordnetFiles.put(Lang.fr, "resources/config/WN/wn-fra-lmf.xml");
+        wordnetFiles.put(Lang.nl, "resources/config/WN/wn-nld-lmf.xml");
+        for (Map.Entry<Lang, String> e : wordnetFiles.entrySet()) {
+            dictionaries.put(e.getKey(), new WordnetPOSData(e.getValue()));
+        }
+    }
 
     public static POS getPOS(String posTag) {
         if (posTag == null) {
@@ -66,31 +89,26 @@ public class OntologySupport {
         return null;
     }
 
-    public static double semanticSimilarity(Word w1, Word w2, int type) {
+    public static double semanticSimilarity(Word w1, Word w2, SimilarityType type) {
         if (!w1.getLanguage().equals(w2.getLanguage())) {
             return 0;
         }
         if (w1 == null || w2 == null || w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
             return 0;
         }
-        String word1 = w1.getLemma() + "#" + getPOS(w1.getPOS());
-        String word2 = w2.getLemma() + "#" + getPOS(w2.getPOS());
-        double sim = 0;
-        switch (w1.getLanguage()) {
-            case fr:
-                sim = related_fr[type].calcRelatednessOfWords(word1, word2);
-            default:
-                sim = related_en[type].calcRelatednessOfWords(word1, word2);
-        }
-
-        if (sim > THRESHOLDS[type]) {
-            sim = THRESHOLDS[type];
+        double sim = dictionaries.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);
+        if (sim > THRESHOLDS.get(type)) {
+            sim = THRESHOLDS.get(type);
         }
         return sim;
     }
 
-    public static boolean haveCommonElements(Set<Sense> set1, Set<Sense> set2) {
-        for (Sense s1 : set1) {
+    public static <T> boolean haveCommonElements(List<T> set1, List<T> set2) {
+        return haveCommonElements(set1, new HashSet<T>(set2));
+    }
+
+    public static <T> boolean haveCommonElements(Collection<T> set1, Set<T> set2) {
+        for (T s1 : set1) {
             if (set2.contains(s1)) {
                 return true;
             }
@@ -98,9 +116,24 @@ public class OntologySupport {
         return false;
     }
 
-    public static boolean areSynonyms(Sense s1, Sense s2, Lang language) {
-        Set<Sense> synonyms1 = JAWJAW.findSynonyms(s1, language);
-        Set<Sense> synonyms2 = JAWJAW.findSynonyms(s2, language);
+    public static WordnetData getDictionary(Lang lang) {
+        return dictionaries.get(lang).getDictionary();
+    }
+
+    public static WordnetData getDictionary(Lang lang, POS pos) {
+        return dictionaries.get(lang).getByPOS(pos);
+    }
+
+    public static WordnetData getDictionary(Word word) {
+        if (word.getPOS() == null) {
+            return getDictionary(word.getLanguage());
+        }
+        return getDictionary(word.getLanguage(), getPOS(word.getPOS()));
+    }
+
+    public static boolean areSynonyms(String s1, String s2, Lang language) {
+        Set<String> synonyms1 = new HashSet<>(getDictionary(language).getSynonyms(s1));
+        Set<String> synonyms2 = new HashSet<>(getDictionary(language).getSynonyms(s2));
 
         return haveCommonElements(synonyms1, synonyms2);
         // return synonyms1.contains(s2) || synonyms2.contains(s1);
@@ -113,79 +146,94 @@ public class OntologySupport {
         if (getPOS(w1.getPOS()) == null || getPOS(w2.getPOS()) == null) {
             return false;
         }
-        Set<String> synonyms1 = JAWJAW.findSynonyms(w1.getLemma(), getPOS(w1.getPOS()), language);
-
-        Set<String> synonyms2 = JAWJAW.findSynonyms(w2.getLemma(), getPOS(w2.getPOS()), language);
+        Set<String> synonyms1 = dictionaries.get(language).getSynonyms(w1.getLemma(), getPOS(w1.getPOS()));
+        Set<String> synonyms2 = dictionaries.get(language).getSynonyms(w2.getLemma(), getPOS(w2.getPOS()));
 
         return synonyms1.contains(w2.getLemma()) || synonyms2.contains(w1.getLemma());
     }
 
-    public static boolean areAntonyms(Sense s1, Sense s2, Lang language) {
-        Set<Sense> synonyms1 = JAWJAW.findSynonyms(s1, language);
-        Set<Sense> synonyms2 = JAWJAW.findSynonyms(s2, language);
-        Set<Sense> antonyms1 = JAWJAW.findSeeAntonyms(s1, language);
-        Set<Sense> antonyms2 = JAWJAW.findSeeAntonyms(s2, language);
-
-        return haveCommonElements(synonyms1, antonyms2) || haveCommonElements(antonyms1, synonyms2);
-        // return antonyms2.contains(s1) || antonyms1.contains(s2);
-    }
-
-    public static boolean areHypernym(Sense s1, Sense s2, Lang language) {
-        Set<Sense> synonyms1 = JAWJAW.findSynonyms(s1, language);
-        Set<Sense> synonyms2 = JAWJAW.findSynonyms(s2, language);
-        Set<Sense> hyponyms1 = JAWJAW.findHyponyms(s1, language);
-        Set<Sense> hypernyms2 = JAWJAW.findHypernyms(s2, language);
-
-        return haveCommonElements(synonyms1, hypernyms2) || haveCommonElements(hyponyms1, synonyms2);
-        // return hypernyms2.contains(s1) || hyponyms1.contains(s2);
-    }
-
-    public static boolean areHyponym(Sense s1, Sense s2, Lang language) {
-        Set<Sense> synonyms1 = JAWJAW.findSynonyms(s1, language);
-        Set<Sense> synonyms2 = JAWJAW.findSynonyms(s2, language);
-        Set<Sense> hypernyms1 = JAWJAW.findHypernyms(s1, language);
-        Set<Sense> hyponyms2 = JAWJAW.findHyponyms(s2, language);
-
-        return haveCommonElements(synonyms1, hyponyms2) || haveCommonElements(hypernyms1, synonyms2);
-        // return hyponyms2.contains(s1) || hypernyms1.contains(s2);
-    }
-
-    public static boolean areSiblings(Sense s1, Sense s2, Lang language) {
-        Set<Sense> synonyms1 = JAWJAW.findSynonyms(s1, language);
-        Set<Sense> synonyms2 = JAWJAW.findSynonyms(s2, language);
-        Set<Sense> siblingsSet1 = getSiblingSet(s1, language);
-        Set<Sense> siblingsSet2 = getSiblingSet(s2, language);
-
-        return haveCommonElements(synonyms1, siblingsSet2) || haveCommonElements(siblingsSet1, synonyms2);
-        // return siblingsSet1.contains(s2) || siblingsSet2.contains(s1);
-    }
-
-    private static Set<Sense> getSiblingSet(Sense sense, Lang language) {
-        Set<Sense> siblingsSet = new TreeSet<Sense>();
-        Set<Sense> hypernyms = JAWJAW.findHypernyms(sense, language);
-        if (hypernyms != null && hypernyms.size() > 0) {
-            for (Sense hypernym : hypernyms) {
-                Set<Sense> hyponyms = JAWJAW.findHyponyms(hypernym, language);
-                if (hyponyms != null) {
-                    siblingsSet.addAll(hyponyms);
+    public static Set<String> getAllHypernyms(String sense, Lang lang) {
+        Set<String> visited = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+        queue.add(sense);
+        visited.add(sense);
+        WordnetData wnd = getDictionary(lang);
+        while (!queue.isEmpty()) {
+            String synset = queue.poll();
+            for (String next : wnd.hyperRelations.getOrDefault(synset, new ArrayList<>())) {
+                if (!visited.contains(next)) {
+                    visited.add(next);
+                    queue.offer(next);
                 }
             }
         }
+        return visited;
+    }
 
-        return siblingsSet;
+    public static boolean areHypernym(String s1, String s2, Lang language) {
+        return getAllHypernyms(s2, language).contains(s1);
+
+    }
+
+    public static boolean areHyponym(String s1, String s2, Lang language) {
+        return getAllHypernyms(s1, language).contains(s2);
+
+    }
+
+    public static boolean areSiblings(String s1, String s2, Lang language) {
+        WordnetData wnd = getDictionary(language);
+        ArrayList<String> parents1 = wnd.getHyperRelations().get(s1);
+        ArrayList<String> parents2 = wnd.getHyperRelations().get(s2);
+        if (parents1 == null || parents2 == null) {
+            return false;
+        }
+        return haveCommonElements(parents1, parents2);
+    }
+
+    private static Set<String> getSiblingSet(String sense, Lang language) {
+        final WordnetData wnd = getDictionary(language);
+        Set<String> siblings = wnd.hyperRelations.getOrDefault(sense, new ArrayList<>()).stream()
+                .flatMap(parent -> wnd.childRelations.getOrDefault(parent, new ArrayList<>()).stream())
+                .collect(Collectors.toSet());
+        siblings.remove(sense);
+        return siblings;
     }
 
     public static boolean exists(String word, String pos, Lang lang) {
-        List<WordJAW> words = WordDAO.findWordsByLemmaAndPos(word, getPOS(pos), lang);
-        return (words != null && words.size() > 0);
+        WordnetData wnd = getDictionary(lang, getPOS(pos));
+        return wnd.entryToSynsets.containsKey(word);
+    }
+
+    public static Set<String> getSynonyms(Word word) {
+        if (word.getPOS() == null) {
+            return null;
+        }
+        return dictionaries.get(word.getLanguage()).getSynonyms(word.getLemma(), getPOS(word.getPOS()));
+    }
+
+    public static Set<String> getHypernyms(Word word) {
+        if (word.getPOS() == null) {
+            return null;
+        }
+        final WordnetData wnd = getDictionary(word.getLanguage(), getPOS(word.getPOS()));
+        return wnd.lemmaToSynsets.getOrDefault(word.getLemma(), new ArrayList<>()).stream()
+                .flatMap(synset -> wnd.hyperRelations.getOrDefault(synset, new ArrayList<>()).stream())
+                .flatMap(synset -> wnd.synsetToEntries.getOrDefault(synset, new ArrayList<>()).stream())
+                .collect(Collectors.toSet());
+    }
+
+    public static Set<String> getHypernymSenses(String sense, Lang lang) {
+        final WordnetData wnd = getDictionary(lang);
+        return wnd.hyperRelations.getOrDefault(sense, new ArrayList<>()).stream()
+                .collect(Collectors.toSet());
     }
 
     public static TreeMap<Word, Double> getSimilarConcepts(Word word) {
         if (word.getPOS() == null) {
             return null;
         }
-        TreeMap<Word, Double> results = new TreeMap<Word, Double>();
-        Set<String> synonyms = JAWJAW.findSynonyms(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
+        TreeMap<Word, Double> results = new TreeMap<>();
+        Set<String> synonyms = getSynonyms(word);
         int no = 0;
         for (String s : synonyms) {
             if (!StopWords.isStopWord(s, word.getLanguage()) && Dictionary.isDictionaryWord(s, word.getLanguage())) {
@@ -198,7 +246,7 @@ public class OntologySupport {
             }
         }
         no = 0;
-        Set<String> hypernyms = JAWJAW.findHypernyms(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
+        Set<String> hypernyms = getHypernyms(word);
         for (String s : hypernyms) {
             Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(), word.getLanguage()), word.getPOS(), null,
                     word.getLanguage());
@@ -215,37 +263,61 @@ public class OntologySupport {
         return results;
     }
 
-    public static Set<Sense> getWordSenses(Word word) {
-        List<WordJAW> words = null;
-        if (getPOS(word.getPOS()) != null) {
-            words = WordDAO.findWordsByLemmaAndPos(word.getLemma(), getPOS(word.getPOS()), word.getLanguage());
+    public static Set<String> getWordSenses(Word word) {
+        WordnetData wnd;
+        if (word.getPOS() == null) {
+            wnd = getDictionary(word.getLanguage());
         } else {
-            words = WordDAO.findWordsByLemma(word.getLemma(), word.getLanguage());
+            wnd = getDictionary(word.getLanguage(), getPOS(word.getPOS()));
         }
-        if (words == null || words.size() == 0) {
-            return null;
-        }
-        Set<Sense> results = new TreeSet<Sense>();
-        for (WordJAW w : words) {
-            List<Sense> senses = SenseDAO.findSensesByWordid(w.getWordid(), w.getLang());
-            if (senses != null && senses.size() > 0) {
-                results.addAll(senses);
-            }
-        }
-        return results;
+        return new HashSet<>(wnd.entryToSynsets.getOrDefault(word.getLemma(), new ArrayList<>()));
+    }
+
+    public static String getFirstSense(Word word) {
+        return getDictionary(word).getFirstSynsetString(word.getLemma());
+    }
+
+    public static void correctFiles() {
+        final Pattern find = Pattern.compile("relType='hype'");
+        wordnetFiles.values().parallelStream()
+                .forEach(fileName -> {
+                    BufferedReader in = null;
+                    BufferedWriter out = null;
+                    try {
+                        in = new BufferedReader( new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
+                        out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName + ".tmp"), "UTF-8"));
+                        String line;
+                        while ((line = in.readLine()) != null) {
+                            line = find.matcher(line).replaceAll("relType='has_hypernym'");
+                            out.write(line + "\n");
+                        }
+                        out.close();
+                        in.close();
+                        new File(fileName).delete();
+                        new File(fileName + ".tmp").renameTo(new File(fileName));
+                    } catch (FileNotFoundException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } finally {
+                        try {
+                            if (in != null) {
+                                in.close();
+                            }
+                            if (out != null) {
+                                out.close();
+                            }
+                        } catch (IOException ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+                    }
+                });
     }
 
     public static void main(String[] args) {
-//        try {
-//            //System.out.println(semanticSimilarity(Word.getWordFromConcept("dog_NN", Lang.eng),
-//            //        Word.getWordFromConcept("cat_NN", Lang.eng), OntologySupport.PATH_SIM));
-//            net.sf.extjwnl.dictionary.Dictionary dictionary = net.sf.extjwnl.dictionary.Dictionary.getDatabaseBackedInstance("jdbc:sqlite:resources/config/WN/wnrom.db");
-//            Iterator<IndexWord> it = dictionary.getIndexWordIterator(net.sf.extjwnl.data.POS.NOUN);
-//            while (it.hasNext()) {
-//                System.out.println(it.next());
-//            }
-//        } catch (JWNLException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
+        //correctFiles();
     }
 }

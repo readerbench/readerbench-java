@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
 import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;

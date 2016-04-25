@@ -5,7 +5,7 @@ import java.util.Date;
 import org.apache.log4j.BasicConfigurator;
 
 import data.cscl.Community;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.ReaderBenchView;
 import webService.ReaderBenchServer;

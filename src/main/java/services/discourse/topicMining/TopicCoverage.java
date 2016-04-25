@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import data.AnalysisElement;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.nlp.listOfWords.MapOfWordWeights;
 import services.readingStrategies.PatternMatching;
 

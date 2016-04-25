@@ -17,7 +17,7 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileManager;
 
 import data.article.ResearchArticle;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import view.widgets.ReaderBenchView;
 
 class Author {

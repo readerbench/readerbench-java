@@ -7,10 +7,9 @@ package services.semanticModels.word2vec;
 
 import data.AnalysisElement;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;

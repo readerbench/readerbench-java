@@ -1,6 +1,6 @@
 package services.nlp.listOfWords;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class Connectives {
 	public static final ClassesOfWords CONNECTIVES_EN = new ClassesOfWords(

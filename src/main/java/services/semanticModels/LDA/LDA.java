@@ -38,7 +38,7 @@ import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
 import services.semanticModels.ISemanticModel;

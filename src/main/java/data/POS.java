@@ -13,14 +13,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package edu.cmu.lti.jawjaw.util;
+package data;
 
-public class TextUtil {
-
-	public static String canonicalize( String englishLemma ) {
-		englishLemma = englishLemma.toLowerCase();
-		englishLemma = englishLemma.replaceAll(" ", "_");
-		return englishLemma;
-	}
-	
+/**
+ * Enum class for the POS (Part of Speech) that is one of Noun, Verb, Adjective and Adverb.
+ * 
+ * @author Hideki Shima
+ *
+ */
+public enum POS {
+	a, // adjective 
+	r, // adverb
+	n, // noun
+	v; // verb
 }

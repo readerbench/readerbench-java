@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;

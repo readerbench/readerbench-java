@@ -17,7 +17,7 @@ import org.apache.log4j.Logger;
 import data.Block;
 import data.cscl.Conversation;
 import data.cscl.Utterance;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class CSCLStatsTime {
 

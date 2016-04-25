@@ -25,7 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class CorpusAssessmentMaster extends Master {
 	static Logger logger = Logger.getLogger(CorpusAssessmentMaster.class);

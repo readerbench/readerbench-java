@@ -10,9 +10,12 @@ import java.util.TreeMap;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 public class StaticLemmatizer {
 
@@ -29,6 +32,7 @@ public class StaticLemmatizer {
         BufferedReader in;
         try {
             FileInputStream inputFile = new FileInputStream(path);
+            //InputStreamReader ir = new InputStreamReader(inputFile, "ISO-8859-1");
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
             in = new BufferedReader(ir);
             String str_linie = "";
@@ -37,7 +41,10 @@ public class StaticLemmatizer {
                 strk = new StringTokenizer(str_linie, "\t");
                 String lemma = strk.nextToken();
                 String inflected = strk.nextToken();
-                lemmas.put(inflected, lemma);
+                String existing = lemmas.get(inflected);
+                if (existing == null || lemma.length() < existing.length()) {
+                    lemmas.put(inflected, lemma);
+                }
             }
             in.close();
         } catch (Exception e) {
@@ -46,8 +53,8 @@ public class StaticLemmatizer {
         return lemmas;
     }
     
-    public static void writeLemmas(String fileName, Map<String, String> lemmas) throws FileNotFoundException {
-        PrintWriter out = new PrintWriter(fileName);
+    public static void writeLemmas(String fileName, Map<String, String> lemmas) throws FileNotFoundException, UnsupportedEncodingException {
+        PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"));
         for (Map.Entry<String, String> e : lemmas.entrySet()) {
             out.println(e.getValue() + "\t" + e.getKey());
         }
@@ -113,13 +120,13 @@ public class StaticLemmatizer {
         return lemmas_nl;
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         BasicConfigurator.configure();
         System.out.println(StaticLemmatizer.lemmaStatic("pointés", Lang.fr));
         System.out.println(StaticLemmatizer.lemmaStatic("mangio", Lang.it));
         System.out.println(StaticLemmatizer.lemmaStatic("armas", Lang.es));
         System.out.println(StaticLemmatizer.lemmaStatic("talmpjes", Lang.nl));
-        //Map<String, String> lemmas = StaticLemmatizer.initialize("resources/config/Lemmas/lemmas_nl_full.txt", Lang.nl);
-        //StaticLemmatizer.writeLemmas("resources/config/Lemmas/lemmas_nl.txt", lemmas);
+//        Map<String, String> lemmas = StaticLemmatizer.initialize("resources/config/Lemmas/lemmas_nl_full.txt", Lang.nl);
+//        StaticLemmatizer.writeLemmas("resources/config/Lemmas/lemmas_nl.txt", lemmas);
     }
 }

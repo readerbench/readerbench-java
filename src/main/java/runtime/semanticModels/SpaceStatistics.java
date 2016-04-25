@@ -32,7 +32,7 @@ import org.openide.util.Lookup;
 
 import data.Word;
 import data.document.Document;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 

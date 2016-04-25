@@ -45,7 +45,7 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import data.sentiment.SentimentWeights;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;

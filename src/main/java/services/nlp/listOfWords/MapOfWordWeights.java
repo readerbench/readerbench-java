@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 /**
  * 

@@ -30,7 +30,7 @@ import org.apache.mahout.math.Vector.Element;
 import org.apache.mahout.math.VectorWritable;
 
 import data.Word;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.semanticModels.PreProcessing;
 
 public class CreateInputMatrix extends LSA {

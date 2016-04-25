@@ -4,7 +4,7 @@
  */
 package services.nlp.listOfWords;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 /**
  * 

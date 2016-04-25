@@ -34,7 +34,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import edu.stanford.nlp.util.Timing;
 
 public class RunMeasurementsView extends JFrame {

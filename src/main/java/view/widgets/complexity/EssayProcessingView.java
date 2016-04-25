@@ -28,7 +28,7 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 import services.complexity.DataGathering;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;

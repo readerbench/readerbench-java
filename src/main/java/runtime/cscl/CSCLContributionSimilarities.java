@@ -1,7 +1,7 @@
 package runtime.cscl;
 
 import data.cscl.Conversation;
-import edu.cmu.lti.jawjaw.pobj.Lang;
+import data.Lang;
 
 public class CSCLContributionSimilarities {
 
