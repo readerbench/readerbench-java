@@ -18,7 +18,7 @@ public class ResultKeyword implements Comparable<ResultKeyword> {
 		return name;
 	}
 
-	private int getNoOccurences() {
+	public int getNoOccurences() {
 		return noOccurences;
 	}
 

@@ -14,13 +14,14 @@ import data.pojo.CategoryPhrase;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import webService.ReaderBenchServer;
+import webService.query.QueryHelper;
 import webService.result.ResultCategory;
 
 public class Categorization {
 	private static Logger logger = Logger.getLogger(Categorization.class);
 
 	public static void performCategorization(String description) {
-		AbstractDocument queryDoc = ReaderBenchServer.processQuery(description, "resources/config/LSA/tasa_lak_en",
+		AbstractDocument queryDoc = QueryHelper.processQuery(description, "resources/config/LSA/tasa_lak_en",
 				"resources/config/LDA/tasa_lak_en", "eng", false, false);
 
 		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
@@ -48,7 +49,7 @@ public class Categorization {
 				sb.append(" ");
 			}
 
-			AbstractDocument queryCategory = ReaderBenchServer.processQuery(sb.toString(),
+			AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(),
 					"resources/config/LSA/tasa_lak_en", "resources/config/LDA/tasa_lak_en", "eng", false, false);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
 			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));

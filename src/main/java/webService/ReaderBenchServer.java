@@ -62,6 +62,9 @@ import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.Cscl;
 import webService.services.utils.FileProcessor;
+import webService.cv.CVHelper;
+import webService.keywords.KeywordsHelper;
+import webService.query.QueryHelper;
 import webService.queryResult.*;
 
 public class ReaderBenchServer {
@@ -74,55 +77,12 @@ public class ReaderBenchServer {
 	private static List<AbstractDocument> loadedDocs;
 	private static String loadedPath;
 
-	public static AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
-			boolean posTagging, boolean computeDialogism) {
-		logger.info("Processign query ...");
-		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(query);
-
-		// Lang lang = Lang.eng;
-		Lang lang = Lang.getLang(language);
-		AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
-				LDA.loadLDA(pathToLDA, lang), lang, posTagging, false);
-		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-		queryDoc.computeAll(computeDialogism, null, null);
-		ComplexityIndices.computeComplexityFactors(queryDoc);
-
-		return queryDoc;
-	}
-
-	public List<ResultKeyword> getKeywords(String documentKeywords, String documentContent, String pathToLSA,
-			String pathToLDA, String lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
-
-		ArrayList<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
-
-		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
-				computeDialogism);
-		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging,
-				computeDialogism);
-		queryKey.computeAll(computeDialogism, null, null);
-
-		for (Word keyword : queryKey.getWordOccurences().keySet()) {
-			AbstractDocument queryKeyword = processQuery(keyword.getLemma(), pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			SemanticCohesion sc = new SemanticCohesion(queryKeyword, queryDoc);
-			int occ = 0;
-			if (queryDoc.getWordOccurences().containsKey(keyword)) {
-				occ = queryDoc.getWordOccurences().get(keyword).intValue();
-			}
-			resultKeywords.add(new ResultKeyword(keyword.getLemma(), occ, Formatting.formatNumber(sc.getCohesion())));
-		}
-
-		Collections.sort(resultKeywords, ResultKeyword.ResultKeywordRelevanceComparator);
-		return resultKeywords;
-
-	}
-
 	public List<ResultCategory> getCategories(String documentContent, String pathToLSA, String pathToLDA, String lang,
 			boolean usePOSTagging, boolean computeDialogism, double threshold) {
 
 		List<ResultCategory> resultCategories = new ArrayList<ResultCategory>();
 
-		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
+		AbstractDocument queryDoc = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
 				computeDialogism);
 		List<Category> dbCategories = CategoryDAO.getInstance().findAll();
 
@@ -143,7 +103,7 @@ public class ReaderBenchServer {
 				sb.append(" ");
 			}
 
-			AbstractDocument queryCategory = processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging,
+			AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging,
 					computeDialogism);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
 			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
@@ -159,17 +119,17 @@ public class ReaderBenchServer {
 
 		// concepts
 		ResultTopic resultTopic = ConceptMap.getTopics(
-				processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
-		List<ResultKeyword> resultKeywords = getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
+				QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
+		List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(documentKeywords, documentContent, pathToLSA, pathToLDA, lang,
 				usePOSTagging, computeDialogism, threshold);
 		List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
 				usePOSTagging, computeDialogism, threshold);
 
-		AbstractDocument queryDoc = processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
+		AbstractDocument queryDoc = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
 				computeDialogism);
-		AbstractDocument queryAbs = processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging,
+		AbstractDocument queryAbs = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging,
 				computeDialogism);
-		AbstractDocument queryKey = processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging,
+		AbstractDocument queryKey = QueryHelper.processQuery(documentKeywords, pathToLSA, pathToLDA, lang, usePOSTagging,
 				computeDialogism);
 
 		// (abstract, document) relevance
@@ -271,7 +231,7 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.setData(ConceptMap.getTopics(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
+					QueryHelper.processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -289,7 +249,7 @@ public class ReaderBenchServer {
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
 			queryResult.setData(webService.services.SentimentAnalysis
-					.getSentiment(processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+					.getSentiment(QueryHelper.processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
 			return queryResult.convertToJson();
 		});
 		Spark.get("/getComplexity", (request, response) -> {
@@ -304,7 +264,7 @@ public class ReaderBenchServer {
 
 			QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
 			queryResult.setData(TextualComplexity.getComplexityIndices(
-					processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), 
+					QueryHelper.processQuery(text, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), 
 					Lang.getLang(lang), usePOSTagging, computeDialogism));
 			return queryResult.convertToJson();
 		});
@@ -348,7 +308,7 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.setData(ConceptMap
-					.getTopics(processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
+					.getTopics(QueryHelper.processQuery(q, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -465,7 +425,7 @@ public class ReaderBenchServer {
 			Conversation conversation = Conversation.load(new File("tmp/" + csclFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			conversation.computeAll(computeDialogism, null, null, true);
-			AbstractDocument conversationDocument = processQuery(conversation.getText(), pathToLSA, pathToLDA, language,
+			AbstractDocument conversationDocument = QueryHelper.processQuery(conversation.getText(), pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
@@ -516,7 +476,7 @@ public class ReaderBenchServer {
 			double threshold = (double) json.get("threshold");
 			
 			resultTopic = ConceptMap.getTopics(
-					processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
+					QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold);
 			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism, threshold);
 
@@ -559,7 +519,7 @@ public class ReaderBenchServer {
 			Map<String, Integer> commonWords = new HashMap<String, Integer>();
 			
 			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
-			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
+			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
 			Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
 			
@@ -573,21 +533,21 @@ public class ReaderBenchServer {
 			ResultCvCover result = new ResultCvCover(null, null);
 			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
 			resultCv.setConcepts(ConceptMap.getTopics(
-					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
 			resultCv.setSentiments(webService.services.SentimentAnalysis
-					.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+					.getSentiment(QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
 			result.setCv(resultCv);
 			
 			//if (coverFile != null) {
 				String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
-				AbstractDocument coverDocument = processQuery(coverContent, pathToLSA, pathToLDA, language,
+				AbstractDocument coverDocument = QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, language,
 						usePOSTagging, computeDialogism);
 				
 				ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
 				resultCover.setConcepts(ConceptMap.getTopics(
-						processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
+						QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
 				resultCover.setSentiments(webService.services.SentimentAnalysis
-						.getSentiment(processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
+						.getSentiment(QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism)));
 				result.setCover(resultCover);
 				
 				Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
@@ -639,7 +599,7 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (Double) json.get("threshold");
-
+			
 			// AbstractDocumentTemplate contents =
 			// Cscl.getConversationText(conversationText);
 			// logger.info("Contents: blocks = " + contents.getBlocks().size());
@@ -657,11 +617,10 @@ public class ReaderBenchServer {
 			String cvContent = pdfConverter.pdftoText("tmp/" + cvFile, true);
 			
 			logger.info("Continut cv: " + cvContent);
-			AbstractDocument cvDocument = processQuery(cvContent, pathToLSA, pathToLDA, language,
+			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
-			AbstractDocument keywordsDocument = processQuery(keywords, pathToLSA, pathToLDA, language,
+			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, language,
 					usePOSTagging, computeDialogism);
-			
 			
 			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
@@ -670,149 +629,7 @@ public class ReaderBenchServer {
 			QueryResultCv queryResult = new QueryResultCv();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			ResultCv result = new ResultCv(
-					null, // topic extraction
-					null, // word occurrences
-					null, // textual complexity
-					0,    // number of images
-					0,    // number of colors
-					0,    // number of pages
-					0,    // number of paragraphs
-					0,    // number of sentences
-					0,    // number of words
-					0,    // number of content words
-					null, // positive words
-					null, // negative words
-					null, // LIWC emotions
-					null, // specific keywords
-					0	  // (keywords, document) relevance
-			);
-
-			// topic extraction
-			result.setConcepts(ConceptMap.getTopics(
-					processQuery(cvContent, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism), threshold));
-			
-			// word occurrences
-			Map<String, Integer> wordOccurences = new HashMap<String, Integer>();
-			List<String> positiveWords = new ArrayList<String>();
-			List<String> negativeWords = new ArrayList<String>();
-			Map<String, List<String>> liwcEmotions = new HashMap<String, List<String>>();
-			liwcEmotions.put(SentimentValence.get("Affect_LIWC").getName(), new ArrayList<String>());
-			liwcEmotions.put(SentimentValence.get("Posemo_LIWC").getName(), new ArrayList<String>());
-			liwcEmotions.put(SentimentValence.get("Negemo_LIWC").getName(), new ArrayList<String>());
-			liwcEmotions.put(SentimentValence.get("Anx_LIWC").getName(), new ArrayList<String>());
-			liwcEmotions.put(SentimentValence.get("Anger_LIWC").getName(), new ArrayList<String>());
-			liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());
-			for (Map.Entry<Word, Integer> entry : cvDocument.getWordOccurences().entrySet()) {
-				Word word = entry.getKey();
-				Integer occurrences = entry.getValue();
-				wordOccurences.put(word.getLemma(), occurrences);
-				SentimentEntity se = word.getSentiment();
-				if (se == null) continue;
-				
-				// FAN (ANEW FR)
-				SentimentValence sv = SentimentValence.get("Valence_ANEW");
-				if (sv != null) {
-					Double fanValence = se.get(sv);
-					if (fanValence != null) {
-						if (fanValence >= 5) positiveWords.add(word.getLemma());
-						else negativeWords.add(word.getLemma());
-					}
-				}
-				
-				// LIWC
-				Double liwcSentimnet; 
-				// 125 - affect
-				sv = SentimentValence.get("Affect_LIWC");
-				if (sv != null) {
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-				// 126 - emopos
-				sv = SentimentValence.get("Posemo_LIWC");
-				if (sv != null) {
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-				// 127 - emoneg
-				if (sv != null) {
-					sv = SentimentValence.get("Negemo_LIWC");
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-				// 128 - anxiete
-				if (sv != null) {
-					sv = SentimentValence.get("Anx_LIWC");
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-				// 129 - colere
-				sv = SentimentValence.get("Anger_LIWC");
-				if (sv != null) {
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-				// 130 - tristesse
-				if (sv != null) {
-					sv = SentimentValence.get("Sad_LIWC");
-					liwcSentimnet = se.get(sv);
-					if (liwcSentimnet != null && liwcSentimnet > 0) 
-						liwcEmotions.get(sv.getName()).add(word.getLemma());
-				}
-				
-			}
-			
-			// textual complexity
-			result.setTextualComplexity(TextualComplexity.getComplexityIndices(cvDocument, lang, usePOSTagging, computeDialogism));
-			
-			// number of images
-			result.setImages(pdfConverter.getImages());
-			
-			// number of colors
-			result.setColors(pdfConverter.getColors() + 1);
-			
-			// number of pages
-			result.setPages(pdfConverter.getPages());
-			
-			// number of paragraphs
-			result.setParagraphs(cvDocument.getNoBlocks());
-			
-			// number of sentences
-			result.setSentences(cvDocument.getNoSentences());
-			
-			// number of words
-			result.setWords(cvDocument.getNoWords());
-			
-			// number of content words
-			result.setContentWords(cvDocument.getNoContentWords());
-			
-			// positive words
-			result.setPositiveWords(positiveWords);
-			
-			// negative words
-			result.setNegativeWords(negativeWords);
-			
-			// LIWC emotions
-			result.setLiwcEmotions(liwcEmotions);
-			
-			// specific keywords
-			result.setKeywords(getKeywords(keywords, cvDocument.toString(), 
-					pathToLSA, pathToLDA, language,
-					usePOSTagging, computeDialogism, threshold));
-			
-			// (keywords, document) relevance
-			SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, cvDocument);
-			result.setKeywordsDocumentRelevance(Formatting.formatNumber(scKeywordsDocument.getCohesion()));
+			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywords, pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism, threshold);
 
 			queryResult.setData(result);
 			
