@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import data.AbstractDocument;
+import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
@@ -14,7 +15,7 @@ import webService.result.ResultKeyword;
 public class KeywordsHelper {
 	
 	public static List<ResultKeyword> getKeywords(String documentKeywords, String documentContent, String pathToLSA,
-			String pathToLDA, String lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
+			String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
 		
 		ArrayList<ResultKeyword> resultKeywords = new ArrayList<ResultKeyword>();
 

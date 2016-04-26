@@ -25,20 +25,45 @@ import webService.result.*;
 
 public class TextualComplexity {
 
-	/**
-	 * Get values for all textual complexity indices applied on the entire
-	 * document
-	 *
-	 * @param query
-	 * @return List of sentiment values per entity
-	 */
-	public static List<ResultTextualComplexity> getComplexityIndices(AbstractDocument d, Lang lang,
-			boolean posTagging, boolean dialogism) {
-		List<ResultTextualComplexity> resultsComplexity = new ArrayList<ResultTextualComplexity>();
+	private AbstractDocument d;
+	private Lang lang;
+	private boolean posTagging;
+	private boolean computeDialogism;
+	private List<IComplexityFactors> list;
 
-		d.setComplexityIndices(new double[ComplexityIndices.NO_COMPLEXITY_INDICES]);
+	public TextualComplexity(Lang lang, boolean posTagging, boolean computeDialogism) {
+		this.lang = lang;
+		this.posTagging = posTagging;
+		this.computeDialogism = computeDialogism;
+		initializeList();
+	}
 
-		List<IComplexityFactors> list = new ArrayList<IComplexityFactors>();
+	public TextualComplexity(AbstractDocument d, Lang lang, boolean posTagging, boolean computeDialogism) {
+		this.d = d;
+		this.lang = lang;
+		this.posTagging = posTagging;
+		this.computeDialogism = computeDialogism;
+		initializeList();
+	}
+
+	public List<IComplexityFactors> getList() {
+		return list;
+	}
+
+	public void setList(List<IComplexityFactors> list) {
+		this.list = list;
+	}
+
+	public Lang getLang() {
+		return lang;
+	}
+
+	public void setLang(Lang lang) {
+		this.lang = lang;
+	}
+
+	private void initializeList() {
+		list = new ArrayList<IComplexityFactors>();
 		list.add(new LengthComplexity());
 		list.add(new SurfaceStatisticsComplexity());
 		list.add(new EntropyComplexity());
@@ -54,12 +79,26 @@ public class TextualComplexity {
 			list.add(new TreeComplexity());
 		}
 
-		if (dialogism == true) {
+		if (computeDialogism == true) {
 			list.add(new LexicalChainsComplexity());
 			list.add(new LexicalCohesionComplexity());
 			list.add(new DialogismStatisticsComplexity());
 			list.add(new DialogismSynergyComplexity());
 		}
+	}
+
+	/**
+	 * Get values for all textual complexity indices applied on the entire
+	 * document
+	 *
+	 * @param query
+	 * @return List of sentiment values per entity
+	 */
+	public List<ResultTextualComplexity> getComplexityIndices() {
+
+		List<ResultTextualComplexity> resultsComplexity = new ArrayList<ResultTextualComplexity>();
+
+		d.setComplexityIndices(new double[ComplexityIndices.NO_COMPLEXITY_INDICES]);
 
 		// complexity indices computation
 		for (IComplexityFactors f : list) {

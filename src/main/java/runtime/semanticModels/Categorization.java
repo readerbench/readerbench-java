@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import dao.CategoryDAO;
 import data.AbstractDocument;
+import data.Lang;
 import data.discourse.SemanticCohesion;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
@@ -22,7 +23,7 @@ public class Categorization {
 
 	public static void performCategorization(String description) {
 		AbstractDocument queryDoc = QueryHelper.processQuery(description, "resources/config/LSA/tasa_lak_en",
-				"resources/config/LDA/tasa_lak_en", "eng", false, false);
+				"resources/config/LDA/tasa_lak_en", Lang.getLang("eng"), false, false);
 
 		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
 		queryDoc.computeAll(false, null, null);
@@ -50,7 +51,7 @@ public class Categorization {
 			}
 
 			AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(),
-					"resources/config/LSA/tasa_lak_en", "resources/config/LDA/tasa_lak_en", "eng", false, false);
+					"resources/config/LSA/tasa_lak_en", "resources/config/LDA/tasa_lak_en", Lang.getLang("eng"), false, false);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
 			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
 		}

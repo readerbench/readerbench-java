@@ -27,13 +27,11 @@ public class CVHelper {
 			String keywords,
 			String pathToLSA,
 			String pathToLDA,
-			String language,
+			Lang lang,
 			boolean usePOSTagging,
 			boolean computeDialogism,
 			double threshold
 			) {
-		
-		Lang lang = Lang.getLang(language);
 		
 		ResultCv result = new ResultCv();
 		
@@ -122,7 +120,8 @@ public class CVHelper {
 		}
 		
 		// textual complexity
-		result.setTextualComplexity(TextualComplexity.getComplexityIndices(document, lang, usePOSTagging, computeDialogism));
+		TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePOSTagging, computeDialogism);
+		result.setTextualComplexity(textualComplexity.getComplexityIndices());
 		
 		// number of images
 		result.setImages(pdfConverter.getImages());
@@ -156,7 +155,7 @@ public class CVHelper {
 		
 		// specific keywords
 		result.setKeywords(KeywordsHelper.getKeywords(keywords, document.toString(), 
-				pathToLSA, pathToLDA, language,
+				pathToLSA, pathToLDA, lang,
 				usePOSTagging, computeDialogism, threshold));
 		
 		// (keywords, document) relevance

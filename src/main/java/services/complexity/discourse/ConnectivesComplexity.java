@@ -80,6 +80,7 @@ public class ConnectivesComplexity extends IComplexityFactors {
 
     public int[] getIDs() {
         int[] ids = null;
+        System.out.println("Language is " + lang);
         switch (lang) {
             case eng:
                 ids = new int[Connectives.NO_CONNECTIVE_TYPES_EN];
