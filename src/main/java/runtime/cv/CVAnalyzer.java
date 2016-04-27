@@ -216,17 +216,17 @@ public class CVAnalyzer {
 		BasicConfigurator.configure();
 		ReaderBenchServer.initializeDB();
 
-		CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv_sample/", "resources/config/LSA/lemonde_fr",
+		/*CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv_sample/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerSample.process();
+		cvAnalyzerSample.process();*/
 
-		/*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "resources/config/LSA/lemonde_fr",
+		CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerPositifs.process();
 
 		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerNegatifs.process();*/
+		cvAnalyzerNegatifs.process();
 	}
 
 }
