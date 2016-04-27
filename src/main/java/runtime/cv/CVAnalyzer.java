@@ -3,8 +3,11 @@ package runtime.cv;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
@@ -75,6 +78,8 @@ public class CVAnalyzer {
 				sb.append("rel" + i + ',');
 			}
 			sb.append("\n");
+			
+			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
 
 			System.out.println("Incep procesarea CV-urilor");
 			// iterate through all PDF CV files
@@ -91,7 +96,7 @@ public class CVAnalyzer {
 					AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
 							usePOSTagging, computeDialogism);
 
-					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywords, pathToLSA,
+					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
 							pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
 					// CV
 					sb.append(filePath.getFileName().toString() + ",");
@@ -215,13 +220,13 @@ public class CVAnalyzer {
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerSample.process();
 
-		CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "resources/config/LSA/lemonde_fr",
+		/*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerPositifs.process();
 
 		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerNegatifs.process();
+		cvAnalyzerNegatifs.process();*/
 	}
 
 }

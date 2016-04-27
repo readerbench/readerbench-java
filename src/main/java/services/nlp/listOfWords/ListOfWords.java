@@ -21,6 +21,10 @@ public class ListOfWords {
     private static Logger logger = Logger.getLogger(ListOfWords.class);
 
     private Set<String> words;
+    
+    public ListOfWords() {
+    	
+    }
 
     public ListOfWords(String path) {
         logger.info("Loading " + path + "...");

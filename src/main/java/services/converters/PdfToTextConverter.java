@@ -12,15 +12,23 @@ import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
+import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.util.ResourceLoader;
+
+import webService.ReaderBenchServer;
 
 public class PdfToTextConverter {
 
+	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+	
 	// number of pages
 	private Integer pages;
 
@@ -138,26 +146,34 @@ public class PdfToTextConverter {
 			// get number of images
 			// get number of colors
 			List<PDPage> list = pdDoc.getDocumentCatalog().getAllPages();
-			// PDFStreamEngine engine = new
-			// PDFStreamEngine(ResourceLoader.loadProperties("org/apache/pdfbox/resources/PDFStreamEngine.properties",
-			// false));
+			PDFStreamEngine engine = new PDFStreamEngine(ResourceLoader.loadProperties("org/apache/pdfbox/resources/PageDrawer.properties", false));
 			// PageDrawer pd = new PageDrawer();
-			// PDGraphicsState graphicState = engine.getGraphicsState();
 			// PDGraphicsState graphicState = pd.getGraphicsState();
 			List<Float> colors = new ArrayList<Float>();
+			logger.info("Incep procesarea paginilor");
 			for (PDPage page : list) {
-				PDResources pdResources = page.getResources();
-				this.images = pdResources.getImages().size();
-
+				//PDResources pdResources = page.getResources();
+				//this.images = pdResources.getImages().size();
+				
+				engine.processStream(page, page.findResources(), page.getContents().getStream());
+				PDGraphicsState graphicState = engine.getGraphicsState();
+				logger.info("Procesez pagina noua");
+				
 				// engine.processStream(page, page.findResources(),
 				// page.getContents().getStream());
-				/*
-				 * float colorSpaceValues[] =
-				 * graphicState.getStrokingColor().getColorSpaceValue(); for
-				 * (int i = 0; i < colorSpaceValues.length; i++) { Float f = new
-				 * Float(colorSpaceValues[i]); if (!colors.contains(f)) {
-				 * colors.add(f); } }
-				 */
+				
+				float colorSpaceValues[] = graphicState.getStrokingColor().getColorSpaceValue();
+				logger.info("Culori: " + graphicState.getStrokingColor().getColorSpaceValue());
+				logger.info("Am " + colorSpaceValues.length + " culori pe aceasta pagina");
+				for (float c : colorSpaceValues) {
+					logger.info("Incerc sa adaug culoarea: " + (c * 255));
+					Float f = new Float(c * 255);
+					if (!colors.contains(f)) {
+						logger.info("Am adaugat culoarea " + f);
+						colors.add(f);
+					}
+				}
+				 
 			}
 			this.colors = colors.size();
 
@@ -171,6 +187,7 @@ public class PdfToTextConverter {
 			return null;
 		} catch (Exception e) {
 			System.err.println("An exception occured in parsing the PDF Document." + e.getMessage());
+			e.printStackTrace();
 		} finally {
 			try {
 				if (cosDoc != null)

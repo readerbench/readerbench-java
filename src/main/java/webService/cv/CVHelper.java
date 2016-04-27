@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import data.AbstractDocument;
 import data.Lang;
@@ -24,7 +25,7 @@ public class CVHelper {
 			AbstractDocument document,
 			AbstractDocument keywordsDocument,
 			PdfToTextConverter pdfConverter,
-			String keywords,
+			Set<String> keywords,
 			String pathToLSA,
 			String pathToLDA,
 			Lang lang,
@@ -154,7 +155,7 @@ public class CVHelper {
 		result.setLiwcEmotions(liwcEmotions);
 		
 		// specific keywords
-		result.setKeywords(KeywordsHelper.getKeywords(keywords, document.toString(), 
+		result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords,
 				pathToLSA, pathToLDA, lang,
 				usePOSTagging, computeDialogism, threshold));
 		
