@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -15,9 +17,12 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.log4j.Logger;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.common.PDStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
 import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -149,18 +154,16 @@ public class PdfToTextConverter {
 			PDFStreamEngine engine = new PDFStreamEngine(ResourceLoader.loadProperties("org/apache/pdfbox/resources/PageDrawer.properties", false));
 			// PageDrawer pd = new PageDrawer();
 			// PDGraphicsState graphicState = pd.getGraphicsState();
-			List<Float> colors = new ArrayList<Float>();
+			//List<Float> colors = new ArrayList<Float>();
 			logger.info("Incep procesarea paginilor");
 			for (PDPage page : list) {
-				//PDResources pdResources = page.getResources();
-				//this.images = pdResources.getImages().size();
+			    
+				PDResources pdResources = page.getResources();
+				this.images = pdResources.getImages().size();
 				
-				engine.processStream(page, page.findResources(), page.getContents().getStream());
+				/*engine.processStream(page, page.findResources(), page.getContents().getStream());
 				PDGraphicsState graphicState = engine.getGraphicsState();
 				logger.info("Procesez pagina noua");
-				
-				// engine.processStream(page, page.findResources(),
-				// page.getContents().getStream());
 				
 				float colorSpaceValues[] = graphicState.getStrokingColor().getColorSpaceValue();
 				logger.info("Culori: " + graphicState.getStrokingColor().getColorSpaceValue());
@@ -172,10 +175,16 @@ public class PdfToTextConverter {
 						logger.info("Am adaugat culoarea " + f);
 						colors.add(f);
 					}
-				}
+				}*/
 				 
 			}
-			this.colors = colors.size();
+			
+			ColorTextStripper stripper = new ColorTextStripper();
+			String text = stripper.getText(pdDoc);
+			logger.info("Culori textuale: " + text);
+			logger.info("Numar culori document: " + stripper.getCharsPerColor().size());
+			
+			this.colors = stripper.getCharsPerColor().size();
 
 			// pdfStripper.setStartPage(1);
 			// pdfStripper.setEndPage(5);

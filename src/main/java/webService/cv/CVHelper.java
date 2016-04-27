@@ -128,7 +128,7 @@ public class CVHelper {
 		result.setImages(pdfConverter.getImages());
 		
 		// number of colors
-		result.setColors(pdfConverter.getColors() + 1);
+		result.setColors(pdfConverter.getColors());
 		
 		// number of pages
 		result.setPages(pdfConverter.getPages());

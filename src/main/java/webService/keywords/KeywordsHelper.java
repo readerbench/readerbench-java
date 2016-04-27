@@ -30,10 +30,11 @@ public class KeywordsHelper {
 		usedList.setWords(keywords);
 		
 		for (String pattern : usedList.getWords()) {
+			AbstractDocument patterDocument = QueryHelper.processQuery(pattern, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism);
 			int occ = 0;
 			Pattern javaPattern = Pattern.compile(" " + pattern + " ");
 			Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");
-			SemanticCohesion sc = new SemanticCohesion(keywordsDocument, document);
+			SemanticCohesion sc = new SemanticCohesion(patterDocument, document);
 			while (matcher.find())
 				occ++;
 			resultKeywords.add(new ResultKeyword(pattern, occ, Formatting.formatNumber(sc.getCohesion())));
