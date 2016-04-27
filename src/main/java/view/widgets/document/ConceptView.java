@@ -311,7 +311,7 @@ public class ConceptView extends JFrame {
 						(float) (COLOR_TOPIC.getBlue()) / 256));
 				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-				graph.addNode(nodes.get(t.getWord()));
+				graph.addNode(n);
 				nodes.put(t.getWord(), n);
 			}
 		}

@@ -77,7 +77,7 @@ public class WordnetPOSData {
     
     public Set<String> getSynonyms(String lemma, POS pos) {
         final WordnetData wnd = getByPOS(pos);
-        return wnd.lemmaToSynsets.get(lemma).stream()
+        return wnd.entryToSynsets.get(lemma).stream()
                 .flatMap(synset -> wnd.getSynonyms(synset).stream())
                 .collect(Collectors.toSet());
     }
