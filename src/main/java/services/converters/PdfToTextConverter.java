@@ -3,12 +3,10 @@ package services.converters;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -17,13 +15,9 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.log4j.Logger;
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
-import org.apache.pdfbox.pdfparser.PDFStreamParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.pdmodel.common.PDStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.graphics.PDGraphicsState;
 import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.util.ResourceLoader;
@@ -103,6 +97,7 @@ public class PdfToTextConverter {
 		File file = null;
 		try {
 			if (!isFile) {
+				
 				URL url;
 
 				FileSystemManager fsManager = VFS.getManager();
@@ -139,10 +134,14 @@ public class PdfToTextConverter {
 
 				parser = new PDFParser(new FileInputStream(file));
 			}
+			
+			PrintWriter out = new PrintWriter(fileName.replace(".pdf", ".txt"), "UTF-8");
 
 			parser.parse();
 			cosDoc = parser.getDocument();
 			pdfStripper = new PDFTextStripper();
+			pdfStripper.setLineSeparator(" ");
+			pdfStripper.setParagraphEnd("\n");
 			pdDoc = new PDDocument(cosDoc);
 
 			// get number of pages
@@ -157,6 +156,8 @@ public class PdfToTextConverter {
 			//List<Float> colors = new ArrayList<Float>();
 			logger.info("Incep procesarea paginilor");
 			for (PDPage page : list) {
+				
+				//out.write(page.getContents().getByteArray());
 			    
 				PDResources pdResources = page.getResources();
 				this.images = pdResources.getImages().size();
@@ -179,17 +180,22 @@ public class PdfToTextConverter {
 				 
 			}
 			
-			ColorTextStripper stripper = new ColorTextStripper();
+			ColorTextStripper stripper = new ColorTextStripper(out);
+			
 			String text = stripper.getText(pdDoc);
 			logger.info("Culori textuale: " + text);
 			logger.info("Numar culori document: " + stripper.getCharsPerColor().size());
 			
 			this.colors = stripper.getCharsPerColor().size();
 
-			// pdfStripper.setStartPage(1);
-			// pdfStripper.setEndPage(5);
 			parsedText = pdfStripper.getText(pdDoc);
-			System.out.println(parsedText);
+			// replace all single \n's with space; multiple \ns means new paragraph
+			parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+			
+			// debug purposes
+			//out.write(parsedText);
+			
+			out.close();
 
 		} catch (IOException e) {
 			System.err.println("Unable to open PDF Parser. " + e.getMessage());

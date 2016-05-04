@@ -1,20 +1,29 @@
 package services.converters;
 
 import java.awt.Color;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.util.TextPosition;
 
+import webService.ReaderBenchServer;
+
 public class ColorTextStripper extends PDFTextStripper
 {
-    public ColorTextStripper() throws IOException
+	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+	private PrintWriter out;
+	
+    public ColorTextStripper(PrintWriter out) throws IOException
     {
         super();
+        this.out = out;
         setSuppressDuplicateOverlappingText(false);
 
         registerOperatorProcessor("CS", new org.apache.pdfbox.util.operator.SetStrokingColorSpace());
@@ -53,6 +62,16 @@ public class ColorTextStripper extends PDFTextStripper
     @Override
     protected void writeString(String text, List<TextPosition> textPositions) throws IOException
     {
+    	/*logger.info("Outputez urmatorul text: " + text);
+    	out.write(text);
+    	// search for paragraphs
+    	logger.info("Punct e la pozitia " + text.lastIndexOf('.') + "; text are lungimea = " + text.length());
+    	if (text.trim().lastIndexOf('.') == text.trim().length() - 1) {
+    		logger.info("Outputez linie noua");
+    		out.write("\n");
+    	}*/
+    	
+    	
         for (TextPosition textPosition: textPositions)
         {
             Integer charRenderingMode = renderingMode.get(textPosition);
