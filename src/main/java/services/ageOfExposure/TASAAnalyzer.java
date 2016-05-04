@@ -87,7 +87,8 @@ public class TASAAnalyzer {
 		/* Compute Matches */
 		Integer[] matches = graph.computeAssociations(modelA.getNoTopics());
 		for (i = 0; i < matches.length; i++) {
-			matches[i] -= modelA.getNoTopics();
+			if (matches[i] != null)
+				matches[i] -= modelA.getNoTopics();
 		}
 
 		return matches;
