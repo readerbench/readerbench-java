@@ -193,7 +193,7 @@ public class PdfToTextConverter {
 			parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
 			
 			// debug purposes
-			//out.write(parsedText);
+			out.write(parsedText);
 			
 			out.close();
 
