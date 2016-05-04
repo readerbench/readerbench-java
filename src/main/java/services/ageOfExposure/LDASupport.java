@@ -33,15 +33,13 @@ public class LDASupport {
 	 *            - second topic
 	 * @return : distance between topics ([0 - 1])
 	 */
-	public static double topicDistance(LDA lda1, int topic1Id, LDA lda2,
-			int topic2Id) {
+	public static double topicDistance(LDA lda1, int topic1Id, LDA lda2, int topic2Id) {
 
 		ParallelTopicModel model1 = lda1.getModel();
 		ParallelTopicModel model2 = lda2.getModel();
 
 		/* Get the bigger Alphabet */
-		Alphabet a1 = model1.getAlphabet(), a2 = model2.getAlphabet(), bigA = (a1
-				.size() > a2.size() ? a1 : a2);
+		Alphabet a1 = model1.getAlphabet(), a2 = model2.getAlphabet(), bigA = (a1.size() > a2.size() ? a1 : a2);
 
 		/* Create model local word id to reference(bigger) model id mapping */
 		int model1IdMap[] = new int[bigA.size()];
@@ -140,17 +138,15 @@ public class LDASupport {
 
 		// Iterate topics and extract top words
 		for (int topic = 0; topic < model.getNumTopics(); topic++) {
-			Iterator<IDSorter> wordIterator = topicSortedWords.get(topic)
-					.iterator();
+			Iterator<IDSorter> wordIterator = topicSortedWords.get(topic).iterator();
 
 			int rank = 0;
 			List<String> currentConcept = new LinkedList<String>();
 			while (wordIterator.hasNext() && ++rank < numWords) {
 				IDSorter idCountPair = wordIterator.next();
 
-				currentConcept.add("("
-						+ alphabet.lookupObject(idCountPair.getID()) + ","
-						+ idCountPair.getWeight() + ")");
+				currentConcept
+						.add("(" + alphabet.lookupObject(idCountPair.getID()) + "," + idCountPair.getWeight() + ")");
 			}
 			result.add(currentConcept);
 		}
@@ -200,7 +196,7 @@ public class LDASupport {
 		return wordWeight / weightSum;
 	}
 
-	public static Map<Word, Double> getWordWeights(LDA lda, int topicId) {
+	public static Map<Word, Double> getWordWeights(LDA lda, Integer topicId) {
 		double weightSum = 0D;
 		Map<Word, Double> wordWeights = new TreeMap<Word, Double>();
 
@@ -217,9 +213,9 @@ public class LDASupport {
 		while (wordIterator.hasNext()) {
 			IDSorter idCountPair = wordIterator.next();
 
-			wordWeights.put(Word.getWordFromConcept(
-					alphabet.lookupObject(idCountPair.getID()).toString(),
-					lda.getLanguage()), idCountPair.getWeight());
+			wordWeights.put(
+					Word.getWordFromConcept(alphabet.lookupObject(idCountPair.getID()).toString(), lda.getLanguage()),
+					idCountPair.getWeight());
 
 			weightSum += idCountPair.getWeight();
 		}
@@ -248,14 +244,12 @@ public class LDASupport {
 			while (wordIterator.hasNext()) {
 				IDSorter idCountPair = wordIterator.next();
 
-				Word w = Word.getWordFromConcept(
-						alphabet.lookupObject(idCountPair.getID()).toString(),
+				Word w = Word.getWordFromConcept(alphabet.lookupObject(idCountPair.getID()).toString(),
 						lda.getLanguage());
 				if (!wordWeights.containsKey(w)) {
 					wordWeights.put(w, 0D);
 				}
-				wordWeights.put(w, wordWeights.get(w) + idCountPair.getWeight()
-						* weights[topicId]);
+				wordWeights.put(w, wordWeights.get(w) + idCountPair.getWeight() * weights[topicId]);
 
 				weightSum += idCountPair.getWeight() * weights[topicId];
 			}

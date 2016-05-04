@@ -33,6 +33,7 @@ public class TopicMatchGraph {
 		this.cost = new double[this.nodes][];
 		for (int i = 0; i < this.nodes; i++)
 			this.cost[i] = new double[this.nodes];
+		this.cost[sourceId][sinkId] = 0D;
 
 		this.edge = new int[this.nodes][];
 		for (int i = 0; i < this.nodes; i++)
@@ -51,18 +52,19 @@ public class TopicMatchGraph {
 
 		this.flow[end][sinkId] = 0;
 		this.edge[end][sinkId] = 1;
-		this.cost[sourceId][sinkId] = this.cost[sinkId][end] = 0D;
+		this.cost[end][sinkId] = 0D;
+		// this.cost[sourceId][sinkId] = this.cost[sinkId][end] = 0D;
 	}
 
 	public double getEdge(int start, int end) {
 		return this.cost[start][end];
 	}
 
-	public Integer[] computeAssociations() {
-		int resultSize = 0;
-		for (int i = 0; i < this.nodes; i++)
-			if (edge[sourceId][i] != 0)
-				resultSize++;
+	public Integer[] computeAssociations(int resultSize) {
+		// int resultSize = 0;
+		// for (int i = 0; i < this.nodes; i++)
+		// if (edge[sourceId][i] != 0)
+		// resultSize++;
 
 		Integer[] result = new Integer[resultSize];
 
@@ -133,14 +135,12 @@ public class TopicMatchGraph {
 		graph.addEdge(0, 4, 0.2);
 		graph.addEdge(0, 5, 0.2);
 
-		graph.addEdge(1, 5, 0.2);
 		graph.addEdge(1, 4, 0.1);
-		graph.addEdge(1, 6, 0.3);
-
+		
 		graph.addEdge(2, 5, 0.1);
 		graph.addEdge(2, 4, 0.2);
 		graph.addEdge(2, 6, 0.3);
-		
+
 		graph.addEdge(3, 4, 0.1);
 		graph.addEdge(3, 5, 0.1);
 		graph.addEdge(3, 6, 0.1);
@@ -148,7 +148,7 @@ public class TopicMatchGraph {
 		System.out.println("Graph:");
 		System.out.println(graph);
 
-		Integer[] assoc = graph.computeAssociations();
+		Integer[] assoc = graph.computeAssociations(4);
 		for (int i = 0; i < assoc.length; i++)
 			System.out.println(i + "--" + assoc[i]);
 	}

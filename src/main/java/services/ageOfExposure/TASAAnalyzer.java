@@ -29,6 +29,7 @@ import data.Lang;
 
 public class TASAAnalyzer {
 	private static Logger logger = Logger.getLogger("TASAAnalyzer");
+	private final double MIN_SEM_SIMILARITY = 0.3;
 	private final double MIN_THRESHOLD = 0.4;
 	private final double MAX_THRESHOLD = 0.7;
 	private final double THRESHOLD_INCREMENT = 0.1;
@@ -76,14 +77,15 @@ public class TASAAnalyzer {
 		for (i = 0; i < modelA.getNoTopics(); i++) {
 			for (j = 0; j < modelB.getNoTopics(); j++) {
 				distance = LDASupport.topicDistance(modelA, i, modelB, j);
-				// logger.info(" topic "+i+" topic "+j+" = "+distance);
-				x = i;
-				y = j + modelA.getNoTopics();
-				graph.addEdge(x, y, distance);
+				if (distance <= 1 - MIN_SEM_SIMILARITY) {
+					x = i;
+					y = j + modelA.getNoTopics();
+					graph.addEdge(x, y, distance);
+				}
 			}
 		}
 		/* Compute Matches */
-		Integer[] matches = graph.computeAssociations();
+		Integer[] matches = graph.computeAssociations(modelA.getNoTopics());
 		for (i = 0; i < matches.length; i++) {
 			matches[i] -= modelA.getNoTopics();
 		}
@@ -130,7 +132,10 @@ public class TASAAnalyzer {
 
 			for (int i = 0; i < intermediateModel.getNoTopics(); i++) {
 				intermediateModelDistrib.put(i, LDASupport.getWordWeights(intermediateModel, i));
-				matureModelDistrib.put(i, LDASupport.getWordWeights(matureModel, matches[i]));
+				if (matches[i] != null)
+					matureModelDistrib.put(i, LDASupport.getWordWeights(matureModel, matches[i]));
+				else
+					matureModelDistrib.put(i, null);
 			}
 
 			/*
@@ -149,7 +154,7 @@ public class TASAAnalyzer {
 						if (intermediateTopicDistr[i] > 0)
 							noI++;
 					}
-					if (matureModelDistrib.get(i).containsKey(analyzedWord)) {
+					if (matureModelDistrib.get(i) != null && matureModelDistrib.get(i).containsKey(analyzedWord)) {
 						matureTopicDistr[i] = matureModelDistrib.get(i).get(analyzedWord);
 						if (matureTopicDistr[i] > 0)
 							noM++;
@@ -215,10 +220,10 @@ public class TASAAnalyzer {
 		Map<String, Double> shockAoA = getWordAcquisitionAge("Shock.csv");
 
 		try {
-			BufferedWriter loweStats = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path + "/stats.csv")), "UTF-8"), 32768);
-			BufferedWriter loweValues = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path + "/words.csv")), "UTF-8"), 32768);
+			BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(new File(path + "/AoE stats bipartite graph.csv")), "UTF-8"), 32768);
+			BufferedWriter loweValues = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(new File(path + "/AoE words bipartite graph.csv")), "UTF-8"), 32768);
 			// create header
 			String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
 			loweStats.write(content);
@@ -304,7 +309,8 @@ public class TASAAnalyzer {
 	public static void main(String args[]) throws Exception {
 		BasicConfigurator.configure();
 
-		TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE", 6);
+		TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE HDP", 6);
+		// TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE 100", 6);
 		ta.loadModels();
 		ta.performMatching();
 		ta.writeResults();

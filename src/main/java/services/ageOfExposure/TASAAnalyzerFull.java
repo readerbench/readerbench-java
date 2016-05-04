@@ -238,11 +238,10 @@ public class TASAAnalyzerFull {
 		Map<String, Double> shockAoA = getWordAcquisitionAge("Shock.csv");
 
 		try {
-			BufferedWriter loweStats = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path + "/AoEstats_full.csv")), "UTF-8"),
-					32768);
-			BufferedWriter loweValues = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(new File(path + "/wordAoE_full.csv")), "UTF-8"), 32768);
+			BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(new File(path + "/AoEstats full matching.csv")), "UTF-8"), 32768);
+			BufferedWriter loweValues = new BufferedWriter(new OutputStreamWriter(
+					new FileOutputStream(new File(path + "/wordAoE full matching.csv")), "UTF-8"), 32768);
 			// create header
 			String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
 			loweStats.write(content);
@@ -329,6 +328,8 @@ public class TASAAnalyzerFull {
 		BasicConfigurator.configure();
 
 		TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE 100", 6);
+		// TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE HDP",
+		// 6);
 		ta.loadModels();
 		ta.performMatching();
 		ta.writeResults();

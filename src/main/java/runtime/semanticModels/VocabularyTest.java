@@ -89,7 +89,7 @@ public class VocabularyTest {
 								}
 							}
 
-							Integer[] assoc = graph.computeAssociations();
+							Integer[] assoc = graph.computeAssociations(6);
 
 							sb.append(questionId + ",");
 							questionId += 1;
