@@ -51,6 +51,8 @@ public class CVHelper {
 		liwcEmotions.put(SentimentValence.get("Anx_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Anger_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());
+		double upperValue = 0;
+		double lowerValue = 0;
 		for (Map.Entry<Word, Integer> entry : document.getWordOccurences().entrySet()) {
 			Word word = entry.getKey();
 			Integer occurrences = entry.getValue();
@@ -67,20 +69,16 @@ public class CVHelper {
 					else negativeWords.add(word.getLemma());
 					
 					// FAN weighted average
-					double upperValue = 0;
-					double lowerValue = 0;
-					for (Map.Entry<Word, Integer> otherEntry : document.getWordOccurences().entrySet()) {
-						Word otherWord = entry.getKey();
-						upperValue += fanValence * (1 + Math.log(document.getWordOccurences().get(otherWord)));
-						lowerValue += 1 + Math.log(document.getWordOccurences().get(otherWord));
-					}
-					if (lowerValue == 0) {
-						result.setFanWeightedAverage(0);
-					}
-					else {
-						result.setFanWeightedAverage(upperValue / lowerValue);
-					}
+					upperValue += fanValence * (1 + Math.log(document.getWordOccurences().get(word)));
+					lowerValue += 1 + Math.log(document.getWordOccurences().get(word));
 				}
+			}
+			
+			if (lowerValue == 0) {
+				result.setFanWeightedAverage(0);
+			}
+			else {
+				result.setFanWeightedAverage(upperValue / lowerValue);
 			}
 			
 			// LIWC
