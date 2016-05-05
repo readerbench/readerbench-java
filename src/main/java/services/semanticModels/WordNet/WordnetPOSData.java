@@ -60,6 +60,14 @@ public class WordnetPOSData {
     
     public double semanticSimilarity(String word1, String word2, POS pos, SimilarityType type) {
         WordnetData wordnetData = getByPOS(pos);
+        if (!wordnetData.entryToSynsets.containsKey(word1) || 
+            !wordnetData.entryToSynsets.containsKey(word2)) {
+            wordnetData = getDictionary();
+        }
+        if (!wordnetData.entryToSynsets.containsKey(word1) || 
+            !wordnetData.entryToSynsets.containsKey(word2)) {
+            return 0;
+        }
         ArrayList<SimilarityPair> similarities = new ArrayList<>();
         switch (type) {
             case LEACOCK_CHODOROW:

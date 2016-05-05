@@ -35,7 +35,7 @@ import services.nlp.listOfWords.Pronouns;
  */
 
 public class ComplexityIndices {
-	static Logger logger = Logger.getLogger(ComplexityIndices.class);
+   static Logger logger = Logger.getLogger(ComplexityIndices.class);
 
 	private static int id = -1;
 

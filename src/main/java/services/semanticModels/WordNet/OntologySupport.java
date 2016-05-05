@@ -65,6 +65,8 @@ public class OntologySupport {
         wordnetFiles.put(Lang.eng, "resources/config/WN/wn-eng-lmf.xml");
         wordnetFiles.put(Lang.fr, "resources/config/WN/wn-fra-lmf.xml");
         wordnetFiles.put(Lang.nl, "resources/config/WN/wn-nld-lmf.xml");
+        wordnetFiles.put(Lang.it, "resources/config/WN/wn-ita-lmf.xml");
+        wordnetFiles.put(Lang.es, "resources/config/WN/wn-spa-lmf.xml");
         for (Map.Entry<Lang, String> e : wordnetFiles.entrySet()) {
             dictionaries.put(e.getKey(), new WordnetPOSData(e.getValue()));
         }
@@ -315,9 +317,10 @@ public class OntologySupport {
     }
 
     public static void main(String[] args) {
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
-        //correctFiles();
+//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
+//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
+//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
+        System.out.println(exists("final", "JJ", Lang.fr));
+//correctFiles();
     }
 }
