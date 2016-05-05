@@ -34,6 +34,8 @@ public class CVAnalyzer {
 
 	public Logger logger = Logger.getLogger(CSCLStatsNew.class);
 	private String path;
+	private String folder;
+	private int type;
 
 	private String pathToLSA;
 	private String pathToLDA;
@@ -44,9 +46,12 @@ public class CVAnalyzer {
 
 	private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffred’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
 
-	public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+	public CVAnalyzer(String path, String folder, int type, 
+			String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean computeDialogism, double threshold) {
 		this.path = path;
+		this.folder = folder;
+		this.type = type;
 		this.pathToLSA = pathToLSA;
 		this.pathToLDA = pathToLDA;
 		this.lang = lang;
@@ -61,7 +66,7 @@ public class CVAnalyzer {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(
-					"CV,images,colors,pages,paragraphs,sentences,words,content words,positive words,negative words,affect,positive emotion,negative emotion,anxiety,anger,sadness,");
+					"folder,type,CV,images,avg images per page,colors,avg colors per page,pages,paragraphs,sentences,words,content words,positive words (FAN >= 5),negative words (FAN < 5),FAN weighted average,affect,positive emotion,negative emotion,anxiety,anger,sadness,");
 			// textual complexity factors
 			TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
 			for (IComplexityFactors f : textualComplexity.getList()) {
@@ -98,15 +103,31 @@ public class CVAnalyzer {
 
 					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
 							pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
+					// Folder
+					sb.append(folder);
+					sb.append(',');
+					
+					// Type
+					sb.append(type);
+					sb.append(',');
+					
 					// CV
 					sb.append(filePath.getFileName().toString() + ",");
 
 					// images
 					sb.append(result.getImages());
 					sb.append(',');
+					
+					// average images per page
+					sb.append(result.getAvgImagesPerPage());
+					sb.append(',');
 
 					// colors
 					sb.append(result.getColors());
+					sb.append(',');
+					
+					// average colors per page
+					sb.append(result.getAvgColorsPerPage());
 					sb.append(',');
 
 					// pages
@@ -135,6 +156,10 @@ public class CVAnalyzer {
 
 					// negative words
 					sb.append(result.getNegativeWords().size());
+					sb.append(',');
+					
+					// FAN weighted average
+					sb.append(result.getFanWeightedAverage());
 					sb.append(',');
 
 					// LIWC emotions
@@ -216,15 +241,15 @@ public class CVAnalyzer {
 		BasicConfigurator.configure();
 		ReaderBenchServer.initializeDB();
 
-		/*CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv_sample/", "resources/config/LSA/lemonde_fr",
+		/*CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv_sample/", "Sample", 1, "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerSample.process();*/
 
-		CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "resources/config/LSA/lemonde_fr",
+		CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "Positif", 1, "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerPositifs.process();
 
-		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "resources/config/LSA/lemonde_fr",
+		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "Negatif", 2, "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerNegatifs.process();
 	}

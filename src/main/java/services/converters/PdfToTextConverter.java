@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -39,6 +41,11 @@ public class PdfToTextConverter {
 	private Integer words;
 
 	private Integer contentWords;
+	
+	public PdfToTextConverter() {
+		this.imagesPerPage = new HashMap<Integer, Integer>();
+		this.colorsPerPage = new HashMap<Integer, Integer>();
+	}
 
 	public Integer getParagraphs() {
 		return paragraphs;
@@ -75,6 +82,18 @@ public class PdfToTextConverter {
 	// number of images
 	private Integer images;
 
+	// number of images per page
+	private Map<Integer, Integer> imagesPerPage;
+	
+	// average number of images per page
+	private double avgImagesPerPage;
+
+	// number of colors per page
+	private Map<Integer, Integer> colorsPerPage;
+	
+	// average number of colors per page
+	private double avgColorsPerPage;
+		
 	// number of colors
 	private Integer colors;
 
@@ -84,6 +103,22 @@ public class PdfToTextConverter {
 
 	public void setColors(Integer colors) {
 		this.colors = colors;
+	}
+
+	public double getAvgImagesPerPage() {
+		return avgImagesPerPage;
+	}
+
+	public void setAvgImagesPerPage(double avgImagesPerPage) {
+		this.avgImagesPerPage = avgImagesPerPage;
+	}
+
+	public double getAvgColorsPerPage() {
+		return avgColorsPerPage;
+	}
+
+	public void setAvgColorsPerPage(double avgColorsPerPage) {
+		this.avgColorsPerPage = avgColorsPerPage;
 	}
 
 	// Extract text from PDF Document
@@ -155,12 +190,19 @@ public class PdfToTextConverter {
 			// PDGraphicsState graphicState = pd.getGraphicsState();
 			//List<Float> colors = new ArrayList<Float>();
 			logger.info("Incep procesarea paginilor");
+			int k = 1;
+			ColorTextStripper stripper = new ColorTextStripper(out);
+			this.images = 0;
+			this.colors = 0;
 			for (PDPage page : list) {
 				
 				//out.write(page.getContents().getByteArray());
 			    
 				PDResources pdResources = page.getResources();
-				this.images = pdResources.getImages().size();
+				int images = pdResources.getImages().size();
+				this.images += images;
+				
+				this.imagesPerPage.put(k, images);
 				
 				/*engine.processStream(page, page.findResources(), page.getContents().getStream());
 				PDGraphicsState graphicState = engine.getGraphicsState();
@@ -177,13 +219,32 @@ public class PdfToTextConverter {
 						colors.add(f);
 					}
 				}*/
-				 
+				
+				stripper.getText(page);
+				int colors = stripper.getCharsPerColor().size();
+				this.colorsPerPage.put(k, colors);
+				
+				k++;
 			}
 			
-			ColorTextStripper stripper = new ColorTextStripper(out);
+			double sum = 0;
+			for (Map.Entry<Integer, Integer> entry : this.imagesPerPage.entrySet()) {
+			    Integer images = entry.getValue();
+			    sum += images;
+			}
+			logger.info("Calculez average images per page, unde sum = " + sum + " si pages = " + this.imagesPerPage.size());
+			this.avgImagesPerPage = sum / (this.imagesPerPage.size() * 1.0);
+			logger.info("Am calculat la " + this.avgImagesPerPage);
+			
+			sum = 0;
+			for (Map.Entry<Integer, Integer> entry : this.colorsPerPage.entrySet()) {
+			    Integer colors = entry.getValue();
+			    sum += colors;
+			}
+			this.avgColorsPerPage = sum / (this.colorsPerPage.size() * 1.0);
 			
 			String text = stripper.getText(pdDoc);
-			logger.info("Culori textuale: " + text);
+			//logger.info("Culori textuale: " + text);
 			logger.info("Numar culori document: " + stripper.getCharsPerColor().size());
 			
 			this.colors = stripper.getCharsPerColor().size();
@@ -192,10 +253,24 @@ public class PdfToTextConverter {
 			// replace all single \n's with space; multiple \ns means new paragraph
 			parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
 			
+			/*StringBuilder paragraph = new StringBuilder(); 
+			for (int i = 0; i < parsedText.length(); i++) {
+				if (parsedText.charAt(i) == '\n') {
+					
+					// new paragraph
+					paragraph = new StringBuilder();
+				}
+				else {
+					paragraph.append(parsedText.charAt(i));
+				}
+			}*/
+			
 			// debug purposes
 			out.write(parsedText);
 			
 			out.close();
+			
+			pdDoc.close();
 
 		} catch (IOException e) {
 			System.err.println("Unable to open PDF Parser. " + e.getMessage());

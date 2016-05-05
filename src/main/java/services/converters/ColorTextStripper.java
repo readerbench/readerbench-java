@@ -4,12 +4,17 @@ import java.awt.Color;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.util.TextPosition;
 
@@ -38,6 +43,22 @@ public class ColorTextStripper extends PDFTextStripper
         registerOperatorProcessor("rg", new org.apache.pdfbox.util.operator.SetNonStrokingRGBColor());
         registerOperatorProcessor("K", new org.apache.pdfbox.util.operator.SetStrokingCMYKColor());
         registerOperatorProcessor("k", new org.apache.pdfbox.util.operator.SetNonStrokingCMYKColor());
+    }
+    
+    // added by Gabi
+    public String getText( PDPage doc ) throws IOException
+    {
+        StringWriter outputStream = new StringWriter();
+        writeText( doc, outputStream );
+        return outputStream.toString();
+    }
+    
+    // added by Gabi
+    public void writeText( PDPage page, Writer outputStream ) throws IOException
+    {
+    	PDDocument doc = new PDDocument();
+    	doc.addPage(page);
+        writeText( doc, outputStream );
     }
 
     @Override

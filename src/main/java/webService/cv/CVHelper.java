@@ -65,6 +65,21 @@ public class CVHelper {
 				if (fanValence != null) {
 					if (fanValence >= 5) positiveWords.add(word.getLemma());
 					else negativeWords.add(word.getLemma());
+					
+					// FAN weighted average
+					double upperValue = 0;
+					double lowerValue = 0;
+					for (Map.Entry<Word, Integer> otherEntry : document.getWordOccurences().entrySet()) {
+						Word otherWord = entry.getKey();
+						upperValue += fanValence * (1 + Math.log(document.getWordOccurences().get(otherWord)));
+						lowerValue += 1 + Math.log(document.getWordOccurences().get(otherWord));
+					}
+					if (lowerValue == 0) {
+						result.setFanWeightedAverage(0);
+					}
+					else {
+						result.setFanWeightedAverage(upperValue / lowerValue);
+					}
 				}
 			}
 			
@@ -126,9 +141,15 @@ public class CVHelper {
 		
 		// number of images
 		result.setImages(pdfConverter.getImages());
-		
+
+		// average number of images per page
+		result.setAvgImagesPerPage(pdfConverter.getAvgImagesPerPage());
+				
 		// number of colors
 		result.setColors(pdfConverter.getColors());
+		
+		// average number of colors per page
+		result.setAvgColorsPerPage(pdfConverter.getAvgColorsPerPage());
 		
 		// number of pages
 		result.setPages(pdfConverter.getPages());

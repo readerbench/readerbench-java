@@ -11,7 +11,9 @@ public class ResultCv {
 	private Map<String, Integer> wordOccurences;
 	private List<ResultTextualComplexity> textualComplexity;
 	private Integer images;
+	private double avgImagesPerPage;
 	private Integer colors;
+	private double avgColorsPerPage;
 	private Integer pages;
 	private Integer paragraphs;
 	private Integer sentences;
@@ -19,6 +21,7 @@ public class ResultCv {
 	private Integer contentWords;
 	private List<String> positiveWords;
 	private List<String> negativeWords;
+	private double fanWeightedAverage;
 	private Map<String, List<String>> liwcEmotions;
 	private List<ResultKeyword> keywords;
 	private double keywordsDocumentRelevance;
@@ -39,9 +42,15 @@ public class ResultCv {
 
 			// number of images
 			Integer images,
+			
+			// average images per page
+			double avgImagesPerPage,
 
 			// number of colors
 			Integer colors,
+			
+			// average colors per page
+			double avgColorsPerPage,
 
 			// number of pages
 			Integer pages,
@@ -66,6 +75,9 @@ public class ResultCv {
 			// LIWC emotions
 			Map<String, List<String>> liwcEmotions,
 			
+			// FAN weighted average
+			double fanWeightedAverage,
+			
 			// specific keywords
 			List<ResultKeyword> keywords,
 			
@@ -78,7 +90,9 @@ public class ResultCv {
 		this.wordOccurences = wordOccurences;
 		this.textualComplexity = textualComplexity;
 		this.images = images;
+		this.avgImagesPerPage = avgImagesPerPage;
 		this.colors = colors;
+		this.avgColorsPerPage = avgColorsPerPage;
 		this.pages = pages;
 		this.paragraphs = paragraphs;
 		this.sentences = sentences;
@@ -86,6 +100,7 @@ public class ResultCv {
 		this.contentWords = contentWords;
 		this.positiveWords = positiveWords;
 		this.negativeWords = negativeWords;
+		this.fanWeightedAverage = fanWeightedAverage;
 		this.liwcEmotions = liwcEmotions;
 		this.keywords = keywords;
 		this.keywordsDocumentRelevance = keywordsDocumentRelevance;
@@ -139,6 +154,14 @@ public class ResultCv {
 	public void setContentWords(Integer contentWords) {
 		this.contentWords = contentWords;
 	}
+	
+	public double getFanWeightedAverage() {
+		return fanWeightedAverage;
+	}
+
+	public void setFanWeightedAverage(double fanWeightedAverage) {
+		this.fanWeightedAverage = fanWeightedAverage;
+	}
 
 	public Map<String, List<String>> getLiwcEmotions() {
 		return liwcEmotions;
@@ -186,6 +209,22 @@ public class ResultCv {
 
 	public void setColors(Integer colors) {
 		this.colors = colors;
+	}
+
+	public double getAvgImagesPerPage() {
+		return avgImagesPerPage;
+	}
+
+	public void setAvgImagesPerPage(double avgImagesPerPage) {
+		this.avgImagesPerPage = avgImagesPerPage;
+	}
+
+	public double getAvgColorsPerPage() {
+		return avgColorsPerPage;
+	}
+
+	public void setAvgColorsPerPage(double avgColorsPerPage) {
+		this.avgColorsPerPage = avgColorsPerPage;
 	}
 
 	public Integer getPages() {
