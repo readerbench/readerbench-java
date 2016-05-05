@@ -63,7 +63,7 @@ public class ComplexityIndicesView extends JFrame {
 			selectedIndices[ComplexityIndices.READABILITY_FOG] = false;
 			selectedIndices[ComplexityIndices.READABILITY_KINCAID] = false;
 			// Word complexity
-			selectedIndices[ComplexityIndices.AVERAGE_WORD_SYLLABLE_COUNT] = false;
+			selectedIndices[ComplexityIndices.WORD_SYLLABLE_COUNT] = false;
 			// Syntax
 			selectedIndices[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = false;
 			// Entity Density
@@ -84,7 +84,7 @@ public class ComplexityIndicesView extends JFrame {
 			editableIndices[ComplexityIndices.READABILITY_FOG] = false;
 			editableIndices[ComplexityIndices.READABILITY_KINCAID] = false;
 			// Word complexity
-			editableIndices[ComplexityIndices.AVERAGE_WORD_SYLLABLE_COUNT] = false;
+			editableIndices[ComplexityIndices.WORD_SYLLABLE_COUNT] = false;
 			// Syntax
 			editableIndices[ComplexityIndices.AVERAGE_NO_SEMANTIC_DEPENDENCIES] = false;
 			// Entity Density

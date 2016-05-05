@@ -244,7 +244,7 @@ public class TopicModeling {
 					ldaSim += LDA.getSimilarity(w.getLDAProbDistribution(), e.getLDAProbDistribution());
 
 				// penalty for specificity
-				double height = WordComplexity.getDistanceToHypernymTreeRoot(w, e.getLanguage());
+				double height = WordComplexity.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
 				if (height == -1)
 					height = 10;
 

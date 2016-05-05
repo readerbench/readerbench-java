@@ -108,11 +108,13 @@ public class ComplexityIndices {
 	public static final int AVERAGE_NO_SEMANTIC_DEPENDENCIES = (id += 1);
 
 	// Word complexity
-	public static final int AVERAGE_WORD_DIFF_LEMMA_STEM = (id += 1);
-	public static final int AVERAGE_WORD_DIFF_WORD_STEM = (id += 1);
-	public static final int AVERAGE_WORD_DEPTH_HYPERNYM_TREE = (id += 1);
-	public static final int AVERAGE_WORD_POLYSEMY_COUNT = (id += 1);
-	public static final int AVERAGE_WORD_SYLLABLE_COUNT = (id += 1);
+	public static final int WORD_DIFF_LEMMA_STEM = (id += 1);
+	public static final int WORD_DIFF_WORD_STEM = (id += 1);
+	public static final int WORD_MAX_DEPTH_HYPERNYM_TREE = (id += 1);
+	public static final int WORD_AVERAGE_DEPTH_HYPERNYM_TREE = (id += 1);
+	public static final int WORD_PATH_COUNT_HYPERNYM_TREE = (id += 1);
+	public static final int WORD_POLYSEMY_COUNT = (id += 1);
+	public static final int WORD_SYLLABLE_COUNT = (id += 1);
 
 	// Entity Density
 	public static final int AVERAGE_NO_NAMED_ENT_PER_BLOCK = (id += 1);
