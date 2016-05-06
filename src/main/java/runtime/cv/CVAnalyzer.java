@@ -249,7 +249,7 @@ public class CVAnalyzer {
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerPositifs.process();
 
-		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "Negatif", 2, "resources/config/LSA/lemonde_fr",
+		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "Negatif", 0, "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerNegatifs.process();
 	}
