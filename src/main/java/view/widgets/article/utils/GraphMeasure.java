@@ -1,12 +1,14 @@
 package view.widgets.article.utils;
 
 public class GraphMeasure {
+	private String name;
 	private Double betwenness;
 	private Double eccentricity;
 	private Double closeness;
 	private Double degree;
 	private String uri;
 	private GraphNodeItemType nodeType;
+	private int noOfReferences;
 	
 	public Double getBetwenness() {
 		return betwenness;
@@ -52,5 +54,17 @@ public class GraphMeasure {
 			return "Author";
 		}
 		return "";
+	}
+	public String getName() {
+		return this.name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public void setNoOfReferences(int noOfReferences) {
+		this.noOfReferences = noOfReferences;
+	}
+	public int getNoOfReferences() {
+		return this.noOfReferences;
 	}
 }

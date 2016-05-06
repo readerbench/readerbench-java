@@ -7,11 +7,19 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
@@ -24,18 +32,24 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
 import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.filters.api.FilterController;
+import org.gephi.filters.api.Query;
+import org.gephi.filters.plugin.graph.EgoBuilder.EgoFilter;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
+import org.gephi.io.exporter.api.ExportController;
 import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2;
 import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
@@ -48,8 +62,10 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
+import data.AbstractDocument;
+import data.Word;
 import data.article.ResearchArticle;
-import services.commons.Formatting;
+import data.discourse.Topic;
 import view.models.PreviewSketch;
 import view.widgets.article.utils.ArticleContainer;
 import view.widgets.article.utils.ArticleAuthorParameterLogger;
@@ -60,15 +76,18 @@ import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
+import view.widgets.document.corpora.PaperConceptView;
 
 public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
 	private static final long serialVersionUID = -8582615231233815258L;
 	static Logger logger = Logger.getLogger(ArticleAuthorSimilarityView.class);
-	public static final Color COLOR_AUTHOR = new Color(10, 255, 0);
+	public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
 	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
+	public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);
 
 	private IAuthorDistanceStrategy[] distanceStrategyList;
+	private String graphCenterUri;
 	private ArticleContainer authorContainer;
 	private ArticleAuthorParameterLogger paramLogger;
 
@@ -76,10 +95,11 @@ public class ArticleAuthorSimilarityView extends JFrame {
 	private JPanel panelGraph;
 
 	public ArticleAuthorSimilarityView(ArticleContainer authorContainer, IAuthorDistanceStrategy[] distanceStrategyList,
-			ArticleAuthorParameterLogger paramLogger) {
+			ArticleAuthorParameterLogger paramLogger, String graphCenterUri) {
 		this.authorContainer = authorContainer;
 		this.distanceStrategyList = distanceStrategyList;
 		this.paramLogger = paramLogger;
+		this.graphCenterUri = graphCenterUri;
 
 		corpusView = this;
 		setTitle("Author & Document View");
@@ -191,6 +211,12 @@ public class ArticleAuthorSimilarityView extends JFrame {
 					GraphNodeItem firstNodeItem = nodeItemList.get(i);
 					GraphNodeItem secondNodeItem = nodeItemList.get(j);
 					
+					if(this.graphCenterUri != null) {
+						if(!firstNodeItem.getURI().equals(this.graphCenterUri) && !secondNodeItem.getURI().equals(this.graphCenterUri)) {
+							continue;
+						}
+					}
+					
 					double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
 					if (sim >= threshold) {
 						visibleDocs.put(firstNodeItem, true);
@@ -202,6 +228,10 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				if (visibleDocs.get(o) && ! nodes.containsKey(o)) {
 					String text = o.getName();
 					Color c = null;
+					
+					Node n = graphModel.factory().newNode(o.getURI());
+					n.setLabel(text);
+					
 					if(o.isArticle()) {
 						c = new Color((float) (COLOR_ARTICLE.getRed()) / 256, (float) (COLOR_ARTICLE.getGreen()) / 256,
 								(float) (COLOR_ARTICLE.getBlue()) / 256);
@@ -210,9 +240,16 @@ public class ArticleAuthorSimilarityView extends JFrame {
 						c = new Color((float) (COLOR_AUTHOR.getRed()) / 256, (float) (COLOR_AUTHOR.getGreen()) / 256,
 								(float) (COLOR_AUTHOR.getBlue()) / 256);
 					}
+					if(this.graphCenterUri != null) {
+						if(o.getURI().equals(this.graphCenterUri)) {
+							c = new Color((float) (COLOR_CENTER_NODE.getRed()) / 256, (float) (COLOR_CENTER_NODE.getGreen()) / 256,
+									(float) (COLOR_CENTER_NODE.getBlue()) / 256);
+							n.setSize(10);
+						}
+					}
+					
 					text = (text.length() > 25) ? (text.substring(0, 25) + "..") : text;
-					Node n = graphModel.factory().newNode(o.getURI());
-					n.setLabel(text);
+					
 					n.setColor(c);
 					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 					n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
@@ -232,13 +269,14 @@ public class ArticleAuthorSimilarityView extends JFrame {
 						double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
 						if (sim >= threshold) {
 							Edge e = graphModel.factory().newEdge(nodes.get(firstNodeItem), nodes.get(secondNodeItem), distanceLbl, sim, false);
-							e.setLabel(Formatting.formatNumber(sim) + "");
+							e.setLabel("");
 							graph.addEdge(e);
 						}
 					}
 				}
 			}
 		}
+		
 		return outMap;
 	}
 	
@@ -279,6 +317,8 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			graphMeasure.setCloseness(closeness);
 			graphMeasure.setDegree(new Double(degree));
 			graphMeasure.setEccentricity(eccentricity);
+			graphMeasure.setName(currentDoc.getName());
+			graphMeasure.setNoOfReferences(currentDoc.getNoOfReferences());
 			graphMeasures.add(graphMeasure);
 
 			if (betwenness > maxCentrality) {
@@ -333,6 +373,15 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		}
 		panelGraph.add(previewSketch, BorderLayout.CENTER);
 
+		logger.info("Saving export...");
+		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+		try {
+			ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			return;
+		}
+		this.pack();
 		logger.info("Finished building the graph");
 	}
 
@@ -386,9 +435,46 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
 
-				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger);
+//				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
+//				String centerUri = "http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker";
+//				String centerUri = "http://data.linkededucation.org/resource/lak/conference/edm2009/paper/202";
+				String centerUri = null;
+				
+				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger, centerUri);
 				view.setVisible(true);
+				
+				// displayMetrics(container);
 			}
 		});
+	}
+	private static void computeMetrics(ArticleContainer container) {
+		List<SingleAuthorContainer> list = container.getAuthorContainers();
+		List<String> authorPaperList = new ArrayList<String>();
+		HashSet<String> uniquePaperList = new HashSet<String>();
+		for(SingleAuthorContainer authContainer: list) {
+			String[] authList = {"http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker",
+				"http://data.linkededucation.org/resource/lak/person/neil-t-heffernan",
+					"http://data.linkededucation.org/resource/lak/person/joseph-e-beck",
+					"http://data.linkededucation.org/resource/lak/person/kenneth-r-koedinger",
+					"http://data.linkededucation.org/resource/lak/person/jack-mostow"//,
+					//"http://data.linkededucation.org/resource/lak/person/arthur-c-graesser",
+					//"http://data.linkededucation.org/resource/lak/person/zachary-a-pardos",
+					//"http://data.linkededucation.org/resource/lak/person/jose-p-gonzalez-brenes",
+					//"http://data.linkededucation.org/resource/lak/person/s-ventura",
+					//"http://data.linkededucation.org/resource/lak/person/c-romero"
+				};
+			for(String authUri : authList) {
+				if(authUri.equals(authContainer.getAuthor().getAuthorUri())) {
+					for(ResearchArticle article : authContainer.getAuthorArticles()) {
+						authorPaperList.add(article.getURI());
+						uniquePaperList.add(article.getURI());
+					}
+					
+					break;
+				}
+			}
+		}
+		System.out.println("Total paper count = " + authorPaperList.size());
+		System.out.println("Unique paper count = " + uniquePaperList.size());
 	}
 }

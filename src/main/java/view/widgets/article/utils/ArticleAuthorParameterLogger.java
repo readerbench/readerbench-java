@@ -6,8 +6,6 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import data.article.ResearchArticle;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class ArticleAuthorParameterLogger {
@@ -82,28 +80,36 @@ public class ArticleAuthorParameterLogger {
 	public void logGraphMeasures(List<GraphMeasure> graphMeasures) {
 		this.createOutDirIfNotExists(ArticleAuthorParameterLogger.OUT_DIRECTORY);
 		try {
-			FileWriter fwrt = new FileWriter(OUT_DIRECTORY + "/ArticleAuthorMeasures.csv");
-			BufferedWriter bfwrt = new BufferedWriter(fwrt);
-			bfwrt.write("Type,Uri,Betwenness,Eccentricity,Closeness,Degree,Published Articles,Co-Authorship Count" );
+			FileWriter fwrtAuthor = new FileWriter(OUT_DIRECTORY + "/AuthorMeasures.csv");
+			BufferedWriter bfwrtAuthor = new BufferedWriter(fwrtAuthor);
+			fwrtAuthor.write("Name,Uri,Betwenness,Eccentricity,Closeness,Degree,Published Articles,Total Citations,Citations 2011,Citations 2012,Citations 2013,Citations 2014,Citations 2015" );
+			
+			FileWriter fwrtArticle = new FileWriter(OUT_DIRECTORY + "/ArticleMeasures.csv");
+			BufferedWriter bfwrtArticle = new BufferedWriter(fwrtArticle);
+			bfwrtArticle.write("Name,Uri,Betwenness,Eccentricity,Closeness,Degree,No Of References" );
 			
 			for(GraphMeasure measure : graphMeasures) {
-				bfwrt.newLine();
-				String lineText = measure.getNodeTypeString() + "," + measure.getUri() + "," + measure.getBetwenness() + "," +
+				
+				String lineText = measure.getName().replaceAll(",", " ") + "," + measure.getUri() + "," + measure.getBetwenness() + "," +
 						measure.getEccentricity() + "," + measure.getCloseness() + "," +
-						measure.getDegree() + ",";
+						measure.getDegree();
 				
 				if(measure.getNodeType() == GraphNodeItemType.Author) {
-					lineText += this.getNoPublishedArticles(measure.getUri()) + "," + this.getAuthorNoOffReferences(measure.getUri());
+					bfwrtAuthor.newLine();
+					lineText += "," + this.getNoPublishedArticles(measure.getUri()) + ",,,,,,";
+					bfwrtAuthor.write(lineText);
 				}
-				else if(measure.getNodeType() == GraphNodeItemType.Article) {
-					lineText += "," + this.getArticleNoOfReferences(measure.getUri());
+				if(measure.getNodeType() == GraphNodeItemType.Article) {
+					bfwrtArticle.newLine();
+					lineText += "," + measure.getNoOfReferences();
+					bfwrtArticle.write(lineText);
 				}
-				
-				bfwrt.write(lineText);
 			}
 			
-			bfwrt.close();
-			fwrt.close();
+			bfwrtAuthor.close();
+			fwrtAuthor.close();
+			bfwrtArticle.close();
+			fwrtArticle.close();
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -115,42 +121,5 @@ public class ArticleAuthorParameterLogger {
 			}
 		}
 		return 0;
-	}
-	private int getArticleNoOfReferences(String articleUri) {
-		int count = 0;
-		for(ResearchArticle article : this.authorContainer.getArticles()) {
-			for(String citationUri : article.getCitationURIList()) {
-				if(citationUri.equals(articleUri)) {
-					count ++;
-				}
-			}
-		}
-		return count;
-	}
-	private int getAuthorNoOffReferences(String authorUri) {
-		int count = 0;
-		for(ResearchArticle article : this.authorContainer.getArticles()) {
-			for(String citationUri : article.getCitationURIList()) {
-				ResearchArticle citedArticle = this.getArticleByUri(citationUri);
-				if(citedArticle != null) {
-					for(data.article.ArticleAuthor author : citedArticle.getArticleAuthorList()) {
-						if(author.getAuthorUri().equals(authorUri)) {
-							count ++;
-							break;
-						}
-					}
-				}
-			}
-		}
-		
-		return count;
-	}
-	private ResearchArticle getArticleByUri(String articleUri) {
-		for(ResearchArticle article : this.authorContainer.getArticles()) {
-			if(article.getURI().equals(articleUri)) {
-				return article;
-			}
-		}
-		return null;
 	}
 }

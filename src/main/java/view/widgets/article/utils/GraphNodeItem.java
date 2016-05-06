@@ -49,6 +49,12 @@ public class GraphNodeItem implements Comparable<GraphNodeItem> {
 	public boolean isAuthor() {
 		return this.nodeType == GraphNodeItemType.Author;
 	}
+	public int getNoOfReferences() {
+		if(this.isArticle()) {
+			return this.article.getCitationURIList().size();
+		}
+		return 0;
+	}
 	
 	@Override
 	public int hashCode() {
