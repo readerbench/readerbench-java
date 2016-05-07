@@ -15,7 +15,7 @@ public class WSLSATest {
 		ReaderBenchServer.initializeDB();
 
 		SerialCorpusAssessment.processCorpus("resources/in/articles financial", "resources/config/LSA/financial_en",
-				null, Lang.eng, true, true, true, SaveType.SERIALIZED);
+				null, Lang.eng, true, false, true, SaveType.SERIALIZED);
 
 		SearchWebServer server1 = new SearchWebServer(5656, "resources/in/articles financial");
 		server1.start();
