@@ -339,7 +339,7 @@ public class Conversation extends AbstractDocument {
 	 * @param saveOutput
 	 */
 	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
-			boolean saveOutput) {
+			SaveType saveOutput) {
 		super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
 
 		for (Participant p : this.getParticipants()) {
@@ -365,10 +365,21 @@ public class Conversation extends AbstractDocument {
 		}
 
 		// writing exports
-		if (saveOutput) {
+		switch (saveOutput) {
+		case SERIALIZED:
+			saveSerializedDocument();
+			break;
+		case SERIALIZED_AND_CSV_EXPORT:
+			saveSerializedDocument();
+			exportDocument();
+			break;
+		case FULL:
 			exportDocument();
 			exportDocumentAdvanced();
 			saveSerializedDocument();
+			break;
+		default:
+			break;
 		}
 	}
 

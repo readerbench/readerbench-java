@@ -72,7 +72,8 @@ public class ReaderBenchView extends JFrame {
 	public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
 	public static final String[] TRAINED_LSA_SPACES_EN = { "resources/config/LSA/tasa_en",
-			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en", "" };
+			"resources/config/LSA/tasa_lak_en", "resources/config/LSA/financial_en",
+			"resources/config/LSA/tasa_financial_word_assoc_en", "" };
 	public static final String[] TRAINED_LSA_SPACES_FR = { "resources/config/LSA/lemonde_fr",
 			"resources/config/LSA/textenfants_fr", "" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
@@ -211,7 +212,7 @@ public class ReaderBenchView extends JFrame {
 										GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.UNRELATED).addComponent(btnAnnotateVerbalization,
 										GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap(690, Short.MAX_VALUE)));
+								.addContainerGap(690, Short.MAX_VALUE)));
 		gl_panelDataInput.setVerticalGroup(gl_panelDataInput.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelDataInput.createSequentialGroup().addContainerGap()
 						.addGroup(gl_panelDataInput.createParallelGroup(Alignment.BASELINE)
@@ -440,12 +441,14 @@ public class ReaderBenchView extends JFrame {
 		lblReaderbench.setFont(new Font("Helvetica", Font.BOLD, 40));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_desktopPane.createSequentialGroup().addContainerGap()
-						.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-								.addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 256,
-										GroupLayout.PREFERRED_SIZE)
-						.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)).addContainerGap()));
+		gl_desktopPane
+				.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(Alignment.TRAILING,
+						gl_desktopPane.createSequentialGroup().addContainerGap()
+								.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+										.addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 256,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE))
+								.addContainerGap()));
 		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
 						.addComponent(tabbedPane, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE)

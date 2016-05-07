@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import data.AbstractDocument.SaveType;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import services.commons.Formatting;
@@ -16,7 +17,7 @@ public class ParticipantInteraction {
 	public static ResultTopic buildParticipantGraph(Conversation c) {
 		List<Participant> participants = new ArrayList<Participant>();
 		participants.addAll(c.getParticipants());
-		c.computeAll(true, null, null, false);
+		c.computeAll(true, null, null, SaveType.NONE);
 		double[][] participantContributions = c.getParticipantContributions();
 
 		DecimalFormat formatter = new DecimalFormat("#.##");

@@ -32,6 +32,7 @@ import services.replicatedWorker.SerialCorpusAssessment;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 import data.Lang;
+import data.AbstractDocument.SaveType;
 
 public class VCoPEvaluationView extends JFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
@@ -184,9 +185,9 @@ public class VCoPEvaluationView extends JFrame {
 					if (comboBoxLanguage.getSelectedIndex() > 0) {
 						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-						SerialCorpusAssessment.processCorpus(false, textFieldPath.getText(),
+						SerialCorpusAssessment.processCorpus(textFieldPath.getText(),
 								(String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(), lang,
-								chckbxUsePosTagging.isSelected(), true, null, null, true);
+								chckbxUsePosTagging.isSelected(), true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
 						Toolkit.getDefaultToolkit().beep();
 						logger.info("Finished processing all files");

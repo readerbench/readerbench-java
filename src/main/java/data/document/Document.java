@@ -371,14 +371,25 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 	}
 
 	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
-			boolean saveOutput) {
+			SaveType saveOutput) {
 		super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
 		// writing exports if document
 		// if chat there are additional computations to perform
-		if (saveOutput) {
+		switch (saveOutput) {
+		case SERIALIZED:
+			saveSerializedDocument();
+			break;
+		case SERIALIZED_AND_CSV_EXPORT:
+			saveSerializedDocument();
+			exportDocument();
+			break;
+		case FULL:
 			exportDocument();
 			exportDocumentAdvanced();
 			saveSerializedDocument();
+			break;
+		default:
+			break;
 		}
 	}
 

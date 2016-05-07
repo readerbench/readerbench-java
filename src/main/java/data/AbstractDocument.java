@@ -58,12 +58,17 @@ import services.semanticModels.LSA.LSA;
  * 
  * @author Mihai Dascalu
  */
+
 public abstract class AbstractDocument extends AnalysisElement {
 	private static final long serialVersionUID = -6173684658096015060L;
 	public static final int MIN_PERCENTAGE_CONTENT_WORDS = 2;
 
 	public static enum DocumentType {
 		DOCUMENT, CONVERSATION, ESSAY_CREATOR, METACOGNITION, SUMMARY
+	};
+
+	public static enum SaveType {
+		NONE, SERIALIZED, SERIALIZED_AND_CSV_EXPORT, FULL
 	};
 
 	private String path;
@@ -209,7 +214,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 	}
 
 	public static AbstractDocument loadGenericDocument(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
-			boolean usePOSTagging, boolean computeDialogism, boolean cleanInput) {
+			boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
+			int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
 		// load also LSA vector space and LDA model
 		LSA lsa = null;
 		LDA lda = null;
@@ -217,11 +223,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 			lsa = LSA.loadLSA(pathToLSA, lang);
 		if (pathToLDA != null && pathToLDA.length() > 0 && new File(pathToLDA).isDirectory())
 			lda = LDA.loadLDA(pathToLDA, lang);
-		return loadGenericDocument(new File(pathToDoc), lsa, lda, lang, computeDialogism, usePOSTagging, cleanInput);
+		return loadGenericDocument(new File(pathToDoc), lsa, lda, lang, usePOSTagging, computeDialogism,
+				pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
 	}
 
 	public static AbstractDocument loadGenericDocument(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-			boolean computeDialogism, boolean cleanInput) {
+			boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean cleanInput,
+			SaveType saveOutput) {
 		// parse the XML file
 		logger.info("Loading " + docFile.getPath() + " file for processing");
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -256,12 +264,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 			if (isDocument) {
 				Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-				d.computeAll(computeDialogism, null, null, true);
+				d.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
 				return d;
 			}
 			if (isChat) {
 				Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-				c.computeAll(computeDialogism, null, null, true);
+				c.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
 				return c;
 			}
 		} catch (Exception e) {

@@ -16,8 +16,9 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileManager;
 
-import data.article.ResearchArticle;
+import data.AbstractDocument.SaveType;
 import data.Lang;
+import data.article.ResearchArticle;
 import view.widgets.ReaderBenchView;
 
 class Author {
@@ -274,6 +275,6 @@ public class RdfToDocumentParser {
 	private static void addSingleDocument(String filePath) {
 		ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0],
 				ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.eng, false, true);
-		d.computeAll(false, null, null, true);
+		d.computeAll(false, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 	}
 }

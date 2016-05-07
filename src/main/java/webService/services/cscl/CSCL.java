@@ -2,9 +2,8 @@ package webService.services.cscl;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,7 +22,7 @@ import services.commons.Formatting;
 import webService.result.ResultCscl;
 import webService.services.ConceptMap;
 
-public class Cscl {
+public class CSCL {
 	
 	public static org.w3c.dom.Document loadXMLFromString(String xml) throws Exception
 	{
@@ -112,8 +111,8 @@ public class Cscl {
 				ParticipantEvolution.buildParticipantEvolutionData(c),
 				Collaboration.buildSocialKBGraph(c),
 				Collaboration.buildVoiceOverlapGraph(c),
-				Cscl.getCsclIndices(c),
-				Cscl.getCsclIndicesDescription(c)
+				CSCL.getCsclIndices(c),
+				CSCL.getCsclIndicesDescription(c)
 			);
 		
 	}

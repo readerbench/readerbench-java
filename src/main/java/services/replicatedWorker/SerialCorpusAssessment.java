@@ -21,11 +21,9 @@ import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import data.cscl.Conversation;
-import data.document.Document;
+import data.AbstractDocument;
+import data.AbstractDocument.SaveType;
 import data.Lang;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 
 public class SerialCorpusAssessment {
 	static Logger logger = Logger.getLogger(SerialCorpusAssessment.class);
@@ -67,9 +65,8 @@ public class SerialCorpusAssessment {
 		}
 	}
 
-	public static void processCorpus(boolean isDocument, String rootPath, String pathToLSA, String pathToLDA, Lang lang,
-			boolean usePOSTagging, boolean cleanInput, String pathToComplexityModel, int[] selectedComplexityFactors,
-			boolean saveOutput) {
+	public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
+			boolean usePOSTagging, boolean computeDialogism, boolean cleanInput, SaveType saveOutput) {
 		logger.info("Analysing all files in \"" + rootPath + "\"");
 		List<File> files = new LinkedList<File>();
 
@@ -120,29 +117,14 @@ public class SerialCorpusAssessment {
 			if (!alreadyAnalysedFiles.contains(f.getName()))
 				files.add(f);
 		}
-		LSA lsa = null;
-		LDA lda = null;
-		if (pathToLSA != null)
-			lsa = LSA.loadLSA(pathToLSA, lang);
-		if (pathToLDA != null)
-			LDA.loadLDA(pathToLDA, lang);
 
 		// process all remaining files
 		for (File f : files) {
 			try {
 				logger.info("Processing file " + f.getName());
 				Long start = System.currentTimeMillis();
-				if (isDocument) {
-					Document d = Document.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
-					d.computeAll(true, pathToComplexityModel, selectedComplexityFactors);
-					// writing exports
-					if (saveOutput) {
-						d.saveSerializedDocument();
-					}
-				} else {
-					Conversation c = Conversation.load(f, lsa, lda, lang, usePOSTagging, cleanInput);
-					c.computeAll(usePOSTagging, pathToComplexityModel, selectedComplexityFactors, saveOutput);
-				}
+				AbstractDocument.loadGenericDocument(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+						computeDialogism, null, null, cleanInput, saveOutput);
 				Long end = System.currentTimeMillis();
 
 				// update checkpoint

@@ -25,6 +25,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import data.AbstractDocument.SaveType;
 import data.Lang;
 
 public class CorpusAssessmentMaster extends Master {
@@ -39,25 +40,24 @@ public class CorpusAssessmentMaster extends Master {
 	public static final boolean PROCESS_INPUT = true;
 	public static final String PATH_TO_COMPLEXITY_MODEL = null;// "in/corpus_complexity_tasa_en";
 	public static final int[] SELECTED_COMPLEXITY_FACTORS = null;
-	public static final boolean SAVE_OUTPUT = true;
+	public static final SaveType SAVE_OUTPUT = SaveType.SERIALIZED_AND_CSV_EXPORT;
 
 	private List<File> files;
 	private File checkpoint;
-//	private LSA lsa;
-//	private LDA lda;
+	// private LSA lsa;
+	// private LDA lda;
 
 	public CorpusAssessmentMaster(String rootPath) {
 		super();
 		// load also LSA vector space and LDA model
-//		lsa = LSA.loadLSA(PATH_TO_LSA, PROCESSING_LANGUAGE);
-//		lda = LDA.loadLDA(PATH_TO_LDA, PROCESSING_LANGUAGE);
+		// lsa = LSA.loadLSA(PATH_TO_LSA, PROCESSING_LANGUAGE);
+		// lda = LDA.loadLDA(PATH_TO_LDA, PROCESSING_LANGUAGE);
 		logger.info("Master analysing all files in " + rootPath);
 		files = new LinkedList<File>();
 
 		FileFilter filter = new FileFilter() {
 			public boolean accept(File f) {
-				return f.getName().endsWith(".xml")
-						&& !f.getName().equals("checkpoint.xml");
+				return f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
 			}
 		};
 
@@ -67,8 +67,7 @@ public class CorpusAssessmentMaster extends Master {
 		if (!checkpoint.exists()) {
 			try {
 				checkpoint.createNewFile();
-				BufferedWriter in = new BufferedWriter(new FileWriter(
-						checkpoint));
+				BufferedWriter in = new BufferedWriter(new FileWriter(checkpoint));
 				in.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<completedFiles/>");
 				in.close();
 			} catch (IOException e) {
@@ -109,11 +108,9 @@ public class CorpusAssessmentMaster extends Master {
 		if (!files.isEmpty()) {
 			synchronized (files) {
 				File f = files.remove(0);
-				TaskMsg tMsg = new TaskMsg(
-						new Object[] { f.getAbsolutePath() }, false);
+				TaskMsg tMsg = new TaskMsg(new Object[] { f.getAbsolutePath() }, false);
 				logger.info("Master assigning " + tMsg);
-				ObjectMessage msg = sessionTask.get(addr).createObjectMessage(
-						tMsg);
+				ObjectMessage msg = sessionTask.get(addr).createObjectMessage(tMsg);
 
 				master.get(addr).send(msg);
 				if (transacted) {
@@ -159,8 +156,7 @@ public class CorpusAssessmentMaster extends Master {
 				}
 			}
 
-			Element completedFiles = (Element) dom.getElementsByTagName(
-					"completedFiles").item(0);
+			Element completedFiles = (Element) dom.getElementsByTagName("completedFiles").item(0);
 			if (completedFiles == null) {
 				completedFiles = dom.createElement("completedFiles");
 			}
@@ -171,9 +167,7 @@ public class CorpusAssessmentMaster extends Master {
 					if (!alreadyAnalysedFiles.contains(fileName)) {
 						Element file = dom.createElement("file");
 						file.setAttribute("name", fileName);
-						file.setAttribute("processingTime",
-								(endTime.get(path) - startTime.get(path))
-										/ 1000 + "");
+						file.setAttribute("processingTime", (endTime.get(path) - startTime.get(path)) / 1000 + "");
 						completedFiles.appendChild(file);
 					}
 
@@ -201,11 +195,11 @@ public class CorpusAssessmentMaster extends Master {
 	}
 
 	public void analyseResult(Object result) {
-//		DAO.Document d = (DAO.Document) result;
-//		if (d != null) {
-//			d.rebuildSemanticSpaces(lsa, lda);
-//			logger.info("Successfully received file " + d.getPath());
-//		}
+		// DAO.Document d = (DAO.Document) result;
+		// if (d != null) {
+		// d.rebuildSemanticSpaces(lsa, lda);
+		// logger.info("Successfully received file " + d.getPath());
+		// }
 	}
 
 	public void performBeforeComplete() {

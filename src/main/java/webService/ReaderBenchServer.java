@@ -30,6 +30,7 @@ import org.simpleframework.xml.Root;
 import dao.CategoryDAO;
 import dao.WordDAO;
 import data.AbstractDocument;
+import data.AbstractDocument.SaveType;
 import data.AbstractDocumentTemplate;
 import data.Block;
 import data.Lang;
@@ -74,7 +75,7 @@ import webService.result.ResultTopic;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
-import webService.services.cscl.Cscl;
+import webService.services.cscl.CSCL;
 import webService.services.utils.FileProcessor;
 
 public class ReaderBenchServer {
@@ -113,8 +114,8 @@ public class ReaderBenchServer {
 				sb.append(" ");
 			}
 
-			AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
+			AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
 			SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
 			resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
 		}
@@ -123,17 +124,14 @@ public class ReaderBenchServer {
 		return resultCategories;
 	}
 
-	private ResultSemanticAnnotation getSemanticAnnotation(AbstractDocument abstractDocument, 
-			AbstractDocument keywordsDocument,
-			AbstractDocument document, 
-			Set<String> keywordsList,
-			String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-			boolean computeDialogism, double threshold) {
+	private ResultSemanticAnnotation getSemanticAnnotation(AbstractDocument abstractDocument,
+			AbstractDocument keywordsDocument, AbstractDocument document, Set<String> keywordsList, String pathToLSA,
+			String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
 
 		// concepts
 		ResultTopic resultTopic = ConceptMap.getTopics(document, threshold);
-		List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, pathToLSA, pathToLDA, lang,
-				usePOSTagging, computeDialogism, threshold);
+		List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList,
+				pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
 		List<ResultCategory> resultCategories = getCategories(document.getText(), pathToLSA, pathToLDA, lang,
 				usePOSTagging, computeDialogism, threshold);
 
@@ -186,7 +184,9 @@ public class ReaderBenchServer {
 	private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
 		PdfToTextConverter pdfConverter = new PdfToTextConverter();
 		if (localFile) {
-			//return new ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/" + uri + ".pdf", true));
+			// return new
+			// ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/"
+			// + uri + ".pdf", true));
 			return new ResultPdfToText(pdfConverter.pdftoText(uri, true));
 		} else {
 			return new ResultPdfToText(pdfConverter.pdftoText(uri, false));
@@ -229,14 +229,14 @@ public class ReaderBenchServer {
 			String text = request.queryParams("text");
 			String language = request.queryParams("lang");
 			String pathToLSA = request.queryParams("lsa");
-			String pathToLDA = request.queryParams("lda");			
+			String pathToLDA = request.queryParams("lda");
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.setData(ConceptMap.getTopics(
-					QueryHelper.processQuery(text, pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
+			queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(text, pathToLSA, pathToLDA,
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -253,8 +253,8 @@ public class ReaderBenchServer {
 
 			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
-			queryResult.setData(webService.services.SentimentAnalysis
-					.getSentiment(QueryHelper.processQuery(text, pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism)));
+			queryResult.setData(webService.services.SentimentAnalysis.getSentiment(QueryHelper.processQuery(text,
+					pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism)));
 			return queryResult.convertToJson();
 		});
 		Spark.get("/getComplexity", (request, response) -> {
@@ -268,8 +268,9 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
 			QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
-			TextualComplexity textualComplexity = new TextualComplexity(QueryHelper.processQuery(text, pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), 
-					Lang.getLang(language), usePOSTagging, computeDialogism);
+			TextualComplexity textualComplexity = new TextualComplexity(QueryHelper.processQuery(text, pathToLSA,
+					pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), Lang.getLang(language),
+					usePOSTagging, computeDialogism);
 			queryResult.setData(textualComplexity.getComplexityIndices());
 			return queryResult.convertToJson();
 		});
@@ -312,8 +313,8 @@ public class ReaderBenchServer {
 			double threshold = Double.parseDouble(request.queryParams("threshold"));
 
 			QueryResultTopic queryResult = new QueryResultTopic();
-			queryResult.setData(ConceptMap
-					.getTopics(QueryHelper.processQuery(q, pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
+			queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(q, pathToLSA, pathToLDA,
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -323,7 +324,7 @@ public class ReaderBenchServer {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
 			response.type("application/json");
-			
+
 			String uri = (String) json.get("uri");
 			String documentContent = null;
 			if (uri == null || uri.isEmpty()) {
@@ -347,21 +348,21 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
-			
+
 			Lang lang = Lang.getLang(language);
-			
+
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
 
-			AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			
+			AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+			AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+
 			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-			queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, pathToLSA,
-					pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
+			queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList,
+					pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -371,7 +372,7 @@ public class ReaderBenchServer {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
 			response.type("application/json");
-			
+
 			String file = (String) json.get("file");
 			String documentContent = getTextFromPdf("tmp/" + file, true).getContent();
 
@@ -383,22 +384,22 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
-			
+
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
 
 			Lang lang = Lang.getLang(language);
 
-			AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism);
-			
+			AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+			AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+
 			QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-			queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, pathToLSA,
-					pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
-			
+			queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList,
+					pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
+
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -418,8 +419,8 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-			queryResult.setData(getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging,
-					computeDialogism));
+			queryResult.setData(
+					getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -431,7 +432,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			// String conversationText = (String) json.get("conversation");
-			//String conversationPath = (String) json.get("conversationPath");
+			// String conversationPath = (String) json.get("conversationPath");
 			String csclFile = (String) json.get("csclFile");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
@@ -449,17 +450,17 @@ public class ReaderBenchServer {
 			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
 			 * usePOSTagging, false);
 			 */
-			
+
 			Conversation conversation = Conversation.load(new File("tmp/" + csclFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-			conversation.computeAll(computeDialogism, null, null, true);
-			AbstractDocument conversationDocument = QueryHelper.processQuery(conversation.getText(), pathToLSA, pathToLDA, Lang.getLang(language),
-					usePOSTagging, computeDialogism);
+			conversation.computeAll(computeDialogism, null, null, SaveType.NONE);
+			AbstractDocument conversationDocument = QueryHelper.processQuery(conversation.getText(), pathToLSA,
+					pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			queryResult.setData(Cscl.getAll(conversationDocument, conversation, threshold));
+			queryResult.setData(CSCL.getAll(conversationDocument, conversation, threshold));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -502,9 +503,9 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
-			
-			resultTopic = ConceptMap.getTopics(
-					QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), threshold);
+
+			resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA,
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold);
 			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, Lang.getLang(language),
 					usePOSTagging, computeDialogism, threshold);
 
@@ -538,78 +539,86 @@ public class ReaderBenchServer {
 			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
 			 * usePOSTagging, false);
 			 */
-			/*Document cvContent = Document.load(new File(cvContent), LSA.loadLSA(pathToLSA, lang),
-					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-			cvContent.computeAll(computeDialogism, null, null, true);*/
-			/*AbstractDocument cvDocument = processQuery(cvContent.getText(), pathToLSA, pathToLDA, language,
-					usePOSTagging, computeDialogism);*/
-			
+			/*
+			 * Document cvContent = Document.load(new File(cvContent),
+			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
+			 * usePOSTagging, false); cvContent.computeAll(computeDialogism,
+			 * null, null, true);
+			 */
+			/*
+			 * AbstractDocument cvDocument = processQuery(cvContent.getText(),
+			 * pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism);
+			 */
+
 			Map<String, Integer> commonWords = new HashMap<String, Integer>();
-			
+
 			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
-			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, Lang.getLang(language),
-					usePOSTagging, computeDialogism);
+			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA,
+					Lang.getLang(language), usePOSTagging, computeDialogism);
 			Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
-			
-			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
-					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-			coverContent.computeAll(computeDialogism, null, null, true);*/
-			
+
+			/*
+			 * Document coverContent = Document.load(new File("tmp/" +
+			 * coverFile), LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA,
+			 * lang), lang, usePOSTagging, false);
+			 * coverContent.computeAll(computeDialogism, null, null, true);
+			 */
+
 			QueryResultCvCover queryResult = new QueryResultCvCover();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			ResultCvCover result = new ResultCvCover(null, null);
 			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
 			resultCv.setConcepts(ConceptMap.getTopics(
-					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
-			resultCv.setSentiments(webService.services.SentimentAnalysis
-					.getSentiment(QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
+					threshold));
+			resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(
+					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
 			result.setCv(resultCv);
-			
-			//if (coverFile != null) {
-				String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
-				AbstractDocument coverDocument = QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang,
-						usePOSTagging, computeDialogism);
-				
-				ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-				resultCover.setConcepts(ConceptMap.getTopics(
-						QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism), threshold));
-				resultCover.setSentiments(webService.services.SentimentAnalysis
-						.getSentiment(QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
-				result.setCover(resultCover);
-				
-				Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
-			    
-			    Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
-			    while (itCvWords.hasNext()) {
-			        Map.Entry cvPair = (Map.Entry)itCvWords.next();
-			        //System.out.println(pair.getKey() + " = " + pair.getValue());
-			        Word cvWord = (Word)cvPair.getKey();
-			        Integer cvWordOccurences = (Integer)cvPair.getValue();
-			        if (coverWords.containsKey(cvWord)) {
-			        	commonWords.put(cvWord.getLemma(), cvWordOccurences + coverWords.get(cvWord));
-			        }
-			        itCvWords.remove(); // avoids a ConcurrentModificationException
-			    }
-			//}
+
+			// if (coverFile != null) {
+			String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
+			AbstractDocument coverDocument = QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang,
+					usePOSTagging, computeDialogism);
+
+			ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
+			resultCover.setConcepts(ConceptMap.getTopics(
+					QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
+					threshold));
+			resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(
+					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+			result.setCover(resultCover);
+
+			Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
+
+			Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
+			while (itCvWords.hasNext()) {
+				Map.Entry<Word, Integer> cvPair = (Map.Entry<Word, Integer>) itCvWords.next();
+				// System.out.println(pair.getKey() + " = " + pair.getValue());
+				Word cvWord = (Word) cvPair.getKey();
+				Integer cvWordOccurences = (Integer) cvPair.getValue();
+				if (coverWords.containsKey(cvWord)) {
+					commonWords.put(cvWord.getLemma(), cvWordOccurences + coverWords.get(cvWord));
+				}
+				itCvWords.remove(); // avoids a ConcurrentModificationException
+			}
+			// }
 			result.setWordOccurences(commonWords);
-			Map<String, Double> similarity = new HashMap<String, Double>();
-			
 			// semantic similarity between Cover Letter & CV
-			/*SemanticCohesion sc = new SemanticCohesion(cvDocument, coverDocument);
-			similarity.put(sc.getSemanticDistances()[1], Formatting.formatNumber(sc.getLSASim()));
-			similarity.put("LDA", Formatting.formatNumber(sc.getLDASim()));
-			sc.getSemanticDistances()[0]=0;
-			for(int i = 0; i < sc.getOntologySim().length; i++)
-				similarity.put("LDA", Formatting.formatNumber(sc.getOntologySim()[i]));
-			result.setSimilarity(similarity);
-			1
-			3
-			4
-			*/
-			
+			/*
+			 * Map<String, Double> similarity = new HashMap<String, Double>();
+			 * SemanticCohesion sc = new SemanticCohesion(cvDocument,
+			 * coverDocument); similarity.put(sc.getSemanticDistances()[1],
+			 * Formatting.formatNumber(sc.getLSASim())); similarity.put("LDA",
+			 * Formatting.formatNumber(sc.getLDASim()));
+			 * sc.getSemanticDistances()[0]=0; for(int i = 0; i <
+			 * sc.getOntologySim().length; i++) similarity.put("LDA",
+			 * Formatting.formatNumber(sc.getOntologySim()[i]));
+			 * result.setSimilarity(similarity); 1 3 4
+			 */
+
 			queryResult.setData(result);
-			
+
 			return queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 
@@ -627,9 +636,9 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (Double) json.get("threshold");
-			
+
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
-			
+
 			// AbstractDocumentTemplate contents =
 			// Cscl.getConversationText(conversationText);
 			// logger.info("Contents: blocks = " + contents.getBlocks().size());
@@ -639,30 +648,37 @@ public class ReaderBenchServer {
 			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
 			 * usePOSTagging, false);
 			 */
-			/*Document cvContent = Document.load(new File(cvContent), LSA.loadLSA(pathToLSA, lang),
-					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-			cvContent.computeAll(computeDialogism, null, null, true);*/
-			
+			/*
+			 * Document cvContent = Document.load(new File(cvContent),
+			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
+			 * usePOSTagging, false); cvContent.computeAll(computeDialogism,
+			 * null, null, true);
+			 */
+
 			PdfToTextConverter pdfConverter = new PdfToTextConverter();
 			String cvContent = pdfConverter.pdftoText("tmp/" + cvFile, true);
-			
+
 			logger.info("Continut cv: " + cvContent);
-			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang,
-					usePOSTagging, computeDialogism);
+			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging,
+					computeDialogism);
 			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism);
-			
-			/*Document coverContent = Document.load(new File("tmp/" + coverFile), LSA.loadLSA(pathToLSA, lang),
-					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-			coverContent.computeAll(computeDialogism, null, null, true);*/
-			
+
+			/*
+			 * Document coverContent = Document.load(new File("tmp/" +
+			 * coverFile), LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA,
+			 * lang), lang, usePOSTagging, false);
+			 * coverContent.computeAll(computeDialogism, null, null, true);
+			 */
+
 			QueryResultCv queryResult = new QueryResultCv();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
+			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
+					pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
 
 			queryResult.setData(result);
-			
+
 			return queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 
@@ -671,7 +687,9 @@ public class ReaderBenchServer {
 		Spark.post("/fileUpload", (request, response) -> {
 			MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
 			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
-			Part file = request.raw().getPart("file"); //file is name of the input in the upload form
+			Part file = request.raw().getPart("file"); // file is name of the
+														// input in the upload
+														// form
 			return FileProcessor.getInstnace().saveFile(file);
 		});
 		Spark.options("/fileUpload", (request, response) -> {

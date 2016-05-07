@@ -56,6 +56,7 @@ import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.document.Document;
 import data.Lang;
+import data.AbstractDocument.SaveType;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -111,7 +112,8 @@ public class DocumentProcessingView extends JInternalFrame {
 				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
 			} else {
 				d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
-						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, true);
+						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
+						SaveType.SERIALIZED_AND_CSV_EXPORT);
 			}
 			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
 				if (d instanceof Document) {
@@ -440,19 +442,25 @@ public class DocumentProcessingView extends JInternalFrame {
 				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 
 		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(
-				Alignment.LEADING,
-				gl_desktopPane.createSequentialGroup().addContainerGap().addGroup(gl_desktopPane
-						.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
-						.addGroup(gl_desktopPane.createSequentialGroup()
-								.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-										.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
-										.addGroup(gl_desktopPane.createSequentialGroup().addComponent(lblLanguage)
-												.addGap(2).addComponent(comboBoxLanguage, 0, 740, Short.MAX_VALUE)))
-								.addContainerGap())
-						.addGroup(gl_desktopPane.createSequentialGroup().addComponent(panelSingleDoc,
-								GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addGap(11)))));
+		gl_desktopPane
+				.setHorizontalGroup(
+						gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
+								gl_desktopPane.createSequentialGroup().addContainerGap()
+										.addGroup(gl_desktopPane
+												.createParallelGroup(Alignment.LEADING).addComponent(scrollPane,
+														GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
+												.addGroup(gl_desktopPane.createSequentialGroup().addGroup(gl_desktopPane
+														.createParallelGroup(Alignment.LEADING)
+														.addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801,
+																Short.MAX_VALUE)
+														.addGroup(gl_desktopPane.createSequentialGroup()
+																.addComponent(lblLanguage).addGap(2).addComponent(
+																		comboBoxLanguage, 0, 740, Short.MAX_VALUE)))
+														.addContainerGap())
+												.addGroup(gl_desktopPane.createSequentialGroup()
+														.addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+														.addGap(11)))));
 		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
 				.createSequentialGroup().addContainerGap()
 				.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)

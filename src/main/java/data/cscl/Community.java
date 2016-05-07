@@ -23,6 +23,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
+import data.AbstractDocument.SaveType;
 import data.AnalysisElement;
 import data.Block;
 import data.Word;
@@ -544,8 +545,8 @@ public class Community extends AnalysisElement {
 						if (checkpoint.exists())
 							checkpoint.delete();
 					}
-					SerialCorpusAssessment.processCorpus(false, f.getAbsolutePath(), pathToLSA, pathToLDA, lang,
-							usePOSTagging, true, null, null, true);
+					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+							true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
 					Community.processDocumentCollection(f.getAbsolutePath(), useTextualComplexity, startDate, endDate,
 							monthIncrement, dayIncrement);
 				}

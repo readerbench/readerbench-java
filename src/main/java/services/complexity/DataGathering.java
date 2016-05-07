@@ -14,9 +14,10 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import data.AbstractDocument.SaveType;
+import data.Lang;
 import data.complexity.Measurement;
 import data.document.Document;
-import data.Lang;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -68,7 +69,7 @@ public class DataGathering {
 			Document d = null;
 			try {
 				d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
-				d.computeAll(computeDialogism, null, null, false);
+				d.computeAll(computeDialogism, null, null, SaveType.NONE);
 				ComplexityIndices.computeComplexityFactors(d);
 			} catch (Exception e) {
 				logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
