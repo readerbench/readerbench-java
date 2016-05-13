@@ -7,12 +7,9 @@ import org.apache.log4j.BasicConfigurator;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
-import data.document.Document;
 import data.Lang;
+import data.document.Document;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import java.io.FileReader;
-import java.io.IOException;
-import org.openide.util.Exceptions;
 
 public class Parsing_FR extends Parsing {
 

@@ -17,6 +17,7 @@ public class StopWords {
 	public static ListOfWords stopwords_it = null;
 	public static ListOfWords stopwords_es = null;
 	public static ListOfWords stopwords_nl = null;
+	public static ListOfWords stopwords_la = null;
 
 	public static boolean isStopWord(String s, Lang lang) {
 		if (lang == null)
@@ -32,6 +33,8 @@ public class StopWords {
 			return getStopwordsRo().getWords().contains(s);
 		case nl:
 			return getStopwordsNl().getWords().contains(s);
+		case la:
+			return getStopwordsLa().getWords().contains(s);
 		default:
 			return getStopwordsEn().getWords().contains(s);
 		}
@@ -71,5 +74,11 @@ public class StopWords {
 		if (stopwords_nl == null)
 			stopwords_nl = new ListOfWords("resources/config/Stopwords/stopwords_nl.txt");
 		return stopwords_nl;
+	}
+
+	public static ListOfWords getStopwordsLa() {
+		if (stopwords_la == null)
+			stopwords_la = new ListOfWords("resources/config/Stopwords/stopwords_la.txt");
+		return stopwords_la;
 	}
 }

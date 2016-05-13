@@ -18,10 +18,10 @@ package data;
 import java.io.Serializable;
 
 public enum Lang implements Serializable {
-	eng, fr, it, jpn, ro, es, nl;
+	eng, fr, it, jpn, ro, es, nl, la;
 
-	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian",
-			"Dutch" };
+	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian", "Dutch",
+			"Latin" };
 
 	public static Lang getLang(String language) {
 		switch (language) {
@@ -35,6 +35,8 @@ public enum Lang implements Serializable {
 			return Lang.ro;
 		case "Dutch":
 			return Lang.nl;
+		case "Latin":
+			return Lang.la;
 		default:
 			return Lang.eng;
 		}

@@ -224,7 +224,7 @@ public class TASAAnalyzer {
 			BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(
 					new FileOutputStream(new File(path + "/AoE stats bipartite graph.csv")), "UTF-8"), 32768);
 			BufferedWriter loweValues = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File(path + "/AoE words bipartite graph.csv")), "UTF-8"), 32768);
+					new FileOutputStream(new File(path + "/AoE word bipartite graph.csv")), "UTF-8"), 32768);
 			// create header
 			String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
 			loweStats.write(content);

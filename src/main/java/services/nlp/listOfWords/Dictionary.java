@@ -21,6 +21,7 @@ public class Dictionary {
 	public static ListOfWords dictionary_en = null;
 	public static ListOfWords dictionary_es = null;
 	public static ListOfWords dictionary_nl = null;
+	public static ListOfWords dictionary_la = null;
 
 	public static Set<String> getDictionaryWords(Lang lang) {
 		if (lang == null)
@@ -36,6 +37,8 @@ public class Dictionary {
 			return getDictionaryEs().getWords();
 		case nl:
 			return getDictionaryNl().getWords();
+		case la:
+			return getDictionaryLa().getWords();
 		default:
 			return getDictionaryEn().getWords();
 		}
@@ -75,6 +78,12 @@ public class Dictionary {
 		if (dictionary_nl == null)
 			dictionary_nl = new ListOfWords("resources/config/Dictionary/dict_nl.txt");
 		return dictionary_nl;
+	}
+
+	public static ListOfWords getDictionaryLa() {
+		if (dictionary_la == null)
+			dictionary_la = new ListOfWords("resources/config/Dictionary/dict_la.txt");
+		return dictionary_la;
 	}
 
 	public static boolean isDictionaryWord(String s, Lang lang) {

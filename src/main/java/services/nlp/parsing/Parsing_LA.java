@@ -14,20 +14,20 @@ import org.apache.log4j.Logger;
  *
  * @author Stefan
  */
-public class Parsing_RO extends Parsing {
+public class Parsing_LA extends Parsing {
 
-	static Logger logger = Logger.getLogger(Parsing_RO.class);
+	static Logger logger = Logger.getLogger(Parsing_LA.class);
 
-	private static Parsing_RO instance = null;
-	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_RO());
+	private static Parsing_LA instance = null;
+	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_LA());
 
-	private Parsing_RO() {
-		lang = Lang.ro;
+	private Parsing_LA() {
+		lang = Lang.la;
 	}
 
-	public static Parsing_RO getInstance() {
+	public static Parsing_LA getInstance() {
 		if (instance == null) {
-			instance = new Parsing_RO();
+			instance = new Parsing_LA();
 		}
 		return instance;
 	}
@@ -37,11 +37,11 @@ public class Parsing_RO extends Parsing {
 		return pipeline;
 	}
 
-	class ParsingParams_RO extends Properties {
+	class ParsingParams_LA extends Properties {
 
-		private static final long serialVersionUID = -161579346323407322L;
+		private static final long serialVersionUID = -1561330268167277821L;
 
-		public ParsingParams_RO() {
+		public ParsingParams_LA() {
 			super();
 		}
 	}

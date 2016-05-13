@@ -239,9 +239,9 @@ public class TASAAnalyzerFull {
 
 		try {
 			BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File(path + "/AoEstats full matching.csv")), "UTF-8"), 32768);
+					new FileOutputStream(new File(path + "/AoE stats full matching.csv")), "UTF-8"), 32768);
 			BufferedWriter loweValues = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream(new File(path + "/wordAoE full matching.csv")), "UTF-8"), 32768);
+					new FileOutputStream(new File(path + "/AoE word full matching.csv")), "UTF-8"), 32768);
 			// create header
 			String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
 			loweStats.write(content);
