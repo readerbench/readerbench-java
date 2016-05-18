@@ -153,11 +153,11 @@ public class ReaderBenchServer {
 	}
 
 	private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, String pathToLSA,
-			String pathToLDA, String lang, boolean usePOSTagging, boolean computeDialogism) {
+			String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism) {
 
 		Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
-				LSA.loadLSA(pathToLSA, Lang.valueOf(lang)), LDA.loadLDA(pathToLDA, Lang.valueOf(lang)),
-				Lang.valueOf(lang), usePOSTagging, false);
+				LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang),
+				lang, usePOSTagging, false);
 
 		Summary s = new Summary(selfExplanation, queryInitialText, true, true);
 
@@ -412,11 +412,13 @@ public class ReaderBenchServer {
 
 			String text = (String) json.get("text");
 			String explanation = (String) json.get("explanation");
-			String lang = (String) json.get("lang");
+			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
+			
+			Lang lang = Lang.getLang(language);
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
 			queryResult.setData(
