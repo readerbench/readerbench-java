@@ -164,6 +164,17 @@ public class CVHelper {
 		// number of content words
 		result.setContentWords(document.getNoContentWords());
 		
+		// normalized number of paragraphs
+		result.setNormalizedParagraphs(result.getParagraphs() / result.getPages());
+		
+		// normalized number of sentences
+		result.setNormalizedSentences(result.getSentences() / result.getPages());
+		
+		// normalized number of words
+		result.setNormalizedWords(result.getWords() / result.getPages());
+		
+		// normalized number of content words
+		result.setNormalizedContentWords(result.getContentWords() / result.getPages());
 		// positive words
 		result.setPositiveWords(positiveWords);
 		

@@ -24,6 +24,7 @@ import org.apache.pdfbox.util.PDFStreamEngine;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.util.ResourceLoader;
 
+import org.apache.commons.lang3.StringUtils;
 import webService.ReaderBenchServer;
 
 public class PdfToTextConverter {
@@ -194,15 +195,18 @@ public class PdfToTextConverter {
 			ColorTextStripper stripper = new ColorTextStripper(out);
 			this.images = 0;
 			this.colors = 0;
+			// iterate through pages
 			for (PDPage page : list) {
 				
 				//out.write(page.getContents().getByteArray());
 			    
 				PDResources pdResources = page.getResources();
+				// get number of images on this page and save them for later normalization				
 				int images = pdResources.getImages().size();
-				this.images += images;
-				
 				this.imagesPerPage.put(k, images);
+
+				// add tot total number of images
+				this.images += images;
 				
 				/*engine.processStream(page, page.findResources(), page.getContents().getStream());
 				PDGraphicsState graphicState = engine.getGraphicsState();
@@ -220,9 +224,16 @@ public class PdfToTextConverter {
 					}
 				}*/
 				
-				stripper.getText(page);
+				// get number of colors on this page and save them for later normalization	
 				int colors = stripper.getCharsPerColor().size();
 				this.colorsPerPage.put(k, colors);
+				
+				// extract text on this page
+				
+				// use the following to extract text on page if the above technique does not work
+				/*pdfStripper.setStartPage(k);
+				pdfStripper.setEndPage(k);
+				String textOnPage = pdfStripper.getText(pdDoc);*/
 				
 				k++;
 			}
