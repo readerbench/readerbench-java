@@ -317,9 +317,9 @@ public class OntologySupport {
     }
 
     public static void main(String[] args) {
-//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
-//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
-//        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
+        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
         System.out.println(exists("final", "JJ", Lang.fr));
 //correctFiles();
     }
