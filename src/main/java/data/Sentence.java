@@ -4,12 +4,12 @@
  */
 package data;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
+import java.util.ArrayList;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -29,17 +29,17 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
 	public Sentence(Block b, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(b, index, text.replaceAll("\\s", " ").trim(), lsa, lda, lang);
-		this.words = new LinkedList<Word>();
-		this.allWords = new LinkedList<Word>();
+		this.words = new ArrayList<>();
+		this.allWords = new ArrayList<>();
 	}
 
 	public void finalProcessing(Block b, CoreMap sentence) {
 		// write the processedText
-		String processedText = "";
+		StringBuilder processedText = new StringBuilder();
 		for (Word word : getWords()) {
-			processedText += word.getLemma() + " ";
+			processedText.append(word.getLemma()).append(" ");
 		}
-		setProcessedText(processedText.trim());
+		setProcessedText(processedText.toString().trim());
 
 		// determine LSA utterance vector
 		determineSemanticDimensions();
