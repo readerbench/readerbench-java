@@ -1,5 +1,6 @@
 package services.semanticModels.WordNet;
 
+import dao.DAOService;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -286,7 +287,7 @@ public class OntologySupport {
                     BufferedReader in = null;
                     BufferedWriter out = null;
                     try {
-                        in = new BufferedReader( new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
+                        in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), "UTF-8"));
                         out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileName + ".tmp"), "UTF-8"));
                         String line;
                         while ((line = in.readLine()) != null) {

@@ -1,12 +1,12 @@
 package services.converters;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.util.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripper;
 
 public class PDFTextParser {
 
@@ -23,7 +23,7 @@ public class PDFTextParser {
 			return null;
 		}
 		try {
-			parser = new PDFParser(new FileInputStream(file));
+			parser = new PDFParser(new RandomAccessBufferedFileInputStream(file));
 		} catch (IOException e) {
 			System.err.println("Unable to open PDF Parser. " + e.getMessage());
 			return null;
