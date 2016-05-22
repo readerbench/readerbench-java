@@ -11,6 +11,7 @@ import data.discourse.SemanticRelatedness;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
+import java.util.ArrayList;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -54,7 +55,7 @@ public class Block extends AnalysisElement implements Serializable {
 
 	public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(d, index, text.trim(), lsa, lda, lang);
-		this.sentences = new LinkedList<Sentence>();
+		this.sentences = new ArrayList<>();
 	}
 
 	public void finalProcessing() {

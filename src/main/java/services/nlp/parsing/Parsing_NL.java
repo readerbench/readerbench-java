@@ -22,7 +22,7 @@ public class Parsing_NL extends Parsing {
     private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_NL());
 
     private Parsing_NL() {
-        lang = Lang.ro;
+        lang = Lang.nl;
     }
 
     public static Parsing_NL getInstance() {

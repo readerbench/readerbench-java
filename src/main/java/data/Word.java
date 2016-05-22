@@ -301,6 +301,16 @@ public class Word implements Comparable<Word>, Serializable {
 		}
 		return this.getLemma();
 	}
+	
+	public boolean isContentWord() {
+		if (this.getPOS() != null) {
+			if (this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
+                    || this.getPOS().equals("RB")) {
+                return true;
+            }
+		}
+		return false;
+	}
 
 	@Override
 	public int compareTo(Word o) {

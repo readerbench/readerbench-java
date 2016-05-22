@@ -15,10 +15,17 @@ public class ResultCv {
 	private Integer colors;
 	private double avgColorsPerPage;
 	private Integer pages;
+	
 	private Integer paragraphs;
 	private Integer sentences;
 	private Integer words;
 	private Integer contentWords;
+	
+	private Integer normalizedParagraphs;
+	private Integer normalizedSentences;
+	private Integer normalizedWords;
+	private Integer normalizedContentWords;
+	
 	private List<String> positiveWords;
 	private List<String> negativeWords;
 	private double fanWeightedAverage;
@@ -55,13 +62,29 @@ public class ResultCv {
 			// number of pages
 			Integer pages,
 
+			// number of paragraphs
 			Integer paragraphs,
 
+			// number of sentences
 			Integer sentences,
 
+			// number of words
 			Integer words,
 
+			// number of content words
 			Integer contentWords,
+			
+			// normalized number of paragraphs
+			Integer normalizedParagraphs,
+			
+			// normalized number of sentences
+			Integer normalizedSentences,
+			
+			// normalized number of words
+			Integer normalizedWords,
+
+			// normalized number of content words
+			Integer normalizedContentWords,
 
 			// volumetric statistics
 			// TODO: add this parameter
@@ -98,6 +121,10 @@ public class ResultCv {
 		this.sentences = sentences;
 		this.words = words;
 		this.contentWords = contentWords;
+		this.normalizedParagraphs = normalizedParagraphs;
+		this.normalizedSentences = normalizedSentences;
+		this.normalizedWords = normalizedWords;
+		this.normalizedContentWords = normalizedContentWords;
 		this.positiveWords = positiveWords;
 		this.negativeWords = negativeWords;
 		this.fanWeightedAverage = fanWeightedAverage;
@@ -155,6 +182,38 @@ public class ResultCv {
 		this.contentWords = contentWords;
 	}
 	
+	public Integer getNormalizedParagraphs() {
+		return normalizedParagraphs;
+	}
+
+	public void setNormalizedParagraphs(Integer normalizedParagraphs) {
+		this.normalizedParagraphs = normalizedParagraphs;
+	}
+
+	public Integer getNormalizedSentences() {
+		return normalizedSentences;
+	}
+
+	public void setNormalizedSentences(Integer normalizedSentences) {
+		this.normalizedSentences = normalizedSentences;
+	}
+
+	public Integer getNormalizedWords() {
+		return normalizedWords;
+	}
+
+	public void setNormalizedWords(Integer normalizedWords) {
+		this.normalizedWords = normalizedWords;
+	}
+
+	public Integer getNormalizedContentWords() {
+		return normalizedContentWords;
+	}
+
+	public void setNormalizedContentWords(Integer normalizedContentWords) {
+		this.normalizedContentWords = normalizedContentWords;
+	}
+
 	public double getFanWeightedAverage() {
 		return fanWeightedAverage;
 	}

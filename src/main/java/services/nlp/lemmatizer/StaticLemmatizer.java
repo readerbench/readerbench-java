@@ -41,8 +41,8 @@ public class StaticLemmatizer {
 			StringTokenizer strk;
 			while ((str_linie = in.readLine()) != null) {
 				strk = new StringTokenizer(str_linie, "\t");
-				String lemma = strk.nextToken();
-				String inflected = strk.nextToken();
+				String lemma = strk.nextToken().replaceAll("[0-9]*", "");
+				String inflected = strk.nextToken().replaceAll("[0-9]*", "");;
 				String existing = lemmas.get(inflected);
 				if (existing == null || lemma.length() < existing.length()) {
 					lemmas.put(inflected, lemma);
@@ -135,14 +135,14 @@ public class StaticLemmatizer {
 
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
 		BasicConfigurator.configure();
-		System.out.println(StaticLemmatizer.lemmaStatic("pointés", Lang.fr));
-		System.out.println(StaticLemmatizer.lemmaStatic("mangio", Lang.it));
-		System.out.println(StaticLemmatizer.lemmaStatic("armas", Lang.es));
-		System.out.println(StaticLemmatizer.lemmaStatic("talmpjes", Lang.nl));
-		// Map<String, String> lemmas =
-		// StaticLemmatizer.initialize("resources/config/Lemmas/lemmas_nl_full.txt",
-		// Lang.nl);
-		// StaticLemmatizer.writeLemmas("resources/config/Lemmas/lemmas_nl.txt",
-		// lemmas);
+//		System.out.println(StaticLemmatizer.lemmaStatic("pointés", Lang.fr));
+//		System.out.println(StaticLemmatizer.lemmaStatic("mangio", Lang.it));
+//		System.out.println(StaticLemmatizer.lemmaStatic("armas", Lang.es));
+//		System.out.println(StaticLemmatizer.lemmaStatic("talmpjes", Lang.nl));
+		 Map<String, String> lemmas =
+		 StaticLemmatizer.initialize("resources/config/Lemmas/lemmas_la.txt",
+		 Lang.la);
+		 StaticLemmatizer.writeLemmas("resources/config/Lemmas/lemmas_la_new.txt",
+		 lemmas);
 	}
 }

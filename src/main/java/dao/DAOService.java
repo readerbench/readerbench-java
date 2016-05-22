@@ -22,6 +22,8 @@ public class DAOService {
     private final EntityManagerFactory emf;
     private EntityManager em;
 	
+    private static final Object lock = new Object();
+    
     private DAOService() {
         Properties p = null;
         try {
@@ -36,8 +38,10 @@ public class DAOService {
     }
         
     public static DAOService getInstance() {
-        if (instance == null) instance = new DAOService();
-        return instance;
+        synchronized(lock) {
+            if (instance == null) instance = new DAOService();
+            return instance;
+        }
     }
     
     public <T> T executeQuery(Function<EntityManager, T> f) {

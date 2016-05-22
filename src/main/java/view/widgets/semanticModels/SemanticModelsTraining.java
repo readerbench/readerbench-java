@@ -92,6 +92,7 @@ public class SemanticModelsTraining extends JFrame {
 			this.includeWordAssociations = includeWordAssociations;
 		}
 
+        @Override
 		public Void doInBackground() {
 			btnPreProcess.setEnabled(false);
 			btnLSATrain.setEnabled(false);

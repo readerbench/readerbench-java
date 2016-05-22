@@ -30,6 +30,7 @@ import data.document.Document;
 import data.Lang;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
+import java.util.ArrayList;
 import services.commons.TextPreprocessing;
 import services.nlp.lemmatizer.StaticLemmatizer;
 import services.nlp.listOfWords.Dictionary;
@@ -40,12 +41,12 @@ public class PreProcessing {
 
 	public static final int MIN_NO_OCCURRENCES = 5;
 
-	private Map<String, Integer> newConcepts = new TreeMap<String, Integer>();
+	private Map<String, Integer> newConcepts = new TreeMap<>();
 
 	private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc, boolean includeWordAssociations) {
 		// returns new entries to write
-		String toWrite = "";
-		List<Word> document = new LinkedList<Word>();
+		StringBuilder toWrite = new StringBuilder();
+		List<Word> document = new ArrayList<>();
 		int no_words_to_write = 0;
 		for (Block b : d.getBlocks()) {
 			// combine with previous paragraph, if the case
@@ -79,14 +80,14 @@ public class PreProcessing {
 			if (no_words_to_write >= noMinWordPerDoc) {
 				// flush the actual contents of the document
 				for (Word w : document) {
-					toWrite += w.getLemma() + " ";
+					toWrite.append(w.getLemma()).append(" ");
 				}
-				toWrite += "\n";
+				toWrite.append("\n");
 				document.clear();
 				no_words_to_write = 0;
 			}
 		}
-		return toWrite;
+		return toWrite.toString();
 	}
 
 	public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc,
@@ -139,11 +140,7 @@ public class PreProcessing {
 		if (!new File(path).isDirectory()) {
 			return;
 		}
-		File[] filesToProcess = new File(path).listFiles(new FileFilter() {
-			public boolean accept(File pathname) {
-				return pathname.getName().endsWith(".txt");
-			}
-		});
+		File[] filesToProcess = new File(path).listFiles((File pathname) -> pathname.getName().endsWith(".txt"));
 
 		int total_docs_to_process = 0;
 		int current_doc_to_process = 0;

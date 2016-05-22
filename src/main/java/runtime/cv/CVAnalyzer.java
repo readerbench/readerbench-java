@@ -66,7 +66,7 @@ public class CVAnalyzer {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(
-					"folder,type,CV,images,avg images per page,colors,avg colors per page,pages,paragraphs,sentences,words,content words,positive words (FAN >= 5),negative words (FAN < 5),FAN weighted average,affect,positive emotion,negative emotion,anxiety,anger,sadness,");
+					"folder,type,CV,images,avg images per page,colors,avg colors per page,pages,paragraphs,sentences,words,content words,normalized paragraphs,normalized sentences, normalized words, normalized content words,positive words (FAN >= 5),negative words (FAN < 5),FAN weighted average,affect,positive emotion,negative emotion,anxiety,anger,sadness,");
 			// textual complexity factors
 			TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
 			for (IComplexityFactors f : textualComplexity.getList()) {
@@ -148,6 +148,22 @@ public class CVAnalyzer {
 
 					// content words
 					sb.append(result.getContentWords());
+					sb.append(',');
+					
+					// normalized paragraphs
+					sb.append(result.getNormalizedParagraphs());
+					sb.append(',');
+
+					// normalized sentences
+					sb.append(result.getNormalizedSentences());
+					sb.append(',');
+
+					// normalized words
+					sb.append(result.getNormalizedWords());
+					sb.append(',');
+
+					// normalized content words
+					sb.append(result.getNormalizedContentWords());
 					sb.append(',');
 
 					// positive words
