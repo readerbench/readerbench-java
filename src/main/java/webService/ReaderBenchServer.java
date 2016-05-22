@@ -3,6 +3,9 @@ package webService;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,6 +38,7 @@ import data.AbstractDocumentTemplate;
 import data.Block;
 import data.Lang;
 import data.Word;
+import data.cscl.Community;
 import data.cscl.Conversation;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
@@ -61,6 +65,7 @@ import webService.queryResult.QueryResultSentiment;
 import webService.queryResult.QueryResultTextCategorization;
 import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
+import webService.queryResult.QueryResultvCoP;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -694,6 +699,33 @@ public class ReaderBenchServer {
 		});
 		Spark.options("/fileUpload", (request, response) -> {
 			return "";
+		});
+		Spark.post("/vCoPView", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+
+			String vCoPFile = (String) json.get("vCoPFile");
+			String startDateString = (String) json.get("startDate");
+			DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+			Date startDate = format.parse(startDateString);
+			String endDateString = (String) json.get("endDate");
+			Date endDate = format.parse(startDateString);
+			String language = (String) json.get("lang");
+			Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+			long monthIncrement = (Long) json.get("monthIncrement");
+			long dayIncrement = (Long) json.get("dayIncrement");
+			
+			Lang lang = Lang.getLang(language);
+			vCoPFile = "resources/in/forum_Nic";
+			//vCoPFile = "resources/in/MOOC/forum_posts&comments";
+			Community community = Community.loadMultipleConversations(vCoPFile, startDate, endDate, (int) monthIncrement, (int) dayIncrement);
+	//		community.getParticipants();
+			community.computeMetrics(useTextualComplexity, true);
+			QueryResultvCoP queryResult = new QueryResultvCoP();
+			String result = queryResult.convertToJson();
+			return result;
+
 		});
 	}
 
