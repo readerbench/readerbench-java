@@ -187,9 +187,9 @@ public class PreProcessing {
 				}
 			}
 			in.close();
-			printNewConcepts();
 			logger.info("Finished pre-processing " + f.getName());
 		}
+		printNewConcepts();
 
 		out.close();
 		logger.info("Finished all pre-processing");
