@@ -1,16 +1,14 @@
 package services.comprehensionModel.utils.indexer.graphStruct;
 
-import data.Word;
-
 public class CiEdgeDO {
-	public Word w1;
-	public Word w2;
+	public CiNodeDO node1;
+	public CiNodeDO node2;
 	public double score;
 	public CiEdgeType edgeType;
 	
 	public boolean equals(CiEdgeDO otherEdge) {
-		if( ((this.w1.equals(otherEdge.w1) && this.w2.equals(otherEdge.w2)) ||
-			 (this.w1.equals(otherEdge.w2) && this.w2.equals(otherEdge.w1))) &&
+		if( ((this.node1.equals(otherEdge.node1) && this.node2.equals(otherEdge.node2)) ||
+			 (this.node1.equals(otherEdge.node2) && this.node2.equals(otherEdge.node1))) &&
 			this.edgeType == otherEdge.edgeType
 				) {
 			return true;

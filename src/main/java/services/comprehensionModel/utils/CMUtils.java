@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
 import services.nlp.lemmatizer.StaticLemmatizer;
 import data.AbstractDocument;
 import data.Lang;
@@ -50,5 +51,15 @@ public class CMUtils {
 			}
 		}
 		return wordList;
+	}
+	public List<CiNodeDO> convertNodeIteratorToList(Iterator<CiNodeDO> nodeIterator) {
+		List<CiNodeDO> nodeList = new ArrayList<CiNodeDO>();
+		while(nodeIterator.hasNext()) {
+			CiNodeDO node = nodeIterator.next();
+			if(node.word.isContentWord()) {
+				nodeList.add(node);
+			}
+		}
+		return nodeList;
 	}
 }

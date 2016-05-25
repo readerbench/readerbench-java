@@ -42,12 +42,13 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import data.Word;
 import services.comprehensionModel.ComprehensionModel;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeType;
 import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
 import view.models.PreviewSketch;
 
 import javax.swing.GroupLayout;
@@ -66,6 +67,8 @@ public class ComprehensionModelView extends JFrame {
 	private int sentenceIndex;
 	public static final Color COLOR_SEMANTIC = new Color(255, 10, 0);
 	public static final Color COLOR_SYNTATIC = new Color(0, 21, 255);
+	public static final Color COLOR_INACTIVE = new Color(170, 170, 170);
+	public static final Color COLOR_ACTIVE = new Color(59, 153, 50);
 	
 	JLabel phraseLabel;
 	JButton btnNextPhrase;
@@ -150,7 +153,7 @@ public class ComprehensionModelView extends JFrame {
 		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
 		AppearanceModel appearanceModel = appearanceController.getModel();
 
-		HashMap<Node, Word> nodeMap = buildConceptGraph(graph, graphModel);
+		HashMap<Node, CiNodeDO> nodeMap = buildConceptGraph(graph, graphModel);
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
@@ -215,52 +218,53 @@ public class ComprehensionModelView extends JFrame {
 		logger.info("Finished building the graph");
 	}
 	
-	public HashMap<Node, Word> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
-		HashMap<Node, Word> outMap = new HashMap<Node, Word>();
-		logger.info("Starting to build the word graph");
+	public HashMap<Node, CiNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
+		HashMap<Node, CiNodeDO> outMap = new HashMap<Node, CiNodeDO>();
+		logger.info("Starting to build the ci graph");
 
 		// build nodes
-		Map<Word, Node> nodes = new TreeMap<Word, Node>();
+		Map<CiNodeDO, Node> nodes = new TreeMap<CiNodeDO, Node>();
 		
-		List<Word> nodeItemList = new ArrayList<Word>();
+		List<CiNodeDO> nodeItemList = new ArrayList<CiNodeDO>();
 		
+		this.ciModel.applyPageRank();
 		WordDistanceIndexer syntacticIndexer = this.ciModel.getSyntacticIndexerAtIndex(this.sentenceIndex);
 		
-		CiGraphDO syntacticGraph = syntacticIndexer.getCiGraph();
+		CiGraphDO ciGraph = syntacticIndexer.getCiGraph(CiNodeType.Syntactic);
+		CiGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph(CiNodeType.Semantic);
 		
-		CiGraphDO ciGraph = syntacticIndexer.getCiGraph();
-		CiGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph();
 		ciGraph.combineWithLinksFrom(semanticGraph);
-		nodeItemList = ciGraph.wordList;
+		ciGraph = ciGraph.getCombinedGraph(this.ciModel.currentGraph);
 		
-		for (Word wordNode : nodeItemList) {
-			String text = wordNode.getLemma() + " " + wordNode.getPOS();
-			Color c = null;
+		this.ciModel.currentGraph = ciGraph;
+		
+		nodeItemList = ciGraph.nodeList;
+		
+		for (CiNodeDO currentNode : nodeItemList) {
+			String text = currentNode.word.getLemma();
 				
 			Node n = graphModel.factory().newNode(text);
 			n.setLabel(text);
 			
-			c = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
-					(float) (COLOR_SEMANTIC.getBlue()) / 256);
-			if(syntacticGraph.containsWord(wordNode)) {
-				c = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
-						(float) (COLOR_SYNTATIC.getBlue()) / 256);
-			}
+			Color actualColor = this.getNodeColor(currentNode);
+			
+			Color c = new Color((float) (actualColor.getRed()) / 256, (float) (actualColor.getGreen()) / 256,
+					(float) (actualColor.getBlue()) / 256);
 			n.setColor(c);
 			
 			n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 			n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 			
-			if(!nodes.containsKey(wordNode)) {
+			if(!nodes.containsKey(currentNode)) {
 				System.out.println(text);
 				graph.addNode(n);
-				nodes.put(wordNode, n);
-				outMap.put(n, wordNode);
+				nodes.put(currentNode, n);
+				outMap.put(n, currentNode);
 			}
 		}
 		for(CiEdgeDO edge : ciGraph.edgeList) {
 			int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
-			Edge e = graphModel.factory().newEdge(nodes.get(edge.w1), nodes.get(edge.w2), distanceLbl, edge.score, false);
+			Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score, false);
 			e.setLabel("");
 			Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
 					(float) (COLOR_SEMANTIC.getBlue()) / 256);
@@ -275,13 +279,25 @@ public class ComprehensionModelView extends JFrame {
 		
 		return outMap;
 	}
+	private Color getNodeColor(CiNodeDO node) {
+		if(node.nodeType == CiNodeType.Semantic) {
+			return COLOR_SEMANTIC;
+		}
+		if(node.nodeType == CiNodeType.Syntactic) {
+			return COLOR_SYNTATIC;
+		}
+		if(node.nodeType == CiNodeType.Active) {
+			return COLOR_ACTIVE;
+		}
+		return COLOR_INACTIVE;
+	}
 	
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ComprehensionModel ciModel = new ComprehensionModel("I went to the coast last weekend with Sally. We had checked the tide schedules and planned to arrive at low tide, because I just love beachcombing. Right off, I found three whole sand dollars.");				
+				ComprehensionModel ciModel = new ComprehensionModel("I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.");				
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}

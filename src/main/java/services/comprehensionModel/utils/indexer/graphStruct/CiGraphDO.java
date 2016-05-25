@@ -2,27 +2,25 @@ package services.comprehensionModel.utils.indexer.graphStruct;
 
 import java.util.ArrayList;
 import java.util.List;
-import data.Word;
 
 public class CiGraphDO {
-	public List<Word> wordList;
+	public List<CiNodeDO> nodeList;
 	public List<CiEdgeDO> edgeList;
 	
-	public boolean containsWord(Word otherWord) {
-		for(Word word : this.wordList) {
-			if(word.equals(otherWord)) {
+	public CiGraphDO() {
+		this.nodeList = new ArrayList<CiNodeDO>();
+		this.edgeList = new ArrayList<CiEdgeDO>();
+	}
+	
+	public static boolean nodeListContainsNode(List<CiNodeDO> nodeList, CiNodeDO otherNode) {
+		for(CiNodeDO node : nodeList) {
+			if(node.equals(otherNode)) {
 				return true;
 			}
 		}
 		return false;
 	}
-	private void addWordIfNotExists(Word otherWord) {
-		if(!this.containsWord(otherWord)) {
-			this.wordList.add(otherWord);
-		}
-	}
-	
-	private boolean containsEdge(CiEdgeDO otherEdge) {
+	public static boolean edgeListContainsEdge(List<CiEdgeDO> edgeList, CiEdgeDO otherEdge) {
 		for(CiEdgeDO edge : edgeList) {
 			if(edge.equals(otherEdge)) {
 				return true;
@@ -30,10 +28,24 @@ public class CiGraphDO {
 		}
 		return false;
 	}
-	public List<CiEdgeDO> getEdgeList(Word word) {
+	
+	
+	public boolean containsNode(CiNodeDO otherNode) {
+		return nodeListContainsNode(this.nodeList, otherNode);
+	}
+	private void addNodeIfNotExists(CiNodeDO otherNode) {
+		if(!this.containsNode(otherNode)) {
+			this.nodeList.add(otherNode);
+		}
+	}
+	
+	private boolean containsEdge(CiEdgeDO otherEdge) {
+		return edgeListContainsEdge(this.edgeList, otherEdge);
+	}
+	public List<CiEdgeDO> getEdgeList(CiNodeDO node) {
 		List<CiEdgeDO> outEdgeList = new ArrayList<CiEdgeDO>();
 		for(CiEdgeDO edge : this.edgeList) {
-			if(edge.w1.equals(word) || edge.w2.equals(word)) {
+			if(edge.node1.equals(node) || edge.node2.equals(node)) {
 				outEdgeList.add(edge);
 			}
 		}
@@ -41,16 +53,37 @@ public class CiGraphDO {
 	}
 	
 	public void combineWithLinksFrom(CiGraphDO otherGraph) {
-		List<Word> thisWordList = new ArrayList<Word>(this.wordList);
-		for(Word word : thisWordList) {
-			List<CiEdgeDO> otherGraphEdgeList = otherGraph.getEdgeList(word);
+		List<CiNodeDO> thisNodeList = new ArrayList<CiNodeDO>(this.nodeList);
+		for(CiNodeDO node: thisNodeList) {
+			List<CiEdgeDO> otherGraphEdgeList = otherGraph.getEdgeList(node);
 			for(CiEdgeDO otherGraphEdge : otherGraphEdgeList) {
 				if(!this.containsEdge(otherGraphEdge)) {
-					this.addWordIfNotExists(otherGraphEdge.w1);
-					this.addWordIfNotExists(otherGraphEdge.w2);
+					this.addNodeIfNotExists(otherGraphEdge.node1);
+					this.addNodeIfNotExists(otherGraphEdge.node2);
 					this.edgeList.add(otherGraphEdge);
 				}
 			}
 		}
+	}
+	public CiGraphDO getCombinedGraph(CiGraphDO otherGraph) {
+		List<CiNodeDO> thisNodeList = new ArrayList<CiNodeDO>(this.nodeList);
+		for(CiNodeDO otherGraphNode : otherGraph.nodeList) {
+			if(!nodeListContainsNode(thisNodeList, otherGraphNode)) {
+				thisNodeList.add(otherGraphNode);
+			}
+		}
+		
+		List<CiEdgeDO> thisEdgeList = new ArrayList<CiEdgeDO>(this.edgeList);
+		for(CiEdgeDO otherGraphEdge : otherGraph.edgeList) {
+			if(!edgeListContainsEdge(thisEdgeList, otherGraphEdge)) {
+				thisEdgeList.add(otherGraphEdge);
+			}
+		}
+		
+		CiGraphDO outGraph = new CiGraphDO();
+		outGraph.nodeList = thisNodeList;
+		outGraph.edgeList = thisEdgeList;
+				
+		return outGraph;
 	}
 }
