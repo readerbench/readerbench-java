@@ -137,10 +137,8 @@ public class ComprehensionModelView extends JFrame {
 		}
 	}
 	private void updateValuesForCurrentSentence() {
-		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
 		this.phraseLabel.setText(this.ciModel.getSentenceAtIndex(this.sentenceIndex).getText());
 		
-		System.out.println(this.ciModel.getWordActivationScoreMap());
 		this.generateGraph();
 	}
 	private void generateGraph() {
@@ -238,6 +236,11 @@ public class ComprehensionModelView extends JFrame {
 		
 		this.ciModel.currentGraph = ciGraph;
 		
+		System.out.println("--------------------");
+		System.out.println(this.ciModel.getNodeActivationScoreMap());
+		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
+		System.out.println(this.ciModel.getNodeActivationScoreMap());
+		
 		nodeItemList = ciGraph.nodeList;
 		
 		for (CiNodeDO currentNode : nodeItemList) {
@@ -255,12 +258,9 @@ public class ComprehensionModelView extends JFrame {
 			n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 			n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 			
-			if(!nodes.containsKey(currentNode)) {
-				System.out.println(text);
-				graph.addNode(n);
-				nodes.put(currentNode, n);
-				outMap.put(n, currentNode);
-			}
+			graph.addNode(n);
+			nodes.put(currentNode, n);
+			outMap.put(n, currentNode);
 		}
 		for(CiEdgeDO edge : ciGraph.edgeList) {
 			int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
@@ -297,7 +297,7 @@ public class ComprehensionModelView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ComprehensionModel ciModel = new ComprehensionModel("I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.");				
+				ComprehensionModel ciModel = new ComprehensionModel("I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. It was sunny. Right off, I found three whole sand dollars. I went home.");
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}

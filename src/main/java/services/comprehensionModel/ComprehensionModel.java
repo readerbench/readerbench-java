@@ -1,10 +1,8 @@
 package services.comprehensionModel;
 
-import java.util.List;
 import java.util.Map;
 
 import data.Sentence;
-import data.Word;
 import services.comprehensionModel.utils.indexer.QueryIndexer;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
@@ -35,15 +33,18 @@ public class ComprehensionModel {
 		return this.queryIndexer.getSyntacticIndexerList().get(index);
 	}
 	
-	public Map<Word, Double> getWordActivationScoreMap() {
-		return this.queryIndexer.getWordActivationScoreMap();
+	public Map<CiNodeDO, Double> getNodeActivationScoreMap() {
+		return this.queryIndexer.getNodeActivationScoreMap();
 	}
 	public void updateActivationScoreMapAtIndex(int index) {
 		WordDistanceIndexer indexer = this.getSyntacticIndexerAtIndex(index);
 		for(int i = 0; i < indexer.wordList.size(); i ++) {
-			double score = this.getWordActivationScoreMap().get(indexer.wordList.get(i));
+			CiNodeDO node = new CiNodeDO();
+			node.nodeType = CiNodeType.Syntactic;
+			node.word = indexer.wordList.get(i);
+			double score = this.getNodeActivationScoreMap().get(node);
 			score++;
-			this.getWordActivationScoreMap().put(indexer.wordList.get(i), score);
+			this.getNodeActivationScoreMap().put(node, score);
 		}
 	}
 	

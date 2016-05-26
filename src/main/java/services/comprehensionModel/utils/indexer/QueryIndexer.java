@@ -9,6 +9,8 @@ import java.util.Map;
 import services.comprehensionModel.utils.CMUtils;
 import services.comprehensionModel.utils.distanceStrategies.SemanticWordDistanceStrategy;
 import services.comprehensionModel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
+import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import data.AbstractDocument;
@@ -30,12 +32,12 @@ public class QueryIndexer {
 	private CMUtils cMUtils;
 	private WordDistanceIndexer semanticIndexer;
 	private List<WordDistanceIndexer> syntacticIndexerList;
-	private Map<Word, Double> wordActivationScoreMap;
+	private Map<CiNodeDO, Double> nodeActivationScoreMap;
 	
 	public QueryIndexer(String text) {
 		this.text = text;
 		this.cMUtils = new CMUtils();
-		this.wordActivationScoreMap = new HashMap<Word, Double>();
+		this.nodeActivationScoreMap = new HashMap<CiNodeDO, Double>();
 		this.loadDocument();
 		this.indexSemanticDistances();
 		this.indexSyntacticDistances();
@@ -73,7 +75,10 @@ public class QueryIndexer {
 	}
 	private void addWordListToWordActivationScoreMap(List<Word> wordList) {
 		for(int i = 0; i < wordList.size(); i++) {
-			this.wordActivationScoreMap.put(wordList.get(i), 0.0);
+			CiNodeDO node = new CiNodeDO();
+			node.word = wordList.get(i);
+			node.nodeType = CiNodeType.Semantic;
+			this.nodeActivationScoreMap.put(node, 0.0);
 		}
 	}
 	
@@ -83,7 +88,7 @@ public class QueryIndexer {
 	public List<WordDistanceIndexer> getSyntacticIndexerList() {
 		return this.syntacticIndexerList;
 	}
-	public Map<Word, Double> getWordActivationScoreMap() {
-		return this.wordActivationScoreMap;
+	public Map<CiNodeDO, Double> getNodeActivationScoreMap() {
+		return this.nodeActivationScoreMap;
 	}
 }

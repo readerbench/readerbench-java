@@ -18,4 +18,7 @@ public class CiNodeDO implements Comparable<CiNodeDO> {
 	public int compareTo(CiNodeDO otherNode) {
 		return this.word.getLemma().compareTo(otherNode.word.getLemma());
 	}
+	public String toString() {
+		return this.word.getLemma();
+	}
 }
