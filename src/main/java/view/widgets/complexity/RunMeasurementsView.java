@@ -2,7 +2,6 @@ package view.widgets.complexity;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,20 +21,17 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
+import data.Lang;
+import edu.stanford.nlp.util.Timing;
 import services.complexity.DataGathering;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
-import data.Lang;
-import edu.stanford.nlp.util.Timing;
 
 public class RunMeasurementsView extends JFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
@@ -235,42 +231,33 @@ public class RunMeasurementsView extends JFrame {
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
-				.setHorizontalGroup(
-						gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(
-										gl_contentPane.createSequentialGroup().addContainerGap()
-												.addGroup(gl_contentPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addGroup(
-																gl_contentPane.createSequentialGroup()
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addComponent(lblPath)
-																						.addComponent(
-																								lblLsaVectorSpace)
-																		.addComponent(lblLdaModel)).addGap(
-																				13)
-								.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-										.addComponent(comboBoxLDA, 0, 404, Short.MAX_VALUE)
-										.addGroup(gl_contentPane.createSequentialGroup()
-												.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 357,
-														Short.MAX_VALUE)
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
-														GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE))
-										.addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE)
-										.addComponent(comboBoxLanguage, Alignment.LEADING, 0, 404, Short.MAX_VALUE))
-								.addGap(6))
-						.addGroup(Alignment.LEADING,
-								gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
-										.addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
-										.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 73,
-												GroupLayout.PREFERRED_SIZE)
-										.addContainerGap())
-						.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage).addContainerGap(469,
-								Short.MAX_VALUE)))));
+				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(
+						gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
+								.createParallelGroup(Alignment.TRAILING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+												.addComponent(lblPath).addComponent(lblLsaVectorSpace).addComponent(
+														lblLdaModel))
+										.addGap(13)
+										.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+												.addComponent(comboBoxLDA, 0, 404, Short.MAX_VALUE)
+												.addGroup(gl_contentPane.createSequentialGroup()
+														.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 357,
+																Short.MAX_VALUE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
+																GroupLayout.PREFERRED_SIZE))
+												.addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE).addComponent(
+														comboBoxLanguage, Alignment.LEADING, 0, 404, Short.MAX_VALUE))
+										.addGap(6))
+								.addGroup(Alignment.LEADING,
+										gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+												.addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
+												.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 73,
+														GroupLayout.PREFERRED_SIZE)
+												.addContainerGap())
+								.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage)
+										.addContainerGap(469, Short.MAX_VALUE)))));
 		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
 				.createSequentialGroup().addContainerGap()
 				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
@@ -293,43 +280,5 @@ public class RunMeasurementsView extends JFrame {
 						.createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
 				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
-	}
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					RunMeasurementsView frame = new RunMeasurementsView();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 }
