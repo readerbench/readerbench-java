@@ -77,20 +77,28 @@ public class DataGathering {
 			}
 
 			if (d != null) {
-				FileWriter fstream = new FileWriter(dir.getPath() + "/measurements.csv", true);
-				BufferedWriter out = new BufferedWriter(fstream);
+				try {
+					FileWriter fstream = new FileWriter(dir.getPath() + "/measurements.csv", true);
+					StringBuffer concat = new StringBuffer();
+					BufferedWriter out = new BufferedWriter(fstream);
 
-				out.write("\n" + gradeLevel + "," + file.getName().replaceAll(",", "") + ","
-						+ (d.getGenre() != null ? d.getGenre().trim() : "") + ","
-						+ (d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
-				out.write("," + d.getNoBlocks());
-				out.write("," + d.getNoSentences());
-				out.write("," + d.getNoWords());
-				out.write("," + d.getNoContentWords());
-				for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
-					out.write("," + d.getComplexityIndices()[i]);
-				// Close the output stream
-				out.close();
+					concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
+							.append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
+							.append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
+					concat.append(",").append(d.getNoBlocks());
+					concat.append(",").append(d.getNoSentences());
+					concat.append(",").append(d.getNoWords());
+					concat.append(",").append(d.getNoContentWords());
+					for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
+						concat.append(",").append(d.getComplexityIndices()[i]);
+					System.out.println(concat);
+					out.write(concat.toString());
+					out.close();
+				} catch (IOException e) {
+					logger.error("Runtime error while initializing measurements.csv file");
+					e.printStackTrace();
+					throw e;
+				}
 			}
 
 			noProcessedFiles++;

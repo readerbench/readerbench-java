@@ -15,7 +15,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.EtchedBorder;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -51,17 +58,9 @@ import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
 import view.models.PreviewSketch;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.border.EtchedBorder;
-import javax.swing.JPanel;
-
 public class ComprehensionModelView extends JFrame {
 	private static final long serialVersionUID = 1L;
-	
+
 	static Logger logger = Logger.getLogger(ComprehensionModelView.class);
 	private ComprehensionModel ciModel;
 	private int sentenceIndex;
@@ -69,19 +68,20 @@ public class ComprehensionModelView extends JFrame {
 	public static final Color COLOR_SYNTATIC = new Color(0, 21, 255);
 	public static final Color COLOR_INACTIVE = new Color(170, 170, 170);
 	public static final Color COLOR_ACTIVE = new Color(59, 153, 50);
-	
+
 	JLabel phraseLabel;
 	JButton btnNextPhrase;
-	JPanel panelGraph;	
-	
+	JPanel panelGraph;
+
 	public ComprehensionModelView(ComprehensionModel ciModel) {
 		this.ciModel = ciModel;
 		this.sentenceIndex = 0;
-		
+
 		this.setDefaultWindowSize();
 		this.generateLayout();
 		this.updateValuesForCurrentSentence();
 	}
+
 	private void generateLayout() {
 		this.phraseLabel = new JLabel("New label");
 		this.btnNextPhrase = new JButton("Next Phrase");
@@ -90,57 +90,47 @@ public class ComprehensionModelView extends JFrame {
 				ComprehensionModelView.this.increaseSentenceIndex();
 			}
 		});
-		
+
 		panelGraph = new JPanel();
 		panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panelGraph.setBackground(Color.WHITE);
 		panelGraph.setLayout(new BorderLayout());
-		
+
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(23)
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panelGraph, GroupLayout.PREFERRED_SIZE, 1428, GroupLayout.PREFERRED_SIZE)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(phraseLabel, GroupLayout.PREFERRED_SIZE, 1561, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnNextPhrase)))
-					.addContainerGap(93, Short.MAX_VALUE))
-		);
-		groupLayout.setVerticalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-						.addComponent(phraseLabel, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnNextPhrase))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panelGraph, GroupLayout.PREFERRED_SIZE, 827, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(25, Short.MAX_VALUE))
-		);
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup().addGap(23)
+						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+								.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 1298, Short.MAX_VALUE)
+								.addGroup(groupLayout.createSequentialGroup().addComponent(phraseLabel)
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnNextPhrase)))
+						.addGap(19)));
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(phraseLabel)
+								.addComponent(btnNextPhrase))
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 721, Short.MAX_VALUE).addGap(16)));
 		getContentPane().setLayout(groupLayout);
 	}
-	
+
 	private void setDefaultWindowSize() {
 		int margin = 50;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
 	}
-	
-	
+
 	private void increaseSentenceIndex() {
-		if(this.sentenceIndex < this.ciModel.getTotalNoOfPhrases() - 1) {
-			this.sentenceIndex ++;
+		if (this.sentenceIndex < this.ciModel.getTotalNoOfPhrases() - 1) {
+			this.sentenceIndex++;
 			this.updateValuesForCurrentSentence();
 		}
 	}
+
 	private void updateValuesForCurrentSentence() {
 		this.phraseLabel.setText(this.ciModel.getSentenceAtIndex(this.sentenceIndex).getText());
-		
 		this.generateGraph();
 	}
+
 	private void generateGraph() {
 		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
 		pc.newProject();
@@ -215,46 +205,46 @@ public class ComprehensionModelView extends JFrame {
 		this.pack();
 		logger.info("Finished building the graph");
 	}
-	
+
 	public HashMap<Node, CiNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
 		HashMap<Node, CiNodeDO> outMap = new HashMap<Node, CiNodeDO>();
 		logger.info("Starting to build the ci graph");
 
 		// build nodes
 		Map<CiNodeDO, Node> nodes = new TreeMap<CiNodeDO, Node>();
-		
+
 		List<CiNodeDO> nodeItemList = new ArrayList<CiNodeDO>();
-		
+
 		this.ciModel.applyPageRank();
 		WordDistanceIndexer syntacticIndexer = this.ciModel.getSyntacticIndexerAtIndex(this.sentenceIndex);
-		
+
 		CiGraphDO ciGraph = syntacticIndexer.getCiGraph(CiNodeType.Syntactic);
 		CiGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph(CiNodeType.Semantic);
-		
+
 		ciGraph.combineWithLinksFrom(semanticGraph);
 		ciGraph = ciGraph.getCombinedGraph(this.ciModel.currentGraph);
-		
+
 		this.ciModel.currentGraph = ciGraph;
 		
 		System.out.println("--------------------");
 		System.out.println(this.ciModel.getNodeActivationScoreMap());
 		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
 		System.out.println(this.ciModel.getNodeActivationScoreMap());
-		
+
 		nodeItemList = ciGraph.nodeList;
-		
+
 		for (CiNodeDO currentNode : nodeItemList) {
 			String text = currentNode.word.getLemma();
-				
+
 			Node n = graphModel.factory().newNode(text);
 			n.setLabel(text);
-			
+
 			Color actualColor = this.getNodeColor(currentNode);
-			
+
 			Color c = new Color((float) (actualColor.getRed()) / 256, (float) (actualColor.getGreen()) / 256,
 					(float) (actualColor.getBlue()) / 256);
 			n.setColor(c);
-			
+
 			n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 			n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 			
@@ -262,42 +252,45 @@ public class ComprehensionModelView extends JFrame {
 			nodes.put(currentNode, n);
 			outMap.put(n, currentNode);
 		}
-		for(CiEdgeDO edge : ciGraph.edgeList) {
+		for (CiEdgeDO edge : ciGraph.edgeList) {
 			int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
-			Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score, false);
+			Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score,
+					false);
 			e.setLabel("");
 			Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
 					(float) (COLOR_SEMANTIC.getBlue()) / 256);
-			if(edge.edgeType == CiEdgeType.Syntactic) {
+			if (edge.edgeType == CiEdgeType.Syntactic) {
 				color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
 						(float) (COLOR_SYNTATIC.getBlue()) / 256);
 			}
 			e.setColor(color);
-			
+
 			graph.addEdge(e);
 		}
-		
+
 		return outMap;
 	}
+
 	private Color getNodeColor(CiNodeDO node) {
-		if(node.nodeType == CiNodeType.Semantic) {
+		if (node.nodeType == CiNodeType.Semantic) {
 			return COLOR_SEMANTIC;
 		}
-		if(node.nodeType == CiNodeType.Syntactic) {
+		if (node.nodeType == CiNodeType.Syntactic) {
 			return COLOR_SYNTATIC;
 		}
-		if(node.nodeType == CiNodeType.Active) {
+		if (node.nodeType == CiNodeType.Active) {
 			return COLOR_ACTIVE;
 		}
 		return COLOR_INACTIVE;
 	}
-	
+
 	public static void main(String[] args) {
 		BasicConfigurator.configure();
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ComprehensionModel ciModel = new ComprehensionModel("I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. It was sunny. Right off, I found three whole sand dollars. I went home.");
+				ComprehensionModel ciModel = new ComprehensionModel(
+						"I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.");
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}
