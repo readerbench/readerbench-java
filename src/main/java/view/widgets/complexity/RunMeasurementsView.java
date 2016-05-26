@@ -88,8 +88,8 @@ public class RunMeasurementsView extends JFrame {
 					DataGathering.writeHeader(path);
 
 					for (int gradeLevel = 1; gradeLevel <= noGrades; gradeLevel++) {
-						DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, gradeLevel, false, lsa,
-								lda, lang, usePOSTagging, usePOSTagging);
+						DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, path, gradeLevel,
+								false, lsa, lda, lang, usePOSTagging, usePOSTagging);
 					}
 
 					logger.info("Finished processing all documents");

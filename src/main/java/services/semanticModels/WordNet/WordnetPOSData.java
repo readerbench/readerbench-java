@@ -5,15 +5,14 @@
  */
 package services.semanticModels.WordNet;
 
-import data.Word;
-import data.Lang;
-import data.POS;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import static services.semanticModels.WordNet.OntologySupport.getPOS;
+
+import data.POS;
+import data.Word;
 import vu.wntools.wnsimilarity.WordnetSimilarityApi;
 import vu.wntools.wnsimilarity.measures.SimilarityPair;
 import vu.wntools.wordnet.WordnetData;

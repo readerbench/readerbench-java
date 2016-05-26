@@ -31,9 +31,11 @@ public class DataGathering {
 		try {
 			FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
 			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
+			StringBuffer concat = new StringBuffer();
+			concat.append("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
 			for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
-				out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+				concat.append(",").append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+			out.write(concat.toString());
 			out.close();
 		} catch (Exception e) {
 			logger.error("Runtime error while initializing measurements.csv file");
@@ -43,7 +45,12 @@ public class DataGathering {
 
 	public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang,
 			boolean usePOSTagging, boolean computeDialogism) throws IOException {
-		File dir = new File(path);
+		processTexts(path, path, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism);
+	}
+
+	public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader,
+			LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+		File dir = new File(processingPath);
 
 		if (!dir.exists()) {
 			throw new IOException("Inexistent Folder: " + dir.getPath());
@@ -58,7 +65,7 @@ public class DataGathering {
 		});
 
 		if (writeHeader) {
-			writeHeader(dir.getPath());
+			writeHeader(saveLocation);
 		}
 
 		int noProcessedFiles = 0;
@@ -78,9 +85,9 @@ public class DataGathering {
 
 			if (d != null) {
 				try {
-					FileWriter fstream = new FileWriter(dir.getPath() + "/measurements.csv", true);
-					StringBuffer concat = new StringBuffer();
+					FileWriter fstream = new FileWriter(saveLocation + "/measurements.csv", true);
 					BufferedWriter out = new BufferedWriter(fstream);
+					StringBuffer concat = new StringBuffer();
 
 					concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
 							.append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
@@ -91,7 +98,6 @@ public class DataGathering {
 					concat.append(",").append(d.getNoContentWords());
 					for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++)
 						concat.append(",").append(d.getComplexityIndices()[i]);
-					System.out.println(concat);
 					out.write(concat.toString());
 					out.close();
 				} catch (IOException e) {
@@ -102,7 +108,6 @@ public class DataGathering {
 			}
 
 			noProcessedFiles++;
-
 			if (noProcessedFiles >= MAX_PROCESSED_FILES)
 				break;
 		}
