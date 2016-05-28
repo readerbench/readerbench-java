@@ -58,6 +58,9 @@ public class PronounsComplexity extends IComplexityFactors {
 		case ro:
 			classes = Pronouns.PRONOUNS_RO;
 			break;
+		case la:
+			classes = Pronouns.PRONOUNS_LA;
+			break;
 		default:
 			classes = null;
 			break;
