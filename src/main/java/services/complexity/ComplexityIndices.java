@@ -35,7 +35,7 @@ import services.nlp.listOfWords.Pronouns;
  */
 
 public class ComplexityIndices {
-   static Logger logger = Logger.getLogger(ComplexityIndices.class);
+	static Logger logger = Logger.getLogger(ComplexityIndices.class);
 
 	private static int id = -1;
 
@@ -134,9 +134,10 @@ public class ComplexityIndices {
 	public static final int CONNECTIVES_EN = (id += 1);
 	public static final int CONNECTIVES_FR = (id += Connectives.NO_CONNECTIVE_TYPES_EN);
 	public static final int CONNECTIVES_RO = (id += Connectives.NO_CONNECTIVE_TYPES_FR);
+	public static final int CONNECTIVES_LA = (id += Connectives.NO_CONNECTIVE_TYPES_RO);
 
 	// Cohesion (Lexical chains)
-	public static final int LEXICAL_CHAINS_AVERAGE_SPAN = (id += Connectives.NO_CONNECTIVE_TYPES_RO);
+	public static final int LEXICAL_CHAINS_AVERAGE_SPAN = (id += Connectives.NO_CONNECTIVE_TYPES_LA);
 	public static final int LEXICAL_CHAINS_MAX_SPAN = (id += 1);
 	public static final int AVERAGE_NO_LEXICAL_CHAINS = (id += 1);
 	public static final int PERCENTAGE_LEXICAL_CHAINS_COVERAGE = (id += 1);
@@ -215,11 +216,12 @@ public class ComplexityIndices {
 			new SurfaceStatisticsComplexity(), new EntropyComplexity(), new BalancedCAF(), new POSComplexity(),
 			new PronounsComplexity(), new TreeComplexity(), new WordComplexity(), new EntityDensityComplexity(),
 			new CoreferenceResolutionComplexity(), new ConnectivesComplexity(Lang.eng),
-			new ConnectivesComplexity(Lang.fr), new ConnectivesComplexity(Lang.ro), new LexicalChainsComplexity(),
-			new LexicalCohesionComplexity(), new DialogismStatisticsComplexity(), new DialogismSynergyComplexity(),
-			new DiscourseComplexity(), new SemanticCohesionComplexity(0), new SemanticCohesionComplexity(1),
-			new SemanticCohesionComplexity(2), new SemanticCohesionComplexity(3), new SemanticCohesionComplexity(4),
-			new SemanticCohesionComplexity(5), new DocumentFlowComplexity(0, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			new ConnectivesComplexity(Lang.fr), new ConnectivesComplexity(Lang.ro), new ConnectivesComplexity(Lang.la),
+			new LexicalChainsComplexity(), new LexicalCohesionComplexity(), new DialogismStatisticsComplexity(),
+			new DialogismSynergyComplexity(), new DiscourseComplexity(), new SemanticCohesionComplexity(0),
+			new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(2), new SemanticCohesionComplexity(3),
+			new SemanticCohesionComplexity(4), new SemanticCohesionComplexity(5),
+			new DocumentFlowComplexity(0, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
 			new DocumentFlowComplexity(0, DocFlowCriteria.MAX_VALUE),
 			new DocumentFlowComplexity(1, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
 			new DocumentFlowComplexity(1, DocFlowCriteria.MAX_VALUE),

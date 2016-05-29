@@ -28,21 +28,27 @@ public class ConnectivesComplexity extends IComplexityFactors {
 		case eng:
 			for (String className : Connectives.CONNECTIVES_EN.getClasses().keySet()) {
 				descriptions[ComplexityIndices.CONNECTIVES_EN + index] = "Average number of "
-						+ className.replaceAll("_", " ") + " connectives per block (EN)";
+						+ className.replaceAll("_", " ") + " per block (EN)";
 				index++;
 			}
 			break;
 		case fr:
 			for (String className : Connectives.CONNECTIVES_FR.getClasses().keySet()) {
-				descriptions[ComplexityIndices.CONNECTIVES_FR + index] = "Nombre moyen de connecteur "
+				descriptions[ComplexityIndices.CONNECTIVES_FR + index] = "Nombre moyen de "
 						+ className.replaceAll("_", " ") + " selon un bloc (FR)";
 				index++;
 			}
 			break;
 		case ro:
 			for (String className : Connectives.CONNECTIVES_RO.getClasses().keySet()) {
-				descriptions[ComplexityIndices.CONNECTIVES_RO + index] = "Număr mediu de conectori"
-						+ className.replaceAll("_", " ") + " conectori per paragraf (RO)";
+				descriptions[ComplexityIndices.CONNECTIVES_RO + index] = "Număr mediu de "
+						+ className.replaceAll("_", " ") + " per paragraf (RO)";
+				index++;
+			}
+		case la:
+			for (String className : Connectives.CONNECTIVES_LA.getClasses().keySet()) {
+				descriptions[ComplexityIndices.CONNECTIVES_LA + index] = "Average number of "
+						+ className.replaceAll("_", " ") + " per paragraf (Latin)";
 				index++;
 			}
 		default:
@@ -73,6 +79,12 @@ public class ConnectivesComplexity extends IComplexityFactors {
 				acronyms[ComplexityIndices.CONNECTIVES_RO + index] = "Avg" + classNameAcronym + "BlRo";
 				index++;
 			}
+		case la:
+			for (String className : Connectives.CONNECTIVES_LA.getClasses().keySet()) {
+				String classNameAcronym = WordUtils.capitalizeFully(className, new char[] { '_' }).replaceAll("_", "");
+				acronyms[ComplexityIndices.CONNECTIVES_LA + index] = "Avg" + classNameAcronym + "BlLa";
+				index++;
+			}
 		default:
 			break;
 		}
@@ -80,7 +92,6 @@ public class ConnectivesComplexity extends IComplexityFactors {
 
 	public int[] getIDs() {
 		int[] ids = null;
-		System.out.println("Language is " + lang);
 		switch (lang) {
 		case eng:
 			ids = new int[Connectives.NO_CONNECTIVE_TYPES_EN];
@@ -100,6 +111,12 @@ public class ConnectivesComplexity extends IComplexityFactors {
 				ids[i] = ComplexityIndices.CONNECTIVES_RO + i;
 			}
 			break;
+		case la:
+			ids = new int[Connectives.NO_CONNECTIVE_TYPES_LA];
+			for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_LA; i++) {
+				ids[i] = ComplexityIndices.CONNECTIVES_LA + i;
+			}
+			break;
 		default:
 			break;
 		}
@@ -108,7 +125,7 @@ public class ConnectivesComplexity extends IComplexityFactors {
 
 	public void computeComplexityFactors(AbstractDocument document) {
 		for (int i = 0; i < Connectives.NO_CONNECTIVE_TYPES_EN + Connectives.NO_CONNECTIVE_TYPES_FR
-				+ Connectives.NO_CONNECTIVE_TYPES_RO; i++) {
+				+ Connectives.NO_CONNECTIVE_TYPES_RO + Connectives.NO_CONNECTIVE_TYPES_LA; i++) {
 			document.getComplexityIndices()[ComplexityIndices.CONNECTIVES_EN + i] = ComplexityIndices.IDENTITY;
 		}
 
@@ -126,6 +143,10 @@ public class ConnectivesComplexity extends IComplexityFactors {
 		case ro:
 			classes = Connectives.CONNECTIVES_RO;
 			index = ComplexityIndices.CONNECTIVES_RO;
+			break;
+		case la:
+			classes = Connectives.CONNECTIVES_LA;
+			index = ComplexityIndices.CONNECTIVES_LA;
 			break;
 		default:
 			classes = null;

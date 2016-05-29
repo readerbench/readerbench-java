@@ -4,6 +4,15 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.filter.DefaultMeasurementModel;
+import org.apache.commons.math3.filter.DefaultProcessModel;
+import org.apache.commons.math3.filter.KalmanFilter;
+import org.apache.commons.math3.filter.MeasurementModel;
+import org.apache.commons.math3.filter.ProcessModel;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import cc.mallet.util.Maths;
@@ -34,6 +43,72 @@ public class VectorAlgebra {
 			result[i] = sum / window;
 		}
 		return result;
+	}
+
+	public static double[] movingAverage(double[] v, int window) {
+		if (window <= 1)
+			return v;
+		double[] result = new double[v.length];
+
+		for (int i = 0; i < v.length; i++) {
+			double sum = v[i];
+			INNER_LOOP: for (int j = 1; j < window; j++) {
+				if (i + j < v.length) {
+					sum += v[i + j];
+				} else {
+					break INNER_LOOP;
+				}
+			}
+			result[i] = sum / window;
+		}
+		return result;
+	}
+
+	public static double[] applyKalmanFilter(double[] v) {
+		final double measurementNoise = stdev(v); // measurement noise - stdev
+		final double processNoise = 0d;
+
+		// the state transition matrix -> constant
+		final RealMatrix A = new Array2DRowRealMatrix(new double[] { 1d });
+
+		// the control matrix -> no control input
+		final RealMatrix B = new Array2DRowRealMatrix(new double[] { 0d });
+
+		// the measurement matrix -> we measure the voltage directly
+		final RealMatrix H = new Array2DRowRealMatrix(new double[] { 1d });
+
+		// the initial state vector
+		final RealVector x0 = new ArrayRealVector(new double[] { avg(v) });
+
+		// the process covariance matrix
+		final RealMatrix Q = new Array2DRowRealMatrix(new double[] { processNoise * processNoise });
+
+		// the initial error covariance -> assume a large error at the beginning
+		final RealMatrix P0 = new Array2DRowRealMatrix(new double[] { measurementNoise });
+
+		// the measurement covariance matrix -> put the "real" variance
+		RealMatrix R = new Array2DRowRealMatrix(new double[] { measurementNoise * measurementNoise });
+
+		final ProcessModel pm = new DefaultProcessModel(A, B, Q, x0, P0);
+		final MeasurementModel mm = new DefaultMeasurementModel(H, R);
+		final KalmanFilter filter = new KalmanFilter(pm, mm);
+
+		final List<Number> kalmanSeries = new ArrayList<Number>();
+		final List<Number> covSeries = new ArrayList<Number>();
+
+		for (int i = 0; i < v.length; i++) {
+			filter.predict();
+			filter.correct(new double[] { v[i] });
+
+			kalmanSeries.add(filter.getStateEstimation()[0]);
+			covSeries.add(filter.getErrorCovariance()[0][0]);
+		}
+
+		double[] res = new double[kalmanSeries.size()];
+		for (int i = 0; i < v.length; i++) {
+			res[i] = kalmanSeries.get(i).doubleValue();
+		}
+		return res;
 	}
 
 	public static double[] normalize(double[] v) {
@@ -330,9 +405,9 @@ public class VectorAlgebra {
 
 	public static void main(String[] args) {
 		double[] v = { 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-		double[] v1 = { 1, 3, 1, 3, 1, 7, 1, 1 };
+		double[] v1 = { 1, 3, 1, 3, 1, 7, 1, 5 };
 		double[] v2 = { 3, 3, 3, 3, 3, 3, 3, 3 };
-		// double[] v2 = { 0, 0, 0, 0, 0, 0, 1, 1 };
+		double[] v3 = { 7, 6, 5, 4, 1 };
 
 		System.out.println(cosineSimilarity(v1, v2));
 		long[] t = { 2, 2, 2, 2, 2, 1, 2, 2 };
@@ -346,5 +421,19 @@ public class VectorAlgebra {
 		System.out.println(entropy(normalize(v)));
 		System.out.println(entropy(v1));
 		System.out.println(entropy(v2));
+		System.out.println("Slope:" + slope(v1));
+		System.out.println("Slope:" + slope(v3));
+
+		for (double d : VectorAlgebra.movingAverage(v1, 2))
+			System.out.print(d + " ");
+
+		System.out.println();
+
+		for (double d : VectorAlgebra.applyKalmanFilter(v1))
+			System.out.print(d + " ");
 	}
+}
+
+class ConstantVoltageExample {
+
 }
