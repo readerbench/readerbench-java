@@ -53,6 +53,32 @@ public class CSCLContributionSimilarities {
 		this.lsa = lsa;
 		this.lda = lda;
 	}
+	
+	private boolean isInBlock(Conversation c, String participantName, int min, int max) {
+		boolean isInBlock = false;
+		if (min != -1) {
+			isInBlock = true;
+			if (min == max)
+				isInBlock = true;
+			if (!((Utterance) c.getBlocks().get(min)).getParticipant().getName()
+					.equals(((Utterance) c.getBlocks().get(max)).getParticipant().getName())) {
+				isInBlock = false;
+			}
+			else {
+				for (int j = min + 1; j <= max - 1; j++) {
+					Utterance secondUtt = (Utterance) c.getBlocks().get(j);
+					if (secondUtt != null) {
+						if (secondUtt.getParticipant() == null || !secondUtt.getParticipant()
+								.getName().equals(((Utterance) c.getBlocks().get(min)).getParticipant().getName())) {
+							isInBlock = false;
+							break;
+						}
+					}
+				}
+			}
+		}
+		return isInBlock;
+	}
 
 	public void process() {
 		StringBuilder capTabel = new StringBuilder();
@@ -586,8 +612,6 @@ public class CSCLContributionSimilarities {
 								rowPathSim.append("" + ",");
 							}
 
-							boolean isInBlock;
-							boolean atLeastOne;
 							Integer minRef;
 							Integer maxRef;
 							minRef = 0;
@@ -615,114 +639,33 @@ public class CSCLContributionSimilarities {
 							rowPathSim.append(((participantMaxPathSim != null) ? participantMaxPathSim : "") + ",");
 
 							// ref detected?
-							rowLSA.append(((refId == refMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId == refMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId == refMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId == refMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId == refMaxPathSim) ? 1 : 0) + ",");
+							rowLSA.append(((refId != -1 && refId == refMaxLSA) ? 1 : 0) + ",");
+							rowLDA.append(((refId != -1 && refId == refMaxLDA) ? 1 : 0) + ",");
+							rowLeacock.append(((refId != -1 && refId == refMaxLeacock) ? 1 : 0) + ",");
+							rowWuPalmer.append(((refId != -1 && refId == refMaxWuPalmer) ? 1 : 0) + ",");
+							rowPathSim.append(((refId != -1 && refId == refMaxPathSim) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMaxLSA);
 							maxRef = (int) Math.max(refId, refMaxLSA);
-							isInBlock = false;
-
-							if (minRef != -1) {
-								isInBlock = true;
-								if (minRef == maxRef)
-									isInBlock = true;
-								if (!((Utterance) c.getBlocks().get(minRef)).getParticipant().getName()
-										.equals(((Utterance) c.getBlocks().get(maxRef)).getParticipant().getName()))
-									isInBlock = false;
-								else {
-									for (int j = minRef + 1; j <= maxRef - 1; j++) {
-										secondUtt = (Utterance) c.getBlocks().get(j);
-										if (secondUtt != null) {
-											if (secondUtt.getParticipant() == null || !secondUtt.getParticipant()
-													.getName().equals(refParticipantName)) {
-												isInBlock = false;
-												break;
-											}
-										}
-									}
-								}
-							}
-							// logger.info("Este in block ? " + ((isInBlock ==
-							// true) ? "DA" : "NU"));
-							// if (!atLeastOne) isInBlock = false;
-							// logger.info("Este inca block ? " + ((isInBlock ==
-							// true) ? "DA" : "NU"));
-							rowLSA.append(((isInBlock == true) ? 1 : 0) + ",");
+							boolean isInBlock = isInBlock(c, refParticipantName, minRef, maxRef); // TODO: refParticipantName de eliminat
+							logger.info("rezultat final: " + ((isInBlock) ? "DA" : "NU"));
+							rowLSA.append(((isInBlock) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMaxLDA);
 							maxRef = (int) Math.max(refId, refMaxLDA);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											atLeastOne = true;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMaxLeacock);
 							maxRef = (int) Math.max(refId, refMaxLeacock);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMaxWuPalmer);
 							maxRef = (int) Math.max(refId, refMaxWuPalmer);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMaxPathSim);
 							maxRef = (int) Math.max(refId, refMaxPathSim);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							// max (sim normalized)
 							rowLSA.append(normMaxLSA + ",");
@@ -749,101 +692,31 @@ public class CSCLContributionSimilarities {
 									((participantNormMaxPathSim != null) ? participantNormMaxPathSim : "") + ",");
 
 							// ref detected?
-							rowLSA.append(((refId == refNormMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId == refNormMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId == refNormMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId == refNormMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId == refNormMaxPathSim) ? 1 : 0) + ",");
+							rowLSA.append(((refId != -1 && refId == refNormMaxLSA) ? 1 : 0) + ",");
+							rowLDA.append(((refId != -1 && refId == refNormMaxLDA) ? 1 : 0) + ",");
+							rowLeacock.append(((refId != -1 && refId == refNormMaxLeacock) ? 1 : 0) + ",");
+							rowWuPalmer.append(((refId != -1 && refId == refNormMaxWuPalmer) ? 1 : 0) + ",");
+							rowPathSim.append(((refId != -1 && refId == refNormMaxPathSim) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refNormMaxLSA);
 							maxRef = (int) Math.max(refId, refNormMaxLSA);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLSA.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLSA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refNormMaxLDA);
 							maxRef = (int) Math.max(refId, refNormMaxLDA);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refNormMaxLeacock);
 							maxRef = (int) Math.max(refId, refNormMaxLeacock);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refNormMaxWuPalmer);
 							maxRef = (int) Math.max(refId, refNormMaxWuPalmer);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refNormMaxPathSim);
 							maxRef = (int) Math.max(refId, refNormMaxPathSim);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							// Mihalcea's similarity
 							rowLSA.append(mihalceaMaxLSA + ",");
@@ -873,101 +746,31 @@ public class CSCLContributionSimilarities {
 											+ ",");
 
 							// ref detected?
-							rowLSA.append(((refId == refMihalceaMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId == refMihalceaMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId == refMihalceaMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId == refMihalceaMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId == refMihalceaMaxPathSim) ? 1 : 0) + ",");
+							rowLSA.append(((refId != -1 && refId == refMihalceaMaxLSA) ? 1 : 0) + ",");
+							rowLDA.append(((refId != -1 && refId == refMihalceaMaxLDA) ? 1 : 0) + ",");
+							rowLeacock.append(((refId != -1 && refId == refMihalceaMaxLeacock) ? 1 : 0) + ",");
+							rowWuPalmer.append(((refId != -1 && refId == refMihalceaMaxWuPalmer) ? 1 : 0) + ",");
+							rowPathSim.append(((refId != -1 && refId == refMihalceaMaxPathSim) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMihalceaMaxLSA);
 							maxRef = (int) Math.max(refId, refMihalceaMaxLSA);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLSA.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLSA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMihalceaMaxLDA);
 							maxRef = (int) Math.max(refId, refMihalceaMaxLDA);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMihalceaMaxLeacock);
 							maxRef = (int) Math.max(refId, refMihalceaMaxLeacock);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMihalceaMaxWuPalmer);
 							maxRef = (int) Math.max(refId, refMihalceaMaxWuPalmer);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							minRef = (int) Math.min(refId, refMihalceaMaxPathSim);
 							maxRef = (int) Math.max(refId, refMihalceaMaxPathSim);
-							isInBlock = true;
-							if (minRef != -1)
-								for (int j = minRef; j <= maxRef; j++) {
-									secondUtt = (Utterance) c.getBlocks().get(j);
-									if (secondUtt != null) {
-										if (secondUtt.getParticipant() == null || secondUtt.getParticipant().getName()
-												.compareTo(refParticipantName) != 0) {
-											isInBlock = false;
-											break;
-										}
-									}
-								}
-							else
-								isInBlock = false;
-							rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
+							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
 
 							// 3 x cautat alta referinta in blocul dat de
 							// replicile aceleiasi
@@ -1016,7 +819,7 @@ public class CSCLContributionSimilarities {
 		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
 		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
 
-		CSCLContributionSimilarities corpusSample = new CSCLContributionSimilarities("resources/in/corpus_v2_sample/",
+		CSCLContributionSimilarities corpusSample = new CSCLContributionSimilarities("resources/in/corpus_v2/",
 				"resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.getLang("English"), true, true,
 				0.3, 20, lsa, lda);
 		corpusSample.process();
