@@ -84,7 +84,7 @@ public class TextPreprocessing {
 		for (Pair<Pattern, String> p : FINAL_PATTERNS) {
 			result = p.first.matcher(result).replaceAll(p.second);
 		}
-		return result;
+		return result.trim();
 	}
 
 	public static String cleanVerbalisation(String text) {

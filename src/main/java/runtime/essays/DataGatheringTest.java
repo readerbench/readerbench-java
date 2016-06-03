@@ -44,8 +44,10 @@ public class DataGatheringTest {
 		BasicConfigurator.configure();
 
 		ReaderBenchServer.initializeDB();
-		LSA lsa = LSA.loadLSA("resources/config/LSA/religious_ro", Lang.ro);
-		LDA lda = LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/letters_la", Lang.la);
+		LDA lda = LDA.loadLDA("resources/config/LDA/letters_la", Lang.la);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/religious_ro", Lang.ro);
+		// LDA lda = LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
@@ -92,9 +94,18 @@ public class DataGatheringTest {
 			// true, lsa, lda, Lang.eng, true, true);
 			// DataGathering.processTexts("resources/in/Elvira/users 2015", -1,
 			// true, lsa, lda, Lang.eng, true, true);
-			
-			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro, false, false);
-			DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro, false, false);
+
+			// DataGathering.processTexts("resources/in/Eminescu vs
+			// Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro,
+			// false, false);
+			// DataGathering.processTexts("resources/in/Eminescu vs
+			// Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro,
+			// false, false);
+
+			DataGathering.processTexts("resources/in/comenius_la/01", 1, true, lsa, lda, Lang.la, false, false);
+			DataGathering.processTexts("resources/in/comenius_la/02", 1, true, lsa, lda, Lang.la, false, false);
+			DataGathering.processTexts("resources/in/comenius_la/03", 1, true, lsa, lda, Lang.la, false, false);
+			DataGathering.processTexts("resources/in/comenius_la/04", 1, true, lsa, lda, Lang.la, false, false);
 
 			/*
 			 * exportPlainTexts("resources/in/Elvira/users 2010");

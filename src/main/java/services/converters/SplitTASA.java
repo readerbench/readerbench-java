@@ -22,15 +22,13 @@ import org.apache.log4j.Logger;
 public class SplitTASA {
 	static Logger logger = Logger.getLogger(SplitTASA.class);
 
-	public static final String[] TASA_GENRES = { "SocialStudies",
-			"LanguageArts", "Science", "Health", "HomeEconomics",
+	public static final String[] TASA_GENRES = { "SocialStudies", "LanguageArts", "Science", "Health", "HomeEconomics",
 			"IndustrialArts", "Business", "Miscellaneous", "Unmarked" };
 	public static final int LOWER_BOUND = 50;
 	public static final int NO_DOCS_PER_GRADE_LEVEL = 50;
 	public static final int NO_GRADE_LEVELS = 13;
 
-	public static void parseTasaFromSingleFile(String input, String path)
-			throws FileNotFoundException, IOException {
+	public static void parseTasaFromSingleFile(String input, String path) throws FileNotFoundException, IOException {
 		createFolders(path);
 		// determine number of documents
 		List<GenericTasaDocument> docs = getTASAdocs(input, path);
@@ -41,11 +39,9 @@ public class SplitTASA {
 		// create unique categories for docs with 2+ paragraphs
 		for (GenericTasaDocument doc : docs) {
 			if (doc.getNoParagraphs() > 1) {
-				String categoryID = doc.getID().substring(0,
-						doc.getID().indexOf("."));
+				String categoryID = doc.getID().substring(0, doc.getID().indexOf("."));
 				if (!uniqueShortIDs.containsKey(categoryID)) {
-					uniqueShortIDs.put(categoryID,
-							new ArrayList<GenericTasaDocument>());
+					uniqueShortIDs.put(categoryID, new ArrayList<GenericTasaDocument>());
 				}
 				uniqueShortIDs.get(categoryID).add(doc);
 			}
@@ -70,8 +66,8 @@ public class SplitTASA {
 		for (List<GenericTasaDocument> docsToWrite : uniqueShortIDs.values()) {
 			Collections.sort(docsToWrite);
 			// write first doc
-			logger.info("Writing " + docsToWrite.get(0).getID() + " ("
-					+ docsToWrite.get(0).getContent().length() + " chars)");
+			logger.info("Writing " + docsToWrite.get(0).getID() + " (" + docsToWrite.get(0).getContent().length()
+					+ " chars)");
 
 			docsToWrite.get(0).writeContent(path + "/tasa(2+)unique");
 			docsToWrite.get(0).writeTxt(path + "/tasa(2+)unique");
@@ -82,22 +78,18 @@ public class SplitTASA {
 			no2unique2++;
 
 			if (docsToWrite.size() > 1) {
-				logger.info("Writing " + docsToWrite.get(1).getID() + " ("
-						+ docsToWrite.get(1).getContent().length() + " chars)");
+				logger.info("Writing " + docsToWrite.get(1).getID() + " (" + docsToWrite.get(1).getContent().length()
+						+ " chars)");
 				docsToWrite.get(1).writeContent(path + "/tasa(2+)unique(2)");
 				docsToWrite.get(1).writeTxt(path + "/tasa(2+)unique(2)");
 				no2unique2++;
 			}
-			logger.info("Last document in the series - "
-					+ docsToWrite.get(docsToWrite.size() - 1).getID()
-					+ " - has "
-					+ docsToWrite.get(docsToWrite.size() - 1).getContent()
-							.length() + " chars");
+			logger.info("Last document in the series - " + docsToWrite.get(docsToWrite.size() - 1).getID() + " - has "
+					+ docsToWrite.get(docsToWrite.size() - 1).getContent().length() + " chars");
 		}
 
 		logger.info(no + " individual TASA files have been written");
-		logger.info(no2
-				+ " individual TASA files with 2+ paragraphs have been written");
+		logger.info(no2 + " individual TASA files with 2+ paragraphs have been written");
 		logger.info(no2unique
 				+ " individual TASA files with unique ID, 2+ paragraphs and longest content have been written");
 		logger.info(no2unique2
@@ -112,9 +104,8 @@ public class SplitTASA {
 	 * @throws UnsupportedEncodingException
 	 * @throws IOException
 	 */
-	public static List<GenericTasaDocument> getTASAdocs(String input,
-			String path) throws FileNotFoundException,
-			UnsupportedEncodingException, IOException {
+	public static List<GenericTasaDocument> getTASAdocs(String input, String path)
+			throws FileNotFoundException, UnsupportedEncodingException, IOException {
 		String corpus_path = path + "/" + input;
 		FileInputStream inputFile = new FileInputStream(corpus_path);
 		InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
@@ -128,8 +119,7 @@ public class SplitTASA {
 			}
 		}
 		in.close();
-		logger.info("Processing " + total_docs_to_process
-				+ " documents in total");
+		logger.info("Processing " + total_docs_to_process + " documents in total");
 
 		// read corpus
 		in = new BufferedReader(new FileReader(corpus_path));
@@ -190,8 +180,7 @@ public class SplitTASA {
 	 * @param path
 	 */
 	private static void createFolders(String path) {
-		String[] folders = { "tasa", "tasa(2+)", "tasa(2+)unique",
-				"tasa(2+)unique(2)" };
+		String[] folders = { "tasa", "tasa(2+)", "tasa(2+)unique", "tasa(2+)unique(2)" };
 
 		for (String folder : folders) {
 			File dir = new File(path + "/" + folder);
@@ -239,8 +228,7 @@ public class SplitTASA {
 			}
 		}
 		in.close();
-		logger.info("Processing " + total_docs_to_process
-				+ " documents in total");
+		logger.info("Processing " + total_docs_to_process + " documents in total");
 
 		// read corpus
 		in = new BufferedReader(new FileReader(corpus_path));
@@ -326,18 +314,15 @@ public class SplitTASA {
 		Map<String, Map<String, List<GenericTasaDocument>>> uniqueShortIDs = new TreeMap<String, Map<String, List<GenericTasaDocument>>>();
 
 		for (String g : genres) {
-			uniqueShortIDs.put(g,
-					new TreeMap<String, List<GenericTasaDocument>>());
+			uniqueShortIDs.put(g, new TreeMap<String, List<GenericTasaDocument>>());
 		}
 
 		// create unique categories for docs with 2+ paragraphs
 		for (GenericTasaDocument doc : docs) {
 			if (doc.getNoParagraphs() > 1) {
-				String categoryID = doc.getID().substring(0,
-						doc.getID().indexOf("."));
+				String categoryID = doc.getID().substring(0, doc.getID().indexOf("."));
 				if (!uniqueShortIDs.containsKey(categoryID)) {
-					uniqueShortIDs.get(doc.getGenre()).put(categoryID,
-							new ArrayList<GenericTasaDocument>());
+					uniqueShortIDs.get(doc.getGenre()).put(categoryID, new ArrayList<GenericTasaDocument>());
 				}
 				uniqueShortIDs.get(doc.getGenre()).get(categoryID).add(doc);
 			}
@@ -356,16 +341,11 @@ public class SplitTASA {
 
 		// sort categories
 		for (String g : genres) {
-			for (List<GenericTasaDocument> potentialDocs : uniqueShortIDs
-					.get(g).values()) {
+			for (List<GenericTasaDocument> potentialDocs : uniqueShortIDs.get(g).values()) {
 				if (potentialDocs.size() > 0) {
 					Collections.sort(potentialDocs);
 					// add first doc for writing
-					docsToWrite
-							.get(g)
-							.get(GenericTasaDocument
-									.get13GradeLevel(potentialDocs
-											.get(0).getDRPscore()))
+					docsToWrite.get(g).get(GenericTasaDocument.get13GradeLevel(potentialDocs.get(0).getDRPscore()))
 							.add(potentialDocs.get(0));
 					// remove first doc from the entire list
 					docs.remove(potentialDocs.get(0));
@@ -391,53 +371,42 @@ public class SplitTASA {
 		// add the documents to corresponding bin in the permutated manner
 		for (int i = 0; i < index.size(); i++) {
 			GenericTasaDocument d = docs.get(index.get(i));
-			docsToWrite
-					.get(d.getGenre())
-					.get(GenericTasaDocument.get13GradeLevel(d
-							.getDRPscore())).add(d);
+			docsToWrite.get(d.getGenre()).get(GenericTasaDocument.get13GradeLevel(d.getDRPscore())).add(d);
 		}
 
 		// write first representative documents
 		for (String g : genres) {
 			for (int i = 1; i <= NO_GRADE_LEVELS; i++) {
 				int no = 0;
-				for (int j = 0; j < Math.min(NO_DOCS_PER_GRADE_LEVEL, docsToWrite
-						.get(g).get(i).size()); j++) {
+				for (int j = 0; j < Math.min(NO_DOCS_PER_GRADE_LEVEL, docsToWrite.get(g).get(i).size()); j++) {
 					GenericTasaDocument d = docsToWrite.get(g).get(i).get(j);
-					logger.info("Writing " + d.getID() + " ("
-							+ d.getContent().length() + " chars)");
+					logger.info("Writing " + d.getID() + " (" + d.getContent().length() + " chars)");
 					d.writeContent(path + "/" + folder);
 					d.writeTxt(path + "/" + folder);
 					no++;
 				}
-				logger.info(no
-						+ " individual TASA files with 2+ paragraphs and an equitable distribution of "
-						+ NO_DOCS_PER_GRADE_LEVEL + " files per " + g
-						+ " genre and complexity class " + i
+				logger.info(no + " individual TASA files with 2+ paragraphs and an equitable distribution of "
+						+ NO_DOCS_PER_GRADE_LEVEL + " files per " + g + " genre and complexity class " + i
 						+ " have been written");
 			}
 		}
 
 	}
 
-	private static void checkDoc(String content, String ID, double DRP,
-			String genre, int noParagraphs, List<GenericTasaDocument> docs)
-			throws UnsupportedEncodingException {
+	private static void checkDoc(String content, String ID, double DRP, String genre, int noParagraphs,
+			List<GenericTasaDocument> docs) throws UnsupportedEncodingException {
 		content = content.trim();
 		if (!genre.equals("Unmarked") && content.trim().length() > 0
 				&& GenericTasaDocument.get13GradeLevel(DRP) != -1) {
 			// create new temporary object
-			GenericTasaDocument tmpDoc = new GenericTasaDocument(ID, DRP,
-					noParagraphs, content, genre);
+			GenericTasaDocument tmpDoc = new GenericTasaDocument(ID, DRP, noParagraphs, content, genre);
 			GenericTasaDocument existingDoc = null;
 			for (GenericTasaDocument doc : docs) {
 				if (doc.getID().equals(tmpDoc.getID())) {
 					logger.warn("Duplicate identifier " + doc.getID());
 				}
-				if (doc.getContent().contains(tmpDoc.getContent())
-						|| tmpDoc.getContent().contains(doc.getContent())) {
-					logger.warn("Duplicate content " + doc.getID() + " and "
-							+ tmpDoc.getID());
+				if (doc.getContent().contains(tmpDoc.getContent()) || tmpDoc.getContent().contains(doc.getContent())) {
+					logger.warn("Duplicate content " + doc.getID() + " and " + tmpDoc.getID());
 					existingDoc = doc;
 					break;
 				}
@@ -447,9 +416,7 @@ public class SplitTASA {
 				docs.add(tmpDoc);
 			}
 			// update the doc list if appropriate
-			if (existingDoc != null
-					&& tmpDoc.getContent().length() > existingDoc.getContent()
-							.length()) {
+			if (existingDoc != null && tmpDoc.getContent().length() > existingDoc.getContent().length()) {
 				docs.remove(existingDoc);
 				docs.add(tmpDoc);
 			}
@@ -469,8 +436,7 @@ public class SplitTASA {
 					}
 				}).length;
 		}
-		logger.info("Processing " + total_docs_to_process
-				+ " documents in total");
+		logger.info("Processing " + total_docs_to_process + " documents in total");
 
 		int current_doc_to_process = 0;
 
@@ -489,11 +455,9 @@ public class SplitTASA {
 					// process each file
 					String content = "";
 					String filename = f.getName();
-					String id = filename
-							.substring(0, filename.indexOf("-DRP-")).trim();
-					Double DRPscore = Double.valueOf(filename.substring(
-							filename.indexOf("-DRP-") + 5,
-							filename.indexOf(".txt")).trim());
+					String id = filename.substring(0, filename.indexOf("-DRP-")).trim();
+					Double DRPscore = Double.valueOf(
+							filename.substring(filename.indexOf("-DRP-") + 5, filename.indexOf(".txt")).trim());
 					FileInputStream inputFile;
 					InputStreamReader ir;
 					try {
@@ -504,11 +468,9 @@ public class SplitTASA {
 							content += line + "\n";
 						}
 						if ((++current_doc_to_process) % 1000 == 0)
-							logger.info("Finished processing "
-									+ (current_doc_to_process)
-									+ " documents of " + total_docs_to_process);
-						GenericTasaDocument tmpDoc = new GenericTasaDocument(
-								id, DRPscore, 0, content, null);
+							logger.info("Finished processing " + (current_doc_to_process) + " documents of "
+									+ total_docs_to_process);
+						GenericTasaDocument tmpDoc = new GenericTasaDocument(id, DRPscore, 0, content, null);
 						tmpDoc.writeContent(path);
 						in.close();
 					} catch (FileNotFoundException e) {
@@ -530,10 +492,9 @@ public class SplitTASA {
 		// SplitTASA.parseTasa("/Users/mihaidascalu/SeparateTasa");
 
 		try {
-			// SplitTASA.parseTasaFromSingleFile("tasa.txt",
+			SplitTASA.parseTasaFromSingleFile("tasa.txt", "/Users/mihaidascalu/Documents/Corpora/TASA");
+			// SplitTASA.parseTasaEquitableDistribution("tasa.txt",
 			// "/Users/mihaidascalu/Corpora/TASA");
-			SplitTASA.parseTasaEquitableDistribution("tasa.txt",
-					"/Users/mihaidascalu/Corpora/TASA");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
