@@ -49,6 +49,15 @@ import services.discourse.topicMining.TopicModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
+import webService.result.ResultCscl;
+import webService.result.ResultTopic;
+import webService.result.ResultvCoP;
+import webService.services.ConceptMap;
+import webService.services.cscl.CSCL;
+import webService.services.cscl.Collaboration;
+import webService.services.cscl.ParticipantEvolution;
+import webService.services.cscl.ParticipantInteraction;
+import webService.services.vCoP.CommunityInteraction;
 
 public class Community extends AnalysisElement {
 	private static final long serialVersionUID = 2836361816092262953L;
@@ -92,8 +101,10 @@ public class Community extends AnalysisElement {
 					// select contributions in imposed timeframe
 					if (u != null && u.isEligible(startDate, endDate)) {
 						// determine first timestamp of considered contributions
-						if (fistContributionDate == null)
+						if (fistContributionDate == null){
 							fistContributionDate = u.getTime();
+							System.out.println("Calculate first contribution");
+						}
 						if (u.getTime().before(fistContributionDate))
 							fistContributionDate = u.getTime();
 						Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
@@ -256,9 +267,10 @@ public class Community extends AnalysisElement {
 
 			IComplexityFactors[] complexityFactors = { new LengthComplexity(), new SurfaceStatisticsComplexity(),
 					new EntropyComplexity(), new POSComplexity(), new PronounsComplexity(), new TreeComplexity(),
-					new EntityDensityComplexity(), new ConnectivesComplexity(getLanguage()), new DiscourseComplexity(),
+					new EntityDensityComplexity(), new ConnectivesComplexity(getLanguage() !=null?getLanguage():Lang.eng), new DiscourseComplexity(),
 					new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(3),
 					new SemanticCohesionComplexity(4) };
+			
 			for (IComplexityFactors f : complexityFactors) {
 				for (int index : f.getIDs()) {
 					selectedIndices[index] = true;
@@ -341,7 +353,6 @@ public class Community extends AnalysisElement {
 				return f.getName().endsWith(".ser");
 			}
 		};
-
 		Community community = new Community(startDate, endDate);
 		File dir = new File(rootPath);
 		if (!dir.isDirectory())
@@ -349,12 +360,12 @@ public class Community extends AnalysisElement {
 		File[] filesTODO = dir.listFiles(filter);
 		for (File f : filesTODO) {
 			Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
-			if (c != null)
+			if (c != null){
 				community.getDocuments().add(c);
+			}
 		}
 
 		community.updateParticipantContributions();
-
 		// create corresponding sub-communities
 		Calendar cal = Calendar.getInstance();
 		Date startSubCommunities = community.getFistContributionDate();
@@ -517,6 +528,7 @@ public class Community extends AnalysisElement {
 			e.printStackTrace();
 		}
 	}
+	
 
 	public static void processDocumentCollection(String rootPath, boolean useTextualComplexity, Date startDate,
 			Date endDate, int monthIncrement, int dayIncrement) {
@@ -553,6 +565,16 @@ public class Community extends AnalysisElement {
 			}
 		}
 		System.out.println("Finished processsing all files...");
+	}
+	
+	public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {
+		
+		return new ResultvCoP(
+				CommunityInteraction.buildParticipantGraph(communityInTimeFrame),
+				CommunityInteraction.buildParticipantGraph(allCommunities),
+				null
+			);
+		
 	}
 
 	public List<Participant> getParticipants() {

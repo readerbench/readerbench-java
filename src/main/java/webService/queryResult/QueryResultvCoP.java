@@ -24,7 +24,7 @@ public class QueryResultvCoP extends QueryResult {
 
 	public QueryResultvCoP() {
 		super();
-		data = new ResultvCoP(null, null, null, null, null, null);
+		data = new ResultvCoP(null, null, null);
 	}
 
 }

@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,6 +68,7 @@ import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
 import webService.queryResult.QueryResultvCoP;
 import webService.result.ResultCategory;
+import webService.result.ResultCscl;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
@@ -77,11 +79,16 @@ import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
 import webService.result.ResultTextCategorization;
 import webService.result.ResultTopic;
+import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
+import webService.services.cscl.Collaboration;
+import webService.services.cscl.ParticipantEvolution;
+import webService.services.cscl.ParticipantInteraction;
 import webService.services.utils.FileProcessor;
+import webService.services.vCoP.CommunityInteraction;
 
 public class ReaderBenchServer {
 	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
@@ -469,6 +476,7 @@ public class ReaderBenchServer {
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			queryResult.setData(CSCL.getAll(conversationDocument, conversation, threshold));
 			String result = queryResult.convertToJson();
+			System.out.println("CSCL queryResult"+result);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -708,24 +716,44 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String vCoPFile = (String) json.get("vCoPFile");
+			System.out.println("vCoP %s"+vCoPFile);
 			String startDateString = (String) json.get("startDate");
 			DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 			Date startDate = format.parse(startDateString);
 			String endDateString = (String) json.get("endDate");
-			Date endDate = format.parse(startDateString);
+			Date endDate = format.parse(endDateString);
 			String language = (String) json.get("lang");
 			Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
 			long monthIncrement = (Long) json.get("monthIncrement");
 			long dayIncrement = (Long) json.get("dayIncrement");
 			
 			Lang lang = Lang.getLang(language);
-			vCoPFile = "resources/in/forum_Nic";
-			//vCoPFile = "resources/in/MOOC/forum_posts&comments";
-			Community community = Community.loadMultipleConversations(vCoPFile, startDate, endDate, (int) monthIncrement, (int) dayIncrement);
-	//		community.getParticipants();
-			community.computeMetrics(useTextualComplexity, true);
+			vCoPFile = "resources/in_copy/forum_Nic";
+			Community communityStartEnd = Community.loadMultipleConversations(vCoPFile, startDate, endDate, (int) monthIncrement, (int) dayIncrement);
+			communityStartEnd.computeMetrics(useTextualComplexity, true);
+			
+			List<Community> subCommunities = communityStartEnd.getTimeframeSubCommunities();
+			
+			Date startDateAllCommunities = format.parse("01/01/1970");
+			Date endDateAllCommunities = format.parse("01/01/2099");
+			
+			Community allCommunity = Community.loadMultipleConversations(vCoPFile, startDateAllCommunities, endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
+			allCommunity.computeMetrics(useTextualComplexity, true);
+			
+			List<ResultTopic> participantsInTimeFrame = new ArrayList<>();
+			
+			for(Community c : subCommunities){
+				participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c));
+			}
+			
 			QueryResultvCoP queryResult = new QueryResultvCoP();
+			ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity),
+					CommunityInteraction.buildParticipantGraph(communityStartEnd), participantsInTimeFrame);
+			System.out.println("resultvCop"+resultVcop);
+			queryResult.setData(resultVcop);
+			
 			String result = queryResult.convertToJson();
+			System.out.println("queryResult"+result);
 			return result;
 
 		});
