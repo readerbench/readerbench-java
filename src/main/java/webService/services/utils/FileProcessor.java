@@ -24,6 +24,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.openide.loaders.FileEntry.Folder;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
@@ -46,7 +47,7 @@ public class FileProcessor {
 	protected FileProcessor() {
 		
 	}
-	public static FileProcessor getInstnace() {
+	public static FileProcessor getInstance() {
 		if (instance == null) {
 			instance = new FileProcessor();
 		}
@@ -61,6 +62,22 @@ public class FileProcessor {
 			logger.error("Can't save uploaded file!");
 		}
 		return targetFile.getName();
+	}
+	
+	public String saveFile(Part submitedFile, File folderPath) {
+		File targetFile = new File(folderPath +"/" + submitedFile.getSubmittedFileName());
+		try {
+			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
+		} catch (IOException e) {
+			logger.error("Can't save uploaded files!");
+		}
+		return targetFile.getName();
+	}
+	
+	public File createFolderForVCoPFiles(){
+		File newFolder = new File("vCoP_"+System.currentTimeMillis());
+		newFolder.mkdir();
+		return newFolder;
 	}
 
 }

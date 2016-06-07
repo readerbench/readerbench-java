@@ -7,18 +7,24 @@ public class ResultvCoP {
 
 		private ResultTopic participantInteractionAllDocuments;
 		private ResultTopic participantInteractionStartEndDate;
-		private List<ResultTopic> participantInteractionInTime;
+		private List<ResultTopic> participantInteractionInTimeList;
+		//ResultTopic participantInteractionInTime;
 		
 		public ResultvCoP(
 				ResultTopic participantInteractionAllDocuments,
 				ResultTopic participantInteractionStartEndDate,
-				List<ResultTopic> participantInteractionInTime
+				List<ResultTopic> participantInteractionInTimeList
 				) {
 			super();
 			this.participantInteractionAllDocuments = participantInteractionAllDocuments;
 			this.participantInteractionStartEndDate = participantInteractionStartEndDate;
-			this.participantInteractionInTime = participantInteractionInTime;
+			this.participantInteractionInTimeList = participantInteractionInTimeList;
 		}
+		
+	//	public ResultvCoP(ResultTopic participantInteractionInTime) {
+	//		super();
+	//		this.participantInteractionInTime = participantInteractionInTime;
+	//	}
 
 		public ResultTopic getParticipantInteractionAllDocuments() {
 			return participantInteractionAllDocuments;
@@ -36,12 +42,19 @@ public class ResultvCoP {
 			this.participantInteractionStartEndDate = participantInteractionStartEndDate;
 		}
 
-		public List<ResultTopic> getParticipantInteractionInTime() {
+		public List<ResultTopic> getParticipantInteractionInTimeList() {
+			return participantInteractionInTimeList;
+		}
+
+		public void setParticipantInteractionInTimeList(List<ResultTopic> participantInteractionInTimeList) {
+			this.participantInteractionInTimeList = participantInteractionInTimeList;
+		}
+
+	/*	public ResultTopic getParticipantInteractionInTime() {
 			return participantInteractionInTime;
 		}
 
-		public void setParticipantInteractionInTime(List<ResultTopic> participantInteractionInTime) {
+		public void setParticipantInteractionInTime(ResultTopic participantInteractionInTime) {
 			this.participantInteractionInTime = participantInteractionInTime;
-		}
-		
+		}		*/
 }

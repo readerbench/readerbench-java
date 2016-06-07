@@ -705,9 +705,22 @@ public class ReaderBenchServer {
 			Part file = request.raw().getPart("file"); // file is name of the
 														// input in the upload
 														// form
-			return FileProcessor.getInstnace().saveFile(file);
+			return FileProcessor.getInstance().saveFile(file);
 		});
 		Spark.options("/fileUpload", (request, response) -> {
+			return "";
+		});
+		Spark.post("/folderUpload", (request, response) -> {
+			File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
+			MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
+			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+			List<Part> filesList = (List<Part>) request.raw().getParts();
+			for (Part file : filesList){
+				FileProcessor.getInstance().saveFile(file, folder);
+			}
+			return folder.getName();
+		});
+		Spark.options("/folderUpload", (request, response) -> {
 			return "";
 		});
 		Spark.post("/vCoPView", (request, response) -> {
@@ -722,13 +735,10 @@ public class ReaderBenchServer {
 			Date startDate = format.parse(startDateString);
 			String endDateString = (String) json.get("endDate");
 			Date endDate = format.parse(endDateString);
-			String language = (String) json.get("lang");
 			Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
 			long monthIncrement = (Long) json.get("monthIncrement");
 			long dayIncrement = (Long) json.get("dayIncrement");
 			
-			Lang lang = Lang.getLang(language);
-			vCoPFile = "resources/in_copy/forum_Nic";
 			Community communityStartEnd = Community.loadMultipleConversations(vCoPFile, startDate, endDate, (int) monthIncrement, (int) dayIncrement);
 			communityStartEnd.computeMetrics(useTextualComplexity, true);
 			
@@ -749,7 +759,6 @@ public class ReaderBenchServer {
 			QueryResultvCoP queryResult = new QueryResultvCoP();
 			ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity),
 					CommunityInteraction.buildParticipantGraph(communityStartEnd), participantsInTimeFrame);
-			System.out.println("resultvCop"+resultVcop);
 			queryResult.setData(resultVcop);
 			
 			String result = queryResult.convertToJson();

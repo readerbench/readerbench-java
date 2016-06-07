@@ -616,4 +616,12 @@ public class Community extends AnalysisElement {
 	public void setTimeframeSubCommunities(List<Community> timeframeSubCommunities) {
 		this.timeframeSubCommunities = timeframeSubCommunities;
 	}
+
+	public double[][] getParticipantContributions() {
+		return participantContributions;
+	}
+
+	public void setParticipantContributions(double[][] participantContributions) {
+		this.participantContributions = participantContributions;
+	}
 }
