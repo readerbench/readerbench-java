@@ -19,7 +19,7 @@ public class SentimentEntity {
 
 	static Logger logger = Logger.getLogger(CohesionGraph.class);
 
-	/**
+    /**
 	 * Map that stores the valences and their quantifier for sentiments
 	 */
 	private Map<SentimentValence, Double> sentiments;
@@ -153,14 +153,16 @@ public class SentimentEntity {
 				}
 			}
 		}
-		return rageSentimentsValues;
+		return normalizeValues(rageSentimentsValues);
 	}
 
 	public static Map<SentimentValence, Double> normalizeValues(Map<SentimentValence, Double> valences) {
-		double max = valences.values().stream().mapToDouble(d -> d).max().getAsDouble();
-		double min = valences.values().stream().mapToDouble(d -> d).min().getAsDouble();
+		//double max = valences.values().stream().mapToDouble(d -> d).max().getAsDouble();
+		//double min = valences.values().stream().mapToDouble(d -> d).min().getAsDouble();
 		Map<SentimentValence, Double> result = new HashMap<>();
 		valences.entrySet().stream().forEach(e -> {
+            double min = SentimentValence.minValues.get(e.getKey()) * 0.3; //don't ask why
+			double max = SentimentValence.maxValues.get(e.getKey()) * 0.3;
 			result.put(e.getKey(), (e.getValue() - min) / (max - min));
 		});
 		return result;
