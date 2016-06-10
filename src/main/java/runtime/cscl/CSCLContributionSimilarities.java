@@ -4,8 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -35,26 +40,97 @@ public class CSCLContributionSimilarities {
 	private Lang lang;
 	private boolean usePOSTagging = false;
 	private boolean computeDialogism = false;
-	private double threshold = 0.3;
-	private int windowSize = 20;
+	private List<Integer> windowSizes = null;
+	private int maxWindowSize;
 	private LSA lsa;
 	private LDA lda;
+	
+	private Map<Integer, Integer> totalSimDetectedLSA;
+	private Map<Integer, Integer> totalSimInBlockLSA;
+	private Map<Integer, Integer> totalNormSimDetectedLSA;
+	private Map<Integer, Integer> totalNormSimInBlockLSA;
+	private Map<Integer, Integer> totalMihalceaSimDetectedLSA;
+	private Map<Integer, Integer> totalMihalceaSimInBlockLSA;
+	
+	private Map<Integer, Integer> totalSimDetectedLDA;
+	private Map<Integer, Integer> totalSimInBlockLDA;
+	private Map<Integer, Integer> totalNormSimDetectedLDA;
+	private Map<Integer, Integer> totalNormSimInBlockLDA;
+	private Map<Integer, Integer> totalMihalceaSimDetectedLDA;
+	private Map<Integer, Integer> totalMihalceaSimInBlockLDA;
+
+	private Map<Integer, Integer> totalSimDetectedLeacock;
+	private Map<Integer, Integer> totalSimInBlockLeacock;
+	private Map<Integer, Integer> totalNormSimDetectedLeacock;
+	private Map<Integer, Integer> totalNormSimInBlockLeacock;
+	private Map<Integer, Integer> totalMihalceaSimDetectedLeacock;
+	private Map<Integer, Integer> totalMihalceaSimInBlockLeacock;
+
+	private Map<Integer, Integer> totalSimDetectedWuPalmer;
+	private Map<Integer, Integer> totalSimInBlockWuPalmer;
+	private Map<Integer, Integer> totalNormSimDetectedWuPalmer;
+	private Map<Integer, Integer> totalNormSimInBlockWuPalmer;
+	private Map<Integer, Integer> totalMihalceaSimDetectedWuPalmer;
+	private Map<Integer, Integer> totalMihalceaSimInBlockWuPalmer;
+	
+	private Map<Integer, Integer> totalSimDetectedPathSim;
+	private Map<Integer, Integer> totalSimInBlockPathSim;
+	private Map<Integer, Integer> totalNormSimDetectedPathSim;
+	private Map<Integer, Integer> totalNormSimInBlockPathSim;
+	private Map<Integer, Integer> totalMihalceaSimDetectedPathSim;
+	private Map<Integer, Integer> totalMihalceaSimInBlockPathSim;
 
 	public CSCLContributionSimilarities(String path, String pathToLSA, String pathToLDA, Lang lang,
-			boolean usePOSTagging, boolean computeDialogism, double threshold, int windowSize, LSA lsa, LDA lda) {
+			boolean usePOSTagging, boolean computeDialogism, List<Integer> windowSizes, LSA lsa, LDA lda) {
 		this.path = path;
 		this.pathToLSA = pathToLSA;
 		this.pathToLDA = pathToLDA;
 		this.lang = lang;
 		this.usePOSTagging = usePOSTagging;
 		this.computeDialogism = computeDialogism;
-		this.threshold = threshold;
-		this.windowSize = windowSize;
+		Collections.sort(windowSizes, Collections.reverseOrder());
+		this.windowSizes = windowSizes;
+		this.maxWindowSize = Collections.max(windowSizes);
 		this.lsa = lsa;
 		this.lda = lda;
+		
+		totalSimDetectedLSA = new HashMap<Integer, Integer>();
+		totalSimInBlockLSA = new HashMap<Integer, Integer>();
+		totalNormSimDetectedLSA = new HashMap<Integer, Integer>();
+		totalNormSimInBlockLSA = new HashMap<Integer, Integer>(); 
+		totalMihalceaSimDetectedLSA = new HashMap<Integer, Integer>();
+		totalMihalceaSimInBlockLSA = new HashMap<Integer, Integer>();
+		
+		totalSimDetectedLDA = new HashMap<Integer, Integer>();
+		totalSimInBlockLDA = new HashMap<Integer, Integer>();
+		totalNormSimDetectedLDA = new HashMap<Integer, Integer>();
+		totalNormSimInBlockLDA = new HashMap<Integer, Integer>();
+		totalMihalceaSimDetectedLDA = new HashMap<Integer, Integer>();
+		totalMihalceaSimInBlockLDA = new HashMap<Integer, Integer>();
+
+		totalSimDetectedLeacock = new HashMap<Integer, Integer>();
+		totalSimInBlockLeacock = new HashMap<Integer, Integer>();
+		totalNormSimDetectedLeacock = new HashMap<Integer, Integer>();
+		totalNormSimInBlockLeacock = new HashMap<Integer, Integer>();
+		totalMihalceaSimDetectedLeacock = new HashMap<Integer, Integer>();
+		totalMihalceaSimInBlockLeacock = new HashMap<Integer, Integer>();
+
+		totalSimDetectedWuPalmer = new HashMap<Integer, Integer>();
+		totalSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+		totalNormSimDetectedWuPalmer = new HashMap<Integer, Integer>();
+		totalNormSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+		totalMihalceaSimDetectedWuPalmer = new HashMap<Integer, Integer>();
+		totalMihalceaSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+		
+		totalSimDetectedPathSim = new HashMap<Integer, Integer>();
+		totalSimInBlockPathSim = new HashMap<Integer, Integer>();
+		totalNormSimDetectedPathSim = new HashMap<Integer, Integer>();
+		totalNormSimInBlockPathSim = new HashMap<Integer, Integer>();
+		totalMihalceaSimDetectedPathSim = new HashMap<Integer, Integer>();
+		totalMihalceaSimInBlockPathSim = new HashMap<Integer, Integer>();
 	}
 	
-	private boolean isInBlock(Conversation c, String participantName, int min, int max) {
+	private boolean isInBlock(Conversation c, int min, int max) {
 		boolean isInBlock = false;
 		if (min != -1) {
 			isInBlock = true;
@@ -94,25 +170,65 @@ public class CSCLContributionSimilarities {
 		capTabel.append("ref_id,"); // reference id
 		capTabel.append("ref_participant,"); // participant
 		capTabel.append("ref_text,"); // reference text
-		capTabel.append("max_sim,"); // max sim
-		capTabel.append("max_sim_id,"); // id of max sim utt
-		capTabel.append("max_sim_participant,"); // participant of max sim utt
-		capTabel.append("max_sim_ref_detected,"); // ref detected
-		capTabel.append("max_sim_ref_in_block,"); // ref in block
-		capTabel.append("max_sim_norm,"); // max sim normalized - how ?? (based
-											// on distance i guess)
-		capTabel.append("max_sim_norm_id,"); // id of max_sim_norm utt
-		capTabel.append("max_sim_norm_participant,"); // participant of
-														// max_sim_norm utt
-		capTabel.append("max_sim_norm_ref_detected,"); // ref detected
-		capTabel.append("max_sim_norm_ref_in_block,"); // ref in block
-		capTabel.append("mihalcea_sim,"); // Mihalcea's similarity
-		capTabel.append("mihalcea_sim_id,"); // id of Mihalcea's similarity utt
-		capTabel.append("mihalcea_sim_participant,"); // participant of
-														// Mihalcea's similarity
-														// utt
-		capTabel.append("mihalcea_sim_ref_detected,"); // ref detected
-		capTabel.append("mihalcea_sim_ref_in_block,"); // ref in block
+		
+		for(Integer windowSize: windowSizes) {
+			capTabel.append("max_sim" + windowSize + ","); // max sim
+			capTabel.append("max_sim_id" + windowSize + ","); // id of max sim utt
+			capTabel.append("max_sim_participant" + windowSize + ","); // participant of max sim utt
+			capTabel.append("max_sim_ref_detected" + windowSize + ","); // ref detected
+			capTabel.append("max_sim_ref_in_block" + windowSize + ","); // ref in block
+			
+			capTabel.append("max_sim_norm" + windowSize + ","); // max sim normalized - how ?? (based
+												// on distance i guess)
+			capTabel.append("max_sim_norm_id" + windowSize + ","); // id of max_sim_norm utt
+			capTabel.append("max_sim_norm_participant" + windowSize + ","); // participant of
+															// max_sim_norm utt
+			capTabel.append("max_sim_norm_ref_detected" + windowSize + ","); // ref detected
+			capTabel.append("max_sim_norm_ref_in_block" + windowSize + ","); // ref in block
+			
+			capTabel.append("mihalcea_sim" + windowSize + ","); // Mihalcea's similarity
+			capTabel.append("mihalcea_sim_id" + windowSize + ","); // id of Mihalcea's similarity utt
+			capTabel.append("mihalcea_sim_participant" + windowSize + ","); // participant of
+															// Mihalcea's similarity
+															// utt
+			capTabel.append("mihalcea_sim_ref_detected" + windowSize + ","); // ref detected
+			capTabel.append("mihalcea_sim_ref_in_block" + windowSize + ","); // ref in block
+			
+			totalSimDetectedLSA.put(windowSize, 0);
+			totalSimInBlockLSA.put(windowSize, 0);
+			totalNormSimDetectedLSA.put(windowSize, 0);
+			totalNormSimInBlockLSA.put(windowSize, 0); 
+			totalMihalceaSimDetectedLSA.put(windowSize, 0);
+			totalMihalceaSimInBlockLSA.put(windowSize, 0);
+			
+			totalSimDetectedLDA.put(windowSize, 0);
+			totalSimInBlockLDA.put(windowSize, 0);
+			totalNormSimDetectedLDA.put(windowSize, 0);
+			totalNormSimInBlockLDA.put(windowSize, 0);
+			totalMihalceaSimDetectedLDA.put(windowSize, 0);
+			totalMihalceaSimInBlockLDA.put(windowSize, 0);
+
+			totalSimDetectedLeacock.put(windowSize, 0);
+			totalSimInBlockLeacock.put(windowSize, 0);
+			totalNormSimDetectedLeacock.put(windowSize, 0);
+			totalNormSimInBlockLeacock.put(windowSize, 0);
+			totalMihalceaSimDetectedLeacock.put(windowSize, 0);
+			totalMihalceaSimInBlockLeacock.put(windowSize, 0);
+
+			totalSimDetectedWuPalmer.put(windowSize, 0);
+			totalSimInBlockWuPalmer.put(windowSize, 0);
+			totalNormSimDetectedWuPalmer.put(windowSize, 0);
+			totalNormSimInBlockWuPalmer.put(windowSize, 0);
+			totalMihalceaSimDetectedWuPalmer.put(windowSize, 0);
+			totalMihalceaSimInBlockWuPalmer.put(windowSize, 0);
+			
+			totalSimDetectedPathSim.put(windowSize, 0);
+			totalSimInBlockPathSim.put(windowSize, 0);
+			totalNormSimDetectedPathSim.put(windowSize, 0);
+			totalNormSimInBlockPathSim.put(windowSize, 0);
+			totalMihalceaSimDetectedPathSim.put(windowSize, 0);
+			totalMihalceaSimInBlockPathSim.put(windowSize, 0);
+		}
 		capTabel.append('\n');
 
 		logger.info("Starting conversation processing...");
@@ -133,11 +249,87 @@ public class CSCLContributionSimilarities {
 				logger.info("Exception: " + e.getMessage());
 				e.printStackTrace();
 			}
+			
+			
+
 
 			Files.walk(Paths.get(path)).forEach(filePath -> {
 				String filePathString = filePath.toString();
 				String fileExtension = FilenameUtils.getExtension(filePathString);
 				if (fileExtension.compareTo("xml") == 0) {
+					
+					Map<Integer, Integer> simDetectedLSA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> simInBlockLSA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimDetectedLSA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimInBlockLSA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimDetectedLSA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimInBlockLSA = new HashMap<Integer, Integer>();
+					
+					Map<Integer, Integer> simDetectedLDA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> simInBlockLDA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimDetectedLDA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimInBlockLDA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimDetectedLDA = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimInBlockLDA = new HashMap<Integer, Integer>();
+					
+					Map<Integer, Integer> simDetectedLeacock = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> simInBlockLeacock = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimDetectedLeacock = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimInBlockLeacock = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimDetectedLeacock = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimInBlockLeacock = new HashMap<Integer, Integer>();
+					
+					Map<Integer, Integer> simDetectedWuPalmer = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> simInBlockWuPalmer = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimDetectedWuPalmer = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimDetectedWuPalmer = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+					
+					Map<Integer, Integer> simDetectedPathSim = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> simInBlockPathSim = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimDetectedPathSim = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> normSimInBlockPathSim = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimDetectedPathSim = new HashMap<Integer, Integer>();
+					Map<Integer, Integer> mihalceaSimInBlockPathSim = new HashMap<Integer, Integer>();
+					
+					for (Integer windowSize : windowSizes) {
+						simDetectedLSA.put(windowSize, 0);
+						simDetectedLDA.put(windowSize, 0);
+						simDetectedLeacock.put(windowSize, 0);
+						simDetectedWuPalmer.put(windowSize, 0);
+						simDetectedPathSim.put(windowSize, 0);
+						
+						normSimDetectedLSA.put(windowSize, 0);
+						normSimDetectedLDA.put(windowSize, 0);
+						normSimDetectedLeacock.put(windowSize, 0);
+						normSimDetectedWuPalmer.put(windowSize, 0);
+						normSimDetectedPathSim.put(windowSize, 0);
+						
+						mihalceaSimDetectedLSA.put(windowSize, 0);
+						mihalceaSimDetectedLDA.put(windowSize, 0);
+						mihalceaSimDetectedLeacock.put(windowSize, 0);
+						mihalceaSimDetectedWuPalmer.put(windowSize, 0);
+						mihalceaSimDetectedPathSim.put(windowSize, 0);
+						
+						simInBlockLSA.put(windowSize, 0);
+						simInBlockLDA.put(windowSize, 0);
+						simInBlockLeacock.put(windowSize, 0);
+						simInBlockWuPalmer.put(windowSize, 0);
+						simInBlockPathSim.put(windowSize, 0);
+						
+						normSimInBlockLSA.put(windowSize, 0);
+						normSimInBlockLDA.put(windowSize, 0);
+						normSimInBlockLeacock.put(windowSize, 0);
+						normSimInBlockWuPalmer.put(windowSize, 0);
+						normSimInBlockPathSim.put(windowSize, 0);
+						
+						mihalceaSimInBlockLSA.put(windowSize, 0);
+						mihalceaSimInBlockLDA.put(windowSize, 0);
+						mihalceaSimInBlockLeacock.put(windowSize, 0);
+						mihalceaSimInBlockWuPalmer.put(windowSize, 0);
+						mihalceaSimInBlockPathSim.put(windowSize, 0);
+					}
 
 					System.out.println("Processing chat " + filePath.getFileName());
 					Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging, true);
@@ -172,57 +364,122 @@ public class CSCLContributionSimilarities {
 							rowPathSim.append(firstUtt.getParticipant().getName() + ",");
 
 							int k = 0;
-							double maxLSA = -1;
-							double maxLDA = -1;
-							double maxLeacock = -1;
-							double maxWuPalmer = -1;
-							double maxPathSim = -1;
-							int refMaxLSA = -1;
-							int refMaxLDA = -1;
-							int refMaxLeacock = -1;
-							int refMaxWuPalmer = -1;
-							int refMaxPathSim = -1;
-							String participantMaxLSA = null;
-							String participantMaxLDA = null;
-							String participantMaxLeacock = null;
-							String participantMaxWuPalmer = null;
-							String participantMaxPathSim = null;
-
-							double normMaxLSA = -1;
-							double normMaxLDA = -1;
-							double normMaxLeacock = -1;
-							double normMaxWuPalmer = -1;
-							double normMaxPathSim = -1;
-							int refNormMaxLSA = -1;
-							int refNormMaxLDA = -1;
-							int refNormMaxLeacock = -1;
-							int refNormMaxWuPalmer = -1;
-							int refNormMaxPathSim = -1;
-							String participantNormMaxLSA = null;
-							String participantNormMaxLDA = null;
-							String participantNormMaxLeacock = null;
-							String participantNormMaxWuPalmer = null;
-							String participantNormMaxPathSim = null;
-
-							double mihalceaMaxLSA = -1;
-							double mihalceaMaxLDA = -1;
-							double mihalceaMaxLeacock = -1;
-							double mihalceaMaxWuPalmer = -1;
-							double mihalceaMaxPathSim = -1;
-							int refMihalceaMaxLSA = -1;
-							int refMihalceaMaxLDA = -1;
-							int refMihalceaMaxLeacock = -1;
-							int refMihalceaMaxWuPalmer = -1;
-							int refMihalceaMaxPathSim = -1;
-							String participantMihalceaMaxLSA = null;
-							String participantMihalceaMaxLDA = null;
-							String participantMihalceaMaxLeacock = null;
-							String participantMihalceaMaxWuPalmer = null;
-							String participantMihalceaMaxPathSim = null;
-
-							for (int j = i - 1; j >= i - windowSize && j > 0; j--) {
+							
+							Map<Integer, Double> maxLSA = new HashMap<Integer, Double>();
+							Map<Integer, Double> maxLDA = new HashMap<Integer, Double>();
+							Map<Integer, Double> maxLeacock = new HashMap<Integer, Double>();
+							Map<Integer, Double> maxWuPalmer = new HashMap<Integer, Double>();
+							Map<Integer, Double> maxPathSim = new HashMap<Integer, Double>();
+							
+							Map<Integer, Integer> refMaxLSA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMaxLDA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMaxLeacock = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMaxWuPalmer = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMaxPathSim = new HashMap<Integer, Integer>();
+							
+							Map<Integer, String> participantMaxLSA = new HashMap<Integer, String>();
+							Map<Integer, String> participantMaxLDA = new HashMap<Integer, String>();
+							Map<Integer, String> participantMaxLeacock = new HashMap<Integer, String>();
+							Map<Integer, String> participantMaxWuPalmer = new HashMap<Integer, String>();
+							Map<Integer, String> participantMaxPathSim = new HashMap<Integer, String>();
+							
+							Map<Integer, Double> normMaxLSA = new HashMap<Integer, Double>();
+							Map<Integer, Double> normMaxLDA = new HashMap<Integer, Double>();
+							Map<Integer, Double> normMaxLeacock = new HashMap<Integer, Double>();
+							Map<Integer, Double> normMaxWuPalmer = new HashMap<Integer, Double>();
+							Map<Integer, Double> normMaxPathSim = new HashMap<Integer, Double>();
+							
+							Map<Integer, Integer> refNormMaxLSA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refNormMaxLDA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refNormMaxLeacock = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refNormMaxWuPalmer = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refNormMaxPathSim = new HashMap<Integer, Integer>();
+							
+							Map<Integer, String> participantNormMaxLSA = new HashMap<Integer, String>();
+							Map<Integer, String> participantNormMaxLDA = new HashMap<Integer, String>();
+							Map<Integer, String> participantNormMaxLeacock = new HashMap<Integer, String>();
+							Map<Integer, String> participantNormMaxWuPalmer = new HashMap<Integer, String>();
+							Map<Integer, String> participantNormMaxPathSim = new HashMap<Integer, String>();
+							
+							Map<Integer, Double> mihalceaMaxLSA = new HashMap<Integer, Double>();
+							Map<Integer, Double> mihalceaMaxLDA = new HashMap<Integer, Double>();
+							Map<Integer, Double> mihalceaMaxLeacock = new HashMap<Integer, Double>();
+							Map<Integer, Double> mihalceaMaxWuPalmer = new HashMap<Integer, Double>();
+							Map<Integer, Double> mihalceaMaxPathSim = new HashMap<Integer, Double>();
+							
+							Map<Integer, Integer> refMihalceaMaxLSA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMihalceaMaxLDA = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMihalceaMaxLeacock = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMihalceaMaxWuPalmer = new HashMap<Integer, Integer>();
+							Map<Integer, Integer> refMihalceaMaxPathSim = new HashMap<Integer, Integer>();
+							
+							Map<Integer, String> participantMihalceaMaxLSA = new HashMap<Integer, String>();
+							Map<Integer, String> participantMihalceaMaxLDA = new HashMap<Integer, String>();
+							Map<Integer, String> participantMihalceaMaxLeacock = new HashMap<Integer, String>();
+							Map<Integer, String> participantMihalceaMaxWuPalmer = new HashMap<Integer, String>();
+							Map<Integer, String> participantMihalceaMaxPathSim = new HashMap<Integer, String>();
+							
+							for(Integer windowSize : windowSizes) {
+								maxLSA.put(windowSize, -1.0);
+								maxLDA.put(windowSize, -1.0);
+								maxLeacock.put(windowSize, -1.0);
+								maxWuPalmer.put(windowSize, -1.0);
+								maxPathSim.put(windowSize, -1.0);
+								
+								refMaxLSA.put(windowSize, -1);
+								refMaxLDA.put(windowSize, -1);
+								refMaxLeacock.put(windowSize, -1);
+								refMaxWuPalmer.put(windowSize, -1);
+								refMaxPathSim.put(windowSize, -1);
+								
+								participantMaxLSA.put(windowSize, null);
+								participantMaxLDA.put(windowSize, null);
+								participantMaxLeacock.put(windowSize, null);
+								participantMaxWuPalmer.put(windowSize, null);
+								participantMaxPathSim.put(windowSize, null);
+								
+								normMaxLSA.put(windowSize, -1.0);
+								normMaxLDA.put(windowSize, -1.0);
+								normMaxLeacock.put(windowSize, -1.0);
+								normMaxWuPalmer.put(windowSize, -1.0);
+								normMaxPathSim.put(windowSize, -1.0);
+								
+								refNormMaxLSA.put(windowSize, -1);
+								refNormMaxLDA.put(windowSize, -1);
+								refNormMaxLeacock.put(windowSize, -1);
+								refNormMaxWuPalmer.put(windowSize, -1);
+								refNormMaxPathSim.put(windowSize, -1);
+								
+								participantNormMaxLSA.put(windowSize, null);
+								participantNormMaxLDA.put(windowSize, null);
+								participantNormMaxLeacock.put(windowSize, null);
+								participantNormMaxWuPalmer.put(windowSize, null);
+								participantNormMaxPathSim.put(windowSize, null);
+								
+								mihalceaMaxLSA.put(windowSize, -1.0);
+								mihalceaMaxLDA.put(windowSize, -1.0);
+								mihalceaMaxLeacock.put(windowSize, -1.0);
+								mihalceaMaxWuPalmer.put(windowSize, -1.0);
+								mihalceaMaxPathSim.put(windowSize, -1.0);
+								
+								refMihalceaMaxLSA.put(windowSize, -1);
+								refMihalceaMaxLDA.put(windowSize, -1);
+								refMihalceaMaxLeacock.put(windowSize, -1);
+								refMihalceaMaxWuPalmer.put(windowSize, -1);
+								refMihalceaMaxPathSim.put(windowSize, -1);
+								
+								participantMihalceaMaxLSA.put(windowSize, null);
+								participantMihalceaMaxLDA.put(windowSize, null);
+								participantMihalceaMaxLeacock.put(windowSize, null);
+								participantMihalceaMaxWuPalmer.put(windowSize, null);
+								participantMihalceaMaxPathSim.put(windowSize, null);
+							}
+							
+							// windowSize
+							for (int j = i - 1; j >= i - maxWindowSize && j > 0; j--) {
 								secondUtt = (Utterance) c.getBlocks().get(j);
 								if (secondUtt != null) {
+									int distance = i - j;
 
 									double sim;
 									// Mihalcea start
@@ -257,13 +514,12 @@ public class CSCLContributionSimilarities {
 									double rightHandSideUpPathSim = 0;
 									double rightHandSideDownPathSim = 0;
 									// iterate through words of first sentence
-									Iterator itFirstUtt = firstUtt.getWordOccurences().entrySet().iterator();
+									Iterator<Entry<Word, Integer>> itFirstUtt = firstUtt.getWordOccurences().entrySet().iterator();
 									while (itFirstUtt.hasNext()) {
-										Map.Entry pairFirstUtt = (Map.Entry) itFirstUtt.next();
+										Map.Entry<Word, Integer> pairFirstUtt = (Map.Entry<Word, Integer>) itFirstUtt.next();
 										// System.out.println(pair.getKey() + "
 										// = " + pair.getValue());
 										Word wordFirstUtt = (Word) pairFirstUtt.getKey();
-										Integer occWordFirstUtt = (Integer) pairFirstUtt.getValue();
 
 										// iterate through words of second
 										// sentence
@@ -272,9 +528,9 @@ public class CSCLContributionSimilarities {
 										double maxSimForWordWithOtherUttLeacock = 0;
 										double maxSimForWordWithOtherUttWuPalmer = 0;
 										double maxSimForWordWithOtherUttPathSim = 0;
-										Iterator itSecondUtt = secondUtt.getWordOccurences().entrySet().iterator();
+										Iterator<Entry<Word, Integer>> itSecondUtt = secondUtt.getWordOccurences().entrySet().iterator();
 										while (itSecondUtt.hasNext()) {
-											Map.Entry pairSecondUtt = (Map.Entry) itSecondUtt.next();
+											Map.Entry<Word, Integer> pairSecondUtt = (Map.Entry<Word, Integer>) itSecondUtt.next();
 											Word wordSecondUtt = (Word) pairSecondUtt.getKey();
 
 											sim = lsa.getSimilarity(wordFirstUtt, wordSecondUtt);
@@ -329,11 +585,10 @@ public class CSCLContributionSimilarities {
 
 									itFirstUtt = secondUtt.getWordOccurences().entrySet().iterator();
 									while (itFirstUtt.hasNext()) {
-										Map.Entry pairFirstUtt = (Map.Entry) itFirstUtt.next();
+										Map.Entry<Word, Integer> pairFirstUtt = (Map.Entry<Word, Integer>) itFirstUtt.next();
 										// System.out.println(pair.getKey() + "
 										// = " + pair.getValue());
 										Word wordFirstUtt = (Word) pairFirstUtt.getKey();
-										Integer occWordFirstUtt = (Integer) pairFirstUtt.getValue();
 
 										// iterate through words of second
 										// sentence
@@ -342,9 +597,9 @@ public class CSCLContributionSimilarities {
 										double maxSimForWordWithOtherUttLeacock = 0;
 										double maxSimForWordWithOtherUttWuPalmer = 0;
 										double maxSimForWordWithOtherUttPathSim = 0;
-										Iterator itSecondUtt = firstUtt.getWordOccurences().entrySet().iterator();
+										Iterator<Entry<Word, Integer>> itSecondUtt = firstUtt.getWordOccurences().entrySet().iterator();
 										while (itSecondUtt.hasNext()) {
-											Map.Entry pairSecondUtt = (Map.Entry) itSecondUtt.next();
+											Map.Entry<Word, Integer> pairSecondUtt = (Map.Entry<Word, Integer>) itSecondUtt.next();
 											Word wordSecondUtt = (Word) pairSecondUtt.getKey();
 
 											sim = lsa.getSimilarity(wordFirstUtt, wordSecondUtt);
@@ -400,149 +655,204 @@ public class CSCLContributionSimilarities {
 
 									SemanticCohesion sc = new SemanticCohesion(firstUtt, secondUtt);
 
+									// ===== LSA =====
+									
+									// ReaderBench similarity
 									sim = sc.getLSASim();
-									if (maxLSA < sim) {
-										maxLSA = sim;
-										refMaxLSA = secondUtt.getIndex();
-										participantMaxLSA = secondUtt.getParticipant().getName();
-									}
 									rowLSA.append(Formatting.formatNumber(sim) + ",");
-
-									double normSim = sim / (i - j + 1);
-									if (normMaxLSA < normSim) {
-										normMaxLSA = normSim;
-										refNormMaxLSA = secondUtt.getIndex();
-										participantNormMaxLSA = secondUtt.getParticipant().getName();
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && maxLSA.get(windowSize) < sim) {
+											maxLSA.put(windowSize, sim);
+											refMaxLSA.put(windowSize, secondUtt.getIndex());
+											participantMaxLSA.put(windowSize, secondUtt.getParticipant().getName());
+										}
 									}
-									rowLSA.append(Formatting.formatNumber(normSim) + ",");
 
+									// normalized similarity
+									double normSim = sim / (i - j + 1);
+									rowLSA.append(Formatting.formatNumber(normSim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && normMaxLSA.get(windowSize) < normSim) {
+											normMaxLSA.put(windowSize, normSim);
+											refNormMaxLSA.put(windowSize, secondUtt.getIndex());
+											participantNormMaxLSA.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+
+									// Mihalcea's similarity
 									sim = .5 * (((leftHandSideDownLSA > 0) ? (leftHandSideUpLSA / leftHandSideDownLSA)
 											: 0)
 											+ ((rightHandSideDownLSA > 0) ? (rightHandSideUpLSA / rightHandSideDownLSA)
 													: 0));
-									if (mihalceaMaxLSA < sim) {
-										mihalceaMaxLSA = sim;
-										refMihalceaMaxLSA = secondUtt.getIndex();
-										participantMihalceaMaxLSA = secondUtt.getParticipant().getName();
-									}
 									rowLSA.append(Formatting.formatNumber(sim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && mihalceaMaxLSA.get(windowSize) < sim) {
+											mihalceaMaxLSA.put(windowSize, sim);
+											refMihalceaMaxLSA.put(windowSize, secondUtt.getIndex());
+											participantMihalceaMaxLSA.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
 
+									// ===== LDA =====
+									
+									// ReaderBench similarity
 									sim = sc.getLDASim();
-									if (maxLDA < sim) {
-										maxLDA = sim;
-										refMaxLDA = secondUtt.getIndex();
-										participantMaxLDA = secondUtt.getParticipant().getName();
-									}
 									rowLDA.append(Formatting.formatNumber(sim) + ",");
-
-									normSim = sim / (i - j + 1);
-									if (normMaxLDA < normSim) {
-										normMaxLDA = normSim;
-										refNormMaxLDA = secondUtt.getIndex();
-										participantNormMaxLDA = secondUtt.getParticipant().getName();
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && maxLDA.get(windowSize) < sim) {
+											maxLDA.put(windowSize, sim);
+											refMaxLDA.put(windowSize, secondUtt.getIndex());
+											participantMaxLDA.put(windowSize, secondUtt.getParticipant().getName());
+										}
 									}
-									rowLDA.append(Formatting.formatNumber(normSim) + ",");
 
+									// normalized similarity
+									normSim = sim / (i - j + 1);
+									rowLDA.append(Formatting.formatNumber(normSim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && normMaxLDA.get(windowSize) < normSim) {
+											normMaxLDA.put(windowSize, normSim);
+											refNormMaxLDA.put(windowSize, secondUtt.getIndex());
+											participantNormMaxLDA.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+
+									// ReaderBench similarity
 									sim = .5 * (((leftHandSideDownLDA > 0) ? (leftHandSideUpLDA / leftHandSideDownLDA)
 											: 0)
 											+ ((rightHandSideDownLDA > 0) ? (rightHandSideUpLDA / rightHandSideDownLDA)
 													: 0));
-									if (mihalceaMaxLDA < sim) {
-										mihalceaMaxLDA = sim;
-										refMihalceaMaxLDA = secondUtt.getIndex();
-										participantMihalceaMaxLDA = secondUtt.getParticipant().getName();
-									}
 									rowLDA.append(Formatting.formatNumber(sim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && mihalceaMaxLDA.get(windowSize) < sim) {
+											mihalceaMaxLDA.put(windowSize, sim);
+											refMihalceaMaxLDA.put(windowSize, secondUtt.getIndex());
+											participantMihalceaMaxLDA.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+									
+									// ===== Leacock =====
 
+									// ReaderBench similarity
 									sim = sc.getOntologySim().get(SimilarityType.LEACOCK_CHODOROW);
 									// sim =
 									// OntologySupport.semanticSimilarity(firstUtt,
 									// secondUtt,
 									// SimilarityType.LEACOCK_CHODOROW);
-									if (maxLeacock < sim) {
-										maxLeacock = sim;
-										refMaxLeacock = secondUtt.getIndex();
-										participantMaxLeacock = secondUtt.getParticipant().getName();
-									}
 									rowLeacock.append(Formatting.formatNumber(sim) + ",");
-
-									normSim = sim / (i - j + 1);
-									if (normMaxLeacock < normSim) {
-										normMaxLeacock = normSim;
-										refNormMaxLeacock = secondUtt.getIndex();
-										participantNormMaxLeacock = secondUtt.getParticipant().getName();
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && maxLeacock.get(windowSize) < sim) {
+											maxLeacock.put(windowSize, sim);
+											refMaxLeacock.put(windowSize, secondUtt.getIndex());
+											participantMaxLeacock.put(windowSize, secondUtt.getParticipant().getName());
+										}
 									}
+									
+									// normalized similarity
+									normSim = sim / (i - j + 1);
 									rowLeacock.append(Formatting.formatNumber(normSim) + ",");
-
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && normMaxLeacock.get(windowSize) < normSim) {
+											normMaxLeacock.put(windowSize, normSim);
+											refNormMaxLeacock.put(windowSize, secondUtt.getIndex());
+											participantNormMaxLeacock.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+									
+									// ReaderBench similarity
 									sim = .5 * (((leftHandSideDownLeacock > 0)
 											? (leftHandSideUpLeacock / leftHandSideDownLeacock) : 0)
 											+ ((rightHandSideDownLeacock > 0)
 													? (rightHandSideUpLeacock / rightHandSideDownLeacock) : 0));
-									if (mihalceaMaxLeacock < sim) {
-										mihalceaMaxLeacock = sim;
-										refMihalceaMaxLeacock = secondUtt.getIndex();
-										participantMihalceaMaxLeacock = secondUtt.getParticipant().getName();
-									}
 									rowLeacock.append(Formatting.formatNumber(sim) + ",");
-
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && mihalceaMaxLeacock.get(windowSize) < sim) {
+											mihalceaMaxLeacock.put(windowSize, sim);
+											refMihalceaMaxLeacock.put(windowSize, secondUtt.getIndex());
+											participantMihalceaMaxLeacock.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+									
+									// ===== WU PALMER =====
+									
+									// ReaderBench similarity
 									sim = sc.getOntologySim().get(SimilarityType.WU_PALMER);
-									if (maxWuPalmer < sim) {
-										maxWuPalmer = sim;
-										refMaxWuPalmer = secondUtt.getIndex();
-										participantMaxWuPalmer = secondUtt.getParticipant().getName();
-									}
 									rowWuPalmer.append(Formatting.formatNumber(sim) + ",");
-
-									normSim = sim / (i - j + 1);
-									if (normMaxWuPalmer < normSim) {
-										normMaxWuPalmer = normSim;
-										refNormMaxWuPalmer = secondUtt.getIndex();
-										participantNormMaxWuPalmer = secondUtt.getParticipant().getName();
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && maxWuPalmer.get(windowSize) < sim) {
+											maxWuPalmer.put(windowSize, sim);
+											refMaxWuPalmer.put(windowSize, secondUtt.getIndex());
+											participantMaxWuPalmer.put(windowSize, secondUtt.getParticipant().getName());
+										}
 									}
-									rowWuPalmer.append(Formatting.formatNumber(normSim) + ",");
 
+									// normalized similarity
+									normSim = sim / (i - j + 1);
+									rowWuPalmer.append(Formatting.formatNumber(normSim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && normMaxWuPalmer.get(windowSize) < normSim) {
+											normMaxWuPalmer.put(windowSize, normSim);
+											refNormMaxWuPalmer.put(windowSize, secondUtt.getIndex());
+											participantNormMaxWuPalmer.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+
+									// ReaderBench similarity
 									sim = .5 * (((leftHandSideDownWuPalmer > 0)
 											? (leftHandSideUpWuPalmer / leftHandSideDownWuPalmer) : 0)
 											+ ((rightHandSideDownWuPalmer > 0)
 													? (rightHandSideUpWuPalmer / rightHandSideDownWuPalmer) : 0));
-									if (mihalceaMaxWuPalmer < sim) {
-										mihalceaMaxWuPalmer = sim;
-										refMihalceaMaxWuPalmer = secondUtt.getIndex();
-										participantMihalceaMaxWuPalmer = secondUtt.getParticipant().getName();
-									}
 									rowWuPalmer.append(Formatting.formatNumber(sim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && mihalceaMaxWuPalmer.get(windowSize) < sim) {
+											mihalceaMaxWuPalmer.put(windowSize, sim);
+											refMihalceaMaxWuPalmer.put(windowSize, secondUtt.getIndex());
+											participantMihalceaMaxWuPalmer.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
 
+									// ===== PATH SIM =====
+									
+									// ReaderBench similarity
 									sim = sc.getOntologySim().get(SimilarityType.PATH_SIM);
-									if (maxPathSim < sim) {
-										maxPathSim = sim;
-										refMaxPathSim = secondUtt.getIndex();
-										participantMaxPathSim = secondUtt.getParticipant().getName();
-									}
 									rowPathSim.append(Formatting.formatNumber(sim) + ",");
-
-									normSim = sim / (i - j + 1);
-									if (normMaxPathSim < normSim) {
-										normMaxPathSim = normSim;
-										refNormMaxPathSim = secondUtt.getIndex();
-										participantNormMaxPathSim = secondUtt.getParticipant().getName();
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && maxPathSim.get(windowSize) < sim) {
+											maxPathSim.put(windowSize, sim);
+											refMaxPathSim.put(windowSize, secondUtt.getIndex());
+											participantMaxPathSim.put(windowSize, secondUtt.getParticipant().getName());
+										}
 									}
+									
+									// normalized similarity
+									normSim = sim / (i - j + 1);
 									rowPathSim.append(Formatting.formatNumber(normSim) + ",");
-
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && normMaxPathSim.get(windowSize) < normSim) {
+											normMaxPathSim.put(windowSize, normSim);
+											refNormMaxPathSim.put(windowSize, secondUtt.getIndex());
+											participantNormMaxPathSim.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
+									
+									// ReaderBench similarity
 									sim = .5 * (((leftHandSideDownPathSim > 0)
 											? (leftHandSideUpPathSim / leftHandSideDownPathSim) : 0)
 											+ ((rightHandSideDownPathSim > 0)
 													? (rightHandSideUpPathSim / rightHandSideDownPathSim) : 0));
-									if (mihalceaMaxPathSim < sim) {
-										mihalceaMaxPathSim = sim;
-										refMihalceaMaxPathSim = secondUtt.getIndex();
-										participantMihalceaMaxPathSim = secondUtt.getParticipant().getName();
-									}
 									rowPathSim.append(Formatting.formatNumber(sim) + ",");
+									for(Integer windowSize: windowSizes) {
+										if (distance <= windowSize && mihalceaMaxPathSim.get(windowSize) < sim) {
+											mihalceaMaxPathSim.put(windowSize, sim);
+											refMihalceaMaxPathSim.put(windowSize, secondUtt.getIndex());
+											participantMihalceaMaxPathSim.put(windowSize, secondUtt.getParticipant().getName());
+										}
+									}
 
 									k++;
 								}
 							}
-							for (int j = k; j < windowSize; j++) {
+							for (int j = k; j < maxWindowSize; j++) {
 								// two commas because of similarity, normalized
 								// similarity and Mihalcea similarity
 								rowLSA.append(",,,");
@@ -560,13 +870,11 @@ public class CSCLContributionSimilarities {
 							rowPathSim.append(firstUtt.getProcessedText() + ",");
 
 							double refId = -1;
-							String refParticipantName = null;
 							if (firstUtt.getRefBlock() != null && firstUtt.getRefBlock().getIndex() != 0) {
 								Utterance refUtt = (Utterance) c.getBlocks().get(firstUtt.getRefBlock().getIndex());
 								if (refUtt != null) {
 									// referred utterance id
 									refId = refUtt.getIndex();
-									refParticipantName = refUtt.getParticipant().getName();
 									rowLSA.append(refId + ",");
 									rowLDA.append(refId + ",");
 									rowLeacock.append(refId + ",");
@@ -617,161 +925,274 @@ public class CSCLContributionSimilarities {
 							minRef = 0;
 							maxRef = new Double(Double.POSITIVE_INFINITY).intValue();
 
-							// max sim
-							rowLSA.append(maxLSA + ",");
-							rowLDA.append(maxLDA + ",");
-							rowLeacock.append(maxLeacock + ",");
-							rowWuPalmer.append(maxWuPalmer + ",");
-							rowPathSim.append(maxPathSim + ",");
+							for(Integer windowSize: windowSizes) {
+								
+								if (refId != -1) {
+									if (refId == refMaxLSA.get(windowSize)) {
+										simDetectedLSA.put(windowSize, simDetectedLSA.get(windowSize) + 1);
+									}
+									if (refId == refNormMaxLSA.get(windowSize)) {
+										normSimDetectedLSA.put(windowSize, normSimDetectedLDA.get(windowSize) + 1);
+									}
+									if (refId == refMihalceaMaxLSA.get(windowSize)) {
+										mihalceaSimDetectedLSA.put(windowSize, mihalceaSimDetectedLSA.get(windowSize) + 1);
+									}
+									
+									if (refId == refMaxLDA.get(windowSize)) {
+										simDetectedLDA.put(windowSize, simDetectedLDA.get(windowSize) + 1);
+									}
+									if (refId == refNormMaxLDA.get(windowSize)) {
+										normSimDetectedLDA.put(windowSize, normSimDetectedLDA.get(windowSize) + 1);
+									}
+									if (refId == refMihalceaMaxLDA.get(windowSize)) {
+										mihalceaSimDetectedLDA.put(windowSize, mihalceaSimDetectedLDA.get(windowSize) + 1);
+									}
+									
+									if (refId == refMaxLeacock.get(windowSize)) {
+										simDetectedLeacock.put(windowSize, simDetectedLeacock.get(windowSize) + 1);
+									}
+									if (refId == refNormMaxLeacock.get(windowSize)) {
+										normSimDetectedLeacock.put(windowSize, normSimDetectedLeacock.get(windowSize) + 1);
+									}
+									if (refId == refMihalceaMaxLeacock.get(windowSize)) {
+										mihalceaSimDetectedLeacock.put(windowSize, mihalceaSimDetectedLeacock.get(windowSize) + 1);
+									}
+									
+									if (refId == refMaxWuPalmer.get(windowSize)) {
+										simDetectedWuPalmer.put(windowSize, simDetectedWuPalmer.get(windowSize) + 1);
+									}
+									if (refId == refNormMaxWuPalmer.get(windowSize)) {
+										normSimDetectedWuPalmer.put(windowSize, normSimDetectedWuPalmer.get(windowSize) + 1);
+									}
+									if (refId == refMihalceaMaxWuPalmer.get(windowSize)) {
+										mihalceaSimDetectedWuPalmer.put(windowSize, mihalceaSimDetectedWuPalmer.get(windowSize) + 1);
+									}
+									
+									if (refId == refMaxPathSim.get(windowSize)) {
+										simDetectedPathSim.put(windowSize, simDetectedPathSim.get(windowSize) + 1);
+									}
+									if (refId == refNormMaxPathSim.get(windowSize)) {
+										normSimDetectedPathSim.put(windowSize, normSimDetectedPathSim.get(windowSize) + 1);
+									}
+									if (refId == refMihalceaMaxPathSim.get(windowSize)) {
+										mihalceaSimDetectedPathSim.put(windowSize, mihalceaSimDetectedPathSim.get(windowSize) + 1);
+									}
+								}
+								
+								// max sim
+								rowLSA.append(maxLSA.get(windowSize) + ",");
+								rowLDA.append(maxLDA.get(windowSize) + ",");
+								rowLeacock.append(maxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(maxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(maxPathSim.get(windowSize) + ",");
+	
+								// id of max sim
+								rowLSA.append(refMaxLSA.get(windowSize) + ",");
+								rowLDA.append(refMaxLDA.get(windowSize) + ",");
+								rowLeacock.append(refMaxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(refMaxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(refMaxPathSim.get(windowSize) + ",");
+	
+								// max sim participant name
+								rowLSA.append(((participantMaxLSA.get(windowSize) != null) ? participantMaxLSA.get(windowSize) : "") + ",");
+								rowLDA.append(((participantMaxLDA.get(windowSize) != null) ? participantMaxLDA.get(windowSize) : "") + ",");
+								rowLeacock.append(((participantMaxLeacock.get(windowSize) != null) ? participantMaxLeacock.get(windowSize) : "") + ",");
+								rowWuPalmer.append(((participantMaxWuPalmer.get(windowSize) != null) ? participantMaxWuPalmer.get(windowSize) : "") + ",");
+								rowPathSim.append(((participantMaxPathSim.get(windowSize) != null) ? participantMaxPathSim.get(windowSize) : "") + ",");
 
-							// id of max sim
-							rowLSA.append(refMaxLSA + ",");
-							rowLDA.append(refMaxLDA + ",");
-							rowLeacock.append(refMaxLeacock + ",");
-							rowWuPalmer.append(refMaxWuPalmer + ",");
-							rowPathSim.append(refMaxPathSim + ",");
+								// ref detected?
+								rowLSA.append(((refId != -1 && refId == refMaxLSA.get(windowSize)) ? 1 : 0) + ",");
+								rowLDA.append(((refId != -1 && refId == refMaxLDA.get(windowSize)) ? 1 : 0) + ",");
+								rowLeacock.append(((refId != -1 && refId == refMaxLeacock.get(windowSize)) ? 1 : 0) + ",");
+								rowWuPalmer.append(((refId != -1 && refId == refMaxWuPalmer.get(windowSize)) ? 1 : 0) + ",");
+								rowPathSim.append(((refId != -1 && refId == refMaxPathSim.get(windowSize)) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMaxLSA.get(windowSize));
+								maxRef = (int) Math.max(refId, refMaxLSA.get(windowSize));
+								boolean isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									simInBlockLSA.put(windowSize, simInBlockLSA.get(windowSize) + 1);
+								}
+								rowLSA.append(((isInBlock) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMaxLDA.get(windowSize));
+								maxRef = (int) Math.max(refId, refMaxLDA.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									simInBlockLDA.put(windowSize, simInBlockLDA.get(windowSize) + 1);
+								}
+								rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMaxLeacock.get(windowSize));
+								maxRef = (int) Math.max(refId, refMaxLeacock.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									simInBlockLeacock.put(windowSize, simDetectedLeacock.get(windowSize) + 1);
+								}
+								rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMaxWuPalmer.get(windowSize));
+								maxRef = (int) Math.max(refId, refMaxWuPalmer.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									simInBlockWuPalmer.put(windowSize, simInBlockWuPalmer.get(windowSize) + 1);
+								}
+								rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMaxPathSim.get(windowSize));
+								maxRef = (int) Math.max(refId, refMaxPathSim.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									simInBlockPathSim.put(windowSize, simInBlockPathSim.get(windowSize) + 1);
+								}
+								rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
+								
+								// max (sim normalized)
+								rowLSA.append(normMaxLSA.get(windowSize) + ",");
+								rowLDA.append(normMaxLDA.get(windowSize) + ",");
+								rowLeacock.append(normMaxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(normMaxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(normMaxPathSim.get(windowSize) + ",");
+	
+								// id of max (sim normalized)
+								rowLSA.append(refNormMaxLSA.get(windowSize) + ",");
+								rowLDA.append(refNormMaxLDA.get(windowSize) + ",");
+								rowLeacock.append(refNormMaxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(refNormMaxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(refNormMaxPathSim.get(windowSize) + ",");
+	
+								// max sim participant name
+								rowLSA.append(((participantNormMaxLSA.get(windowSize) != null) ? participantNormMaxLSA.get(windowSize) : "") + ",");
+								rowLDA.append(((participantNormMaxLDA.get(windowSize) != null) ? participantNormMaxLDA.get(windowSize) : "") + ",");
+								rowLeacock.append(
+										((participantNormMaxLeacock.get(windowSize) != null) ? participantNormMaxLeacock.get(windowSize) : "") + ",");
+								rowWuPalmer.append(
+										((participantNormMaxWuPalmer.get(windowSize) != null) ? participantNormMaxWuPalmer.get(windowSize) : "") + ",");
+								rowPathSim.append(
+										((participantNormMaxPathSim.get(windowSize) != null) ? participantNormMaxPathSim.get(windowSize) : "") + ",");
+	
+								// ref detected?
+								rowLSA.append(((refId != -1 && refId == refNormMaxLSA.get(windowSize)) ? 1 : 0) + ",");
+								rowLDA.append(((refId != -1 && refId == refNormMaxLDA.get(windowSize)) ? 1 : 0) + ",");
+								rowLeacock.append(((refId != -1 && refId == refNormMaxLeacock.get(windowSize)) ? 1 : 0) + ",");
+								rowWuPalmer.append(((refId != -1 && refId == refNormMaxWuPalmer.get(windowSize)) ? 1 : 0) + ",");
+								rowPathSim.append(((refId != -1 && refId == refNormMaxPathSim.get(windowSize)) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refNormMaxLSA.get(windowSize));
+								maxRef = (int) Math.max(refId, refNormMaxLSA.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									normSimInBlockLSA.put(windowSize, normSimInBlockLSA.get(windowSize) + 1);
+								}
+								rowLSA.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refNormMaxLDA.get(windowSize));
+								maxRef = (int) Math.max(refId, refNormMaxLDA.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									normSimInBlockLDA.put(windowSize, normSimInBlockLDA.get(windowSize) + 1);
+								}
+								rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refNormMaxLeacock.get(windowSize));
+								maxRef = (int) Math.max(refId, refNormMaxLeacock.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									normSimInBlockLeacock.put(windowSize, normSimInBlockLeacock.get(windowSize) + 1);
+								}
+								rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refNormMaxWuPalmer.get(windowSize));
+								maxRef = (int) Math.max(refId, refNormMaxWuPalmer.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									normSimInBlockWuPalmer.put(windowSize, normSimInBlockWuPalmer.get(windowSize) + 1);
+								}
+								rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refNormMaxPathSim.get(windowSize));
+								maxRef = (int) Math.max(refId, refNormMaxPathSim.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									normSimInBlockPathSim.put(windowSize, normSimInBlockPathSim.get(windowSize) + 1);
+								}
+								rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								// Mihalcea's similarity
+								rowLSA.append(mihalceaMaxLSA.get(windowSize) + ",");
+								rowLDA.append(mihalceaMaxLDA.get(windowSize) + ",");
+								rowLeacock.append(mihalceaMaxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(mihalceaMaxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(mihalceaMaxPathSim.get(windowSize) + ",");
+	
+								// id of max (Mihalcea's similarity)
+								rowLSA.append(refMihalceaMaxLSA.get(windowSize) + ",");
+								rowLDA.append(refMihalceaMaxLDA.get(windowSize) + ",");
+								rowLeacock.append(refMihalceaMaxLeacock.get(windowSize) + ",");
+								rowWuPalmer.append(refMihalceaMaxWuPalmer.get(windowSize) + ",");
+								rowPathSim.append(refMihalceaMaxPathSim.get(windowSize) + ",");
+	
+								// max sim participant name (Mihalcea's similarity)
+								rowLSA.append(((participantMihalceaMaxLSA.get(windowSize) != null) ? participantMihalceaMaxLSA.get(windowSize) : "") + ",");
+								rowLDA.append(((participantMihalceaMaxLDA.get(windowSize) != null) ? participantMihalceaMaxLDA.get(windowSize) : "") + ",");
+								rowLeacock.append(
+										((participantMihalceaMaxLeacock.get(windowSize) != null) ? participantMihalceaMaxLeacock.get(windowSize) : "")
+												+ ",");
+								rowWuPalmer.append(
+										((participantMihalceaMaxWuPalmer.get(windowSize) != null) ? participantMihalceaMaxWuPalmer.get(windowSize) : "")
+												+ ",");
+								rowPathSim.append(
+										((participantMihalceaMaxPathSim.get(windowSize) != null) ? participantMihalceaMaxPathSim.get(windowSize) : "")
+												+ ",");
+	
+								// ref detected?
+								rowLSA.append(((refId != -1 && refId == refMihalceaMaxLSA.get(windowSize)) ? 1 : 0) + ",");
+								rowLDA.append(((refId != -1 && refId == refMihalceaMaxLDA.get(windowSize)) ? 1 : 0) + ",");
+								rowLeacock.append(((refId != -1 && refId == refMihalceaMaxLeacock.get(windowSize)) ? 1 : 0) + ",");
+								rowWuPalmer.append(((refId != -1 && refId == refMihalceaMaxWuPalmer.get(windowSize)) ? 1 : 0) + ",");
+								rowPathSim.append(((refId != -1 && refId == refMihalceaMaxPathSim.get(windowSize)) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMihalceaMaxLSA.get(windowSize));
+								maxRef = (int) Math.max(refId, refMihalceaMaxLSA.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									mihalceaSimInBlockLSA.put(windowSize, mihalceaSimInBlockLSA.get(windowSize) + 1);
+								}
+								rowLSA.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMihalceaMaxLDA.get(windowSize));
+								maxRef = (int) Math.max(refId, refMihalceaMaxLDA.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									mihalceaSimInBlockLDA.put(windowSize, mihalceaSimInBlockLDA.get(windowSize) + 1);
+								}
+								rowLDA.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMihalceaMaxLeacock.get(windowSize));
+								maxRef = (int) Math.max(refId, refMihalceaMaxLeacock.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									mihalceaSimInBlockLeacock.put(windowSize, mihalceaSimInBlockLeacock.get(windowSize) + 1);
+								}
+								rowLeacock.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMihalceaMaxWuPalmer.get(windowSize));
+								maxRef = (int) Math.max(refId, refMihalceaMaxWuPalmer.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									mihalceaSimInBlockWuPalmer.put(windowSize, mihalceaSimInBlockWuPalmer.get(windowSize) + 1);
+								}
+								rowWuPalmer.append(((isInBlock == true) ? 1 : 0) + ",");
+	
+								minRef = (int) Math.min(refId, refMihalceaMaxPathSim.get(windowSize));
+								maxRef = (int) Math.max(refId, refMihalceaMaxPathSim.get(windowSize));
+								isInBlock = isInBlock(c, minRef, maxRef);
+								if (isInBlock) {
+									mihalceaSimInBlockPathSim.put(windowSize, mihalceaSimInBlockPathSim.get(windowSize) + 1);
+								}
+								rowPathSim.append(((isInBlock == true) ? 1 : 0) + ",");
 
-							// max sim participant name
-							rowLSA.append(((participantMaxLSA != null) ? participantMaxLSA : "") + ",");
-							rowLDA.append(((participantMaxLDA != null) ? participantMaxLDA : "") + ",");
-							rowLeacock.append(((participantMaxLeacock != null) ? participantMaxLeacock : "") + ",");
-							rowWuPalmer.append(((participantMaxWuPalmer != null) ? participantMaxWuPalmer : "") + ",");
-							rowPathSim.append(((participantMaxPathSim != null) ? participantMaxPathSim : "") + ",");
-
-							// ref detected?
-							rowLSA.append(((refId != -1 && refId == refMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId != -1 && refId == refMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId != -1 && refId == refMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId != -1 && refId == refMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId != -1 && refId == refMaxPathSim) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMaxLSA);
-							maxRef = (int) Math.max(refId, refMaxLSA);
-							boolean isInBlock = isInBlock(c, refParticipantName, minRef, maxRef); // TODO: refParticipantName de eliminat
-							logger.info("rezultat final: " + ((isInBlock) ? "DA" : "NU"));
-							rowLSA.append(((isInBlock) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMaxLDA);
-							maxRef = (int) Math.max(refId, refMaxLDA);
-							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMaxLeacock);
-							maxRef = (int) Math.max(refId, refMaxLeacock);
-							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMaxWuPalmer);
-							maxRef = (int) Math.max(refId, refMaxWuPalmer);
-							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMaxPathSim);
-							maxRef = (int) Math.max(refId, refMaxPathSim);
-							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							// max (sim normalized)
-							rowLSA.append(normMaxLSA + ",");
-							rowLDA.append(normMaxLDA + ",");
-							rowLeacock.append(normMaxLeacock + ",");
-							rowWuPalmer.append(normMaxWuPalmer + ",");
-							rowPathSim.append(normMaxPathSim + ",");
-
-							// id of max (sim normalized)
-							rowLSA.append(refNormMaxLSA + ",");
-							rowLDA.append(refNormMaxLDA + ",");
-							rowLeacock.append(refNormMaxLeacock + ",");
-							rowWuPalmer.append(refNormMaxWuPalmer + ",");
-							rowPathSim.append(refNormMaxPathSim + ",");
-
-							// max sim participant name
-							rowLSA.append(((participantNormMaxLSA != null) ? participantNormMaxLSA : "") + ",");
-							rowLDA.append(((participantNormMaxLDA != null) ? participantNormMaxLDA : "") + ",");
-							rowLeacock.append(
-									((participantNormMaxLeacock != null) ? participantNormMaxLeacock : "") + ",");
-							rowWuPalmer.append(
-									((participantNormMaxWuPalmer != null) ? participantNormMaxWuPalmer : "") + ",");
-							rowPathSim.append(
-									((participantNormMaxPathSim != null) ? participantNormMaxPathSim : "") + ",");
-
-							// ref detected?
-							rowLSA.append(((refId != -1 && refId == refNormMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId != -1 && refId == refNormMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId != -1 && refId == refNormMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId != -1 && refId == refNormMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId != -1 && refId == refNormMaxPathSim) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refNormMaxLSA);
-							maxRef = (int) Math.max(refId, refNormMaxLSA);
-							rowLSA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refNormMaxLDA);
-							maxRef = (int) Math.max(refId, refNormMaxLDA);
-							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refNormMaxLeacock);
-							maxRef = (int) Math.max(refId, refNormMaxLeacock);
-							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refNormMaxWuPalmer);
-							maxRef = (int) Math.max(refId, refNormMaxWuPalmer);
-							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refNormMaxPathSim);
-							maxRef = (int) Math.max(refId, refNormMaxPathSim);
-							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							// Mihalcea's similarity
-							rowLSA.append(mihalceaMaxLSA + ",");
-							rowLDA.append(mihalceaMaxLDA + ",");
-							rowLeacock.append(mihalceaMaxLeacock + ",");
-							rowWuPalmer.append(mihalceaMaxWuPalmer + ",");
-							rowPathSim.append(mihalceaMaxPathSim + ",");
-
-							// id of max (Mihalcea's similarity)
-							rowLSA.append(refMihalceaMaxLSA + ",");
-							rowLDA.append(refMihalceaMaxLDA + ",");
-							rowLeacock.append(refMihalceaMaxLeacock + ",");
-							rowWuPalmer.append(refMihalceaMaxWuPalmer + ",");
-							rowPathSim.append(refMihalceaMaxPathSim + ",");
-
-							// max sim participant name (Mihalcea's similarity)
-							rowLSA.append(((participantMihalceaMaxLSA != null) ? participantMihalceaMaxLSA : "") + ",");
-							rowLDA.append(((participantMihalceaMaxLDA != null) ? participantMihalceaMaxLDA : "") + ",");
-							rowLeacock.append(
-									((participantMihalceaMaxLeacock != null) ? participantMihalceaMaxLeacock : "")
-											+ ",");
-							rowWuPalmer.append(
-									((participantMihalceaMaxWuPalmer != null) ? participantMihalceaMaxWuPalmer : "")
-											+ ",");
-							rowPathSim.append(
-									((participantMihalceaMaxPathSim != null) ? participantMihalceaMaxPathSim : "")
-											+ ",");
-
-							// ref detected?
-							rowLSA.append(((refId != -1 && refId == refMihalceaMaxLSA) ? 1 : 0) + ",");
-							rowLDA.append(((refId != -1 && refId == refMihalceaMaxLDA) ? 1 : 0) + ",");
-							rowLeacock.append(((refId != -1 && refId == refMihalceaMaxLeacock) ? 1 : 0) + ",");
-							rowWuPalmer.append(((refId != -1 && refId == refMihalceaMaxWuPalmer) ? 1 : 0) + ",");
-							rowPathSim.append(((refId != -1 && refId == refMihalceaMaxPathSim) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMihalceaMaxLSA);
-							maxRef = (int) Math.max(refId, refMihalceaMaxLSA);
-							rowLSA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMihalceaMaxLDA);
-							maxRef = (int) Math.max(refId, refMihalceaMaxLDA);
-							rowLDA.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMihalceaMaxLeacock);
-							maxRef = (int) Math.max(refId, refMihalceaMaxLeacock);
-							rowLeacock.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMihalceaMaxWuPalmer);
-							maxRef = (int) Math.max(refId, refMihalceaMaxWuPalmer);
-							rowWuPalmer.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
-							minRef = (int) Math.min(refId, refMihalceaMaxPathSim);
-							maxRef = (int) Math.max(refId, refMihalceaMaxPathSim);
-							rowPathSim.append(((isInBlock(c, refParticipantName, minRef, maxRef) == true) ? 1 : 0) + ",");
-
+							}
 							// 3 x cautat alta referinta in blocul dat de
 							// replicile aceleiasi
 							// daca toate replicile intre minim si maxim
@@ -784,6 +1205,127 @@ public class CSCLContributionSimilarities {
 							rowLeacock.append('\n');
 							rowWuPalmer.append('\n');
 							rowPathSim.append('\n');
+							
+							if (i == c.getBlocks().size() - 1) {
+								// totals
+								rowLSA.append(",,,");
+								rowLDA.append(",,,");
+								rowLeacock.append(",,,");
+								rowWuPalmer.append(",,,");
+								rowPathSim.append(",,,");
+								for (int j = 0; j < maxWindowSize; j++) {
+									rowLSA.append(",,,");
+									rowLDA.append(",,,");
+									rowLeacock.append(",,,");
+									rowWuPalmer.append(",,,");
+									rowPathSim.append(",,,");
+								}
+								rowLSA.append(",,,,");
+								rowLDA.append(",,,,");
+								rowLeacock.append(",,,,");
+								rowWuPalmer.append(",,,,");
+								rowPathSim.append(",,,,");
+								
+								for(Integer windowSize : windowSizes) {
+									
+									rowLSA.append(",,,");
+									rowLDA.append(",,,");
+									rowLeacock.append(",,,");
+									rowWuPalmer.append(",,,");
+									rowPathSim.append(",,,");
+									
+									rowLSA.append(simDetectedLSA.get(windowSize) + ",");
+									rowLDA.append(simDetectedLDA.get(windowSize) + ",");
+									rowLeacock.append(simDetectedLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(simDetectedWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(simDetectedPathSim.get(windowSize) + ",");
+									
+									rowLSA.append(simInBlockLSA.get(windowSize) + ",");
+									rowLDA.append(simInBlockLDA.get(windowSize) + ",");
+									rowLeacock.append(simInBlockLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(simInBlockWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(simInBlockPathSim.get(windowSize) + ",");
+									
+									totalSimDetectedLSA.put(windowSize, totalSimDetectedLSA.get(windowSize) + simDetectedLSA.get(windowSize));
+									totalSimDetectedLDA.put(windowSize, totalSimDetectedLDA.get(windowSize) + simDetectedLDA.get(windowSize));
+									totalSimDetectedLeacock.put(windowSize, totalSimDetectedLeacock.get(windowSize) + simDetectedLeacock.get(windowSize));
+									totalSimDetectedWuPalmer.put(windowSize, totalSimDetectedWuPalmer.get(windowSize) + simDetectedWuPalmer.get(windowSize));
+									totalSimDetectedPathSim.put(windowSize, totalSimDetectedPathSim.get(windowSize) + simDetectedPathSim.get(windowSize));
+									
+									totalSimInBlockLSA.put(windowSize, totalSimInBlockLSA.get(windowSize) + simInBlockLSA.get(windowSize));
+									totalSimInBlockLDA.put(windowSize, totalSimInBlockLDA.get(windowSize) + simInBlockLDA.get(windowSize));
+									totalSimInBlockLeacock.put(windowSize, totalSimInBlockLeacock.get(windowSize) + simInBlockLeacock.get(windowSize));
+									totalSimInBlockWuPalmer.put(windowSize, totalSimInBlockWuPalmer.get(windowSize) + simInBlockWuPalmer.get(windowSize));
+									totalSimInBlockPathSim.put(windowSize, totalSimInBlockPathSim.get(windowSize) + simInBlockPathSim.get(windowSize));
+									
+									rowLSA.append(",,,");
+									rowLDA.append(",,,");
+									rowLeacock.append(",,,");
+									rowWuPalmer.append(",,,");
+									rowPathSim.append(",,,");
+									
+									rowLSA.append(normSimDetectedLSA.get(windowSize) + ",");
+									rowLDA.append(normSimDetectedLDA.get(windowSize) + ",");
+									rowLeacock.append(normSimDetectedLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(normSimDetectedWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(normSimDetectedPathSim.get(windowSize) + ",");
+									
+									rowLSA.append(normSimInBlockLSA.get(windowSize) + ",");
+									rowLDA.append(normSimInBlockLDA.get(windowSize) + ",");
+									rowLeacock.append(normSimInBlockLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(normSimInBlockWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(normSimInBlockPathSim.get(windowSize) + ",");
+									
+									totalNormSimDetectedLSA.put(windowSize, totalNormSimDetectedLSA.get(windowSize) + normSimDetectedLSA.get(windowSize));
+									totalNormSimDetectedLDA.put(windowSize, totalNormSimDetectedLDA.get(windowSize) + normSimDetectedLDA.get(windowSize));
+									totalNormSimDetectedLeacock.put(windowSize, totalNormSimDetectedLeacock.get(windowSize) + normSimDetectedLeacock.get(windowSize));
+									totalNormSimDetectedWuPalmer.put(windowSize, totalNormSimDetectedWuPalmer.get(windowSize) + normSimDetectedWuPalmer.get(windowSize));
+									totalNormSimDetectedPathSim.put(windowSize, totalNormSimDetectedPathSim.get(windowSize) + normSimDetectedPathSim.get(windowSize));
+									
+									totalNormSimInBlockLSA.put(windowSize, totalNormSimInBlockLSA.get(windowSize) + normSimInBlockLSA.get(windowSize));
+									totalNormSimInBlockLDA.put(windowSize, totalNormSimInBlockLDA.get(windowSize) + normSimInBlockLDA.get(windowSize));
+									totalNormSimInBlockLeacock.put(windowSize, totalNormSimInBlockLeacock.get(windowSize) + normSimInBlockLeacock.get(windowSize));
+									totalNormSimInBlockWuPalmer.put(windowSize, totalNormSimInBlockWuPalmer.get(windowSize) + normSimInBlockWuPalmer.get(windowSize));
+									totalNormSimInBlockPathSim.put(windowSize, totalNormSimInBlockPathSim.get(windowSize) + normSimInBlockPathSim.get(windowSize));
+									
+									rowLSA.append(",,,");
+									rowLDA.append(",,,");
+									rowLeacock.append(",,,");
+									rowWuPalmer.append(",,,");
+									rowPathSim.append(",,,");
+									
+									rowLSA.append(mihalceaSimDetectedLSA.get(windowSize) + ",");
+									rowLDA.append(mihalceaSimDetectedLDA.get(windowSize) + ",");
+									rowLeacock.append(mihalceaSimDetectedLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(mihalceaSimDetectedWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(mihalceaSimDetectedPathSim.get(windowSize) + ",");
+									
+									rowLSA.append(mihalceaSimInBlockLSA.get(windowSize) + ",");
+									rowLDA.append(mihalceaSimInBlockLDA.get(windowSize) + ",");
+									rowLeacock.append(mihalceaSimInBlockLeacock.get(windowSize) + ",");
+									rowWuPalmer.append(mihalceaSimInBlockWuPalmer.get(windowSize) + ",");
+									rowPathSim.append(mihalceaSimInBlockPathSim.get(windowSize) + ",");
+									
+									totalMihalceaSimDetectedLSA.put(windowSize, totalMihalceaSimDetectedLSA.get(windowSize) + mihalceaSimDetectedLSA.get(windowSize));
+									totalMihalceaSimDetectedLDA.put(windowSize, totalMihalceaSimDetectedLDA.get(windowSize) + mihalceaSimDetectedLDA.get(windowSize));
+									totalMihalceaSimDetectedLeacock.put(windowSize, totalMihalceaSimDetectedLeacock.get(windowSize) + mihalceaSimDetectedLeacock.get(windowSize));
+									totalMihalceaSimDetectedWuPalmer.put(windowSize, totalMihalceaSimDetectedWuPalmer.get(windowSize) + mihalceaSimDetectedWuPalmer.get(windowSize));
+									totalMihalceaSimDetectedPathSim.put(windowSize, totalMihalceaSimDetectedPathSim.get(windowSize) + mihalceaSimDetectedPathSim.get(windowSize));
+									
+									totalMihalceaSimInBlockLSA.put(windowSize, totalMihalceaSimInBlockLSA.get(windowSize) + mihalceaSimInBlockLSA.get(windowSize));
+									totalMihalceaSimInBlockLDA.put(windowSize, totalMihalceaSimInBlockLDA.get(windowSize) + mihalceaSimInBlockLDA.get(windowSize));
+									totalMihalceaSimInBlockLeacock.put(windowSize, totalMihalceaSimInBlockLeacock.get(windowSize) + mihalceaSimInBlockLeacock.get(windowSize));
+									totalMihalceaSimInBlockWuPalmer.put(windowSize, totalMihalceaSimInBlockWuPalmer.get(windowSize) + mihalceaSimInBlockWuPalmer.get(windowSize));
+									totalMihalceaSimInBlockPathSim.put(windowSize, totalMihalceaSimInBlockPathSim.get(windowSize) + mihalceaSimInBlockPathSim.get(windowSize));
+								}
+								
+								rowLSA.append('\n');
+								rowLDA.append('\n');
+								rowLeacock.append('\n');
+								rowWuPalmer.append('\n');
+								rowPathSim.append('\n');
+								
+							}
 
 							try {
 								FileUtils.writeStringToFile(fileLSA, rowLSA.toString(), "UTF-8", true);
@@ -800,6 +1342,102 @@ public class CSCLContributionSimilarities {
 					}
 				}
 			});
+			
+			StringBuilder rowLSA = new StringBuilder();
+			StringBuilder rowLDA = new StringBuilder();
+			StringBuilder rowLeacock = new StringBuilder();
+			StringBuilder rowWuPalmer = new StringBuilder();
+			StringBuilder rowPathSim = new StringBuilder();
+			
+			// append totals
+			rowLSA.append(",,,");
+			rowLDA.append(",,,");
+			rowLeacock.append(",,,");
+			rowWuPalmer.append(",,,");
+			rowPathSim.append(",,,");
+			for (int i = 0; i < maxWindowSize; i++) {
+				rowLSA.append(",,,");
+				rowLDA.append(",,,");
+				rowLeacock.append(",,,");
+				rowWuPalmer.append(",,,");
+				rowPathSim.append(",,,");
+			}
+			rowLSA.append(",,,,");
+			rowLDA.append(",,,,");
+			rowLeacock.append(",,,,");
+			rowWuPalmer.append(",,,,");
+			rowPathSim.append(",,,,");
+			
+			for(Integer windowSize : windowSizes) {
+			
+				rowLSA.append(",,,");
+				rowLDA.append(",,,");
+				rowLeacock.append(",,,");
+				rowWuPalmer.append(",,,");
+				rowPathSim.append(",,,");
+				
+				rowLSA.append(totalSimDetectedLSA.get(windowSize) + ",");
+				rowLDA.append(totalSimDetectedLDA.get(windowSize) + ",");
+				rowLeacock.append(totalSimDetectedLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalSimDetectedWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalSimDetectedPathSim.get(windowSize) + ",");
+				
+				rowLSA.append(totalSimInBlockLSA.get(windowSize) + ",");
+				rowLDA.append(totalSimInBlockLDA.get(windowSize) + ",");
+				rowLeacock.append(totalSimInBlockLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalSimInBlockWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalSimInBlockPathSim.get(windowSize) + ",");
+				
+				rowLSA.append(",,,");
+				rowLDA.append(",,,");
+				rowLeacock.append(",,,");
+				rowWuPalmer.append(",,,");
+				rowPathSim.append(",,,");
+				
+				rowLSA.append(totalNormSimDetectedLSA.get(windowSize) + ",");
+				rowLDA.append(totalNormSimDetectedLDA.get(windowSize) + ",");
+				rowLeacock.append(totalNormSimDetectedLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalNormSimDetectedWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalNormSimDetectedPathSim.get(windowSize) + ",");
+				
+				rowLSA.append(totalNormSimInBlockLSA.get(windowSize) + ",");
+				rowLDA.append(totalNormSimInBlockLDA.get(windowSize) + ",");
+				rowLeacock.append(totalNormSimInBlockLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalNormSimInBlockWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalNormSimInBlockPathSim.get(windowSize) + ",");
+				
+				rowLSA.append(",,,");
+				rowLDA.append(",,,");
+				rowLeacock.append(",,,");
+				rowWuPalmer.append(",,,");
+				rowPathSim.append(",,,");
+				
+				rowLSA.append(totalMihalceaSimDetectedLSA.get(windowSize) + ",");
+				rowLDA.append(totalMihalceaSimDetectedLDA.get(windowSize) + ",");
+				rowLeacock.append(totalMihalceaSimDetectedLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalMihalceaSimDetectedWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalMihalceaSimDetectedPathSim.get(windowSize) + ",");
+				
+				rowLSA.append(totalMihalceaSimInBlockLSA.get(windowSize) + ",");
+				rowLDA.append(totalMihalceaSimInBlockLDA.get(windowSize) + ",");
+				rowLeacock.append(totalMihalceaSimInBlockLeacock.get(windowSize) + ",");
+				rowWuPalmer.append(totalMihalceaSimInBlockWuPalmer.get(windowSize) + ",");
+				rowPathSim.append(totalMihalceaSimInBlockPathSim.get(windowSize) + ",");
+			
+			}
+			
+			rowLSA.append('\n');
+			rowLDA.append('\n');
+			rowLeacock.append('\n');
+			rowWuPalmer.append('\n');
+			rowPathSim.append('\n');
+			
+			FileUtils.writeStringToFile(fileLSA, rowLSA.toString(), "UTF-8", true);
+			FileUtils.writeStringToFile(fileLDA, rowLDA.toString(), "UTF-8", true);
+			FileUtils.writeStringToFile(fileLeacock, rowLeacock.toString(), "UTF-8", true);
+			FileUtils.writeStringToFile(fileWuPalmer, rowWuPalmer.toString(), "UTF-8", true);
+			FileUtils.writeStringToFile(filePathSim, rowPathSim.toString(), "UTF-8", true);
+			
 		} catch (IOException e) {
 			logger.info("Exception: " + e.getMessage());
 			e.printStackTrace();
@@ -818,10 +1456,16 @@ public class CSCLContributionSimilarities {
 
 		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
 		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
+		
+		List<Integer> windowSizes = new ArrayList<Integer>();
+		windowSizes.add(20);
+		windowSizes.add(10);
+		windowSizes.add(5);
+		windowSizes.add(3);
 
-		CSCLContributionSimilarities corpusSample = new CSCLContributionSimilarities("resources/in/corpus_v2/",
+		CSCLContributionSimilarities corpusSample = new CSCLContributionSimilarities("resources/in/corpus_v2_sample/",
 				"resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.getLang("English"), true, true,
-				0.3, 20, lsa, lda);
+				windowSizes, lsa, lda);
 		corpusSample.process();
 	}
 }
