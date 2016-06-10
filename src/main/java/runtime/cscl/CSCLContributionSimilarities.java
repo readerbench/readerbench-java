@@ -1452,11 +1452,21 @@ public class CSCLContributionSimilarities {
 			rowWuPalmer.append('\n');
 			rowPathSim.append('\n');
 			
+			locks.get("LSA").lock();
 			FileUtils.writeStringToFile(fileLSA, rowLSA.toString(), "UTF-8", true);
+			locks.get("LSA").unlock();
+			locks.get("LDA").lock();
 			FileUtils.writeStringToFile(fileLDA, rowLDA.toString(), "UTF-8", true);
+			locks.get("LDA").unlock();
+			locks.get("Leacock").lock();
 			FileUtils.writeStringToFile(fileLeacock, rowLeacock.toString(), "UTF-8", true);
+			locks.get("Leacock").unlock();
+			locks.get("WuPalmer").lock();
 			FileUtils.writeStringToFile(fileWuPalmer, rowWuPalmer.toString(), "UTF-8", true);
+			locks.get("WuPalmer").unlock();
+			locks.get("PathSim").lock();
 			FileUtils.writeStringToFile(filePathSim, rowPathSim.toString(), "UTF-8", true);
+			locks.get("PathSim").unlock();
 			
 		} catch (IOException e) {
 			logger.info("Exception: " + e.getMessage());
