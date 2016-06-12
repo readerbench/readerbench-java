@@ -25,6 +25,12 @@ public class CMUtils {
 		}
 		return word;
 	}
+	public Word convertStringToWord(String wordString, Lang lang) {
+		Word word = Word.getWordFromConcept(wordString, lang);
+		word.setLemma(StaticLemmatizer.lemmaStatic(wordString, lang));
+		word.setPOS("");
+		return word;
+	}
 	public List<Word> getContentWordListFromDocument(AbstractDocument document) {
 		return this.convertIteratorToList(document.getWordOccurences().keySet().iterator());
 	}
