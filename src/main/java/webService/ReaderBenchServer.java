@@ -231,7 +231,7 @@ public class ReaderBenchServer {
 		Spark.staticFileLocation("/public");
 		
 		Spark.get("/", (request, response) -> {
-			return "OK"; // test commit
+			return "OK";
 		});
 		Spark.before((request, response) -> {
 			response.header("Access-Control-Allow-Origin", "*");
