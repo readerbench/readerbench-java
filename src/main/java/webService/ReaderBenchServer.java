@@ -227,6 +227,9 @@ public class ReaderBenchServer {
 
 	public void start() {
 		Spark.port(PORT);
+		
+		Spark.staticFileLocation("/public");
+		
 		Spark.get("/", (request, response) -> {
 			return "OK";
 		});
