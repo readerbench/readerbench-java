@@ -258,7 +258,7 @@ public class ComplexityIndices {
 		for (IComplexityFactors factors : TEXTUAL_COMPLEXITY_FACTORS) {
 			System.out.println(factors.getClassName());
 			for (int i : factors.getIDs())
-				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i] + "\n\t\t"
+				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i] + "\t"
 						+ TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[i]);
 		}
 		System.out.println("TOTAL:" + NO_COMPLEXITY_INDICES + " factors");

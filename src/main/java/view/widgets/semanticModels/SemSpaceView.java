@@ -53,6 +53,7 @@ import data.Lang;
 import services.semanticModels.GenerateSpace;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 import view.models.PreviewSketch;
 
 public class SemSpaceView extends JFrame {
@@ -444,7 +445,14 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
+		// JFrame frame = new
+		// SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LDA/letters_la", Lang.la));
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		frame.setVisible(true);
+
+		frame = new SemSpaceView(LSA.loadLSA("resources/config/LSA/letters_la", Lang.la));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);

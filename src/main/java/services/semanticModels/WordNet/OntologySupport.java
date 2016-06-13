@@ -73,6 +73,7 @@ public class OntologySupport {
         wordnetFiles.put(Lang.nl, "resources/config/WN/wn-nld-lmf.xml");
         wordnetFiles.put(Lang.it, "resources/config/WN/wn-ita-lmf.xml");
         wordnetFiles.put(Lang.es, "resources/config/WN/wn-spa-lmf.xml");
+        wordnetFiles.put(Lang.la, "resources/config/WN/wn-la-lmf.xml");
         for (Map.Entry<Lang, String> e : wordnetFiles.entrySet()) {
             dictionaries.put(e.getKey(), new WordnetPOSData(e.getValue()));
         }

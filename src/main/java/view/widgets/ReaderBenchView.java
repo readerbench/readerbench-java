@@ -19,6 +19,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -78,12 +79,14 @@ public class ReaderBenchView extends JFrame {
 			"resources/config/LSA/textenfants_fr", "" };
 	public static final String[] TRAINED_LSA_SPACES_IT = { "" };
 	public static final String[] TRAINED_LSA_SPACES_ES = { "resources/config/LSA/joseantonio_es", "" };
+	public static final String[] TRAINED_LSA_SPACES_LA = { "resources/config/LSA/letters_la", "" };
 	public static final String[] TRAINED_LDA_MODELS_EN = { "resources/config/LDA/tasa_en",
 			"resources/config/LDA/tasa_lak_en", "resources/config/LDA/tasa_smart_cities_en", "" };
 	public static final String[] TRAINED_LDA_MODELS_FR = { "resources/config/LDA/lemonde_fr",
 			"resources/config/LDA/textenfants_fr", "resources/config/LDA/philosophy_fr", "" };
 	public static final String[] TRAINED_LDA_MODELS_IT = { "resources/config/LDA/paisa_it", "" };
 	public static final String[] TRAINED_LDA_MODELS_ES = { "resources/config/LDA/joseantonio_es", "" };
+	public static final String[] TRAINED_LDA_MODELS_LA = { "resources/config/LDA/letters_la", "" };
 
 	public static Lang RUNTIME_LANGUAGE = null;
 
@@ -640,6 +643,47 @@ public class ReaderBenchView extends JFrame {
 		ResourceBundle.clearCache();
 		updateNames();
 		ReaderBenchView.this.revalidate();
+	}
+
+	public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, Lang lang) {
+		comboBoxLSA.removeAllItems();
+		comboBoxLDA.removeAllItems();
+
+		switch (lang) {
+		case fr:
+			for (String url : ReaderBenchView.TRAINED_LSA_SPACES_FR)
+				comboBoxLSA.addItem(url);
+			for (String url : ReaderBenchView.TRAINED_LDA_MODELS_FR)
+				comboBoxLDA.addItem(url);
+			break;
+		case it:
+			for (String url : ReaderBenchView.TRAINED_LSA_SPACES_IT)
+				comboBoxLSA.addItem(url);
+			for (String url : ReaderBenchView.TRAINED_LDA_MODELS_IT)
+				comboBoxLDA.addItem(url);
+			break;
+		case es:
+			for (String url : ReaderBenchView.TRAINED_LSA_SPACES_ES)
+				comboBoxLSA.addItem(url);
+			for (String url : ReaderBenchView.TRAINED_LDA_MODELS_ES)
+				comboBoxLDA.addItem(url);
+			break;
+		case la:
+			for (String url : ReaderBenchView.TRAINED_LSA_SPACES_LA)
+				comboBoxLSA.addItem(url);
+			for (String url : ReaderBenchView.TRAINED_LDA_MODELS_LA)
+				comboBoxLDA.addItem(url);
+			break;
+		default:
+			for (String url : ReaderBenchView.TRAINED_LSA_SPACES_EN)
+				comboBoxLSA.addItem(url);
+			for (String url : ReaderBenchView.TRAINED_LDA_MODELS_EN)
+				comboBoxLDA.addItem(url);
+			break;
+		}
+
+		comboBoxLSA.setEnabled(true);
+		comboBoxLDA.setEnabled(true);
 	}
 
 	public static void main(String[] args) {

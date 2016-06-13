@@ -56,10 +56,24 @@ public class CiGraphDO {
 		List<CiNodeDO> thisNodeList = new ArrayList<CiNodeDO>(this.nodeList);
 		for(CiNodeDO node: thisNodeList) {
 			List<CiEdgeDO> otherGraphEdgeList = otherGraph.getEdgeList(node);
+			
 			for(CiEdgeDO otherGraphEdge : otherGraphEdgeList) {
+				// add direct nodes with links
 				if(!this.containsEdge(otherGraphEdge)) {
 					this.addNodeIfNotExists(otherGraphEdge.node1);
 					this.addNodeIfNotExists(otherGraphEdge.node2);
+					this.edgeList.add(otherGraphEdge);
+				}
+			}
+		}
+		// add missing links from the second graph
+		thisNodeList = new ArrayList<CiNodeDO>(this.nodeList);
+		for(CiNodeDO node: thisNodeList) {
+			List<CiEdgeDO> otherGraphEdgeList = otherGraph.getEdgeList(node);
+			for(CiEdgeDO otherGraphEdge : otherGraphEdgeList) {
+				// add direct nodes with links
+				if(!this.containsEdge(otherGraphEdge) && this.containsNode(otherGraphEdge.node1) 
+						&& this.containsNode(otherGraphEdge.node2)) {
 					this.edgeList.add(otherGraphEdge);
 				}
 			}

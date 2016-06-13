@@ -187,41 +187,43 @@ public class ConceptView extends JFrame {
 		txtTopics.setColumns(10);
 
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-				.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-						.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-								.addComponent(scrollPaneInferredConcepts, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
-										1168, Short.MAX_VALUE)
+		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.TRAILING).addGroup(groupLayout
+				.createSequentialGroup().addContainerGap()
+				.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+						.addComponent(scrollPaneInferredConcepts, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168,
+								Short.MAX_VALUE)
 						.addComponent(panelGraph, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
-						.addGroup(Alignment.LEADING,
-								groupLayout.createSequentialGroup().addComponent(lblListOfInferred)
+						.addGroup(
+								Alignment.LEADING, groupLayout.createSequentialGroup().addComponent(lblListOfInferred)
 										.addPreferredGap(ComponentPlacement.RELATED, 824, Short.MAX_VALUE)
 										.addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, 74,
 												GroupLayout.PREFERRED_SIZE)
 										.addPreferredGap(ComponentPlacement.RELATED).addComponent(txtInferredConcepts,
 												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 												GroupLayout.PREFERRED_SIZE))
-						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup().addGap(6)
+						.addGroup(Alignment.LEADING, groupLayout
+								.createSequentialGroup().addGroup(groupLayout.createParallelGroup(
+										Alignment.LEADING)
+										.addGroup(groupLayout.createSequentialGroup()
+												.addGap(6)
 												.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 														.addComponent(lblIdentifyOnly)
 														.addComponent(checkBoxNoun, GroupLayout.PREFERRED_SIZE, 90,
 																GroupLayout.PREFERRED_SIZE)
 														.addComponent(checkBoxVerb))
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(sliderInferredConcepts, GroupLayout.PREFERRED_SIZE, 177,
-												GroupLayout.PREFERRED_SIZE))
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addComponent(sliderInferredConcepts, GroupLayout.PREFERRED_SIZE, 177,
+														GroupLayout.PREFERRED_SIZE))
 										.addComponent(lblInferredConcepts))
 								.addGap(18)
 								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING).addComponent(lblThreshold)
 										.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
 				.addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup().addGap(7)
-						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(lblInferredConcepts)
-								.addComponent(lblThreshold))
+		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
+				.createSequentialGroup().addGap(7)
+				.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(lblInferredConcepts)
+						.addComponent(lblThreshold))
 				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup().addPreferredGap(ComponentPlacement.UNRELATED)
 								.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE, false)
@@ -241,9 +243,9 @@ public class ConceptView extends JFrame {
 										GroupLayout.PREFERRED_SIZE)
 								.addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
 										GroupLayout.PREFERRED_SIZE)))
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(scrollPaneInferredConcepts,
-								GroupLayout.PREFERRED_SIZE, 59, GroupLayout.PREFERRED_SIZE)
-						.addContainerGap()));
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scrollPaneInferredConcepts, GroupLayout.PREFERRED_SIZE, 59, GroupLayout.PREFERRED_SIZE)
+				.addContainerGap()));
 
 		textAreaInferredConcepts = new JTextArea();
 		scrollPaneInferredConcepts.setViewportView(textAreaInferredConcepts);
@@ -327,7 +329,7 @@ public class ConceptView extends JFrame {
 		}
 
 		for (Topic t : subListInferredConcepts) {
-			if (visibleConcepts.get(t.getWord())) {
+			if (visibleConcepts.get(t.getWord()) && !nodes.containsKey(t.getWord())) {
 				Node n = graphModel.factory().newNode(t.getWord().getLemma());
 				n.setLabel(t.getWord().getLemma());
 

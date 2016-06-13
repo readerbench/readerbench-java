@@ -32,6 +32,7 @@ import org.openide.util.Lookup;
 
 import data.Word;
 import data.document.Document;
+import runtime.semanticModels.utils.WordDistance;
 import data.Lang;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
@@ -43,14 +44,14 @@ public class SpaceStatistics {
 
 	private LDA lda;
 	private int noWords;
-	private List<Connection> relevantSimilarities;
+	private List<WordDistance> relevantSimilarities;
 
 	public SpaceStatistics(LDA lda) {
 		logger.info("Loading " + lda.getPath() + "...");
 		this.lda = lda;
 		this.noWords = lda.getWordProbDistributions().size();
 
-		relevantSimilarities = new ArrayList<Connection>();
+		relevantSimilarities = new ArrayList<WordDistance>();
 	}
 
 	public void buildWordDistances() {
@@ -58,7 +59,7 @@ public class SpaceStatistics {
 		double sim;
 		double s00 = 0, s10 = 0, s20 = 0;
 		double s01 = 0, s11 = 0, s21 = 0;
-		List<Connection> allSimilarities = new ArrayList<Connection>();
+		List<WordDistance> allSimilarities = new ArrayList<WordDistance>();
 		for (Entry<Word, double[]> e1 : lda.getWordProbDistributions().entrySet()) {
 			for (Entry<Word, double[]> e2 : lda.getWordProbDistributions().entrySet()) {
 				if (e1.getKey().getLemma().compareTo(e2.getKey().getLemma()) > 0) {
@@ -67,7 +68,7 @@ public class SpaceStatistics {
 					s10 += sim;
 					s20 += Math.pow(sim, 2);
 					if (sim >= MINIMUM_IMPOSED_THRESHOLD) {
-						allSimilarities.add(new Connection(e1.getKey().getLemma(), e2.getKey().getLemma(), sim));
+						allSimilarities.add(new WordDistance(e1.getKey().getLemma(), e2.getKey().getLemma(), sim));
 						s01++;
 						s11 += sim;
 						s21 += Math.pow(sim, 2);
@@ -100,7 +101,7 @@ public class SpaceStatistics {
 		double threshold = avg - stdev;
 		double s02 = 0, s12 = 0, s22 = 0;
 
-		for (Connection c : allSimilarities) {
+		for (WordDistance c : allSimilarities) {
 			if (c.getSimilarity() >= threshold) {
 				relevantSimilarities.add(c);
 				s02++;
@@ -138,7 +139,7 @@ public class SpaceStatistics {
 			graph.addNode(wordNode);
 		}
 
-		for (Connection c : relevantSimilarities) {
+		for (WordDistance c : relevantSimilarities) {
 			Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
 			e.setWeight((float) (c.getSimilarity()));
 			graph.addEdge(e);
@@ -195,7 +196,7 @@ public class SpaceStatistics {
 		System.out.println("Semantic model path length:\t" + Formatting.formatNumber(distance.getPathLength()));
 	}
 
-	public List<Connection> getRelevantSimilarities() {
+	public List<WordDistance> getRelevantSimilarities() {
 		return relevantSimilarities;
 	}
 
@@ -225,7 +226,7 @@ public class SpaceStatistics {
 				out.write("," + space.getLDA().getPath());
 			}
 
-			for (Connection c : corpora.get(0).getRelevantSimilarities()) {
+			for (WordDistance c : corpora.get(0).getRelevantSimilarities()) {
 				if (c.getSimilarity() > 0) {
 					String outputString = "\n" + c.getWord1() + "," + c.getWord2();
 					boolean viableEntry = true;
@@ -312,7 +313,7 @@ public class SpaceStatistics {
 				graph.addNode(wordNode);
 			}
 
-			for (Connection c : space.getRelevantSimilarities()) {
+			for (WordDistance c : space.getRelevantSimilarities()) {
 				Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()), 0,
 						c.getSimilarity(), false);
 				graph.addEdge(e);
@@ -420,31 +421,6 @@ public class SpaceStatistics {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-	}
-
-	private class Connection {
-		private String word1;
-		private String word2;
-		private double similarity;
-
-		public Connection(String word1, String word2, double similarity) {
-			super();
-			this.word1 = word1;
-			this.word2 = word2;
-			this.similarity = similarity;
-		}
-
-		public String getWord1() {
-			return word1;
-		}
-
-		public String getWord2() {
-			return word2;
-		}
-
-		public double getSimilarity() {
-			return similarity;
 		}
 	}
 
