@@ -132,37 +132,7 @@ public class VCoPEvaluationView extends JFrame {
 					// set language
 					lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
 
-					comboBoxLSA.removeAllItems();
-					comboBoxLDA.removeAllItems();
-
-					switch (lang) {
-					case fr:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_FR)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_FR)
-							comboBoxLDA.addItem(url);
-						break;
-					case it:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_IT)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_IT)
-							comboBoxLDA.addItem(url);
-						break;
-					default:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_EN)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_EN)
-							comboBoxLDA.addItem(url);
-						break;
-					}
-				} else {
-					lang = null;
-					comboBoxLSA.removeAllItems();
-					comboBoxLSA.addItem(
-							LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
-					comboBoxLDA.removeAllItems();
-					comboBoxLDA.addItem(
-							LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
+					ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
 				}
 			}
 		});

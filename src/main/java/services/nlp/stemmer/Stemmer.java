@@ -1,6 +1,7 @@
 package services.nlp.stemmer;
 
 import data.Lang;
+import services.nlp.lemmatizer.StaticLemmatizer;
 
 public class Stemmer {
 	public static String stemWord(String word, Lang lang) {
@@ -17,6 +18,9 @@ public class Stemmer {
 			return Stemmer_ES.stemWord(word);
 		case nl:
 			return Stemmer_NL.stemWord(word);
+		// TODO implement latin stemmer, for now rely on lemmas
+		case la:
+			return StaticLemmatizer.lemmaStatic(word, Lang.la);
 		default:
 			return Stemmer_EN.stemWord(word);
 		}
