@@ -1,7 +1,7 @@
 package data;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,7 +11,6 @@ import data.discourse.SemanticRelatedness;
 import edu.stanford.nlp.dcoref.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.ArrayList;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 

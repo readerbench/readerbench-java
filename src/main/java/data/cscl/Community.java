@@ -26,9 +26,9 @@ import data.AbstractDocument;
 import data.AbstractDocument.SaveType;
 import data.AnalysisElement;
 import data.Block;
+import data.Lang;
 import data.Word;
 import data.discourse.Topic;
-import data.Lang;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;
@@ -49,14 +49,7 @@ import services.discourse.topicMining.TopicModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
-import webService.result.ResultCscl;
-import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
-import webService.services.ConceptMap;
-import webService.services.cscl.CSCL;
-import webService.services.cscl.Collaboration;
-import webService.services.cscl.ParticipantEvolution;
-import webService.services.cscl.ParticipantInteraction;
 import webService.services.vCoP.CommunityInteraction;
 
 public class Community extends AnalysisElement {
@@ -66,6 +59,8 @@ public class Community extends AnalysisElement {
 
 	static Logger logger = Logger.getLogger(Community.class);
 
+	private String path;
+	private boolean needsAnonymization;
 	private List<Participant> participants;
 	private List<Conversation> documents;
 	private List<Community> timeframeSubCommunities;
@@ -74,8 +69,10 @@ public class Community extends AnalysisElement {
 	private Date fistContributionDate, lastContributionDate;
 	private boolean[] selectedIndices;
 
-	public Community(Date startDate, Date endDate) {
+	public Community(String path, boolean needsAnonymization, Date startDate, Date endDate) {
 		super(null, 0, null, null, null);
+		this.path = path;
+		this.needsAnonymization = needsAnonymization;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		participants = new ArrayList<Participant>();
@@ -101,7 +98,7 @@ public class Community extends AnalysisElement {
 					// select contributions in imposed timeframe
 					if (u != null && u.isEligible(startDate, endDate)) {
 						// determine first timestamp of considered contributions
-						if (fistContributionDate == null){
+						if (fistContributionDate == null) {
 							fistContributionDate = u.getTime();
 							System.out.println("Calculate first contribution");
 						}
@@ -215,18 +212,19 @@ public class Community extends AnalysisElement {
 		return ls;
 	}
 
-	public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution) {
+	public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 		if (startDate != null && endDate != null && participants != null && participants.size() > 0)
 			logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
 					+ dateFormat.format(endDate) + " having " + participants.size() + " participants.");
 
+		String fileName;
 		if (startDate != null && endDate != null)
-			ParticipantEvaluation.performSNA(participants, participantContributions, true,
-					"out/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate) + ".pdf");
+			fileName = "graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate);
 		else
-			ParticipantEvaluation.performSNA(participants, participantContributions, true,
-					"out/graph_" + System.currentTimeMillis() + ".pdf");
+			fileName = path + "/graph_" + System.currentTimeMillis();
+
+		ParticipantEvaluation.performSNA(participants, participantContributions, true, path + "/" + fileName + ".pdf");
 		// update surface statistics
 		for (AbstractDocument d : documents) {
 			Participant p = null;
@@ -262,15 +260,18 @@ public class Community extends AnalysisElement {
 								/ p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
 		}
 
+		export(path + "/" + fileName + ".csv", modelTimeEvolution, additionalInfo);
+
 		if (useTextualComplexity) {
 			selectedIndices = new boolean[ComplexityIndices.NO_COMPLEXITY_INDICES];
 
 			IComplexityFactors[] complexityFactors = { new LengthComplexity(), new SurfaceStatisticsComplexity(),
 					new EntropyComplexity(), new POSComplexity(), new PronounsComplexity(), new TreeComplexity(),
-					new EntityDensityComplexity(), new ConnectivesComplexity(getLanguage() !=null?getLanguage():Lang.eng), new DiscourseComplexity(),
-					new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(3),
+					new EntityDensityComplexity(),
+					new ConnectivesComplexity(getLanguage() != null ? getLanguage() : Lang.eng),
+					new DiscourseComplexity(), new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(3),
 					new SemanticCohesionComplexity(4) };
-			
+
 			for (IComplexityFactors f : complexityFactors) {
 				for (int index : f.getIDs()) {
 					selectedIndices[index] = true;
@@ -336,31 +337,32 @@ public class Community extends AnalysisElement {
 	}
 
 	private static Community getSubCommunity(Community community, Date startSubCommunities, Date endSubCommunities) {
-		Community subCommunity = new Community(startSubCommunities, endSubCommunities);
+		Community subCommunity = new Community(community.getPath(), community.needsAnonymization(), startSubCommunities,
+				endSubCommunities);
 		for (Conversation c : community.getDocuments())
 			subCommunity.getDocuments().add(c);
 		subCommunity.updateParticipantContributions();
-		subCommunity.computeMetrics(false, false);
+		subCommunity.computeMetrics(false, false, false);
 		return subCommunity;
 	}
 
-	public static Community loadMultipleConversations(String rootPath, Date startDate, Date endDate, int monthIncrement,
-			int dayIncrement) {
-		logger.info("Loading all files in " + rootPath);
+	public static Community loadMultipleConversations(String path, boolean needsAnonymization, Date startDate,
+			Date endDate, int monthIncrement, int dayIncrement) {
+		logger.info("Loading all files in " + path);
 
 		FileFilter filter = new FileFilter() {
 			public boolean accept(File f) {
 				return f.getName().endsWith(".ser");
 			}
 		};
-		Community community = new Community(startDate, endDate);
-		File dir = new File(rootPath);
+		Community community = new Community(path, needsAnonymization, startDate, endDate);
+		File dir = new File(path);
 		if (!dir.isDirectory())
 			return null;
 		File[] filesTODO = dir.listFiles(filter);
 		for (File f : filesTODO) {
 			Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
-			if (c != null){
+			if (c != null) {
 				community.getDocuments().add(c);
 			}
 		}
@@ -395,18 +397,18 @@ public class Community extends AnalysisElement {
 		return community;
 	}
 
-	public void generateParticipantView(final String path) {
+	public void generateParticipantView(String path) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ParticipantInteractionView view = new ParticipantInteractionView("Member", path, participants,
-						participantContributions, true, true);
+				ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
+						participantContributions, true, needsAnonymization);
 				view.setVisible(true);
 			}
 		});
 	}
 
-	public void generateConceptView(final String path) {
+	public void generateConceptView(String path) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -416,7 +418,7 @@ public class Community extends AnalysisElement {
 		});
 	}
 
-	public void export(String pathToFile) {
+	public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
 		try {
 			logger.info("Writing document collection export");
 			File output = new File(pathToFile);
@@ -429,10 +431,12 @@ public class Community extends AnalysisElement {
 				out.write("Participant name,Anonymized name");
 				for (CSCLIndices CSCLindex : CSCLIndices.values())
 					out.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
-				for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-					if (CSCLindex.isUsedForTimeModeling()) {
-						for (CSCLCriteria crit : CSCLCriteria.values()) {
-							out.write("," + crit.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+				if (modelTimeEvolution) {
+					for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+						if (CSCLindex.isUsedForTimeModeling()) {
+							for (CSCLCriteria crit : CSCLCriteria.values()) {
+								out.write("," + crit.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+							}
 						}
 					}
 				}
@@ -450,11 +454,13 @@ public class Community extends AnalysisElement {
 					out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
 					for (CSCLIndices CSCLindex : CSCLIndices.values())
 						out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
-					for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-						if (CSCLindex.isUsedForTimeModeling()) {
-							for (CSCLCriteria crit : CSCLCriteria.values()) {
-								out.write("," + p.getLongitudinalIndices()
-										.get(new AbstractMap.SimpleEntry<CSCLIndices, CSCLCriteria>(CSCLindex, crit)));
+					if (modelTimeEvolution) {
+						for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+							if (CSCLindex.isUsedForTimeModeling()) {
+								for (CSCLCriteria crit : CSCLCriteria.values()) {
+									out.write("," + p.getLongitudinalIndices().get(
+											new AbstractMap.SimpleEntry<CSCLIndices, CSCLCriteria>(CSCLindex, crit)));
+								}
 							}
 						}
 					}
@@ -469,43 +475,45 @@ public class Community extends AnalysisElement {
 					out.write("\n");
 				}
 
-				// print discussed topics
-				out.write("\nDiscussed topics\n");
-				out.write("Concept,Relevance\n");
-				List<Topic> topicL = new ArrayList<Topic>();
-				Iterator<Map.Entry<Word, Double>> mapIter = TopicModeling.getCollectionTopics(documents).entrySet()
-						.iterator();
-				while (mapIter.hasNext()) {
-					Map.Entry<Word, Double> entry = mapIter.next();
-					topicL.add(new Topic(entry.getKey(), entry.getValue()));
-				}
-				Collections.sort(topicL);
-				for (Topic t : topicL) {
-					out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
-				}
-
-				// print general statistic per thread
-				out.write("\nIndividual thread statistics\n");
-				out.write(
-						"Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
-				for (AbstractDocument d : documents) {
-					int noBlocks = 0;
-					for (Block b : d.getBlocks()) {
-						if (b != null) {
-							noBlocks++;
-						}
+				if (additionalInfo) {
+					// print discussed topics
+					out.write("\nDiscussed topics\n");
+					out.write("Concept,Relevance\n");
+					List<Topic> topicL = new ArrayList<Topic>();
+					Iterator<Map.Entry<Word, Double>> mapIter = TopicModeling.getCollectionTopics(documents).entrySet()
+							.iterator();
+					while (mapIter.hasNext()) {
+						Map.Entry<Word, Double> entry = mapIter.next();
+						topicL.add(new Topic(entry.getKey(), entry.getValue()));
+					}
+					Collections.sort(topicL);
+					for (Topic t : topicL) {
+						out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
 					}
 
+					// print general statistic per thread
+					out.write("\nIndividual thread statistics\n");
 					out.write(
-							new File(d.getPath()).getName() + "," + noBlocks + ","
-									+ ((Conversation) d).getParticipants().size() + ","
-									+ Formatting.formatNumber(d.getOverallScore()) + ","
-									+ Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-									+ ","
-									+ Formatting.formatNumber(
-											VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-									+ "\n");
+							"Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
+					for (AbstractDocument d : documents) {
+						int noBlocks = 0;
+						for (Block b : d.getBlocks()) {
+							if (b != null) {
+								noBlocks++;
+							}
+						}
+
+						out.write(
+								new File(d.getPath()).getName() + "," + noBlocks + ","
+										+ ((Conversation) d).getParticipants().size() + ","
+										+ Formatting.formatNumber(d.getOverallScore()) + ","
+										+ Formatting.formatNumber(
+												VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+										+ ","
+										+ Formatting.formatNumber(
+												VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+										+ "\n");
+					}
 				}
 
 				// print interaction matrix
@@ -528,23 +536,23 @@ public class Community extends AnalysisElement {
 			e.printStackTrace();
 		}
 	}
-	
 
-	public static void processDocumentCollection(String rootPath, boolean useTextualComplexity, Date startDate,
-			Date endDate, int monthIncrement, int dayIncrement) {
-		Community dc = Community.loadMultipleConversations(rootPath, startDate, endDate, monthIncrement, dayIncrement);
+	public static void processDocumentCollection(String rootPath, boolean needsAnonymization,
+			boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
+		Community dc = Community.loadMultipleConversations(rootPath, needsAnonymization, startDate, endDate,
+				monthIncrement, dayIncrement);
 		if (dc != null) {
-			dc.computeMetrics(useTextualComplexity, true);
+			dc.computeMetrics(useTextualComplexity, true, true);
 			File f = new File(rootPath);
-			dc.export(rootPath + "/" + f.getName() + ".csv");
+			dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
 			dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
 			dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
 		}
 	}
 
-	public static void processAllFolders(String folder, String prefix, boolean restartProcessing, String pathToLSA,
-			String pathToLDA, Lang lang, boolean usePOSTagging, boolean useTextualComplexity, Date startDate,
-			Date endDate, int monthIncrement, int dayIncrement) {
+	public static void processAllFolders(String folder, String prefix, boolean needsAnonymization,
+			boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+			boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
 		File dir = new File(folder);
 
 		if (dir.isDirectory()) {
@@ -559,22 +567,30 @@ public class Community extends AnalysisElement {
 					}
 					SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
 							true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
-					Community.processDocumentCollection(f.getAbsolutePath(), useTextualComplexity, startDate, endDate,
-							monthIncrement, dayIncrement);
+					Community.processDocumentCollection(f.getAbsolutePath(), needsAnonymization, useTextualComplexity,
+							startDate, endDate, monthIncrement, dayIncrement);
 				}
 			}
 		}
 		System.out.println("Finished processsing all files...");
 	}
-	
+
 	public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {
-		
-		return new ResultvCoP(
-				CommunityInteraction.buildParticipantGraph(communityInTimeFrame),
-				CommunityInteraction.buildParticipantGraph(allCommunities),
-				null
-			);
-		
+		return new ResultvCoP(CommunityInteraction.buildParticipantGraph(communityInTimeFrame),
+				CommunityInteraction.buildParticipantGraph(allCommunities), null);
+
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public boolean needsAnonymization() {
+		return needsAnonymization;
 	}
 
 	public List<Participant> getParticipants() {

@@ -3,15 +3,12 @@ package view.widgets.document.corpora;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -34,8 +31,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -43,7 +38,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -298,14 +292,13 @@ public class PaperCorpusSimilarityView extends JFrame {
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout
 				.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(tableScroll, GroupLayout.DEFAULT_SIZE, 1020,
-														Short.MAX_VALUE)
-												.addContainerGap())
-						.addGroup(groupLayout.createSequentialGroup()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup().addContainerGap().addGroup(groupLayout
+								.createParallelGroup(Alignment.LEADING).addGroup(groupLayout.createSequentialGroup()
+										.addComponent(tableScroll, GroupLayout.DEFAULT_SIZE, 1020,
+												Short.MAX_VALUE)
+										.addContainerGap())
+								.addGroup(groupLayout.createSequentialGroup().addGroup(groupLayout
+										.createParallelGroup(Alignment.LEADING)
 										.addGroup(groupLayout.createSequentialGroup()
 												.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 														.addComponent(lblThreshold).addComponent(sliderThreshold,
@@ -316,31 +309,33 @@ public class PaperCorpusSimilarityView extends JFrame {
 												.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 774,
 														Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.RELATED)))
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality)
-												.addGap(27))
-										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 236,
-														Short.MAX_VALUE)
-												.addContainerGap())))
-						.addGroup(groupLayout.createSequentialGroup().addComponent(lblTopSimilarArticles)
-								.addContainerGap(896, Short.MAX_VALUE)))));
+										.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+												.addGroup(groupLayout.createSequentialGroup()
+														.addComponent(lblCentrality).addGap(27))
+												.addGroup(groupLayout.createSequentialGroup()
+														.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE,
+																236, Short.MAX_VALUE)
+														.addContainerGap())))
+								.addGroup(groupLayout.createSequentialGroup().addComponent(lblTopSimilarArticles)
+										.addContainerGap(896, Short.MAX_VALUE)))));
 		groupLayout
-				.setVerticalGroup(
-						groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(lblThreshold).addComponent(lblCentrality))
+				.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
+								.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(lblThreshold)
+										.addComponent(lblCentrality))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 52,
 										GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE)
-						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
-				.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTopSimilarArticles)
-				.addPreferredGap(ComponentPlacement.RELATED).addComponent(tableScroll, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE).addContainerGap()));
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+										.addComponent(tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 581,
+												Short.MAX_VALUE)
+										.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTopSimilarArticles)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(tableScroll, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+										GroupLayout.PREFERRED_SIZE)
+								.addContainerGap()));
 		getContentPane().setLayout(groupLayout);
 	}
 
@@ -385,16 +380,18 @@ public class PaperCorpusSimilarityView extends JFrame {
 				if (d.getTitleText() != null)
 					text += d.getTitleText();
 				text += "(" + new File(d.getPath()).getName() + ")";
-				text = (text.length() > 20) ? (text.substring(0, 20) + "..") : text;
+				text = (text.length() > 60) ? (text.substring(0, 60) + "..") : text;
 				Node n = graphModel.factory().newNode(text);
 				n.setLabel(text);
 				n.setColor(new Color((float) (COLOR_CONCEPT.getRed()) / 256, (float) (COLOR_CONCEPT.getGreen()) / 256,
 						(float) (COLOR_CONCEPT.getBlue()) / 256));
 				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
 				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-				graph.addNode(n);
-				nodes.put(d, n);
-				outMap.put(n, d);
+				if (!graph.contains(n)) {
+					graph.addNode(n);
+					nodes.put(d, n);
+					outMap.put(n, d);
+				}
 			}
 		}
 
@@ -576,58 +573,5 @@ public class PaperCorpusSimilarityView extends JFrame {
 		}
 		this.pack();
 		logger.info("Finished building the graph");
-	}
-
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-		revalidate();
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				List<Document> docs = new LinkedList<Document>();
-
-				File dir = new File("in\\AbstractAnalyzer2\\AbstractAnalyzer2");
-				File[] files = dir.listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.endsWith(".ser");
-					}
-				});
-
-				for (File file : files) {
-					Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-					docs.add(d);
-				}
-
-				PaperCorpusSimilarityView view = new PaperCorpusSimilarityView(docs);
-				view.setVisible(true);
-			}
-		});
 	}
 }
