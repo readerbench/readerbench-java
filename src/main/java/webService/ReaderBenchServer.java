@@ -8,11 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,7 +72,6 @@ import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
 import webService.queryResult.QueryResultvCoP;
 import webService.result.ResultCategory;
-import webService.result.ResultCscl;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
@@ -89,9 +87,6 @@ import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
-import webService.services.cscl.Collaboration;
-import webService.services.cscl.ParticipantEvolution;
-import webService.services.cscl.ParticipantInteraction;
 import webService.services.utils.FileProcessor;
 import webService.services.vCoP.CommunityInteraction;
 
@@ -173,8 +168,7 @@ public class ReaderBenchServer {
 			String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism) {
 
 		Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
-				LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang),
-				lang, usePOSTagging, false);
+				LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 
 		Summary s = new Summary(selfExplanation, queryInitialText, true, true);
 
@@ -232,9 +226,9 @@ public class ReaderBenchServer {
 
 	public void start() {
 		Spark.port(PORT);
-		
+
 		Spark.staticFileLocation("/public");
-		
+
 		Spark.get("/", (request, response) -> {
 			return "OK";
 		});
@@ -437,7 +431,7 @@ public class ReaderBenchServer {
 			String pathToLDA = (String) json.get("lda");
 			boolean usePOSTagging = (boolean) json.get("postagging");
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-			
+
 			Lang lang = Lang.getLang(language);
 
 			QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
@@ -484,7 +478,7 @@ public class ReaderBenchServer {
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			queryResult.setData(CSCL.getAll(conversationDocument, conversation, threshold));
 			String result = queryResult.convertToJson();
-			System.out.println("CSCL queryResult"+result);
+			System.out.println("CSCL queryResult" + result);
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
 
@@ -743,7 +737,7 @@ public class ReaderBenchServer {
 			MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
 			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
 			List<Part> filesList = (List<Part>) request.raw().getParts();
-			for (Part file : filesList){
+			for (Part file : filesList) {
 				FileProcessor.getInstance().saveFile(file, folder);
 			}
 			return folder.getName();
@@ -757,7 +751,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String vCoPFile = (String) json.get("vCoPFile");
-			System.out.println("vCoP %s"+vCoPFile);
+			System.out.println("vCoP %s" + vCoPFile);
 			String startDateString = (String) json.get("startDate");
 			DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 			Date startDate = format.parse(startDateString);
@@ -766,31 +760,33 @@ public class ReaderBenchServer {
 			Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
 			long monthIncrement = (Long) json.get("monthIncrement");
 			long dayIncrement = (Long) json.get("dayIncrement");
-			
-			Community communityStartEnd = Community.loadMultipleConversations(vCoPFile, startDate, endDate, (int) monthIncrement, (int) dayIncrement);
-			communityStartEnd.computeMetrics(useTextualComplexity, true);
-			
+
+			Community communityStartEnd = Community.loadMultipleConversations(vCoPFile, true, startDate, endDate,
+					(int) monthIncrement, (int) dayIncrement);
+			communityStartEnd.computeMetrics(useTextualComplexity, true, true);
+
 			List<Community> subCommunities = communityStartEnd.getTimeframeSubCommunities();
-			
+
 			Date startDateAllCommunities = format.parse("01/01/1970");
 			Date endDateAllCommunities = format.parse("01/01/2099");
-			
-			Community allCommunity = Community.loadMultipleConversations(vCoPFile, startDateAllCommunities, endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
-			allCommunity.computeMetrics(useTextualComplexity, true);
-			
+
+			Community allCommunity = Community.loadMultipleConversations(vCoPFile, true, startDateAllCommunities,
+					endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
+			allCommunity.computeMetrics(useTextualComplexity, true, true);
+
 			List<ResultTopic> participantsInTimeFrame = new ArrayList<>();
-			
-			for(Community c : subCommunities){
+
+			for (Community c : subCommunities) {
 				participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c));
 			}
-			
+
 			QueryResultvCoP queryResult = new QueryResultvCoP();
 			ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity),
 					CommunityInteraction.buildParticipantGraph(communityStartEnd), participantsInTimeFrame);
 			queryResult.setData(resultVcop);
-			
+
 			String result = queryResult.convertToJson();
-			System.out.println("queryResult"+result);
+			System.out.println("queryResult" + result);
 			return result;
 
 		});

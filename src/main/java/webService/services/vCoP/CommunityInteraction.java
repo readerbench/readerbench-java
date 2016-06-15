@@ -4,9 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import data.AbstractDocument.SaveType;
 import data.cscl.Community;
-import data.cscl.Conversation;
 import data.cscl.Participant;
 import services.commons.Formatting;
 import webService.result.ResultEdge;

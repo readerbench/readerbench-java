@@ -60,7 +60,7 @@ public class ConceptView extends JFrame {
 	static Logger logger = Logger.getLogger(ConceptView.class);
 	public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
 	public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
-	private static final int MIN_SIZE = 5;
+	private static final int MIN_SIZE = 10;
 	private static final int MAX_SIZE_TOPIC = 20;
 	private static final int MAX_SIZE_INFERRED_CONCEPT = 20;
 
@@ -404,7 +404,7 @@ public class ConceptView extends JFrame {
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
 		previewController.refreshPreview();
 

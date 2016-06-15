@@ -39,10 +39,10 @@ import services.commons.Formatting;
 
 public class ParticipantEvaluation {
 	static Logger logger = Logger.getLogger(ParticipantEvaluation.class);
+	private static final String GENERIC_NAME = "Member";
 
-	public static void buildParticipantGraph(String genericName, DirectedGraph graph, GraphModel graphModel,
-			List<Participant> participants, double[][] participantContributions, boolean displayEdgeLabels,
-			boolean isAnonymized) {
+	public static void buildParticipantGraph(DirectedGraph graph, GraphModel graphModel, List<Participant> participants,
+			double[][] participantContributions, boolean displayEdgeLabels, boolean needsAnonymization) {
 
 		Node[] participantNodes = new Node[participants.size()];
 
@@ -57,9 +57,9 @@ public class ParticipantEvaluation {
 			// if (!namesToIgnore.contains(participants.get(i).getName())) {
 			// build block element
 			Node participant = null;
-			if (isAnonymized) {
-				participant = graphModel.factory().newNode(genericName + " " + i);
-				participant.setLabel(genericName + " " + i);
+			if (needsAnonymization) {
+				participant = graphModel.factory().newNode(GENERIC_NAME + " " + i);
+				participant.setLabel(GENERIC_NAME + " " + i);
 			} else {
 				participant = graphModel.factory().newNode(participants.get(i).getName());
 				participant.setLabel(participants.get(i).getName());
@@ -198,7 +198,7 @@ public class ParticipantEvaluation {
 	}
 
 	public static void performSNA(List<Participant> participants, double[][] participantContributions,
-			boolean isAnonymized, String exportPath) {
+			boolean needsAnonymization, String exportPath) {
 
 		for (int index1 = 0; index1 < participants.size(); index1++) {
 			for (int index2 = 0; index2 < participants.size(); index2++) {
@@ -220,8 +220,8 @@ public class ParticipantEvaluation {
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
 
-		ParticipantEvaluation.buildParticipantGraph("Member", graph, graphModel, participants, participantContributions,
-				true, isAnonymized);
+		ParticipantEvaluation.buildParticipantGraph(graph, graphModel, participants, participantContributions, true,
+				needsAnonymization);
 
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
@@ -230,8 +230,8 @@ public class ParticipantEvaluation {
 		// Determine various metrics
 		Map<String, Participant> mappings = new TreeMap<String, Participant>();
 		for (int index = 0; index < participants.size(); index++) {
-			if (isAnonymized)
-				mappings.put("Member " + index, participants.get(index));
+			if (needsAnonymization)
+				mappings.put(GENERIC_NAME + " " + index, participants.get(index));
 			else
 				mappings.put(participants.get(index).getName(), participants.get(index));
 		}
@@ -257,17 +257,17 @@ public class ParticipantEvaluation {
 			// determine max weight
 			float max = 0;
 			for (Edge e : graph.getEdges()) {
-					max = (float) Math.max(max, e.getWeight());
+				max = (float) Math.max(max, e.getWeight());
 			}
 			for (Edge e : graph.getEdges()) {
-					e.setWeight(e.getWeight() / max);
+				e.setWeight(e.getWeight() / max);
 			}
 			layout.setOptimalDistance(max * 10);
 			// layout.setOptimalDistance(100f);
-			
+
 			layout.initAlgo();
 			for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-					layout.goAlgo();
+				layout.goAlgo();
 			}
 			layout.endAlgo();
 
