@@ -2,7 +2,10 @@ package webService;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +22,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.MultipartConfigElement;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.BasicConfigurator;
@@ -47,6 +51,7 @@ import data.document.Summary;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
+import scala.collection.immutable.Stream.StreamBuilder;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import services.readingStrategies.ReadingStrategies;
@@ -712,6 +717,26 @@ public class ReaderBenchServer {
 		});
 		Spark.options("/fileUpload", (request, response) -> {
 			return "";
+		});
+		Spark.get("/fileDownload", (request, response) -> {
+			String file = request.queryParams("file");
+			
+			int indexOfLastSlash = file.lastIndexOf('/');
+			if (indexOfLastSlash != -1)  file = file.substring(indexOfLastSlash);
+			File f = new File("tmp/" + file);
+			
+			HttpServletResponse raw = response.raw();
+			if(f.exists() && !f.isDirectory()) { 
+				byte[] bytes = Files.readAllBytes(Paths.get("tmp/" + file));         
+				raw.getOutputStream().write(bytes);
+			}
+			else {
+				raw.getOutputStream().write(null);
+			}
+			raw.getOutputStream().flush();
+			raw.getOutputStream().close();		
+			
+			return response.raw();
 		});
 		Spark.post("/folderUpload", (request, response) -> {
 			File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
