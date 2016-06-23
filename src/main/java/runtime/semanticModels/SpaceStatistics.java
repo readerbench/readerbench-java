@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -130,6 +131,10 @@ public class SpaceStatistics {
 				+ Formatting.formatNumber(avg));
 		System.out.println("Stdev similarity for significant word associations (above avg-stdev):\t"
 				+ Formatting.formatNumber(stdev));
+		
+		System.out.println("Sorting relevant similarities");
+		Collections.sort(relevantSimilarities, Collections.reverseOrder());
+		System.out.println("Finished sorting relevant similarities");
 		this.saveSerializedRelevantSimilarities();
 	}
 	private void saveSerializedRelevantSimilarities() {

@@ -58,6 +58,14 @@ public class CMUtils {
 		}
 		return wordList;
 	}
+	public List<String> convertStringIteratorToList(Iterator<String> wordIterator) {
+		List<String> wordList = new ArrayList<String>();
+		while(wordIterator.hasNext()) {
+			String w = wordIterator.next();
+			wordList.add(w);
+		}
+		return wordList;
+	}
 	public List<CiNodeDO> convertNodeIteratorToList(Iterator<CiNodeDO> nodeIterator) {
 		List<CiNodeDO> nodeList = new ArrayList<CiNodeDO>();
 		while(nodeIterator.hasNext()) {
