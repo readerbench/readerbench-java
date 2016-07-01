@@ -208,49 +208,4 @@ public class Txt2XmlConverter {
         }
         logger.info("Finished processing all files.");
     }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-        // Txt2XmlConverter.parseTxtFiles("Think aloud ",
-        // "in/SEvsTA/Class1/TA", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Self-explanation ",
-        // "in/SEvsTA/Class1/SE", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Competition essay - ",
-        // "in/essays/competition_en/texts", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("FYP essay - ",
-        // "in/essays/essays_FYP_en/texts", Lang.eng,
-        // "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Images essay - ",
-        // "in/essays/images_en/texts", Lang.eng,
-        // "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Competition essay - ",
-        // "in/essays/competition_en/texts", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("DC 2009 essay - ",
-        // "in/essays/DC_essays_2009_en/texts", Lang.eng, "windows-1250");
-        // Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
-        // "in/essays/msu_timed_en/texts", Lang.eng, "windows-1250");
-        // Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
-        // "in/essays/posttest_fall_2009/texts", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
-        // "in/essays/pretest_spring_2010/texts", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Familiarity essay - ", "in/texts 2
-        // for familiarity", Lang.eng, "UTF-8");
-        // Txt2XmlConverter.parseMergedTxtFiles("resources/in/essays/chaprou_fr",
-        // Lang.fr, "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Eminescu - ", "resources/in/Eminescu
-        // vs Bratianu/Eminescu 1877 - 1880", Lang.ro,
-        // "UTF-8");
-        // Txt2XmlConverter.parseTxtFiles("Bratianu - ", "resources/in/Eminescu
-        // vs Bratianu/Bratianu 1857 - 1875", Lang.ro,
-        // "UTF-8");
-//		Txt2XmlConverter.parseTxtFiles("Comenius main letter collection - ", "resources/in/comenius_la/01", Lang.la,
-//				"UTF-8");
-//		Txt2XmlConverter.parseTxtFiles("Comenius letters to Hartlibians - ", "resources/in/comenius_la/02", Lang.la,
-//				"UTF-8");
-//		Txt2XmlConverter.parseTxtFiles("Comenius letters to German didacticians - ", "resources/in/comenius_la/03",
-//				Lang.la, "UTF-8");
-//		Txt2XmlConverter.parseTxtFiles("Comenius letters to Gdansk circle - ", "resources/in/comenius_la/04", Lang.la,
-//				"UTF-8");
-        Txt2XmlConverter.parseTxtFiles("ViBOA: ", "resources/in/ViBOA_nl/analysis", Lang.nl, "UTF-8");
-    }
 }
