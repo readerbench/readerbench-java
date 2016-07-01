@@ -186,8 +186,8 @@ public class Txt2XmlConverter {
 		// "in/essays/posttest_fall_2009/texts", Lang.eng, "UTF-8");
 		// Txt2XmlConverter.parseTxtFiles("MSU Timed essay - ",
 		// "in/essays/pretest_spring_2010/texts", Lang.eng, "UTF-8");
-		// Txt2XmlConverter.parseTxtFiles("Familiarity essay - ", "in/texts 2
-		// for familiarity", Lang.eng, "UTF-8");
+		Txt2XmlConverter.parseTxtFiles("Familiarity essay - ", "resources/in/texts 2 for familiarity", Lang.eng,
+				"UTF-8");
 		// Txt2XmlConverter.parseMergedTxtFiles("resources/in/essays/chaprou_fr",
 		// Lang.fr, "UTF-8");
 		// Txt2XmlConverter.parseTxtFiles("Eminescu - ", "resources/in/Eminescu
@@ -196,13 +196,17 @@ public class Txt2XmlConverter {
 		// Txt2XmlConverter.parseTxtFiles("Bratianu - ", "resources/in/Eminescu
 		// vs Bratianu/Bratianu 1857 - 1875", Lang.ro,
 		// "UTF-8");
-		Txt2XmlConverter.parseTxtFiles("Comenius main letter collection - ", "resources/in/comenius_la/01", Lang.la,
-				"UTF-8");
-		Txt2XmlConverter.parseTxtFiles("Comenius letters to Hartlibians - ", "resources/in/comenius_la/02", Lang.la,
-				"UTF-8");
-		Txt2XmlConverter.parseTxtFiles("Comenius letters to German didacticians - ", "resources/in/comenius_la/03",
-				Lang.la, "UTF-8");
-		Txt2XmlConverter.parseTxtFiles("Comenius letters to Gdansk circle - ", "resources/in/comenius_la/04", Lang.la,
-				"UTF-8");
+		// Txt2XmlConverter.parseTxtFiles("Comenius main letter collection - ",
+		// "resources/in/comenius_la/01", Lang.la,
+		// "UTF-8");
+		// Txt2XmlConverter.parseTxtFiles("Comenius letters to Hartlibians - ",
+		// "resources/in/comenius_la/02", Lang.la,
+		// "UTF-8");
+		// Txt2XmlConverter.parseTxtFiles("Comenius letters to German
+		// didacticians - ", "resources/in/comenius_la/03",
+		// Lang.la, "UTF-8");
+		// Txt2XmlConverter.parseTxtFiles("Comenius letters to Gdansk circle -
+		// ", "resources/in/comenius_la/04", Lang.la,
+		// "UTF-8");
 	}
 }

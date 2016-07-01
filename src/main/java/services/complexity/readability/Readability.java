@@ -1,10 +1,16 @@
 package services.complexity.readability;
 
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+
+import data.AbstractDocument;
+import edu.stanford.nlp.util.Pair;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.complexity.readability.Fathom.Stats;
+import services.nlp.listOfWords.ClassesOfWords;
+import services.nlp.listOfWords.ListOfWords;
 import utils.localization.LocalizationUtils;
-import data.AbstractDocument;
 
 /**
  * <p>
@@ -150,6 +156,49 @@ public class Readability extends IComplexityFactors {
 		return LocalizationUtils.getTranslation("Readability Formulas (EN only)");
 	}
 
+	public static ListOfWords simpleWords_en = null;
+
+	public static ListOfWords getSimpleWords() {
+		if (simpleWords_en == null)
+			simpleWords_en = new ListOfWords("resources/config/WordLists/Dale-Chall simple words.txt");
+		return simpleWords_en;
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static double computeDaleChall(AbstractDocument d) {
+		// RGS : Reading Grade Score
+		// DS : Dale Score, or % of words not on Dale-Chall list of 3,000 common
+		// words
+		// ASL : average sentence length (the number of words divided by the
+		// number of sentences)
+
+		double DS, ASL;
+		Pair[] restore = { new Pair<>(Pattern.compile("\\s"), " "), new Pair<>(Pattern.compile("' "), "'"),
+				new Pair<>(Pattern.compile(" \\- "), "\\-"), };
+
+		String text = d.getText().toLowerCase();
+		for (Pair<Pattern, String> p : restore) {
+			text = p.first.matcher(text).replaceAll(p.second).trim();
+		}
+		double no_occurrences = 0;
+
+		for (String p : getSimpleWords().getWords()) {
+			no_occurrences += ClassesOfWords.countPatternOccurrences(text, p);
+		}
+
+		StringTokenizer st = new StringTokenizer(text, ".!? ,:;");
+
+		DS = 1 - no_occurrences / st.countTokens();
+		ASL = ((double) st.countTokens()) / d.getNoSentences();
+
+		double RGS = (0.1579 * DS * 100) + (0.0496 * ASL);
+
+		if (DS > 0.05d)
+			RGS += 3.6365;
+
+		return RGS;
+	}
+
 	@Override
 	public void setComplexityIndexDescription(String[] descriptions) {
 		descriptions[ComplexityIndices.READABILITY_FLESCH] = LocalizationUtils
@@ -157,6 +206,8 @@ public class Readability extends IComplexityFactors {
 		descriptions[ComplexityIndices.READABILITY_FOG] = LocalizationUtils.getTranslation("Readability FOG (EN only)");
 		descriptions[ComplexityIndices.READABILITY_KINCAID] = LocalizationUtils
 				.getTranslation("Readability Kincaid (EN only)");
+		descriptions[ComplexityIndices.READABILITY_DALE_CHALL] = LocalizationUtils
+				.getTranslation("READABILITY_DALE_CHALL");
 	}
 
 	@Override
@@ -164,6 +215,7 @@ public class Readability extends IComplexityFactors {
 		acronyms[ComplexityIndices.READABILITY_FLESCH] = this.getComplexityIndexAcronym("READABILITY_FLESCH");
 		acronyms[ComplexityIndices.READABILITY_FOG] = this.getComplexityIndexAcronym("READABILITY_FOG");
 		acronyms[ComplexityIndices.READABILITY_KINCAID] = this.getComplexityIndexAcronym("READABILITY_KINCAID");
+		acronyms[ComplexityIndices.READABILITY_DALE_CHALL] = this.getComplexityIndexAcronym("READABILITY_DALE_CHALL");
 	}
 
 	@Override
@@ -174,11 +226,13 @@ public class Readability extends IComplexityFactors {
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FLESCH] = Readability.calcFlesch(stats);
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FOG] = Readability.calcFog(stats);
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_KINCAID] = Readability.calcKincaid(stats);
+			d.getComplexityIndices()[ComplexityIndices.READABILITY_DALE_CHALL] = computeDaleChall(d);
 			break;
 		default:
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FLESCH] = ComplexityIndices.IDENTITY;
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_FOG] = ComplexityIndices.IDENTITY;
 			d.getComplexityIndices()[ComplexityIndices.READABILITY_KINCAID] = ComplexityIndices.IDENTITY;
+			d.getComplexityIndices()[ComplexityIndices.READABILITY_DALE_CHALL] = ComplexityIndices.IDENTITY;
 			break;
 		}
 	}
@@ -186,6 +240,6 @@ public class Readability extends IComplexityFactors {
 	@Override
 	public int[] getIDs() {
 		return new int[] { ComplexityIndices.READABILITY_FLESCH, ComplexityIndices.READABILITY_FOG,
-				ComplexityIndices.READABILITY_KINCAID };
+				ComplexityIndices.READABILITY_KINCAID, ComplexityIndices.READABILITY_DALE_CHALL };
 	}
 }
