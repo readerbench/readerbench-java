@@ -56,13 +56,9 @@ public class DataGathering {
 			throw new IOException("Inexistent Folder: " + dir.getPath());
 		}
 
-		File[] files = dir.listFiles(new FileFilter() {
-			public boolean accept(File pathname) {
-				if (pathname.getName().toLowerCase().endsWith(".xml"))
-					return true;
-				return false;
-			}
-		});
+		File[] files = dir.listFiles((File pathname) -> {
+            return pathname.getName().toLowerCase().endsWith(".xml");
+        });
 
 		if (writeHeader) {
 			writeHeader(saveLocation);
@@ -87,7 +83,7 @@ public class DataGathering {
 				try {
 					FileWriter fstream = new FileWriter(saveLocation + "/measurements.csv", true);
 					BufferedWriter out = new BufferedWriter(fstream);
-					StringBuffer concat = new StringBuffer();
+					StringBuilder concat = new StringBuilder();
 
 					concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
 							.append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
@@ -114,7 +110,7 @@ public class DataGathering {
 	}
 
 	public static Map<Double, List<Measurement>> getMeasurements(String fileName) {
-		Map<Double, List<Measurement>> result = new TreeMap<Double, List<Measurement>>();
+		Map<Double, List<Measurement>> result = new TreeMap<>();
 
 		try {
 			BufferedReader input = new BufferedReader(new FileReader(fileName));
@@ -130,7 +126,7 @@ public class DataGathering {
 						values[i - 4] = Double.parseDouble(fields[i]);
 					}
 					if (!result.containsKey(classNumber))
-						result.put(classNumber, new ArrayList<Measurement>());
+						result.put(classNumber, new ArrayList<>());
 					result.get(classNumber).add(new Measurement(classNumber, values));
 				}
 			} finally {

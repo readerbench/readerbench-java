@@ -5,113 +5,116 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbstractDocumentTemplate implements Serializable {
-	private static final long serialVersionUID = 6486392022508461270L;
-	private String genre;
-	private List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
 
-	public static AbstractDocumentTemplate getDocumentModel(String text) {
-		AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
-		String[] blocks = text.split("\n");
-		for (int i = 0; i < blocks.length; i++) {
-			BlockTemplate block = docTmp.new BlockTemplate();
-			block.setId(i);
-			block.setContent(blocks[i]);
-			docTmp.getBlocks().add(block);
-		}
-		return docTmp;
-	}
+    private static final long serialVersionUID = 6486392022508461270L;
+    private String genre;
+    private List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
 
-	public class BlockTemplate implements Serializable {
-		private static final long serialVersionUID = -4411300040028049069L;
+    public static AbstractDocumentTemplate getDocumentModel(String text) {
+        AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
+        String[] blocks = text.split("\n");
+        for (int i = 0; i < blocks.length; i++) {
+            BlockTemplate block = docTmp.new BlockTemplate();
+            block.setId(i);
+            block.setContent(blocks[i]);
+            docTmp.getBlocks().add(block);
+        }
+        return docTmp;
+    }
 
-		private String speaker;
-		private String time;
-		private Integer id;
-		private Integer refId;
-		private Integer verbId;
-		private String content;
+    public class BlockTemplate implements Serializable {
 
-		public String getSpeaker() {
-			return speaker;
-		}
+        private static final long serialVersionUID = -4411300040028049069L;
 
-		public void setSpeaker(String speaker) {
-			this.speaker = speaker;
-		}
+        private String speaker;
+        private String time;
+        private Integer id;
+        private Integer refId;
+        private Integer verbId;
+        private String content;
 
-		public String getTime() {
-			return time;
-		}
+        public String getSpeaker() {
+            return speaker;
+        }
 
-		public void setTime(String time) {
-			this.time = time;
-		}
+        public void setSpeaker(String speaker) {
+            this.speaker = speaker;
+        }
 
-		public Integer getId() {
-			return id;
-		}
+        public String getTime() {
+            return time;
+        }
 
-		public void setId(Integer id) {
-			this.id = id;
-		}
+        public void setTime(String time) {
+            this.time = time;
+        }
 
-		public Integer getRefId() {
-			return refId;
-		}
+        public Integer getId() {
+            return id;
+        }
 
-		public void setRefId(Integer refId) {
-			this.refId = refId;
-		}
+        public void setId(Integer id) {
+            this.id = id;
+        }
 
-		public Integer getVerbId() {
-			return verbId;
-		}
+        public Integer getRefId() {
+            return refId;
+        }
 
-		public void setVerbId(Integer verbId) {
-			this.verbId = verbId;
-		}
+        public void setRefId(Integer refId) {
+            this.refId = refId;
+        }
 
-		public String getContent() {
-			return content;
-		}
+        public Integer getVerbId() {
+            return verbId;
+        }
 
-		public void setContent(String content) {
-			this.content = content;
-		}
+        public void setVerbId(Integer verbId) {
+            this.verbId = verbId;
+        }
 
-		@Override
-		public String toString() {
-			return "BlockTemplate [speaker=" + speaker + ", time=" + time + ", id=" + id + ", refId=" + refId
-					+ ", verbId=" + verbId + ", content=" + content + "]";
-		}
-	}
+        public String getContent() {
+            return content;
+        }
 
-	public String getGenre() {
-		return genre;
-	}
+        public void setContent(String content) {
+            this.content = content;
+        }
 
-	public void setGenre(String genre) {
-		this.genre = genre;
-	}
+        @Override
+        public String toString() {
+            return "BlockTemplate [speaker=" + speaker + ", time=" + time + ", id=" + id + ", refId=" + refId
+                    + ", verbId=" + verbId + ", content=" + content + "]";
+        }
+    }
 
-	public List<BlockTemplate> getBlocks() {
-		return blocks;
-	}
+    public String getGenre() {
+        return genre;
+    }
 
-	public void setBlocks(List<BlockTemplate> blocks) {
-		this.blocks = blocks;
-	}
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
 
-	public String getText() {
-		StringBuilder build = new StringBuilder();
-		for (BlockTemplate temp : blocks) {
-			build.append(temp.getContent() + "\n");
-		}
-		return build.toString();
-	}
+    public List<BlockTemplate> getBlocks() {
+        return blocks;
+    }
 
-	@Override
-	public String toString() {
-		return "DocumentTemplate [blocks=" + blocks + "]";
-	}
+    public void setBlocks(List<BlockTemplate> blocks) {
+        this.blocks = blocks;
+    }
+
+    public String getText() {
+        StringBuilder build = new StringBuilder();
+        for (BlockTemplate temp : blocks) {
+            build.append(temp.getContent() + "\n");
+        }
+        return build.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "DocumentTemplate [blocks=" + blocks + "]";
+    }
+
 }

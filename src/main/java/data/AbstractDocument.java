@@ -97,7 +97,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 	private List<LexicalChain> lexicalChains;
 	private DisambiguationGraph disambiguationGraph;
 
-	private double[] complexityIndices;
+	protected double[] complexityIndices;
 
 	private List<SemanticChain> voices;
 	private transient List<SemanticChain> selectedVoices;
@@ -725,7 +725,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 		return docTmp;
 	}
 
-	public void setDocTmp(AbstractDocumentTemplate docTmp) {
+	public final void setDocTmp(AbstractDocumentTemplate docTmp) {
 		this.docTmp = docTmp;
 	}
 

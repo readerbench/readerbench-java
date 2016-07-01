@@ -194,7 +194,7 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @param lsa Latent Semantic Analysis object to be set
      */
-    public void setLSA(LSA lsa) {
+    public final void setLSA(LSA lsa) {
         this.lsa = lsa;
     }
 
@@ -208,7 +208,7 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @param lda Latent Dirichlet Allocation object to be set
      */
-    public void setLDA(LDA lda) {
+    public final void setLDA(LDA lda) {
         this.lda = lda;
     }
 
