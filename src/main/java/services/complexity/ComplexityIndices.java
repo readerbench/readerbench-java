@@ -45,6 +45,7 @@ public class ComplexityIndices {
 	public static final int READABILITY_FLESCH = (id += 1);
 	public static final int READABILITY_FOG = (id += 1);
 	public static final int READABILITY_KINCAID = (id += 1);
+	public static final int READABILITY_DALE_CHALL = (id += 1);
 
 	// surface factors
 	public static final int AVERAGE_BLOCK_LENGTH = (id += 1);
@@ -218,21 +219,28 @@ public class ComplexityIndices {
 			new CoreferenceResolutionComplexity(), new ConnectivesComplexity(Lang.eng),
 			new ConnectivesComplexity(Lang.fr), new ConnectivesComplexity(Lang.ro), new ConnectivesComplexity(Lang.la),
 			new LexicalChainsComplexity(), new LexicalCohesionComplexity(), new DialogismStatisticsComplexity(),
-			new DialogismSynergyComplexity(), new DiscourseComplexity(), new SemanticCohesionComplexity(0),
-			new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(2), new SemanticCohesionComplexity(3),
-			new SemanticCohesionComplexity(4), new SemanticCohesionComplexity(5),
-			new DocumentFlowComplexity(0, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(0, DocFlowCriteria.MAX_VALUE),
+			new DialogismSynergyComplexity(), new DiscourseComplexity(),
+			// new SemanticCohesionComplexity(0),
+			new SemanticCohesionComplexity(1),
+			// new SemanticCohesionComplexity(2),
+			new SemanticCohesionComplexity(3), new SemanticCohesionComplexity(4),
+			// new SemanticCohesionComplexity(5),
+			// new DocumentFlowComplexity(0,
+			// DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			// new DocumentFlowComplexity(0, DocFlowCriteria.MAX_VALUE),
 			new DocumentFlowComplexity(1, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
 			new DocumentFlowComplexity(1, DocFlowCriteria.MAX_VALUE),
-			new DocumentFlowComplexity(2, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(2, DocFlowCriteria.MAX_VALUE),
+			// new DocumentFlowComplexity(2,
+			// DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			// new DocumentFlowComplexity(2, DocFlowCriteria.MAX_VALUE),
 			new DocumentFlowComplexity(3, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
 			new DocumentFlowComplexity(3, DocFlowCriteria.MAX_VALUE),
 			new DocumentFlowComplexity(4, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(4, DocFlowCriteria.MAX_VALUE),
-			new DocumentFlowComplexity(5, DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
-			new DocumentFlowComplexity(5, DocFlowCriteria.MAX_VALUE) };
+			new DocumentFlowComplexity(4, DocFlowCriteria.MAX_VALUE)
+			// , new DocumentFlowComplexity(5,
+			// DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV),
+			// new DocumentFlowComplexity(5, DocFlowCriteria.MAX_VALUE)
+	};
 
 	public static String TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[] = new String[NO_COMPLEXITY_INDICES];
 
@@ -258,7 +266,7 @@ public class ComplexityIndices {
 		for (IComplexityFactors factors : TEXTUAL_COMPLEXITY_FACTORS) {
 			System.out.println(factors.getClassName());
 			for (int i : factors.getIDs())
-				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i] + "\n\t\t"
+				System.out.println(i + "\t" + TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i] + "\t"
 						+ TEXTUAL_COMPLEXITY_INDEX_DESCRIPTIONS[i]);
 		}
 		System.out.println("TOTAL:" + NO_COMPLEXITY_INDICES + " factors");

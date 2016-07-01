@@ -41,16 +41,14 @@ public class ParticipantInteractionView extends JFrame {
 	private List<Participant> participants;
 	private double[][] participantContributions;
 	private JPanel panelGraph;
-	private String genericName;
 	private String path;
 
-	public ParticipantInteractionView(String genericName, String path, List<Participant> participants,
-			double[][] participantContributions, boolean displayEdgeLabels, boolean isAnonymized) {
+	public ParticipantInteractionView(String path, List<Participant> participants,
+			double[][] participantContributions, boolean displayEdgeLabels, boolean needsAnonymization) {
 		super();
 		setTitle("ReaderBench - Participant Interaction");
 		setBackground(Color.WHITE);
 		this.participants = participants;
-		this.genericName = genericName;
 		this.path = path;
 		this.participantContributions = participantContributions;
 		getContentPane().setBackground(Color.WHITE);
@@ -68,7 +66,7 @@ public class ParticipantInteractionView extends JFrame {
 
 		setBounds(50, 50, 800, 600);
 
-		generateGraph(displayEdgeLabels, isAnonymized);
+		generateGraph(displayEdgeLabels, needsAnonymization);
 	}
 
 	private void generateGraph(boolean displayEdgeLabels, boolean isAnonymized) {
@@ -80,7 +78,7 @@ public class ParticipantInteractionView extends JFrame {
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
 
-		ParticipantEvaluation.buildParticipantGraph(genericName, graph, graphModel, this.participants,
+		ParticipantEvaluation.buildParticipantGraph(graph, graphModel, this.participants,
 				this.participantContributions, displayEdgeLabels, isAnonymized);
 
 		// Run YifanHuLayout for 100 passes

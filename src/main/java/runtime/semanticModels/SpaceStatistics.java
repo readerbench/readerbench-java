@@ -1,13 +1,20 @@
 package runtime.semanticModels;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +52,8 @@ public class SpaceStatistics {
 	private LDA lda;
 	private int noWords;
 	private List<WordDistance> relevantSimilarities;
+	
+	private String serializedPath;
 
 	public SpaceStatistics(LDA lda) {
 		logger.info("Loading " + lda.getPath() + "...");
@@ -52,6 +61,8 @@ public class SpaceStatistics {
 		this.noWords = lda.getWordProbDistributions().size();
 
 		relevantSimilarities = new ArrayList<WordDistance>();
+		
+		this.serializedPath = lda.getPath().replace("in", "out") + "_relevant.ser";
 	}
 
 	public void buildWordDistances() {
@@ -120,6 +131,41 @@ public class SpaceStatistics {
 				+ Formatting.formatNumber(avg));
 		System.out.println("Stdev similarity for significant word associations (above avg-stdev):\t"
 				+ Formatting.formatNumber(stdev));
+		
+		System.out.println("Sorting relevant similarities");
+		Collections.sort(relevantSimilarities, Collections.reverseOrder());
+		System.out.println("Finished sorting relevant similarities");
+		this.saveSerializedRelevantSimilarities();
+	}
+	private void saveSerializedRelevantSimilarities() {
+		try {
+			File f = new File (this.serializedPath.substring(0, this.serializedPath.lastIndexOf("/")));
+			f.mkdirs();
+			
+			FileOutputStream fout = new FileOutputStream(this.serializedPath);
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			oos.writeObject(this.relevantSimilarities);
+			oos.close();
+			System.out.println("Written serialized relevant similarities to " + this.serializedPath);
+		} catch(Exception e) {
+			System.out.println("Error serializing relevant similarities to " + this.serializedPath);
+			e.printStackTrace();
+		}
+	}
+	@SuppressWarnings("unchecked")
+	private boolean loadRelevantSimilarities() {
+		try {
+			InputStream file = new FileInputStream(this.serializedPath);
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream (buffer);
+			this.relevantSimilarities = (List<WordDistance>)input.readObject();
+			System.out.println("Loaded " + this.relevantSimilarities.size() + " relevant similarities");
+			input.close();
+			return true;
+		} catch (Exception e) {
+		    System.out.println("Failed to load the serialized relevant similarities from " + this.serializedPath);
+		    return false;
+		}
 	}
 
 	public void computeGraphStatistics() {
@@ -197,6 +243,9 @@ public class SpaceStatistics {
 	}
 
 	public List<WordDistance> getRelevantSimilarities() {
+		if(!this.loadRelevantSimilarities()) {
+			this.buildWordDistances();
+		}
 		return relevantSimilarities;
 	}
 

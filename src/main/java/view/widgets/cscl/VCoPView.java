@@ -190,22 +190,18 @@ public class VCoPView extends JFrame {
 				LocalizationUtils.getTranslation("View"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(
-						gl_contentPane.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-												.addGroup(gl_contentPane.createSequentialGroup()
-														.addComponent(panelViewCommunity, GroupLayout.DEFAULT_SIZE, 635,
-																Short.MAX_VALUE)
-														.addContainerGap())
-								.addGroup(
-										gl_contentPane.createSequentialGroup().addComponent(lblPath).addGap(110)
-												.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 435,
-														Short.MAX_VALUE)
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
-														GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
-								.addGap(6)))));
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_contentPane.createSequentialGroup().addContainerGap()
+						.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+										.addComponent(panelViewCommunity, GroupLayout.DEFAULT_SIZE, 635,
+												Short.MAX_VALUE)
+										.addContainerGap())
+								.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblPath).addGap(110)
+										.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch,
+												GroupLayout.PREFERRED_SIZE, 41, GroupLayout.PREFERRED_SIZE)
+										.addGap(6)))));
 		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
@@ -228,37 +224,33 @@ public class VCoPView extends JFrame {
 
 		GroupLayout gl_panelViewCommunity = new GroupLayout(panelViewCommunity);
 		gl_panelViewCommunity.setHorizontalGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
-								.addComponent(btnViewCommunity, Alignment.TRAILING)
-								.addGroup(gl_panelViewCommunity.createSequentialGroup()
-										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING)
-												.addComponent(lblInitialDate))
+				.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap().addGroup(gl_panelViewCommunity
+						.createParallelGroup(Alignment.LEADING)
+						.addComponent(btnViewCommunity, Alignment.TRAILING)
+						.addGroup(gl_panelViewCommunity
+								.createSequentialGroup()
+								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING)
+										.addComponent(lblInitialDate))
 								.addPreferredGap(ComponentPlacement.UNRELATED)
 								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.TRAILING, false)
-												.addComponent(frmtdtxtfldFinaldatetext, Alignment.LEADING)
-												.addComponent(frmtdtxtfldInputdatetext, Alignment.LEADING,
+												.addComponent(frmtdtxtfldFinaldatetext, Alignment.LEADING).addComponent(
+														frmtdtxtfldInputdatetext, Alignment.LEADING,
 														GroupLayout.PREFERRED_SIZE, 217, GroupLayout.PREFERRED_SIZE))))
 						.addComponent(lblFinalDate)).addContainerGap()));
 		gl_panelViewCommunity
-				.setVerticalGroup(
-						gl_panelViewCommunity
-								.createParallelGroup(
-										Alignment.LEADING)
-								.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
-										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE))
-										.addGap(32)
-										.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
-												.addComponent(lblInitialDate).addComponent(frmtdtxtfldInputdatetext,
-														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-														GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
-						.addGroup(
-								gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE).addComponent(lblFinalDate)
-										.addComponent(frmtdtxtfldFinaldatetext, GroupLayout.PREFERRED_SIZE,
+				.setVerticalGroup(gl_panelViewCommunity.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panelViewCommunity.createSequentialGroup().addContainerGap()
+								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)).addGap(32)
+								.addGroup(gl_panelViewCommunity
+										.createParallelGroup(Alignment.BASELINE).addComponent(lblInitialDate)
+										.addComponent(frmtdtxtfldInputdatetext, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-										.addGap(13).addComponent(btnViewCommunity).addContainerGap()));
+								.addPreferredGap(ComponentPlacement.RELATED, 40, Short.MAX_VALUE)
+								.addGroup(gl_panelViewCommunity.createParallelGroup(Alignment.BASELINE)
+										.addComponent(lblFinalDate).addComponent(frmtdtxtfldFinaldatetext,
+												GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+								.addGap(13).addComponent(btnViewCommunity).addContainerGap()));
 		panelViewCommunity.setLayout(gl_panelViewCommunity);
 		btnViewCommunity.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -271,7 +263,7 @@ public class VCoPView extends JFrame {
 					System.out.println("date1=" + date1 + ", date2=" + date2);
 
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					Community.processDocumentCollection(textFieldPath.getText(), true, date1, date2, 0, 7);
+					Community.processDocumentCollection(textFieldPath.getText(), true, true, date1, date2, 0, 7);
 					Toolkit.getDefaultToolkit().beep();
 					setCursor(null); // turn off the wait cursor
 				} else

@@ -44,12 +44,12 @@ public class DataGatheringTest {
 		BasicConfigurator.configure();
 
 		ReaderBenchServer.initializeDB();
-		LSA lsa = LSA.loadLSA("resources/config/LSA/letters_la", Lang.la);
-		LDA lda = LDA.loadLDA("resources/config/LDA/letters_la", Lang.la);
+		// LSA lsa = LSA.loadLSA("resources/config/LSA/letters_la", Lang.la);
+		// LDA lda = LDA.loadLDA("resources/config/LDA/letters_la", Lang.la);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/religious_ro", Lang.ro);
 		// LDA lda = LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro);
-		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
+		LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+		LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
 		// LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
 		// LSA lsa = LSA.loadLSA("resources/config/LSA/lemonde_nursery_fr",
@@ -78,8 +78,8 @@ public class DataGatheringTest {
 			// DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts",
 			// -1, true, lsa, lda, Lang.eng,
 			// true, true);
-			// DataGathering.processTexts("resources/in/texts 2 for
-			// familiarity", -1, true, lsa, lda, Lang.eng, true, true);
+			DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true,
+					true);
 			// DataGathering.processTexts("resources/in/essays/nursery_fr", -1,
 			// // true, lsa, lda, Lang.fr, true, true);
 			// DataGathering.processTexts("resources/in/Elvira/users 2010", -1,
@@ -102,10 +102,14 @@ public class DataGatheringTest {
 			// Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro,
 			// false, false);
 
-			DataGathering.processTexts("resources/in/comenius_la/01", 1, true, lsa, lda, Lang.la, false, false);
-			DataGathering.processTexts("resources/in/comenius_la/02", 1, true, lsa, lda, Lang.la, false, false);
-			DataGathering.processTexts("resources/in/comenius_la/03", 1, true, lsa, lda, Lang.la, false, false);
-			DataGathering.processTexts("resources/in/comenius_la/04", 1, true, lsa, lda, Lang.la, false, false);
+			// DataGathering.processTexts("resources/in/comenius_la/01", 1,
+			// true, lsa, lda, Lang.la, false, false);
+			// DataGathering.processTexts("resources/in/comenius_la/02", 1,
+			// true, lsa, lda, Lang.la, false, false);
+			// DataGathering.processTexts("resources/in/comenius_la/03", 1,
+			// true, lsa, lda, Lang.la, false, false);
+			// DataGathering.processTexts("resources/in/comenius_la/04", 1,
+			// true, lsa, lda, Lang.la, false, false);
 
 			/*
 			 * exportPlainTexts("resources/in/Elvira/users 2010");

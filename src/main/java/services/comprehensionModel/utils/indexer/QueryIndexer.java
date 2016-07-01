@@ -29,6 +29,8 @@ public class QueryIndexer {
 	public static String LdaPath = "resources/config/LDA/tasa_en";
 	public static Lang lang = Lang.eng;
 	
+	private int hdpGrade;
+	private int noTopSimilarWords;
 	private String text;
 	public AbstractDocument document;
 	
@@ -37,7 +39,9 @@ public class QueryIndexer {
 	private List<WordDistanceIndexer> syntacticIndexerList;
 	private Map<CiNodeDO, Double> nodeActivationScoreMap;
 	
-	public QueryIndexer(String text) {
+	public QueryIndexer(String text, int hdpGrade, int noTopSimilarWords) {
+		this.hdpGrade = hdpGrade;
+		this.noTopSimilarWords = noTopSimilarWords;
 		this.text = text;
 		this.cMUtils = new CMUtils();
 		this.nodeActivationScoreMap = new HashMap<CiNodeDO, Double>();
@@ -61,7 +65,7 @@ public class QueryIndexer {
 		this.addWordListToWordActivationScoreMap(this.semanticIndexer.wordList);
 	}
 	private void indexFullSemanticSpaceDistances() {
-		FullSemanticSpaceWordDistanceStrategy wdStrategy = new FullSemanticSpaceWordDistanceStrategy(QueryIndexer.lang);
+		FullSemanticSpaceWordDistanceStrategy wdStrategy = new FullSemanticSpaceWordDistanceStrategy(QueryIndexer.lang, this.hdpGrade, this.noTopSimilarWords);
 		
 		this.semanticIndexer = new WordDistanceIndexer(wdStrategy.getWordList(), wdStrategy);
 		this.addWordListToWordActivationScoreMap(this.semanticIndexer.wordList);

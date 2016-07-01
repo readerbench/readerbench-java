@@ -192,38 +192,8 @@ public class RunMeasurementsView extends JFrame {
 					// set final analysis language
 					lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
 
-					comboBoxLSA.removeAllItems();
-					comboBoxLDA.removeAllItems();
+					ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
 
-					switch (lang) {
-					case fr:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_FR)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_FR)
-							comboBoxLDA.addItem(url);
-						break;
-					case it:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_IT)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_IT)
-							comboBoxLDA.addItem(url);
-						break;
-					case es:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_ES)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_ES)
-							comboBoxLDA.addItem(url);
-						break;
-					default:
-						for (String url : ReaderBenchView.TRAINED_LSA_SPACES_EN)
-							comboBoxLSA.addItem(url);
-						for (String url : ReaderBenchView.TRAINED_LDA_MODELS_EN)
-							comboBoxLDA.addItem(url);
-						break;
-					}
-
-					comboBoxLSA.setEnabled(true);
-					comboBoxLDA.setEnabled(true);
 					btnRun.setEnabled(true);
 				}
 			}

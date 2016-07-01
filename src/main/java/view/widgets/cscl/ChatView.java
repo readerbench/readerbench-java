@@ -101,15 +101,15 @@ public class ChatView extends JFrame {
 														Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.RELATED).addComponent(panelConcepts,
 														GroupLayout.PREFERRED_SIZE, 246, GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap()));
+								.addContainerGap()));
 		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup().addContainerGap()
 						.addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 32, GroupLayout.PREFERRED_SIZE)
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-								.addComponent(panelConcepts, 0, 0, Short.MAX_VALUE)
-								.addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 633, Short.MAX_VALUE))
-				.addGap(1)));
+								.addComponent(panelConcepts, 0, 0, Short.MAX_VALUE).addComponent(panelContents,
+										GroupLayout.DEFAULT_SIZE, 633, Short.MAX_VALUE))
+						.addGap(1)));
 
 		JLabel lblContents = new JLabel("Contents");
 		lblContents.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -132,8 +132,8 @@ public class ChatView extends JFrame {
 							lsPart.add(part);
 						}
 
-						ParticipantInteractionView view = new ParticipantInteractionView("Participant", "out/graph.pdf",
-								lsPart, chat.getParticipantContributions(), true, false);
+						ParticipantInteractionView view = new ParticipantInteractionView("out/graph.pdf", lsPart,
+								chat.getParticipantContributions(), true, false);
 						view.setVisible(true);
 					}
 				});
@@ -225,31 +225,33 @@ public class ChatView extends JFrame {
 
 		GroupLayout gl_panelContents = new GroupLayout(panelContents);
 		gl_panelContents.setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
-								.addComponent(scrollPaneConcept, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 970,
-										Short.MAX_VALUE)
+				.addGroup(gl_panelContents.createSequentialGroup().addContainerGap().addGroup(gl_panelContents
+						.createParallelGroup(Alignment.TRAILING)
+						.addComponent(scrollPaneConcept, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 970,
+								Short.MAX_VALUE)
 						.addComponent(separator, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 970, Short.MAX_VALUE)
 						.addComponent(lblContents, Alignment.LEADING).addGroup(Alignment.LEADING,
 								gl_panelContents.createSequentialGroup()
 										.addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING, false)
 												.addComponent(btnParticipantEvolution, GroupLayout.DEFAULT_SIZE,
 														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(btnParticipantInvolvement, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnTimeEvolution)
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
-										.addComponent(btnCollaborationVoice, Alignment.TRAILING,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(btnCollaborationSocialKB, Alignment.TRAILING,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
-										.addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+												.addComponent(btnParticipantInvolvement, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addComponent(btnTimeEvolution).addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+												.addComponent(btnCollaborationVoice, Alignment.TRAILING,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+														Short.MAX_VALUE)
+												.addComponent(btnCollaborationSocialKB, Alignment.TRAILING,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+														Short.MAX_VALUE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+												.addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+												.addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
 						.addContainerGap()));
 		gl_panelContents
 				.setVerticalGroup(
@@ -264,10 +266,12 @@ public class ChatView extends JFrame {
 										.addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
 												.addComponent(btnParticipantInvolvement).addComponent(btnTimeEvolution)
 												.addComponent(btnCollaborationSocialKB).addComponent(btnSelectVoices))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-								.addComponent(btnParticipantEvolution).addComponent(btnCollaborationVoice)
-								.addComponent(btnDisplayVoiceInteranimation)).addContainerGap()));
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+												.addComponent(btnParticipantEvolution)
+												.addComponent(btnCollaborationVoice)
+												.addComponent(btnDisplayVoiceInteranimation))
+										.addContainerGap()));
 		panelContents.setLayout(gl_panelContents);
 		JLabel lblTitle = new JLabel("Discussion topic:");
 		lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
@@ -292,7 +296,7 @@ public class ChatView extends JFrame {
 				.addGroup(gl_panelHeader.createSequentialGroup()
 						.addContainerGap().addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblTitle).addComponent(lblChatTitle))
-				.addContainerGap(10, Short.MAX_VALUE)));
+						.addContainerGap(10, Short.MAX_VALUE)));
 		panelHeader.setLayout(gl_panelHeader);
 
 		JLabel lblTopics = new JLabel("Topics");
@@ -392,19 +396,18 @@ public class ChatView extends JFrame {
 		});
 
 		GroupLayout gl_panelConcepts = new GroupLayout(panelConcepts);
-		gl_panelConcepts
-				.setHorizontalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap()
-								.addGroup(gl_panelConcepts.createParallelGroup(Alignment.TRAILING).addComponent(
-										scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+		gl_panelConcepts.setHorizontalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap().addGroup(gl_panelConcepts
+						.createParallelGroup(Alignment.TRAILING)
+						.addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
 						.addComponent(separatorTopics, GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
 						.addGroup(gl_panelConcepts.createSequentialGroup().addGroup(gl_panelConcepts
 								.createParallelGroup(Alignment.LEADING)
 								.addComponent(lblCategory, GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
-								.addGroup(gl_panelConcepts.createSequentialGroup().addGap(6)
-										.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-												.addComponent(chckbxVerbTopics, Alignment.TRAILING,
-														GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
+								.addGroup(gl_panelConcepts.createSequentialGroup().addGap(6).addGroup(gl_panelConcepts
+										.createParallelGroup(Alignment.LEADING)
+										.addComponent(chckbxVerbTopics, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE,
+												98, Short.MAX_VALUE)
 										.addComponent(chckbxNounTopics, GroupLayout.DEFAULT_SIZE, 98, Short.MAX_VALUE)
 										.addComponent(lblFilterOnly))))
 								.addPreferredGap(ComponentPlacement.RELATED)
@@ -412,37 +415,35 @@ public class ChatView extends JFrame {
 										.addComponent(sliderTopics, GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
 										.addComponent(comboBoxCategory, GroupLayout.PREFERRED_SIZE, 158,
 												GroupLayout.PREFERRED_SIZE)))
-										.addComponent(lblTopics).addComponent(btnGenerateNetwork))
-								.addContainerGap()));
+						.addComponent(lblTopics).addComponent(btnGenerateNetwork)).addContainerGap()));
 		gl_panelConcepts
-				.setVerticalGroup(
-						gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-								.addGroup(
-										gl_panelConcepts.createSequentialGroup().addContainerGap()
-												.addComponent(lblTopics).addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(separatorTopics, GroupLayout.PREFERRED_SIZE, 2,
-														GroupLayout.PREFERRED_SIZE)
+				.setVerticalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap().addComponent(lblTopics)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(separatorTopics, GroupLayout.PREFERRED_SIZE, 2,
+										GroupLayout.PREFERRED_SIZE)
 								.addGap(18)
 								.addGroup(gl_panelConcepts.createParallelGroup(Alignment.BASELINE)
 										.addComponent(lblCategory, GroupLayout.PREFERRED_SIZE, 17,
 												GroupLayout.PREFERRED_SIZE)
 										.addComponent(comboBoxCategory, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING, false)
-								.addGroup(gl_panelConcepts.createSequentialGroup().addComponent(lblFilterOnly)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(chckbxNounTopics, GroupLayout.PREFERRED_SIZE, 15,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE,
-												Short.MAX_VALUE)
-										.addComponent(chckbxVerbTopics, GroupLayout.PREFERRED_SIZE, 15,
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING, false)
+										.addGroup(gl_panelConcepts.createSequentialGroup().addComponent(lblFilterOnly)
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addComponent(chckbxNounTopics, GroupLayout.PREFERRED_SIZE, 15,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE,
+														Short.MAX_VALUE)
+												.addComponent(chckbxVerbTopics, GroupLayout.PREFERRED_SIZE, 15,
+														GroupLayout.PREFERRED_SIZE))
+										.addComponent(sliderTopics, GroupLayout.PREFERRED_SIZE, 64,
 												GroupLayout.PREFERRED_SIZE))
-								.addComponent(sliderTopics, GroupLayout.PREFERRED_SIZE, 64, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.UNRELATED)
-						.addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnGenerateNetwork)
-						.addContainerGap()));
+								.addPreferredGap(ComponentPlacement.UNRELATED)
+								.addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnGenerateNetwork)
+								.addContainerGap()));
 		modelTopics = new TopicsTableModel();
 
 		tableTopics = new JTable(modelTopics);

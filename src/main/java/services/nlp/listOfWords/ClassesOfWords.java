@@ -106,43 +106,54 @@ public class ClassesOfWords {
 		return set;
 	}
 
-	public double countAveragePatternOccurrences(AbstractDocument document, String className) {
-		int no_occurences = 0;
-		int no_blocks = 0;
-		for (String p : this.getClasses().get(className)) {
-			// check that the pattern does not exist in any of the previous
-			// sentences
-			for (Block b : document.getBlocks()) {
-				if (b != null) {
-					no_blocks++;
-					for (Sentence s : b.getSentences()) {
-						String text = TextPreprocessing.cleanText(s.getText(), document.getLanguage());
+	public static int countPatternOccurrences(String text, String pattern) {
+		Pattern p = Pattern.compile("(?:\\s)" + pattern.trim() + "(?:\\s)");
+		Matcher matcher = p.matcher(" " + text + " ");
 
-						Pattern pattern = Pattern.compile("(?:\\s)" + p + "(?:\\s)");
-						Matcher matcher = pattern.matcher(text);
+		int count = 0;
+		if (matcher.find())
+			count++;
+		if (count > 0) {
+			while (matcher.find(matcher.end() - 1)) {
+				count++;
+			}
+		}
 
-						int count = 0;
-						if (matcher.find())
-							count++;
-						if (count > 0) {
-							while (matcher.find(matcher.end() - 1))
-								count++;
-						}
-						no_occurences += count;
-					}
+		return count;
+	}
+
+	public static int countPatternOccurrences(AbstractDocument document, String pattern) {
+		int no_occurrences = 0;
+		for (Block b : document.getBlocks()) {
+			if (b != null) {
+				for (Sentence s : b.getSentences()) {
+					no_occurrences += countPatternOccurrences(
+							TextPreprocessing.cleanText(s.getText(), document.getLanguage()), pattern);
 				}
 			}
 		}
+		return no_occurrences;
+	}
+
+	public double countAveragePatternOccurrences(AbstractDocument document, String className) {
+		int no_occurrences = 0;
+		int no_blocks = document.getNoBlocks();
+
+		for (String p : this.getClasses().get(className)) {
+			no_occurrences += countPatternOccurrences(document, p);
+		}
+
 		if (no_blocks == 0) {
 			return ComplexityIndices.IDENTITY;
 		}
-		return ((double) no_occurences) / no_blocks;
+		return ((double) no_occurrences) / no_blocks;
 	}
 
 	public static void main(String[] args) {
-		String text = TextPreprocessing.cleanText("C'est-à-dire atque  que que queque Tout va atque bien", Lang.fr);
+		String text = TextPreprocessing
+				.cleanText("C'est-à-dire atque alors qu'elle que n't que queque Tout va atque bien", Lang.fr);
 		System.out.println(text);
-		Pattern pattern = Pattern.compile("(?:\\s)que(?:\\s)");
+		Pattern pattern = Pattern.compile("(?:\\s)alors qu '(?:\\s)");
 		Matcher matcher = pattern.matcher(text);
 
 		int count = 0;

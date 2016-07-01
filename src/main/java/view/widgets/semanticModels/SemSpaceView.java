@@ -29,7 +29,6 @@ import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
 import org.gephi.appearance.plugin.RankingElementColorTransformer;
-import org.gephi.appearance.plugin.RankingLabelSizeTransformer;
 import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.GraphController;
@@ -62,10 +61,8 @@ public class SemSpaceView extends JFrame {
 
 	static Logger logger = Logger.getLogger(SemSpaceView.class);
 
-	public static final int MIN_NODE_SIZE = 5;
-	public static final int MAX_NODE_SIZE = 40;
-	public static final int MIN_LABEL_SIZE = 1;
-	public static final int MAX_LABEL_SIZE = 5;
+	public static final int MIN_NODE_SIZE = 10;
+	public static final int MAX_NODE_SIZE = 20;
 
 	private ISemanticModel semModel = null;
 	private JSplitPane viewSplitPane = null;
@@ -191,15 +188,6 @@ public class SemSpaceView extends JFrame {
 			}
 		}
 
-		// Rank label size - set a multiplier size
-		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingLabelSizeTransformer.class);
-		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
-				.getTransformer();
-		labelSizeTransformer.setMinSize(MIN_LABEL_SIZE);
-		labelSizeTransformer.setMaxSize(MAX_LABEL_SIZE);
-		appearanceController.transform(centralityRanking2);
-
 		logger.info("Generating preview...");
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
@@ -209,7 +197,7 @@ public class SemSpaceView extends JFrame {
 				new DependantOriginalColor(Color.BLACK));
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
 
 		// New Processing target, get the PApplet
@@ -444,8 +432,17 @@ public class SemSpaceView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
+		// JFrame frame = new
+		// SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
+		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LDA/letters_la", Lang.la));
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		frame.setVisible(true);
+
+		// frame = new
+		// SemSpaceView(LSA.loadLSA("resources/config/LSA/letters_la",
+		// Lang.la));
+		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		frame.setVisible(true);
 	}

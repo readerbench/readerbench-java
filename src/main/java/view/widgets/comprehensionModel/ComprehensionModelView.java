@@ -289,8 +289,11 @@ public class ComprehensionModelView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ComprehensionModel ciModel = new ComprehensionModel(
-						"I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.");
+				String text = "I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.";
+				int hdpGrade = 2;
+				int noTopSimilarWords = 5;
+				
+				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noTopSimilarWords);
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}
