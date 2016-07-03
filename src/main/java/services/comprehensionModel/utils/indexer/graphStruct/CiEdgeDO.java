@@ -21,4 +21,14 @@ public class CiEdgeDO {
 			return "Semantic";
 		return "Syntactic";
 	}
+	
+	public CiNodeDO getOppositeNode(CiNodeDO node) {
+		if(this.node1.equals(node)) {
+			return this.node2;
+		}
+		if(this.node2.equals(node)) {
+			return this.node1;
+		}
+		return null;
+	}
 }

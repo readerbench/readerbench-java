@@ -215,7 +215,7 @@ public class ComprehensionModelView extends JFrame {
 
 		List<CiNodeDO> nodeItemList = new ArrayList<CiNodeDO>();
 
-		this.ciModel.applyPageRank();
+		this.ciModel.markAllNodesAsInactive();
 		WordDistanceIndexer syntacticIndexer = this.ciModel.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
 		CiGraphDO ciGraph = syntacticIndexer.getCiGraph(CiNodeType.Syntactic);
@@ -225,11 +225,8 @@ public class ComprehensionModelView extends JFrame {
 		ciGraph = ciGraph.getCombinedGraph(this.ciModel.currentGraph);
 
 		this.ciModel.currentGraph = ciGraph;
-		
-		System.out.println("--------------------");
-		System.out.println(this.ciModel.getNodeActivationScoreMap());
 		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
-		System.out.println(this.ciModel.getNodeActivationScoreMap());
+		this.ciModel.applyPageRank(sentenceIndex);
 
 		nodeItemList = ciGraph.nodeList;
 
@@ -292,8 +289,12 @@ public class ComprehensionModelView extends JFrame {
 				String text = "I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.";
 				int hdpGrade = 2;
 				int noTopSimilarWords = 5;
+				double activationThreshold = 0.3;
+				int noActiveWords = 3;
+				int noActiveWordsIncrement = 1;
 				
-				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noTopSimilarWords);
+				
+				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noTopSimilarWords, activationThreshold, noActiveWords, noActiveWordsIncrement);
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}

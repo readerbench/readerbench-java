@@ -34,7 +34,11 @@ public class ComprehensionModelManagementView extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtFieldHdpGrade;
 	private JTextField textFieldSimilarWords;
+	private JTextField textFieldActivationThreshold;
+	private JTextField textFieldNoActiveWords;
+	private JTextField textFieldNoActiveWordsIncrement;
 	private JTextArea textAreaContent;
+	private JLabel label_2;
 
 	/**
 	 * Create the frame.
@@ -49,7 +53,7 @@ public class ComprehensionModelManagementView extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 
-		JLabel lblComplexityLevel = new JLabel("HDP Grade:");
+		JLabel lblComplexityLevel = new JLabel("Semantic Model:");
 		lblComplexityLevel.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		txtFieldHdpGrade = new JTextField();
@@ -65,8 +69,6 @@ public class ComprehensionModelManagementView extends JFrame {
 
 		JLabel lblText = new JLabel(LocalizationUtils.getTranslation("Text"));
 		lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
-
-		JSeparator separator = new JSeparator();
 		
 		textAreaContent = new JTextArea();
 		textAreaContent.setLineWrap(true);
@@ -83,29 +85,65 @@ public class ComprehensionModelManagementView extends JFrame {
 			}
 		});
 		
+		JLabel label = new JLabel("Activation Threshold:");
+		label.setFont(new Font("SansSerif", Font.BOLD, 12));
+		
+		textFieldActivationThreshold = new JTextField();
+		textFieldActivationThreshold.setText("0.2");
+		textFieldActivationThreshold.setColumns(10);
+		
+		JLabel label_1 = new JLabel("Active Words:");
+		label_1.setFont(new Font("SansSerif", Font.BOLD, 12));
+		
+		textFieldNoActiveWords = new JTextField();
+		textFieldNoActiveWords.setText("3");
+		textFieldNoActiveWords.setColumns(10);
+		
+		label_2 = new JLabel("A.W. Increment:");
+		label_2.setFont(new Font("SansSerif", Font.BOLD, 12));
+		
+		textFieldNoActiveWordsIncrement = new JTextField();
+		textFieldNoActiveWordsIncrement.setText("1");
+		textFieldNoActiveWordsIncrement.setColumns(10);
+		
+		
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane.setHorizontalGroup(
 			gl_contentPane.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_contentPane.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-								.addComponent(textAreaContent, GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
-								.addComponent(separator, GroupLayout.DEFAULT_SIZE, 689, Short.MAX_VALUE)
-								.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 222, GroupLayout.PREFERRED_SIZE))
-							.addGap(9))
+							.addGap(471)
+							.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 222, GroupLayout.PREFERRED_SIZE))
+						.addComponent(textAreaContent, GroupLayout.PREFERRED_SIZE, 693, GroupLayout.PREFERRED_SIZE)
+						.addComponent(lblText)
 						.addGroup(gl_contentPane.createSequentialGroup()
-							.addComponent(lblComplexityLevel)
-							.addPreferredGap(ComponentPlacement.UNRELATED)
-							.addComponent(txtFieldHdpGrade, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)
-							.addGap(29)
-							.addComponent(lblSource)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(textFieldSimilarWords, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-							.addGap(418))
-						.addComponent(lblText))
-					.addContainerGap())
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(lblComplexityLevel)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addComponent(txtFieldHdpGrade, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addComponent(label_1, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.UNRELATED)
+									.addComponent(textFieldNoActiveWords, GroupLayout.PREFERRED_SIZE, 42, GroupLayout.PREFERRED_SIZE)))
+							.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(29)
+									.addComponent(lblSource)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textFieldSimilarWords, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+									.addGap(35)
+									.addComponent(label, GroupLayout.PREFERRED_SIZE, 129, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textFieldActivationThreshold, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE))
+								.addGroup(gl_contentPane.createSequentialGroup()
+									.addGap(18)
+									.addComponent(label_2, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED)
+									.addComponent(textFieldNoActiveWordsIncrement, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)))))
+					.addContainerGap(17, Short.MAX_VALUE))
 		);
 		gl_contentPane.setVerticalGroup(
 			gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -115,16 +153,22 @@ public class ComprehensionModelManagementView extends JFrame {
 						.addComponent(lblComplexityLevel)
 						.addComponent(txtFieldHdpGrade, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 						.addComponent(lblSource)
-						.addComponent(textFieldSimilarWords, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-					.addGap(23)
+						.addComponent(textFieldSimilarWords, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(label)
+						.addComponent(textFieldActivationThreshold, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGap(28)
+					.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+						.addComponent(label_1)
+						.addComponent(textFieldNoActiveWords, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(label_2)
+						.addComponent(textFieldNoActiveWordsIncrement, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+					.addGap(27)
 					.addComponent(lblText, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addComponent(separator, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(textAreaContent, GroupLayout.PREFERRED_SIZE, 414, GroupLayout.PREFERRED_SIZE)
-					.addGap(63)
+					.addGap(35)
 					.addComponent(btnNewButton)
-					.addGap(39))
+					.addGap(38))
 		);
 		contentPane.setLayout(gl_contentPane);
 	}
@@ -132,12 +176,16 @@ public class ComprehensionModelManagementView extends JFrame {
 	public void openComprehensionModel() {
 		int hdpGrade = Integer.parseInt(this.txtFieldHdpGrade.getText());
 		int noSimilarWords = Integer.parseInt(this.textFieldSimilarWords.getText());
+		double activationThreshold = Double.parseDouble(this.textFieldActivationThreshold.getText());
+		int noActiveWords = Integer.parseInt(this.textFieldNoActiveWords.getText());
+		int noActiveWordsIncrement = Integer.parseInt(this.textFieldNoActiveWordsIncrement.getText());
+		
 		String text = this.textAreaContent.getText();
 		
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noSimilarWords);
+				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noSimilarWords, activationThreshold, noActiveWords, noActiveWordsIncrement);
 				ComprehensionModelView view = new ComprehensionModelView(ciModel);
 				view.setVisible(true);
 			}
