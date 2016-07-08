@@ -4,24 +4,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.mahout.math.DenseMatrix;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decompositions.SSVD;
-import org.apache.mahout.math.drm.DistributedEngine$class;
-import org.apache.mahout.math.drm.DrmLike;
-import org.openide.util.Exceptions;
+
 import scala.Tuple3;
 
 public class RunSVD {

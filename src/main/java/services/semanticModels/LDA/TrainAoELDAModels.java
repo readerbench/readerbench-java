@@ -1,13 +1,12 @@
-package services.ageOfExposure;
+package services.semanticModels.LDA;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 
-import services.semanticModels.LDA.LDA;
 import data.Lang;
 
-public class TrainLDAModels {
+public class TrainAoELDAModels {
 
 	public static void trainModels(String path, int noThreads, int noIterations) throws IOException {
 		// determine number of classes
@@ -40,7 +39,7 @@ public class TrainLDAModels {
 
 	public static void main(String[] args) {
 		try {
-			TrainLDAModels.trainModels("resources/in/AoE 100", 8, 20000);
+			TrainAoELDAModels.trainModels("resources/in/AoE 100", 8, 20000);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

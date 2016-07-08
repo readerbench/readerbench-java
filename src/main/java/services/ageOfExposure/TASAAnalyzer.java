@@ -39,7 +39,7 @@ public class TASAAnalyzer {
 	private Map<Integer, LDA> models;
 	private LDA matureModel;
 	private int noGrades;
-	private Map<Word, List<Double>> aoeEvolution;
+	private Map<Word, List<Double>> AoEEvolution;
 
 	public TASAAnalyzer(String path, int noThreads) {
 		super();
@@ -119,9 +119,9 @@ public class TASAAnalyzer {
 
 		Integer[] matches;
 		List<Double> stats;
-		aoeEvolution = new HashMap<Word, List<Double>>();
+		AoEEvolution = new HashMap<Word, List<Double>>();
 		for (Word analyzedWord : matureModel.getWordProbDistributions().keySet())
-			aoeEvolution.put(analyzedWord, new LinkedList<Double>());
+			AoEEvolution.put(analyzedWord, new LinkedList<Double>());
 
 		for (int cLevel = 0; cLevel < noGrades - 1; cLevel++) {
 			logger.info("Building word distributions for grade level " + cLevel + "...");
@@ -171,7 +171,7 @@ public class TASAAnalyzer {
 				// matureTopicDistr[i] /= sumM;
 				// }
 
-				stats = aoeEvolution.get(analyzedWord);
+				stats = AoEEvolution.get(analyzedWord);
 				double similarity = 0;
 				if (sumI != 0 && sumM != 0)
 					similarity = VectorAlgebra.cosineSimilarity(intermediateTopicDistr, matureTopicDistr);
@@ -184,7 +184,7 @@ public class TASAAnalyzer {
 		taskPool.shutdown();
 	}
 
-	public Map<String, Double> getWordAcquisitionAge(String normFile) {
+	public static Map<String, Double> getWordAcquisitionAge(String normFile) {
 		Map<String, Double> aoaWords = new HashMap<String, Double>();
 		logger.info("Loading file " + normFile + "...");
 
@@ -245,7 +245,7 @@ public class TASAAnalyzer {
 			List<Double> stats;
 
 			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
-				stats = aoeEvolution.get(analyzedWord);
+				stats = AoEEvolution.get(analyzedWord);
 				content = analyzedWord.getExtendedLemma() + ",";
 				// AoA indices
 				if (birdAoA.containsKey(analyzedWord.getLemma())) {

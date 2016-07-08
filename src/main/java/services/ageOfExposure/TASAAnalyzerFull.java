@@ -1,11 +1,9 @@
 package services.ageOfExposure;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,8 +19,8 @@ import java.util.logging.Logger;
 
 import org.apache.log4j.BasicConfigurator;
 
-import data.Word;
 import data.Lang;
+import data.Word;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
@@ -39,7 +37,7 @@ public class TASAAnalyzerFull {
 	private Map<Integer, LDA> models;
 	private LDA matureModel;
 	private int noClasses;
-	private Map<Word, List<Double>> loweEvolution;
+	private Map<Word, List<Double>> AoEEvolution;
 
 	public TASAAnalyzerFull(String path, int noThreads) {
 		super();
@@ -139,9 +137,9 @@ public class TASAAnalyzerFull {
 
 		Double[][] matches;
 		List<Double> stats;
-		loweEvolution = new HashMap<Word, List<Double>>();
+		AoEEvolution = new HashMap<Word, List<Double>>();
 		for (Word analyzedWord : matureModel.getWordProbDistributions().keySet())
-			loweEvolution.put(analyzedWord, new LinkedList<Double>());
+			AoEEvolution.put(analyzedWord, new LinkedList<Double>());
 
 		for (int cLevel = 0; cLevel < noClasses - 1; cLevel++) {
 			logger.info("Building word distributions for grade level " + cLevel + "...");
@@ -187,7 +185,7 @@ public class TASAAnalyzerFull {
 						matureTopicDistr[i] /= sumM;
 				}
 
-				stats = loweEvolution.get(analyzedWord);
+				stats = AoEEvolution.get(analyzedWord);
 				double similarity = 0;
 				if (sumI != 0 && sumM != 0)
 					similarity = VectorAlgebra.cosineSimilarity(intermediateTopicDistr, matureTopicDistr);
@@ -201,41 +199,13 @@ public class TASAAnalyzerFull {
 
 	}
 
-	public Map<String, Double> getWordAcquisitionAge(String normFile) {
-		Map<String, Double> aoaWords = new HashMap<String, Double>();
-		logger.info("Loading file " + normFile + "...");
-
-		/* Compute the AgeOfAcquisition Dictionary */
-		String tokens[];
-		String line;
-		String word;
-		try {
-			BufferedReader br = new BufferedReader(
-					new FileReader("resources/config/WordLists/age_of_acquisition_en/" + normFile));
-			while ((line = br.readLine()) != null) {
-				tokens = line.split(",");
-				word = tokens[0].trim().replaceAll(" ", "");
-
-				if (tokens[1].equals("NA"))
-					continue;
-
-				Double.parseDouble(tokens[1]);
-				aoaWords.put(word, Double.parseDouble(tokens[1]));
-			}
-			br.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return aoaWords;
-	}
-
 	public void writeResults() {
 		// determine word acquisition ages
-		Map<String, Double> birdAoA = getWordAcquisitionAge("Bird.csv");
-		Map<String, Double> bristolAoA = getWordAcquisitionAge("Bristol.csv");
-		Map<String, Double> corteseAoA = getWordAcquisitionAge("Cortese.csv");
-		Map<String, Double> kupermanAoA = getWordAcquisitionAge("Kuperman.csv");
-		Map<String, Double> shockAoA = getWordAcquisitionAge("Shock.csv");
+		Map<String, Double> birdAoA = TASAAnalyzer.getWordAcquisitionAge("Bird.csv");
+		Map<String, Double> bristolAoA = TASAAnalyzer.getWordAcquisitionAge("Bristol.csv");
+		Map<String, Double> corteseAoA = TASAAnalyzer.getWordAcquisitionAge("Cortese.csv");
+		Map<String, Double> kupermanAoA = TASAAnalyzer.getWordAcquisitionAge("Kuperman.csv");
+		Map<String, Double> shockAoA = TASAAnalyzer.getWordAcquisitionAge("Shock.csv");
 
 		try {
 			BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(
@@ -262,7 +232,7 @@ public class TASAAnalyzerFull {
 			List<Double> stats;
 
 			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
-				stats = loweEvolution.get(analyzedWord);
+				stats = AoEEvolution.get(analyzedWord);
 				content = analyzedWord.getExtendedLemma() + ",";
 				// AoA indices
 				if (birdAoA.containsKey(analyzedWord.getLemma())) {
