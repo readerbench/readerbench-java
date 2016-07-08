@@ -257,7 +257,34 @@ public class PdfToTextConverter {
 
             parsedText = pdfStripper.getText(pdDoc);
             // replace all single \n's with space; multiple \ns means new paragraph
-            parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+            // OLD method - should be replaced
+            //parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+            
+            // NEW method
+            String lines[] = parsedText.split("\\r?\\n");
+            StringBuilder documentBuilder = new StringBuilder();
+            StringBuilder lineBuilder = new StringBuilder();
+            logger.info("Extracted " + lines.length + " lines from document.");
+            for(String line : lines) {
+            	logger.info("Processing line " + line);
+            	line = line.trim();
+            	if (line.length() == 0) continue;
+            	// if there is a dot at the end of the line, stop the string builder
+            	if (line.charAt(line.length() - 1) == '.') {
+					documentBuilder.append(lineBuilder.toString());
+            		documentBuilder.append("\n");
+            		lineBuilder.setLength(0);
+            	}
+            	// if there is no dot at the end of the line, append the next string to this line
+            	else {
+            		lineBuilder.append(line);
+            	}
+            }
+            if (lineBuilder.length() != 0) {
+            	documentBuilder.append(lineBuilder.toString());
+            	documentBuilder.append("\n");
+            }
+            parsedText = documentBuilder.toString();
 
             /*StringBuilder paragraph = new StringBuilder(); 
 			for (int i = 0; i < parsedText.length(); i++) {

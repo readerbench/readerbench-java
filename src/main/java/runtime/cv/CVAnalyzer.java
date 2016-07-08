@@ -84,6 +84,7 @@ public class CVAnalyzer {
 			}
 			sb.append("\n");
 			
+			//test
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
 
 			System.out.println("Incep procesarea CV-urilor");
