@@ -62,7 +62,6 @@ public class SemanticModelsTraining extends JFrame {
 	private JComboBox<String> comboBoxLDALanguage;
 	private JComboBox<String> comboBoxLSALanguage;
 	private JCheckBox chckbxUsePosTagging;
-	private JCheckBox chckbxConsiderWordAssociations;
 	private JTextField textFieldLSAFile;
 	private JTextField textFieldLSARank;
 	private JTextField textFieldLSAReduceTasks;
@@ -78,10 +77,9 @@ public class SemanticModelsTraining extends JFrame {
 		private int minNoWords;
 		private boolean usePosTagging;
 		private int selectedCase;
-		private boolean includeWordAssociations;
 
 		public PreProcessingTask(String input, String output, Lang lang, int minNoWords, boolean usePosTagging,
-				boolean includeWordAssociations, int selectedCase) {
+				int selectedCase) {
 			super();
 			this.input = input;
 			this.output = output;
@@ -89,10 +87,9 @@ public class SemanticModelsTraining extends JFrame {
 			this.minNoWords = minNoWords;
 			this.usePosTagging = usePosTagging;
 			this.selectedCase = selectedCase;
-			this.includeWordAssociations = includeWordAssociations;
 		}
 
-        @Override
+		@Override
 		public Void doInBackground() {
 			btnPreProcess.setEnabled(false);
 			btnLSATrain.setEnabled(false);
@@ -102,14 +99,13 @@ public class SemanticModelsTraining extends JFrame {
 				PreProcessing preprocess = new PreProcessing();
 				switch (selectedCase) {
 				case 1:
-					preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords, includeWordAssociations);
+					preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords);
 					break;
 				case 2:
-					preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords, includeWordAssociations);
+					preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords);
 					break;
 				default:
-					preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords,
-							includeWordAssociations);
+					preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
 				}
 			} catch (Exception exc) {
 				logger.error("Error processing input file " + exc.getMessage(), exc);
@@ -315,7 +311,7 @@ public class SemanticModelsTraining extends JFrame {
 				}
 
 				PreProcessingTask task = new PreProcessingTask(input.getPath(), textFieldOutput.getText(), lang,
-						minNoWords, chckbxUsePosTagging.isSelected(), chckbxConsiderWordAssociations.isSelected(),
+						minNoWords, chckbxUsePosTagging.isSelected(),
 						SemanticModelsTraining.this.comboBoxFormat.getSelectedIndex());
 				task.execute();
 			}
@@ -328,37 +324,35 @@ public class SemanticModelsTraining extends JFrame {
 		textFieldMinWords.setHorizontalAlignment(SwingConstants.RIGHT);
 		textFieldMinWords.setColumns(10);
 
-		chckbxConsiderWordAssociations = new JCheckBox("Consider word associations");
-
 		GroupLayout gl_panelPreProcessing = new GroupLayout(panelPreProcessing);
-		gl_panelPreProcessing.setHorizontalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-								.addComponent(lblSelectInput).addComponent(lblOutputFileName).addComponent(lblFormat)
-								.addComponent(lblLanguage).addComponent(lblMinWords))
-						.addGap(18)
-						.addGroup(
-								gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+		gl_panelPreProcessing
+				.setHorizontalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
+								.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+										.addComponent(lblSelectInput)
+										.addComponent(
+												lblOutputFileName)
+										.addComponent(lblFormat).addComponent(lblLanguage).addComponent(lblMinWords))
+								.addGap(18)
+								.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_panelPreProcessing.createSequentialGroup()
 												.addComponent(textFieldInput, GroupLayout.DEFAULT_SIZE, 255,
 														Short.MAX_VALUE)
 												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnBrowse))
 										.addComponent(comboBoxFormat, 0, 336, Short.MAX_VALUE)
 										.addComponent(comboBoxLanguage, 0, 336, Short.MAX_VALUE)
-										.addComponent(textFieldOutput, 336, 336,
-												336)
-								.addGroup(gl_panelPreProcessing.createSequentialGroup()
-										.addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE, 97,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-												.addComponent(chckbxConsiderWordAssociations)
-												.addGroup(gl_panelPreProcessing.createSequentialGroup()
-														.addComponent(chckbxUsePosTagging)
-														.addPreferredGap(ComponentPlacement.RELATED,
-																GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-														.addComponent(btnPreProcess)))))
-						.addContainerGap()));
+										.addComponent(textFieldOutput, 336, 336, 336)
+										.addGroup(gl_panelPreProcessing.createSequentialGroup()
+												.addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE, 97,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+														.addGroup(gl_panelPreProcessing.createSequentialGroup()
+																.addComponent(chckbxUsePosTagging)
+																.addPreferredGap(ComponentPlacement.RELATED,
+																		GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+																.addComponent(btnPreProcess)))))
+								.addContainerGap()));
 		gl_panelPreProcessing.setVerticalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
 						.addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE)
@@ -385,9 +379,8 @@ public class SemanticModelsTraining extends JFrame {
 								gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE).addComponent(lblMinWords)
 										.addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE,
 												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(chckbxUsePosTagging).addComponent(btnPreProcess))
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(chckbxConsiderWordAssociations)
-						.addContainerGap(14, Short.MAX_VALUE)));
+										.addComponent(chckbxUsePosTagging).addComponent(btnPreProcess))
+						.addPreferredGap(ComponentPlacement.RELATED).addContainerGap(14, Short.MAX_VALUE)));
 		panelPreProcessing.setLayout(gl_panelPreProcessing);
 
 		JPanel panelLSATraining = new JPanel();
@@ -499,72 +492,108 @@ public class SemanticModelsTraining extends JFrame {
 		});
 
 		GroupLayout gl_panelLSATraining = new GroupLayout(panelLSATraining);
-		gl_panelLSATraining.setHorizontalGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelLSATraining.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-								.addGroup(Alignment.TRAILING, gl_panelLSATraining.createSequentialGroup()
-										.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-												.addGroup(gl_panelLSATraining.createSequentialGroup()
-														.addComponent(lblLSAInputFile)
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(textFieldLSAFile, GroupLayout.DEFAULT_SIZE, 316,
-																Short.MAX_VALUE))
-												.addComponent(lblTxtOnly))
-										.addPreferredGap(ComponentPlacement.RELATED).addComponent(
-												btnLSAFile))
-						.addGroup(Alignment.TRAILING,
-								gl_panelLSATraining.createSequentialGroup().addGroup(gl_panelLSATraining
-										.createParallelGroup(Alignment.LEADING).addComponent(lblLSALanguage)
-										.addComponent(lblLSARank).addComponent(lblLSAReduceTasks))
-								.addGap(29)
-								.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_panelLSATraining.createSequentialGroup()
-												.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-														.addComponent(textFieldLSAReduceTasks, GroupLayout.DEFAULT_SIZE,
-																66, Short.MAX_VALUE)
-														.addComponent(textFieldLSARank, Alignment.TRAILING,
-																GroupLayout.DEFAULT_SIZE, 66, Short.MAX_VALUE))
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.TRAILING)
-														.addGroup(gl_panelLSATraining.createSequentialGroup()
-																.addComponent(lblLSAPowerInterations)
-																.addPreferredGap(ComponentPlacement.RELATED)
-																.addComponent(textFieldLSAPowerIterations,
-																		GroupLayout.PREFERRED_SIZE, 91,
-																		GroupLayout.PREFERRED_SIZE))
-														.addComponent(btnLSATrain)))
-										.addComponent(comboBoxLSALanguage, 0, 297, Short.MAX_VALUE)))
-						.addComponent(chckbxLSAUseHalfSigma)).addContainerGap()));
-		gl_panelLSATraining.setVerticalGroup(gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelLSATraining.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblLSAInputFile).addComponent(btnLSAFile).addComponent(textFieldLSAFile,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTxtOnly)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(
-								gl_panelLSATraining.createParallelGroup(Alignment.BASELINE).addComponent(lblLSALanguage)
-										.addComponent(comboBoxLSALanguage, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE).addComponent(lblLSARank)
-								.addComponent(textFieldLSAPowerIterations, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblLSAPowerInterations).addComponent(textFieldLSARank,
-										GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.TRAILING)
-								.addGroup(gl_panelLSATraining.createSequentialGroup()
+		gl_panelLSATraining
+				.setHorizontalGroup(
+						gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
+								.addGroup(
+										gl_panelLSATraining.createSequentialGroup()
+												.addContainerGap().addGroup(gl_panelLSATraining
+														.createParallelGroup(Alignment.LEADING).addGroup(
+																Alignment.TRAILING, gl_panelLSATraining
+																		.createSequentialGroup()
+																		.addGroup(gl_panelLSATraining
+																				.createParallelGroup(Alignment.LEADING)
+																				.addGroup(gl_panelLSATraining
+																						.createSequentialGroup()
+																						.addComponent(lblLSAInputFile)
+																						.addPreferredGap(
+																								ComponentPlacement.RELATED)
+																						.addComponent(textFieldLSAFile,
+																								GroupLayout.DEFAULT_SIZE,
+																								316, Short.MAX_VALUE))
+																				.addComponent(lblTxtOnly))
+																		.addPreferredGap(ComponentPlacement.RELATED)
+																		.addComponent(btnLSAFile))
+														.addGroup(Alignment.TRAILING, gl_panelLSATraining
+																.createSequentialGroup()
+																.addGroup(gl_panelLSATraining
+																		.createParallelGroup(Alignment.LEADING)
+																		.addComponent(lblLSALanguage)
+																		.addComponent(
+																				lblLSARank)
+																		.addComponent(lblLSAReduceTasks))
+																.addGap(29)
+																.addGroup(gl_panelLSATraining
+																		.createParallelGroup(Alignment.LEADING)
+																		.addGroup(gl_panelLSATraining
+																				.createSequentialGroup()
+																				.addGroup(gl_panelLSATraining
+																						.createParallelGroup(
+																								Alignment.LEADING)
+																						.addComponent(
+																								textFieldLSAReduceTasks,
+																								GroupLayout.DEFAULT_SIZE,
+																								66, Short.MAX_VALUE)
+																						.addComponent(textFieldLSARank,
+																								Alignment.TRAILING,
+																								GroupLayout.DEFAULT_SIZE,
+																								66, Short.MAX_VALUE))
+																				.addPreferredGap(
+																						ComponentPlacement.RELATED)
+																				.addGroup(gl_panelLSATraining
+																						.createParallelGroup(
+																								Alignment.TRAILING)
+																						.addGroup(gl_panelLSATraining
+																								.createSequentialGroup()
+																								.addComponent(
+																										lblLSAPowerInterations)
+																								.addPreferredGap(
+																										ComponentPlacement.RELATED)
+																								.addComponent(
+																										textFieldLSAPowerIterations,
+																										GroupLayout.PREFERRED_SIZE,
+																										91,
+																										GroupLayout.PREFERRED_SIZE))
+																						.addComponent(btnLSATrain)))
+																		.addComponent(comboBoxLSALanguage, 0, 297,
+																				Short.MAX_VALUE)))
+														.addComponent(chckbxLSAUseHalfSigma))
+												.addContainerGap()));
+		gl_panelLSATraining
+				.setVerticalGroup(
+						gl_panelLSATraining.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelLSATraining.createSequentialGroup().addContainerGap()
 										.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
-												.addComponent(textFieldLSAReduceTasks, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addComponent(lblLSAReduceTasks))
+												.addComponent(lblLSAInputFile).addComponent(btnLSAFile)
+												.addComponent(textFieldLSAFile, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTxtOnly)
 										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(chckbxLSAUseHalfSigma))
-								.addComponent(btnLSATrain))
-						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+										.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblLSALanguage).addComponent(comboBoxLSALanguage,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblLSARank).addComponent(
+														textFieldLSAPowerIterations, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(lblLSAPowerInterations).addComponent(textFieldLSARank,
+														GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelLSATraining.createParallelGroup(Alignment.TRAILING).addGroup(
+												gl_panelLSATraining.createSequentialGroup().addGroup(gl_panelLSATraining
+														.createParallelGroup(Alignment.BASELINE)
+														.addComponent(textFieldLSAReduceTasks,
+																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+																GroupLayout.PREFERRED_SIZE)
+														.addComponent(lblLSAReduceTasks))
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(chckbxLSAUseHalfSigma))
+												.addComponent(btnLSATrain))
+										.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		panelLSATraining.setLayout(gl_panelLSATraining);
 
 		JPanel panelLDATraining = new JPanel();
@@ -659,65 +688,73 @@ public class SemanticModelsTraining extends JFrame {
 			}
 		});
 		GroupLayout gl_panelLDATraining = new GroupLayout(panelLDATraining);
-		gl_panelLDATraining.setHorizontalGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelLDATraining.createSequentialGroup().addContainerGap().addGroup(gl_panelLDATraining
-						.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_panelLDATraining.createSequentialGroup().addGroup(gl_panelLDATraining
-								.createParallelGroup(Alignment.TRAILING)
-								.addGroup(Alignment.LEADING,
-										gl_panelLDATraining.createSequentialGroup().addComponent(lblLDAInputDirectory)
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(textFieldLDADirectory, GroupLayout.DEFAULT_SIZE, 282,
-														Short.MAX_VALUE))
-								.addComponent(lblAllTxt)).addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(btnLDADirectory))
-						.addGroup(gl_panelLDATraining.createSequentialGroup()
-								.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblLDALanguage).addComponent(lblLDANoTopics)
-										.addComponent(lblLDANoThreads))
-								.addGap(29)
-								.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_panelLDATraining.createSequentialGroup()
-												.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.TRAILING)
-														.addComponent(textFieldLDANoTopics, GroupLayout.DEFAULT_SIZE,
-																88, Short.MAX_VALUE)
-												.addComponent(textFieldLDANoThreads, 0, 0, Short.MAX_VALUE))
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.TRAILING)
-														.addGroup(gl_panelLDATraining.createSequentialGroup()
-																.addComponent(lblLDANoIterations).addGap(61)
-																.addComponent(textFieldLDANoIterations,
-																		GroupLayout.PREFERRED_SIZE, 91,
-																		GroupLayout.PREFERRED_SIZE))
-														.addComponent(btnLDATrain)))
-										.addComponent(comboBoxLDALanguage, 0, 327, Short.MAX_VALUE))))
+		gl_panelLDATraining.setHorizontalGroup(
+				gl_panelLDATraining.createParallelGroup(Alignment.LEADING).addGroup(gl_panelLDATraining
+						.createSequentialGroup().addContainerGap().addGroup(gl_panelLDATraining
+								.createParallelGroup(
+										Alignment.TRAILING)
+								.addGroup(gl_panelLDATraining.createSequentialGroup()
+										.addGroup(gl_panelLDATraining
+												.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
+														gl_panelLDATraining.createSequentialGroup()
+																.addComponent(lblLDAInputDirectory)
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addComponent(textFieldLDADirectory,
+																		GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE))
+												.addComponent(lblAllTxt))
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnLDADirectory))
+								.addGroup(gl_panelLDATraining.createSequentialGroup()
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
+												.addComponent(lblLDALanguage).addComponent(lblLDANoTopics)
+												.addComponent(lblLDANoThreads))
+										.addGap(29)
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
+												.addGroup(gl_panelLDATraining.createSequentialGroup()
+														.addGroup(gl_panelLDATraining
+																.createParallelGroup(Alignment.TRAILING)
+																.addComponent(textFieldLDANoTopics,
+																		GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+																.addComponent(textFieldLDANoThreads, 0, 0,
+																		Short.MAX_VALUE))
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addGroup(gl_panelLDATraining
+																.createParallelGroup(Alignment.TRAILING)
+																.addGroup(gl_panelLDATraining.createSequentialGroup()
+																		.addComponent(lblLDANoIterations).addGap(61)
+																		.addComponent(textFieldLDANoIterations,
+																				GroupLayout.PREFERRED_SIZE, 91,
+																				GroupLayout.PREFERRED_SIZE))
+																.addComponent(btnLDATrain)))
+												.addComponent(comboBoxLDALanguage, 0, 327, Short.MAX_VALUE))))
 						.addContainerGap()));
-		gl_panelLDATraining.setVerticalGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelLDATraining.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
-								.addComponent(lblLDAInputDirectory).addComponent(btnLDADirectory)
-								.addComponent(textFieldLDADirectory, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblAllTxt)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(
-								gl_panelLDATraining.createParallelGroup(Alignment.BASELINE).addComponent(lblLDALanguage)
-										.addComponent(comboBoxLDALanguage, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(
-								gl_panelLDATraining.createParallelGroup(Alignment.BASELINE).addComponent(lblLDANoTopics)
-										.addComponent(textFieldLDANoTopics, GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblLDANoIterations)
-								.addComponent(textFieldLDANoIterations, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
-								.addComponent(textFieldLDANoThreads, GroupLayout.PREFERRED_SIZE,
-										GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblLDANoThreads).addComponent(btnLDATrain))
-						.addContainerGap(40, Short.MAX_VALUE)));
+		gl_panelLDATraining
+				.setVerticalGroup(
+						gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panelLDATraining.createSequentialGroup().addContainerGap()
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblLDAInputDirectory).addComponent(btnLDADirectory)
+												.addComponent(textFieldLDADirectory, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblAllTxt)
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblLDALanguage).addComponent(comboBoxLDALanguage,
+														GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(lblLDANoTopics).addComponent(
+														textFieldLDANoTopics, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(lblLDANoIterations)
+												.addComponent(textFieldLDANoIterations, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
+												.addComponent(textFieldLDANoThreads, GroupLayout.PREFERRED_SIZE,
+														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+												.addComponent(lblLDANoThreads).addComponent(btnLDATrain))
+										.addContainerGap(40, Short.MAX_VALUE)));
 		panelLDATraining.setLayout(gl_panelLDATraining);
 	}
 

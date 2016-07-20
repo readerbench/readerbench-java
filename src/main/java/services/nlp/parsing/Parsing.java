@@ -13,13 +13,13 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
+import data.Lang;
 import data.Sentence;
 import data.Word;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.sentiment.SentimentEntity;
-import data.Lang;
 import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
@@ -30,15 +30,12 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
-import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import services.commons.TextPreprocessing;
-import services.nlp.lemmatizer.StaticLemmatizer;
 import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
@@ -302,33 +299,6 @@ public abstract class Parsing {
 			// tp.printTree(tree);
 			if (lang.equals(Lang.eng) || lang.equals(Lang.fr)) {
 				s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
-
-				// add relevant word associations if the case
-				SemanticGraph dependencies = s.getDependencies();
-				if (dependencies != null) {
-					for (SemanticGraphEdge edge : dependencies.edgeListSorted()) {
-						String dependent = edge.getDependent().word().toLowerCase();
-						Word w1 = Word.getWordFromConcept(dependent, lang);
-						w1.setLemma(StaticLemmatizer.lemmaStatic(dependent, lang));
-
-						String governor = edge.getGovernor().word().toLowerCase();
-						Word w2 = Word.getWordFromConcept(governor, lang);
-						w2.setLemma(StaticLemmatizer.lemmaStatic(governor, lang));
-						String association = w1.getLemma() + Word.WORD_ASSOCIATION + w2.getLemma();
-						Word wordAssociation = new Word(association, association, association, null, null, s.getLSA(),
-								s.getLDA(), lang);
-						// add correspondingly the word association if the LSA
-						// space contains it
-						if (s.getLSA() != null && s.getLSA().getWords().containsKey(wordAssociation)) {
-							if (s.getWordOccurences().containsKey(wordAssociation)) {
-								s.getWordOccurences().put(wordAssociation,
-										s.getWordOccurences().get(wordAssociation) + 1);
-							} else {
-								s.getWordOccurences().put(wordAssociation, 1);
-							}
-						}
-					}
-				}
 			}
 			if (lang.equals(Lang.eng)) {
 				tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);

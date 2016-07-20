@@ -29,8 +29,6 @@ public class Word implements Comparable<Word>, Serializable {
 
 	static Logger logger = Logger.getLogger(CohesionGraph.class);
 
-	public static final String WORD_ASSOCIATION = "<>";
-
 	private static final long serialVersionUID = -3809934014813200184L;
 
 	private int blockIndex;// the number of the block the word is part of
@@ -148,10 +146,6 @@ public class Word implements Comparable<Word>, Serializable {
 			return false;
 		}
 		return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
-	}
-
-	public boolean isWordAssociation() {
-		return lemma.contains(WORD_ASSOCIATION);
 	}
 
 	public int getBlockIndex() {
@@ -301,13 +295,13 @@ public class Word implements Comparable<Word>, Serializable {
 		}
 		return this.getLemma();
 	}
-	
+
 	public boolean isContentWord() {
 		if (this.getPOS() != null) {
 			if (this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
-                    || this.getPOS().equals("RB")) {
-                return true;
-            }
+					|| this.getPOS().equals("RB")) {
+				return true;
+			}
 		}
 		return false;
 	}
