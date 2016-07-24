@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import data.Sentence;
+import services.comprehensionModel.utils.ActivationScoreLogger;
 import services.comprehensionModel.utils.indexer.QueryIndexer;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
@@ -18,6 +19,7 @@ public class ComprehensionModel {
 	private double minActivationThreshold;
 	private int maxNoActiveWords;
 	private int maxNoActiveWordsIncrement;
+	private ActivationScoreLogger activationScoreLogger;
 	
 	private QueryIndexer queryIndexer;
 	public CiGraphDO currentGraph;
@@ -29,6 +31,7 @@ public class ComprehensionModel {
 		this.minActivationThreshold = minActivationThreshold;
 		this.maxNoActiveWords = maxNoActiveWords;
 		this.maxNoActiveWordsIncrement = maxNoActiveWordsIncrement;
+		this.activationScoreLogger = new ActivationScoreLogger();
 	}
 	
 	public WordDistanceIndexer getSemanticIndexer() {
@@ -59,6 +62,11 @@ public class ComprehensionModel {
 			score++;
 			this.getNodeActivationScoreMap().put(node, score);
 		}
+		for(CiNodeDO otherNode : this.currentGraph.nodeList) {
+			if(!this.getNodeActivationScoreMap().containsKey(otherNode)) {
+				this.getNodeActivationScoreMap().put(otherNode, 0.0);
+			}
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -86,6 +94,8 @@ public class ComprehensionModel {
 		 Collections.sort(nodeRankList, Collections.reverseOrder());
 		 
 		 this.activateFirstWords(nodeRankList, maxWords);
+		 
+		 this.activationScoreLogger.saveScores(updatedNodeActivationScoreMap);
 	}
 	
 	private void activateFirstWords(List<NodeRank> nodeRankList, int maxWords) {
@@ -107,5 +117,8 @@ public class ComprehensionModel {
 				 break;
 			 }
 		 }
+	}
+	public void logSavedScores() {
+		this.activationScoreLogger.logSavedScores();
 	}
 }
