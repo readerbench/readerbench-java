@@ -118,7 +118,9 @@ public class ComprehensionModel {
 			 }
 		 }
 	}
-	public void logSavedScores() {
+	public void logSavedScores(CiGraphDO syntacticGraph) {
+		this.activationScoreLogger.saveNodes(syntacticGraph);
+		this.activationScoreLogger.saveNodes(this.currentGraph);
 		this.activationScoreLogger.logSavedScores();
 	}
 }

@@ -227,7 +227,7 @@ public class ComprehensionModelView extends JFrame {
 		this.ciModel.currentGraph = ciGraph;
 		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
 		this.ciModel.applyPageRank(sentenceIndex);
-		this.ciModel.logSavedScores();
+		this.ciModel.logSavedScores(syntacticIndexer.getCiGraph(CiNodeType.Syntactic));
 
 		nodeItemList = ciGraph.nodeList;
 
