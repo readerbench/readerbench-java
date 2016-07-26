@@ -59,7 +59,7 @@ public class ActivationScoreLogger {
 			FileWriter fwrt = new FileWriter(ActivationScoreLogger.OUTPUT_FILE_NAME);
 			BufferedWriter bfwrt = new BufferedWriter(fwrt);
 			
-			String header = "Word,Type,";
+			String header = "Word,Type";
 			for(int  i = 0; i < activationHistory.size(); i++) {
 				header += ",Phrase " + (i + 1);
 			}
