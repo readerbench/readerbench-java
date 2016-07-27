@@ -23,7 +23,6 @@ public class Utterance extends Block {
 		setSentences(b.getSentences());
 		setRefBlock(b.getRefBlock());
 		setFollowedByVerbalization(b.isFollowedByVerbalization());
-		setAnnotation(b.getAnnotation());
 		setCorefs(b.getCorefs());
 		setStanfordSentences(b.getStanfordSentences());
 		setWordOccurences(b.getWordOccurences());

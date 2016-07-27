@@ -112,14 +112,6 @@ public class Block extends AnalysisElement implements Serializable {
 		this.sentences = sentences;
 	}
 
-	public Annotation getAnnotation() {
-		return annotation;
-	}
-
-	public void setAnnotation(Annotation annotation) {
-		this.annotation = annotation;
-	}
-
 	public Map<Integer, CorefChain> getCorefs() {
 		return corefs;
 	}
