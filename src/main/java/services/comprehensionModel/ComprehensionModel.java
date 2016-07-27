@@ -128,14 +128,14 @@ public class ComprehensionModel {
 				break;
 			}
 		}
-		updatedNodeActivationScoreMap.keySet().forEach((node) -> {
-			if (activeNodeSet.contains(node)) {
-				double oldValue = updatedNodeActivationScoreMap.get(node);
-				updatedNodeActivationScoreMap.put(node, oldValue + 1.0);
-			} else {
-				updatedNodeActivationScoreMap.put(node, 0.0);
-			}
-		});
+//		updatedNodeActivationScoreMap.keySet().forEach((node) -> {
+//			if (!activeNodeSet.contains(node)) {
+//				double oldValue = updatedNodeActivationScoreMap.get(node);
+//				updatedNodeActivationScoreMap.put(node, oldValue + 1.0);
+//			} else {
+//				updatedNodeActivationScoreMap.put(node, 0.0);
+//			}
+//		});
 	}
 
 	public void logSavedScores(CMGraphDO syntacticGraph) {
