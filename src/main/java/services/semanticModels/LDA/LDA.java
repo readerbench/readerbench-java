@@ -12,7 +12,6 @@ import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,7 +48,7 @@ public class LDA implements ISemanticModel, Serializable {
     static Logger logger = Logger.getLogger(LDA.class);
     private static int MIN_NO_WORDS_PER_DOCUMENT = 5;
 
-    private static List<LDA> LOADED_LDA_MODELS = new LinkedList<LDA>();
+    private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();
 
     private Lang language;
     private String path;
@@ -82,10 +81,7 @@ public class LDA implements ISemanticModel, Serializable {
             }
         }
         LDA ldaLoad = new LDA(path, language);
-
-        if (ldaLoad != null) {
-            LOADED_LDA_MODELS.add(ldaLoad);
-        }
+        LOADED_LDA_MODELS.add(ldaLoad);
 
         return ldaLoad;
     }
@@ -178,7 +174,7 @@ public class LDA implements ISemanticModel, Serializable {
      * @param path
      * @param initialTopics
      * @param numIterations
-     * @return 
+     * @return
      */
     public int createHDPModel(String path, int initialTopics, int numIterations) {
         logger.info("Running HDP on " + path + " with " + initialTopics + " initial topics and " + numIterations
@@ -499,7 +495,8 @@ public class LDA implements ISemanticModel, Serializable {
         this.pipe = pipe;
     }
 
-    public Map<Word, double[]> getWordProbDistributions() {
+    @Override
+    public Map<Word, double[]> getWordRepresentation() {
         return wordProbDistributions;
     }
 

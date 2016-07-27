@@ -19,6 +19,7 @@ import data.AnalysisElement;
 import data.Lang;
 import data.Word;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import services.commons.ObjectManipulation;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
@@ -65,6 +66,11 @@ public class Word2VecModel implements ISemanticModel{
 	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
+    
+    @Override
+	public Map<Word, double[]> getWordRepresentation() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 	@Override
 	public Set<Word> getWordSet() {
@@ -108,7 +114,6 @@ public class Word2VecModel implements ISemanticModel{
     }
 	
     public void processCorpus(String path) throws IOException {
-    	
     	File corpusDir = new File(path);
     	String corpusFileName = "";
     	

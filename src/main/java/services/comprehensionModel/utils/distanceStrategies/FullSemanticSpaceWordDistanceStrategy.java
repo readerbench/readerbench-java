@@ -13,7 +13,7 @@ import java.util.Set;
 
 import data.Lang;
 import data.Word;
-import runtime.semanticModels.SpaceStatistics;
+import services.semanticModels.SpaceStatistics;
 import runtime.semanticModels.utils.WordDistance;
 import services.comprehensionModel.utils.CMUtils;
 import services.comprehensionModel.utils.indexer.QueryIndexer;

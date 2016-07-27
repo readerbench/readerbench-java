@@ -89,7 +89,7 @@ public class ComprehensionModelManagementView extends JFrame {
 		label.setFont(new Font("SansSerif", Font.BOLD, 12));
 		
 		textFieldActivationThreshold = new JTextField();
-		textFieldActivationThreshold.setText("0.2");
+		textFieldActivationThreshold.setText("0.3");
 		textFieldActivationThreshold.setColumns(10);
 		
 		JLabel label_1 = new JLabel("Active Words:");

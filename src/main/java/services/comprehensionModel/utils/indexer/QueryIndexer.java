@@ -21,7 +21,7 @@ import data.Sentence;
 import data.Word;
 import data.document.Document;
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import runtime.semanticModels.SpaceStatistics;
+import services.semanticModels.SpaceStatistics;
 import runtime.semanticModels.utils.WordDistance;
 
 public class QueryIndexer {

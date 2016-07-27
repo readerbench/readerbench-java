@@ -138,7 +138,7 @@ public class TASAAnalyzerFull {
 		Double[][] matches;
 		List<Double> stats;
 		AoEEvolution = new HashMap<Word, List<Double>>();
-		for (Word analyzedWord : matureModel.getWordProbDistributions().keySet())
+		for (Word analyzedWord : matureModel.getWordRepresentation().keySet())
 			AoEEvolution.put(analyzedWord, new LinkedList<Double>());
 
 		for (int cLevel = 0; cLevel < noClasses - 1; cLevel++) {
@@ -158,7 +158,7 @@ public class TASAAnalyzerFull {
 			// distribution
 
 			logger.info("Matching all words for level " + cLevel + "...");
-			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+			for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
 				double intermediateTopicDistr[] = new double[intermediateModel.getNoTopics()];
 				double matureTopicDistr[] = new double[intermediateModel.getNoTopics()];
 
@@ -231,7 +231,7 @@ public class TASAAnalyzerFull {
 			loweValues.write(content);
 			List<Double> stats;
 
-			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+			for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
 				stats = AoEEvolution.get(analyzedWord);
 				content = analyzedWord.getExtendedLemma() + ",";
 				// AoA indices
