@@ -1,7 +1,7 @@
 package services.comprehensionModel.utils.distanceStrategies;
 
 import services.comprehensionModel.utils.CMUtils;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
 import data.Lang;
 import data.Word;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -31,7 +31,7 @@ public class SyntacticWordDistanceStrategy implements IWordDistanceStrategy, jav
 		}
 		return 0.0;
 	}
-	public CiEdgeType getCiEdgeType() {
-		return CiEdgeType.Syntactic;
+	public CMEdgeType getCiEdgeType() {
+		return CMEdgeType.Syntactic;
 	}
 }

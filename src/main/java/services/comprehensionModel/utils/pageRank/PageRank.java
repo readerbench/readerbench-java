@@ -1,12 +1,12 @@
 package services.comprehensionModel.utils.pageRank;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.List;
 import java.util.Map;
 
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 
 public class PageRank {
 	public static int MAX_ITER = 100000;
@@ -16,15 +16,15 @@ public class PageRank {
 	public PageRank() {
 	}
 	
-	public Map<CiNodeDO, Double> runPageRank(Map<CiNodeDO, Double> pageRankValues, CiGraphDO graph) {
+	public Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
 		int algIteration = 0;
-		Map<CiNodeDO, Double> currentPageRankValues = new HashMap<CiNodeDO, Double>(pageRankValues);
+		Map<CMNodeDO, Double> currentPageRankValues = new TreeMap<CMNodeDO, Double>(pageRankValues);
 		while(algIteration < PageRank.MAX_ITER) {
 			double r = this.calculateR(currentPageRankValues, graph);
 			
-			Map<CiNodeDO, Double> tempPageRankValues = new HashMap<CiNodeDO, Double>();
+			Map<CMNodeDO, Double> tempPageRankValues = new TreeMap<CMNodeDO, Double>();
 			boolean done = true;
-			for(CiNodeDO node : graph.nodeList) {
+			for(CMNodeDO node : graph.nodeList) {
 				double tempPRValue = this.computeTempPageRankValue(currentPageRankValues, graph, node, r);
 				double prevPRValue = this.getPageRankValue(currentPageRankValues, node, graph);
 				
@@ -43,11 +43,11 @@ public class PageRank {
 		return currentPageRankValues;
 	}
 	
-	private double calculateR(Map<CiNodeDO, Double> pageRankValues, CiGraphDO graph) {
+	private double calculateR(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
 		double r = 0;
 		double N = (double)graph.nodeList.size();
-		for(CiNodeDO node : graph.nodeList) {
-			List<CiEdgeDO> nodeEdgeList = graph.getEdgeList(node);
+		for(CMNodeDO node : graph.nodeList) {
+			List<CMEdgeDO> nodeEdgeList = graph.getEdgeList(node);
 			double nodeDegree = (double)nodeEdgeList.size();
 			double nodePageRankVal = this.getPageRankValue(pageRankValues, node, graph);
 			if(nodeDegree > 0) {
@@ -60,19 +60,19 @@ public class PageRank {
 		return r;
 	}
 	
-	private double computeTempPageRankValue(Map<CiNodeDO, Double> pageRankValues, CiGraphDO graph, CiNodeDO node, double r) {
+	private double computeTempPageRankValue(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph, CMNodeDO node, double r) {
 		double res = r;
-		List<CiEdgeDO> nodeEdgeList = graph.getEdgeList(node);
-		for(CiEdgeDO edge: nodeEdgeList) {
-			CiNodeDO neighbor = edge.getOppositeNode(node);
-			List<CiEdgeDO> neighborEdgeList = graph.getEdgeList(neighbor);
+		List<CMEdgeDO> nodeEdgeList = graph.getEdgeList(node);
+		for(CMEdgeDO edge: nodeEdgeList) {
+			CMNodeDO neighbor = edge.getOppositeNode(node);
+			List<CMEdgeDO> neighborEdgeList = graph.getEdgeList(neighbor);
 			double normalize = (double)neighborEdgeList.size();
 			res += PageRank.PROB * (this.getPageRankValue(pageRankValues, neighbor, graph) / normalize);
 		}
 		return res;
 	}
 	
-	private double getPageRankValue(Map<CiNodeDO, Double> pageRankValues, CiNodeDO node, CiGraphDO graph) {
+	private double getPageRankValue(Map<CMNodeDO, Double> pageRankValues, CMNodeDO node, CMGraphDO graph) {
 		if(pageRankValues.containsKey(node)) {
 			return pageRankValues.get(node);
 		}

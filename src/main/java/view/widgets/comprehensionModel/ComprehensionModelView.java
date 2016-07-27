@@ -51,11 +51,11 @@ import org.openide.util.Lookup;
 
 import services.comprehensionModel.ComprehensionModel;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeType;
-import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import view.models.PreviewSketch;
 
 public class ComprehensionModelView extends JFrame {
@@ -141,7 +141,7 @@ public class ComprehensionModelView extends JFrame {
 		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
 		AppearanceModel appearanceModel = appearanceController.getModel();
 
-		HashMap<Node, CiNodeDO> nodeMap = buildConceptGraph(graph, graphModel);
+		buildConceptGraph(graph, graphModel);
 
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
@@ -206,20 +206,20 @@ public class ComprehensionModelView extends JFrame {
 		logger.info("Finished building the graph");
 	}
 
-	public HashMap<Node, CiNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
-		HashMap<Node, CiNodeDO> outMap = new HashMap<Node, CiNodeDO>();
+	public HashMap<Node, CMNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
+		HashMap<Node, CMNodeDO> outMap = new HashMap<Node, CMNodeDO>();
 		logger.info("Starting to build the ci graph");
 
 		// build nodes
-		Map<CiNodeDO, Node> nodes = new TreeMap<CiNodeDO, Node>();
+		Map<CMNodeDO, Node> nodes = new TreeMap<CMNodeDO, Node>();
 
-		List<CiNodeDO> nodeItemList = new ArrayList<CiNodeDO>();
+		List<CMNodeDO> nodeItemList = new ArrayList<CMNodeDO>();
 
 		this.ciModel.markAllNodesAsInactive();
 		WordDistanceIndexer syntacticIndexer = this.ciModel.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
-		CiGraphDO ciGraph = syntacticIndexer.getCiGraph(CiNodeType.Syntactic);
-		CiGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph(CiNodeType.Semantic);
+		CMGraphDO ciGraph = syntacticIndexer.getCiGraph(CMNodeType.Syntactic);
+		CMGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph(CMNodeType.Semantic);
 
 		ciGraph.combineWithLinksFrom(semanticGraph);
 		ciGraph = ciGraph.getCombinedGraph(this.ciModel.currentGraph);
@@ -227,11 +227,11 @@ public class ComprehensionModelView extends JFrame {
 		this.ciModel.currentGraph = ciGraph;
 		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
 		this.ciModel.applyPageRank(sentenceIndex);
-		this.ciModel.logSavedScores(syntacticIndexer.getCiGraph(CiNodeType.Syntactic));
+		this.ciModel.logSavedScores(syntacticIndexer.getCiGraph(CMNodeType.Syntactic));
 
 		nodeItemList = ciGraph.nodeList;
 
-		for (CiNodeDO currentNode : nodeItemList) {
+		for (CMNodeDO currentNode : nodeItemList) {
 			String text = currentNode.word.getLemma();
 
 			Node n = graphModel.factory().newNode(text);
@@ -250,14 +250,14 @@ public class ComprehensionModelView extends JFrame {
 			nodes.put(currentNode, n);
 			outMap.put(n, currentNode);
 		}
-		for (CiEdgeDO edge : ciGraph.edgeList) {
+		for (CMEdgeDO edge : ciGraph.edgeList) {
 			int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
 			Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score,
 					false);
 			e.setLabel("");
 			Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
 					(float) (COLOR_SEMANTIC.getBlue()) / 256);
-			if (edge.edgeType == CiEdgeType.Syntactic) {
+			if (edge.edgeType == CMEdgeType.Syntactic) {
 				color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
 						(float) (COLOR_SYNTATIC.getBlue()) / 256);
 			}
@@ -269,14 +269,14 @@ public class ComprehensionModelView extends JFrame {
 		return outMap;
 	}
 
-	private Color getNodeColor(CiNodeDO node) {
-		if (node.nodeType == CiNodeType.Semantic) {
+	private Color getNodeColor(CMNodeDO node) {
+		if (node.nodeType == CMNodeType.Semantic) {
 			return COLOR_SEMANTIC;
 		}
-		if (node.nodeType == CiNodeType.Syntactic) {
+		if (node.nodeType == CMNodeType.Syntactic) {
 			return COLOR_SYNTATIC;
 		}
-		if (node.nodeType == CiNodeType.Active) {
+		if (node.nodeType == CMNodeType.Active) {
 			return COLOR_ACTIVE;
 		}
 		return COLOR_INACTIVE;

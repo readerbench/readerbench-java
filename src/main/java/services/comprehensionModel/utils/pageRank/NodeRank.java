@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 
 public class NodeRank implements Comparable<NodeRank> {
-	public CiNodeDO node;
+	public CMNodeDO node;
 	public Double value;
 
 	@Override
@@ -22,9 +22,9 @@ public class NodeRank implements Comparable<NodeRank> {
 		return 0;
 	}
 	
-	public static List<NodeRank> convertMapToNodeRankList(Map<CiNodeDO, Double> nodeActivationScoreMap) {
+	public static List<NodeRank> convertMapToNodeRankList(Map<CMNodeDO, Double> nodeActivationScoreMap) {
 		List<NodeRank> rankList = new ArrayList<NodeRank>();
-		Iterator<CiNodeDO> nodeIterator = nodeActivationScoreMap.keySet().iterator();
+		Iterator<CMNodeDO> nodeIterator = nodeActivationScoreMap.keySet().iterator();
 		while(nodeIterator.hasNext()) {
 			NodeRank rank = new NodeRank();
 			rank.node = nodeIterator.next();

@@ -12,7 +12,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +36,13 @@ import org.openide.util.Lookup;
 
 import data.Word;
 import data.document.Document;
-import runtime.semanticModels.utils.WordDistance;
 import data.Lang;
 import org.openide.util.Exceptions;
 import runtime.semanticModels.WordAssociationTest;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
+import services.semanticModels.utils.WordPairSimilarity;
+import services.semanticModels.utils.WordSimilarityContainer;
 
 public class SpaceStatistics {
 
@@ -52,15 +52,15 @@ public class SpaceStatistics {
 
     private final ISemanticModel semModel;
     private final int noWords;
-    private List<WordDistance> relevantSimilarities;
+    private List<WordPairSimilarity> relevantWordPairList;
+    private WordSimilarityContainer wordSimilarityContainer;
     private final String indexPath;
 
     public SpaceStatistics(ISemanticModel semModel) {
         logger.info("Loading " + semModel.getPath() + "...");
         this.semModel = semModel;
         this.noWords = semModel.getWordSet().size();
-        relevantSimilarities = new ArrayList<>();
-        this.indexPath = semModel.getPath() + "/index.ser";
+        this.indexPath = semModel.getPath() + File.separator + "index.ser";
     }
 
     public void buildWordDistances() {
@@ -68,7 +68,7 @@ public class SpaceStatistics {
         double sim;
         double s00 = 0, s10 = 0, s20 = 0;
         double s01 = 0, s11 = 0, s21 = 0;
-        List<WordDistance> allSimilarities = new ArrayList<>();
+        List<WordPairSimilarity> allWordSimilarityPairList = new ArrayList<WordPairSimilarity>();
         for (Entry<Word, double[]> e1 : semModel.getWordRepresentation().entrySet()) {
             for (Entry<Word, double[]> e2 : semModel.getWordRepresentation().entrySet()) {
                 if (e1.getKey().getLemma().compareTo(e2.getKey().getLemma()) > 0) {
@@ -77,7 +77,8 @@ public class SpaceStatistics {
                     s10 += sim;
                     s20 += Math.pow(sim, 2);
                     if (sim >= MINIMUM_IMPOSED_THRESHOLD) {
-                        allSimilarities.add(new WordDistance(e1.getKey().getLemma(), e2.getKey().getLemma(), sim));
+                    	WordPairSimilarity pairSimilarity = new WordPairSimilarity(e1.getKey().getLemma(), e2.getKey().getLemma(), sim);
+                    	allWordSimilarityPairList.add(pairSimilarity);
                         s01++;
                         s11 += sim;
                         s21 += Math.pow(sim, 2);
@@ -107,13 +108,17 @@ public class SpaceStatistics {
         // add only significant edges
         double threshold = avg - stdev;
         double s02 = 0, s12 = 0, s22 = 0;
-
-        for (WordDistance c : allSimilarities) {
-            if (c.getSimilarity() >= threshold) {
-                relevantSimilarities.add(c);
+        
+        this.relevantWordPairList = new ArrayList<>();
+        this.wordSimilarityContainer = new WordSimilarityContainer();
+        
+        for (WordPairSimilarity pair : allWordSimilarityPairList) {
+            if (pair.getSimilarity() >= threshold) {
+            	relevantWordPairList.add(pair);
+            	wordSimilarityContainer.indexDistance(pair.getWord1(), pair.getWord2(), pair.getSimilarity());
                 s02++;
-                s12 += c.getSimilarity();
-                s22 += Math.pow(c.getSimilarity(), 2);
+                s12 += pair.getSimilarity();
+                s22 += Math.pow(pair.getSimilarity(), 2);
             }
         }
         avg = -1;
@@ -126,9 +131,6 @@ public class SpaceStatistics {
         logger.info("Average similarity for significant word associations (above avg-stdev):\t" + Formatting.formatNumber(avg));
         logger.info("Stdev similarity for significant word associations (above avg-stdev):\t" + Formatting.formatNumber(stdev));
 
-        logger.info("Sorting relevant similarities");
-        Collections.sort(relevantSimilarities, Collections.reverseOrder());
-        logger.info("Finished sorting relevant similarities");
         this.saveSerializedRelevantSimilarities();
     }
 
@@ -139,7 +141,7 @@ public class SpaceStatistics {
 
             FileOutputStream fout = new FileOutputStream(this.indexPath);
             try (ObjectOutputStream oos = new ObjectOutputStream(fout)) {
-                oos.writeObject(this.relevantSimilarities);
+                oos.writeObject(this.wordSimilarityContainer);
             }
             logger.info("Written serialized relevant similarities to " + this.indexPath);
         } catch (Exception ex) {
@@ -148,19 +150,17 @@ public class SpaceStatistics {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private boolean loadRelevantSimilarities() {
         try {
             InputStream file = new FileInputStream(this.indexPath);
             InputStream buffer = new BufferedInputStream(file);
             try (ObjectInput input = new ObjectInputStream(buffer)) {
-                this.relevantSimilarities = (List<WordDistance>) input.readObject();
-                logger.info("Loaded " + this.relevantSimilarities.size() + " relevant similarities");
+                this.wordSimilarityContainer = (WordSimilarityContainer) input.readObject();
+                logger.info("Loaded relevant similarities");
             }
             return true;
         } catch (IOException | ClassNotFoundException ex) {
             logger.error("Failed to load the serialized relevant similarities from " + this.indexPath + " - " + ex.getMessage());
-            Exceptions.printStackTrace(ex);
             return false;
         }
     }
@@ -184,7 +184,7 @@ public class SpaceStatistics {
             graph.addNode(wordNode);
         });
 
-        relevantSimilarities.stream().map((c) -> {
+        this.relevantWordPairList.stream().map((c) -> {
             Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()));
             e.setWeight((float) (c.getSimilarity()));
             return e;
@@ -237,11 +237,11 @@ public class SpaceStatistics {
         logger.info("Semantic model path length:\t" + Formatting.formatNumber(distance.getPathLength()));
     }
 
-    public List<WordDistance> getRelevantSimilarities() {
+    public WordSimilarityContainer getWordSimilarityContainer() {
         if (!this.loadRelevantSimilarities()) {
             this.buildWordDistances();
         }
-        return relevantSimilarities;
+        return this.wordSimilarityContainer;
     }
 
     public ISemanticModel getSemModel() {
@@ -269,7 +269,7 @@ public class SpaceStatistics {
                 out.write("," + space.getSemModel().getPath());
             }
 
-            for (WordDistance c : corpora.get(0).getRelevantSimilarities()) {
+            for (WordPairSimilarity c : corpora.get(0).relevantWordPairList) {
                 if (c.getSimilarity() > 0) {
                     String outputString = "\n" + c.getWord1() + "," + c.getWord2();
                     boolean viableEntry = true;
@@ -357,7 +357,7 @@ public class SpaceStatistics {
                 graph.addNode(wordNode);
             });
 
-            space.getRelevantSimilarities().stream().map((c) -> {
+            space.relevantWordPairList.stream().map((c) -> {
                 Edge e = graphModel.factory().newEdge(associations.get(c.getWord1()), associations.get(c.getWord2()), 0,
                         c.getSimilarity(), false);
                 graph.addEdge(e);

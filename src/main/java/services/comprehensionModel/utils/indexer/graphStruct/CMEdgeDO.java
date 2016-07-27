@@ -1,12 +1,12 @@
 package services.comprehensionModel.utils.indexer.graphStruct;
 
-public class CiEdgeDO {
-	public CiNodeDO node1;
-	public CiNodeDO node2;
+public class CMEdgeDO {
+	public CMNodeDO node1;
+	public CMNodeDO node2;
 	public double score;
-	public CiEdgeType edgeType;
+	public CMEdgeType edgeType;
 	
-	public boolean equals(CiEdgeDO otherEdge) {
+	public boolean equals(CMEdgeDO otherEdge) {
 		if( ((this.node1.equals(otherEdge.node1) && this.node2.equals(otherEdge.node2)) ||
 			 (this.node1.equals(otherEdge.node2) && this.node2.equals(otherEdge.node1))) &&
 			this.edgeType == otherEdge.edgeType
@@ -17,12 +17,12 @@ public class CiEdgeDO {
 	}
 	
 	public String getEdgeTypeString() {
-		if(this.edgeType == CiEdgeType.Semantic)
+		if(this.edgeType == CMEdgeType.Semantic)
 			return "Semantic";
 		return "Syntactic";
 	}
 	
-	public CiNodeDO getOppositeNode(CiNodeDO node) {
+	public CMNodeDO getOppositeNode(CMNodeDO node) {
 		if(this.node1.equals(node)) {
 			return this.node2;
 		}
