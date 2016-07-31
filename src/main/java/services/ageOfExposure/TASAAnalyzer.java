@@ -26,6 +26,7 @@ import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import data.Word;
 import data.Lang;
+import org.openide.util.Exceptions;
 
 public class TASAAnalyzer {
 	private static Logger logger = Logger.getLogger("TASAAnalyzer");
@@ -120,7 +121,7 @@ public class TASAAnalyzer {
 		Integer[] matches;
 		List<Double> stats;
 		AoEEvolution = new HashMap<Word, List<Double>>();
-		for (Word analyzedWord : matureModel.getWordProbDistributions().keySet())
+		for (Word analyzedWord : matureModel.getWordRepresentation().keySet())
 			AoEEvolution.put(analyzedWord, new LinkedList<Double>());
 
 		for (int cLevel = 0; cLevel < noGrades - 1; cLevel++) {
@@ -144,7 +145,7 @@ public class TASAAnalyzer {
 			 * distribution
 			 */
 			logger.info("Matching all words for grade level " + cLevel + "...");
-			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+			for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
 				double intermediateTopicDistr[] = new double[intermediateModel.getNoTopics()];
 				double matureTopicDistr[] = new double[intermediateModel.getNoTopics()];
 
@@ -244,7 +245,7 @@ public class TASAAnalyzer {
 			loweValues.write(content);
 			List<Double> stats;
 
-			for (Word analyzedWord : matureModel.getWordProbDistributions().keySet()) {
+			for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
 				stats = AoEEvolution.get(analyzedWord);
 				content = analyzedWord.getExtendedLemma() + ",";
 				// AoA indices
@@ -303,7 +304,7 @@ public class TASAAnalyzer {
 			loweStats.close();
 			loweValues.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+            Exceptions.printStackTrace(e);
 		}
 	}
 

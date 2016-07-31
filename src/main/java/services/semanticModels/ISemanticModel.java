@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
+import java.util.Map;
 
 public interface ISemanticModel {
 	public double getSimilarity(Word w1, Word w2);
@@ -17,6 +18,8 @@ public interface ISemanticModel {
 	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold);
 
 	public Set<Word> getWordSet();
+    
+    public Map<Word, double[]> getWordRepresentation();
 
 	public String getPath();
 

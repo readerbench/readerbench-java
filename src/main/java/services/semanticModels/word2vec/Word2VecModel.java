@@ -18,6 +18,8 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 import data.AnalysisElement;
 import data.Lang;
 import data.Word;
+import java.io.FileNotFoundException;
+import java.util.Map;
 import services.commons.ObjectManipulation;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
@@ -64,6 +66,11 @@ public class Word2VecModel implements ISemanticModel{
 	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
+    
+    @Override
+	public Map<Word, double[]> getWordRepresentation() {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
 	@Override
 	public Set<Word> getWordSet() {
@@ -81,9 +88,32 @@ public class Word2VecModel implements ISemanticModel{
 	public Lang getLanguage() {
 		return lang;
 	}
+    
+    public static void trainModel(String inputFile, String outputFile) throws FileNotFoundException {
+        SentenceIterator iter = new BasicLineIterator(inputFile);
+        // Split on white spaces in the line to get words
+        TokenizerFactory t = new DefaultTokenizerFactory();
+        t.setTokenPreProcessor(new CommonPreprocessor());
+        logger.info("Building word2vec model");
+        Word2Vec word2Vec = new Word2Vec.Builder()
+                .minWordFrequency(5)
+                .iterations(5)
+                .layerSize(300)
+                .seed(42)
+                .windowSize(5)
+                .negativeSample(10)
+                .iterate(iter)
+                .tokenizerFactory(t)
+                .build();
+
+        word2Vec.fit();
+
+        logger.info("Writing word vectors to text file....");
+
+        WordVectorSerializer.writeFullModel(word2Vec, outputFile);
+    }
 	
     public void processCorpus(String path) throws IOException {
-    	
     	File corpusDir = new File(path);
     	String corpusFileName = "";
     	
@@ -130,5 +160,9 @@ public class Word2VecModel implements ISemanticModel{
         	logger.error(e);
         }
         return word2Vec;
+    }
+    
+    public static void main(String[] args) throws FileNotFoundException {
+        trainModel("resources/corpora/NL/out.txt", "resources/config/Word2Vec/nl.txt");
     }
 }

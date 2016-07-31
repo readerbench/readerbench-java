@@ -7,6 +7,8 @@ package data;
 import java.io.Serializable;
 
 import services.discourse.cohesion.CohesionGraph;
+import services.nlp.listOfWords.Dictionary;
+import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
@@ -28,8 +30,6 @@ import org.apache.log4j.Logger;
 public class Word implements Comparable<Word>, Serializable {
 
 	static Logger logger = Logger.getLogger(CohesionGraph.class);
-
-	public static final String WORD_ASSOCIATION = "<>";
 
 	private static final long serialVersionUID = -3809934014813200184L;
 
@@ -148,10 +148,6 @@ public class Word implements Comparable<Word>, Serializable {
 			return false;
 		}
 		return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
-	}
-
-	public boolean isWordAssociation() {
-		return lemma.contains(WORD_ASSOCIATION);
 	}
 
 	public int getBlockIndex() {
@@ -301,13 +297,21 @@ public class Word implements Comparable<Word>, Serializable {
 		}
 		return this.getLemma();
 	}
-	
+
 	public boolean isContentWord() {
-		if (this.getPOS() != null) {
-			if (this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
-                    || this.getPOS().equals("RB")) {
-                return true;
-            }
+		if (this.getText().length() > 1 
+				&& !StopWords.isStopWord(this.getText(), this.language)
+				&& !StopWords.isStopWord(this.getLemma(), this.language) 
+				&& 	(Dictionary.isDictionaryWord(this.getText(), this.language)
+					|| Dictionary.isDictionaryWord(this.getLemma(), this.language))) {
+			if (this.getPOS() != null) {
+				if (this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
+						|| this.getPOS().equals("RB")) {
+					return true;
+				}
+				return false;
+			}
+			return true;
 		}
 		return false;
 	}

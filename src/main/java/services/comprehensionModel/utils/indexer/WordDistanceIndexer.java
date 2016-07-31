@@ -7,10 +7,10 @@ import java.util.Set;
 
 import services.comprehensionModel.utils.CMUtils;
 import services.comprehensionModel.utils.distanceStrategies.IWordDistanceStrategy;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import data.Word;
 
 public class WordDistanceIndexer implements java.io.Serializable {
@@ -84,25 +84,25 @@ public class WordDistanceIndexer implements java.io.Serializable {
 		return max;
 	}
 	
-	public CiGraphDO getCiGraph(CiNodeType nodeType) {
-		CiGraphDO graph = new CiGraphDO();
-		graph.nodeList = new ArrayList<CiNodeDO>();
-		graph.edgeList = new ArrayList<CiEdgeDO>();
+	public CMGraphDO getCiGraph(CMNodeType nodeType) {
+		CMGraphDO graph = new CMGraphDO();
+		graph.nodeList = new ArrayList<CMNodeDO>();
+		graph.edgeList = new ArrayList<CMEdgeDO>();
 		
-		Set<CiNodeDO> nodeSet = new HashSet<CiNodeDO>();
+		Set<CMNodeDO> nodeSet = new HashSet<CMNodeDO>();
 		for(int i = 0; i < this.distances.length; i ++) {
 			for(int j = i + 1; j < this.distances[i].length; j ++) {
 				if(i != j && this.distances[i][j] > 0) {
 					Word w1 = this.wordList.get(i);
 					Word w2 = this.wordList.get(j);
 					
-					CiEdgeDO edge = new CiEdgeDO();
+					CMEdgeDO edge = new CMEdgeDO();
 					
-					edge.node1 = new CiNodeDO();
+					edge.node1 = new CMNodeDO();
 					edge.node1.nodeType = nodeType;
 					edge.node1.word = w1;
 					
-					edge.node2 = new CiNodeDO();
+					edge.node2 = new CMNodeDO();
 					edge.node2.nodeType = nodeType;
 					edge.node2.word = w2;
 					

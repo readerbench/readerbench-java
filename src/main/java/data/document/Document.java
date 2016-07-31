@@ -45,11 +45,15 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
 import data.Word;
 import data.Lang;
-import java.util.ArrayList;
+import data.lexicalChains.DisambiguationGraph;
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import services.semanticModels.ISemanticModel;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 
     private static final long serialVersionUID = 9219491499980439567L;
+
     private List<String> authors = new LinkedList<>();
     private String uri;
     private String source;
@@ -72,6 +76,28 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging, cleanInput);
     }
 
+    public Document(AbstractDocumentTemplate docTmp, ISemanticModel semModel, boolean usePOSTagging,
+            boolean cleanInput) {
+        LSA lsa = null;
+        LDA lda = null;
+        if (semModel instanceof LSA) {
+            lsa = (LSA) semModel;
+        } else if (semModel instanceof LDA) {
+            lda = (LDA) semModel;
+        } else {
+            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
+        }
+
+        setLanguage(semModel.getLanguage());
+        setLSA(lsa);
+        setLDA(lda);
+        setDisambiguationGraph(new DisambiguationGraph(semModel.getLanguage()));
+        setText(docTmp.getText());
+
+        setDocTmp(docTmp);
+        Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging, cleanInput);
+    }
+
     public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
             boolean cleanInput) {
         // load also LSA vector space and LDA model
@@ -91,16 +117,14 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Element doc = dom.getDocumentElement();
             return load(docFile.getAbsolutePath(), doc, lsa, lda, lang, usePOSTagging, cleanInput);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-			logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
-			e.printStackTrace();
-		}
-		return null;
-    
+            logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+        return null;
     }
 
     public static Document load(String inputPath, Element root, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
         // parse the XML file
-
         Element el;
         NodeList nl;
         int noBreakPoints = 0;
@@ -195,11 +219,11 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Date date = null;
             try {
                 DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-                date = df.parse(((Element) nl.item(0)).getFirstChild().getNodeValue());
+                date = df.parse(el.getFirstChild().getNodeValue());
             } catch (ParseException e) {
                 DateFormat df2 = new SimpleDateFormat("dd.mm.yyyy");
                 try {
-                    date = df2.parse(((Element) nl.item(0)).getFirstChild().getNodeValue());
+                    date = df2.parse(el.getFirstChild().getNodeValue());
                 } catch (ParseException e2) {
                 }
             }
@@ -252,7 +276,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         // rebuild LSA / LDA
         rebuildSemanticSpaces(lsa, lda);
     }
-    
+
     public void addToXML(org.w3c.dom.Document doc, Element parent) {
         for (int i = 0; i < getBlocks().size(); i++) {
             Block b = getBlocks().get(i);
@@ -267,7 +291,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             }
         }
     }
-    
+
     public void exportXML(String path) {
         try {
             org.w3c.dom.Document dom = generateDOMforXMLexport(path);
@@ -331,9 +355,9 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             }
 
             writeDOMforXMLexport(path, dom);
-        } catch (Exception e) {
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
             logger.error(e.getMessage());
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
     }
 
@@ -357,8 +381,8 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
         // create string from xml tree
         OutputStream out = new FileOutputStream(path);
-        DOMSource source = new DOMSource(dom);
-        trans.transform(source, new StreamResult((new OutputStreamWriter(out, "UTF-8"))));
+        DOMSource domSource = new DOMSource(dom);
+        trans.transform(domSource, new StreamResult((new OutputStreamWriter(out, "UTF-8"))));
     }
 
     /**
@@ -377,11 +401,11 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         if (!output.exists()) {
             try {
                 output.createNewFile();
-                BufferedWriter in = new BufferedWriter(new FileWriter(output));
-                in.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<document/>");
-                in.close();
+                try (BufferedWriter in = new BufferedWriter(new FileWriter(output))) {
+                    in.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<document/>");
+                }
             } catch (IOException e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
         }
 
@@ -484,9 +508,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             descr += this.getLDA().getPath() + "_";
         }
         if (this.getAuthors() != null) {
-            for (String author : this.getAuthors()) {
-                descr += author + "_";
-            }
+            descr = this.getAuthors().stream().map((author) -> author + "_").reduce(descr, String::concat);
         }
         if (this.getText() != null) {
             descr += this.getText() + "_";
@@ -528,12 +550,8 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             compare2 += d.getLDA().getPath() + "_";
         }
         if (this.getAuthors() != null && d.getAuthors() != null) {
-            for (String author : this.getAuthors()) {
-                compare1 += author + "_";
-            }
-            for (String author : d.getAuthors()) {
-                compare2 += author + "_";
-            }
+            compare1 = this.getAuthors().stream().map((author) -> author + "_").reduce(compare1, String::concat);
+            compare2 = d.getAuthors().stream().map((author) -> author + "_").reduce(compare2, String::concat);
         }
         if (this.getText() != null && d.getText() != null) {
             compare1 += this.getText() + "_";

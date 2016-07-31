@@ -1,6 +1,6 @@
 package services.comprehensionModel.utils.indexer.graphStruct;
 
-public enum CiNodeType {
+public enum CMNodeType {
 	Semantic,
 	Syntactic,
 	Active,

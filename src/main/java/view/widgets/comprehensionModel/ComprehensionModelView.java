@@ -3,13 +3,11 @@ package view.widgets.comprehensionModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +22,6 @@ import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -47,257 +44,236 @@ import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.preview.types.DependantOriginalColor.Mode;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 import services.comprehensionModel.ComprehensionModel;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiEdgeType;
-import services.comprehensionModel.utils.indexer.graphStruct.CiGraphDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CiNodeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
+import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import view.models.PreviewSketch;
 
 public class ComprehensionModelView extends JFrame {
-	private static final long serialVersionUID = 1L;
 
-	static Logger logger = Logger.getLogger(ComprehensionModelView.class);
-	private ComprehensionModel ciModel;
-	private int sentenceIndex;
-	public static final Color COLOR_SEMANTIC = new Color(255, 10, 0);
-	public static final Color COLOR_SYNTATIC = new Color(0, 21, 255);
-	public static final Color COLOR_INACTIVE = new Color(170, 170, 170);
-	public static final Color COLOR_ACTIVE = new Color(59, 153, 50);
+    private static final long serialVersionUID = 1L;
 
-	JLabel phraseLabel;
-	JButton btnNextPhrase;
-	JPanel panelGraph;
+    static Logger logger = Logger.getLogger(ComprehensionModelView.class);
+    private ComprehensionModel cm;
+    private int sentenceIndex;
+    public static final Color COLOR_SEMANTIC = new Color(255, 10, 0);
+    public static final Color COLOR_SYNTATIC = new Color(0, 21, 255);
+    public static final Color COLOR_INACTIVE = new Color(170, 170, 170);
+    public static final Color COLOR_ACTIVE = new Color(59, 153, 50);
 
-	public ComprehensionModelView(ComprehensionModel ciModel) {
-		this.ciModel = ciModel;
-		this.sentenceIndex = 0;
+    JLabel phraseLabel;
+    JButton btnNextPhrase;
+    JPanel panelGraph;
 
-		this.setDefaultWindowSize();
-		this.generateLayout();
-		this.updateValuesForCurrentSentence();
-	}
+    public ComprehensionModelView(ComprehensionModel cm) {
+        this.cm = cm;
+        this.sentenceIndex = 0;
 
-	private void generateLayout() {
-		this.phraseLabel = new JLabel("New label");
-		this.btnNextPhrase = new JButton("Next Phrase");
-		this.btnNextPhrase.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ComprehensionModelView.this.increaseSentenceIndex();
-			}
-		});
+        this.setDefaultWindowSize();
+        this.generateLayout();
+        this.updateValuesForCurrentSentence();
+    }
 
-		panelGraph = new JPanel();
-		panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panelGraph.setBackground(Color.WHITE);
-		panelGraph.setLayout(new BorderLayout());
+    private void generateLayout() {
+        this.phraseLabel = new JLabel("New label");
+        this.btnNextPhrase = new JButton("Next Phrase");
+        this.btnNextPhrase.addActionListener((ActionEvent e) -> {
+            ComprehensionModelView.this.increaseSentenceIndex();
+        });
 
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup().addGap(23)
-						.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-								.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 1298, Short.MAX_VALUE)
-								.addGroup(groupLayout.createSequentialGroup().addComponent(phraseLabel)
-										.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnNextPhrase)))
-						.addGap(19)));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-						.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(phraseLabel)
-								.addComponent(btnNextPhrase))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 721, Short.MAX_VALUE).addGap(16)));
-		getContentPane().setLayout(groupLayout);
-	}
+        panelGraph = new JPanel();
+        panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        panelGraph.setBackground(Color.WHITE);
+        panelGraph.setLayout(new BorderLayout());
 
-	private void setDefaultWindowSize() {
-		int margin = 50;
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
-	}
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                .addGroup(groupLayout.createSequentialGroup().addGap(23)
+                        .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                .addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 1298, Short.MAX_VALUE)
+                                .addGroup(groupLayout.createSequentialGroup().addComponent(phraseLabel)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnNextPhrase)))
+                        .addGap(19)));
+        groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                        .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE).addComponent(phraseLabel)
+                                .addComponent(btnNextPhrase))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 721, Short.MAX_VALUE).addGap(16)));
+        getContentPane().setLayout(groupLayout);
+    }
 
-	private void increaseSentenceIndex() {
-		if (this.sentenceIndex < this.ciModel.getTotalNoOfPhrases() - 1) {
-			this.sentenceIndex++;
-			this.updateValuesForCurrentSentence();
-		}
-	}
+    private void setDefaultWindowSize() {
+        int margin = 50;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
+    }
 
-	private void updateValuesForCurrentSentence() {
-		this.phraseLabel.setText(this.ciModel.getSentenceAtIndex(this.sentenceIndex).getText());
-		this.generateGraph();
-	}
+    private void increaseSentenceIndex() {
+        if (this.sentenceIndex < this.cm.getTotalNoOfPhrases() - 1) {
+            this.sentenceIndex++;
+            this.updateValuesForCurrentSentence();
+        }
+    }
 
-	private void generateGraph() {
-		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-		pc.newProject();
+    private void updateValuesForCurrentSentence() {
+        this.phraseLabel.setText(this.cm.getSentenceAtIndex(this.sentenceIndex).getText());
+        this.generateGraph(this.sentenceIndex);
+    }
 
-		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
-		UndirectedGraph graph = graphModel.getUndirectedGraph();
-		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-		AppearanceModel appearanceModel = appearanceController.getModel();
+    private void generateGraph(int sentenceIndex) {
+        ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
+        pc.newProject();
 
-		HashMap<Node, CiNodeDO> nodeMap = buildConceptGraph(graph, graphModel);
+        // get models
+        GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+        UndirectedGraph graph = graphModel.getUndirectedGraph();
+        AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+        AppearanceModel appearanceModel = appearanceController.getModel();
 
-		// Get Centrality
-		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel);
+        buildConceptGraph(graph, graphModel);
 
-		// run ForceAtlas 2 layout
-		ForceAtlas2 layout = new ForceAtlas2(null);
-		layout.setGraphModel(graphModel);
-		layout.resetPropertiesValues();
+        // Get Centrality
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(true);
+        distance.execute(graphModel);
 
-		layout.setOutboundAttractionDistribution(false);
-		layout.setEdgeWeightInfluence(1.5d);
-		layout.setGravity(10d);
-		layout.setJitterTolerance(.02);
-		layout.setScalingRatio(15.0);
-		layout.initAlgo();
+        // run ForceAtlas 2 layout
+        ForceAtlas2 layout = new ForceAtlas2(null);
+        layout.setGraphModel(graphModel);
+        layout.resetPropertiesValues();
 
-		// Rank size by centrality
-		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingNodeSizeTransformer.class);
-		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-				.getTransformer();
-		centralityTransformer.setMinSize(3);
-		centralityTransformer.setMaxSize(10);
-		appearanceController.transform(centralityRanking);
+        layout.setOutboundAttractionDistribution(false);
+        layout.setEdgeWeightInfluence(1.5d);
+        layout.setGravity(10d);
+        layout.setJitterTolerance(.02);
+        layout.setScalingRatio(15.0);
+        layout.initAlgo();
 
-		// Preview configuration
-		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
-		PreviewModel previewModel = previewController.getModel();
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-				new DependantOriginalColor(Mode.ORIGINAL));
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 50);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+        // Rank size by centrality
+        Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+                RankingNodeSizeTransformer.class);
+        RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+                .getTransformer();
+        centralityTransformer.setMinSize(3);
+        centralityTransformer.setMaxSize(10);
+        appearanceController.transform(centralityRanking);
 
-		// New Processing target, get the PApplet
-		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
-		PreviewSketch previewSketch = new PreviewSketch(target);
-		previewController.refreshPreview();
-		previewSketch.resetZoom();
-		if (panelGraph.getComponents().length > 0) {
-			panelGraph.removeAll();
-			panelGraph.revalidate();
-		}
-		panelGraph.add(previewSketch, BorderLayout.CENTER);
+        // Preview configuration
+        PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
+        PreviewModel previewModel = previewController.getModel();
+        previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+                new DependantOriginalColor(Mode.ORIGINAL));
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 50);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
+        previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
 
-		logger.info("Saving export...");
-		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-		try {
-			ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return;
-		}
-		this.pack();
-		logger.info("Finished building the graph");
-	}
+        // New Processing target, get the PApplet
+        G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+        PreviewSketch previewSketch = new PreviewSketch(target);
+        previewController.refreshPreview();
+        previewSketch.resetZoom();
+        if (panelGraph.getComponents().length > 0) {
+            panelGraph.removeAll();
+            panelGraph.revalidate();
+        }
+        panelGraph.add(previewSketch, BorderLayout.CENTER);
 
-	public HashMap<Node, CiNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
-		HashMap<Node, CiNodeDO> outMap = new HashMap<Node, CiNodeDO>();
-		logger.info("Starting to build the ci graph");
+        logger.info("Saving export...");
+        ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+        try {
+            ec.exportFile(new File("out/graph_doc_corpus_view_" + sentenceIndex + ".pdf"));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+            return;
+        }
+        this.pack();
+        logger.info("Finished building the graph");
+    }
 
-		// build nodes
-		Map<CiNodeDO, Node> nodes = new TreeMap<CiNodeDO, Node>();
+    public HashMap<Node, CMNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
+        HashMap<Node, CMNodeDO> outMap = new HashMap<>();
+        logger.info("Starting to build the comprehension model graph");
 
-		List<CiNodeDO> nodeItemList = new ArrayList<CiNodeDO>();
+        Map<CMNodeDO, Node> nodes = new TreeMap<>();
 
-		this.ciModel.markAllNodesAsInactive();
-		WordDistanceIndexer syntacticIndexer = this.ciModel.getSyntacticIndexerAtIndex(this.sentenceIndex);
+        this.cm.markAllNodesAsInactive();
+        WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
-		CiGraphDO ciGraph = syntacticIndexer.getCiGraph(CiNodeType.Syntactic);
-		CiGraphDO semanticGraph = this.ciModel.getSemanticIndexer().getCiGraph(CiNodeType.Semantic);
+        CMGraphDO ciGraph = syntacticIndexer.getCiGraph(CMNodeType.Syntactic);
+        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCiGraph(CMNodeType.Semantic);
 
-		ciGraph.combineWithLinksFrom(semanticGraph);
-		ciGraph = ciGraph.getCombinedGraph(this.ciModel.currentGraph);
+        ciGraph.combineWithLinksFrom(semanticGraph);
+        ciGraph = ciGraph.getCombinedGraph(this.cm.currentGraph);
 
-		this.ciModel.currentGraph = ciGraph;
-		this.ciModel.updateActivationScoreMapAtIndex(this.sentenceIndex);
-		this.ciModel.applyPageRank(sentenceIndex);
+        this.cm.currentGraph = ciGraph;
+        this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
+        this.cm.applyPageRank(this.sentenceIndex);
+        this.cm.logSavedScores(syntacticIndexer.getCiGraph(CMNodeType.Syntactic), this.sentenceIndex);
 
-		nodeItemList = ciGraph.nodeList;
+        List<CMNodeDO> nodeItemList = ciGraph.nodeList;
 
-		for (CiNodeDO currentNode : nodeItemList) {
-			String text = currentNode.word.getLemma();
+        nodeItemList.stream().forEach((currentNode) -> {
+            String text = currentNode.word.getLemma();
 
-			Node n = graphModel.factory().newNode(text);
-			n.setLabel(text);
+            Node n = graphModel.factory().newNode(text);
+            n.setLabel(text);
 
-			Color actualColor = this.getNodeColor(currentNode);
+            Color actualColor = this.getNodeColor(currentNode);
 
-			Color c = new Color((float) (actualColor.getRed()) / 256, (float) (actualColor.getGreen()) / 256,
-					(float) (actualColor.getBlue()) / 256);
-			n.setColor(c);
+            Color c = new Color((float) (actualColor.getRed()) / 256, (float) (actualColor.getGreen()) / 256,
+                    (float) (actualColor.getBlue()) / 256);
+            n.setColor(c);
 
-			n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
-			n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-			
-			graph.addNode(n);
-			nodes.put(currentNode, n);
-			outMap.put(n, currentNode);
-		}
-		for (CiEdgeDO edge : ciGraph.edgeList) {
-			int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
-			Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score,
-					false);
-			e.setLabel("");
-			Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
-					(float) (COLOR_SEMANTIC.getBlue()) / 256);
-			if (edge.edgeType == CiEdgeType.Syntactic) {
-				color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
-						(float) (COLOR_SYNTATIC.getBlue()) / 256);
-			}
-			e.setColor(color);
+            n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+            n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 
-			graph.addEdge(e);
-		}
+            graph.addNode(n);
+            nodes.put(currentNode, n);
+            outMap.put(n, currentNode);
+        });
 
-		return outMap;
-	}
+        for (CMEdgeDO edge : ciGraph.edgeList) {
+            int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
+            Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score,
+                    false);
+            e.setLabel("");
+            Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
+                    (float) (COLOR_SEMANTIC.getBlue()) / 256);
+            if (edge.edgeType == CMEdgeType.Syntactic) {
+                color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
+                        (float) (COLOR_SYNTATIC.getBlue()) / 256);
+            }
+            e.setColor(color);
 
-	private Color getNodeColor(CiNodeDO node) {
-		if (node.nodeType == CiNodeType.Semantic) {
-			return COLOR_SEMANTIC;
-		}
-		if (node.nodeType == CiNodeType.Syntactic) {
-			return COLOR_SYNTATIC;
-		}
-		if (node.nodeType == CiNodeType.Active) {
-			return COLOR_ACTIVE;
-		}
-		return COLOR_INACTIVE;
-	}
+            graph.addEdge(e);
+        }
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				String text = "I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.";
-				int hdpGrade = 2;
-				int noTopSimilarWords = 5;
-				double activationThreshold = 0.3;
-				int noActiveWords = 3;
-				int noActiveWordsIncrement = 1;
-				
-				
-				ComprehensionModel ciModel = new ComprehensionModel(text, hdpGrade, noTopSimilarWords, activationThreshold, noActiveWords, noActiveWordsIncrement);
-				ComprehensionModelView view = new ComprehensionModelView(ciModel);
-				view.setVisible(true);
-			}
-		});
-	}
+        return outMap;
+    }
+
+    private Color getNodeColor(CMNodeDO node) {
+        if (node.nodeType == CMNodeType.Semantic) {
+            return COLOR_SEMANTIC;
+        }
+        if (node.nodeType == CMNodeType.Syntactic) {
+            return COLOR_SYNTATIC;
+        }
+        if (node.nodeType == CMNodeType.Active) {
+            return COLOR_ACTIVE;
+        }
+        return COLOR_INACTIVE;
+    }
 }

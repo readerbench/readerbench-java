@@ -222,7 +222,7 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @param language the language the text is written in to be set
      */
-    public void setLanguage(Lang language) {
+    public final void setLanguage(Lang language) {
         this.language = language;
     }
 
@@ -295,7 +295,7 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @param text parsed text to be set
      */
-    public void setText(String text) {
+    public final void setText(String text) {
         this.text = text;
         this.alternateText = text;
     }

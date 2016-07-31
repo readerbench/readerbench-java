@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -65,7 +64,7 @@ public class ComprehensionModelManagementView extends JFrame {
 
 		textFieldSimilarWords = new JTextField();
 		textFieldSimilarWords.setColumns(10);
-		textFieldSimilarWords.setText("3");
+		textFieldSimilarWords.setText("5");
 
 		JLabel lblText = new JLabel(LocalizationUtils.getTranslation("Text"));
 		lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
@@ -76,7 +75,7 @@ public class ComprehensionModelManagementView extends JFrame {
 		Border border = BorderFactory.createLineBorder(Color.BLACK);
 		textAreaContent.setBorder(BorderFactory.createCompoundBorder(border, 
 		            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		textAreaContent.setText("I went to the coast last weekend with Sally. It was sunny. We had checked the tide schedules and planned to arrive at low tide. I just love beachcombing. Right off, I found three whole sand dollars.");
+		textAreaContent.setText("A young knight rode through the forest. The knight was unfamiliar with the country. Suddenly, a dragon appeared. The dragon was kidnapping a beautiful princess. The knight wanted to free her. He wanted to marry her. The knight hurried after the dragon. They fought for life and death. Soon, the knight's armor was completely scorched. At last, the knight killed the dragon. He freed the princess. The princess was very thankful to the knight. She married the knight.");
 		
 		JButton btnNewButton = new JButton("Comprehension Model");
 		btnNewButton.addActionListener(new ActionListener() {
@@ -89,7 +88,7 @@ public class ComprehensionModelManagementView extends JFrame {
 		label.setFont(new Font("SansSerif", Font.BOLD, 12));
 		
 		textFieldActivationThreshold = new JTextField();
-		textFieldActivationThreshold.setText("0.2");
+		textFieldActivationThreshold.setText("0.3");
 		textFieldActivationThreshold.setColumns(10);
 		
 		JLabel label_1 = new JLabel("Active Words:");

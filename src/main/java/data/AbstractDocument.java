@@ -675,7 +675,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 		return disambiguationGraph;
 	}
 
-	public void setDisambiguationGraph(DisambiguationGraph disambiguationGraph) {
+	public final void setDisambiguationGraph(DisambiguationGraph disambiguationGraph) {
 		this.disambiguationGraph = disambiguationGraph;
 	}
 

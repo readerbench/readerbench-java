@@ -1,6 +1,6 @@
 package services.comprehensionModel.utils.indexer.graphStruct;
 
-public enum CiEdgeType {
+public enum CMEdgeType {
 	Semantic,
 	Syntactic
 }
