@@ -258,7 +258,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Block b = getBlocks().get(i);
             if (b != null) {
                 Element pEl = doc.createElement("p");
-                pEl.setAttribute("id", b.getIndex() + "");
+                if (b.getIndex() != -1) pEl.setAttribute("id", b.getIndex() + "");
                 if (b.isFollowedByVerbalization()) {
                     pEl.setAttribute("verbalization_after", "true");
                 }

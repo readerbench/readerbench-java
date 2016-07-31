@@ -140,12 +140,18 @@ public class DialogismComputations {
 			for (SemanticChain chain : d.getVoices()) {
 				chain.setSentenceDistribution(new double[noSentences]);
 				chain.setBlockDistribution(new double[d.getBlocks().size()]);
-				Map<String, Integer> voiceOccurrences = new TreeMap<String, Integer>();
+				Map<String, Integer> voiceOccurrences = new TreeMap<>();
 				for (Word w : chain.getWords()) {
 					int blockIndex = w.getBlockIndex();
 					int sentenceIndex = w.getUtteranceIndex();
 					// determine spread as 1+log(no_occurences) per sentence
-					chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
+					try {
+                        chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
+                    }
+                    catch (ArrayIndexOutOfBoundsException ex) {
+                        System.out.println(ex);
+                    }
+                        
 					chain.getBlockDistribution()[blockIndex] += 1;
 
 					// build cumulative importance in terms of sentences in

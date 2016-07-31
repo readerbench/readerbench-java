@@ -109,6 +109,7 @@ public class Word2VecModel implements ISemanticModel{
                 .layerSize(300)
                 .seed(42)
                 .windowSize(5)
+                .negativeSample(10)
                 .iterate(iter)
                 .tokenizerFactory(t)
                 .build();

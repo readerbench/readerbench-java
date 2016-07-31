@@ -159,7 +159,7 @@ public abstract class Parsing {
 					try {
 						id = Double.valueOf(blockTmp.getId()).intValue();
 					} catch (Exception e) {
-						id = 0;
+						id = -1;
 					}
 					// get ref ID
 					int ref = 0;
@@ -197,8 +197,7 @@ public abstract class Parsing {
 					}
 					b.setFollowedByVerbalization(followedByVerbalization);
 					Block.addBlock(d, b);
-
-					// add explicit reference, if the case
+                    // add explicit reference, if the case
 					if (ref > 0) {
 						for (Block refB : d.getBlocks()) {
 							if (refB != null && refB.getIndex() == ref) {
@@ -255,7 +254,7 @@ public abstract class Parsing {
 				b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
 			}
 		}
-
+        
 		b.finalProcessing();
 		return b;
 	}

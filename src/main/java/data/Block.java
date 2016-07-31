@@ -15,296 +15,300 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 /**
- * 
+ *
  * @author Mihai Dascalu
  */
 public class Block extends AnalysisElement implements Serializable {
-	private static final long serialVersionUID = 8767353039355337678L;
 
-	public static final String SPEAKER_ANNOTATION = "name";
-	public static final String TIME_ANNOTATION = "time";
-	public static final String ID_ANNOTATION = "id";
-	public static final String REF_ANNOTATION = "ref";
-	public static final String VERBALIZATION_ANNOTATION = "verba";
+    private static final long serialVersionUID = 8767353039355337678L;
 
-	private List<Sentence> sentences;
-	private Block refBlock;
-	// used for identifying the relationship between the
-	// verbalizations and the initial text
-	private boolean isFollowedByVerbalization;
+    public static final String SPEAKER_ANNOTATION = "name";
+    public static final String TIME_ANNOTATION = "time";
+    public static final String ID_ANNOTATION = "id";
+    public static final String REF_ANNOTATION = "ref";
+    public static final String VERBALIZATION_ANNOTATION = "verba";
 
-	private transient Annotation annotation; // useful for rebuilding
-												// coref-chains
-	private transient Map<Integer, CorefChain> corefs;
-	private transient List<CoreMap> stanfordSentences;
+    private List<Sentence> sentences;
+    private Block refBlock;
+    // used for identifying the relationship between the
+    // verbalizations and the initial text
+    private boolean isFollowedByVerbalization;
 
-	// inter-sentence cohesion values
-	private SemanticCohesion[][] sentenceDistances;
-	private SemanticCohesion[][] prunnedSentenceDistances;
-	// cohesion between an utterance and its corresponding block
-	private SemanticCohesion[] sentenceBlockDistances;
-	private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
+    private transient Annotation annotation; // useful for rebuilding
+    // coref-chains
+    private transient Map<Integer, CorefChain> corefs;
+    private transient List<CoreMap> stanfordSentences;
 
-	// inner-sentence semantic similarity values
-	private SemanticRelatedness[][] sentenceRelatedness;
-	private SemanticRelatedness[][] prunnedSentenceRelatedness;
-	// semantic similarity between an utterance and its corresponding block
-	private SemanticRelatedness[] sentenceBlockRelatedness;
-	private SemanticRelatedness prevSentenceBlockRelatedness, nextSentenceBlockRelatedness;
+    // inter-sentence cohesion values
+    private SemanticCohesion[][] sentenceDistances;
+    private SemanticCohesion[][] prunnedSentenceDistances;
+    // cohesion between an utterance and its corresponding block
+    private SemanticCohesion[] sentenceBlockDistances;
+    private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
 
-	public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
-		super(d, index, text.trim(), lsa, lda, lang);
-		this.sentences = new ArrayList<>();
-	}
+    // inner-sentence semantic similarity values
+    private SemanticRelatedness[][] sentenceRelatedness;
+    private SemanticRelatedness[][] prunnedSentenceRelatedness;
+    // semantic similarity between an utterance and its corresponding block
+    private SemanticRelatedness[] sentenceBlockRelatedness;
+    private SemanticRelatedness prevSentenceBlockRelatedness, nextSentenceBlockRelatedness;
 
-	public void finalProcessing() {
-		setProcessedText(getProcessedText().trim());
+    public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
+        super(d, index, text.trim(), lsa, lda, lang);
+        this.sentences = new ArrayList<>();
+    }
 
-		// determine overall word occurrences
-		determineWordOccurences(getSentences());
+    public void finalProcessing() {
+        setProcessedText(getProcessedText().trim());
 
-		// determine LSA block vector
-		determineSemanticDimensions();
-	}
+        // determine overall word occurrences
+        determineWordOccurences(getSentences());
 
-	public boolean isSignificant() {
-		// determine if a block is significant from a quantitative point of view
-		// useful for eliminating short utterances
-		int noOccurences = 0;
-		for (Entry<Word, Integer> entry : getWordOccurences().entrySet())
-			noOccurences += entry.getValue();
+        // determine LSA block vector
+        determineSemanticDimensions();
+    }
 
-		return (noOccurences >= 5);
-	}
+    public boolean isSignificant() {
+        // determine if a block is significant from a quantitative point of view
+        // useful for eliminating short utterances
+        int noOccurences = 0;
+        for (Entry<Word, Integer> entry : getWordOccurences().entrySet()) {
+            noOccurences += entry.getValue();
+        }
 
-	public int noSignificant() {
-		// determine if a block is significant from a quantitative point of view
-		// useful for eliminating short utterances
-		int noOccurences = 0;
-		for (Entry<Word, Integer> entry : getWordOccurences().entrySet())
-			noOccurences += entry.getValue();
+        return (noOccurences >= 5);
+    }
 
-		return noOccurences;
-	}
+    public int noSignificant() {
+        // determine if a block is significant from a quantitative point of view
+        // useful for eliminating short utterances
+        int noOccurences = 0;
+        for (Entry<Word, Integer> entry : getWordOccurences().entrySet()) {
+            noOccurences += entry.getValue();
+        }
 
-	public static void addBlock(AbstractDocument d, Block b) {
-		if (b.getIndex() != -1) {
-			if (d.getBlocks().size() < b.getIndex() + 1) {
-				d.getBlocks().setSize(b.getIndex() + 1);
-			}
-			d.getBlocks().set(b.getIndex(), b);
-		} else {
-			d.getBlocks().add(b);
-		}
-		d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
+        return noOccurences;
+    }
 
-		// sum block vectors
-		for (int i = 0; i < LSA.K; i++) {
-			d.getLSAVector()[i] += b.getLSAVector()[i];
-		}
-	}
+    public static void addBlock(AbstractDocument d, Block b) {
+        if (b.getIndex() != -1) {
+            while (d.getBlocks().size() < b.getIndex()) {
+                d.getBlocks().add(null);
+            }
+            d.getBlocks().add(b.getIndex(), b);
+        } else {
+            d.getBlocks().add(b);
+        }
+        d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
 
-	public List<Sentence> getSentences() {
-		return sentences;
-	}
+        // sum block vectors
+        for (int i = 0; i < LSA.K; i++) {
+            d.getLSAVector()[i] += b.getLSAVector()[i];
+        }
+    }
 
-	public void setSentences(List<Sentence> sentences) {
-		this.sentences = sentences;
-	}
+    public List<Sentence> getSentences() {
+        return sentences;
+    }
 
-	public Annotation getAnnotation() {
-		return annotation;
-	}
+    public void setSentences(List<Sentence> sentences) {
+        this.sentences = sentences;
+    }
 
-	public void setAnnotation(Annotation annotation) {
-		this.annotation = annotation;
-	}
+    public Annotation getAnnotation() {
+        return annotation;
+    }
 
-	public Map<Integer, CorefChain> getCorefs() {
-		return corefs;
-	}
+    public void setAnnotation(Annotation annotation) {
+        this.annotation = annotation;
+    }
 
-	public void setCorefs(Map<Integer, CorefChain> corefs) {
-		this.corefs = corefs;
-	}
+    public Map<Integer, CorefChain> getCorefs() {
+        return corefs;
+    }
 
-	public Block getRefBlock() {
-		return refBlock;
-	}
+    public void setCorefs(Map<Integer, CorefChain> corefs) {
+        this.corefs = corefs;
+    }
 
-	public void setRefBlock(Block refBlock) {
-		this.refBlock = refBlock;
-	}
+    public Block getRefBlock() {
+        return refBlock;
+    }
 
-	public List<CoreMap> getStanfordSentences() {
-		return stanfordSentences;
-	}
+    public void setRefBlock(Block refBlock) {
+        this.refBlock = refBlock;
+    }
 
-	public void setStanfordSentences(List<CoreMap> sentences) {
-		this.stanfordSentences = sentences;
-	}
+    public List<CoreMap> getStanfordSentences() {
+        return stanfordSentences;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticRelatedness[] getSentenceBlockRelatedness() {
-		return sentenceBlockRelatedness;
-	}
+    public void setStanfordSentences(List<CoreMap> sentences) {
+        this.stanfordSentences = sentences;
+    }
 
-	/**
-	 * @param sentenceBlockRelatedness
-	 */
-	public void setSentenceBlockRelatedness(SemanticRelatedness[] sentenceBlockRelatedness) {
-		this.sentenceBlockRelatedness = sentenceBlockRelatedness;
-	}
+    /**
+     * @return
+     */
+    public SemanticRelatedness[] getSentenceBlockRelatedness() {
+        return sentenceBlockRelatedness;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticRelatedness[][] getSentenceRelatedness() {
-		return sentenceRelatedness;
-	}
+    /**
+     * @param sentenceBlockRelatedness
+     */
+    public void setSentenceBlockRelatedness(SemanticRelatedness[] sentenceBlockRelatedness) {
+        this.sentenceBlockRelatedness = sentenceBlockRelatedness;
+    }
 
-	/**
-	 * @param sentenceRelatedness
-	 */
-	public void setSentenceRelatedness(SemanticRelatedness[][] sentenceRelatedness) {
-		this.sentenceRelatedness = sentenceRelatedness;
-	}
+    /**
+     * @return
+     */
+    public SemanticRelatedness[][] getSentenceRelatedness() {
+        return sentenceRelatedness;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticRelatedness[][] getPrunnedSentenceRelatedness() {
-		return prunnedSentenceRelatedness;
-	}
+    /**
+     * @param sentenceRelatedness
+     */
+    public void setSentenceRelatedness(SemanticRelatedness[][] sentenceRelatedness) {
+        this.sentenceRelatedness = sentenceRelatedness;
+    }
 
-	/**
-	 * @param prunnedSentenceRelatedness
-	 */
-	public void setPrunnedSentenceRelatedness(SemanticRelatedness[][] prunnedSentenceRelatedness) {
-		this.prunnedSentenceRelatedness = prunnedSentenceRelatedness;
-	}
+    /**
+     * @return
+     */
+    public SemanticRelatedness[][] getPrunnedSentenceRelatedness() {
+        return prunnedSentenceRelatedness;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticCohesion[] getSentenceBlockDistances() {
-		return sentenceBlockDistances;
-	}
+    /**
+     * @param prunnedSentenceRelatedness
+     */
+    public void setPrunnedSentenceRelatedness(SemanticRelatedness[][] prunnedSentenceRelatedness) {
+        this.prunnedSentenceRelatedness = prunnedSentenceRelatedness;
+    }
 
-	/**
-	 * @param sentenceBlockDistances
-	 */
-	public void setSentenceBlockDistances(SemanticCohesion[] sentenceBlockDistances) {
-		this.sentenceBlockDistances = sentenceBlockDistances;
-	}
+    /**
+     * @return
+     */
+    public SemanticCohesion[] getSentenceBlockDistances() {
+        return sentenceBlockDistances;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticCohesion[][] getSentenceDistances() {
-		return sentenceDistances;
-	}
+    /**
+     * @param sentenceBlockDistances
+     */
+    public void setSentenceBlockDistances(SemanticCohesion[] sentenceBlockDistances) {
+        this.sentenceBlockDistances = sentenceBlockDistances;
+    }
 
-	/**
-	 * @param sentenceDistances
-	 */
-	public void setSentenceDistances(SemanticCohesion[][] sentenceDistances) {
-		this.sentenceDistances = sentenceDistances;
-	}
+    /**
+     * @return
+     */
+    public SemanticCohesion[][] getSentenceDistances() {
+        return sentenceDistances;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticCohesion[][] getPrunnedSentenceDistances() {
-		return prunnedSentenceDistances;
-	}
+    /**
+     * @param sentenceDistances
+     */
+    public void setSentenceDistances(SemanticCohesion[][] sentenceDistances) {
+        this.sentenceDistances = sentenceDistances;
+    }
 
-	/**
-	 * @param prunnedSentenceDistances
-	 */
-	public void setPrunnedSentenceDistances(SemanticCohesion[][] prunnedSentenceDistances) {
-		this.prunnedSentenceDistances = prunnedSentenceDistances;
-	}
+    /**
+     * @return
+     */
+    public SemanticCohesion[][] getPrunnedSentenceDistances() {
+        return prunnedSentenceDistances;
+    }
 
-	/**
-	 * @return
-	 */
-	public boolean isFollowedByVerbalization() {
-		return isFollowedByVerbalization;
-	}
+    /**
+     * @param prunnedSentenceDistances
+     */
+    public void setPrunnedSentenceDistances(SemanticCohesion[][] prunnedSentenceDistances) {
+        this.prunnedSentenceDistances = prunnedSentenceDistances;
+    }
 
-	/**
-	 * @param isFollowedByVerbalization
-	 */
-	public void setFollowedByVerbalization(boolean isFollowedByVerbalization) {
-		this.isFollowedByVerbalization = isFollowedByVerbalization;
-	}
+    /**
+     * @return
+     */
+    public boolean isFollowedByVerbalization() {
+        return isFollowedByVerbalization;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticRelatedness getPrevSentenceBlockSimilarity() {
-		return prevSentenceBlockRelatedness;
-	}
+    /**
+     * @param isFollowedByVerbalization
+     */
+    public void setFollowedByVerbalization(boolean isFollowedByVerbalization) {
+        this.isFollowedByVerbalization = isFollowedByVerbalization;
+    }
 
-	/**
-	 * @param prevSentenceBlockRelatedness
-	 */
-	public void setPrevSentenceBlockRelatedness(SemanticRelatedness prevSentenceBlockRelatedness) {
-		this.prevSentenceBlockRelatedness = prevSentenceBlockRelatedness;
-	}
+    /**
+     * @return
+     */
+    public SemanticRelatedness getPrevSentenceBlockSimilarity() {
+        return prevSentenceBlockRelatedness;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticRelatedness getNextSentenceBlockRelatedness() {
-		return nextSentenceBlockRelatedness;
-	}
+    /**
+     * @param prevSentenceBlockRelatedness
+     */
+    public void setPrevSentenceBlockRelatedness(SemanticRelatedness prevSentenceBlockRelatedness) {
+        this.prevSentenceBlockRelatedness = prevSentenceBlockRelatedness;
+    }
 
-	/**
-	 * @param nextSentenceBlockRelatedness
-	 */
-	public void setNextSentenceBlockRelatedness(SemanticRelatedness nextSentenceBlockRelatedness) {
-		this.nextSentenceBlockRelatedness = nextSentenceBlockRelatedness;
-	}
+    /**
+     * @return
+     */
+    public SemanticRelatedness getNextSentenceBlockRelatedness() {
+        return nextSentenceBlockRelatedness;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticCohesion getPrevSentenceBlockDistance() {
-		return prevSentenceBlockDistance;
-	}
+    /**
+     * @param nextSentenceBlockRelatedness
+     */
+    public void setNextSentenceBlockRelatedness(SemanticRelatedness nextSentenceBlockRelatedness) {
+        this.nextSentenceBlockRelatedness = nextSentenceBlockRelatedness;
+    }
 
-	/**
-	 * @param prevSentenceBlockDistance
-	 */
-	public void setPrevSentenceBlockDistance(SemanticCohesion prevSentenceBlockDistance) {
-		this.prevSentenceBlockDistance = prevSentenceBlockDistance;
-	}
+    /**
+     * @return
+     */
+    public SemanticCohesion getPrevSentenceBlockDistance() {
+        return prevSentenceBlockDistance;
+    }
 
-	/**
-	 * @return
-	 */
-	public SemanticCohesion getNextSentenceBlockDistance() {
-		return nextSentenceBlockDistance;
-	}
+    /**
+     * @param prevSentenceBlockDistance
+     */
+    public void setPrevSentenceBlockDistance(SemanticCohesion prevSentenceBlockDistance) {
+        this.prevSentenceBlockDistance = prevSentenceBlockDistance;
+    }
 
-	/**
-	 * @param nextSentenceBlockDistance
-	 */
-	public void setNextSentenceBlockDistance(SemanticCohesion nextSentenceBlockDistance) {
-		this.nextSentenceBlockDistance = nextSentenceBlockDistance;
-	}
+    /**
+     * @return
+     */
+    public SemanticCohesion getNextSentenceBlockDistance() {
+        return nextSentenceBlockDistance;
+    }
 
-	@Override
-	public String toString() {
-		String s = "";
-		s += "{\n";
-		for (Sentence sentence : sentences)
-			s += "\t" + sentence.toString() + "\n";
-		s += "}\n[" + getOverallScore() + "]\n";
-		return s;
-	}
+    /**
+     * @param nextSentenceBlockDistance
+     */
+    public void setNextSentenceBlockDistance(SemanticCohesion nextSentenceBlockDistance) {
+        this.nextSentenceBlockDistance = nextSentenceBlockDistance;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        s += "{\n";
+        for (Sentence sentence : sentences) {
+            s += "\t" + sentence.toString() + "\n";
+        }
+        s += "}\n[" + getOverallScore() + "]\n";
+        return s;
+    }
 }

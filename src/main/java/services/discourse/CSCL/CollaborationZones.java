@@ -108,7 +108,7 @@ public class CollaborationZones {
 
 	private void computeDivergencyZones() {
 		System.out.println("CollaborationZones::computeDivergencyZones() ");
-		Vector<Block> blocks = chat.getBlocks();
+		List<Block> blocks = chat.getBlocks();
 		int chatSize = blocks.size();
 		int start = 0;
 		int itteration = 0;

@@ -74,7 +74,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 	private String path;
 	private String titleText;
 	private Sentence title;
-	private Vector<Block> blocks;
+	private List<Block> blocks;
 	// cohesion between a block and the overall document
 	private SemanticCohesion[] blockDocDistances;
 	// inter-block cohesion values
@@ -104,8 +104,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 	public AbstractDocument() {
 		super();
-		this.blocks = new Vector<Block>();
-		this.lexicalChains = new LinkedList<LexicalChain>();
+		this.blocks = new ArrayList<>();
+		this.lexicalChains = new LinkedList<>();
 	}
 
 	public AbstractDocument(String path, LSA lsa, LDA lda, Lang lang) {
@@ -146,11 +146,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
 	public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors) {
 		computeDiscourseAnalysis(computeDialogism);
-
-		// compute all textual complexity factors
-		if (pathToComplexityModel != null && selectedComplexityFactors != null) {
-			ComplexityIndices.computeComplexityFactors(this);
-		}
+        ComplexityIndices.computeComplexityFactors(this);
+		
 	}
 
 	/**
@@ -602,11 +599,11 @@ public abstract class AbstractDocument extends AnalysisElement {
 		return titleText;
 	}
 
-	public Vector<Block> getBlocks() {
+	public List<Block> getBlocks() {
 		return blocks;
 	}
 
-	public void setBlocks(Vector<Block> blocks) {
+	public void setBlocks(List<Block> blocks) {
 		this.blocks = blocks;
 	}
 

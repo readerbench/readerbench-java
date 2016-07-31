@@ -19,7 +19,7 @@ public class Parsing_NL extends Parsing {
     static Logger logger = Logger.getLogger(Parsing_NL.class);
 
     private static Parsing_NL instance = null;
-    private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_NL());
+    private StanfordCoreNLP pipeline = null;
 
     private Parsing_NL() {
         lang = Lang.nl;
@@ -34,6 +34,9 @@ public class Parsing_NL extends Parsing {
 
     @Override
     public StanfordCoreNLP getPipeline() {
+        if (pipeline == null) {
+            pipeline = new StanfordCoreNLP(new ParsingParams_NL());
+        }
         return pipeline;
     }
 
@@ -44,7 +47,7 @@ public class Parsing_NL extends Parsing {
         public ParsingParams_NL() {
             super();
             //this.put("pos.model", "resources/config/POSmodels/italian.tagger");
-            //this.put("annotators", "tokenize, ssplit, pos");
+            this.put("annotators", "");
         }
     }
 
