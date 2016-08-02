@@ -14,10 +14,13 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.semanticModels.ISemanticModel;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
+import data.Block;
 import data.Lang;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
+import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.hcoref.data.Dictionaries;
 import edu.stanford.nlp.semgraph.SemanticGraph;
 
 public class QueryIndexer {
@@ -58,19 +61,50 @@ public class QueryIndexer {
 	}
 	
 	private void indexSyntacticDistances() {
+		List<Block> blockList = this.document.getBlocks();
+		for(Block block : blockList) {
+			List<Sentence> sentenceList = block.getSentences();
+			Map<Integer, CorefChain> blockCorefs =  block.getCorefs();
+			blockCorefs.keySet().forEach(corefIndex -> {
+				CorefChain chain = blockCorefs.get(corefIndex);
+				
+				for(CorefChain.CorefMention mention : chain.getMentionsInTextualOrder()) {
+					if(mention.mentionType == Dictionaries.MentionType.PRONOMINAL) {
+						String referenceWord = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+						for(CorefChain.CorefMention inner : chain.getMentionsInTextualOrder()) {
+							if(inner.mentionType == Dictionaries.MentionType.NOMINAL && inner.mentionSpan.length() < referenceWord.length()) {
+								referenceWord = inner.mentionSpan;
+							}
+						}
+						System.out.println(mention.mentionSpan);
+						System.out.println(referenceWord);
+						
+						//block.getStanfordSentences().get(mention.sentNum).
+						
+						System.out.println("-------------------------");
+						
+						sentenceList.get(mention.sentNum - 1).addPronimialReplacement(Word.getWordFromConcept(mention.mentionSpan, lang) , 
+								Word.getWordFromConcept(referenceWord, lang));
+					}
+				}
+			});
+		}
+		
 		List<Sentence> sentenceList = this.document.getSentencesInDocument();
 		Iterator<Sentence> sentenceIterator = sentenceList.iterator();
 		this.syntacticIndexerList = new ArrayList<WordDistanceIndexer>();
+		int sentenceNum = 0;
 		while(sentenceIterator.hasNext()) {
 			Sentence sentence = sentenceIterator.next();
 			
 			SemanticGraph semanticGraph = sentence.getDependencies();
-			List<Word> wordList = this.cMUtils.getContentWordListFromSemanticGraph(semanticGraph, QueryIndexer.lang);
+			List<Word> wordList = this.cMUtils.getContentWordListFromSemanticGraph(sentence, QueryIndexer.lang);
 			SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(semanticGraph, QueryIndexer.lang);
 			
 			WordDistanceIndexer wdIndexer = new WordDistanceIndexer(wordList, syntacticStrategy);
 			this.syntacticIndexerList.add(wdIndexer);
 			this.addWordListToWordActivationScoreMap(wdIndexer.wordList);
+			sentenceNum ++;
 		}
 	}
 	private void addWordListToWordActivationScoreMap(List<Word> wordList) {

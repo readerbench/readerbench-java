@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.nlp.lemmatizer.StaticLemmatizer;
 import data.AbstractDocument;
 import data.Lang;
+import data.Sentence;
 import data.Word;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -34,18 +36,30 @@ public class CMUtils {
 	public List<Word> getContentWordListFromDocument(AbstractDocument document) {
 		return this.convertIteratorToList(document.getWordOccurences().keySet().iterator());
 	}
-	public List<Word> getContentWordListFromSemanticGraph(SemanticGraph semanticGraph, Lang lang) {
+	public List<Word> getContentWordListFromSemanticGraph(Sentence sentence, Lang lang) {
 		HashSet<Word> wordset = new HashSet<Word>();
+		SemanticGraph semanticGraph = sentence.getDependencies();
+		
+		Map<Word, Word> pronomialReplMap = sentence.getPronimialReplacementMap();
 		
 		for (SemanticGraphEdge edge : semanticGraph.edgeListSorted()) {
-			Word dependentEdge = this.convertToWord(edge.getDependent(), lang);
-			Word governorEdge = this.convertToWord(edge.getGovernor(), lang);
+			Word dependentNode = this.convertToWord(edge.getDependent(), lang);
+			Word governorNode = this.convertToWord(edge.getGovernor(), lang);
 			
-			if(dependentEdge.isContentWord() && governorEdge.isContentWord()){
-				wordset.add(dependentEdge);
-				wordset.add(governorEdge);
+			if(pronomialReplMap.containsKey(dependentNode)) {
+				dependentNode = pronomialReplMap.get(dependentNode);
+			}
+			
+			if(pronomialReplMap.containsKey(governorNode)) {
+				governorNode = pronomialReplMap.get(governorNode);
+			}
+			
+			if(dependentNode.isContentWord() && governorNode.isContentWord()){
+				wordset.add(dependentNode);
+				wordset.add(governorNode);
 			}
 		}
+		
 		return this.convertIteratorToList(wordset.iterator());
 	}
 	private List<Word> convertIteratorToList(Iterator<Word> wordIterator) {
