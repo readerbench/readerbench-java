@@ -5,6 +5,8 @@
 package data;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.Tree;
@@ -26,11 +28,20 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 	private int POSTreeSize;
 	private transient Tree parseTree;
 	private transient SemanticGraph dependencies;
+	private Map<Word, Word> pronimialReplacementMap;
 
 	public Sentence(Block b, int index, String text, LSA lsa, LDA lda, Lang lang) {
 		super(b, index, text.replaceAll("\\s", " ").trim(), lsa, lda, lang);
 		this.words = new ArrayList<>();
 		this.allWords = new ArrayList<>();
+		this.pronimialReplacementMap = new TreeMap<>();
+	}
+	
+	public void addPronimialReplacement(Word pronoun, Word referencedWord) {
+		this.pronimialReplacementMap.put(pronoun, referencedWord);
+	}
+	public Map<Word, Word> getPronimialReplacementMap() {
+		return this.pronimialReplacementMap;
 	}
 
 	public void finalProcessing(Block b, CoreMap sentence) {

@@ -20,7 +20,7 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.sentiment.SentimentEntity;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations.CorefChainAnnotation;
+import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -205,7 +205,7 @@ public abstract class Parsing {
                     if (usePOSTagging && lang.equals(Lang.eng)) {
                         // Build the co-reference link graph
                         // Each chain stores a set of mentions that link to each other, along with a method for getting the most representative mention.
-                        b.setCorefs(document.get(CorefChainAnnotation.class));
+                    	b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
                     }
                 }
             }
