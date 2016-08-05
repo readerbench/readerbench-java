@@ -47,26 +47,29 @@ public class PronounsComplexity extends IComplexityFactors {
 		return ids;
 	}
 
-	@Override
-	public void computeComplexityFactors(AbstractDocument document) {
-		ClassesOfWords classes = null;
-		switch (document.getLanguage()) {
-		case fr:
-			classes = Pronouns.PRONOUNS_FR;
-			break;
-		case eng:
-			classes = Pronouns.PRONOUNS_EN;
-			break;
-		case ro:
-			classes = Pronouns.PRONOUNS_RO;
-			break;
-		case la:
-			classes = Pronouns.PRONOUNS_LA;
-			break;
-		default:
-			classes = null;
-			break;
-		}
+    @Override
+    public void computeComplexityFactors(AbstractDocument document) {
+        ClassesOfWords classes;
+        switch (document.getLanguage()) {
+            case fr:
+                classes = Pronouns.PRONOUNS_FR;
+                break;
+            case eng:
+                classes = Pronouns.PRONOUNS_EN;
+                break;
+            case ro:
+                classes = Pronouns.PRONOUNS_RO;
+                break;
+            case nl:
+                classes = Pronouns.PRONOUNS_NL;
+                break;
+            case la:
+                classes = Pronouns.PRONOUNS_LA;
+                break;
+            default:
+                classes = null;
+                break;
+        }
 
 		if (classes != null) {
 			int index = 0;

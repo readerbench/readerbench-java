@@ -36,33 +36,8 @@ public class CMUtils {
 	public List<Word> getContentWordListFromDocument(AbstractDocument document) {
 		return this.convertIteratorToList(document.getWordOccurences().keySet().iterator());
 	}
-	public List<Word> getContentWordListFromSemanticGraph(Sentence sentence, Lang lang) {
-		HashSet<Word> wordset = new HashSet<Word>();
-		SemanticGraph semanticGraph = sentence.getDependencies();
-		
-		Map<Word, Word> pronomialReplMap = sentence.getPronimialReplacementMap();
-		
-		for (SemanticGraphEdge edge : semanticGraph.edgeListSorted()) {
-			Word dependentNode = this.convertToWord(edge.getDependent(), lang);
-			Word governorNode = this.convertToWord(edge.getGovernor(), lang);
-			
-			if(pronomialReplMap.containsKey(dependentNode)) {
-				dependentNode = pronomialReplMap.get(dependentNode);
-			}
-			
-			if(pronomialReplMap.containsKey(governorNode)) {
-				governorNode = pronomialReplMap.get(governorNode);
-			}
-			
-			if(dependentNode.isContentWord() && governorNode.isContentWord()){
-				wordset.add(dependentNode);
-				wordset.add(governorNode);
-			}
-		}
-		
-		return this.convertIteratorToList(wordset.iterator());
-	}
-	private List<Word> convertIteratorToList(Iterator<Word> wordIterator) {
+	
+	public List<Word> convertIteratorToList(Iterator<Word> wordIterator) {
 		List<Word> wordList = new ArrayList<Word>();
 		while(wordIterator.hasNext()) {
 			Word w = wordIterator.next();
