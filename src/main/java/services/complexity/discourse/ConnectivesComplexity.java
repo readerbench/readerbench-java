@@ -182,8 +182,8 @@ public class ConnectivesComplexity extends IComplexityFactors {
 
         if (classes != null) {
             for (String className : classes.getClasses().keySet()) {
-                document.getComplexityIndices()[index] = classes.countAveragePatternOccurrences(document, className);
-                index++;
+                document.getComplexityIndices()[index++] = classes.countAveragePatternOccurrences(document, className, true); // paragraph
+                document.getComplexityIndices()[index++] = classes.countAveragePatternOccurrences(document, className, false); // sentence
             }
         }
     }

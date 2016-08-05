@@ -31,7 +31,9 @@ public class CVHelper {
 			Lang lang,
 			boolean usePOSTagging,
 			boolean computeDialogism,
-			double threshold
+			double threshold,
+			double FANthreshold,
+			double deltaFAN
 			) {
 		
 		ResultCv result = new ResultCv();
@@ -44,13 +46,22 @@ public class CVHelper {
 		Map<String, Integer> wordOccurences = new HashMap<String, Integer>();
 		List<String> positiveWords = new ArrayList<String>();
 		List<String> negativeWords = new ArrayList<String>();
+		List<String> neutralWords = new ArrayList<String>();
 		Map<String, List<String>> liwcEmotions = new HashMap<String, List<String>>();
-		liwcEmotions.put(SentimentValence.get("Affect_LIWC").getName(), new ArrayList<String>());
+		/*liwcEmotions.put(SentimentValence.get("Affect_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Posemo_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Negemo_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Anx_LIWC").getName(), new ArrayList<String>());
 		liwcEmotions.put(SentimentValence.get("Anger_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());
+		liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());*/
+		
+		List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
+		for(SentimentValence svLiwc : sentimentValences) {
+			if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
+				liwcEmotions.put(svLiwc.getName(), new ArrayList<String>());
+			}
+		}
+		
 		double upperValue = 0;
 		double lowerValue = 0;
 		for (Map.Entry<Word, Integer> entry : document.getWordOccurences().entrySet()) {
@@ -65,8 +76,9 @@ public class CVHelper {
 			if (sv != null) {
 				Double fanValence = se.get(sv);
 				if (fanValence != null) {
-					if (fanValence >= 5) positiveWords.add(word.getLemma());
-					else negativeWords.add(word.getLemma());
+					if (fanValence >= FANthreshold + deltaFAN) positiveWords.add(word.getLemma());
+					else if (fanValence <= FANthreshold - deltaFAN) negativeWords.add(word.getLemma());
+					else neutralWords.add(word.getLemma());
 					
 					// FAN weighted average
 					upperValue += fanValence * (1 + Math.log(document.getWordOccurences().get(word)));
@@ -78,11 +90,12 @@ public class CVHelper {
 				result.setFanWeightedAverage(0);
 			}
 			else {
-				result.setFanWeightedAverage(upperValue / lowerValue);
+				result.setFanWeightedAverage(Formatting.formatNumber(upperValue / lowerValue));
 			}
 			
 			// LIWC
 			Double liwcSentimnet; 
+			/*
 			// 125 - affect
 			sv = SentimentValence.get("Affect_LIWC");
 			if (sv != null) {
@@ -130,6 +143,16 @@ public class CVHelper {
 				if (liwcSentimnet != null && liwcSentimnet > 0) 
 					liwcEmotions.get(sv.getName()).add(word.getLemma());
 			}
+			*/
+			
+			//sentimentValences = SentimentValence.getAllValences();
+			for(SentimentValence svLiwc : sentimentValences) {
+				if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
+					liwcSentimnet = se.get(svLiwc);
+					if (liwcSentimnet != null && liwcSentimnet > 0) 
+						liwcEmotions.get(svLiwc.getName()).add(word.getLemma());
+				}
+			}
 			
 		}
 		
@@ -139,15 +162,9 @@ public class CVHelper {
 		
 		// number of images
 		result.setImages(pdfConverter.getImages());
-
-		// average number of images per page
-		result.setAvgImagesPerPage(pdfConverter.getAvgImagesPerPage());
 				
 		// number of colors
-		result.setColors(pdfConverter.getColors());
-		
-		// average number of colors per page
-		result.setAvgColorsPerPage(pdfConverter.getAvgColorsPerPage());
+		result.setColors(pdfConverter.getColors());	
 		
 		// number of pages
 		result.setPages(pdfConverter.getPages());
@@ -164,23 +181,15 @@ public class CVHelper {
 		// number of content words
 		result.setContentWords(document.getNoContentWords());
 		
-		// normalized number of paragraphs
-		result.setNormalizedParagraphs(result.getParagraphs() / result.getPages());
-		
-		// normalized number of sentences
-		result.setNormalizedSentences(result.getSentences() / result.getPages());
-		
-		// normalized number of words
-		result.setNormalizedWords(result.getWords() / result.getPages());
-		
-		// normalized number of content words
-		result.setNormalizedContentWords(result.getContentWords() / result.getPages());
 		// positive words
 		result.setPositiveWords(positiveWords);
 		
 		// negative words
 		result.setNegativeWords(negativeWords);
 		
+		// neutral words
+		result.setNeutralWords(neutralWords);
+				
 		// LIWC emotions
 		result.setLiwcEmotions(liwcEmotions);
 		

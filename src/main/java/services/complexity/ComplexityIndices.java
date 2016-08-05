@@ -188,8 +188,6 @@ public class ComplexityIndices {
     public static final int BLOCK_SCORE_STANDARD_DEVIATION = (id += 1);
     public static final int AVERAGE_SENTENCE_SCORE = (id += 1);
     public static final int SENTENCE_SCORE_STANDARD_DEVIATION = (id += 1);
-    public static final int AVERAGE_TOP10_KEYWORDS_RELEVANCE = (id += 1);
-    public static final int TOP10_KEYWORDS_RELEVANCE_STANDARD_DEVIATION = (id += 1);
 
     public static final int AVERAGE_BLOCK_DOC_COHESION = (id += 1);
     public static final int AVERAGE_SENTENCE_BLOCK_COHESION = (id += 6);

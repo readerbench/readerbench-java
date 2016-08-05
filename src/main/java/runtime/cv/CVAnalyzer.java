@@ -15,7 +15,8 @@ import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
 import data.Lang;
-import runtime.cscl.CSCLStatsNew;
+import data.sentiment.SentimentValence;
+import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.complexity.IComplexityFactors;
 import services.converters.PdfToTextConverter;
@@ -32,26 +33,23 @@ import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
-	public Logger logger = Logger.getLogger(CSCLStatsNew.class);
+	public Logger logger = Logger.getLogger(CVAnalyzer.class);
 	private String path;
-	private String folder;
-	private int type;
-
+	
 	private String pathToLSA;
 	private String pathToLDA;
 	private Lang lang;
 	private boolean usePOSTagging = false;
 	private boolean computeDialogism = false;
 	private double threshold = 0.3;
+	private double FANthreshold = 5;
+	private double FANdelta = 1;
 
-	private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffred’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
+	private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
 
-	public CVAnalyzer(String path, String folder, int type, 
-			String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+	public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean computeDialogism, double threshold) {
 		this.path = path;
-		this.folder = folder;
-		this.type = type;
 		this.pathToLSA = pathToLSA;
 		this.pathToLDA = pathToLDA;
 		this.lang = lang;
@@ -66,7 +64,22 @@ public class CVAnalyzer {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(
-					"folder,type,CV,images,avg images per page,colors,avg colors per page,pages,paragraphs,sentences,words,content words,normalized paragraphs,normalized sentences, normalized words, normalized content words,positive words (FAN >= 5),negative words (FAN < 5),FAN weighted average,affect,positive emotion,negative emotion,anxiety,anger,sadness,");
+					"CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page," + 
+					"positive words (FAN >= " + (FANthreshold + FANdelta) + "),pos words percentage," + 
+					"negative words (FAN <= " + (FANthreshold - FANdelta) + "),neg words percentage," + 
+					"neutral words (FAN > " + (FANthreshold - FANdelta) + " & FAN < " + (FANthreshold + FANdelta) + "),neutral words percentage," + 
+					"FAN weighted average," 
+			);
+			//affect,positive emotion,negative emotion,anxiety,anger,sadness,");
+			
+			List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
+			for(SentimentValence svLiwc : sentimentValences) {
+				if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
+					sb.append(svLiwc.getName() + ",");
+					sb.append(svLiwc.getName() + " percentage,");
+				}
+			}
+			
 			// textual complexity factors
 			TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
 			for (IComplexityFactors f : textualComplexity.getList()) {
@@ -76,7 +89,7 @@ public class CVAnalyzer {
 			sb.append("keywords document relevance,");
 			// keywords
 			sb.append(
-					"prospection,,prospect,,développement,,clients,,fidélisation,,chiffred’affaires,,marge,,vente,,portefeuille,,négociation,,budget,,rendez-vous,,proposition,,terrain,,téléphone,,rentabilité,,business,,reporting,,veille,,secteur,,objectifs,,comptes,,animation,,suivi,,création,,gestion,,");
+					"prospection_sim,prospection_no,prospect_sim,prospect_no,développement_sim,développement_no,clients_sim,clients_no,fidélisation_sim,fidélisation_no,chiffre d’affaires_sim,chiffre d’affaires_no,marge_sim,marge_no,vente_sim,vente_no,portefeuille_sim,portefeuille_no,négociation_sim,négociation_no,budget_sim,budget_no,rendez-vous_sim,rendez-vous_no,proposition_sim,proposition_no,terrain_sim,terrain_no,téléphone_sim,téléphone_no,rentabilité_sim,rentabilité_no,business_sim,business_no,reporting_sim,reporting_no,veille_sim,veille_no,secteur_sim,secteur_no,objectifs_sim,objectifs_no,comptes_sim,comptes_no,animation_sim,animation_no,suivi_sim,suivi_no,création_sim,création_no,gestion_sim,gestion_no,");
 			// concepts
 			for (int i = 0; i < 25; i++) {
 				sb.append("concept" + i + ',');
@@ -103,24 +116,21 @@ public class CVAnalyzer {
 							usePOSTagging, computeDialogism);
 
 					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
-							pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
-					// Folder
-					sb.append(folder);
-					sb.append(',');
-					
-					// Type
-					sb.append(type);
-					sb.append(',');
+							pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
 					
 					// CV
 					sb.append(filePath.getFileName().toString() + ",");
 
+					// pages
+					sb.append(result.getPages());
+					sb.append(',');
+					
 					// images
 					sb.append(result.getImages());
 					sb.append(',');
 					
 					// average images per page
-					sb.append(result.getAvgImagesPerPage());
+					sb.append(Formatting.formatNumber(result.getImages() * 1.0 / result.getPages()));
 					sb.append(',');
 
 					// colors
@@ -128,62 +138,76 @@ public class CVAnalyzer {
 					sb.append(',');
 					
 					// average colors per page
-					sb.append(result.getAvgColorsPerPage());
-					sb.append(',');
-
-					// pages
-					sb.append(result.getPages());
-					sb.append(',');
+					sb.append(Formatting.formatNumber(result.getColors() * 1.0 / result.getPages()));
+					sb.append(',');					
 
 					// paragraphs
 					sb.append(result.getParagraphs());
+					sb.append(',');
+					
+					// avg paragraphs per page
+					sb.append(Formatting.formatNumber(result.getParagraphs() * 1.0 / result.getPages()));
 					sb.append(',');
 
 					// sentences
 					sb.append(result.getSentences());
 					sb.append(',');
+					
+					// avg sentences per page
+					sb.append(Formatting.formatNumber(result.getSentences() * 1.0 / result.getPages()));
+					sb.append(',');
 
 					// words
 					sb.append(result.getWords());
+					sb.append(',');
+					
+					// avg words per page
+					sb.append(Formatting.formatNumber(result.getWords() * 1.0 / result.getPages()));
 					sb.append(',');
 
 					// content words
 					sb.append(result.getContentWords());
 					sb.append(',');
 					
-					// normalized paragraphs
-					sb.append(result.getNormalizedParagraphs());
-					sb.append(',');
-
-					// normalized sentences
-					sb.append(result.getNormalizedSentences());
-					sb.append(',');
-
-					// normalized words
-					sb.append(result.getNormalizedWords());
-					sb.append(',');
-
-					// normalized content words
-					sb.append(result.getNormalizedContentWords());
+					// avg content words per page
+					sb.append(Formatting.formatNumber(result.getContentWords() * 1.0 / result.getPages()));
 					sb.append(',');
 
 					// positive words
 					sb.append(result.getPositiveWords().size());
+					sb.append(',');
+					
+					// positive words norm.
+					sb.append(Formatting.formatNumber(result.getPositiveWords().size() * 1.0 / result.getWords()));
 					sb.append(',');
 
 					// negative words
 					sb.append(result.getNegativeWords().size());
 					sb.append(',');
 					
-					// FAN weighted average
-					sb.append(result.getFanWeightedAverage());
+					// negative words norm.
+					sb.append(Formatting.formatNumber(result.getNegativeWords().size() * 1.0 / result.getWords()));
 					sb.append(',');
-
+					
+					// neutral words
+					sb.append(result.getNeutralWords().size());
+					sb.append(',');
+					
+					// neutral words norm.
+					sb.append(Formatting.formatNumber(result.getNeutralWords().size() * 1.0 / result.getWords()));
+					sb.append(',');
+					
+					// FAN weighted average
+					sb.append(Formatting.formatNumber((result.getFanWeightedAverage())));
+					sb.append(',');
+					
 					// LIWC emotions
 					for (Map.Entry<String, List<String>> entry : result.getLiwcEmotions().entrySet()) {
 						// String emotion = entry.getKey();
 						// sb.append(emotion);
 						sb.append(entry.getValue().size());
+						sb.append(',');
+						sb.append(Formatting.formatNumber(entry.getValue().size() * 1.0 / result.getWords()));
 						sb.append(',');
 					}
 
@@ -240,7 +264,7 @@ public class CVAnalyzer {
 
 			File file = new File(path + "stats.csv");
 			try {
-				FileUtils.writeStringToFile(file, sb.toString());
+				FileUtils.writeStringToFile(file, sb.toString(), "UTF-8");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -258,17 +282,13 @@ public class CVAnalyzer {
 		BasicConfigurator.configure();
 		ReaderBenchServer.initializeDB();
 
-		/*CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv_sample/", "Sample", 1, "resources/config/LSA/lemonde_fr",
+		CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerSample.process();*/
+		cvAnalyzerSample.process();
 
-		CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv_positifs/", "Positif", 1, "resources/config/LSA/lemonde_fr",
+		/*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", "resources/config/LSA/lemonde_fr",
 				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerPositifs.process();
-
-		CVAnalyzer cvAnalyzerNegatifs = new CVAnalyzer("resources/in/cv_negatifs/", "Negatif", 0, "resources/config/LSA/lemonde_fr",
-				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerNegatifs.process();
+		cvAnalyzerPositifs.process();*/
 	}
 
 }

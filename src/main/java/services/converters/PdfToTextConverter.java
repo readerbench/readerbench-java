@@ -24,6 +24,8 @@ import org.apache.pdfbox.pdmodel.PDResources;
 
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.text.PDFTextStripper;
+
+import services.commons.Formatting;
 import webService.ReaderBenchServer;
 
 public class PdfToTextConverter {
@@ -85,14 +87,8 @@ public class PdfToTextConverter {
     // number of images per page
     private Map<Integer, Integer> imagesPerPage;
 
-    // average number of images per page
-    private double avgImagesPerPage;
-
     // number of colors per page
     private Map<Integer, Integer> colorsPerPage;
-
-    // average number of colors per page
-    private double avgColorsPerPage;
 
     // number of colors
     private Integer colors;
@@ -103,22 +99,6 @@ public class PdfToTextConverter {
 
     public void setColors(Integer colors) {
         this.colors = colors;
-    }
-
-    public double getAvgImagesPerPage() {
-        return avgImagesPerPage;
-    }
-
-    public void setAvgImagesPerPage(double avgImagesPerPage) {
-        this.avgImagesPerPage = avgImagesPerPage;
-    }
-
-    public double getAvgColorsPerPage() {
-        return avgColorsPerPage;
-    }
-
-    public void setAvgColorsPerPage(double avgColorsPerPage) {
-        this.avgColorsPerPage = avgColorsPerPage;
     }
 
     // Extract text from PDF Document
@@ -222,8 +202,6 @@ public class PdfToTextConverter {
 					}
 				}*/
                 // get number of colors on this page and save them for later normalization	
-                int colors = stripper.getCharsPerColor().size();
-                this.colorsPerPage.put(k, colors);
 
                 // extract text on this page
                 // use the following to extract text on page if the above technique does not work
@@ -232,23 +210,7 @@ public class PdfToTextConverter {
 				String textOnPage = pdfStripper.getText(pdDoc);*/
                 k++;
             }
-
-            double sum = 0;
-            for (Map.Entry<Integer, Integer> entry : this.imagesPerPage.entrySet()) {
-                Integer images = entry.getValue();
-                sum += images;
-            }
-            logger.info("Calculez average images per page, unde sum = " + sum + " si pages = " + this.imagesPerPage.size());
-            this.avgImagesPerPage = sum / (this.imagesPerPage.size() * 1.0);
-            logger.info("Am calculat la " + this.avgImagesPerPage);
-
-            sum = 0;
-            for (Map.Entry<Integer, Integer> entry : this.colorsPerPage.entrySet()) {
-                Integer colors = entry.getValue();
-                sum += colors;
-            }
-            this.avgColorsPerPage = sum / (this.colorsPerPage.size() * 1.0);
-
+            
             String text = stripper.getText(pdDoc);
             //logger.info("Culori textuale: " + text);
             logger.info("Numar culori document: " + stripper.getCharsPerColor().size());
@@ -258,10 +220,12 @@ public class PdfToTextConverter {
             parsedText = pdfStripper.getText(pdDoc);
             // replace all single \n's with space; multiple \ns means new paragraph
             // OLD method - should be replaced
-            //parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+            parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+            // OLD method ends here
             
             // NEW method
-            String lines[] = parsedText.split("\\r?\\n");
+            // append current line to previous line if previous line does not end with a "." character
+            /*String lines[] = parsedText.split("\\r?\\n");
             StringBuilder documentBuilder = new StringBuilder();
             StringBuilder lineBuilder = new StringBuilder();
             logger.info("Extracted " + lines.length + " lines from document.");
@@ -284,7 +248,8 @@ public class PdfToTextConverter {
             	documentBuilder.append(lineBuilder.toString());
             	documentBuilder.append("\n");
             }
-            parsedText = documentBuilder.toString();
+            parsedText = documentBuilder.toString();*/
+            // NEW method ends here
 
             /*StringBuilder paragraph = new StringBuilder(); 
 			for (int i = 0; i < parsedText.length(); i++) {

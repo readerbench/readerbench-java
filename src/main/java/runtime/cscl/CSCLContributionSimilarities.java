@@ -28,7 +28,6 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.WordNet.SimilarityType;
-import utils.Lock;
 import webService.ReaderBenchServer;
 
 public class CSCLContributionSimilarities {
@@ -80,8 +79,6 @@ public class CSCLContributionSimilarities {
 	private Map<Integer, Integer> totalNormSimInBlockPathSim;
 	private Map<Integer, Integer> totalMihalceaSimDetectedPathSim;
 	private Map<Integer, Integer> totalMihalceaSimInBlockPathSim;
-	
-	private HashMap<String, Lock> locks;
 
 	public CSCLContributionSimilarities(String path, String pathToLSA, String pathToLDA, Lang lang,
 			boolean usePOSTagging, boolean computeDialogism, List<Integer> windowSizes, LSA lsa, LDA lda) {
@@ -131,13 +128,6 @@ public class CSCLContributionSimilarities {
 		totalNormSimInBlockPathSim = new HashMap<Integer, Integer>();
 		totalMihalceaSimDetectedPathSim = new HashMap<Integer, Integer>();
 		totalMihalceaSimInBlockPathSim = new HashMap<Integer, Integer>();
-		
-		locks = new HashMap<String, Lock>();
-		locks.put("LSA", new Lock());
-		locks.put("LDA", new Lock());
-		locks.put("Leacock", new Lock());
-		locks.put("WuPalmer", new Lock());
-		locks.put("PathSim", new Lock());
 	}
 	
 	private boolean isInBlock(Conversation c, int min, int max) {
@@ -1338,21 +1328,11 @@ public class CSCLContributionSimilarities {
 							}
 
 							try {
-								locks.get("LSA").lock();
 								FileUtils.writeStringToFile(fileLSA, rowLSA.toString(), "UTF-8", true);
-								locks.get("LSA").unlock();
-								locks.get("LDA").lock();
 								FileUtils.writeStringToFile(fileLDA, rowLDA.toString(), "UTF-8", true);
-								locks.get("LDA").unlock();
-								locks.get("Leacock").lock();
 								FileUtils.writeStringToFile(fileLeacock, rowLeacock.toString(), "UTF-8", true);
-								locks.get("Leacock").unlock();
-								locks.get("WuPalmer").lock();
 								FileUtils.writeStringToFile(fileWuPalmer, rowWuPalmer.toString(), "UTF-8", true);
-								locks.get("WuPalmer").unlock();
-								locks.get("PathSim").lock();
 								FileUtils.writeStringToFile(filePathSim, rowPathSim.toString(), "UTF-8", true);
-								locks.get("PathSim").unlock();
 							} catch (Exception e) {
 								logger.info("Exception: " + e.getMessage());
 								e.printStackTrace();
@@ -1452,21 +1432,11 @@ public class CSCLContributionSimilarities {
 			rowWuPalmer.append('\n');
 			rowPathSim.append('\n');
 			
-			locks.get("LSA").lock();
 			FileUtils.writeStringToFile(fileLSA, rowLSA.toString(), "UTF-8", true);
-			locks.get("LSA").unlock();
-			locks.get("LDA").lock();
 			FileUtils.writeStringToFile(fileLDA, rowLDA.toString(), "UTF-8", true);
-			locks.get("LDA").unlock();
-			locks.get("Leacock").lock();
 			FileUtils.writeStringToFile(fileLeacock, rowLeacock.toString(), "UTF-8", true);
-			locks.get("Leacock").unlock();
-			locks.get("WuPalmer").lock();
 			FileUtils.writeStringToFile(fileWuPalmer, rowWuPalmer.toString(), "UTF-8", true);
-			locks.get("WuPalmer").unlock();
-			locks.get("PathSim").lock();
 			FileUtils.writeStringToFile(filePathSim, rowPathSim.toString(), "UTF-8", true);
-			locks.get("PathSim").unlock();
 			
 		} catch (IOException e) {
 			logger.info("Exception: " + e.getMessage());

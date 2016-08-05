@@ -692,7 +692,7 @@ public class ReaderBenchServer {
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
 			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
-					pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
+					pathToLDA, lang, usePOSTagging, computeDialogism, threshold, 5, 1);
 
 			queryResult.setData(result);
 

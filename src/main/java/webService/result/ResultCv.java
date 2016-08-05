@@ -13,7 +13,6 @@ public class ResultCv {
 	private Integer images;
 	private double avgImagesPerPage;
 	private Integer colors;
-	private double avgColorsPerPage;
 	private Integer pages;
 	
 	private Integer paragraphs;
@@ -21,13 +20,9 @@ public class ResultCv {
 	private Integer words;
 	private Integer contentWords;
 	
-	private Integer normalizedParagraphs;
-	private Integer normalizedSentences;
-	private Integer normalizedWords;
-	private Integer normalizedContentWords;
-	
 	private List<String> positiveWords;
 	private List<String> negativeWords;
+	private List<String> neutralWords;
 	private double fanWeightedAverage;
 	private Map<String, List<String>> liwcEmotions;
 	private List<ResultKeyword> keywords;
@@ -74,26 +69,14 @@ public class ResultCv {
 			// number of content words
 			Integer contentWords,
 			
-			// normalized number of paragraphs
-			Integer normalizedParagraphs,
-			
-			// normalized number of sentences
-			Integer normalizedSentences,
-			
-			// normalized number of words
-			Integer normalizedWords,
-
-			// normalized number of content words
-			Integer normalizedContentWords,
-
 			// volumetric statistics
 			// TODO: add this parameter
 
 			// inferred topics
 			// TODO: add this parameter
 
-			// FAN positive & negative words
-			List<String> positiveWords, List<String> negativeWords,
+			// FAN positive, negative words and neutral words
+			List<String> positiveWords, List<String> negativeWords, List<String> neutralWords,
 
 			// LIWC emotions
 			Map<String, List<String>> liwcEmotions,
@@ -115,18 +98,14 @@ public class ResultCv {
 		this.images = images;
 		this.avgImagesPerPage = avgImagesPerPage;
 		this.colors = colors;
-		this.avgColorsPerPage = avgColorsPerPage;
 		this.pages = pages;
 		this.paragraphs = paragraphs;
 		this.sentences = sentences;
 		this.words = words;
 		this.contentWords = contentWords;
-		this.normalizedParagraphs = normalizedParagraphs;
-		this.normalizedSentences = normalizedSentences;
-		this.normalizedWords = normalizedWords;
-		this.normalizedContentWords = normalizedContentWords;
 		this.positiveWords = positiveWords;
 		this.negativeWords = negativeWords;
+		this.neutralWords = neutralWords;
 		this.fanWeightedAverage = fanWeightedAverage;
 		this.liwcEmotions = liwcEmotions;
 		this.keywords = keywords;
@@ -182,38 +161,6 @@ public class ResultCv {
 		this.contentWords = contentWords;
 	}
 	
-	public Integer getNormalizedParagraphs() {
-		return normalizedParagraphs;
-	}
-
-	public void setNormalizedParagraphs(Integer normalizedParagraphs) {
-		this.normalizedParagraphs = normalizedParagraphs;
-	}
-
-	public Integer getNormalizedSentences() {
-		return normalizedSentences;
-	}
-
-	public void setNormalizedSentences(Integer normalizedSentences) {
-		this.normalizedSentences = normalizedSentences;
-	}
-
-	public Integer getNormalizedWords() {
-		return normalizedWords;
-	}
-
-	public void setNormalizedWords(Integer normalizedWords) {
-		this.normalizedWords = normalizedWords;
-	}
-
-	public Integer getNormalizedContentWords() {
-		return normalizedContentWords;
-	}
-
-	public void setNormalizedContentWords(Integer normalizedContentWords) {
-		this.normalizedContentWords = normalizedContentWords;
-	}
-
 	public double getFanWeightedAverage() {
 		return fanWeightedAverage;
 	}
@@ -278,14 +225,6 @@ public class ResultCv {
 		this.avgImagesPerPage = avgImagesPerPage;
 	}
 
-	public double getAvgColorsPerPage() {
-		return avgColorsPerPage;
-	}
-
-	public void setAvgColorsPerPage(double avgColorsPerPage) {
-		this.avgColorsPerPage = avgColorsPerPage;
-	}
-
 	public Integer getPages() {
 		return pages;
 	}
@@ -308,6 +247,14 @@ public class ResultCv {
 
 	public void setNegativeWords(List<String> negativeWords) {
 		this.negativeWords = negativeWords;
+	}
+
+	public List<String> getNeutralWords() {
+		return neutralWords;
+	}
+
+	public void setNeutralWords(List<String> neutralWords) {
+		this.neutralWords = neutralWords;
 	}
 
 }

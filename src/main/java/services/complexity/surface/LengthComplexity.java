@@ -109,6 +109,7 @@ public class LengthComplexity extends IComplexityFactors {
 		return new int[] { ComplexityIndices.AVERAGE_BLOCK_LENGTH,
 				ComplexityIndices.AVERAGE_SENTENCE_LENGTH,
 				ComplexityIndices.AVERAGE_WORD_LENGTH,
-				ComplexityIndices.WORD_LETTERS_STANDARD_DEVIATION };
+				ComplexityIndices.WORD_LETTERS_STANDARD_DEVIATION
+		};
 	}
 }

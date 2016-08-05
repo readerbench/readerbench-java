@@ -135,18 +135,27 @@ public class ClassesOfWords {
 		return no_occurrences;
 	}
 
-	public double countAveragePatternOccurrences(AbstractDocument document, String className) {
+	public double countAveragePatternOccurrences(AbstractDocument document, String className, boolean paragraph) {
 		int no_occurrences = 0;
-		int no_blocks = document.getNoBlocks();
-
+		
 		for (String p : this.getClasses().get(className)) {
 			no_occurrences += countPatternOccurrences(document, p);
 		}
 
-		if (no_blocks == 0) {
-			return ComplexityIndices.IDENTITY;
+		if (paragraph == true) {
+			int no_blocks = document.getNoBlocks();
+			if (no_blocks == 0) {
+				return ComplexityIndices.IDENTITY;
+			}
+			return ((double) no_occurrences) / no_blocks;
 		}
-		return ((double) no_occurrences) / no_blocks;
+		else {
+			int no_sentences = document.getNoSentences();
+			if (no_sentences == 0) {
+				return ComplexityIndices.IDENTITY;
+			}
+			return ((double) no_occurrences) / no_sentences;
+		}
 	}
 
 	public static void main(String[] args) {
