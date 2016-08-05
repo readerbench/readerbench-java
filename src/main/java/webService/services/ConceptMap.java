@@ -3,6 +3,7 @@ package webService.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import data.AbstractDocument;
@@ -27,13 +28,14 @@ public class ConceptMap {
 	 * @param query
 	 * @return List of keywords and corresponding relevance scores for results
 	 */
-	public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold) {
+	public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold, Set<String> ignoredWords) {
 
 		List<ResultNode> nodes = new ArrayList<ResultNode>();
 		List<ResultEdge> links = new ArrayList<ResultEdge>();
 
 		// List<Topic> topics = queryDoc.getTopics();
 		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
+		if (ignoredWords != null) topics = TopicModeling.filterTopics(queryDoc, ignoredWords);
 
 		// build connected graph
 		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();

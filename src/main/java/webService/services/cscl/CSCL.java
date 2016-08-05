@@ -106,7 +106,7 @@ public class CSCL {
 	public static ResultCscl getAll(AbstractDocument conversationDocument, Conversation c, double threshold) {
 		
 		return new ResultCscl(
-				ConceptMap.getTopics(conversationDocument, threshold),
+				ConceptMap.getTopics(conversationDocument, threshold, null),
 				ParticipantInteraction.buildParticipantGraph(c),
 				ParticipantEvolution.buildParticipantEvolutionData(c),
 				Collaboration.buildSocialKBGraph(c),

@@ -10,6 +10,8 @@ import data.AbstractDocument;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
+import data.discourse.Topic;
+import data.document.Document;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import services.commons.Formatting;
@@ -26,6 +28,7 @@ public class CVHelper {
 			AbstractDocument keywordsDocument,
 			PdfToTextConverter pdfConverter,
 			Set<String> keywords,
+			Set<String> ignore,
 			String pathToLSA,
 			String pathToLDA,
 			Lang lang,
@@ -39,8 +42,7 @@ public class CVHelper {
 		ResultCv result = new ResultCv();
 		
 		// topic extraction
-		result.setConcepts(ConceptMap.getTopics(
-				document, threshold));
+		result.setConcepts(ConceptMap.getTopics(document, threshold, ignore));
 		
 		// word occurrences
 		Map<String, Integer> wordOccurences = new HashMap<String, Integer>();

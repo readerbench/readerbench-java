@@ -33,6 +33,17 @@ public class TopicModeling {
 	public static final double LDA_WEIGHT = 1.0;
 	public static final double WN_WEIGHT = 1.0;
 	public static final double SIMILARITY_THRESHOLD = 0.9;
+	
+	public static List<Topic> filterTopics(AnalysisElement e, Set<String> ignoredWords) {
+		logger.info("Filtering toppics");
+		List<Topic> filteredTopics = new ArrayList<Topic>();
+		for (Topic t : e.getTopics()) {
+			if (!ignoredWords.contains(t.getWord().getText())) { 
+				filteredTopics.add(t);
+			}
+		}
+		return filteredTopics;
+	}
 
 	public static void determineTopics(AnalysisElement e) {
 		logger.info("Determining topics using Tf-IDf, LSA and LDA");

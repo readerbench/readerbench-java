@@ -141,7 +141,7 @@ public class ReaderBenchServer {
 			String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
 
 		// concepts
-		ResultTopic resultTopic = ConceptMap.getTopics(document, threshold);
+		ResultTopic resultTopic = ConceptMap.getTopics(document, threshold, null);
 		List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList,
 				pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
 		List<ResultCategory> resultCategories = getCategories(document.getText(), pathToLSA, pathToLDA, lang,
@@ -250,7 +250,7 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(text, pathToLSA, pathToLDA,
-					Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -328,7 +328,7 @@ public class ReaderBenchServer {
 
 			QueryResultTopic queryResult = new QueryResultTopic();
 			queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(q, pathToLSA, pathToLDA,
-					Lang.getLang(language), usePOSTagging, computeDialogism), threshold));
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null));
 			String result = queryResult.convertToJson();
 			// return Charset.forName("UTF-8").encode(result);
 			return result;
@@ -522,7 +522,7 @@ public class ReaderBenchServer {
 			double threshold = (double) json.get("threshold");
 
 			resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA,
-					Lang.getLang(language), usePOSTagging, computeDialogism), threshold);
+					Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null);
 			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, Lang.getLang(language),
 					usePOSTagging, computeDialogism, threshold);
 
@@ -588,7 +588,7 @@ public class ReaderBenchServer {
 			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
 			resultCv.setConcepts(ConceptMap.getTopics(
 					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
-					threshold));
+					threshold, null));
 			resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(
 					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
 			result.setCv(resultCv);
@@ -601,7 +601,7 @@ public class ReaderBenchServer {
 			ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
 			resultCover.setConcepts(ConceptMap.getTopics(
 					QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
-					threshold));
+					threshold, null));
 			resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(
 					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
 			result.setCover(resultCover);
@@ -647,6 +647,7 @@ public class ReaderBenchServer {
 
 			String cvFile = (String) json.get("cvFile");
 			String keywords = (String) json.get("keywords");
+			String ignore = (String) json.get("ignore");
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
 			String pathToLDA = (String) json.get("lda");
@@ -655,6 +656,7 @@ public class ReaderBenchServer {
 			double threshold = (Double) json.get("threshold");
 
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
+			Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",")));
 
 			// AbstractDocumentTemplate contents =
 			// Cscl.getConversationText(conversationText);
@@ -691,8 +693,8 @@ public class ReaderBenchServer {
 			QueryResultCv queryResult = new QueryResultCv();
 			// queryResult.data =
 			// ParticipantInteraction.buildParticipantGraph(conversation);
-			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
-					pathToLDA, lang, usePOSTagging, computeDialogism, threshold, 5, 1);
+			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
+					pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, 5, 1);
 
 			queryResult.setData(result);
 

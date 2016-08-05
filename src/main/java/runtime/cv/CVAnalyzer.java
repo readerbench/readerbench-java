@@ -46,6 +46,7 @@ public class CVAnalyzer {
 	private double FANdelta = 1;
 
 	private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
+	private String ignore = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
 
 	public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
 			boolean computeDialogism, double threshold) {
@@ -91,14 +92,15 @@ public class CVAnalyzer {
 			sb.append(
 					"prospection_sim,prospection_no,prospect_sim,prospect_no,développement_sim,développement_no,clients_sim,clients_no,fidélisation_sim,fidélisation_no,chiffre d’affaires_sim,chiffre d’affaires_no,marge_sim,marge_no,vente_sim,vente_no,portefeuille_sim,portefeuille_no,négociation_sim,négociation_no,budget_sim,budget_no,rendez-vous_sim,rendez-vous_no,proposition_sim,proposition_no,terrain_sim,terrain_no,téléphone_sim,téléphone_no,rentabilité_sim,rentabilité_no,business_sim,business_no,reporting_sim,reporting_no,veille_sim,veille_no,secteur_sim,secteur_no,objectifs_sim,objectifs_no,comptes_sim,comptes_no,animation_sim,animation_no,suivi_sim,suivi_no,création_sim,création_no,gestion_sim,gestion_no,");
 			// concepts
-			for (int i = 0; i < 25; i++) {
+			/*for (int i = 0; i < 25; i++) {
 				sb.append("concept" + i + ',');
 				sb.append("rel" + i + ',');
-			}
+			}*/
 			sb.append("\n");
 			
 			//test
 			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
+			Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",[ ]*")));
 
 			System.out.println("Incep procesarea CV-urilor");
 			// iterate through all PDF CV files
@@ -115,8 +117,9 @@ public class CVAnalyzer {
 					AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
 							usePOSTagging, computeDialogism);
 
-					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, pathToLSA,
-							pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
+					logger.info("Lista de ignore contine " + ignore);
+					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
+							pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
 					
 					// CV
 					sb.append(filePath.getFileName().toString() + ",");
@@ -242,7 +245,7 @@ public class CVAnalyzer {
 					// sb.append(',');
 
 					// concepts
-					ResultTopic resultTopic = result.getConcepts();
+					/*ResultTopic resultTopic = result.getConcepts();
 					List<ResultNode> resultNodes = resultTopic.getNodes();
 					int i = 0;
 					for (ResultNode resultNode : resultNodes) {
@@ -255,7 +258,7 @@ public class CVAnalyzer {
 						i++;
 						if (i == 25)
 							break;
-					}
+					}*/
 
 					sb.append("\n");
 

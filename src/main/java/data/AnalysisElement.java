@@ -384,7 +384,7 @@ public abstract class AnalysisElement implements Serializable {
         this.inferredConcepts = inferredConcepts;
     }
 
-    /**
+	/**
      * @return
      */
     public double getSpecificity() {
