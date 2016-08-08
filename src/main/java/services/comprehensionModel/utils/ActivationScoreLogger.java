@@ -60,7 +60,7 @@ public class ActivationScoreLogger {
     }
 
     public void saveNodes(CMGraphDO graph) {
-        graph.nodeList.stream().forEach((node) -> {
+        graph.getNodeList().stream().forEach((node) -> {
             this.addNodeIfNotExists(node);
         });
     }

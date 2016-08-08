@@ -23,12 +23,12 @@ public class ComprehensionModel {
     private final int maxNoActiveWordsIncrement;
     private final ActivationScoreLogger activationScoreLogger;
 
-    private final CMIndexer queryIndexer;
-    public CMGraphDO currentGraph;
+    private final CMIndexer cmIndexer;
+    private CMGraphDO currentGraph;
 
     public ComprehensionModel(String text, ISemanticModel semModel, double semanticThreshold, int noTopSimilarWords, double minActivationThreshold,
             int maxNoActiveWords, int maxNoActiveWordsIncrement) {
-        this.queryIndexer = new CMIndexer(text, semModel, semanticThreshold, noTopSimilarWords);
+        this.cmIndexer = new CMIndexer(text, semModel, semanticThreshold, noTopSimilarWords);
         this.currentGraph = new CMGraphDO();
         this.minActivationThreshold = minActivationThreshold;
         this.maxNoActiveWords = maxNoActiveWords;
@@ -37,23 +37,31 @@ public class ComprehensionModel {
     }
 
     public WordDistanceIndexer getSemanticIndexer() {
-        return this.queryIndexer.getSemanticIndexer();
+        return this.cmIndexer.getSemanticIndexer();
     }
 
+    public CMGraphDO getCurrentGraph() {
+        return currentGraph;
+    }
+
+    public void setCurrentGraph(CMGraphDO currentGraph) {
+        this.currentGraph = currentGraph;
+    }
+    
     public int getTotalNoOfPhrases() {
-        return this.queryIndexer.getSyntacticIndexerList().size();
+        return this.cmIndexer.getSyntacticIndexerList().size();
     }
 
     public Sentence getSentenceAtIndex(int index) {
-        return this.queryIndexer.document.getSentencesInDocument().get(index);
+        return this.cmIndexer.document.getSentencesInDocument().get(index);
     }
 
     public WordDistanceIndexer getSyntacticIndexerAtIndex(int index) {
-        return this.queryIndexer.getSyntacticIndexerList().get(index);
+        return this.cmIndexer.getSyntacticIndexerList().get(index);
     }
 
     public Map<CMNodeDO, Double> getNodeActivationScoreMap() {
-        return this.queryIndexer.getNodeActivationScoreMap();
+        return this.cmIndexer.getNodeActivationScoreMap();
     }
 
     public void updateActivationScoreMapAtIndex(int index) {
@@ -64,13 +72,13 @@ public class ComprehensionModel {
             score++;
             this.getNodeActivationScoreMap().put(node, score);
         }
-        this.currentGraph.nodeList.stream().filter((otherNode) -> (!this.getNodeActivationScoreMap().containsKey(otherNode))).forEach((otherNode) -> {
+        this.currentGraph.getNodeList().stream().filter((otherNode) -> (!this.getNodeActivationScoreMap().containsKey(otherNode))).forEach((otherNode) -> {
             this.getNodeActivationScoreMap().put(otherNode, 0.0);
         });
     }
 
     public void markAllNodesAsInactive() {
-        this.currentGraph.nodeList.stream().forEach((node) -> {
+        this.currentGraph.getNodeList().stream().forEach((node) -> {
             node.deactivate();
         });
     }
@@ -105,7 +113,7 @@ public class ComprehensionModel {
             if (nodeRank.getValue() < this.minActivationThreshold) {
                 break;
             }
-            for (CMNodeDO currentNode : this.currentGraph.nodeList) {
+            for (CMNodeDO currentNode : this.currentGraph.getNodeList()) {
                 if (currentNode.equals(nodeRank.getNode())) {
                     currentNode.activate();
 //                    activeNodeSet.add(currentNode);

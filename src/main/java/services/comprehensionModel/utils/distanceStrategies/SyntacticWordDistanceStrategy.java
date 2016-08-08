@@ -30,7 +30,7 @@ public class SyntacticWordDistanceStrategy implements IWordDistanceStrategy, jav
     }
 
     @Override
-    public CMEdgeType getCiEdgeType() {
+    public CMEdgeType getCMEdgeType() {
         return CMEdgeType.Syntactic;
     }
 }

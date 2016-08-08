@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -178,8 +177,8 @@ public class ComprehensionModelManagementView extends JFrame {
         String text = this.textAreaContent.getText();
 
         EventQueue.invokeLater(() -> {
-            ComprehensionModel ciModel = new ComprehensionModel(text, LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.eng), semanticThreshold, 5, activationThreshold, noActiveWords, noActiveWordsIncrement);
-            ComprehensionModelView view = new ComprehensionModelView(ciModel);
+            ComprehensionModel cm = new ComprehensionModel(text, LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.eng), semanticThreshold, 5, activationThreshold, noActiveWords, noActiveWordsIncrement);
+            ComprehensionModelView view = new ComprehensionModelView(cm);
             view.setVisible(true);
         });
     }

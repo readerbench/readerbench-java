@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -82,7 +81,7 @@ public class ComprehensionModelView extends JFrame {
     }
 
     private void generateLayout() {
-        this.phraseLabel = new JLabel("New label");
+        this.phraseLabel = new JLabel();
         this.btnNextPhrase = new JButton("Next Phrase");
         this.btnNextPhrase.addActionListener((ActionEvent e) -> {
             ComprehensionModelView.this.increaseSentenceIndex();
@@ -142,7 +141,7 @@ public class ComprehensionModelView extends JFrame {
 
         // Get Centrality
         GraphDistance distance = new GraphDistance();
-        distance.setDirected(true);
+        distance.setDirected(false);
         distance.execute(graphModel);
 
         // run ForceAtlas 2 layout
@@ -200,30 +199,30 @@ public class ComprehensionModelView extends JFrame {
             return;
         }
         this.pack();
-        logger.info("Finished building the graph");
+        logger.info("Finished building the graph ...");
     }
 
     public HashMap<Node, CMNodeDO> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
         HashMap<Node, CMNodeDO> outMap = new HashMap<>();
-        logger.info("Starting to build the comprehension model graph");
+        logger.info("Starting to build the comprehension model graph ...");
 
         Map<CMNodeDO, Node> nodes = new TreeMap<>();
 
         this.cm.markAllNodesAsInactive();
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
-        CMGraphDO ciGraph = syntacticIndexer.getCiGraph(CMNodeType.TextBased);
-        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCiGraph(CMNodeType.Inferred);
+        CMGraphDO cmGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
+        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCMGraph(CMNodeType.Inferred);
 
-        ciGraph.combineWithLinksFrom(semanticGraph);
-        ciGraph = ciGraph.getCombinedGraph(this.cm.currentGraph);
+        cmGraph.combineWithLinksFrom(semanticGraph);
+        cmGraph = cmGraph.getCombinedGraph(this.cm.getCurrentGraph());
 
-        this.cm.currentGraph = ciGraph;
+        this.cm.setCurrentGraph(cmGraph);
         this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
         this.cm.applyPageRank(this.sentenceIndex);
-        this.cm.logSavedScores(syntacticIndexer.getCiGraph(CMNodeType.TextBased), this.sentenceIndex);
+        this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
 
-        List<CMNodeDO> nodeItemList = ciGraph.nodeList;
+        List<CMNodeDO> nodeItemList = cmGraph.getNodeList();
 
         nodeItemList.stream().forEach((currentNode) -> {
             String text = currentNode.getWord().getLemma();
@@ -245,7 +244,7 @@ public class ComprehensionModelView extends JFrame {
             outMap.put(n, currentNode);
         });
 
-        for (CMEdgeDO edge : ciGraph.edgeList) {
+        for (CMEdgeDO edge : cmGraph.getEdgeList()) {
             int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
             Edge e = graphModel.factory().newEdge(nodes.get(edge.getNode1()), nodes.get(edge.getNode2()), distanceLbl, edge.getScore(), false);
             e.setLabel("");

@@ -5,5 +5,5 @@ import data.Word;
 
 public interface IWordDistanceStrategy {
 	public double getDistance(Word w1, Word w2);
-	public CMEdgeType getCiEdgeType();
+	public CMEdgeType getCMEdgeType();
 }

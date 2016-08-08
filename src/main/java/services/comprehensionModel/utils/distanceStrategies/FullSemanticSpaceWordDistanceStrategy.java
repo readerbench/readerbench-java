@@ -51,11 +51,14 @@ public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrat
 
     @Override
     public double getDistance(Word w1, Word w2) {
-        double sim = semanticModel.getSimilarity(w1, w2);
-        return ((sim >= threshold) && (getIndex(w1.getLemma(), w2.getLemma()) != -1 || getIndex(w2.getLemma(), w1.getLemma()) != -1)) ? sim : 0;
+        double similarity = this.getSimilarity(w1.getLemma(), w2.getLemma());
+        if (similarity != -1) {
+            similarity = this.getSimilarity(w2.getLemma(), w1.getLemma());
+        }
+        return similarity >= threshold ? similarity : 0;
     }
 
-    private int getIndex(String referenceLemma, String lemma) {
+    private double getSimilarity(String referenceLemma, String otherLemma) {
         PriorityQueue<WordSimilarity> similarityQueue = this.wordDistanceContainer.getWordSimilarityMap().get(referenceLemma);
         if (similarityQueue == null) {
             return -1;
@@ -63,15 +66,15 @@ public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrat
         Iterator<WordSimilarity> similarityIterator = similarityQueue.iterator();
         for (int currentStep = 0; currentStep < this.noTopSimilarWords && similarityIterator.hasNext(); currentStep++) {
             WordSimilarity sim = similarityIterator.next();
-            if (sim.getWordLemma().equalsIgnoreCase(lemma)) {
-                return currentStep;
+            if (sim.getWordLemma().equals(otherLemma)) {
+                return sim.getSimilarity();
             }
         }
         return -1;
     }
 
     @Override
-    public CMEdgeType getCiEdgeType() {
+    public CMEdgeType getCMEdgeType() {
         return CMEdgeType.Semantic;
     }
 

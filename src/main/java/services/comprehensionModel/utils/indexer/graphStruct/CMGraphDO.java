@@ -5,8 +5,8 @@ import java.util.List;
 
 public class CMGraphDO {
 
-    public List<CMNodeDO> nodeList;
-    public List<CMEdgeDO> edgeList;
+    private List<CMNodeDO> nodeList;
+    private List<CMEdgeDO> edgeList;
 
     public CMGraphDO() {
         this.nodeList = new ArrayList<>();
@@ -35,6 +35,22 @@ public class CMGraphDO {
         return edgeListContainsEdge(this.edgeList, otherEdge);
     }
 
+    public List<CMNodeDO> getNodeList() {
+        return nodeList;
+    }
+
+    public List<CMEdgeDO> getEdgeList() {
+        return edgeList;
+    }
+
+    public void setNodeList(List<CMNodeDO> nodeList) {
+        this.nodeList = nodeList;
+    }
+
+    public void setEdgeList(List<CMEdgeDO> edgeList) {
+        this.edgeList = edgeList;
+    }
+    
     public List<CMEdgeDO> getEdgeList(CMNodeDO node) {
         List<CMEdgeDO> outEdgeList = new ArrayList<>();
         this.edgeList.stream().filter((edge) -> (edge.getNode1().equals(node) || edge.getNode2().equals(node))).forEach((edge) -> {
