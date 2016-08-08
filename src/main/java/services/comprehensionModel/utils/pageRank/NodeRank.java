@@ -8,9 +8,17 @@ import java.util.Map;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 
 public class NodeRank implements Comparable<NodeRank> {
-	public CMNodeDO node;
-	public Double value;
+	private CMNodeDO node;
+	private Double value;
 
+    public CMNodeDO getNode() {
+        return node;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+    
 	@Override
 	public int compareTo(NodeRank otherRank) {
 		if(this.value < otherRank.value) {
@@ -23,7 +31,7 @@ public class NodeRank implements Comparable<NodeRank> {
 	}
 	
 	public static List<NodeRank> convertMapToNodeRankList(Map<CMNodeDO, Double> nodeActivationScoreMap) {
-		List<NodeRank> rankList = new ArrayList<NodeRank>();
+		List<NodeRank> rankList = new ArrayList<>();
 		Iterator<CMNodeDO> nodeIterator = nodeActivationScoreMap.keySet().iterator();
 		while(nodeIterator.hasNext()) {
 			NodeRank rank = new NodeRank();

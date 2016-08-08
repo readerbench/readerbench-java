@@ -17,8 +17,32 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 public class ActivationScoreLogger {
 
     public static final String OUTPUT_FILE_NAME = "out/comprehension_model_scores.csv";
-    private final List<Map<Word, Double>> activationHistory;
+    private final List<Map<Word, WordActivation>> activationHistory;
     private final List<CMNodeDO> uniqueWordList;
+
+    private class WordActivation {
+
+        private final double activationValue;
+        private final boolean isActive;
+
+        public WordActivation(double activationValue, boolean isActive) {
+            this.activationValue = activationValue;
+            this.isActive = isActive;
+        }
+
+        public double getActivationValue() {
+            return activationValue;
+        }
+
+        public boolean isActive() {
+            return isActive;
+        }
+
+        @Override
+        public String toString() {
+            return this.activationValue + "," + (this.isActive ? "X" : "");
+        }
+    }
 
     public ActivationScoreLogger() {
         this.activationHistory = new ArrayList<>();
@@ -26,11 +50,11 @@ public class ActivationScoreLogger {
     }
 
     public void saveScores(Map<CMNodeDO, Double> activationMap) {
-        Map<Word, Double> activationMapCopy = new TreeMap<>();
+        Map<Word, WordActivation> activationMapCopy = new TreeMap<>();
         Iterator<CMNodeDO> nodeIterator = activationMap.keySet().iterator();
         while (nodeIterator.hasNext()) {
             CMNodeDO currentNode = nodeIterator.next();
-            activationMapCopy.put(currentNode.word, activationMap.get(currentNode));
+            activationMapCopy.put(currentNode.getWord(), new WordActivation(activationMap.get(currentNode), currentNode.isActive()));
         }
         this.activationHistory.add(activationMapCopy);
     }
@@ -46,7 +70,7 @@ public class ActivationScoreLogger {
         for (int i = 0; i < this.uniqueWordList.size(); i++) {
             CMNodeDO currentNode = this.uniqueWordList.get(i);
             if (currentNode.equals(nodeToAdd)) {
-                if (currentNode.nodeType != CMNodeType.Syntactic && nodeToAdd.nodeType == CMNodeType.Syntactic) {
+                if (currentNode.getNodeType() != CMNodeType.TextBased && nodeToAdd.getNodeType() == CMNodeType.TextBased) {
                     this.uniqueWordList.set(i, nodeToAdd);
                 }
                 exists = true;
@@ -62,21 +86,21 @@ public class ActivationScoreLogger {
         try (FileWriter fwrt = new FileWriter(ActivationScoreLogger.OUTPUT_FILE_NAME); BufferedWriter bfwrt = new BufferedWriter(fwrt)) {
             String header = "Word,Type";
             for (int i = 0; i < activationHistory.size(); i++) {
-                header += ",Phrase " + (i + 1);
+                header += ",Phrase " + (i + 1) + ",Active?";
             }
             bfwrt.write(header);
 
             for (CMNodeDO node : this.uniqueWordList) {
-                if (node.nodeType == CMNodeType.Syntactic) {
-                    String line = this.getLogLineForNode(node, "Syntactic");
+                if (node.getNodeType() == CMNodeType.TextBased) {
+                    String line = this.getLogLineForNode(node, "Text-Based");
                     bfwrt.newLine();
                     bfwrt.write(line);
                 }
             }
 
             for (CMNodeDO node : this.uniqueWordList) {
-                if (node.nodeType != CMNodeType.Syntactic) {
-                    String line = this.getLogLineForNode(node, "Semantic");
+                if (node.getNodeType() != CMNodeType.TextBased) {
+                    String line = this.getLogLineForNode(node, "Semantically Inferred");
                     bfwrt.newLine();
                     bfwrt.write(line);
                 }
@@ -87,13 +111,13 @@ public class ActivationScoreLogger {
     }
 
     private String getLogLineForNode(CMNodeDO node, String nodeType) {
-        String line = node.word.getLemma() + "," + nodeType;
+        String line = node.getWord().getLemma() + "," + nodeType;
 
-        for (Map<Word, Double> activationMap : this.activationHistory) {
-            if (!activationMap.containsKey(node.word)) {
-                line += ",0";
+        for (Map<Word, WordActivation> activationMap : this.activationHistory) {
+            if (!activationMap.containsKey(node.getWord())) {
+                line += ",0,";
             } else {
-                line += "," + activationMap.get(node.word);
+                line += "," + activationMap.get(node.getWord()).toString();
             }
         }
         return line;

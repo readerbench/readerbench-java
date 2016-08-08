@@ -68,7 +68,7 @@ public class SpaceStatistics {
         double sim;
         double s00 = 0, s10 = 0, s20 = 0;
         double s01 = 0, s11 = 0, s21 = 0;
-        List<WordPairSimilarity> allWordSimilarityPairList = new ArrayList<WordPairSimilarity>();
+        List<WordPairSimilarity> allWordSimilarityPairList = new ArrayList<>();
         for (Entry<Word, double[]> e1 : semModel.getWordRepresentation().entrySet()) {
             for (Entry<Word, double[]> e2 : semModel.getWordRepresentation().entrySet()) {
                 if (e1.getKey().getLemma().compareTo(e2.getKey().getLemma()) > 0) {
@@ -156,7 +156,7 @@ public class SpaceStatistics {
             InputStream buffer = new BufferedInputStream(file);
             try (ObjectInput input = new ObjectInputStream(buffer)) {
                 this.wordSimilarityContainer = (WordSimilarityContainer) input.readObject();
-                logger.info("Loaded relevant similarities");
+                logger.info("Loaded relevant similarities ...");
             }
             return true;
         } catch (IOException | ClassNotFoundException ex) {

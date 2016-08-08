@@ -1,29 +1,27 @@
 package services.semanticModels.utils;
 
 public class WordSimilarity implements java.io.Serializable, Comparable<WordSimilarity> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private String wordLemma;
-	private double similarity;
 
-	public WordSimilarity(String wordLemma, double similarity) {
-		super();
-		this.wordLemma = wordLemma;
-		this.similarity = similarity;
-	}
+    private static final long serialVersionUID = 1L;
+    private final String wordLemma;
+    private final double similarity;
 
-	public String getWordLemma() {
-		return wordLemma;
-	}
+    public WordSimilarity(String wordLemma, double similarity) {
+        super();
+        this.wordLemma = wordLemma;
+        this.similarity = similarity;
+    }
 
-	public double getSimilarity() {
-		return similarity;
-	}
+    public String getWordLemma() {
+        return wordLemma;
+    }
 
-	@Override
-	public int compareTo(WordSimilarity otherWordSimilarity) {
-		return (int)Math.signum(otherWordSimilarity.similarity - this.similarity);
-	}
+    public double getSimilarity() {
+        return similarity;
+    }
+
+    @Override
+    public int compareTo(WordSimilarity otherWordSimilarity) {
+        return (int) Math.signum(otherWordSimilarity.similarity - this.similarity);
+    }
 }

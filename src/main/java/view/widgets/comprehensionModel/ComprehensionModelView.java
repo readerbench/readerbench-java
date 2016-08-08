@@ -61,7 +61,7 @@ public class ComprehensionModelView extends JFrame {
     private static final long serialVersionUID = 1L;
 
     static Logger logger = Logger.getLogger(ComprehensionModelView.class);
-    private ComprehensionModel cm;
+    private final ComprehensionModel cm;
     private int sentenceIndex;
     public static final Color COLOR_SEMANTIC = new Color(255, 10, 0);
     public static final Color COLOR_SYNTATIC = new Color(0, 21, 255);
@@ -194,7 +194,7 @@ public class ComprehensionModelView extends JFrame {
         logger.info("Saving export...");
         ExportController ec = Lookup.getDefault().lookup(ExportController.class);
         try {
-            ec.exportFile(new File("out/graph_doc_corpus_view_" + sentenceIndex + ".pdf"));
+            ec.exportFile(new File("out/network graph phrase " + (sentenceIndex + 1) + ".pdf"));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
             return;
@@ -212,8 +212,8 @@ public class ComprehensionModelView extends JFrame {
         this.cm.markAllNodesAsInactive();
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
-        CMGraphDO ciGraph = syntacticIndexer.getCiGraph(CMNodeType.Syntactic);
-        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCiGraph(CMNodeType.Semantic);
+        CMGraphDO ciGraph = syntacticIndexer.getCiGraph(CMNodeType.TextBased);
+        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCiGraph(CMNodeType.Inferred);
 
         ciGraph.combineWithLinksFrom(semanticGraph);
         ciGraph = ciGraph.getCombinedGraph(this.cm.currentGraph);
@@ -221,12 +221,12 @@ public class ComprehensionModelView extends JFrame {
         this.cm.currentGraph = ciGraph;
         this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
         this.cm.applyPageRank(this.sentenceIndex);
-        this.cm.logSavedScores(syntacticIndexer.getCiGraph(CMNodeType.Syntactic), this.sentenceIndex);
+        this.cm.logSavedScores(syntacticIndexer.getCiGraph(CMNodeType.TextBased), this.sentenceIndex);
 
         List<CMNodeDO> nodeItemList = ciGraph.nodeList;
 
         nodeItemList.stream().forEach((currentNode) -> {
-            String text = currentNode.word.getLemma();
+            String text = currentNode.getWord().getLemma();
 
             Node n = graphModel.factory().newNode(text);
             n.setLabel(text);
@@ -247,12 +247,11 @@ public class ComprehensionModelView extends JFrame {
 
         for (CMEdgeDO edge : ciGraph.edgeList) {
             int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
-            Edge e = graphModel.factory().newEdge(nodes.get(edge.node1), nodes.get(edge.node2), distanceLbl, edge.score,
-                    false);
+            Edge e = graphModel.factory().newEdge(nodes.get(edge.getNode1()), nodes.get(edge.getNode2()), distanceLbl, edge.getScore(), false);
             e.setLabel("");
             Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
                     (float) (COLOR_SEMANTIC.getBlue()) / 256);
-            if (edge.edgeType == CMEdgeType.Syntactic) {
+            if (edge.getEdgeType().equals(CMEdgeType.Syntactic)) {
                 color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
                         (float) (COLOR_SYNTATIC.getBlue()) / 256);
             }
@@ -265,15 +264,16 @@ public class ComprehensionModelView extends JFrame {
     }
 
     private Color getNodeColor(CMNodeDO node) {
-        if (node.nodeType == CMNodeType.Semantic) {
-            return COLOR_SEMANTIC;
+        Color c = null;
+        if (node.getNodeType().equals(CMNodeType.Inferred)) {
+            c = COLOR_SEMANTIC;
         }
-        if (node.nodeType == CMNodeType.Syntactic) {
-            return COLOR_SYNTATIC;
+        if (node.getNodeType().equals(CMNodeType.TextBased)) {
+            c = COLOR_SYNTATIC;
         }
-        if (node.nodeType == CMNodeType.Active) {
-            return COLOR_ACTIVE;
+        if (!node.isActive()) {
+            c = COLOR_INACTIVE;
         }
-        return COLOR_INACTIVE;
+        return c;
     }
 }

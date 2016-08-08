@@ -15,32 +15,30 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.semanticModels.ISemanticModel;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
-import data.Lang;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
 
-public class QueryIndexer {
-    public static String LsaPath = "resources/config/LSA/tasa_en";
-    public static String LdaPath = "resources/config/LDA/tasa_en";
-    public static Lang lang = Lang.eng;
+/**
+ *
+ * @author Ionut Paraschiv
+ */
+public class CMIndexer {
 
-    private ISemanticModel semanticModel;
-    private int noTopSimilarWords;
-    private String text;
+    private final ISemanticModel semanticModel;
+    private final String text;
     public AbstractDocument document;
 
     private WordDistanceIndexer semanticIndexer;
     private List<WordDistanceIndexer> syntacticIndexerList;
-    private Map<CMNodeDO, Double> nodeActivationScoreMap;
+    private final Map<CMNodeDO, Double> nodeActivationScoreMap;
 
-    public QueryIndexer(String text, ISemanticModel semanticModel, int noTopSimilarWords) {
-        this.noTopSimilarWords = noTopSimilarWords;
+    public CMIndexer(String text, ISemanticModel semanticModel, double threshold, int noTopSimilarWords) {
         this.text = text;
         this.semanticModel = semanticModel;
-        this.nodeActivationScoreMap = new TreeMap<CMNodeDO, Double>();
+        this.nodeActivationScoreMap = new TreeMap<>();
         this.loadDocument();
-        this.indexFullSemanticSpaceDistances();
+        this.indexFullSemanticSpaceDistances(threshold, noTopSimilarWords);
         this.indexSyntacticDistances();
     }
 
@@ -49,37 +47,35 @@ public class QueryIndexer {
         this.document = new Document(contents, this.semanticModel, true, false);
     }
 
-    private void indexFullSemanticSpaceDistances() {
-        FullSemanticSpaceWordDistanceStrategy wdStrategy = new FullSemanticSpaceWordDistanceStrategy(this.semanticModel, this.noTopSimilarWords);
+    private void indexFullSemanticSpaceDistances(double threshold, int noTopSimilarWords) {
+        FullSemanticSpaceWordDistanceStrategy wdStrategy = new FullSemanticSpaceWordDistanceStrategy(this.semanticModel, threshold, noTopSimilarWords);
         this.semanticIndexer = new WordDistanceIndexer(wdStrategy.getWordList(), wdStrategy);
-        this.addWordListToWordActivationScoreMap(this.semanticIndexer.wordList);
+        this.addWordListToWordActivationScoreMap(this.semanticIndexer.getWordList());
     }
 
     private void indexSyntacticDistances() {
-    	CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, QueryIndexer.lang);
+        CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, this.semanticModel.getLanguage());
 
         List<Sentence> sentenceList = this.document.getSentencesInDocument();
         Iterator<Sentence> sentenceIterator = sentenceList.iterator();
         this.syntacticIndexerList = new ArrayList<>();
-        int sentenceNum=0;
+        int sentenceNum = 0;
         while (sentenceIterator.hasNext()) {
             Sentence sentence = sentenceIterator.next();
-            
+
             CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
             SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
 
             WordDistanceIndexer wdIndexer = new WordDistanceIndexer(syntacticGraph.getWordList(), syntacticStrategy);
             this.syntacticIndexerList.add(wdIndexer);
-            this.addWordListToWordActivationScoreMap(wdIndexer.wordList);
+            this.addWordListToWordActivationScoreMap(wdIndexer.getWordList());
             sentenceNum++;
         }
     }
 
     private void addWordListToWordActivationScoreMap(List<Word> wordList) {
         for (int i = 0; i < wordList.size(); i++) {
-            CMNodeDO node = new CMNodeDO();
-            node.word = wordList.get(i);
-            node.nodeType = CMNodeType.Semantic;
+            CMNodeDO node = new CMNodeDO(wordList.get(i), CMNodeType.Inferred);
             this.nodeActivationScoreMap.put(node, 0.0);
         }
     }

@@ -18,11 +18,11 @@ public class PageRank {
 	
 	public Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
 		int algIteration = 0;
-		Map<CMNodeDO, Double> currentPageRankValues = new TreeMap<CMNodeDO, Double>(pageRankValues);
+		Map<CMNodeDO, Double> currentPageRankValues = new TreeMap<>(pageRankValues);
 		while(algIteration < PageRank.MAX_ITER) {
 			double r = this.calculateR(currentPageRankValues, graph);
 			
-			Map<CMNodeDO, Double> tempPageRankValues = new TreeMap<CMNodeDO, Double>();
+			Map<CMNodeDO, Double> tempPageRankValues = new TreeMap<>();
 			boolean done = true;
 			for(CMNodeDO node : graph.nodeList) {
 				double tempPRValue = this.computeTempPageRankValue(currentPageRankValues, graph, node, r);

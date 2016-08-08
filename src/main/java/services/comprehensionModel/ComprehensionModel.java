@@ -4,20 +4,17 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
-import data.Lang;
 import data.Sentence;
 import services.comprehensionModel.utils.ActivationScoreLogger;
-import services.comprehensionModel.utils.indexer.QueryIndexer;
+import services.comprehensionModel.utils.indexer.CMIndexer;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.comprehensionModel.utils.pageRank.NodeRank;
 import services.comprehensionModel.utils.pageRank.PageRank;
-import services.semanticModels.LDA.LDA;
+import services.semanticModels.ISemanticModel;
 
 public class ComprehensionModel {
 
@@ -26,13 +23,12 @@ public class ComprehensionModel {
     private final int maxNoActiveWordsIncrement;
     private final ActivationScoreLogger activationScoreLogger;
 
-    private final QueryIndexer queryIndexer;
+    private final CMIndexer queryIndexer;
     public CMGraphDO currentGraph;
 
-    public ComprehensionModel(String text, int hdpGrade, int noTopSimilarWords, double minActivationThreshold,
+    public ComprehensionModel(String text, ISemanticModel semModel, double semanticThreshold, int noTopSimilarWords, double minActivationThreshold,
             int maxNoActiveWords, int maxNoActiveWordsIncrement) {
-        this.queryIndexer = new QueryIndexer(text, LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.eng),
-                noTopSimilarWords);
+        this.queryIndexer = new CMIndexer(text, semModel, semanticThreshold, noTopSimilarWords);
         this.currentGraph = new CMGraphDO();
         this.minActivationThreshold = minActivationThreshold;
         this.maxNoActiveWords = maxNoActiveWords;
@@ -62,10 +58,8 @@ public class ComprehensionModel {
 
     public void updateActivationScoreMapAtIndex(int index) {
         WordDistanceIndexer indexer = this.getSyntacticIndexerAtIndex(index);
-        for (int i = 0; i < indexer.wordList.size(); i++) {
-            CMNodeDO node = new CMNodeDO();
-            node.nodeType = CMNodeType.Syntactic;
-            node.word = indexer.wordList.get(i);
+        for (int i = 0; i < indexer.getWordList().size(); i++) {
+            CMNodeDO node = new CMNodeDO(indexer.getWordList().get(i), CMNodeType.TextBased);
             double score = this.getNodeActivationScoreMap().get(node);
             score++;
             this.getNodeActivationScoreMap().put(node, score);
@@ -77,7 +71,7 @@ public class ComprehensionModel {
 
     public void markAllNodesAsInactive() {
         this.currentGraph.nodeList.stream().forEach((node) -> {
-            node.nodeType = CMNodeType.Inactive;
+            node.deactivate();
         });
     }
 
@@ -91,7 +85,8 @@ public class ComprehensionModel {
         List<NodeRank> nodeRankList = NodeRank.convertMapToNodeRankList(updatedNodeActivationScoreMap);
         Collections.sort(nodeRankList, Collections.reverseOrder());
 
-        this.activateFirstWords(updatedNodeActivationScoreMap, nodeRankList, maxWords);
+        this.activateFirstWords(//updatedNodeActivationScoreMap, 
+                nodeRankList, maxWords);
 
         Iterator<CMNodeDO> nodeIterator = updatedNodeActivationScoreMap.keySet().iterator();
         while (nodeIterator.hasNext()) {
@@ -102,20 +97,18 @@ public class ComprehensionModel {
         this.activationScoreLogger.saveScores(updatedNodeActivationScoreMap);
     }
 
-    private void activateFirstWords(Map<CMNodeDO, Double> updatedNodeActivationScoreMap, List<NodeRank> nodeRankList,
-            int maxWords) {
+    private void activateFirstWords(//Map<CMNodeDO, Double> updatedNodeActivationScoreMap, 
+            List<NodeRank> nodeRankList, int maxWords) {
         int noActivatedWord = 0;
-        Set<CMNodeDO> activeNodeSet = new TreeSet<>();
+        //Set<CMNodeDO> activeNodeSet = new TreeSet<>();
         for (NodeRank nodeRank : nodeRankList) {
-            if (nodeRank.value < this.minActivationThreshold) {
+            if (nodeRank.getValue() < this.minActivationThreshold) {
                 break;
             }
             for (CMNodeDO currentNode : this.currentGraph.nodeList) {
-                if (currentNode.equals(nodeRank.node)) {
-                    if (currentNode.nodeType == CMNodeType.Inactive) {
-                        currentNode.nodeType = CMNodeType.Active;
-                    }
-                    activeNodeSet.add(currentNode);
+                if (currentNode.equals(nodeRank.getNode())) {
+                    currentNode.activate();
+//                    activeNodeSet.add(currentNode);
                     noActivatedWord++;
                     break;
                 }
