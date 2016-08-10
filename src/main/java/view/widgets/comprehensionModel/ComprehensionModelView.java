@@ -250,7 +250,7 @@ public class ComprehensionModelView extends JFrame {
             e.setLabel("");
             Color color = new Color((float) (COLOR_SEMANTIC.getRed()) / 256, (float) (COLOR_SEMANTIC.getGreen()) / 256,
                     (float) (COLOR_SEMANTIC.getBlue()) / 256);
-            if (edge.getEdgeType().equals(CMEdgeType.Syntactic)) {
+            if (edge.getEdgeType() == CMEdgeType.Syntactic) {
                 color = new Color((float) (COLOR_SYNTATIC.getRed()) / 256, (float) (COLOR_SYNTATIC.getGreen()) / 256,
                         (float) (COLOR_SYNTATIC.getBlue()) / 256);
             }
@@ -263,16 +263,15 @@ public class ComprehensionModelView extends JFrame {
     }
 
     private Color getNodeColor(CMNodeDO node) {
-        Color c = null;
-        if (node.getNodeType().equals(CMNodeType.Inferred)) {
-            c = COLOR_SEMANTIC;
+    	if (!node.isActive()) {
+            return COLOR_INACTIVE;
         }
-        if (node.getNodeType().equals(CMNodeType.TextBased)) {
-            c = COLOR_SYNTATIC;
+    	if (node.getNodeType() == CMNodeType.Inferred) {
+            return COLOR_SEMANTIC;
         }
-        if (!node.isActive()) {
-            c = COLOR_INACTIVE;
+        if (node.getNodeType() == CMNodeType.TextBased) {
+            return COLOR_SYNTATIC;
         }
-        return c;
+        return COLOR_INACTIVE;
     }
 }

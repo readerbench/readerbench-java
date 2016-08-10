@@ -52,7 +52,7 @@ public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrat
     @Override
     public double getDistance(Word w1, Word w2) {
         double similarity = this.getSimilarity(w1.getLemma(), w2.getLemma());
-        if (similarity != -1) {
+        if (similarity == -1) {
             similarity = this.getSimilarity(w2.getLemma(), w1.getLemma());
         }
         return similarity >= threshold ? similarity : 0;

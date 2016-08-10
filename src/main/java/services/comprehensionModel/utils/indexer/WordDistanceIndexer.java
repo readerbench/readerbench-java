@@ -15,7 +15,7 @@ import data.Word;
 
 public class WordDistanceIndexer implements java.io.Serializable {
 
-    private static final long serialVersionUID = 5625856114036715717L;
+	private static final long serialVersionUID = 5625856114036715717L;
 
     private final IWordDistanceStrategy wordDistanceStrategy;
     private List<Word> wordList;
@@ -94,28 +94,34 @@ public class WordDistanceIndexer implements java.io.Serializable {
         }
         return max;
     }
-
-    public CMGraphDO getCMGraph(CMNodeType nodeType) {
-        CMGraphDO graph = new CMGraphDO();
-        graph.setNodeList(new ArrayList<>());
+	
+	public CMGraphDO getCMGraph(CMNodeType nodeType) {
+		CMGraphDO graph = new CMGraphDO();
+		graph.setNodeList(new ArrayList<>());
         graph.setEdgeList(new ArrayList<>());
-
-        Set<CMNodeDO> nodeSet = new HashSet<>();
-        for (int i = 0; i < this.distances.length; i++) {
-            for (int j = i + 1; j < this.distances[i].length; j++) {
-                if (i != j && this.distances[i][j] > 0) {
-                    Word w1 = this.wordList.get(i);
-                    Word w2 = this.wordList.get(j);
-                    CMEdgeDO edge = new CMEdgeDO(new CMNodeDO(w1, nodeType), new CMNodeDO(w2, nodeType), this.wordDistanceStrategy.getCMEdgeType(), this.wordDistanceStrategy.getDistance(w1, w2));
-                    if (edge.getScore() > 0) {
-                        nodeSet.add(edge.getNode1());
-                        nodeSet.add(edge.getNode2());
-                        graph.getEdgeList().add(edge);
-                    }
-                }
-            }
-        }
-        graph.setNodeList((new CMUtils()).convertNodeIteratorToList(nodeSet.iterator()));
-        return graph;
-    }
+		
+		Set<CMNodeDO> nodeSet = new HashSet<CMNodeDO>();
+		for(int i = 0; i < this.distances.length; i ++) {
+			for(int j = i + 1; j < this.distances[i].length; j ++) {
+				if(i != j && this.distances[i][j] > 0) {
+					Word w1 = this.wordList.get(i);
+					Word w2 = this.wordList.get(j);
+					
+					CMNodeDO node1 = new CMNodeDO(w1, nodeType);
+					node1.activate();
+					
+					CMNodeDO node2 = new CMNodeDO(w2, nodeType);
+					node2.activate();
+					
+					CMEdgeDO edge = new CMEdgeDO(node1, node2, this.wordDistanceStrategy.getCMEdgeType(), this.distances[i][j]);
+					
+					graph.getEdgeList().add(edge);
+					nodeSet.add(node1);
+					nodeSet.add(node2);
+				}
+			}
+		}
+		graph.setNodeList((new CMUtils()).convertNodeIteratorToList(nodeSet.iterator()));
+		return graph;
+	}
 }
