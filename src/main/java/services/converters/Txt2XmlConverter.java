@@ -519,10 +519,10 @@ public class Txt2XmlConverter {
 //        parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 1/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 2/", Lang.nl);
-//        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
-//        parseDocFiles("resources/in/ViBOA_nl/evaluation task 2/", Lang.nl);
-//        parseDocFiles("resources/in/ViBOA_nl/final task/", Lang.nl);
-        parseDocFiles("resources/in/ViBOA_nl/Test/", Lang.nl);
+        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
+        parseDocFiles("resources/in/ViBOA_nl/evaluation task 2/", Lang.nl);
+        parseDocFiles("resources/in/ViBOA_nl/final task/", Lang.nl);
+//        parseDocFiles("resources/in/ViBOA_nl/Test/", Lang.nl);
         
     }
 }

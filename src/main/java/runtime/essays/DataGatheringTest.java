@@ -79,9 +79,31 @@ public class DataGatheringTest {
 //            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true,
 //                    true);
             DataGathering.processTexts(
-                    "resources/in/ViBOA_nl/Test", 
-                    "resources/in/ViBOA_nl/Test", 
+                    "resources/in/ViBOA_nl/analysis", 
+                    "resources/in/ViBOA_nl/analysis", 
                     0, true, null, null, Lang.nl, false, true, true);
+            DataGathering.processTexts(
+                    "resources/in/ViBOA_nl/design task 1", 
+                    "resources/in/ViBOA_nl/design task 1", 
+                    0, true, null, null, Lang.nl, false, true, true);
+            
+            DataGathering.processTexts(
+                    "resources/in/ViBOA_nl/design task 2", 
+                    "resources/in/ViBOA_nl/design task 2", 
+                    0, true, null, null, Lang.nl, false, true, true);
+            DataGathering.processTexts(
+                    "resources/in/ViBOA_nl/evaluation task 1", 
+                    "resources/in/ViBOA_nl/evaluation task 1", 
+                    0, true, null, null, Lang.nl, false, true, true);
+            DataGathering.processTexts(
+                    "resources/in/ViBOA_nl/evaluation task 2", 
+                    "resources/in/ViBOA_nl/evaluation task 2", 
+                    0, true, null, null, Lang.nl, false, true, true);
+            DataGathering.processTexts(
+                    "resources/in/ViBOA_nl/final task", 
+                    "resources/in/ViBOA_nl/final task", 
+                    0, true, null, null, Lang.nl, false, true, true);
+           
             // DataGathering.processTexts("resources/in/essays/nursery_fr", -1,
             // // true, lsa, lda, Lang.fr, true, true);
             // DataGathering.processTexts("resources/in/Elvira/users 2010", -1,

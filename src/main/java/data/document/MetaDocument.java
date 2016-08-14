@@ -95,6 +95,7 @@ public class MetaDocument extends Document {
             complexityIndices[i] = leaves.parallelStream()
                     .map(Document::getComplexityIndices)
                     .mapToDouble(indices -> indices[index])
+                    .filter(x -> x != -1)
                     .average().orElse((double) ComplexityIndices.IDENTITY);
 
         }
