@@ -116,7 +116,7 @@ public class ReaderBenchServer {
 	public List<ResultCategory> getCategories(String documentContent, String pathToLSA, String pathToLDA, Lang lang,
 			boolean usePOSTagging, boolean computeDialogism, double threshold) {
 
-		List<ResultCategory> resultCategories = new ArrayList<ResultCategory>();
+		List<ResultCategory> resultCategories = new ArrayList<>();
 
 		AbstractDocument queryDoc = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
 				computeDialogism);
@@ -187,7 +187,7 @@ public class ReaderBenchServer {
 
 		s.computeAll(computeDialogism, false);
 
-		List<ResultReadingStrategy> readingStrategies = new ArrayList<ResultReadingStrategy>();
+		List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 			readingStrategies.add(new ResultReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i],
 					s.getAutomaticReadingStrategies()[0][i]));
@@ -214,26 +214,6 @@ public class ReaderBenchServer {
 			return new ResultPdfToText(pdfConverter.pdftoText(uri, true));
 		} else {
 			return new ResultPdfToText(pdfConverter.pdftoText(uri, false));
-		}
-	}
-
-	@Root(name = "response")
-	private static class QueryResultPdfToText {
-
-		@Element
-		private boolean success;
-
-		@Element(name = "errormsg")
-		private String errorMsg; // custom error message (optional)
-
-		@Path("data")
-		@ElementList(inline = true, entry = "result")
-		private ResultPdfToText data;
-
-		private QueryResultPdfToText() {
-			success = true;
-			errorMsg = "";
-			data = new ResultPdfToText("");
 		}
 	}
 
@@ -278,7 +258,6 @@ public class ReaderBenchServer {
 			boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 
-			// System.out.println("Am primit: " + q);
 			QueryResultSentiment queryResult = new QueryResultSentiment();
 			queryResult.setData(webService.services.SentimentAnalysis.getSentiment(QueryHelper.processQuery(text,
 					pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism)));
@@ -353,7 +332,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String uri = (String) json.get("uri");
-			String documentContent = null;
+			String documentContent;
 			if (uri == null || uri.isEmpty()) {
 				logger.error("URI an URL are empty. Aborting...");
 				System.exit(-1);
@@ -362,9 +341,6 @@ public class ReaderBenchServer {
 				documentContent = getTextFromPdf(uri, false).getContent();
 			} else {
 				documentContent = getTextFromPdf(uri, true).getContent();
-			}
-			if (uri != null && !uri.isEmpty()) {
-
 			}
 
 			String documentAbstract = (String) json.get("abstract");
@@ -378,7 +354,7 @@ public class ReaderBenchServer {
 
 			Lang lang = Lang.getLang(language);
 
-			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
+			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
 
 			AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism);
@@ -412,7 +388,7 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
 
-			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
+			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
 
 			Lang lang = Lang.getLang(language);
 
@@ -470,16 +446,7 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (Double) json.get("threshold");
 
-			// AbstractDocumentTemplate contents =
-			// Cscl.getConversationText(conversationText);
-			// logger.info("Contents: blocks = " + contents.getBlocks().size());
 			Lang lang = Lang.getLang(language);
-			/*
-			 * Conversation conversation = new Conversation( null, contents,
-			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
-			 * usePOSTagging, false);
-			 */
-
 			Conversation conversation = Conversation.load(new File("tmp/" + csclFile), LSA.loadLSA(pathToLSA, lang),
 					LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
 			conversation.computeAll(computeDialogism, null, null, SaveType.NONE);
@@ -487,13 +454,9 @@ public class ReaderBenchServer {
 					pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism);
 
 			QueryResultCscl queryResult = new QueryResultCscl();
-			// queryResult.data =
-			// ParticipantInteraction.buildParticipantGraph(conversation);
 			queryResult.setData(CSCL.getAll(conversationDocument, conversation, threshold));
-			String result = queryResult.convertToJson();
-			System.out.println("CSCL queryResult" + result);
-			// return Charset.forName("UTF-8").encode(result);
-			return result;
+
+			return queryResult.convertToJson();
 
 		});
 		Spark.post("/textCategorization", (request, response) -> {
@@ -502,15 +465,8 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String uri = (String) json.get("uri");
-			// String url = (String) json.get("url");
 
-			/*
-			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
-			 * queryResult.data = getTextFromPdf(uri); String result =
-			 * convertToJson(queryResult);
-			 */
-
-			String documentContent = null;
+			String documentContent;
 			if (uri == null || uri.isEmpty()) {
 				logger.error("URI an URL are empty. Aborting...");
 				System.exit(-1);
@@ -520,12 +476,6 @@ public class ReaderBenchServer {
 			} else {
 				documentContent = getTextFromPdf(uri, true).getContent();
 			}
-			if (uri != null && !uri.isEmpty()) {
-
-			}
-
-			ResultTopic resultTopic = null;
-			List<ResultCategory> resultCategories = null;
 
 			String language = (String) json.get("lang");
 			String pathToLSA = (String) json.get("lsa");
@@ -534,16 +484,15 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (double) json.get("threshold");
 
-			resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA,
+			ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA,
 					Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null);
-			resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, Lang.getLang(language),
+			List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, Lang.getLang(language),
 					usePOSTagging, computeDialogism, threshold);
 
 			QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
 			queryResult.setData(new ResultTextCategorization(resultTopic, resultCategories));
-			String result = queryResult.convertToJson();
-			// return Charset.forName("UTF-8").encode(result);
-			return result;
+			
+			return queryResult.convertToJson();
 
 		});
 		Spark.post("/cvCoverProcessing", (request, response) -> {
@@ -560,43 +509,14 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (Double) json.get("threshold");
 
-			// AbstractDocumentTemplate contents =
-			// Cscl.getConversationText(conversationText);
-			// logger.info("Contents: blocks = " + contents.getBlocks().size());
 			Lang lang = Lang.getLang(language);
-			/*
-			 * Conversation conversation = new Conversation( null, contents,
-			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
-			 * usePOSTagging, false);
-			 */
-			/*
-			 * Document cvContent = Document.load(new File(cvContent),
-			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
-			 * usePOSTagging, false); cvContent.computeAll(computeDialogism,
-			 * null, null, true);
-			 */
-			/*
-			 * AbstractDocument cvDocument = processQuery(cvContent.getText(),
-			 * pathToLSA, pathToLDA, language, usePOSTagging, computeDialogism);
-			 */
-
-			Map<String, Integer> commonWords = new HashMap<String, Integer>();
-
+			Map<String, Integer> commonWords = new HashMap<>();
 			String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
 			AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA,
 					Lang.getLang(language), usePOSTagging, computeDialogism);
 			Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
 
-			/*
-			 * Document coverContent = Document.load(new File("tmp/" +
-			 * coverFile), LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA,
-			 * lang), lang, usePOSTagging, false);
-			 * coverContent.computeAll(computeDialogism, null, null, true);
-			 */
-
 			QueryResultCvCover queryResult = new QueryResultCvCover();
-			// queryResult.data =
-			// ParticipantInteraction.buildParticipantGraph(conversation);
 			ResultCvCover result = new ResultCvCover(null, null);
 			ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
 			resultCv.setConcepts(ConceptMap.getTopics(
@@ -606,7 +526,6 @@ public class ReaderBenchServer {
 					QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
 			result.setCv(resultCv);
 
-			// if (coverFile != null) {
 			String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
 			AbstractDocument coverDocument = QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism);
@@ -624,15 +543,13 @@ public class ReaderBenchServer {
 			Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
 			while (itCvWords.hasNext()) {
 				Map.Entry<Word, Integer> cvPair = (Map.Entry<Word, Integer>) itCvWords.next();
-				// System.out.println(pair.getKey() + " = " + pair.getValue());
 				Word cvWord = (Word) cvPair.getKey();
-				Integer cvWordOccurences = (Integer) cvPair.getValue();
+				Integer cvWordOccurences = cvPair.getValue();
 				if (coverWords.containsKey(cvWord)) {
 					commonWords.put(cvWord.getLemma(), cvWordOccurences + coverWords.get(cvWord));
 				}
-				itCvWords.remove(); // avoids a ConcurrentModificationException
 			}
-			// }
+			
 			result.setWordOccurences(commonWords);
 			// semantic similarity between Cover Letter & CV
 			/*
@@ -648,9 +565,7 @@ public class ReaderBenchServer {
 			 */
 
 			queryResult.setData(result);
-
 			return queryResult.convertToJson();
-			// return Charset.forName("UTF-8").encode(result);
 
 		});
 		Spark.post("/cvProcessing", (request, response) -> {
@@ -668,25 +583,10 @@ public class ReaderBenchServer {
 			boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
 			double threshold = (Double) json.get("threshold");
 
-			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
-			Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",")));
+			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
+			Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",")));
 
-			// AbstractDocumentTemplate contents =
-			// Cscl.getConversationText(conversationText);
-			// logger.info("Contents: blocks = " + contents.getBlocks().size());
 			Lang lang = Lang.getLang(language);
-			/*
-			 * Conversation conversation = new Conversation( null, contents,
-			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
-			 * usePOSTagging, false);
-			 */
-			/*
-			 * Document cvContent = Document.load(new File(cvContent),
-			 * LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang,
-			 * usePOSTagging, false); cvContent.computeAll(computeDialogism,
-			 * null, null, true);
-			 */
-
 			PdfToTextConverter pdfConverter = new PdfToTextConverter();
 			String cvContent = pdfConverter.pdftoText("tmp/" + cvFile, true);
 
@@ -696,23 +596,13 @@ public class ReaderBenchServer {
 			AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
 					usePOSTagging, computeDialogism);
 
-			/*
-			 * Document coverContent = Document.load(new File("tmp/" +
-			 * coverFile), LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA,
-			 * lang), lang, usePOSTagging, false);
-			 * coverContent.computeAll(computeDialogism, null, null, true);
-			 */
-
 			QueryResultCv queryResult = new QueryResultCv();
-			// queryResult.data =
-			// ParticipantInteraction.buildParticipantGraph(conversation);
 			ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
 					pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, 5, 1);
 
 			queryResult.setData(result);
 
 			return queryResult.convertToJson();
-			// return Charset.forName("UTF-8").encode(result);
 
 		});
 		// File Upload - send file as multipart form-data to be accepted
@@ -720,8 +610,8 @@ public class ReaderBenchServer {
 			MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
 			request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
 			Part file = request.raw().getPart("file"); // file is name of the
-														// input in the upload
-														// form
+			// input in the upload
+			// form
 			return FileProcessor.getInstance().saveFile(file);
 		});
 		Spark.options("/fileUpload", (request, response) -> {
@@ -766,7 +656,7 @@ public class ReaderBenchServer {
 			response.type("application/json");
 
 			String vCoPFile = (String) json.get("vCoPFile");
-			System.out.println("vCoP %s" + vCoPFile);
+			logger.info("vCoP %s" + vCoPFile);
 			String startDateString = (String) json.get("startDate");
 			DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 			Date startDate = format.parse(startDateString);
@@ -801,7 +691,7 @@ public class ReaderBenchServer {
 			queryResult.setData(resultVcop);
 
 			String result = queryResult.convertToJson();
-			System.out.println("queryResult" + result);
+			logger.info("queryResult" + result);
 			return result;
 
 		});
@@ -815,13 +705,13 @@ public class ReaderBenchServer {
 			String subject = (String) json.get("subject");
 			String message = (String) json.get("message");
 			
-			HashMap<Object, Object> hm = new HashMap<Object, Object>();			
-			HashMap<String, String> hmFrom = new HashMap<String, String>();
+			HashMap<Object, Object> hm = new HashMap<>();			
+			HashMap<String, String> hmFrom = new HashMap<>();
 			hmFrom.put("name", name);
 			hmFrom.put("email", email);
 			hm.put("from", hmFrom);
 			
-			HashMap<String, String> hmSimpleReceiver = new HashMap<String, String>();
+			HashMap<String, String> hmSimpleReceiver = new HashMap<>();
 			hmSimpleReceiver.put("email", "contact@readerbench.com");
 			hm.put("to", hmSimpleReceiver);
 			hm.put("subject", subject);
@@ -836,13 +726,13 @@ public class ReaderBenchServer {
 			String output = mailGunResponse.getEntity(String.class);
 			
 			JSONParser parser = new JSONParser();
-			JSONObject jsonObject = (JSONObject) parser.parse(output.toString());
+			JSONObject jsonObject = (JSONObject) parser.parse(output);
 			queryResult.setMailgunResponse(jsonObject);
 			
 			String result = queryResult.convertToJson();
-			System.out.println("queryResult" + result);
+			logger.info("queryResult" + result);
 			
-			return result;			
+			return result;		
 		});
 	}
 
