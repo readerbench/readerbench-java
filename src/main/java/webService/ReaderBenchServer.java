@@ -34,6 +34,10 @@ import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
 import org.simpleframework.xml.Root;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.sun.jersey.api.client.ClientResponse;
+
 import dao.CategoryDAO;
 import dao.WordDAO;
 import data.AbstractDocument;
@@ -53,6 +57,7 @@ import data.sentiment.SentimentWeights;
 import scala.collection.immutable.Stream.StreamBuilder;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
+import services.mail.SendMail;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -63,6 +68,7 @@ import webService.query.QueryHelper;
 import webService.queryResult.QueryResultCscl;
 import webService.queryResult.QueryResultCv;
 import webService.queryResult.QueryResultCvCover;
+import webService.queryResult.QueryResultMailgun;
 import webService.queryResult.QueryResultSearch;
 import webService.queryResult.QueryResultSelfExplanation;
 import webService.queryResult.QueryResultSemanticAnnotation;
@@ -791,6 +797,45 @@ public class ReaderBenchServer {
 			System.out.println("queryResult" + result);
 			return result;
 
+		});
+		Spark.post("/sendContactEmail", (request, response) -> {
+			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+			response.type("application/json");
+
+			String name = (String) json.get("name");
+			String email = (String) json.get("email");
+			String subject = (String) json.get("subject");
+			String message = (String) json.get("message");
+			
+			HashMap<Object, Object> hm = new HashMap<Object, Object>();			
+			HashMap<String, String> hmFrom = new HashMap<String, String>();
+			hmFrom.put("name", name);
+			hmFrom.put("email", email);
+			hm.put("from", hmFrom);
+			
+			HashMap<String, String> hmSimpleReceiver = new HashMap<String, String>();
+			hmSimpleReceiver.put("email", "contact@readerbench.com");
+			hm.put("to", hmSimpleReceiver);
+			hm.put("subject", subject);
+			hm.put("message", message);
+			ClientResponse mailGunResponse = SendMail.sendSimpleMessage(hm);
+			if (mailGunResponse.getStatus() != 200) {
+				throw new RuntimeException("Failed : HTTP error code : "
+						+ mailGunResponse.getStatus());
+			}
+			
+			QueryResultMailgun queryResult = new QueryResultMailgun();
+			String output = mailGunResponse.getEntity(String.class);
+			
+			JSONParser parser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) parser.parse(output.toString());
+			queryResult.setMailgunResponse(jsonObject);
+			
+			String result = queryResult.convertToJson();
+			System.out.println("queryResult" + result);
+			
+			return result;			
 		});
 	}
 
