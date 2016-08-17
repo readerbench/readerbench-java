@@ -38,12 +38,16 @@ import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import services.commons.Formatting;
 
-public class CSCLStats {
+/**
+ *
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
+public class SimilarityAnalysis {
 
-    public static Logger logger = Logger.getLogger(CSCLStats.class);
+    public static Logger logger = Logger.getLogger(SimilarityAnalysis.class);
 
     private static final int WINDOW_SIZE = 20;
-    private static final String CORPUS_PATH = "resources/in/corpus_v2/";
+    private static final String CORPORA_PATH = "resources/in/corpus_v2/";
     private static int no_references = 0;
 
     public static void main(String[] args) {
@@ -58,16 +62,16 @@ public class CSCLStats {
         Map<String, ChatStats> chatStats = new HashMap<>();
 
         try {
-            Files.walk(Paths.get(CSCLStats.CORPUS_PATH)).forEach(filePath -> {
+            Files.walk(Paths.get(SimilarityAnalysis.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
-
                     logger.info("Processing file " + filePath.getFileName().toString());
 
                     Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
                             "resources/config/LDA/tasa_en", Lang.eng, false, true);
                     c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
+                    
                     Utterance firstUtt = null;
                     for (int i = 1; i < c.getBlocks().size(); i++) {
                         firstUtt = (Utterance) c.getBlocks().get(i);
@@ -265,22 +269,39 @@ public class CSCLStats {
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 ChatStats cs = (ChatStats) pair.getValue();
-                sb.append(pair.getKey() + "," + cs.getContributions() + ", " + cs.getParticipants() + ","
-                        + cs.getDuration() + "," + cs.getExplicitLinks() + ","
-                        + Formatting.formatNumber(cs.getCoverage()) + "," + cs.getSameSpeakerFirst() + ","
-                        + cs.getDifferentSpeakerFirst() + "," + cs.getSameBlock() + "," + cs.getDifferentBlock() + ",");
+                sb.append(pair.getKey());
+                sb.append(",");
+                sb.append(cs.getContributions());
+                sb.append(",");
+                sb.append(cs.getParticipants());
+                sb.append(",");
+                sb.append(cs.getDuration());
+                sb.append(",");
+                sb.append(cs.getExplicitLinks());
+                sb.append(",");
+                sb.append(Formatting.formatNumber(cs.getCoverage()));
+                sb.append(",");
+                sb.append(cs.getSameSpeakerFirst());
+                sb.append(",");
+                sb.append(cs.getDifferentSpeakerFirst());
+                sb.append(",");
+                sb.append(cs.getSameBlock());
+                sb.append(",");
+                sb.append(cs.getDifferentBlock());
+                sb.append(",");
 
                 logger.info("References for " + pair.getKey() + " file: " + cs.getReferences().size());
                 Iterator itReferences = cs.getReferences().entrySet().iterator();
                 while (itReferences.hasNext()) {
                     Map.Entry pairReference = (Map.Entry) itReferences.next();
-                    sb.append(pairReference.getValue() + ",");
+                    sb.append(pairReference.getValue());
+                    sb.append(",");
                 }
 
                 sb.append("\n");
             }
 
-            File file = new File(CORPUS_PATH + "stats.csv");
+            File file = new File(CORPORA_PATH + "stats.csv");
             try {
                 FileUtils.writeStringToFile(file, sb.toString());
             } catch (Exception e) {
@@ -326,7 +347,7 @@ public class CSCLStats {
                 sb.append("\n");
             }
 
-            File file = new File(CORPUS_PATH + "distances.csv");
+            File file = new File(CORPORA_PATH + "distances.csv");
             try {
                 FileUtils.writeStringToFile(file, sb.toString());
             } catch (Exception e) {
