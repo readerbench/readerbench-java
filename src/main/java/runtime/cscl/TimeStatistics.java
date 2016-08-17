@@ -34,9 +34,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
-public class TimeAnalysis {
+public class TimeStatistics {
 
-    public static Logger logger = Logger.getLogger(TimeAnalysis.class);
+    public static Logger logger = Logger.getLogger(TimeStatistics.class);
 
     private static final String CORPORA_PATH = "resources/in/corpus_v2/";
 
@@ -47,7 +47,7 @@ public class TimeAnalysis {
         Map<Integer, TimeStats> timeStatsGlobal = new TreeMap<>();
 
         try {
-            Files.walk(Paths.get(TimeAnalysis.CORPORA_PATH)).forEach(filePath -> {
+            Files.walk(Paths.get(TimeStatistics.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
 
