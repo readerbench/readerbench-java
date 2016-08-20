@@ -15,7 +15,6 @@
  */
 package services.sentiment;
 
-import com.csvreader.CsvReader;
 import dao.DAOService;
 import dao.EntityXValenceDAO;
 import dao.ValenceDAO;
@@ -26,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import org.openide.util.Exceptions;
@@ -38,9 +36,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import services.nlp.listOfWords.ListOfWords;
 
 /**
@@ -49,7 +44,7 @@ import services.nlp.listOfWords.ListOfWords;
  */
 public class Seanse {
 
-    private static final String BASE_DIR = "resources/config/WordLists/EN/";
+    private static final String BASE_DIR = "resources/config/EN/word lists";
     private static final String AFFECTIVE_LIST = "affective_list.txt";
     private static final String INQUIRER_BASIC = "inquirerbasic.txt";
     private static final String NEGATIVE_WORDS = "negative_words.txt";
@@ -97,7 +92,7 @@ public class Seanse {
     }
 
     public void loadWords() {
-        low = new ListOfWords("resources/config/Dictionary/dict_fr.txt");
+        low = new ListOfWords("resources/config/FR/word lists/dict_fr.txt");
     }
 
     public void readANEW(String fileName, Lang lang) throws FileNotFoundException, IOException {
@@ -109,7 +104,9 @@ public class Seanse {
         String line;
         while ((line = in.readLine()) != null) {
             String[] cols = line.split(",");
-            if (cols.length == 0) continue;
+            if (cols.length == 0) {
+                continue;
+            }
             addANEW(cols[0], lang,
                     ValenceDAO.getInstance().findById(1),
                     Float.parseFloat(cols[4]),
@@ -332,7 +329,7 @@ public class Seanse {
         //seanse.readNegativeWords();
         //seanse.readANEW();
         //seanse.readSenticnet();
-        seanse.readANEW("resources/config/WordLists/FR/13428_2013_431_MOESM2_ESM.csv", Lang.fr);
+        seanse.readANEW("resources/config/FR/word lists/13428_2013_431_MOESM2_ESM.csv", Lang.fr);
         //seanse.readANEW();
 //        seanse.getLIWCValences().values().stream().forEach(s -> {
 //            SentimentValence valence = new SentimentValence();
@@ -341,7 +338,7 @@ public class Seanse {
 //            valence.setRage(false);
 //            ValenceDAO.getInstance().save(valence);
 //        });
-        //seanse.addLIWCFromDic("resources/config/WordLists/FR/FrenchLIWCDictionary.dic", Lang.fr);
+        //seanse.addLIWCFromDic("resources/config/FR/word lists/FrenchLIWCDictionary.dic", Lang.fr);
         System.out.println("Closing..");
         DAOService.getInstance().close();
         System.out.println("Finished");

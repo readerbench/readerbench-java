@@ -20,15 +20,15 @@ import data.Lang;
 public class Pronouns {
 
     public static final ClassesOfWords PRONOUNS_EN = new ClassesOfWords(
-            "resources/config/WordLists/pronouns_en.txt");
+            "resources/config/EN/word lists/pronouns_en.txt");
     public static final ClassesOfWords PRONOUNS_FR = new ClassesOfWords(
-            "resources/config/WordLists/pronouns_fr.txt");
+            "resources/config/FR/word lists/pronouns_fr.txt");
     public static final ClassesOfWords PRONOUNS_RO = new ClassesOfWords(
-            "resources/config/WordLists/pronouns_ro.txt");
+            "resources/config/RO/word lists/pronouns_ro.txt");
     public static final ClassesOfWords PRONOUNS_NL = new ClassesOfWords(
-            "resources/config/WordLists/pronouns_nl.txt");
+            "resources/config/NL/word lists/pronouns_nl.txt");
     public static final ClassesOfWords PRONOUNS_LA = new ClassesOfWords(
-            "resources/config/WordLists/pronouns_la.txt");
+            "resources/config/LA/word lists/pronouns_la.txt");
     public static final int NO_PRONOUN_TYPES = PRONOUNS_EN.getClasses().size();
 
     public static boolean isConnective(String s, Lang lang) {

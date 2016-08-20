@@ -27,11 +27,6 @@ public class TopicCoverage {
 
 	static Logger logger = Logger.getLogger(PatternMatching.class);
 
-	public static final MapOfWordWeights WORDS_ACADEMIC_ADMINISTRATION_EN = new MapOfWordWeights(
-			"resources/config/Topics/academic administration_en.txt", Lang.eng);
-	public static final MapOfWordWeights WORDS_EDUCATIONAL_SCIENCES_EN = new MapOfWordWeights(
-			"resources/config/Topics/educational sciences_en.txt", Lang.eng);
-
 	// returns the coverage with the predefined topic class
 	public static double coverage(MapOfWordWeights usedMap, AnalysisElement el) {
 		double coverage = 0;

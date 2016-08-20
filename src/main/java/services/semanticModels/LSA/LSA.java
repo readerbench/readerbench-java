@@ -45,6 +45,7 @@ import services.semanticModels.ISemanticModel;
  * @author Mihai Dascalu
  */
 public class LSA implements ISemanticModel {
+
     static Logger logger = Logger.getLogger(LSA.class);
 
     private static final List<LSA> LOADED_LSA_SPACES = new LinkedList<>();
@@ -310,28 +311,25 @@ public class LSA implements ISemanticModel {
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_new_en2", Lang.eng);
+        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
         //
         // Word w1 = Word.getWordFromConcept("cat", Lang.eng);
         // Word w2 = Word.getWordFromConcept("dog", Lang.eng);
         // System.out.println(lsa.getSimilarity(w1, w2));
         //
-        // for (Entry<Word, Double> entry : lsa.getSimilarConcepts(
-        // Word.getWordFromConcept("cat", Lang.eng), 0.3).entrySet()) {
+        // for (Entry<Word, Double> entry : lsa.getSimilarConcepts(Word.getWordFromConcept("cat", Lang.eng), 0.3).entrySet()) {
         // System.out.println(entry.getKey().getLemma() + "\t"
         // + entry.getValue());
         // }
 
-        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
 
         Word w1 = Word.getWordFromConcept("men", Lang.eng);
         Word w2 = Word.getWordFromConcept("address", Lang.eng);
         System.out.println(lsa.getSimilarity(w1, w2));
 
         // for (Entry<Word, Double> entry :
-        // lsa.getSimilarConcepts(Word.getWordFromConcept("psicología",
-        // Lang.es), 0.3)
-        // .entrySet()) {
+        // lsa.getSimilarConcepts(Word.getWordFromConcept("psicología", Lang.es), 0.3).entrySet()) {
         // System.out.println(entry.getKey().getLemma() + "\t" +
         // entry.getValue());
         // }

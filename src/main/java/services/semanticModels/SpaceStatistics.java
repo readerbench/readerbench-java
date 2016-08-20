@@ -92,8 +92,8 @@ public class SpaceStatistics {
                     s10 += sim;
                     s20 += Math.pow(sim, 2);
                     if (sim >= MINIMUM_IMPOSED_THRESHOLD) {
-                    	WordPairSimilarity pairSimilarity = new WordPairSimilarity(e1.getKey().getLemma(), e2.getKey().getLemma(), sim);
-                    	allWordSimilarityPairList.add(pairSimilarity);
+                        WordPairSimilarity pairSimilarity = new WordPairSimilarity(e1.getKey().getLemma(), e2.getKey().getLemma(), sim);
+                        allWordSimilarityPairList.add(pairSimilarity);
                         s01++;
                         s11 += sim;
                         s21 += Math.pow(sim, 2);
@@ -123,14 +123,14 @@ public class SpaceStatistics {
         // add only significant edges
         double threshold = avg - stdev;
         double s02 = 0, s12 = 0, s22 = 0;
-        
+
         this.relevantWordPairList = new ArrayList<>();
         this.wordSimilarityContainer = new WordSimilarityContainer();
-        
+
         for (WordPairSimilarity pair : allWordSimilarityPairList) {
             if (pair.getSimilarity() >= threshold) {
-            	relevantWordPairList.add(pair);
-            	wordSimilarityContainer.indexDistance(pair.getWord1(), pair.getWord2(), pair.getSimilarity());
+                relevantWordPairList.add(pair);
+                wordSimilarityContainer.indexDistance(pair.getWord1(), pair.getWord2(), pair.getSimilarity());
                 s02++;
                 s12 += pair.getSimilarity();
                 s22 += Math.pow(pair.getSimilarity(), 2);
@@ -491,13 +491,9 @@ public class SpaceStatistics {
         //
         // corpora.add(baseline);
         // for (int i = initialGrade - 1; i > 0; i--) {
-        // corpora.add(new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade"
-        // + i, Lang.eng)));
+        // corpora.add(new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + i, Lang.eng)));
         // }
         // compareSpaces("resources/in/HDP/comparison HDP 12-.csv", corpora);
-        //
-        // compareSpaces("resources/config/LSA/word_associations_en.txt", 3,
-        // "resources/in/HDP/comparison HDP Nelson.csv", corpora);
         int gradeLevel = 0;
         LDA matureSpace = LDA.loadLDA("resources/in/HDP/grade12", Lang.eng);
         determineWLP("resources/in/HDP/WLP HDP " + gradeLevel + ".csv",

@@ -18,7 +18,6 @@ package services.complexity;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,11 +28,11 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import data.AbstractDocument.SaveType;
 import data.Lang;
 import data.complexity.Measurement;
 import data.document.Document;
 import data.document.MetaDocument;
+import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -47,32 +46,33 @@ public class DataGathering {
         // create measurements.csv header
         try {
             FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
-            BufferedWriter out = new BufferedWriter(fstream);
-            StringBuffer concat = new StringBuffer();
-            concat.append("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
-            for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-                concat.append(",").append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+            try (BufferedWriter out = new BufferedWriter(fstream)) {
+                StringBuilder concat = new StringBuilder();
+                concat.append("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
+                for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
+                    concat.append(",").append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+                }
+                out.write(concat.toString());
             }
-            out.write(concat.toString());
-            out.close();
         } catch (Exception e) {
             logger.error("Runtime error while initializing measurements.csv file");
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
     }
 
-    public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism) throws IOException {
+    public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
         processTexts(path, path, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader,
-            LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
         processTexts(processingPath, saveLocation, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism, false);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader,
-            LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
+    public static void processMetaDocuments(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+        processTexts(processingPath, processingPath, 0, true, lsa, lda, lang, usePOSTagging, computeDialogism, true);
+    }
+
+    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -102,31 +102,31 @@ public class DataGathering {
                 d.computeAll(computeDialogism, null, null);
             } catch (Exception e) {
                 logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
 
             if (d != null) {
                 try {
                     FileWriter fstream = new FileWriter(saveLocation + "/measurements.csv", true);
-                    BufferedWriter out = new BufferedWriter(fstream);
-                    StringBuilder concat = new StringBuilder();
+                    try (BufferedWriter out = new BufferedWriter(fstream)) {
+                        StringBuilder concat = new StringBuilder();
 
-                    concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
-                            .append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
-                            .append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
-                    concat.append(",").append(d.getNoBlocks());
-                    concat.append(",").append(d.getNoSentences());
-                    concat.append(",").append(d.getNoWords());
-                    concat.append(",").append(d.getNoContentWords());
-                    for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-                        concat.append(",").append(d.getComplexityIndices()[i]);
+                        concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
+                                .append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
+                                .append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
+                        concat.append(",").append(d.getNoBlocks());
+                        concat.append(",").append(d.getNoSentences());
+                        concat.append(",").append(d.getNoWords());
+                        concat.append(",").append(d.getNoContentWords());
+                        for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
+                            concat.append(",").append(d.getComplexityIndices()[i]);
+                        }
+                        out.write(concat.toString());
                     }
-                    out.write(concat.toString());
-                    out.close();
-                } catch (IOException e) {
+                } catch (IOException ex) {
                     logger.error("Runtime error while initializing measurements.csv file");
-                    e.printStackTrace();
-                    throw e;
+                    Exceptions.printStackTrace(ex);
+                    throw ex;
                 }
             }
 
@@ -141,8 +141,7 @@ public class DataGathering {
         Map<Double, List<Measurement>> result = new TreeMap<>();
 
         try {
-            BufferedReader input = new BufferedReader(new FileReader(fileName));
-            try {
+            try (BufferedReader input = new BufferedReader(new FileReader(fileName))) {
                 // disregard first line
                 String line = input.readLine();
                 while ((line = input.readLine()) != null) {
@@ -158,11 +157,9 @@ public class DataGathering {
                     }
                     result.get(classNumber).add(new Measurement(classNumber, values));
                 }
-            } finally {
-                input.close();
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
         }
         return result;
     }

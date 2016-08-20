@@ -20,15 +20,15 @@ import data.Lang;
 public class Connectives {
 
     public static final ClassesOfWords CONNECTIVES_EN = new ClassesOfWords(
-            "resources/config/WordLists/connectives_en.txt");
+            "resources/config/EN/word lists/connectives_en.txt");
     public static final ClassesOfWords CONNECTIVES_FR = new ClassesOfWords(
-            "resources/config/WordLists/connectives_fr.txt");
+            "resources/config/FR/word lists/connectives_fr.txt");
     public static final ClassesOfWords CONNECTIVES_RO = new ClassesOfWords(
-            "resources/config/WordLists/connectives_ro.txt");
+            "resources/config/RO/word lists/connectives_ro.txt");
     public static final ClassesOfWords CONNECTIVES_NL = new ClassesOfWords(
-            "resources/config/WordLists/connectives_nl.txt");
+            "resources/config/NL/word lists/connectives_nl.txt");
     public static final ClassesOfWords CONNECTIVES_LA = new ClassesOfWords(
-            "resources/config/WordLists/connectives_la.txt");
+            "resources/config/LA/word lists/connectives_la.txt");
 
     public static final int NO_CONNECTIVE_TYPES_EN = CONNECTIVES_EN.getClasses().size();
     public static final int NO_CONNECTIVE_TYPES_FR = CONNECTIVES_FR.getClasses().size();

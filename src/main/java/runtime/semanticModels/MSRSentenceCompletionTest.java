@@ -26,6 +26,7 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.document.Document;
 import data.Lang;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -33,116 +34,120 @@ import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class MSRSentenceCompletionTest {
-	static Logger logger = Logger.getLogger(MSRSentenceCompletionTest.class);
 
-	int questionId;
+    static Logger logger = Logger.getLogger(MSRSentenceCompletionTest.class);
 
-	public void process(String path, ISemanticModel semModel) {
-		logger.info("Starting sentence completion test...");
+    int questionId;
 
-		LSA lsa = null;
-		LDA lda = null;
-		if (semModel instanceof LSA) {
-			lsa = (LSA) semModel;
-		} else if (semModel instanceof LDA) {
-			lda = (LDA) semModel;
-		} else {
-			logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-			return;
-		}
+    public void process(String path, ISemanticModel semModel) {
+        logger.info("Starting sentence completion test...");
 
-		try {
-			// read answers
-			BufferedReader answers = new BufferedReader(new FileReader(path + "/Holmes.human_format.answers.txt"));
-			String line = null;
-			int[] correct = new int[1041];
-			questionId = 1;
-			while ((line = answers.readLine()) != null) {
-				if (line.contains("[a]"))
-					correct[questionId] = 0;
-				else if (line.contains("[b]"))
-					correct[questionId] = 1;
-				else if (line.contains("[c]"))
-					correct[questionId] = 2;
-				else if (line.contains("[d]"))
-					correct[questionId] = 3;
-				else if (line.contains("[e]"))
-					correct[questionId] = 4;
-				questionId++;
-			}
-			answers.close();
+        LSA lsa = null;
+        LDA lda = null;
+        if (semModel instanceof LSA) {
+            lsa = (LSA) semModel;
+        } else if (semModel instanceof LDA) {
+            lda = (LDA) semModel;
+        } else {
+            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
+            return;
+        }
 
-			questionId = 1;
-			StringBuilder sb = new StringBuilder();
-			sb.append("sep=,\nQuestion ID,guessed answer,sim,correct answer,is correct?");
+        try {
+            String line;
+            int[] correct;
+            try ( // read answers
+                    BufferedReader answers = new BufferedReader(new FileReader(path + "/Holmes.human_format.answers.txt"))) {
+                correct = new int[1041];
+                questionId = 1;
+                while ((line = answers.readLine()) != null) {
+                    if (line.contains("[a]")) {
+                        correct[questionId] = 0;
+                    } else if (line.contains("[b]")) {
+                        correct[questionId] = 1;
+                    } else if (line.contains("[c]")) {
+                        correct[questionId] = 2;
+                    } else if (line.contains("[d]")) {
+                        correct[questionId] = 3;
+                    } else if (line.contains("[e]")) {
+                        correct[questionId] = 4;
+                    }
+                    questionId++;
+                }
+            }
 
-			BufferedReader questions = new BufferedReader(new FileReader(path + "/Holmes.human_format.questions.txt"));
-			AbstractDocument concepts[] = new AbstractDocument[6];
+            questionId = 1;
+            StringBuilder sb = new StringBuilder();
+            sb.append("sep=,\nQuestion ID,guessed answer,sim,correct answer,is correct?");
 
-			int noCorrects = 0;
-			outer: while (true) {
-				// read each line
-				for (int i = 0; i < 6; i++) {
-					if ((line = questions.readLine()) == null)
-						break outer;
-					concepts[i] = processDoc(line, lsa, lda, semModel.getLanguage());
-				}
+            try (BufferedReader questions = new BufferedReader(new FileReader(path + "/Holmes.human_format.questions.txt"))) {
+                AbstractDocument concepts[] = new AbstractDocument[6];
 
-				// read blank lines
-				questions.readLine();
-				questions.readLine();
+                int noCorrects = 0;
+                outer:
+                while (true) {
+                    // read each line
+                    for (int i = 0; i < 6; i++) {
+                        if ((line = questions.readLine()) == null) {
+                            break outer;
+                        }
+                        concepts[i] = processDoc(line, lsa, lda, semModel.getLanguage());
+                    }
 
-				double maxSim = Double.MIN_VALUE;
-				int maxIndex = -1;
+                    // read blank lines
+                    questions.readLine();
+                    questions.readLine();
 
-				for (int i = 1; i < 6; i++) {
-					double sim = semModel.getSimilarity(concepts[0], concepts[i]);
-					if (sim > maxSim) {
-						maxSim = sim;
-						maxIndex = i - 1;
-					}
-				}
+                    double maxSim = Double.MIN_VALUE;
+                    int maxIndex = -1;
 
-				sb.append("\n" + questionId + "," + maxIndex + "," + maxSim + "," + correct[questionId] + ","
-						+ ((maxIndex == correct[questionId]) ? 1 : 0));
-				if (maxIndex == correct[questionId])
-					noCorrects++;
-				questionId++;
-			}
-			logger.info("Finished using " + semModel.getPath() + " semantic model: " + noCorrects
-					+ " correct predictions and " + Formatting.formatNumber(noCorrects / 1040d * 100) + "% accuracy");
-			questions.close();
+                    for (int i = 1; i < 6; i++) {
+                        double sim = semModel.getSimilarity(concepts[0], concepts[i]);
+                        if (sim > maxSim) {
+                            maxSim = sim;
+                            maxIndex = i - 1;
+                        }
+                    }
 
-			File file = new File(
-					path + "/out_" + semModel.getPath().replace("resources/config/", "").replaceAll("/", "_") + ".csv");
-			try {
-				FileUtils.writeStringToFile(file, sb.toString());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+                    sb.append("\n").append(questionId).append(",").append(maxIndex).append(",").append(maxSim).append(",").append(correct[questionId]).append(",").append((maxIndex == correct[questionId]) ? 1 : 0);
+                    if (maxIndex == correct[questionId]) {
+                        noCorrects++;
+                    }
+                    questionId++;
+                }
+                logger.info("Finished using " + semModel.getPath() + " semantic model: " + noCorrects
+                        + " correct predictions and " + Formatting.formatNumber(noCorrects / 1040d * 100) + "% accuracy");
+            }
 
-	public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
-		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-		Document doc = new Document(null, contents, lsa, lda, lang, true, true);
-		return doc;
-	}
+            File file = new File(path + "/out_" + semModel.getPath().replace("resources/config/", "").replaceAll("/", "_") + ".csv");
+            try {
+                FileUtils.writeStringToFile(file, sb.toString());
+            } catch (Exception e) {
+                Exceptions.printStackTrace(e);
+            }
+        } catch (Exception e) {
+            Exceptions.printStackTrace(e);
+        }
+    }
 
-	public static void main(String[] args) {
-		ReaderBenchServer.initializeDB();
+    public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
+        AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
+        Document doc = new Document(null, contents, lsa, lda, lang, true, true);
+        return doc;
+    }
 
-		MSRSentenceCompletionTest test = new MSRSentenceCompletionTest();
+    public static void main(String[] args) {
+        ReaderBenchServer.initializeDB();
 
-		ISemanticModel lsa1 = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-		test.process("resources/in/MSR sentence completion", lsa1);
-		ISemanticModel lsa2 = LSA.loadLSA("resources/config/LSA/coca_en/text_newspaper_lsp", Lang.eng);
-		test.process("resources/in/MSR sentence completion", lsa2);
-		ISemanticModel lda1 = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
-		test.process("resources/in/MSR sentence completion", lda1);
-		ISemanticModel lda2 = LDA.loadLDA("resources/config/LDA/coca_en/text_newspaper_lsp", Lang.eng);
-		test.process("resources/in/MSR sentence completion", lda2);
-	}
+        MSRSentenceCompletionTest test = new MSRSentenceCompletionTest();
+
+        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
+        test.process("resources/in/MSR sentence completion", lsa1);
+        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.eng);
+        test.process("resources/in/MSR sentence completion", lsa2);
+        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
+        test.process("resources/in/MSR sentence completion", lda1);
+        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.eng);
+        test.process("resources/in/MSR sentence completion", lda2);
+    }
 }

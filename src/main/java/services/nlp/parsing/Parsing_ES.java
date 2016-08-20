@@ -117,13 +117,5 @@ class ParsingParams_ES extends Properties {
 		this.put("ner.useSUTime", "false");
 		this.put("parse.model", "edu/stanford/nlp/models/lexparser/spanishPCFG.ser.gz");
 		this.put("annotators", "tokenize, ssplit, pos, ner, parse");
-		/*
-		 * this.put("tokenize.language", "es"); this.put("pos.model",
-		 * "resources/config/POSmodels/spanish-distsim.tagger");
-		 * this.put("parse.model",
-		 * "edu/stanford/nlp/models/lexparser/spanishPCFG.ser.gz");
-		 * this.put("parse.flags", ""); this.put("parse.buildgraphs", "false");
-		 * this.put("annotators", "tokenize, ssplit, pos, parse");
-		 */
 	}
 }

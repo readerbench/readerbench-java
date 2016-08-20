@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  */
 public class Parsing_NL extends Parsing {
 
-    static Logger logger = Logger.getLogger(Parsing_NL.class);
+    static final Logger logger = Logger.getLogger(Parsing_NL.class);
 
     private static Parsing_NL instance = null;
     private StanfordCoreNLP pipeline = null;
@@ -56,7 +56,6 @@ public class Parsing_NL extends Parsing {
 
         public ParsingParams_NL() {
             super();
-            //this.put("pos.model", "resources/config/POSmodels/italian.tagger");
             this.put("annotators", "");
         }
     }

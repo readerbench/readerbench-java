@@ -57,8 +57,8 @@ public class CSCLStatsTime {
 
 					logger.info("Processing file " + filePath.getFileName().toString());
 
-					Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
-							"resources/config/LDA/tasa_en", Lang.eng, false, true);
+					Conversation c = Conversation.load(filePathString, "resources/config/EN/LSA/TASA",
+							"resources/config/EN/LDA/TASA", Lang.eng, false, true);
 					c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
 					logger.info("Conversation has " + c.getBlocks().size() + " blocks.");

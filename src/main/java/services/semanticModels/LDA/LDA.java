@@ -146,32 +146,25 @@ public class LDA implements ISemanticModel, Serializable {
         // remove stopwords
         switch (language) {
             case fr:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_fr.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/FR/word lists/stopwords_fr.txt"), "UTF-8", false, false, false));
                 break;
             case it:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_it.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/IT/word lists/stopwords_it.txt"), "UTF-8", false, false, false));
                 break;
             case nl:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_nl.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/NL/word lists/stopwords_nl.txt"), "UTF-8", false, false, false));
                 break;
             case ro:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_ro.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/RO/word lists/stopwords_ro.txt"), "UTF-8", false, false, false));
                 break;
             case la:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_la.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/LA/word lists/stopwords_la.txt"), "UTF-8", false, false, false));
                 break;
             case es:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_es.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/ES/word lists/stopwords_es.txt"), "UTF-8", false, false, false));
                 break;
             default:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_en.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/EN/word lists/stopwords_en.txt"), "UTF-8", false, false, false));
         }
 
         // Rather than storing tokens as strings, convert

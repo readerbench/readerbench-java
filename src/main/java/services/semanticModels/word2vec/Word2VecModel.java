@@ -44,66 +44,67 @@ import services.semanticModels.LDA.LDA;
  *
  * @author Stefan
  */
-public class Word2VecModel implements ISemanticModel{
-	private static final String MODEL = "resources/config/Word2Vec/GoogleNews-vectors-negative300.bin";
-	static Logger logger = Logger.getLogger(LDA.class);
-	 
-	private Word2Vec word2vec;
-	private Lang lang = Lang.eng;
-	
-	public static Word2VecModel load() throws IOException {
-		return load(MODEL);
-	}
-	
-	public static Word2VecModel load(String fileName) throws IOException {
-		File gModel = new File(fileName);
-		Word2VecModel w2vm = new Word2VecModel();
-		w2vm.word2vec = (Word2Vec) WordVectorSerializer.loadGoogleModel(gModel, true);
-		return w2vm;
-	}
-	
-	@Override
-	public double getSimilarity(Word w1, Word w2) {
-		return word2vec.similarity(w1.getText(), w2.getText());
-	}
+public class Word2VecModel implements ISemanticModel {
 
-	@Override
-	public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    private static final String MODEL = "resources/config/EN/word2vec/Google news/GoogleNews-vectors-negative300.bin";
+    static Logger logger = Logger.getLogger(LDA.class);
 
-	@Override
-	public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    private Word2Vec word2vec;
+    private Lang lang = Lang.eng;
 
-	@Override
-	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
-    
+    public static Word2VecModel load() throws IOException {
+        return load(MODEL);
+    }
+
+    public static Word2VecModel load(String fileName) throws IOException {
+        File gModel = new File(fileName);
+        Word2VecModel w2vm = new Word2VecModel();
+        w2vm.word2vec = (Word2Vec) WordVectorSerializer.loadGoogleModel(gModel, true);
+        return w2vm;
+    }
+
     @Override
-	public Map<Word, double[]> getWordRepresentation() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    public double getSimilarity(Word w1, Word w2) {
+        return word2vec.similarity(w1.getText(), w2.getText());
+    }
 
-	@Override
-	public Set<Word> getWordSet() {
-		return word2vec.vocab().words().stream()
-				.map(w -> new Word(w, w, Stemmer.stemWord(w, lang), null, null, lang))
-				.collect(Collectors.toSet());
-	}
+    @Override
+    public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public String getPath() {
-		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-	}
+    @Override
+    public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
-	@Override
-	public Lang getLanguage() {
-		return lang;
-	}
-    
+    @Override
+    public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Map<Word, double[]> getWordRepresentation() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Set<Word> getWordSet() {
+        return word2vec.vocab().words().stream()
+                .map(w -> new Word(w, w, Stemmer.stemWord(w, lang), null, null, lang))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public String getPath() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Lang getLanguage() {
+        return lang;
+    }
+
     public static void trainModel(String inputFile, String outputFile) throws FileNotFoundException {
         SentenceIterator iter = new BasicLineIterator(inputFile);
         // Split on white spaces in the line to get words
@@ -127,19 +128,19 @@ public class Word2VecModel implements ISemanticModel{
 
         WordVectorSerializer.writeFullModel(word2Vec, outputFile);
     }
-	
+
     public void processCorpus(String path) throws IOException {
-    	File corpusDir = new File(path);
-    	String corpusFileName = "";
-    	
-    	if (corpusDir.isDirectory()) {
-    		for (String fileName : corpusDir.list()) {
-    			if (fileName.startsWith("alltexts")) {
-    				corpusFileName = path + "/" + fileName;
-    			}
-    		}
-    	}
-    	
+        File corpusDir = new File(path);
+        String corpusFileName = "";
+
+        if (corpusDir.isDirectory()) {
+            for (String fileName : corpusDir.list()) {
+                if (fileName.startsWith("alltexts")) {
+                    corpusFileName = path + "/" + fileName;
+                }
+            }
+        }
+
         logger.info("Corpus file is: " + corpusFileName);
         // Strip white space before and after for each line
         SentenceIterator iter = new BasicLineIterator(corpusFileName);
@@ -166,18 +167,18 @@ public class Word2VecModel implements ISemanticModel{
         // save the trained model
         ObjectManipulation.saveObject(word2Vec, path + "/word2vec.model");
     }
-    
+
     public static Word2Vec loadWord2Vec(String path) {
         Word2Vec word2Vec = null;
         try {
-        	word2Vec = (Word2Vec) ObjectManipulation.loadObject(path + "/word2vec.model");
-        } catch (Exception e) {
-        	logger.error(e);
+            word2Vec = (Word2Vec) ObjectManipulation.loadObject(path + "/word2vec.model");
+        } catch (ClassNotFoundException | IOException e) {
+            logger.error(e);
         }
         return word2Vec;
     }
-    
+
     public static void main(String[] args) throws FileNotFoundException {
-        trainModel("resources/corpora/NL/out.txt", "resources/config/Word2Vec/nl.txt");
+        trainModel("resources/corpora/NL/out.txt", "resources/config/NL/word2vec/nl.txt");
     }
 }

@@ -35,8 +35,6 @@ import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -64,10 +62,12 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.Lang;
+import org.openide.util.Exceptions;
 import services.semanticModels.GenerateSpace;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import view.models.PreviewSketch;
+import view.widgets.ReaderBenchView;
 
 public class SemSpaceView extends JFrame {
 
@@ -225,10 +225,9 @@ public class SemSpaceView extends JFrame {
         logger.info("Saving export...");
         ExportController ec = Lookup.getDefault().lookup(ExportController.class);
         try {
-            ec.exportFile(new File(
-                    "out/graph_" + wordTextField.getText() + "_" + (new File(semModel.getPath()).getName()) + ".pdf"));
+            ec.exportFile(new File("out/graph_" + wordTextField.getText() + "_" + (new File(semModel.getPath()).getName()) + ".pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();
@@ -367,10 +366,8 @@ public class SemSpaceView extends JFrame {
             startButton.setText("Start");
             startButton.setFont(new Font("Dialog", Font.PLAIN, 14));
             startButton.setPreferredSize(new Dimension(120, 25));
-            startButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    generateNetwork();
-                }
+            startButton.addActionListener((java.awt.event.ActionEvent e) -> {
+                generateNetwork();
             });
         }
         return startButton;
@@ -383,18 +380,13 @@ public class SemSpaceView extends JFrame {
             thresholdSlider.setMinorTickSpacing(1);
             thresholdSlider.setBackground(Color.WHITE);
             thresholdSlider.setForeground(Color.BLACK);
-            java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
-            labelTable.put(new Integer(10), new JLabel("100%"));
-            labelTable.put(new Integer(5), new JLabel("50%"));
-            labelTable.put(new Integer(0), new JLabel("0"));
+            java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<>();
+            labelTable.put(10, new JLabel("100%"));
+            labelTable.put(5, new JLabel("50%"));
+            labelTable.put(0, new JLabel("0"));
             thresholdSlider.setLabelTable(labelTable);
             thresholdSlider.setPaintTicks(true);
             thresholdSlider.setPaintLabels(true);
-            // thresholdSlider.addChangeListener(new ChangeListener() {
-            // public void stateChanged(ChangeEvent e) {
-            // generateNetwork();
-            // }
-            // });
         }
         return thresholdSlider;
     }
@@ -416,10 +408,10 @@ public class SemSpaceView extends JFrame {
             depthSlider.setPaintTicks(true);
             depthSlider.setPaintLabels(true);
             depthSlider.setMajorTickSpacing(5);
-            java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
-            labelTable.put(new Integer(10), new JLabel("10"));
-            labelTable.put(new Integer(5), new JLabel("5"));
-            labelTable.put(new Integer(0), new JLabel("0"));
+            java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<>();
+            labelTable.put(10, new JLabel("10"));
+            labelTable.put(5, new JLabel("5"));
+            labelTable.put(0, new JLabel("0"));
             depthSlider.setLabelTable(labelTable);
 
             // depthSlider.addChangeListener(new ChangeListener() {
@@ -444,36 +436,19 @@ public class SemSpaceView extends JFrame {
     public static void main(String[] args) {
         BasicConfigurator.configure();
 
-        adjustToSystemGraphics();
+        ReaderBenchView.adjustToSystemGraphics();
 
         JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
-//		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LDA/letters_la", Lang.la));
+//		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         frame.setVisible(true);
 
         // frame = new
-        // SemSpaceView(LSA.loadLSA("resources/config/LSA/letters_la",
+        // SemSpaceView(LSA.loadLSA("resources/config/LA/LSA/Letters",
         // Lang.la));
         // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
 
-    private static void adjustToSystemGraphics() {
-        for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-            if ("Nimbus".equals(info.getName())) {
-                try {
-                    UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-} // @jve:decl-index=0:visual-constraint="10,10"
+}

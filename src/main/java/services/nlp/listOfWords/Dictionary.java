@@ -57,43 +57,43 @@ public class Dictionary {
 
 	public static ListOfWords getDictionaryRo() {
 		if (dictionary_ro == null)
-			dictionary_ro = new ListOfWords("resources/config/Dictionary/dict_ro.txt");
+			dictionary_ro = new ListOfWords("resources/config/RO/word lists/dict_ro.txt");
 		return dictionary_ro;
 	}
 
 	public static ListOfWords getDictionaryFr() {
 		if (dictionary_fr == null)
-			dictionary_fr = new ListOfWords("resources/config/Dictionary/dict_fr.txt");
+			dictionary_fr = new ListOfWords("resources/config/FR/word lists/dict_fr.txt");
 		return dictionary_fr;
 	}
 
 	public static ListOfWords getDictionaryIt() {
 		if (dictionary_it == null)
-			dictionary_it = new ListOfWords("resources/config/Dictionary/dict_it.txt");
+			dictionary_it = new ListOfWords("resources/config/IT/word lists/dict_it.txt");
 		return dictionary_it;
 	}
 
 	public static ListOfWords getDictionaryEn() {
 		if (dictionary_en == null)
-			dictionary_en = new ListOfWords("resources/config/Dictionary/dict_en.txt");
+			dictionary_en = new ListOfWords("resources/config/EN/word lists/dict_en.txt");
 		return dictionary_en;
 	}
 
 	public static ListOfWords getDictionaryEs() {
 		if (dictionary_es == null)
-			dictionary_es = new ListOfWords("resources/config/Dictionary/dict_es.txt");
+			dictionary_es = new ListOfWords("resources/config/ES/word lists/dict_es.txt");
 		return dictionary_es;
 	}
 
 	public static ListOfWords getDictionaryNl() {
 		if (dictionary_nl == null)
-			dictionary_nl = new ListOfWords("resources/config/Dictionary/dict_nl.txt");
+			dictionary_nl = new ListOfWords("resources/config/NL/word lists/dict_nl.txt");
 		return dictionary_nl;
 	}
 
 	public static ListOfWords getDictionaryLa() {
 		if (dictionary_la == null)
-			dictionary_la = new ListOfWords("resources/config/Dictionary/dict_la.txt");
+			dictionary_la = new ListOfWords("resources/config/LA/word lists/dict_la.txt");
 		return dictionary_la;
 	}
 

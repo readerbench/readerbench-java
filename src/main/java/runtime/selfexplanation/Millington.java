@@ -40,34 +40,34 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import data.document.Summary;
 import data.Lang;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.WordNet.SimilarityType;
 
 public class Millington {
 
     static Logger logger = Logger.getLogger(Millington.class);
 
-    private String path;
+    private final String path;
 
-    private Map<String, String> loadedDocuments;
+    private final Map<String, String> loadedDocuments;
 
-    private LSA lsa;
+    private final LSA lsa;
 
-    private LDA lda;
+    private final LDA lda;
 
-    private Lang lang;
+    private final Lang lang;
 
     public Millington(String path) {
         this.path = path;
-        this.loadedDocuments = new TreeMap<String, String>();
+        this.loadedDocuments = new TreeMap<>();
         this.lang = Lang.eng;
-        this.lsa = LSA.loadLSA("resources/config/lsa/tasa_en", lang);
-        this.lda = LDA.loadLDA("resources/config/lda/tasa_en", lang);
+        this.lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", lang);
+        this.lda = LDA.loadLDA("resources/config/EN/LDA/TASA", lang);
     }
 
     private String getTextFromFile(String path) {
@@ -78,20 +78,20 @@ public class Millington {
         try {
             inputFile = new FileInputStream(new File(path));
             ir = new InputStreamReader(inputFile, "UTF-8");
-            BufferedReader in = new BufferedReader(ir);
-            while ((line = in.readLine()) != null) {
-                if (line.trim().length() > 0) {
-                    content.append(line.trim() + "\n");
+            try (BufferedReader in = new BufferedReader(ir)) {
+                while ((line = in.readLine()) != null) {
+                    if (line.trim().length() > 0) {
+                        content.append(line.trim()).append("\n");
+                    }
                 }
             }
-            in.close();
             return content.toString();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
         return null;
     }
@@ -116,8 +116,7 @@ public class Millington {
 
         // write header
         BufferedWriter out = new BufferedWriter(new FileWriter(path + "/output.csv", false));
-        out.write(
-                "StudID,Attempt,Time to response,TextID,SentenceID,Score,Garbage,Frozen (binary),Vague/irrelevant,Repeat,Paraphrase,LocalBridging,Elaboration,Global");
+        out.write("StudID,Attempt,Time to response,TextID,SentenceID,Score,Garbage,Frozen (binary),Vague/irrelevant,Repeat,Paraphrase,LocalBridging,Elaboration,Global");
         for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
             out.write("," + ReadingStrategies.STRATEGY_NAMES[i]);
         }
@@ -148,7 +147,7 @@ public class Millington {
 
             String studentSE = row.getCell(4).getStringCellValue();
 
-            String content = null;
+            String content;
 
             int textID = (int) row.getCell(0).getNumericCellValue();
 
@@ -196,7 +195,7 @@ public class Millington {
                     true, true);
             Summary se = new Summary(studentSE, refDoc, true, true);
             se.computeAll(true, false);
-            List<SemanticCohesion> cohesionScores = new ArrayList<SemanticCohesion>();
+            List<SemanticCohesion> cohesionScores = new ArrayList<>();
 
             String prevText = content.substring(0, content.indexOf(targetText));
             Document prevDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(prevText), lsa, lda, lang,
@@ -248,7 +247,7 @@ public class Millington {
             Millington m = new Millington("resources/in/Millington");
             m.parseMillington(50);
         } catch (IOException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
     }
 }
