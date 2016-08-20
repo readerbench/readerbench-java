@@ -15,6 +15,13 @@
  */
 package runtime.cscl;
 
+import data.AbstractDocument.SaveType;
+import data.Block;
+import data.Lang;
+import data.cscl.ChatStats;
+import data.cscl.Conversation;
+import data.cscl.DistanceStats;
+import data.cscl.Utterance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,47 +33,41 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
-
-import data.AbstractDocument.SaveType;
-import data.Block;
-import data.Lang;
-import data.cscl.Conversation;
-import data.cscl.Utterance;
 import services.commons.Formatting;
 
-public class CSCLStatsNew {
+/**
+ *
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
+public class DistanceStatistics {
 
-    public static Logger logger = Logger.getLogger(CSCLStatsNew.class);
+    public static Logger logger = Logger.getLogger(DistanceStatistics.class);
 
-    private static int WINDOW_SIZE = 20;
-    private static String conversationsPath = "resources/in/corpus_v2/";
-    // private static String conversationsPath = "resources/in/corpus_chats/";
+    private static final String CORPORA_PATH = "resources/in/corpus_v2/";
     private static int no_references = 0;
 
     public static void main(String[] args) {
 
-        Map<Integer, DistanceStatsNew> blockDistances = new TreeMap<Integer, DistanceStatsNew>(
+        Map<Integer, DistanceStats> blockDistances = new TreeMap<>(
                 new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
                 return o1.compareTo(o2);
             }
         });
-        Map<String, ChatStatsNew> chatStats = new HashMap<String, ChatStatsNew>();
+        Map<String, ChatStats> chatStats = new HashMap<>();
 
         try {
-            Files.walk(Paths.get(CSCLStatsNew.conversationsPath)).forEach(filePath -> {
+            Files.walk(Paths.get(DistanceStatistics.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
-                    // if (filePathString.contains(".xml")) {
-
                     logger.info("Processing file " + filePath.getFileName().toString());
 
-                    Conversation c = Conversation.load(filePathString, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.eng, false, true);
+                    Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
+                            "resources/config/LDA/tasa_en", Lang.eng, false, true);
                     c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     Utterance firstUtt = null;
@@ -95,7 +96,7 @@ public class CSCLStatsNew {
                     }
                     // save conversation info
                     chatStats.put(filePath.getFileName().toString(),
-                            new ChatStatsNew(c.getBlocks().size(), // contributions
+                            new ChatStats(c.getBlocks().size(), // contributions
                                     c.getParticipants().size(), // participants
                                     timp, // duration
                                     0, // explicitLinks
@@ -145,7 +146,7 @@ public class CSCLStatsNew {
 
                                     // global information for the conversation
                                     // corpus
-                                    DistanceStatsNew ds;
+                                    DistanceStats ds;
                                     if (blockDistances.get(distance) != null) {
                                         // blockDistances.put(distance,
                                         // blockDistances.get(distance) + 1);
@@ -186,7 +187,7 @@ public class CSCLStatsNew {
                                             }
                                         }
                                     } else if (utterance1.getParticipant() == utterance2.getParticipant()) {
-                                        ds = new DistanceStatsNew(1, 1, 0, 0, 0);
+                                        ds = new DistanceStats(1, 1, 0, 0, 0);
                                         if (distance == 1) {
                                             ds.setSameSpeakerFirst(ds.getSameSpeakerFirst() + 1);
                                         }
@@ -207,7 +208,7 @@ public class CSCLStatsNew {
                                                     + 1);
                                         }
                                     } else {
-                                        ds = new DistanceStatsNew(1, 0, 1, 0, 0);
+                                        ds = new DistanceStats(1, 0, 1, 0, 0);
                                     }
                                     blockDistances.put(distance, ds);
 
@@ -220,7 +221,6 @@ public class CSCLStatsNew {
                                             references.put(distance, 1);
                                         }
                                     }
-                                    // }
                                 }
                             }
                         }
@@ -235,11 +235,8 @@ public class CSCLStatsNew {
                         Map.Entry pair = (Map.Entry) it.next();
                         logger.info(pair.getKey() + " = " + pair.getValue());
                     }
-
                 }
-
             });
-
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -258,7 +255,7 @@ public class CSCLStatsNew {
 
     }
 
-    private static void printConversationStatsToCSVFile(Map<String, ChatStatsNew> chatStats) {
+    private static void printConversationStatsToCSVFile(Map<String, ChatStats> chatStats) {
 
         try {
 
@@ -269,23 +266,40 @@ public class CSCLStatsNew {
             Iterator it = chatStats.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
-                ChatStatsNew cs = (ChatStatsNew) pair.getValue();
-                sb.append(pair.getKey() + "," + cs.getContributions() + ", " + cs.getParticipants() + ","
-                        + cs.getDuration() + "," + cs.getExplicitLinks() + ","
-                        + Formatting.formatNumber(cs.getCoverage()) + "," + cs.getSameSpeakerFirst() + ","
-                        + cs.getDifferentSpeakerFirst() + "," + cs.getSameBlock() + "," + cs.getDifferentBlock() + ",");
+                ChatStats cs = (ChatStats) pair.getValue();
+                sb.append(pair.getKey());
+                sb.append(",");
+                sb.append(cs.getContributions());
+                sb.append(",");
+                sb.append(cs.getParticipants());
+                sb.append(",");
+                sb.append(cs.getDuration());
+                sb.append(",");
+                sb.append(cs.getExplicitLinks());
+                sb.append(",");
+                sb.append(Formatting.formatNumber(cs.getCoverage()));
+                sb.append(",");
+                sb.append(cs.getSameSpeakerFirst());
+                sb.append(",");
+                sb.append(cs.getDifferentSpeakerFirst());
+                sb.append(",");
+                sb.append(cs.getSameBlock());
+                sb.append(",");
+                sb.append(cs.getDifferentBlock());
+                sb.append(",");
 
                 logger.info("References for " + pair.getKey() + " file: " + cs.getReferences().size());
                 Iterator itReferences = cs.getReferences().entrySet().iterator();
                 while (itReferences.hasNext()) {
                     Map.Entry pairReference = (Map.Entry) itReferences.next();
-                    sb.append(pairReference.getValue() + ",");
+                    sb.append(pairReference.getValue());
+                    sb.append(",");
                 }
 
                 sb.append("\n");
             }
 
-            File file = new File(conversationsPath + "stats.csv");
+            File file = new File(CORPORA_PATH + "stats.csv");
             try {
                 FileUtils.writeStringToFile(file, sb.toString());
             } catch (Exception e) {
@@ -301,7 +315,7 @@ public class CSCLStatsNew {
 
     }
 
-    private static void printDistancesToCSVFile(Map<Integer, DistanceStatsNew> blockDistances, int no_references) {
+    private static void printDistancesToCSVFile(Map<Integer, DistanceStats> blockDistances, int no_references) {
         // String prependPath =
         // "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
 
@@ -311,15 +325,27 @@ public class CSCLStatsNew {
             sb.append(
                     "sep=,\ndistance,total,same speaker,different speaker,%,same speaker first,different speaker first\n");
 
-            blockDistances.entrySet().stream().map((pair) -> {
-                DistanceStatsNew ds = (DistanceStatsNew) pair.getValue();
-                sb.append(pair.getKey()).append(",").append(ds.getTotal()).append(", ").append(ds.getSameSpeaker()).append(",").append(ds.getDifferentSpeaker()).append(",").append(ds.getTotal() / no_references).append(",").append(ds.getSameSpeakerFirst()).append(", ").append(ds.getDifferentSpeakerFirst());
-                return pair;
-            }).forEach((_item) -> {
+            Iterator it = blockDistances.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                DistanceStats ds = (DistanceStats) pair.getValue();
+                sb.append(pair.getKey());
+                sb.append(",");
+                sb.append(ds.getTotal());
+                sb.append(",");
+                sb.append(ds.getSameSpeaker());
+                sb.append(",");
+                sb.append(ds.getDifferentSpeaker());
+                sb.append(",");
+                sb.append(ds.getTotal() / no_references);
+                sb.append(",");
+                sb.append(ds.getSameSpeakerFirst());
+                sb.append(",");
+                sb.append(ds.getDifferentSpeakerFirst());
                 sb.append("\n");
-            });
+            }
 
-            File file = new File(conversationsPath + "distances.csv");
+            File file = new File(CORPORA_PATH + "distances.csv");
             try {
                 FileUtils.writeStringToFile(file, sb.toString());
             } catch (Exception e) {
@@ -342,178 +368,6 @@ public class CSCLStatsNew {
     private static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
         long diffInMillies = date2.getTime() - date1.getTime();
         return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    }
-
-}
-
-class DistanceStatsNew {
-
-    private int total;
-    private int sameSpeaker;
-    private int differentSpeaker;
-    private int sameSpeakerFirst;
-    private int differentSpeakerFirst;
-
-    public DistanceStatsNew(int total, int sameSpeaker, int differentSpeaker, int sameSpeakerFirst,
-            int differentSpeakerFirst) {
-        super();
-        this.total = total;
-        this.sameSpeaker = sameSpeaker;
-        this.differentSpeaker = differentSpeaker;
-        this.sameSpeakerFirst = sameSpeakerFirst;
-        this.differentSpeaker = differentSpeaker;
-    }
-
-    public int getTotal() {
-        return total;
-    }
-
-    public void setTotal(int total) {
-        this.total = total;
-    }
-
-    public int getSameSpeaker() {
-        return sameSpeaker;
-    }
-
-    public void setSameSpeaker(int sameSpeaker) {
-        this.sameSpeaker = sameSpeaker;
-    }
-
-    public int getDifferentSpeaker() {
-        return differentSpeaker;
-    }
-
-    public void setDifferentSpeaker(int differentSpeaker) {
-        this.differentSpeaker = differentSpeaker;
-    }
-
-    public int getSameSpeakerFirst() {
-        return sameSpeakerFirst;
-    }
-
-    public void setSameSpeakerFirst(int sameSpeakerFirst) {
-        this.sameSpeakerFirst = sameSpeakerFirst;
-    }
-
-    public int getDifferentSpeakerFirst() {
-        return differentSpeakerFirst;
-    }
-
-    public void setDifferentSpeakerFirst(int differentSpeakerFirst) {
-        this.differentSpeakerFirst = differentSpeakerFirst;
-    }
-
-}
-
-class ChatStatsNew {
-
-    private int contributions;
-    private int participants;
-    private int duration; // timestamp
-    private int explicitLinks;
-    private int sameSpeakerFirst;
-    private int differentSpeakerFirst;
-    private int sameBlock;
-    private int differentBlock;
-    private double coverage;
-    private Map<Integer, Integer> references; // number of references to
-    // distance 1, 2, ... 5
-
-    public ChatStatsNew(int contributions, int participants, int duration, int explicitLinks, double coverage,
-            int sameSpeakerFirst, int differentSpeakerFirst, int sameBlock, int differentBlock,
-            Map<Integer, Integer> references) {
-        super();
-        this.contributions = contributions;
-        this.participants = participants;
-        this.duration = duration;
-        this.explicitLinks = explicitLinks;
-        this.coverage = coverage;
-        this.sameSpeakerFirst = sameSpeakerFirst;
-        this.differentSpeakerFirst = differentSpeakerFirst;
-        this.sameBlock = sameBlock;
-        this.differentBlock = sameBlock;
-        this.references = references;
-    }
-
-    public int getSameSpeakerFirst() {
-        return sameSpeakerFirst;
-    }
-
-    public void setSameSpeakerFirst(int sameSpeakerFirst) {
-        this.sameSpeakerFirst = sameSpeakerFirst;
-    }
-
-    public int getDifferentSpeakerFirst() {
-        return differentSpeakerFirst;
-    }
-
-    public void setDifferentSpeakerFirst(int differentSpeakerFirst) {
-        this.differentSpeakerFirst = differentSpeakerFirst;
-    }
-
-    public int getDifferentBlock() {
-        return differentBlock;
-    }
-
-    public void setDifferentBlock(int differentBlock) {
-        this.differentBlock = differentBlock;
-    }
-
-    public int getContributions() {
-        return contributions;
-    }
-
-    public void setContributions(int contributions) {
-        this.contributions = contributions;
-    }
-
-    public int getParticipants() {
-        return participants;
-    }
-
-    public void setParticipants(int participants) {
-        this.participants = participants;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public int getExplicitLinks() {
-        return explicitLinks;
-    }
-
-    public void setExplicitLinks(int explicitLinks) {
-        this.explicitLinks = explicitLinks;
-    }
-
-    public int getSameBlock() {
-        return explicitLinks;
-    }
-
-    public void setSameBlock(int sameBlock) {
-        this.sameBlock = sameBlock;
-    }
-
-    public double getCoverage() {
-        return coverage;
-    }
-
-    public void setCoverage(double coverage) {
-        this.coverage = coverage;
-    }
-
-    public Map<Integer, Integer> getReferences() {
-        return references;
-    }
-
-    public void setReferences(Map<Integer, Integer> references) {
-        this.references = references;
     }
 
 }

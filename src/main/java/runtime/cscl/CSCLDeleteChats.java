@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 
 public class CSCLDeleteChats {
 	
-	public static Logger logger = Logger.getLogger(CSCLStatsTime.class);
+	public static Logger logger = Logger.getLogger(TimeStatistics.class);
 
 	private static String conversationsPath = "resources/in/corpus_v2/";	
 	

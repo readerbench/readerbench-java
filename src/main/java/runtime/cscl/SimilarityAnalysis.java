@@ -15,6 +15,12 @@
  */
 package runtime.cscl;
 
+import data.AbstractDocument.SaveType;
+import data.Lang;
+import data.Word;
+import data.cscl.Conversation;
+import data.cscl.Utterance;
+import data.discourse.SemanticCohesion;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,18 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-
-import data.AbstractDocument.SaveType;
-import data.Lang;
-import data.Word;
-import data.cscl.Conversation;
-import data.cscl.Utterance;
-import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -45,9 +43,9 @@ import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.WordNet.SimilarityType;
 import webService.ReaderBenchServer;
 
-public class CSCLContributionSimilarities {
+public class SimilarityAnalysis {
 
-    public Logger logger = Logger.getLogger(CSCLContributionSimilarities.class);
+    public Logger logger = Logger.getLogger(SimilarityAnalysis.class);
     private String path;
 
     private String pathToLSA;
@@ -95,7 +93,7 @@ public class CSCLContributionSimilarities {
     private Map<Integer, Integer> totalMihalceaSimDetectedPathSim;
     private Map<Integer, Integer> totalMihalceaSimInBlockPathSim;
 
-    public CSCLContributionSimilarities(String path, String pathToLSA, String pathToLDA, Lang lang,
+    public SimilarityAnalysis(String path, String pathToLSA, String pathToLDA, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, List<Integer> windowSizes, LSA lsa, LDA lda) {
         this.path = path;
         this.pathToLSA = pathToLSA;
@@ -109,40 +107,40 @@ public class CSCLContributionSimilarities {
         this.lsa = lsa;
         this.lda = lda;
 
-        totalSimDetectedLSA = new HashMap<Integer, Integer>();
-        totalSimInBlockLSA = new HashMap<Integer, Integer>();
-        totalNormSimDetectedLSA = new HashMap<Integer, Integer>();
-        totalNormSimInBlockLSA = new HashMap<Integer, Integer>();
-        totalMihalceaSimDetectedLSA = new HashMap<Integer, Integer>();
-        totalMihalceaSimInBlockLSA = new HashMap<Integer, Integer>();
+        totalSimDetectedLSA = new HashMap<>();
+        totalSimInBlockLSA = new HashMap<>();
+        totalNormSimDetectedLSA = new HashMap<>();
+        totalNormSimInBlockLSA = new HashMap<>();
+        totalMihalceaSimDetectedLSA = new HashMap<>();
+        totalMihalceaSimInBlockLSA = new HashMap<>();
 
-        totalSimDetectedLDA = new HashMap<Integer, Integer>();
-        totalSimInBlockLDA = new HashMap<Integer, Integer>();
-        totalNormSimDetectedLDA = new HashMap<Integer, Integer>();
-        totalNormSimInBlockLDA = new HashMap<Integer, Integer>();
-        totalMihalceaSimDetectedLDA = new HashMap<Integer, Integer>();
-        totalMihalceaSimInBlockLDA = new HashMap<Integer, Integer>();
+        totalSimDetectedLDA = new HashMap<>();
+        totalSimInBlockLDA = new HashMap<>();
+        totalNormSimDetectedLDA = new HashMap<>();
+        totalNormSimInBlockLDA = new HashMap<>();
+        totalMihalceaSimDetectedLDA = new HashMap<>();
+        totalMihalceaSimInBlockLDA = new HashMap<>();
 
-        totalSimDetectedLeacock = new HashMap<Integer, Integer>();
-        totalSimInBlockLeacock = new HashMap<Integer, Integer>();
-        totalNormSimDetectedLeacock = new HashMap<Integer, Integer>();
-        totalNormSimInBlockLeacock = new HashMap<Integer, Integer>();
-        totalMihalceaSimDetectedLeacock = new HashMap<Integer, Integer>();
-        totalMihalceaSimInBlockLeacock = new HashMap<Integer, Integer>();
+        totalSimDetectedLeacock = new HashMap<>();
+        totalSimInBlockLeacock = new HashMap<>();
+        totalNormSimDetectedLeacock = new HashMap<>();
+        totalNormSimInBlockLeacock = new HashMap<>();
+        totalMihalceaSimDetectedLeacock = new HashMap<>();
+        totalMihalceaSimInBlockLeacock = new HashMap<>();
 
-        totalSimDetectedWuPalmer = new HashMap<Integer, Integer>();
-        totalSimInBlockWuPalmer = new HashMap<Integer, Integer>();
-        totalNormSimDetectedWuPalmer = new HashMap<Integer, Integer>();
-        totalNormSimInBlockWuPalmer = new HashMap<Integer, Integer>();
-        totalMihalceaSimDetectedWuPalmer = new HashMap<Integer, Integer>();
-        totalMihalceaSimInBlockWuPalmer = new HashMap<Integer, Integer>();
+        totalSimDetectedWuPalmer = new HashMap<>();
+        totalSimInBlockWuPalmer = new HashMap<>();
+        totalNormSimDetectedWuPalmer = new HashMap<>();
+        totalNormSimInBlockWuPalmer = new HashMap<>();
+        totalMihalceaSimDetectedWuPalmer = new HashMap<>();
+        totalMihalceaSimInBlockWuPalmer = new HashMap<>();
 
-        totalSimDetectedPathSim = new HashMap<Integer, Integer>();
-        totalSimInBlockPathSim = new HashMap<Integer, Integer>();
-        totalNormSimDetectedPathSim = new HashMap<Integer, Integer>();
-        totalNormSimInBlockPathSim = new HashMap<Integer, Integer>();
-        totalMihalceaSimDetectedPathSim = new HashMap<Integer, Integer>();
-        totalMihalceaSimInBlockPathSim = new HashMap<Integer, Integer>();
+        totalSimDetectedPathSim = new HashMap<>();
+        totalSimInBlockPathSim = new HashMap<>();
+        totalNormSimDetectedPathSim = new HashMap<>();
+        totalNormSimInBlockPathSim = new HashMap<>();
+        totalMihalceaSimDetectedPathSim = new HashMap<>();
+        totalMihalceaSimInBlockPathSim = new HashMap<>();
     }
 
     private boolean isInBlock(Conversation c, int min, int max) {
@@ -176,10 +174,16 @@ public class CSCLContributionSimilarities {
         capTabel.append("chat,");
         capTabel.append("utt_id,");
         capTabel.append("utt_participant,");
-        for (int i = 1; i <= 20; i++) {
-            capTabel.append("d" + i + ",");
-            capTabel.append("d" + i + "_norm,");
-            capTabel.append("d" + i + "_mihalcea,");
+        for (int i = 1; i <= Collections.max(windowSizes); i++) {
+            capTabel.append("d");
+            capTabel.append(i);
+            capTabel.append(",");
+            capTabel.append("d");
+            capTabel.append(i);
+            capTabel.append("_norm,");
+            capTabel.append("d");
+            capTabel.append(i);
+            capTabel.append("_mihalcea,");
         }
         capTabel.append("utt_text,"); // contribution text
         capTabel.append("ref_id,"); // reference id
@@ -343,7 +347,7 @@ public class CSCLContributionSimilarities {
                         mihalceaSimInBlockPathSim.put(windowSize, 0);
                     }
 
-                    System.out.println("Processing chat " + filePath.getFileName());
+                    logger.info("Processing chat " + filePath.getFileName());
                     Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging, true);
                     c.computeAll(computeDialogism, null, null, SaveType.NONE);
 
@@ -529,8 +533,6 @@ public class CSCLContributionSimilarities {
                                     Iterator<Entry<Word, Integer>> itFirstUtt = firstUtt.getWordOccurences().entrySet().iterator();
                                     while (itFirstUtt.hasNext()) {
                                         Map.Entry<Word, Integer> pairFirstUtt = (Map.Entry<Word, Integer>) itFirstUtt.next();
-                                        // System.out.println(pair.getKey() + "
-                                        // = " + pair.getValue());
                                         Word wordFirstUtt = (Word) pairFirstUtt.getKey();
 
                                         // iterate through words of second
@@ -598,8 +600,6 @@ public class CSCLContributionSimilarities {
                                     itFirstUtt = secondUtt.getWordOccurences().entrySet().iterator();
                                     while (itFirstUtt.hasNext()) {
                                         Map.Entry<Word, Integer> pairFirstUtt = (Map.Entry<Word, Integer>) itFirstUtt.next();
-                                        // System.out.println(pair.getKey() + "
-                                        // = " + pair.getValue());
                                         Word wordFirstUtt = (Word) pairFirstUtt.getKey();
 
                                         // iterate through words of second
@@ -1460,8 +1460,8 @@ public class CSCLContributionSimilarities {
         BasicConfigurator.configure();
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA LAK", Lang.eng);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA LAK", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
+        LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
 
         List<Integer> windowSizes = new ArrayList<>();
         windowSizes.add(20);
@@ -1469,7 +1469,9 @@ public class CSCLContributionSimilarities {
         windowSizes.add(5);
         windowSizes.add(3);
 
-        CSCLContributionSimilarities corpusSample = new CSCLContributionSimilarities("resources/in/corpus_v2/", "resources/config/EN/LSA/TASA LAK", "resources/config/LDA/TASA LAK", Lang.getLang("English"), true, true, windowSizes, lsa, lda);
+        SimilarityAnalysis corpusSample = new SimilarityAnalysis("resources/in/corpus_v2/",
+                "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.getLang("English"), true, true,
+                windowSizes, lsa, lda);
         corpusSample.process();
     }
 }
