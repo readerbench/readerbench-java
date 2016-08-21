@@ -28,7 +28,7 @@ import webService.result.ResultTopic;
 
 public class CommunityInteraction {
 
-	public static ResultTopic buildParticipantGraph(Community c) {
+	public static ResultTopic buildParticipantGraph(Community c, boolean needsAnonymization) {
 		List<Participant> participants = new ArrayList<Participant>();
 		participants.addAll(c.getParticipants());
 		double[][] participantContributions = c.getParticipantContributions();
@@ -45,7 +45,8 @@ public class CommunityInteraction {
 				if (participantContributions[j][i] != 0.0)
 					in += participantContributions[j][i];
 			}
-			nodes.add(new ResultNode(i, participants.get(i).getName(), Formatting.formatNumber(in), 1));
+                        if (!needsAnonymization) nodes.add(new ResultNode(i, participants.get(i).getName(), Formatting.formatNumber(in), 1));
+                        else nodes.add(new ResultNode(i, "Participant " + (i + 1), Formatting.formatNumber(in), 1));
 		}
 
 		// determine max value

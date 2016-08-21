@@ -650,13 +650,15 @@ public class ReaderBenchServer {
 		Spark.options("/folderUpload", (request, response) -> {
 			return "";
 		});
-		Spark.post("/vCoPView", (request, response) -> {
+		Spark.post("/vcop", (request, response) -> {
 			JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
 			response.type("application/json");
 
-			String vCoPFile = (String) json.get("vCoPFile");
-			logger.info("vCoP %s" + vCoPFile);
+                        StringBuilder communityFolder = new StringBuilder();
+                        communityFolder.append("resources/in/");
+			String community = (String) json.get("community");
+                        communityFolder.append(community);
 			String startDateString = (String) json.get("startDate");
 			DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 			Date startDate = format.parse(startDateString);
@@ -666,7 +668,7 @@ public class ReaderBenchServer {
 			long monthIncrement = (Long) json.get("monthIncrement");
 			long dayIncrement = (Long) json.get("dayIncrement");
 
-			Community communityStartEnd = Community.loadMultipleConversations(vCoPFile, true, startDate, endDate,
+			Community communityStartEnd = Community.loadMultipleConversations(communityFolder.toString(), true, startDate, endDate,
 					(int) monthIncrement, (int) dayIncrement);
 			communityStartEnd.computeMetrics(useTextualComplexity, true, true);
 
@@ -675,19 +677,19 @@ public class ReaderBenchServer {
 			Date startDateAllCommunities = format.parse("01/01/1970");
 			Date endDateAllCommunities = format.parse("01/01/2099");
 
-			Community allCommunity = Community.loadMultipleConversations(vCoPFile, true, startDateAllCommunities,
+			Community allCommunity = Community.loadMultipleConversations(communityFolder.toString(), true, startDateAllCommunities,
 					endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
 			allCommunity.computeMetrics(useTextualComplexity, true, true);
 
 			List<ResultTopic> participantsInTimeFrame = new ArrayList<>();
 
 			for (Community c : subCommunities) {
-				participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c));
+				participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c, true));
 			}
 
 			QueryResultvCoP queryResult = new QueryResultvCoP();
-			ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity),
-					CommunityInteraction.buildParticipantGraph(communityStartEnd), participantsInTimeFrame);
+			ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity, true),
+					CommunityInteraction.buildParticipantGraph(communityStartEnd, true), participantsInTimeFrame);
 			queryResult.setData(resultVcop);
 
 			String result = queryResult.convertToJson();

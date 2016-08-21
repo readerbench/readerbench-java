@@ -591,8 +591,8 @@ public class Community extends AnalysisElement {
 	}
 
 	public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {
-		return new ResultvCoP(CommunityInteraction.buildParticipantGraph(communityInTimeFrame),
-				CommunityInteraction.buildParticipantGraph(allCommunities), null);
+		return new ResultvCoP(CommunityInteraction.buildParticipantGraph(communityInTimeFrame, true),
+				CommunityInteraction.buildParticipantGraph(allCommunities, true), null);
 
 	}
 
