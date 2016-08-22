@@ -1,6 +1,17 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package services.nlp.listOfWords;
 
@@ -46,43 +57,43 @@ public class Dictionary {
 
 	public static ListOfWords getDictionaryRo() {
 		if (dictionary_ro == null)
-			dictionary_ro = new ListOfWords("resources/config/Dictionary/dict_ro.txt");
+			dictionary_ro = new ListOfWords("resources/config/RO/word lists/dict_ro.txt");
 		return dictionary_ro;
 	}
 
 	public static ListOfWords getDictionaryFr() {
 		if (dictionary_fr == null)
-			dictionary_fr = new ListOfWords("resources/config/Dictionary/dict_fr.txt");
+			dictionary_fr = new ListOfWords("resources/config/FR/word lists/dict_fr.txt");
 		return dictionary_fr;
 	}
 
 	public static ListOfWords getDictionaryIt() {
 		if (dictionary_it == null)
-			dictionary_it = new ListOfWords("resources/config/Dictionary/dict_it.txt");
+			dictionary_it = new ListOfWords("resources/config/IT/word lists/dict_it.txt");
 		return dictionary_it;
 	}
 
 	public static ListOfWords getDictionaryEn() {
 		if (dictionary_en == null)
-			dictionary_en = new ListOfWords("resources/config/Dictionary/dict_en.txt");
+			dictionary_en = new ListOfWords("resources/config/EN/word lists/dict_en.txt");
 		return dictionary_en;
 	}
 
 	public static ListOfWords getDictionaryEs() {
 		if (dictionary_es == null)
-			dictionary_es = new ListOfWords("resources/config/Dictionary/dict_es.txt");
+			dictionary_es = new ListOfWords("resources/config/ES/word lists/dict_es.txt");
 		return dictionary_es;
 	}
 
 	public static ListOfWords getDictionaryNl() {
 		if (dictionary_nl == null)
-			dictionary_nl = new ListOfWords("resources/config/Dictionary/dict_nl.txt");
+			dictionary_nl = new ListOfWords("resources/config/NL/word lists/dict_nl.txt");
 		return dictionary_nl;
 	}
 
 	public static ListOfWords getDictionaryLa() {
 		if (dictionary_la == null)
-			dictionary_la = new ListOfWords("resources/config/Dictionary/dict_la.txt");
+			dictionary_la = new ListOfWords("resources/config/LA/word lists/dict_la.txt");
 		return dictionary_la;
 	}
 

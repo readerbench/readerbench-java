@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.semanticModels.LDA;
 
 import java.io.BufferedWriter;
@@ -131,32 +146,25 @@ public class LDA implements ISemanticModel, Serializable {
         // remove stopwords
         switch (language) {
             case fr:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_fr.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/FR/word lists/stopwords_fr.txt"), "UTF-8", false, false, false));
                 break;
             case it:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_it.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/IT/word lists/stopwords_it.txt"), "UTF-8", false, false, false));
                 break;
             case nl:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_nl.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/NL/word lists/stopwords_nl.txt"), "UTF-8", false, false, false));
                 break;
             case ro:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_ro.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/RO/word lists/stopwords_ro.txt"), "UTF-8", false, false, false));
                 break;
             case la:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_la.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/LA/word lists/stopwords_la.txt"), "UTF-8", false, false, false));
                 break;
             case es:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_es.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/ES/word lists/stopwords_es.txt"), "UTF-8", false, false, false));
                 break;
             default:
-                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/Stopwords/stopwords_en.txt"),
-                        "UTF-8", false, false, false));
+                pipeList.add(new TokenSequenceRemoveStopwords(new File("resources/config/EN/word lists/stopwords_en.txt"), "UTF-8", false, false, false));
         }
 
         // Rather than storing tokens as strings, convert

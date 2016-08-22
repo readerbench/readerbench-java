@@ -1,16 +1,29 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package runtime.essays;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 
 import org.apache.log4j.BasicConfigurator;
 
 import data.document.Document;
 import data.Lang;
+import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class DataGatheringTest {
@@ -27,12 +40,11 @@ public class DataGatheringTest {
                 -> pathname.getName().toLowerCase().endsWith(".xml"));
 
         for (File file : files) {
-            Document d = null;
             try {
-                d = Document.load(file, null, null, Lang.eng, false, true);
+                Document d = Document.load(file, null, null, Lang.eng, false, true);
                 d.saveTxtDocument();
             } catch (Exception e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
         }
     }
@@ -41,19 +53,17 @@ public class DataGatheringTest {
         BasicConfigurator.configure();
 
         ReaderBenchServer.initializeDB();
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/letters_la", Lang.la);
-        // LDA lda = LDA.loadLDA("resources/config/LDA/letters_la", Lang.la);
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/religious_ro", Lang.ro);
-        // LDA lda = LDA.loadLDA("resources/config/LDA/religious_ro", Lang.ro);
-//        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
-//        LDA lda = LDA.loadLDA("resources/config/LDA/tasa_en", Lang.eng);
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
-        // LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/lemonde_nursery_fr",
-        // Lang.fr);
-        // LDA lda = LDA.loadLDA("resources/config/LDA/lemonde_nursery_fr",
-        // Lang.fr);
-//        LDA lda = LDA.loadLDA("resources/config/LDA/inl_nl", Lang.nl);
+//        LSA lsa = LSA.loadLSA("resources/config/LA/LSA/Letters", Lang.la);
+//        LDA lda = LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la);
+        // LSA lsa = LSA.loadLSA("resources/config/RO/LSA/Religie", Lang.ro);
+        // LDA lda = LDA.loadLDA("resources/config/RO/LDA/Religie", Lang.ro);
+        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
+        // LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
+        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA LAK", Lang.eng);
+        // LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA LAK", Lang.eng);
+        // LSA lsa = LSA.loadLSA("resources/config/FR/Le Monde Nursery", Lang.fr);
+        // LDA lda = LDA.loadLDA("resources/config/LDA/Le Monde Nursery", Lang.fr);
+        // LDA lda = LDA.loadLDA("resources/config/LDA/INL", Lang.nl);
         try {
             // DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts",
             // -1, true, lsa, lda, Lang.eng, true,
@@ -119,31 +129,37 @@ public class DataGatheringTest {
             // DataGathering.processTexts("resources/in/Elvira/users 2015", -1,
             // true, lsa, lda, Lang.eng, true, true);
 
-            // DataGathering.processTexts("resources/in/Eminescu vs
-            // Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro,
-            // false, false);
-            // DataGathering.processTexts("resources/in/Eminescu vs
-            // Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro,
-            // false, false);
-            // DataGathering.processTexts("resources/in/comenius_la/01", 1,
-            // true, lsa, lda, Lang.la, false, false);
-            // DataGathering.processTexts("resources/in/comenius_la/02", 1,
-            // true, lsa, lda, Lang.la, false, false);
-            // DataGathering.processTexts("resources/in/comenius_la/03", 1,
-            // true, lsa, lda, Lang.la, false, false);
-            // DataGathering.processTexts("resources/in/comenius_la/04", 1,
-            // true, lsa, lda, Lang.la, false, false);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, null, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 1", null, null, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 2", null, null, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/final task", null, null, Lang.nl, false, true);
 
-            /*
-			 * exportPlainTexts("resources/in/Elvira/users 2010");
-			 * exportPlainTexts("resources/in/Elvira/users 2011");
-			 * exportPlainTexts("resources/in/Elvira/users 2012");
-			 * exportPlainTexts("resources/in/Elvira/users 2013");
-			 * exportPlainTexts("resources/in/Elvira/users 2014");
-			 * exportPlainTexts("resources/in/Elvira/users 2015");
-             */
-        } catch (IOException e) {
-            e.printStackTrace();
+//            DataGathering.processTexts("resources/in/essays/nursery_fr", -1, true, lsa, lda, Lang.fr, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2010", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2011", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2012", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2013", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2014", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2015", -1, true, lsa, lda, Lang.eng, true, true);
+//
+//            DataGathering.processTexts("resources/in/Eminescu vs Bratianu / Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro, false, false);
+//            DataGathering.processTexts("resources/in/Eminescu vs Bratianu / Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro, false, false);
+//
+//            DataGathering.processTexts("resources/in/comenius_la/01", 1, true, lsa, lda, Lang.la, false, false);
+//            DataGathering.processTexts("resources/in/comenius_la/02", 1, true, lsa, lda, Lang.la, false, false);
+//            DataGathering.processTexts("resources/in/comenius_la/03", 1, true, lsa, lda, Lang.la, false, false);
+//            DataGathering.processTexts("resources/in/comenius_la/04", 1, true, lsa, lda, Lang.la, false, false);
+//
+//            exportPlainTexts("resources/in/Elvira/users 2010");
+//            exportPlainTexts("resources/in/Elvira/users 2011");
+//            exportPlainTexts("resources/in/Elvira/users 2012");
+//            exportPlainTexts("resources/in/Elvira/users 2013");
+//            exportPlainTexts("resources/in/Elvira/users 2014");
+//            exportPlainTexts("resources/in/Elvira/users 2015");
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 }

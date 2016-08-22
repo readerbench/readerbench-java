@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package runtime.cv;
 
 import java.io.File;
@@ -31,35 +46,33 @@ import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
-	public Logger logger = Logger.getLogger(CVAnalyzer.class);
-	private String path;
-	
-	private String pathToLSA;
-	private String pathToLDA;
-	private Lang lang;
-	private boolean usePOSTagging = false;
-	private boolean computeDialogism = false;
-	private double threshold = 0.3;
-	private double FANthreshold = 5;
-	private double FANdelta = 1;
+    public Logger logger = Logger.getLogger(CVAnalyzer.class);
+    private String path;
 
-	private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
-	private String ignore = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
+    private String pathToLSA;
+    private String pathToLDA;
+    private Lang lang;
+    private boolean usePOSTagging = false;
+    private boolean computeDialogism = false;
+    private double threshold = 0.3;
+    private double FANthreshold = 5;
+    private double FANdelta = 1;
 
-	public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-			boolean computeDialogism, double threshold) {
-		this.path = path;
-		this.pathToLSA = pathToLSA;
-		this.pathToLDA = pathToLDA;
-		this.lang = lang;
-		this.usePOSTagging = usePOSTagging;
-		this.computeDialogism = computeDialogism;
-		this.threshold = threshold;
-	}
+    private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
+    private String ignore = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
 
-	public void process() {
+    public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+            boolean computeDialogism, double threshold) {
+        this.path = path;
+        this.pathToLSA = pathToLSA;
+        this.pathToLDA = pathToLDA;
+        this.lang = lang;
+        this.usePOSTagging = usePOSTagging;
+        this.computeDialogism = computeDialogism;
+        this.threshold = threshold;
+    }
 
-		try {
+    public void process() {
 
 			StringBuilder sb = new StringBuilder();
 			sb.append(
@@ -100,150 +113,154 @@ public class CVAnalyzer {
 			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
 			Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",[ ]*")));
 
-			System.out.println("Incep procesarea CV-urilor");
-			// iterate through all PDF CV files
-			Files.walk(Paths.get(path)).forEach(filePath -> {
-				String filePathString = filePath.toString();
-				if (filePathString.contains(".pdf")) {
+            //test
+            Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
+            Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",[ ]*")));
 
-					PdfToTextConverter pdfConverter = new PdfToTextConverter();
-					String cvContent = pdfConverter.pdftoText(filePathString, true);
+            System.out.println("Incep procesarea CV-urilor");
+            // iterate through all PDF CV files
+            Files.walk(Paths.get(path)).forEach(filePath -> {
+                String filePathString = filePath.toString();
+                if (filePathString.contains(".pdf")) {
 
-					logger.info("Continut cv: " + cvContent);
-					AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang,
-							usePOSTagging, computeDialogism);
-					AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
-							usePOSTagging, computeDialogism);
+                    PdfToTextConverter pdfConverter = new PdfToTextConverter();
+                    String cvContent = pdfConverter.pdftoText(filePathString, true);
 
-					logger.info("Lista de ignore contine " + ignore);
-					ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-							pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
-					
-					// CV
-					sb.append(filePath.getFileName().toString() + ",");
+                    logger.info("Continut cv: " + cvContent);
+                    AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang,
+                            usePOSTagging, computeDialogism);
+                    AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
+                            usePOSTagging, computeDialogism);
 
-					// pages
-					sb.append(result.getPages());
-					sb.append(',');
-					
-					// images
-					sb.append(result.getImages());
-					sb.append(',');
-					
-					// average images per page
-					sb.append(Formatting.formatNumber(result.getImages() * 1.0 / result.getPages()));
-					sb.append(',');
+                    logger.info("Lista de ignore contine " + ignore);
+                    ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
+                            pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
 
-					// colors
-					sb.append(result.getColors());
-					sb.append(',');
-					
-					// average colors per page
-					sb.append(Formatting.formatNumber(result.getColors() * 1.0 / result.getPages()));
-					sb.append(',');					
+                    // CV
+                    sb.append(filePath.getFileName().toString() + ",");
 
-					// paragraphs
-					sb.append(result.getParagraphs());
-					sb.append(',');
-					
-					// avg paragraphs per page
-					sb.append(Formatting.formatNumber(result.getParagraphs() * 1.0 / result.getPages()));
-					sb.append(',');
+                    // pages
+                    sb.append(result.getPages());
+                    sb.append(',');
 
-					// sentences
-					sb.append(result.getSentences());
-					sb.append(',');
-					
-					// avg sentences per page
-					sb.append(Formatting.formatNumber(result.getSentences() * 1.0 / result.getPages()));
-					sb.append(',');
+                    // images
+                    sb.append(result.getImages());
+                    sb.append(',');
 
-					// words
-					sb.append(result.getWords());
-					sb.append(',');
-					
-					// avg words per page
-					sb.append(Formatting.formatNumber(result.getWords() * 1.0 / result.getPages()));
-					sb.append(',');
+                    // average images per page
+                    sb.append(Formatting.formatNumber(result.getImages() * 1.0 / result.getPages()));
+                    sb.append(',');
 
-					// content words
-					sb.append(result.getContentWords());
-					sb.append(',');
-					
-					// avg content words per page
-					sb.append(Formatting.formatNumber(result.getContentWords() * 1.0 / result.getPages()));
-					sb.append(',');
+                    // colors
+                    sb.append(result.getColors());
+                    sb.append(',');
 
-					// positive words
-					sb.append(result.getPositiveWords().size());
-					sb.append(',');
-					
-					// positive words norm.
-					sb.append(Formatting.formatNumber(result.getPositiveWords().size() * 1.0 / result.getWords()));
-					sb.append(',');
+                    // average colors per page
+                    sb.append(Formatting.formatNumber(result.getColors() * 1.0 / result.getPages()));
+                    sb.append(',');
 
-					// negative words
-					sb.append(result.getNegativeWords().size());
-					sb.append(',');
-					
-					// negative words norm.
-					sb.append(Formatting.formatNumber(result.getNegativeWords().size() * 1.0 / result.getWords()));
-					sb.append(',');
-					
-					// neutral words
-					sb.append(result.getNeutralWords().size());
-					sb.append(',');
-					
-					// neutral words norm.
-					sb.append(Formatting.formatNumber(result.getNeutralWords().size() * 1.0 / result.getWords()));
-					sb.append(',');
-					
-					// FAN weighted average
-					sb.append(Formatting.formatNumber((result.getFanWeightedAverage())));
-					sb.append(',');
-					
-					// LIWC emotions
-					for (Map.Entry<String, List<String>> entry : result.getLiwcEmotions().entrySet()) {
-						// String emotion = entry.getKey();
-						// sb.append(emotion);
-						sb.append(entry.getValue().size());
-						sb.append(',');
-						sb.append(Formatting.formatNumber(entry.getValue().size() * 1.0 / result.getWords()));
-						sb.append(',');
-					}
+                    // paragraphs
+                    sb.append(result.getParagraphs());
+                    sb.append(',');
 
-					// textual complexity factors
-					List<ResultTextualComplexity> complexityFactors = result.getTextualComplexity();
-					for (ResultTextualComplexity category : complexityFactors) {
-						// sb.append(category.getContent() + ": ");
-						for (ResultValence factor : category.getValences()) {
-							// sb.append(factor.getContent() + '(' +
-							// factor.getScore() + ')');
-							sb.append(factor.getScore());
-							sb.append(',');
-						}
-						// sb.append('|');
-					}
-					// sb.append(',');
+                    // avg paragraphs per page
+                    sb.append(Formatting.formatNumber(result.getParagraphs() * 1.0 / result.getPages()));
+                    sb.append(',');
 
-					// (keywords, document) relevance
-					sb.append(result.getKeywordsDocumentRelevance());
-					sb.append(',');
+                    // sentences
+                    sb.append(result.getSentences());
+                    sb.append(',');
 
-					// keywords
-					for (ResultKeyword keyword : result.getKeywords()) {
-						// sb.append(keyword.getName() + '(' +
-						// keyword.getRelevance() + ") - " +
-						// keyword.getNoOccurences() + " occurences,");
-						sb.append(keyword.getRelevance());
-						sb.append(',');
-						sb.append(keyword.getNoOccurences());
-						sb.append(',');
-					}
-					// sb.append(',');
+                    // avg sentences per page
+                    sb.append(Formatting.formatNumber(result.getSentences() * 1.0 / result.getPages()));
+                    sb.append(',');
 
-					// concepts
-					/*ResultTopic resultTopic = result.getConcepts();
+                    // words
+                    sb.append(result.getWords());
+                    sb.append(',');
+
+                    // avg words per page
+                    sb.append(Formatting.formatNumber(result.getWords() * 1.0 / result.getPages()));
+                    sb.append(',');
+
+                    // content words
+                    sb.append(result.getContentWords());
+                    sb.append(',');
+
+                    // avg content words per page
+                    sb.append(Formatting.formatNumber(result.getContentWords() * 1.0 / result.getPages()));
+                    sb.append(',');
+
+                    // positive words
+                    sb.append(result.getPositiveWords().size());
+                    sb.append(',');
+
+                    // positive words norm.
+                    sb.append(Formatting.formatNumber(result.getPositiveWords().size() * 1.0 / result.getWords()));
+                    sb.append(',');
+
+                    // negative words
+                    sb.append(result.getNegativeWords().size());
+                    sb.append(',');
+
+                    // negative words norm.
+                    sb.append(Formatting.formatNumber(result.getNegativeWords().size() * 1.0 / result.getWords()));
+                    sb.append(',');
+
+                    // neutral words
+                    sb.append(result.getNeutralWords().size());
+                    sb.append(',');
+
+                    // neutral words norm.
+                    sb.append(Formatting.formatNumber(result.getNeutralWords().size() * 1.0 / result.getWords()));
+                    sb.append(',');
+
+                    // FAN weighted average
+                    sb.append(Formatting.formatNumber((result.getFanWeightedAverage())));
+                    sb.append(',');
+
+                    // LIWC emotions
+                    for (Map.Entry<String, List<String>> entry : result.getLiwcEmotions().entrySet()) {
+                        // String emotion = entry.getKey();
+                        // sb.append(emotion);
+                        sb.append(entry.getValue().size());
+                        sb.append(',');
+                        sb.append(Formatting.formatNumber(entry.getValue().size() * 1.0 / result.getWords()));
+                        sb.append(',');
+                    }
+
+                    // textual complexity factors
+                    List<ResultTextualComplexity> complexityFactors = result.getTextualComplexity();
+                    for (ResultTextualComplexity category : complexityFactors) {
+                        // sb.append(category.getContent() + ": ");
+                        for (ResultValence factor : category.getValences()) {
+                            // sb.append(factor.getContent() + '(' +
+                            // factor.getScore() + ')');
+                            sb.append(factor.getScore());
+                            sb.append(',');
+                        }
+                        // sb.append('|');
+                    }
+                    // sb.append(',');
+
+                    // (keywords, document) relevance
+                    sb.append(result.getKeywordsDocumentRelevance());
+                    sb.append(',');
+
+                    // keywords
+                    for (ResultKeyword keyword : result.getKeywords()) {
+                        // sb.append(keyword.getName() + '(' +
+                        // keyword.getRelevance() + ") - " +
+                        // keyword.getNoOccurences() + " occurences,");
+                        sb.append(keyword.getRelevance());
+                        sb.append(',');
+                        sb.append(keyword.getNoOccurences());
+                        sb.append(',');
+                    }
+                    // sb.append(',');
+
+                    // concepts
+                    /*ResultTopic resultTopic = result.getConcepts();
 					List<ResultNode> resultNodes = resultTopic.getNodes();
 					int i = 0;
 					for (ResultNode resultNode : resultNodes) {
@@ -257,39 +274,38 @@ public class CVAnalyzer {
 						if (i == 25)
 							break;
 					}*/
+                    sb.append("\n");
 
-					sb.append("\n");
+                }
+            });
 
-				}
-			});
+            File file = new File(path + "stats.csv");
+            try {
+                FileUtils.writeStringToFile(file, sb.toString(), "UTF-8");
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            logger.info("Printed CV stats to CSV file: " + file.getAbsolutePath());
 
-			File file = new File(path + "stats.csv");
-			try {
-				FileUtils.writeStringToFile(file, sb.toString(), "UTF-8");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			logger.info("Printed CV stats to CSV file: " + file.getAbsolutePath());
+        } catch (Exception e) {
+            logger.info("Exception: " + e.getMessage());
+            e.printStackTrace();
+        }
 
-		} catch (Exception e) {
-			logger.info("Exception: " + e.getMessage());
-			e.printStackTrace();
-		}
+    }
 
-	}
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
+        ReaderBenchServer.initializeDB();
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		ReaderBenchServer.initializeDB();
+        CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", "resources/config/FR/LSA/Le Monde",
+                "resources/config/FR/LDA/Le Monde", Lang.getLang("French"), false, false, 0.3);
+        cvAnalyzerSample.process();
 
-		CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", "resources/config/LSA/lemonde_fr",
-				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
-		cvAnalyzerSample.process();
-
-		/*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", "resources/config/LSA/lemonde_fr",
-				"resources/config/LDA/lemonde_fr", Lang.getLang("French"), false, false, 0.3);
+        /*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", "resources/config/FR/LSA/Le Monde",
+				"resources/config/FR/LDA/Le Monde", Lang.getLang("French"), false, false, 0.3);
 		cvAnalyzerPositifs.process();*/
-	}
+    }
 
 }

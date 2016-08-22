@@ -1,36 +1,18 @@
-/* Hierarchical Dirichlet Process for Mallet
- * Version:0.1
- * 
- * Author: CHyi-Kwei Yau
- * 
- * HDP implementation on Mallet 
- * Basic structure & Code form "Implementing the HDP with minimum code complexity" by Gregor Heinrich.
- * 
- * ==================================================================================================
- * 
- * Update History:
- * 
- * 2012/10/01 version 0.1
- *  - bug fix: print correct topic number in training
- *  - add cross validation in HDP
- *  - add inferencer class
- *  - add preplexity calculation in inferencer
- * 
- * 2012/09/29 Version 0.1
- *  - bug fix: printed result are correct now
- *  - bug fix: empty topic are caused by initial topic number > 0
- *  - change initial topic assignment to uniform distribution and remove empty topics.
- * 
- * 2012/09/28 Version 0.1
- * 	- bug: Topic number and total word count not match in printed result
- *  - bug: some topics are empty but not removed  
- * 
- * 2012/09/27 Version 0.1
- * 	- main algorithm work. not finished all function, 
- *  - bug: auto update hyper-parameter doesn't work well. Disable it for now.
- *  
- * */
-
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.semanticModels.LDA;
 
 import java.io.BufferedWriter;

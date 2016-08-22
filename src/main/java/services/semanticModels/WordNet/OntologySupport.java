@@ -1,6 +1,20 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.semanticModels.WordNet;
 
-import dao.DAOService;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -11,7 +25,6 @@ import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
 import data.Word;
-import data.cscl.Utterance;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
 import data.AbstractDocument;
@@ -24,14 +37,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -42,14 +50,11 @@ import java.util.Queue;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.openide.util.Exceptions;
-import vu.wntools.wnsimilarity.main.WordSim;
 import vu.wntools.wordnet.WordnetData;
-import vu.wntools.wordnet.WordnetLmfSaxParser;
 
 public class OntologySupport {
 
     static Logger logger = Logger.getLogger(OntologySupport.class);
-    private static int id = 0;
 
     public static final double SYNONYM_WEIGHT = 1.0;
     public static final double HYPERNYM_WEIGHT = 1.0;
@@ -67,13 +72,13 @@ public class OntologySupport {
     private static final Map<Lang, String> wordnetFiles = new EnumMap<>(Lang.class);
 
     static {
-        wordnetFiles.put(Lang.ro, "resources/config/WN/wn-ron-lmf.xml");
-        wordnetFiles.put(Lang.eng, "resources/config/WN/wn-eng-lmf.xml");
-        wordnetFiles.put(Lang.fr, "resources/config/WN/wn-fra-lmf.xml");
-        wordnetFiles.put(Lang.nl, "resources/config/WN/wn-nld-lmf.xml");
-        wordnetFiles.put(Lang.it, "resources/config/WN/wn-ita-lmf.xml");
-        wordnetFiles.put(Lang.es, "resources/config/WN/wn-spa-lmf.xml");
-        wordnetFiles.put(Lang.la, "resources/config/WN/wn-la-lmf.xml");
+        wordnetFiles.put(Lang.ro, "resources/config/RO/WN/wn-ron-lmf.xml");
+        wordnetFiles.put(Lang.eng, "resources/config/EN/WN/wn-eng-lmf.xml");
+        wordnetFiles.put(Lang.fr, "resources/config/FR/WN/wn-fra-lmf.xml");
+        wordnetFiles.put(Lang.nl, "resources/config/NL/WN/wn-nld-lmf.xml");
+        wordnetFiles.put(Lang.it, "resources/config/IT/WN/wn-ita-lmf.xml");
+        wordnetFiles.put(Lang.es, "resources/config/ES/WN/wn-spa-lmf.xml");
+        wordnetFiles.put(Lang.la, "resources/config/LA/WN/wn-la-lmf.xml");
         for (Map.Entry<Lang, String> e : wordnetFiles.entrySet()) {
             dictionaries.put(e.getKey(), new WordnetPOSData(e.getValue()));
         }
@@ -328,7 +333,7 @@ public class OntologySupport {
         System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
         System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
         System.out.println(exists("final", "JJ", Lang.fr));
-        
+
         /*Word w1 = Word.getWordFromConcept("horse", Lang.eng);
         Word w2 = Word.getWordFromConcept("dog", Lang.eng);
         w1.setPOS("noun");
@@ -336,19 +341,18 @@ public class OntologySupport {
         System.out.println(OntologySupport.semanticSimilarity(w1, w2, SimilarityType.LEACOCK_CHODOROW));
         System.out.println(OntologySupport.semanticSimilarity(w1, w2, SimilarityType.WU_PALMER));
         System.out.println(OntologySupport.semanticSimilarity(w1, w2, SimilarityType.PATH_SIM));*/
-        
         AbstractDocumentTemplate docTmp = AbstractDocumentTemplate.getDocumentModel(
-				"What is the private language hypothesis, and what is its importance? According to this hypothesis, the meanings of the terms of the private language are the very sensory experiences to which they refer. These experiences are private to the subject in that he alone is directly aware of them. As classically expressed, the premise is that we have knowledge by acquaintance of our sensory experiences. As the private experiences are the meanings of the words of the language, a fortiori the language itself is private. Such a hypothesis, if successfully defended, promises to solve two important philosophical problems: It explains the connection between language and reality - there is a class of expressions that are special in that their meanings are given immediately in experience and not in further verbal definition. More generally, these experiences constitute the basic semantic units in which all discursive meaning is rooted. I shall refer to this solution as the thesis of semantic autonomy. This hypothesis also provides a solution to the problem of knowledge. For the same reason that sensory experience seems such an appropriate candidate for the ultimate source of all meaning, so it seems appropriate as the ultimate foundation for all knowledge. It is the alleged character of sensory experience, as that which is immediately and directly knowable, that makes it the prime candidate for both the ultimate semantic and epistemic unit. This I shall refer to as the thesis of non-propositional knowledge (or knowledge by acquaintance). Human machine interface for ABC computer applications."
-						+ " A survey of user opinion of computer system response time."
-						+ " The EPS user interface management system. "
-						+ "System and human system engineering testing of EPS. "
-						+ "Relation of user perceived response time to error measurement.");
+                "What is the private language hypothesis, and what is its importance? According to this hypothesis, the meanings of the terms of the private language are the very sensory experiences to which they refer. These experiences are private to the subject in that he alone is directly aware of them. As classically expressed, the premise is that we have knowledge by acquaintance of our sensory experiences. As the private experiences are the meanings of the words of the language, a fortiori the language itself is private. Such a hypothesis, if successfully defended, promises to solve two important philosophical problems: It explains the connection between language and reality - there is a class of expressions that are special in that their meanings are given immediately in experience and not in further verbal definition. More generally, these experiences constitute the basic semantic units in which all discursive meaning is rooted. I shall refer to this solution as the thesis of semantic autonomy. This hypothesis also provides a solution to the problem of knowledge. For the same reason that sensory experience seems such an appropriate candidate for the ultimate source of all meaning, so it seems appropriate as the ultimate foundation for all knowledge. It is the alleged character of sensory experience, as that which is immediately and directly knowable, that makes it the prime candidate for both the ultimate semantic and epistemic unit. This I shall refer to as the thesis of non-propositional knowledge (or knowledge by acquaintance). Human machine interface for ABC computer applications."
+                + " A survey of user opinion of computer system response time."
+                + " The EPS user interface management system. "
+                + "System and human system engineering testing of EPS. "
+                + "Relation of user perceived response time to error measurement.");
         AbstractDocument d = new Document(null, docTmp, null, null, Lang.eng, true, false);
-        
+
         AbstractDocumentTemplate docTmp1 = AbstractDocumentTemplate.getDocumentModel(
-				"RAGE, Realising an Applied Gaming Eco-system, aims to develop, transform and enrich advanced technologies from the leisure games industry into self-contained gaming assets that support game studios at developing applied games easier, faster and more cost-effectively. These assets will be available along with a large volume of high-quality knowledge resources through a self-sustainable Ecosystem, which is a social space that connects research, gaming industries, intermediaries, education providers, policy makers and end-users.");
+                "RAGE, Realising an Applied Gaming Eco-system, aims to develop, transform and enrich advanced technologies from the leisure games industry into self-contained gaming assets that support game studios at developing applied games easier, faster and more cost-effectively. These assets will be available along with a large volume of high-quality knowledge resources through a self-sustainable Ecosystem, which is a social space that connects research, gaming industries, intermediaries, education providers, policy makers and end-users.");
         AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.eng, false, false);
-        
+
         SemanticCohesion sc = new SemanticCohesion(d, d1);
         System.out.println(sc.getOntologySim().get(SimilarityType.LEACOCK_CHODOROW));
         System.out.println(sc.getOntologySim().get(SimilarityType.WU_PALMER));

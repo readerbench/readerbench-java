@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package view.widgets.selfexplanation.verbalization;
 
 import java.awt.Color;
@@ -345,127 +360,6 @@ public class VerbalizationView extends JFrame {
 			}
 			dataRow.add("");
 			modelContents.addRow(dataRow);
-		}
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				// Document d = Document
-				// .load("in/Matilda/Verbalization extracts AIED/MATILDA grain moyen.xml",
-				// "resources/config/LSA/lemonde_fr",
-				// "resources/config/LDA/lemonde_fr", Lang.fr, true, true);
-				// d.computeAll(null, null, true);
-				//
-				// logger.info("Finished building all documents");
-				//
-				// Metacognition v1 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 EYRAUD Alice.xml",
-				// d, true, true);
-				// v1.computeAll(true);
-
-				Metacognition v1 = (Metacognition) Metacognition
-						.loadSerializedDocument("in/Matilda/Verbalization extracts AIED/MATILDA CM2 EYRAUD Alice.ser");
-
-				// Metacognition v2 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 ALLANIC Victor.xml",
-				// d, true, true);
-				// v2.computeAll(true);
-				//
-				// Metacognition v3 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 BLOCIER Orianne.xml",
-				// d, true, true);
-				// v3.computeAll(true);
-				//
-				// Metacognition v4 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 COSENTINO Florian.xml",
-				// d, true, true);
-				// v4.computeAll(true);
-				//
-				// Metacognition v5 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 EYRAUD Axel.xml",
-				// d, true, true);
-				// v5.computeAll(true);
-				//
-				// Metacognition v6 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 LAROCHE Daphne.xml",
-				// d, true, true);
-				// v6.computeAll(true);
-				//
-				// Metacognition v7 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CE2 RUIZ Elodie.xml",
-				// d, true, true);
-				// v7.computeAll(true);
-				//
-				// Metacognition v8 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 JADOT QUINTON.xml",
-				// d, true, true);
-				// v8.computeAll(true);
-				//
-				// Metacognition v9 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 MERNIZ.xml",
-				// d, true, true);
-				// v9.computeAll(true);
-				//
-				// Metacognition v10 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 PEYCELLIER.xml",
-				// d, true, true);
-				// v10.computeAll(true);
-				//
-				// Metacognition v11 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 RAIS Adel.xml",
-				// d, true, true);
-				// v11.computeAll(true);
-				//
-				// Metacognition v12 = Metacognition
-				// .loadVerbalization(
-				// "in/Matilda/Verbalization extracts AIED/MATILDA CM2 ZANNETTACCI.xml",
-				// d, true, true);
-				// v12.computeAll(true);
-
-				logger.info("Finished building all verbalizations");
-
-				VerbalizationView view = new VerbalizationView(v1);
-				view.setVisible(true);
-			}
-		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 }

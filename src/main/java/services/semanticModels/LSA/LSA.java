@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.semanticModels.LSA;
 
 import java.io.BufferedReader;
@@ -30,6 +45,7 @@ import services.semanticModels.ISemanticModel;
  * @author Mihai Dascalu
  */
 public class LSA implements ISemanticModel {
+
     static Logger logger = Logger.getLogger(LSA.class);
 
     private static final List<LSA> LOADED_LSA_SPACES = new LinkedList<>();
@@ -295,28 +311,25 @@ public class LSA implements ISemanticModel {
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
-        // LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_new_en2", Lang.eng);
+        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
         //
         // Word w1 = Word.getWordFromConcept("cat", Lang.eng);
         // Word w2 = Word.getWordFromConcept("dog", Lang.eng);
         // System.out.println(lsa.getSimilarity(w1, w2));
         //
-        // for (Entry<Word, Double> entry : lsa.getSimilarConcepts(
-        // Word.getWordFromConcept("cat", Lang.eng), 0.3).entrySet()) {
+        // for (Entry<Word, Double> entry : lsa.getSimilarConcepts(Word.getWordFromConcept("cat", Lang.eng), 0.3).entrySet()) {
         // System.out.println(entry.getKey().getLemma() + "\t"
         // + entry.getValue());
         // }
 
-        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_en", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
 
         Word w1 = Word.getWordFromConcept("men", Lang.eng);
         Word w2 = Word.getWordFromConcept("address", Lang.eng);
         System.out.println(lsa.getSimilarity(w1, w2));
 
         // for (Entry<Word, Double> entry :
-        // lsa.getSimilarConcepts(Word.getWordFromConcept("psicología",
-        // Lang.es), 0.3)
-        // .entrySet()) {
+        // lsa.getSimilarConcepts(Word.getWordFromConcept("psicología", Lang.es), 0.3).entrySet()) {
         // System.out.println(entry.getKey().getLemma() + "\t" +
         // entry.getValue());
         // }

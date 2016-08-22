@@ -1,3 +1,18 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package services.nlp.parsing;
 
 import java.util.Properties;
@@ -87,20 +102,10 @@ class ParsingParams_FR extends Properties {
     private static final long serialVersionUID = -161579346328207322L;
 
     public ParsingParams_FR() {
-        
         this.put("tokenize.language", "fr");
         this.put("pos.model", "edu/stanford/nlp/models/pos-tagger/french/french.tagger");
         this.put("parse.model", "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
         this.put("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_French.gz");
         this.put("annotators", "tokenize, ssplit, pos, parse, depparse");
-
-        /*
-		 * this.put("pos.model", "resources/config/POSmodels/french.tagger");
-		 * this.put("parse.model",
-		 * "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
-		 * this.put("parse.flags", ""); this.put("parse.buildgraphs", "false");
-		 * this.put("annotators", "tokenize, ssplit, pos, parse");
-		 * this.put("numThreads", "8");
-         */
     }
 }
