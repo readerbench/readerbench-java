@@ -29,20 +29,13 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Topic;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
+import services.complexity.ComplexityIndex;
+import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
-import services.complexity.IComplexityFactors;
-import services.complexity.discourse.ConnectivesComplexity;
-import services.complexity.discourse.DiscourseComplexity;
-import services.complexity.discourse.SemanticCohesionComplexity;
-import services.complexity.entityDensity.EntityDensityComplexity;
-import services.complexity.surface.EntropyComplexity;
-import services.complexity.surface.LengthComplexity;
-import services.complexity.surface.SurfaceStatisticsComplexity;
-import services.complexity.syntax.POSComplexity;
-import services.complexity.syntax.PronounsComplexity;
-import services.complexity.syntax.TreeComplexity;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.topicMining.TopicModeling;
@@ -57,17 +50,16 @@ public class Community extends AnalysisElement {
 	private static final int MIN_NO_CONTRIBUTIONS = 3;
 	private static final int MIN_NO_CONTENT_WORDS = 50;
 
-	static Logger logger = Logger.getLogger(Community.class);
+	static final Logger logger = Logger.getLogger(Community.class);
 
 	private String path;
-	private boolean needsAnonymization;
+	private final boolean needsAnonymization;
 	private List<Participant> participants;
 	private List<Conversation> documents;
 	private List<Community> timeframeSubCommunities;
 	private double[][] participantContributions;
-	private Date startDate, endDate;
+	private final Date startDate, endDate;
 	private Date fistContributionDate, lastContributionDate;
-	private boolean[] selectedIndices;
 
 	public Community(String path, boolean needsAnonymization, Date startDate, Date endDate) {
 		super(null, 0, null, null, null);
@@ -75,9 +67,9 @@ public class Community extends AnalysisElement {
 		this.needsAnonymization = needsAnonymization;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		participants = new ArrayList<Participant>();
-		documents = new ArrayList<Conversation>();
-		timeframeSubCommunities = new ArrayList<Community>();
+		participants = new ArrayList<>();
+		documents = new ArrayList<>();
+		timeframeSubCommunities = new ArrayList<>();
 	}
 
 	private void updateParticipantContributions() {
@@ -263,21 +255,8 @@ public class Community extends AnalysisElement {
 		export(path + "/" + fileName + ".csv", modelTimeEvolution, additionalInfo);
 
 		if (useTextualComplexity) {
-			selectedIndices = new boolean[ComplexityIndices.NO_COMPLEXITY_INDICES];
-
-			IComplexityFactors[] complexityFactors = { new LengthComplexity(), new SurfaceStatisticsComplexity(),
-					new EntropyComplexity(), new POSComplexity(), new PronounsComplexity(), new TreeComplexity(),
-					new EntityDensityComplexity(),
-					new ConnectivesComplexity(getLanguage() != null ? getLanguage() : Lang.eng),
-					new DiscourseComplexity(), new SemanticCohesionComplexity(1), new SemanticCohesionComplexity(3),
-					new SemanticCohesionComplexity(4) };
-
-			for (IComplexityFactors f : complexityFactors) {
-				for (int index : f.getIDs()) {
-					selectedIndices[index] = true;
-				}
-			}
-
+			
+			
 			// determine complexity indices
 			for (Participant p : participants) {
 				// establish minimum criteria
@@ -289,17 +268,13 @@ public class Community extends AnalysisElement {
 						}
 					}
 				}
-				p.getSignificantInterventions()
-						.setComplexityIndices(new double[ComplexityIndices.NO_COMPLEXITY_INDICES]);
-
+				
 				if (p.getSignificantInterventions().getBlocks().size() >= MIN_NO_CONTRIBUTIONS
 						&& noContentWords >= MIN_NO_CONTENT_WORDS) {
 					// build cohesion graph for additional indices
-					CohesionGraph.buildCohesionGraph(p.getSignificantInterventions());
-
-					for (IComplexityFactors f : complexityFactors) {
-						f.computeComplexityFactors(p.getSignificantInterventions());
-					}
+					CohesionGraph.buildCohesionGraph(p.getSignificantInterventions());      
+                    ComplexityIndices.computeComplexityFactors(p.getSignificantInterventions());
+					
 				}
 			}
 		}
@@ -440,13 +415,13 @@ public class Community extends AnalysisElement {
 						}
 					}
 				}
-				if (selectedIndices != null) {
-					for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-						if (selectedIndices[i]) {
-							out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
-						}
-					}
-				}
+                List<ComplexityIndex> factors = Arrays.stream(ComplexityIndexType.values())
+                    .map(cat -> cat.getFactory())
+                    .flatMap(f -> f.build(getLanguage()).stream())
+                    .collect(Collectors.toList());
+                for (ComplexityIndex factor : factors) {
+                    out.write("," + factor.getAcronym());
+                }
 				out.write("\n");
 
 				for (int index = 0; index < participants.size(); index++) {
@@ -459,19 +434,15 @@ public class Community extends AnalysisElement {
 							if (CSCLindex.isUsedForTimeModeling()) {
 								for (CSCLCriteria crit : CSCLCriteria.values()) {
 									out.write("," + p.getLongitudinalIndices().get(
-											new AbstractMap.SimpleEntry<CSCLIndices, CSCLCriteria>(CSCLindex, crit)));
+											new AbstractMap.SimpleEntry<>(CSCLindex, crit)));
 								}
 							}
 						}
 					}
-					if (selectedIndices != null) {
-						for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-							if (selectedIndices[i]) {
-								out.write("," + Formatting
-										.formatNumber(p.getSignificantInterventions().getComplexityIndices()[i]));
-							}
-						}
-					}
+                    for (ComplexityIndex factor : factors) {
+                        out.write("," + Formatting
+                                .formatNumber(p.getSignificantInterventions().getComplexityIndices().get(factor)));
+                    }
 					out.write("\n");
 				}
 

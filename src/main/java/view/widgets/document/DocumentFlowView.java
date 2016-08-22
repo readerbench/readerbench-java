@@ -24,8 +24,8 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
-import services.complexity.flow.DocFlowCriteria;
-import services.complexity.flow.DocumentFlow;
+import services.complexity.cohesion.flow.DocFlowCriteria;
+import services.complexity.cohesion.flow.DocumentFlow;
 import view.models.document.DocumentFlowTable;
 import view.models.document.DocumentTableModel;
 

@@ -6,6 +6,7 @@ import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import java.util.EnumMap;
+import java.util.Map;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.WordNet.OntologySupport;
@@ -165,12 +166,15 @@ public class SemanticCohesion implements Serializable {
         return cohesion;
     }
 
-    public double[] getSemanticDistances() {
-        return new double[]{
-            ontologySim.get(SimilarityType.LEACOCK_CHODOROW),
-            ontologySim.get(SimilarityType.WU_PALMER),
-            ontologySim.get(SimilarityType.PATH_SIM),
-            lsaSim, ldaSim, cohesion};
+    public EnumMap<SimilarityType, Double> getSemanticDistances() {
+        EnumMap<SimilarityType, Double> map = new EnumMap<>(SimilarityType.class);
+        for (Map.Entry<SimilarityType, Double> e : ontologySim.entrySet()) {
+            map.put(e.getKey(), e.getValue());
+        }
+        map.put(SimilarityType.LSA, lsaSim);
+        map.put(SimilarityType.LDA, ldaSim);
+        map.put(SimilarityType.COHESION, cohesion);
+        return map;
     }
 
     public static String[] getSemanticDistanceNames() {

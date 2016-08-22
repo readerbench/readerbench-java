@@ -219,9 +219,9 @@ public class ComputeBalancedMeasure {
 
 		// define training and testing sets
 		// training = entire corpus
-		List<Measurement> trainingMeasurements = new LinkedList<Measurement>();
+		List<Measurement> trainingMeasurements = new LinkedList<>();
 		// testing = list of documents
-		List<Measurement> testMeasurements = new LinkedList<Measurement>();
+		List<Measurement> testMeasurements = new LinkedList<>();
 
 		for (Double classId : measurements.keySet()) {
 			for (int i = 0; i < measurements.get(classId).size(); i++)
@@ -230,7 +230,7 @@ public class ComputeBalancedMeasure {
 
 		for (AbstractDocument d : documents) {
 			ComplexityIndices.computeComplexityFactors(d);
-			testMeasurements.add(new Measurement(-1, d.getComplexityIndices()));
+			testMeasurements.add(new Measurement(-1, ComplexityIndices.getComplexityIndicesArray(d)));
 		}
 
 		// run SVM classifier

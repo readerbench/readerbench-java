@@ -7,20 +7,32 @@ import java.util.function.BiFunction;
 import data.AbstractDocument;
 import data.Lang;
 import data.Word;
-import services.complexity.ComplexityIndices;
-import services.complexity.IComplexityFactors;
+import java.util.function.Function;
+import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndex;
 import services.complexity.readability.Syllable;
 import services.semanticModels.WordNet.OntologySupport;
-import utils.localization.LocalizationUtils;
 import vu.wntools.wordnet.WordnetData;
 
-public class WordComplexity extends IComplexityFactors {
+public class WordComplexity extends ComplexityIndex {
 
-	private static int getSyllables(Word word) {
+    private final BiFunction<Word, Lang, ? extends Number> f;
+    
+    public WordComplexity(ComplexityIndecesEnum index, Lang lang, BiFunction<Word, Lang, ? extends Number> f) {
+        super(index, lang);
+        this.f = f;
+    }
+    
+    public WordComplexity(ComplexityIndecesEnum index, Lang lang, Function<Word, ? extends Number> f) {
+        super(index, lang);
+        this.f = ((Word w, Lang l) -> f.apply(w));
+    }
+
+	public static int getSyllables(Word word) {
 		return Syllable.syllable(word.getLemma());
 	}
 
-	private static int getPolysemyCount(Word word) {
+	public static int getPolysemyCount(Word word) {
 		if (OntologySupport.getWordSenses(word) == null) {
 			return 0;
 		}
@@ -89,52 +101,8 @@ public class WordComplexity extends IComplexityFactors {
 		return Math.abs(word.getLemma().length() - word.getStem().length());
 	}
 
-	private static double getDifferenceBetweenWordAndStem(Word word) {
+	public static double getDifferenceBetweenWordAndStem(Word word) {
 		return Math.abs(word.getText().length() - word.getStem().length());
-	}
-
-	/**
-	 * Average syllables per word in the document.
-	 */
-	public static double getWordSyllableCountMean(AbstractDocument d) {
-		double totalSyllables = 0;
-		double totalWords = 0;
-		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
-			totalSyllables += getSyllables(e.getKey()) * e.getValue();
-			totalWords += e.getValue();
-		}
-		return (totalWords > 0 ? totalSyllables / totalWords : 0);
-	}
-
-	/**
-	 * Average word senses per word in the document. Note: For some words the
-	 * sense count method returns -1 (either word was not found in WordNet or
-	 * POS was not recognized). These words do not count toward the mean.
-	 */
-	public static double getWordPolysemyCountMean(AbstractDocument d) {
-		double senseCount = 0;
-		double totalWords = 0;
-		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
-			int noSenses = getPolysemyCount(e.getKey());
-			if (noSenses > 0) {
-				senseCount += noSenses * e.getValue();
-				totalWords += e.getValue();
-			}
-		}
-		return (totalWords > 0 ? senseCount / totalWords : 0);
-	}
-
-	/**
-	 * Average distance to the hypernym tree root per word in the document.
-	 */
-	public static double getWordDistanceToHypernymTreeRootMean(AbstractDocument d) {
-		double distanceSum = 0;
-		double totalWords = 0;
-		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
-			distanceSum += getMaxDistanceToHypernymTreeRoot(e.getKey(), d.getLanguage()) * e.getValue();
-			totalWords += e.getValue();
-		}
-		return (totalWords > 0 ? distanceSum / totalWords : 0);
 	}
 
 	public static double getAverageComplexity(AbstractDocument d, BiFunction<Word, Lang, ? extends Number> f) {
@@ -147,93 +115,8 @@ public class WordComplexity extends IComplexityFactors {
 		return (totalWords > 0 ? distanceSum / totalWords : 0);
 	}
 
-	/**
-	 * Average difference between the lemma and stem per word in the document.
-	 */
-	public static double getWordDifferenceBetweenLemmaAndStemMean(AbstractDocument d) {
-		double distanceSum = 0;
-		double totalWords = 0;
-		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
-			distanceSum += getDifferenceBetweenLemmaAndStem(e.getKey()) * e.getValue();
-			totalWords += e.getValue();
-		}
-		return (totalWords > 0 ? distanceSum / totalWords : 0);
-	}
-
-	public static double getWordDifferenceBetweenWordAndStemMean(AbstractDocument d) {
-		double distanceSum = 0;
-		double totalWords = 0;
-		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
-			distanceSum += getDifferenceBetweenWordAndStem(e.getKey()) * e.getValue();
-			totalWords += e.getValue();
-		}
-		return (totalWords > 0 ? distanceSum / totalWords : 0);
-	}
-
 	@Override
-	public String getClassName() {
-		return LocalizationUtils.getTranslation("Word Complexity Factors");
-	}
-
-	@Override
-	public void setComplexityIndexDescription(String[] descriptions) {
-		descriptions[ComplexityIndices.WORD_DIFF_LEMMA_STEM] = LocalizationUtils
-				.getTranslation("Average distance between lemma and word stems (only content words)");
-		descriptions[ComplexityIndices.WORD_DIFF_WORD_STEM] = LocalizationUtils
-				.getTranslation("Average distance between words and corresponding stems (only content words)");
-		descriptions[ComplexityIndices.WORD_MAX_DEPTH_HYPERNYM_TREE] = LocalizationUtils
-				.getTranslation("WORD_MAX_DEPTH_HYPERNYM_TREE");
-		descriptions[ComplexityIndices.WORD_AVERAGE_DEPTH_HYPERNYM_TREE] = LocalizationUtils
-				.getTranslation("WORD_AVERAGE_DEPTH_HYPERNYM_TREE");
-		descriptions[ComplexityIndices.WORD_PATH_COUNT_HYPERNYM_TREE] = LocalizationUtils
-				.getTranslation("WORD_PATH_COUNT_HYPERNYM_TREE");
-		descriptions[ComplexityIndices.WORD_POLYSEMY_COUNT] = LocalizationUtils
-				.getTranslation("Average word polysemy count (only content words)");
-		descriptions[ComplexityIndices.WORD_SYLLABLE_COUNT] = LocalizationUtils
-				.getTranslation("Average word syllable count (lemmas for content words) (EN only)");
-	}
-
-	public void setComplexityIndexAcronym(String[] acronyms) {
-		acronyms[ComplexityIndices.WORD_DIFF_LEMMA_STEM] = this.getComplexityIndexAcronym("WORD_DIFF_LEMMA_STEM");
-		acronyms[ComplexityIndices.WORD_DIFF_WORD_STEM] = this.getComplexityIndexAcronym("WORD_DIFF_WORD_STEM");
-		acronyms[ComplexityIndices.WORD_MAX_DEPTH_HYPERNYM_TREE] = this
-				.getComplexityIndexAcronym("WORD_MAX_DEPTH_HYPERNYM_TREE");
-		acronyms[ComplexityIndices.WORD_AVERAGE_DEPTH_HYPERNYM_TREE] = this
-				.getComplexityIndexAcronym("WORD_AVERAGE_DEPTH_HYPERNYM_TREE");
-		acronyms[ComplexityIndices.WORD_PATH_COUNT_HYPERNYM_TREE] = this
-				.getComplexityIndexAcronym("WORD_PATH_COUNT_HYPERNYM_TREE");
-		acronyms[ComplexityIndices.WORD_POLYSEMY_COUNT] = this.getComplexityIndexAcronym("WORD_POLYSEMY_COUNT");
-		acronyms[ComplexityIndices.WORD_SYLLABLE_COUNT] = this.getComplexityIndexAcronym("WORD_SYLLABLE_COUNT");
-	}
-
-	@Override
-	public void computeComplexityFactors(AbstractDocument d) {
-		d.getComplexityIndices()[ComplexityIndices.WORD_DIFF_LEMMA_STEM] = WordComplexity
-				.getWordDifferenceBetweenLemmaAndStemMean(d);
-		d.getComplexityIndices()[ComplexityIndices.WORD_DIFF_WORD_STEM] = WordComplexity
-				.getWordDifferenceBetweenWordAndStemMean(d);
-		d.getComplexityIndices()[ComplexityIndices.WORD_MAX_DEPTH_HYPERNYM_TREE] = WordComplexity
-				.getAverageComplexity(d, WordComplexity::getMaxDistanceToHypernymTreeRoot);
-		d.getComplexityIndices()[ComplexityIndices.WORD_AVERAGE_DEPTH_HYPERNYM_TREE] = WordComplexity
-				.getAverageComplexity(d, WordComplexity::getAverageDistanceToHypernymTreeRoot);
-		d.getComplexityIndices()[ComplexityIndices.WORD_PATH_COUNT_HYPERNYM_TREE] = WordComplexity
-				.getAverageComplexity(d, WordComplexity::getPathCountToHypernymTreeRoot);
-		d.getComplexityIndices()[ComplexityIndices.WORD_POLYSEMY_COUNT] = WordComplexity.getWordPolysemyCountMean(d);
-		switch (d.getLanguage()) {
-		case fr:
-			d.getComplexityIndices()[ComplexityIndices.WORD_SYLLABLE_COUNT] = ComplexityIndices.IDENTITY;
-			break;
-		default:
-			d.getComplexityIndices()[ComplexityIndices.WORD_SYLLABLE_COUNT] = WordComplexity
-					.getWordSyllableCountMean(d);
-		}
-	}
-
-	@Override
-	public int[] getIDs() {
-		return new int[] { ComplexityIndices.WORD_DIFF_LEMMA_STEM, ComplexityIndices.WORD_DIFF_WORD_STEM,
-				ComplexityIndices.WORD_MAX_DEPTH_HYPERNYM_TREE, ComplexityIndices.WORD_AVERAGE_DEPTH_HYPERNYM_TREE,
-				ComplexityIndices.WORD_PATH_COUNT_HYPERNYM_TREE, ComplexityIndices.WORD_POLYSEMY_COUNT,
-				ComplexityIndices.WORD_SYLLABLE_COUNT };
-	}
+    public double compute(AbstractDocument d) {
+        return getAverageComplexity(d, f);
+    }
 }

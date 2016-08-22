@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
@@ -26,7 +27,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
-import static services.complexity.ComplexityIndices.NO_COMPLEXITY_INDICES;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -52,8 +52,7 @@ public class MetaDocument extends Document {
         Stream doc;
         if (getBlocks().isEmpty()) {
             doc = Stream.empty();
-        }
-        else {
+        } else {
             doc = Stream.of(this);
         }
         return Stream.concat(doc, children.stream().flatMap(child -> {
@@ -68,12 +67,11 @@ public class MetaDocument extends Document {
     public List<Document> getLeaves() {
         return getLeavesStream().collect(Collectors.toList());
     }
-    
+
     @Override
     public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors) {
         computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, true);
     }
-    
 
     public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean recursive) {
         if (!recursive) {
@@ -83,22 +81,18 @@ public class MetaDocument extends Document {
         List<Document> leaves = getLeaves();
         for (Document doc : leaves) {
             if (doc instanceof MetaDocument) {
-                ((MetaDocument)doc).computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, false);
-            }
-            else {
+                ((MetaDocument) doc).computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, false);
+            } else {
                 doc.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
             }
         }
-        if (complexityIndices == null) setComplexityIndices(new double[NO_COMPLEXITY_INDICES]);
-		for (int i = 0; i < complexityIndices.length; i++) {
-            final int index = i;
-            complexityIndices[i] = leaves.parallelStream()
-                    .map(Document::getComplexityIndices)
-                    .mapToDouble(indices -> indices[index])
-                    .filter(x -> x != -1)
-                    .average().orElse((double) ComplexityIndices.IDENTITY);
-
-        }
+        setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().parallelStream()
+                .collect(Collectors.toMap(
+                    Function.identity(),
+                    index -> leaves.parallelStream()
+                        .mapToDouble(d -> d.getComplexityIndices().get(index))
+                        .filter(x -> x != -1)
+                        .average().orElse((double) ComplexityIndices.IDENTITY))));
 
     }
 
@@ -180,30 +174,30 @@ public class MetaDocument extends Document {
             }
         }
     }
-    
+
     @Override
     public int getNoBlocks() {
-        return super.getNoBlocks() + 
-                children.stream().mapToInt(AbstractDocument::getNoBlocks).sum();
+        return super.getNoBlocks()
+                + children.stream().mapToInt(AbstractDocument::getNoBlocks).sum();
     }
-    
+
     @Override
     public int getNoSentences() {
-        return super.getNoSentences() + 
-                children.stream().mapToInt(AbstractDocument::getNoSentences).sum();
+        return super.getNoSentences()
+                + children.stream().mapToInt(AbstractDocument::getNoSentences).sum();
     }
-    
+
     @Override
     public int getNoWords() {
-        return super.getNoWords() + 
-                children.stream().mapToInt(AbstractDocument::getNoWords).sum();
-    }  
-    
+        return super.getNoWords()
+                + children.stream().mapToInt(AbstractDocument::getNoWords).sum();
+    }
+
     @Override
     public int getNoContentWords() {
-        return super.getNoContentWords() + 
-                children.stream().mapToInt(AbstractDocument::getNoContentWords).sum();
-    }  
+        return super.getNoContentWords()
+                + children.stream().mapToInt(AbstractDocument::getNoContentWords).sum();
+    }
 
     public static DocumentLevel getDocumentLevelOfElement(Element elem) {
         String level = elem.getAttribute("type");

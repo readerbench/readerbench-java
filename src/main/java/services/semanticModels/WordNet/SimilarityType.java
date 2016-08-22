@@ -12,5 +12,8 @@ package services.semanticModels.WordNet;
 public enum SimilarityType {
     LEACOCK_CHODOROW,
     WU_PALMER,
-    PATH_SIM
+    PATH_SIM,
+    LSA,
+    LDA,
+    COHESION
 }

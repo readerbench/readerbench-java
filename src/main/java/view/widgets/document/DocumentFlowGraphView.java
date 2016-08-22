@@ -37,7 +37,7 @@ import org.openide.util.Lookup;
 import data.AbstractDocument;
 import data.Block;
 import services.commons.Formatting;
-import services.complexity.flow.DocumentFlow;
+import services.complexity.cohesion.flow.DocumentFlow;
 import view.models.PreviewSketch;
 
 public class DocumentFlowGraphView extends JFrame {

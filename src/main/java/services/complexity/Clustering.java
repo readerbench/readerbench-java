@@ -17,7 +17,7 @@ public class Clustering {
 	public static void performKMeansClustering(List<AbstractDocument> docs,
 			int K) {
 
-		List<AbstractDocument> clustroids = new LinkedList<AbstractDocument>();
+		List<AbstractDocument> clustroids = new LinkedList<>();
 
 		// sets initialization to random or "smart" node selection for maximum
 		// dispersion
@@ -49,9 +49,9 @@ public class Clustering {
 
 		// cohesion and separation evolution
 		double compactness = 0, isolation = 0;
-		List<List<AbstractDocument>> clusters = new Vector<List<AbstractDocument>>();
+		List<List<AbstractDocument>> clusters = new Vector<>();
 		for (int i = 0; i < K; i++)
-			clusters.add(new LinkedList<AbstractDocument>());
+			clusters.add(new LinkedList<>());
 
 		int noIterations = 0;
 		// begin assigning process
@@ -62,7 +62,7 @@ public class Clustering {
 
 			// clean clusters
 			for (int i = 0; i < K; i++) {
-				clusters.set(i, new LinkedList<AbstractDocument>());
+				clusters.set(i, new LinkedList<>());
 				clusters.get(i).add(clustroids.get(i));
 			}
 
@@ -103,18 +103,18 @@ public class Clustering {
 
 			// recompute clusteroids
 			for (int i = 0; i < K; i++) {
-				if (clusters.get(i).size() == 0)
+				if (clusters.get(i).isEmpty())
 					System.out.println("Empty cluster!");
 				AbstractDocument localCluster = null;
 				// determine new centroid
-				double maxDist = Double.MIN_VALUE;
+				double maxSim = Double.MIN_VALUE;
 				for (AbstractDocument d1 : clusters.get(i)) {
-					double dist = 0;
+					double sim = 0;
 					for (AbstractDocument d2 : clusters.get(i))
-						dist += compareDocs(d1, d2);
-					if (dist > maxDist) {
+						sim += compareDocs(d1, d2);
+					if (sim > maxSim) {
 						localCluster = d1;
-						dist = maxDist;
+						maxSim = sim;
 					}
 				}
 				if (localCluster != null
@@ -199,8 +199,9 @@ public class Clustering {
 		if (d1 == null || d2 == null || d1.getComplexityIndices() == null
 				|| d2.getComplexityIndices() == null)
 			return -1;
-		return VectorAlgebra.cosineSimilarity(d1.getComplexityIndices(),
-				d2.getComplexityIndices());
+        return VectorAlgebra.cosineSimilarity(
+                ComplexityIndices.getComplexityIndicesArray(d1), 
+                ComplexityIndices.getComplexityIndicesArray(d2));
 	}
 
 	public static double compareGroups(List<AbstractDocument> docs,
@@ -212,7 +213,7 @@ public class Clustering {
 				dist += compareDocs(docs.get(i), docs.get(j));
 			}
 		}
-		if (group1.size() != 0 && group2.size() != 0)
+		if (!group1.isEmpty() && !group2.isEmpty())
 			return dist / (group1.size() * group2.size());
 		return 0;
 	}

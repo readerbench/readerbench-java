@@ -41,6 +41,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
+import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.Collaboration;
 import services.discourse.cohesion.CohesionGraph;
@@ -97,7 +98,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 	private List<LexicalChain> lexicalChains;
 	private DisambiguationGraph disambiguationGraph;
 
-	protected double[] complexityIndices;
+	protected Map<ComplexityIndex, Double> complexityIndices;
 
 	private List<SemanticChain> voices;
 	private transient List<SemanticChain> selectedVoices;
@@ -679,11 +680,11 @@ public abstract class AbstractDocument extends AnalysisElement {
 		this.disambiguationGraph = disambiguationGraph;
 	}
 
-	public double[] getComplexityIndices() {
+	public Map<ComplexityIndex, Double> getComplexityIndices() {
 		return complexityIndices;
 	}
 
-	public void setComplexityIndices(double[] complexityFactors) {
+	public void setComplexityIndices(Map<ComplexityIndex, Double> complexityFactors) {
 		this.complexityIndices = complexityFactors;
 	}
 
@@ -751,49 +752,33 @@ public abstract class AbstractDocument extends AnalysisElement {
 	}
 
 	public int getNoBlocks() {
-		int noBlocks = 0;
-		for (Block b : getBlocks()) {
-			if (b != null) {
-				noBlocks++;
-			}
-		}
-		return noBlocks;
+		return (int)getBlocks().stream().filter(b -> b != null).count();
 	}
 
 	public int getNoSentences() {
-		int noSentences = 0;
-		for (Block b : getBlocks()) {
-			if (b != null) {
-				noSentences += b.getSentences().size();
-			}
-		}
-		return noSentences;
+		return getBlocks().parallelStream()
+                .filter(b -> b != null)
+                .mapToInt(b -> b.getSentences().size())
+                .sum();
+		
 	}
 
 	public int getNoWords() {
-		int noWords = 0;
-		for (Block b : getBlocks()) {
-			if (b != null) {
-				for (Sentence s : b.getSentences()) {
-					noWords += s.getAllWords().size();
-				}
-			}
-		}
-		return noWords;
-	}
+		return getBlocks().parallelStream()
+                .filter(b -> b != null)
+                .flatMap(b -> b.getSentences().stream())
+                .mapToInt(s -> s.getAllWords().size())
+                .sum();
+    }
 
 	public int getNoContentWords() {
-		int noWords = 0;
-		for (Block b : getBlocks()) {
-			if (b != null) {
-				for (Sentence s : b.getSentences()) {
-					for (Entry<Word, Integer> entry : s.getWordOccurences().entrySet())
-						noWords += entry.getValue();
-				}
-			}
-		}
-		return noWords;
-	}
+		return getBlocks().parallelStream()
+                .filter(b -> b != null)
+                .flatMap(b -> b.getSentences().stream())
+                .flatMap(s -> s.getWordOccurences().values().stream())
+                .mapToInt(x -> x)
+                .sum();
+    }
 
 	public String getGenre() {
 		return genre;

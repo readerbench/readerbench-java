@@ -35,6 +35,9 @@ import view.models.complexity.HeaderCheckBoxHandler;
 import view.models.complexity.HeaderRenderer;
 import view.models.complexity.Status;
 import data.Lang;
+import java.util.HashSet;
+import java.util.Set;
+import services.complexity.ComplexityIndex;
 
 public class ComplexityIndicesView extends JFrame {
 	private static final long serialVersionUID = -3120119620693209906L;
@@ -46,15 +49,8 @@ public class ComplexityIndicesView extends JFrame {
 	private static int modelColumnIndex = 4;
 	private static JTable complexityIndicesTable;
 	private static DefaultTableModel complexityIndicesTableModel = null;
-	private static boolean[] selectedIndices = new boolean[ComplexityIndices.NO_COMPLEXITY_INDICES];
-	private static boolean[] editableIndices = new boolean[ComplexityIndices.NO_COMPLEXITY_INDICES];
-
-	static {
-		for (int i = 0; i < selectedIndices.length; i++) {
-			selectedIndices[i] = true;
-			editableIndices[i] = true;
-		}
-	}
+	private static Set<ComplexityIndex> selectedIndices = new HashSet<>();
+	private static Set<ComplexityIndex> editableIndices = new HashSet<>();
 
 	public static void updateSelectedIndices(Lang lang) {
 		if (lang.equals(Lang.fr)) {

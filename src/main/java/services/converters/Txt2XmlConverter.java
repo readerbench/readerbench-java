@@ -241,6 +241,14 @@ public class Txt2XmlConverter {
         authorEl.setTextContent(author);
         authors.appendChild(authorEl);
         root.appendChild(authors);
+        
+        if (titleParagraph.getLevel() != 0) {
+            Element section = doc.createElement("section");
+            section.setAttribute("title", title);
+            section.setAttribute("type", "document");
+            root.appendChild(section);
+            root = section;
+        }
         processMetaDocFile(content, root, -1);
 
         TransformerFactory transfac = TransformerFactory.newInstance();
@@ -516,12 +524,12 @@ public class Txt2XmlConverter {
     }
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException {
-//        parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
+        parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 1/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 2/", Lang.nl);
-        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
-        parseDocFiles("resources/in/ViBOA_nl/evaluation task 2/", Lang.nl);
-        parseDocFiles("resources/in/ViBOA_nl/final task/", Lang.nl);
+//        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
+//        parseDocFiles("resources/in/ViBOA_nl/evaluation task 2/", Lang.nl);
+//        parseDocFiles("resources/in/ViBOA_nl/final task/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/Test/", Lang.nl);
         
     }

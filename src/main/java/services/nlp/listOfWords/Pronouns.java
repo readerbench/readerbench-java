@@ -16,6 +16,23 @@ public class Pronouns {
             "resources/config/WordLists/pronouns_la.txt");
     public static final int NO_PRONOUN_TYPES = PRONOUNS_EN.getClasses().size();
 
+    public static ClassesOfWords getClasses(Lang lang) {
+        switch (lang) {
+            case eng:
+                return PRONOUNS_EN;
+            case fr:
+                return PRONOUNS_FR;
+            case ro:
+                return PRONOUNS_RO;
+            case nl:
+                return PRONOUNS_NL;
+            case la:
+                return PRONOUNS_LA;
+            default:
+                return null;
+        }
+    }
+    
     public static boolean isConnective(String s, Lang lang) {
         if (lang == null) {
             return false;

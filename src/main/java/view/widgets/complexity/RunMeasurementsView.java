@@ -85,7 +85,7 @@ public class RunMeasurementsView extends JFrame {
 					Timing totalTiming = new Timing();
 					totalTiming.start();
 
-					DataGathering.writeHeader(path);
+					DataGathering.writeHeader(path, lang);
 
 					for (int gradeLevel = 1; gradeLevel <= noGrades; gradeLevel++) {
 						DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, path, gradeLevel,

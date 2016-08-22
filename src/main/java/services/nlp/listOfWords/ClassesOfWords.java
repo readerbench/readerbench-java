@@ -30,148 +30,130 @@ import services.complexity.ComplexityIndices;
  */
 public class ClassesOfWords {
 
-	static Logger logger = Logger.getLogger(ClassesOfWords.class);
+    static Logger logger = Logger.getLogger(ClassesOfWords.class);
 
-	private Map<String, Set<String>> classes;
+    private Map<String, Set<String>> classes;
 
-	public ClassesOfWords(String path) {
-		BufferedReader in = null;
-		classes = new TreeMap<>();
-		try {
-			FileInputStream inputFile = new FileInputStream(path);
-			InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-			in = new BufferedReader(ir);
-			String line;
-			String className = null;
-			while ((line = in.readLine()) != null) {
-				String concept = line.toLowerCase().trim().toLowerCase();
-				if (concept.startsWith("[")) {
-					className = concept.replaceAll("\\[", "").replaceAll("\\]", "").trim();
-					if (!classes.containsKey(className)) {
-						classes.put(className, new TreeSet<>());
-					}
-				} else if (className != null && concept.length() > 0) {
-					classes.get(className).add(concept);
-				}
-			}
-		} catch (IOException ex) {
-			logger.error(ex.getMessage());
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ex) {
-				logger.error(ex.getMessage());
-			}
-		}
-	}
+    public ClassesOfWords(String path) {
+        BufferedReader in = null;
+        classes = new TreeMap<>();
+        try {
+            FileInputStream inputFile = new FileInputStream(path);
+            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
+            in = new BufferedReader(ir);
+            String line;
+            String className = null;
+            while ((line = in.readLine()) != null) {
+                String concept = line.toLowerCase().trim().toLowerCase();
+                if (concept.startsWith("[")) {
+                    className = concept.replaceAll("\\[", "").replaceAll("\\]", "").trim();
+                    if (!classes.containsKey(className)) {
+                        classes.put(className, new TreeSet<>());
+                    }
+                } else if (className != null && concept.length() > 0) {
+                    classes.get(className).add(concept);
+                }
+            }
+        } catch (IOException ex) {
+            logger.error(ex.getMessage());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ex) {
+                logger.error(ex.getMessage());
+            }
+        }
+    }
 
-	public void writeClassesOfWords(String path) {
-		BufferedWriter out = null;
-		try {
-			FileOutputStream outputFile = new FileOutputStream(path);
-			OutputStreamWriter ow = new OutputStreamWriter(outputFile, "UTF-8");
-			out = new BufferedWriter(ow);
-			for (Entry<String, Set<String>> entry : classes.entrySet()) {
-				out.write("[" + entry.getKey() + "]\n");
-				for (String w : entry.getValue()) {
-					if (w != null & w.length() > 0) {
-						out.write(w + "\n");
-					}
-				}
-			}
-		} catch (IOException ex) {
-			logger.error(ex.getMessage());
-		} finally {
-			try {
-				out.close();
-			} catch (IOException ex) {
-				logger.error(ex.getMessage());
-			}
-		}
-	}
+    public void writeClassesOfWords(String path) {
+        BufferedWriter out = null;
+        try {
+            FileOutputStream outputFile = new FileOutputStream(path);
+            OutputStreamWriter ow = new OutputStreamWriter(outputFile, "UTF-8");
+            out = new BufferedWriter(ow);
+            for (Entry<String, Set<String>> entry : classes.entrySet()) {
+                out.write("[" + entry.getKey() + "]\n");
+                for (String w : entry.getValue()) {
+                    if (w != null & w.length() > 0) {
+                        out.write(w + "\n");
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            logger.error(ex.getMessage());
+        } finally {
+            try {
+                out.close();
+            } catch (IOException ex) {
+                logger.error(ex.getMessage());
+            }
+        }
+    }
 
-	public Map<String, Set<String>> getClasses() {
-		return classes;
-	}
+    public Map<String, Set<String>> getClasses() {
+        return classes;
+    }
 
-	public Set<String> getWords(String className) {
-		return classes.get(className);
-	}
+    public Set<String> getWords(String className) {
+        return classes.get(className);
+    }
 
-	public Set<String> getAllWords() {
-		Set<String> set = new TreeSet<>();
-		for (Set<String> words : classes.values()) {
-			set.addAll(words);
-		}
-		return set;
-	}
+    public Set<String> getAllWords() {
+        Set<String> set = new TreeSet<>();
+        for (Set<String> words : classes.values()) {
+            set.addAll(words);
+        }
+        return set;
+    }
 
-	public static int countPatternOccurrences(String text, String pattern) {
-		Pattern p = Pattern.compile("(?:\\s)" + pattern.trim() + "(?:\\s)");
-		Matcher matcher = p.matcher(" " + text + " ");
+    public static int countPatternOccurrences(String text, String pattern) {
+        Pattern p = Pattern.compile("(?:\\s)" + pattern.trim() + "(?:\\s)");
+        Matcher matcher = p.matcher(" " + text + " ");
 
-		int count = 0;
-		if (matcher.find())
-			count++;
-		if (count > 0) {
-			while (matcher.find(matcher.end() - 1)) {
-				count++;
-			}
-		}
+        int count = 0;
+        if (matcher.find()) {
+            count++;
+        }
+        if (count > 0) {
+            while (matcher.find(matcher.end() - 1)) {
+                count++;
+            }
+        }
 
-		return count;
-	}
+        return count;
+    }
 
-	public static int countPatternOccurrences(AbstractDocument document, String pattern) {
-		int no_occurrences = 0;
-		for (Block b : document.getBlocks()) {
-			if (b != null) {
-				for (Sentence s : b.getSentences()) {
-					no_occurrences += countPatternOccurrences(
-							TextPreprocessing.cleanText(s.getText(), document.getLanguage()), pattern);
-				}
-			}
-		}
-		return no_occurrences;
-	}
+    public static int countPatternOccurrences(AbstractDocument document, String pattern) {
+        return document.getBlocks().stream()
+                .filter(b -> b != null)
+                .flatMap(b -> b.getSentences().stream())
+                .mapToInt(s -> countPatternOccurrences(
+                            TextPreprocessing.cleanText(s.getText(), document.getLanguage()), pattern))
+                .sum();
+    }
 
-	public double countAveragePatternOccurrences(AbstractDocument document, String className, boolean paragraph) {
-		int no_occurrences = 0;
-		
-		for (String p : this.getClasses().get(className)) {
-			no_occurrences += countPatternOccurrences(document, p);
-		}
+    public int countCategoryOccurrences(AbstractDocument document, String category) {
+        return this.getClasses().get(category).stream()
+                .mapToInt(p -> countPatternOccurrences(document, p))
+                .sum();
+    }
 
-		if (paragraph == true) {
-			int no_blocks = document.getNoBlocks();
-			if (no_blocks == 0) {
-				return ComplexityIndices.IDENTITY;
-			}
-			return ((double) no_occurrences) / no_blocks;
-		}
-		else {
-			int no_sentences = document.getNoSentences();
-			if (no_sentences == 0) {
-				return ComplexityIndices.IDENTITY;
-			}
-			return ((double) no_occurrences) / no_sentences;
-		}
-	}
+    public static void main(String[] args) {
+        String text = TextPreprocessing
+                .cleanText("C'est-à-dire atque alors qu'elle que n't que queque Tout va atque bien", Lang.fr);
+        System.out.println(text);
+        Pattern pattern = Pattern.compile("(?:\\s)alors qu '(?:\\s)");
+        Matcher matcher = pattern.matcher(text);
 
-	public static void main(String[] args) {
-		String text = TextPreprocessing
-				.cleanText("C'est-à-dire atque alors qu'elle que n't que queque Tout va atque bien", Lang.fr);
-		System.out.println(text);
-		Pattern pattern = Pattern.compile("(?:\\s)alors qu '(?:\\s)");
-		Matcher matcher = pattern.matcher(text);
-
-		int count = 0;
-		if (matcher.find())
-			count++;
-		if (count > 0) {
-			while (matcher.find(matcher.end() - 1))
-				count++;
-		}
-		System.out.println(count);
-	}
+        int count = 0;
+        if (matcher.find()) {
+            count++;
+        }
+        if (count > 0) {
+            while (matcher.find(matcher.end() - 1)) {
+                count++;
+            }
+        }
+        System.out.println(count);
+    }
 }

@@ -19,6 +19,8 @@ import data.Lang;
 import data.complexity.Measurement;
 import data.document.Document;
 import data.document.MetaDocument;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -28,15 +30,15 @@ public class DataGathering {
 
     public static final int MAX_PROCESSED_FILES = 10000;
 
-    public static void writeHeader(String path) {
+    public static void writeHeader(String path, Lang lang) {
         // create measurements.csv header
         try {
             FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
             BufferedWriter out = new BufferedWriter(fstream);
             StringBuffer concat = new StringBuffer();
             concat.append("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
-            for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-                concat.append(",").append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+            for (ComplexityIndex factor : ComplexityIndices.getIndices(lang)) {
+                concat.append(",").append(factor.getAcronym());
             }
             out.write(concat.toString());
             out.close();
@@ -69,7 +71,7 @@ public class DataGathering {
         });
 
         if (writeHeader) {
-            writeHeader(saveLocation);
+            writeHeader(saveLocation, lang);
         }
 
         int noProcessedFiles = 0;
@@ -95,16 +97,16 @@ public class DataGathering {
                     FileWriter fstream = new FileWriter(saveLocation + "/measurements.csv", true);
                     BufferedWriter out = new BufferedWriter(fstream);
                     StringBuilder concat = new StringBuilder();
-
-                    concat.append("\n").append(gradeLevel).append(",").append(file.getName().replaceAll(",", ""))
-                            .append(",").append((d.getGenre() != null ? d.getGenre().trim() : "")).append(",")
-                            .append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
+                    String fileName = FilenameUtils.removeExtension(file.getName().replaceAll(",", ""));
+                    concat.append("\n").append(fileName).append(",").append(gradeLevel)
+                            .append(",").append((d.getGenre() != null ? d.getGenre().trim() : ""))
+                            .append(",").append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
                     concat.append(",").append(d.getNoBlocks());
                     concat.append(",").append(d.getNoSentences());
                     concat.append(",").append(d.getNoWords());
                     concat.append(",").append(d.getNoContentWords());
-                    for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-                        concat.append(",").append(d.getComplexityIndices()[i]);
+                    for (ComplexityIndex factor : ComplexityIndices.getIndices(lang)) {
+                        concat.append(",").append(d.getComplexityIndices().get(factor));
                     }
                     out.write(concat.toString());
                     out.close();

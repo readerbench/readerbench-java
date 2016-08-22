@@ -17,17 +17,15 @@ import data.AbstractDocument;
 import data.Lang;
 import data.sentiment.SentimentValence;
 import services.commons.Formatting;
-import services.complexity.ComplexityIndices;
-import services.complexity.IComplexityFactors;
+import services.complexity.ComplexityIndex;
+import services.complexity.ComplexityIndexType;
 import services.converters.PdfToTextConverter;
 import webService.ReaderBenchServer;
 import webService.cv.CVHelper;
 import webService.query.QueryHelper;
 import webService.result.ResultCv;
 import webService.result.ResultKeyword;
-import webService.result.ResultNode;
 import webService.result.ResultTextualComplexity;
-import webService.result.ResultTopic;
 import webService.result.ResultValence;
 import webService.services.TextualComplexity;
 
@@ -83,9 +81,9 @@ public class CVAnalyzer {
 			
 			// textual complexity factors
 			TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
-			for (IComplexityFactors f : textualComplexity.getList()) {
-				for (int i : f.getIDs())
-					sb.append(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i] + ',');
+			for (ComplexityIndexType cat : textualComplexity.getList()) {
+				for (ComplexityIndex index : cat.getFactory().build(lang))
+					sb.append(index.getAcronym() + ',');
 			}
 			sb.append("keywords document relevance,");
 			// keywords
@@ -99,8 +97,8 @@ public class CVAnalyzer {
 			sb.append("\n");
 			
 			//test
-			Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
-			Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",[ ]*")));
+			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
+			Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",[ ]*")));
 
 			System.out.println("Incep procesarea CV-urilor");
 			// iterate through all PDF CV files

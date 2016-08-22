@@ -11,11 +11,12 @@ import org.apache.log4j.Logger;
 import services.complexity.ComputeBalancedMeasure;
 import data.complexity.Measurement;
 import data.document.Metacognition;
+import services.complexity.ComplexityIndices;
 
 public class ComprehensionPrediction extends ComputeBalancedMeasure {
 	static Logger logger = Logger.getLogger(ComprehensionPrediction.class);
 	public static final int NO_COMPREHENSION_CLASSES = 3;
-	private List<? extends Metacognition> selfExplanations;
+	private final List<? extends Metacognition> selfExplanations;
 	private Map<Double, List<Measurement>> measurements;
 	private Map<Double, Integer[]> order;
 
@@ -30,7 +31,7 @@ public class ComprehensionPrediction extends ComputeBalancedMeasure {
 	 * @param loadedSelfExplanations
 	 */
 	private void determineComprehensionClass() {
-		List<Double> values = new LinkedList<Double>();
+		List<Double> values = new LinkedList<>();
 		for (Metacognition v : selfExplanations) {
 			if (v != null) {
 				values.add(v.getAnnotatedComprehensionScore());
@@ -68,24 +69,25 @@ public class ComprehensionPrediction extends ComputeBalancedMeasure {
 	}
 
 	private void determineMeasurements() {
-		measurements = new TreeMap<Double, List<Measurement>>();
+		measurements = new TreeMap<>();
 		for (int index = 0; index < selfExplanations.size(); index++) {
 			if (selfExplanations.get(index) != null) {
 				Metacognition v = selfExplanations.get(index);
 				if (!measurements.containsKey(Double.valueOf(v
 						.getComprehensionClass()))) {
 					measurements.put(Double.valueOf(v.getComprehensionClass()),
-							new LinkedList<Measurement>());
+							new LinkedList<>());
 				}
 
 				measurements.get(Double.valueOf(v.getComprehensionClass()))
-						.add(new Measurement(v.getComprehensionClass(), v
-								.getComplexityIndices()));
+						.add(new Measurement(
+                                v.getComprehensionClass(), 
+                                ComplexityIndices.getComplexityIndicesArray(v)));
 			}
 		}
 
 		// generate random sequence of measurements
-		order = new TreeMap<Double, Integer[]>();
+		order = new TreeMap<>();
 		for (Double classId : measurements.keySet()) {
 			order.put(classId, new Integer[measurements.get(classId).size()]);
 			for (int j = 0; j < measurements.get(classId).size(); j++) {
@@ -111,8 +113,8 @@ public class ComprehensionPrediction extends ComputeBalancedMeasure {
 
 		// perform the K folds
 		for (int k = 0; k < no_folds; k++) {
-			List<Measurement> trainingMeasurements = new LinkedList<Measurement>();
-			List<Measurement> testMeasurements = new LinkedList<Measurement>();
+			List<Measurement> trainingMeasurements = new LinkedList<>();
+			List<Measurement> testMeasurements = new LinkedList<>();
 
 			// add entries to corresponding set
 
