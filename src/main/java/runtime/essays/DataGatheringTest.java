@@ -130,11 +130,11 @@ public class DataGatheringTest {
             // true, lsa, lda, Lang.eng, true, true);
 
             DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, null, Lang.nl, false, true);
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 1", null, null, Lang.nl, false, true);
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 2", null, null, Lang.nl, false, true);
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/final task", null, null, Lang.nl, false, true);
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 1", null, null, Lang.nl, false, true);
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 2", null, null, Lang.nl, false, true);
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/final task", null, null, Lang.nl, false, true);
 
 //            DataGathering.processTexts("resources/in/essays/nursery_fr", -1, true, lsa, lda, Lang.fr, true, true);
 //            DataGathering.processTexts("resources/in/Elvira/users 2010", -1, true, lsa, lda, Lang.eng, true, true);

@@ -57,6 +57,11 @@ public class CohesionFactory implements ComplexityIndecesFactory{
         result.add(new LexicalChainsMaxSpan());
         result.add(new AvgLexicalChainsPerBlock());
         result.add(new LexicalChainsCoverage());
+        result.add(new AvgBlockScore());
+        result.add(new AvgSentenceScore());
+        result.add(new BlockScoreSD());
+        result.add(new SentenceScoreSD());
+            
         for (SimilarityType simType : SimilarityType.values()) {
             result.add(new AvgBlockAdjacencyCohesion(simType));
             result.add(new AvgBlockDocCohesion(simType));
@@ -68,10 +73,6 @@ public class CohesionFactory implements ComplexityIndecesFactory{
             result.add(new AvgStartMiddleCohesion(simType));
             result.add(new AvgTransitionCohesion(simType));
             result.add(new StartEndCohesion(simType));
-            result.add(new AvgBlockScore());
-            result.add(new AvgSentenceScore());
-            result.add(new BlockScoreSD());
-            result.add(new SentenceScoreSD());
             for (DocFlowCriteria crit : DocFlowCriteria.values()) {
                 result.add(new DocFlowIndex(
                         ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, 

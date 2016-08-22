@@ -97,6 +97,11 @@ public class LocalizationUtils {
     }
 
     public static String getTranslation(String text) {
-        return ResourceBundle.getBundle("utils.localization.translations").getString(text);
+        try {
+            return ResourceBundle.getBundle("utils.localization.translations").getString(text);
+        }
+        catch (Exception ex) {
+            return null;
+        }
     }
 }

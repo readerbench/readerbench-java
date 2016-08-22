@@ -7,6 +7,7 @@ package services.complexity;
 
 import data.AbstractDocument;
 import data.Lang;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import services.semanticModels.WordNet.SimilarityType;
 import utils.localization.LocalizationUtils;
@@ -48,7 +49,13 @@ public abstract class ComplexityIndex {
     abstract public double compute(AbstractDocument d);
 
     public String getAcronym() {
-        String acronym = ResourceBundle.getBundle("utils.localization.index_acronyms").getString(index.name());
+        String acronym;
+        try {
+            acronym = ResourceBundle.getBundle("utils.localization.index_acronyms").getString(index.name());
+        }
+        catch (Exception ex) {
+            acronym = null;
+        }
         if (acronym == null || acronym.isEmpty()) {
             return index.name();
         }
@@ -57,6 +64,7 @@ public abstract class ComplexityIndex {
 
     public String getDescription() {
         String description = LocalizationUtils.getTranslation(index.name());
+        if (description == null) description = getAcronym();
         if (simType != null) description += " (" + simType.name() + ")";
         if (param != null) description += " (" + param + ")";
         return description;
@@ -65,4 +73,43 @@ public abstract class ComplexityIndex {
     public String getCategoryName() {
         return index.getType().name();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + Objects.hashCode(this.index);
+        hash = 37 * hash + Objects.hashCode(this.lang);
+        hash = 37 * hash + Objects.hashCode(this.simType);
+        hash = 37 * hash + Objects.hashCode(this.param);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ComplexityIndex other = (ComplexityIndex) obj;
+        if (!Objects.equals(this.param, other.param)) {
+            return false;
+        }
+        if (this.index != other.index) {
+            return false;
+        }
+        if (this.lang != other.lang) {
+            return false;
+        }
+        if (this.simType != other.simType) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

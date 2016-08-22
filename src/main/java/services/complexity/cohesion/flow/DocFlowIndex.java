@@ -26,8 +26,8 @@ import services.semanticModels.WordNet.SimilarityType;
  * @author Stefan Ruseti
  */
 public class DocFlowIndex extends ComplexityIndex {
-    private DocFlowCriteria crit;
-    private Function<DocumentFlow, Double> op;
+    private final DocFlowCriteria crit;
+    private final Function<DocumentFlow, Double> op;
 
     public DocFlowIndex(ComplexityIndecesEnum index, DocFlowCriteria crit, SimilarityType simType, Function<DocumentFlow, Double> op) {
         super(index, null, simType, crit.getAcronym());

@@ -121,6 +121,8 @@ public class DataGathering {
                     for (ComplexityIndex factor : ComplexityIndices.getIndices(lang)) {
                         concat.append(",").append(d.getComplexityIndices().get(factor));
                     }
+                    out.write(concat.toString());
+                    out.close();
                 } catch (IOException ex) {
                     logger.error("Runtime error while initializing measurements.csv file");
                     Exceptions.printStackTrace(ex);

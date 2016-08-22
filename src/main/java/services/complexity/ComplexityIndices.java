@@ -20,7 +20,9 @@ import org.apache.log4j.Logger;
 import data.AbstractDocument;
 import data.Lang;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,7 @@ public class ComplexityIndices {
 
     public static void computeComplexityFactors(AbstractDocument d) {
         d.setComplexityIndices(
-                Arrays.stream(ComplexityIndexType.values())
+                Arrays.stream(ComplexityIndexType.values()).parallel()
                 .filter(t -> t.getFactory() != null)
                 .map(cat -> cat.getFactory())
                 .flatMap(f -> f.build(d.getLanguage()).stream())
@@ -47,6 +49,7 @@ public class ComplexityIndices {
     
     public static List<ComplexityIndex> getIndices(Lang lang) {
         return Arrays.stream(ComplexityIndexType.values())
+                .filter(cat -> cat.getFactory() != null)
                 .map(cat -> cat.getFactory())
                 .flatMap(f -> f.build(lang).stream())
                 .collect(Collectors.toList());

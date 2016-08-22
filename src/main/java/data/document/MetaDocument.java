@@ -89,17 +89,17 @@ public class MetaDocument extends Document {
             return;
         }
         List<Document> leaves = getLeaves();
-        for (Document doc : leaves) {
+        leaves.parallelStream().forEach(doc -> {
             if (doc instanceof MetaDocument) {
                 ((MetaDocument) doc).computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, false);
             } else {
                 doc.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
             }
-        }
-        setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().parallelStream()
+        });
+        setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
                 .collect(Collectors.toMap(
-                    Function.identity(),
-                    index -> leaves.parallelStream()
+                        Function.identity(),
+                        index -> leaves.parallelStream()
                         .mapToDouble(d -> d.getComplexityIndices().get(index))
                         .filter(x -> x != -1)
                         .average().orElse((double) ComplexityIndices.IDENTITY))));
