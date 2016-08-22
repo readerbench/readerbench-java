@@ -34,6 +34,7 @@ import data.document.Document;
 import data.document.MetaDocument;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
