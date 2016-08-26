@@ -29,6 +29,7 @@ import data.document.Document;
 import data.document.Metacognition;
 import data.Lang;
 import org.openide.util.Exceptions;
+import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
@@ -82,8 +83,8 @@ public class TestMatildaAvaleurSE {
                 for (String s : ReadingStrategies.STRATEGY_NAMES) {
                     out.write(",Annotated " + s);
                 }
-                for (String s : ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS) {
-                    out.write("," + s);
+                for (ComplexityIndex index : ComplexityIndices.getIndices(Lang.fr)) {
+                    out.write("," + index.getAcronym());
                 }
                 for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES) {
                     out.write(",Automated " + s);

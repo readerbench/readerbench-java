@@ -31,6 +31,8 @@ import org.apache.log4j.Logger;
 import data.AbstractDocument;
 import data.Lang;
 import data.sentiment.SentimentValence;
+import java.io.IOException;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndexType;
@@ -74,48 +76,51 @@ public class CVAnalyzer {
 
     public void process() {
 
-			StringBuilder sb = new StringBuilder();
-			sb.append(
-					"CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page," + 
-					"positive words (FAN >= " + (FANthreshold + FANdelta) + "),pos words percentage," + 
-					"negative words (FAN <= " + (FANthreshold - FANdelta) + "),neg words percentage," + 
-					"neutral words (FAN > " + (FANthreshold - FANdelta) + " & FAN < " + (FANthreshold + FANdelta) + "),neutral words percentage," + 
-					"FAN weighted average," 
-			);
-			//affect,positive emotion,negative emotion,anxiety,anger,sadness,");
-			
-			List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
-			for(SentimentValence svLiwc : sentimentValences) {
-				if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
-					sb.append(svLiwc.getName() + ",");
-					sb.append(svLiwc.getName() + " percentage,");
-				}
-			}
-			
-			// textual complexity factors
-			TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
-			for (ComplexityIndexType cat : textualComplexity.getList()) {
-				for (ComplexityIndex index : cat.getFactory().build(lang))
-					sb.append(index.getAcronym() + ',');
-			}
-			sb.append("keywords document relevance,");
-			// keywords
-			sb.append(
-					"prospection_sim,prospection_no,prospect_sim,prospect_no,développement_sim,développement_no,clients_sim,clients_no,fidélisation_sim,fidélisation_no,chiffre d’affaires_sim,chiffre d’affaires_no,marge_sim,marge_no,vente_sim,vente_no,portefeuille_sim,portefeuille_no,négociation_sim,négociation_no,budget_sim,budget_no,rendez-vous_sim,rendez-vous_no,proposition_sim,proposition_no,terrain_sim,terrain_no,téléphone_sim,téléphone_no,rentabilité_sim,rentabilité_no,business_sim,business_no,reporting_sim,reporting_no,veille_sim,veille_no,secteur_sim,secteur_no,objectifs_sim,objectifs_no,comptes_sim,comptes_no,animation_sim,animation_no,suivi_sim,suivi_no,création_sim,création_no,gestion_sim,gestion_no,");
-			// concepts
-			/*for (int i = 0; i < 25; i++) {
-				sb.append("concept" + i + ',');
-				sb.append("rel" + i + ',');
-			}*/
-			sb.append("\n");
-			
-			//test
-			Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
-			Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",[ ]*")));
+        try {
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page,")
+                    .append("positive words (FAN >= ")
+                    .append(FANthreshold + FANdelta)
+                    .append("),pos words percentage," + "negative words (FAN <= ")
+                    .append(FANthreshold - FANdelta)
+                    .append("),neg words percentage," + "neutral words (FAN > ")
+                    .append(FANthreshold - FANdelta)
+                    .append(" & FAN < ")
+                    .append(FANthreshold + FANdelta)
+                    .append("),neutral words percentage,")
+                    .append("FAN weighted average,");
+            //affect,positive emotion,negative emotion,anxiety,anger,sadness,");
+
+            List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
+            for (SentimentValence svLiwc : sentimentValences) {
+                if (svLiwc != null && svLiwc.getName().contains("LIWC")) {
+                    sb.append(svLiwc.getName() + ",");
+                    sb.append(svLiwc.getName() + " percentage,");
+                }
+            }
+
+            // textual complexity factors
+            TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
+            for (ComplexityIndexType cat : textualComplexity.getList()) {
+                for (ComplexityIndex index : cat.getFactory().build(lang)) {
+                    sb.append(index.getAcronym() + ',');
+                }
+            }
+            sb.append("keywords document relevance,");
+            // keywords
+            sb.append(
+                    "prospection_sim,prospection_no,prospect_sim,prospect_no,développement_sim,développement_no,clients_sim,clients_no,fidélisation_sim,fidélisation_no,chiffre d’affaires_sim,chiffre d’affaires_no,marge_sim,marge_no,vente_sim,vente_no,portefeuille_sim,portefeuille_no,négociation_sim,négociation_no,budget_sim,budget_no,rendez-vous_sim,rendez-vous_no,proposition_sim,proposition_no,terrain_sim,terrain_no,téléphone_sim,téléphone_no,rentabilité_sim,rentabilité_no,business_sim,business_no,reporting_sim,reporting_no,veille_sim,veille_no,secteur_sim,secteur_no,objectifs_sim,objectifs_no,comptes_sim,comptes_no,animation_sim,animation_no,suivi_sim,suivi_no,création_sim,création_no,gestion_sim,gestion_no,");
+            // concepts
+            /*for (int i = 0; i < 25; i++) {
+            sb.append("concept" + i + ',');
+            sb.append("rel" + i + ',');
+            }*/
+            sb.append("\n");
 
             //test
-            Set<String> keywordsList = new HashSet<String>(Arrays.asList(keywords.split(",")));
-            Set<String> ignoreList = new HashSet<String>(Arrays.asList(ignore.split(",[ ]*")));
+            Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
+            Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",[ ]*")));
 
             System.out.println("Incep procesarea CV-urilor");
             // iterate through all PDF CV files
@@ -261,19 +266,19 @@ public class CVAnalyzer {
 
                     // concepts
                     /*ResultTopic resultTopic = result.getConcepts();
-					List<ResultNode> resultNodes = resultTopic.getNodes();
-					int i = 0;
-					for (ResultNode resultNode : resultNodes) {
-						// sb.append(resultNode.getName() + '(' +
-						// resultNode.getValue() + ')');
-						sb.append(resultNode.getName());
-						sb.append(',');
-						sb.append(resultNode.getValue());
-						sb.append(',');
-						i++;
-						if (i == 25)
-							break;
-					}*/
+                    List<ResultNode> resultNodes = resultTopic.getNodes();
+                    int i = 0;
+                    for (ResultNode resultNode : resultNodes) {
+                    // sb.append(resultNode.getName() + '(' +
+                    // resultNode.getValue() + ')');
+                    sb.append(resultNode.getName());
+                    sb.append(',');
+                    sb.append(resultNode.getValue());
+                    sb.append(',');
+                    i++;
+                    if (i == 25)
+                    break;
+                    }*/
                     sb.append("\n");
 
                 }
@@ -287,10 +292,9 @@ public class CVAnalyzer {
                 e.printStackTrace();
             }
             logger.info("Printed CV stats to CSV file: " + file.getAbsolutePath());
-
-        } catch (Exception e) {
-            logger.info("Exception: " + e.getMessage());
-            e.printStackTrace();
+        } catch (IOException ex) {
+            logger.info("Exception: " + ex.getMessage());
+            Exceptions.printStackTrace(ex);
         }
 
     }
