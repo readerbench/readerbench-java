@@ -20,7 +20,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.List;
@@ -47,10 +46,10 @@ import javax.swing.table.DefaultTableModel;
 import org.apache.log4j.Logger;
 
 import services.commons.Formatting;
-import services.complexity.ComplexityIndices;
 import services.readingStrategies.ComprehensionPrediction;
 import view.widgets.complexity.ComplexityIndicesView;
 import data.document.Metacognition;
+import services.complexity.ComplexityIndex;
 
 public class ComprehensionPredictionView extends JFrame {
 
@@ -109,12 +108,13 @@ public class ComprehensionPredictionView extends JFrame {
 		public void RunTests() {
 			// run measurements, if selected, for each selected factor
 			if (chckbxIndividual.isSelected()) {
-				for (int index : ComplexityIndicesView.getSelectedMeasurements()) {
-					Test(new int[] { index }, ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[index]);
+				for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
+                    ComplexityIndex index = ComplexityIndicesView.getAllIndices()[i];
+					Test(new int[] { i },index.getAcronym());
 				}
-				for (int index : ReadingStrategiesIndicesView.getSelectedMeasurements()) {
-					Test(new int[] { ComplexityIndices.NO_COMPLEXITY_INDICES + index },
-							ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES[index]);
+				for (int i : ReadingStrategiesIndicesView.getSelectedMeasurements()) {
+					Test(new int[] { ComplexityIndicesView.getAllIndices().length + i },
+							ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES[i]);
 				}
 			}
 
@@ -128,8 +128,8 @@ public class ComprehensionPredictionView extends JFrame {
 				for (int i : ComplexityIndicesView.getSelectedMeasurements())
 					selectedIndices[index++] = i;
 				for (int i : ReadingStrategiesIndicesView.getSelectedMeasurements())
-					selectedIndices[index++] = ComplexityIndices.NO_COMPLEXITY_INDICES + i;
-				Test(ComplexityIndicesView.getSelectedMeasurements(), "All Selected Factors Combined");
+					selectedIndices[index++] = ComplexityIndicesView.getAllIndices().length + i;
+				Test(selectedIndices, "All Selected Factors Combined");
 			}
 		}
 
@@ -145,8 +145,8 @@ public class ComprehensionPredictionView extends JFrame {
 					file.write("Filename,Comprehension score,Comprehension class,Fluency");
 					for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES)
 						file.write(",Annotated " + s);
-					for (String s : ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS)
-						file.write("," + s);
+					for (ComplexityIndex index : ComplexityIndicesView.getAllIndices())
+						file.write("," + index.getAcronym());
 					for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES)
 						file.write(",Automated " + s);
 					for (Metacognition v : selfExplanations) {
@@ -234,7 +234,7 @@ public class ComprehensionPredictionView extends JFrame {
 	}
 
 	public ComprehensionPredictionView(List<? extends Metacognition> loadedSelfExplanations) {
-		if (loadedSelfExplanations == null || loadedSelfExplanations.size() == 0) {
+		if (loadedSelfExplanations == null || loadedSelfExplanations.isEmpty()) {
 			return;
 		}
 		setTitle("ReaderBench - Comprehension Prediction");
@@ -270,36 +270,32 @@ public class ComprehensionPredictionView extends JFrame {
 		textFieldCrossValidation.setColumns(10);
 
 		btnSelectComplexityIndices = new JButton("Select complexity indices");
-		btnSelectComplexityIndices.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ComplexityIndicesView view = new ComplexityIndicesView();
-				view.setVisible(true);
-			}
-		});
+		btnSelectComplexityIndices.addActionListener((ActionEvent e) -> {
+            ComplexityIndicesView view = new ComplexityIndicesView();
+            view.setVisible(true);
+        });
 
 		btnPerformMeasurements = new JButton("Perform measurements");
-		btnPerformMeasurements.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int noFolds = 0;
-				try {
-					noFolds = Integer.valueOf(textFieldCrossValidation.getText());
-				} catch (Exception exception) {
-					noFolds = 0;
-				}
-				if (noFolds < 2 || noFolds > 10) {
-					JOptionPane.showMessageDialog(contentPane,
-							"Specified number of k cross-validation folds should be a number in the [2; 10] interval!",
-							"Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-
-				btnPerformMeasurements.setEnabled(false);
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-				Task task = new Task(noFolds);
-				task.execute();
-			}
-		});
+		btnPerformMeasurements.addActionListener((ActionEvent e) -> {
+            int noFolds = 0;
+            try {
+                noFolds = Integer.valueOf(textFieldCrossValidation.getText());
+            } catch (Exception exception) {
+                noFolds = 0;
+            }
+            if (noFolds < 2 || noFolds > 10) {
+                JOptionPane.showMessageDialog(contentPane,
+                        "Specified number of k cross-validation folds should be a number in the [2; 10] interval!",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            btnPerformMeasurements.setEnabled(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            
+            Task task = new Task(noFolds);
+            task.execute();
+        });
 
 		scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -310,12 +306,10 @@ public class ComprehensionPredictionView extends JFrame {
 		lblComments = new JLabel("* EA - Exact Agreement");
 
 		JButton btnSelectReadingStrategyIndices = new JButton("Select reading strategy indices");
-		btnSelectReadingStrategyIndices.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ReadingStrategiesIndicesView view = new ReadingStrategiesIndicesView();
-				view.setVisible(true);
-			}
-		});
+		btnSelectReadingStrategyIndices.addActionListener((ActionEvent e) -> {
+            ReadingStrategiesIndicesView view = new ReadingStrategiesIndicesView();
+            view.setVisible(true);
+        });
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
 				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)

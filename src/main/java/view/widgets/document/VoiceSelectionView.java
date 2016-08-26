@@ -86,25 +86,21 @@ public class VoiceSelectionView extends JFrame {
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				VoiceSelectionView.this.dispose();
-			}
-		});
+		btnCancel.addActionListener((ActionEvent e) -> {
+            VoiceSelectionView.this.dispose();
+        });
 
 		JButton btnOk = new JButton("OK");
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				document.setSelectedVoices(new LinkedList<SemanticChain>());
-				for (int index = 0; index < displayedVoices.size(); index++) {
-					if (selectedVoices[index]) {
-						document.getSelectedVoices().add(
-								displayedVoices.get(index));
-					}
-				}
-				VoiceSelectionView.this.dispose();
-			}
-		});
+		btnOk.addActionListener((ActionEvent e) -> {
+            document.setSelectedVoices(new LinkedList<SemanticChain>());
+            for (int index = 0; index < displayedVoices.size(); index++) {
+                if (selectedVoices[index]) {
+                    document.getSelectedVoices().add(
+                            displayedVoices.get(index));
+                }
+            }
+            VoiceSelectionView.this.dispose();
+        });
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
 				.setHorizontalGroup(gl_contentPane
@@ -178,9 +174,7 @@ public class VoiceSelectionView extends JFrame {
 
 			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
-				if (columnIndex == 3)
-					return true;
-				return false;
+				return columnIndex == 3;
 			}
 
 			@Override
@@ -218,8 +212,7 @@ public class VoiceSelectionView extends JFrame {
 			editableCells[i] = true;
 
 		TableCellRenderer renderer = new HeaderRenderer(
-				tableVoices.getTableHeader(), modelColumnIndex, selectedVoices,
-				editableCells);
+				tableVoices.getTableHeader(), modelColumnIndex, selectedVoices);
 		tableVoices.getColumnModel().getColumn(modelColumnIndex)
 				.setHeaderRenderer(renderer);
 
@@ -241,6 +234,7 @@ public class VoiceSelectionView extends JFrame {
 		tableModelVoices.addTableModelListener(new TableModelListener() {
 			private int row = -1;
 
+            @Override
 			public void tableChanged(TableModelEvent e) {
 				if (row == -1) {
 					row = e.getFirstRow();
@@ -266,7 +260,7 @@ public class VoiceSelectionView extends JFrame {
 	}
 
 	public void initialization() {
-		displayedVoices = new LinkedList<SemanticChain>();
+		displayedVoices = new LinkedList<>();
 		for (SemanticChain chain : document.getVoices()) {
 			if (chain.getWords().size() >= SEMANTIC_CHAIN_MIN_NO_WORDS) {
 				displayedVoices.add(chain);
@@ -291,7 +285,7 @@ public class VoiceSelectionView extends JFrame {
 
 		int id = 0;
 		for (SemanticChain chain : displayedVoices) {
-			Vector<Object> dataRow = new Vector<Object>();
+			Vector<Object> dataRow = new Vector<>();
 			dataRow.add(id);
 			dataRow.add(chain.toString());
 			dataRow.add(chain.getNoWords());

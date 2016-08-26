@@ -21,7 +21,6 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -59,6 +58,7 @@ import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import data.AbstractDocument;
 import data.complexity.Measurement;
+import services.complexity.ComplexityIndex;
 
 public class DocumentEvaluationView extends JFrame {
 
@@ -186,7 +186,7 @@ public class DocumentEvaluationView extends JFrame {
 
 				// display results
 				// first line = SVM predictions
-				Vector<Object> dataRow = new Vector<Object>();
+				Vector<Object> dataRow = new Vector<>();
 				dataRow.add("Complexity prediction");
 				out.write("Complexity prediction");
 				for (int i = 0; i < documents.size(); i++) {
@@ -200,12 +200,13 @@ public class DocumentEvaluationView extends JFrame {
 				// the selected evaluation factors
 
 				for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
-					dataRow = new Vector<Object>();
-					dataRow.add(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
-					out.write(ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+					dataRow = new Vector<>();
+                    ComplexityIndex index = ComplexityIndicesView.getAllIndices()[i];
+					dataRow.add(index.getAcronym());
+					out.write(index.getAcronym());
 					for (AbstractDocument d : documents) {
-						dataRow.add(d.getComplexityIndices()[i]);
-						out.write("," + d.getComplexityIndices()[i]);
+						dataRow.add(d.getComplexityIndices().get(index));
+						out.write("," + d.getComplexityIndices().get(index));
 					}
 					tableModel.addRow(dataRow);
 					out.write("\n");
@@ -254,54 +255,48 @@ public class DocumentEvaluationView extends JFrame {
 		textFieldDirectory.setColumns(10);
 
 		JButton btnPath = new JButton("...");
-		btnPath.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser(new File("in"));
-				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				int returnVal = fc.showOpenDialog(DocumentEvaluationView.this);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					textFieldDirectory.setText(file.getPath());
-				}
-			}
-		});
+		btnPath.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = new JFileChooser(new File("in"));
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int returnVal = fc.showOpenDialog(DocumentEvaluationView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                textFieldDirectory.setText(file.getPath());
+            }
+        });
 
 		lblResults = new JLabel("Results");
 		lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		btnSelectComplexityFactors = new JButton("Select complexity factors");
-		btnSelectComplexityFactors.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ComplexityIndicesView view = new ComplexityIndicesView();
-				view.setVisible(true);
-			}
-		});
+		btnSelectComplexityFactors.addActionListener((ActionEvent e) -> {
+            ComplexityIndicesView view = new ComplexityIndicesView();
+            view.setVisible(true);
+        });
 
 		btnTrainSVM = new JButton("Train SVM Model");
-		btnTrainSVM.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String path = textFieldDirectory.getText();
-				if (!new File(path).isDirectory()) {
-					JOptionPane.showMessageDialog(contentPane,
-							"Specified path should be a directory!", "Error",
-							JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-
-				if (!new File(path + "/measurements.csv").exists()) {
-					JOptionPane
-							.showMessageDialog(
-									contentPane,
-									"Specified path should contain a precomputed \"measurements.csv\" file!",
-									"Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-
-				Task task = new Task(path);
-				task.execute();
-			}
-		});
+		btnTrainSVM.addActionListener((ActionEvent e) -> {
+            String path = textFieldDirectory.getText();
+            if (!new File(path).isDirectory()) {
+                JOptionPane.showMessageDialog(contentPane,
+                        "Specified path should be a directory!", "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (!new File(path + "/measurements.csv").exists()) {
+                JOptionPane
+                        .showMessageDialog(
+                                contentPane,
+                                "Specified path should contain a precomputed \"measurements.csv\" file!",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            Task task = new Task(path);
+            task.execute();
+        });
 
 		scrollPane = new JScrollPane();
 		scrollPane

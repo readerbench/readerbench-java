@@ -100,9 +100,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
-					if (columnIndex == 2)
-						return true;
-					return false;
+					return columnIndex == 2;
 				}
 
 				@Override
@@ -140,7 +138,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			editableCells[i] = true;
 
 		TableCellRenderer renderer = new HeaderRenderer(readingStrategiesTable.getTableHeader(), modelColumnIndex,
-				selectedFactors, editableCells);
+				selectedFactors);
 		readingStrategiesTable.getColumnModel().getColumn(modelColumnIndex).setHeaderRenderer(renderer);
 
 		readingStrategiesTableModel.addTableModelListener(
@@ -156,7 +154,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 		readingStrategiesTable.getColumnModel().getColumn(2).setMaxWidth(70);
 		readingStrategiesTable.getColumnModel().getColumn(2).setPreferredWidth(70);
 
-		TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(readingStrategiesTable.getModel());
+		TableRowSorter<TableModel> sorter = new TableRowSorter<>(readingStrategiesTable.getModel());
 		sorter.setSortable(modelColumnIndex, false);
 		readingStrategiesTable.setRowSorter(sorter);
 
@@ -187,13 +185,13 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			Vector<Object> dataRow;
 			int index = 0;
 			for (; index < ReadingStrategies.NO_READING_STRATEGIES; index++) {
-				dataRow = new Vector<Object>();
+				dataRow = new Vector<>();
 				dataRow.add(index);
 				dataRow.add(ReadingStrategies.STRATEGY_NAMES[index]);
 				dataRow.add(selectedFactors[index]);
 				readingStrategiesTableModel.addRow(dataRow);
 			}
-			dataRow = new Vector<Object>();
+			dataRow = new Vector<>();
 			dataRow.add(index);
 			dataRow.add("Cohesion with initial text");
 			dataRow.add(selectedFactors[index]);
@@ -205,7 +203,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 	}
 
 	public static int[] getSelectedMeasurements() {
-		List<Integer> selected = new LinkedList<Integer>();
+		List<Integer> selected = new LinkedList<>();
 		int i = 0;
 		for (; i < selectedFactors.length - 1; i++)
 			if (selectedFactors[i])
@@ -223,16 +221,14 @@ public class ReadingStrategiesIndicesView extends JFrame {
 
 		adjustToSystemGraphics();
 
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					JFrame frame = new ReadingStrategiesIndicesView();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                JFrame frame = new ReadingStrategiesIndicesView();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 
 	private static void adjustToSystemGraphics() {
@@ -240,13 +236,7 @@ public class ReadingStrategiesIndicesView extends JFrame {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 					e.printStackTrace();
 				}
 			}

@@ -21,13 +21,11 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -114,7 +112,7 @@ public class ConversationProcessingView extends JInternalFrame {
 		}
 
 		public void addSingleDocument(String pathToIndividualFile) {
-			AbstractDocument d = null;
+			AbstractDocument d;
 			if (isSerialized) {
 				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
 			} else {
@@ -136,6 +134,7 @@ public class ConversationProcessingView extends JInternalFrame {
 			}
 		}
 
+        @Override
 		public Void doInBackground() {
 			btnAddDocument.setEnabled(false);
 			btnAddSerializedDocument.setEnabled(false);
@@ -145,22 +144,12 @@ public class ConversationProcessingView extends JInternalFrame {
 			if (isSerialized) {
 				if (file.isDirectory()) {
 					// process each individual ser file
-					files = file.listFiles(new FilenameFilter() {
-						@Override
-						public boolean accept(File dir, String name) {
-							return name.endsWith(".ser");
-						}
-					});
+					files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
 				}
 			} else {
 				if (file.isDirectory()) {
 					// process each individual xml file
-					files = file.listFiles(new FilenameFilter() {
-						@Override
-						public boolean accept(File dir, String name) {
-							return name.endsWith(".xml");
-						}
-					});
+					files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
 				}
 			}
 			for (File f : files) {
@@ -297,77 +286,71 @@ public class ConversationProcessingView extends JInternalFrame {
 		lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
 		lblLanguage.setForeground(Color.BLACK);
 
-		comboBoxLanguage = new JComboBox<String>();
+		comboBoxLanguage = new JComboBox<>();
 		comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
 		for (String lang : Lang.SUPPORTED_LANGUAGES)
 			comboBoxLanguage.addItem(lang);
 
 		btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
 		btnAddDocument.setEnabled(false);
-		btnAddDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					JInternalFrame frame = new AddConversationView(ReaderBenchView.RUNTIME_LANGUAGE,
-							ConversationProcessingView.this);
-					frame.setVisible(true);
-					desktopPane.add(frame);
-					try {
-						frame.setSelected(true);
-					} catch (java.beans.PropertyVetoException exception) {
-						exception.printStackTrace();
-					}
-				} catch (Exception exception) {
-					exception.printStackTrace();
-				}
-			}
-		});
+		btnAddDocument.addActionListener((ActionEvent e) -> {
+            try {
+                JInternalFrame frame = new AddConversationView(ReaderBenchView.RUNTIME_LANGUAGE,
+                        ConversationProcessingView.this);
+                frame.setVisible(true);
+                desktopPane.add(frame);
+                try {
+                    frame.setSelected(true);
+                } catch (java.beans.PropertyVetoException exception) {
+                    exception.printStackTrace();
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        });
 
 		btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed conversation(s)"));
 		btnAddSerializedDocument.setEnabled(false);
-		btnAddSerializedDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = null;
-				if (lastDirectory == null)
-					fc = new JFileChooser(new File("resources/in"));
-				else
-					fc = new JFileChooser(lastDirectory);
-				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				fc.setFileFilter(new FileFilter() {
-					public boolean accept(File f) {
-						if (f.isDirectory()) {
-							return true;
-						}
-						return f.getName().endsWith(".ser");
-					}
+		btnAddSerializedDocument.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null)
+                fc = new JFileChooser(new File("resources/in"));
+            else
+                fc = new JFileChooser(lastDirectory);
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".ser");
+                }
+                
+                public String getDescription() {
+                    return "Serialized documents (*.ser) or directory";
+                }
+            });
+            int returnVal = fc.showOpenDialog(ConversationProcessingView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(
+                        file.getPath(), null, null, false, true);
+                task.execute();
+            }
+        });
 
-					public String getDescription() {
-						return "Serialized documents (*.ser) or directory";
-					}
-				});
-				int returnVal = fc.showOpenDialog(ConversationProcessingView.this);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					lastDirectory = file.getParentFile();
-					ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(
-							file.getPath(), null, null, false, true);
-					task.execute();
-				}
-			}
-		});
-
-		comboBoxLanguage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (comboBoxLanguage.getSelectedIndex() > 0) {
-					// set final analysis language
-					ReaderBenchView.RUNTIME_LANGUAGE = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
-					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
-					comboBoxLanguage.setEnabled(false);
-					btnAddDocument.setEnabled(true);
-					btnAddSerializedDocument.setEnabled(true);
-				}
-			}
-		});
+		comboBoxLanguage.addActionListener((ActionEvent e) -> {
+            if (comboBoxLanguage.getSelectedIndex() > 0) {
+                // set final analysis language
+                ReaderBenchView.RUNTIME_LANGUAGE = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
+                ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
+                comboBoxLanguage.setEnabled(false);
+                btnAddDocument.setEnabled(true);
+                btnAddSerializedDocument.setEnabled(true);
+            }
+        });
 
 		if (ReaderBenchView.RUNTIME_LANGUAGE != null) {
 			comboBoxLanguage.setEnabled(false);
@@ -389,7 +372,7 @@ public class ConversationProcessingView extends JInternalFrame {
 		docTableModel = new ConversationManagementTableModel();
 		docTable = new JTable(docTableModel);
 		docTable.setFillsViewportHeight(true);
-		docSorter = new TableRowSorter<ConversationManagementTableModel>(docTableModel);
+		docSorter = new TableRowSorter<>(docTableModel);
 		docTable.setRowSorter(docSorter);
 
 		docTable.addMouseListener(new MouseAdapter() {
@@ -421,13 +404,10 @@ public class ConversationProcessingView extends JInternalFrame {
 			public void updateUI() {
 				if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
 					UIDefaults map = new UIDefaults();
-					Painter<JComponent> painter = new Painter<JComponent>() {
-						@Override
-						public void paint(Graphics2D g, JComponent c, int w, int h) {
-							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, w, h);
-						}
-					};
+					Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0, 0, w, h);
+                    };
 					map.put("DesktopPane[Enabled].backgroundPainter", painter);
 					putClientProperty("Nimbus.Overrides", map);
 				}
@@ -477,14 +457,17 @@ public class ConversationProcessingView extends JInternalFrame {
 		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
 		articleTextField.setPlaceholderForeground(Color.gray);
 		articleTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
 			public void changedUpdate(DocumentEvent e) {
 				warn();
 			}
 
+            @Override
 			public void removeUpdate(DocumentEvent e) {
 				warn();
 			}
 
+            @Override
 			public void insertUpdate(DocumentEvent e) {
 				warn();
 			}
@@ -505,21 +488,19 @@ public class ConversationProcessingView extends JInternalFrame {
 
 		btnViewDocument = new JButton(LocalizationUtils.getTranslation("View conversation"));
 		btnViewDocument.setEnabled(false);
-		btnViewDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument d = loadedConversations.get(modelRow);
-					if (d instanceof Conversation) {
-						ChatView view = new ChatView((Conversation) d);
-						view.setVisible(true);
-					}
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+		btnViewDocument.addActionListener((ActionEvent e) -> {
+            if (docTable.getSelectedRow() != -1) {
+                int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
+                AbstractDocument d = loadedConversations.get(modelRow);
+                if (d instanceof Conversation) {
+                    ChatView view = new ChatView((Conversation) d);
+                    view.setVisible(true);
+                }
+            } else {
+                JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
 		btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove conversation"));
 		btnRemoveDocument.setEnabled(false);
@@ -534,19 +515,17 @@ public class ConversationProcessingView extends JInternalFrame {
 								.addComponent(btnViewDocument).addComponent(btnAddDocument)
 								.addComponent(btnAddSerializedDocument).addComponent(btnRemoveDocument))));
 		panelSingleDoc.setLayout(gl_panelSingleDoc);
-		btnRemoveDocument.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (docTable.getSelectedRow() != -1) {
-					int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-					AbstractDocument toRemove = loadedConversations.get(modelRow);
-					loadedConversations.remove(toRemove);
-					docTableModel.removeRow(modelRow);
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+		btnRemoveDocument.addActionListener((ActionEvent e) -> {
+            if (docTable.getSelectedRow() != -1) {
+                int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
+                AbstractDocument toRemove = loadedConversations.get(modelRow);
+                loadedConversations.remove(toRemove);
+                docTableModel.removeRow(modelRow);
+            } else {
+                JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 		desktopPane.setLayout(gl_desktopPane);
 
 		setContentPane(desktopPane);
@@ -603,7 +582,7 @@ public class ConversationProcessingView extends JInternalFrame {
 				synchronized (loadedConversations) {
 					for (Conversation c : loadedConversations) {
 						// add rows as loaded documents
-						Vector<Object> dataRow = new Vector<Object>();
+						Vector<Object> dataRow = new Vector<>();
 						dataRow.add(c.getTitleText());
 						if (c.getLSA() != null) {
 							dataRow.add(c.getLSA().getPath());
@@ -633,9 +612,9 @@ public class ConversationProcessingView extends JInternalFrame {
 	}
 
 	private void newFilter() {
-		List<RowFilter<ConversationManagementTableModel, Object>> rfs = new ArrayList<RowFilter<ConversationManagementTableModel, Object>>(
+		List<RowFilter<ConversationManagementTableModel, Object>> rfs = new ArrayList<>(
 				2);
-		RowFilter<ConversationManagementTableModel, Object> rf = null;
+		RowFilter<ConversationManagementTableModel, Object> rf;
 		// If current expression doesn't parse, don't update.
 		try {
 			rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);
@@ -653,13 +632,10 @@ public class ConversationProcessingView extends JInternalFrame {
 
 		adjustToSystemGraphics();
 
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				ConversationProcessingView view = new ConversationProcessingView();
-				view.setVisible(true);
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            ConversationProcessingView view = new ConversationProcessingView();
+            view.setVisible(true);
+        });
 	}
 
 	private static void adjustToSystemGraphics() {
@@ -667,13 +643,7 @@ public class ConversationProcessingView extends JInternalFrame {
 			if ("Nimbus".equals(info.getName())) {
 				try {
 					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
+				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
 					e.printStackTrace();
 				}
 			}

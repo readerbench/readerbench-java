@@ -110,6 +110,9 @@ public abstract class ComplexityIndex {
         }
         return true;
     }
-    
+
+    public ComplexityIndecesEnum getIndex() {
+        return index;
+    }
     
 }
