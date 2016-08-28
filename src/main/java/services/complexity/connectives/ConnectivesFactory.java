@@ -58,12 +58,12 @@ public class ConnectivesFactory implements ComplexityIndecesFactory {
         if (connectives == null) return result;
         for (String className : connectives.getClasses().keySet()) {
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.CONNECTIVES_BLOCK, 
+                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_BLOCK, 
                     lang, 
                     AbstractDocument::getNoBlocks, 
                     className));
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.CONNECTIVES_SENTENCE, 
+                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_SENTENCE, 
                     lang, 
                     AbstractDocument::getNoSentences, 
                     className));

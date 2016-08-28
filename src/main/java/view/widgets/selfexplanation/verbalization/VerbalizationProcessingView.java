@@ -57,420 +57,392 @@ import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
 import view.widgets.document.DocumentProcessingView;
-import view.widgets.selfexplanation.ComprehensionPredictionView;
 
 public class VerbalizationProcessingView extends JInternalFrame {
-	private static final long serialVersionUID = -8772215709851320157L;
-	static Logger logger = Logger.getLogger(VerbalizationProcessingView.class);
 
-	private JDesktopPane desktopPane;
+    private static final long serialVersionUID = -8772215709851320157L;
+    static Logger logger = Logger.getLogger(VerbalizationProcessingView.class);
 
-	private JTable verbalisationsTable;
-	private DefaultTableModel verbalizationsTableModel = null;
+    private JDesktopPane desktopPane;
 
-	private JButton btnRemoveVerbalization = null;
-	private JButton btnAddVerbalization = null;
-	private JButton btnViewVerbalization = null;
-	private JButton btnViewDetailedStatistics = null;
-	private JButton btnViewCummulativeStatistics = null;
-	private JButton btnComprehensionPrediction = null;
-	private static File lastDirectory = null;
+    private JTable verbalisationsTable;
+    private DefaultTableModel verbalizationsTableModel = null;
 
-	private static List<Metacognition> loadedVervalizations = new Vector<Metacognition>();
-	private JButton btnAddSerializedVerbalization;
+    private JButton btnRemoveVerbalization = null;
+    private JButton btnAddVerbalization = null;
+    private JButton btnViewVerbalization = null;
+    private JButton btnViewCummulativeStatistics = null;
+    private static File lastDirectory = null;
 
-	public class VerbalizationProcessingTask extends SwingWorker<Void, Void> {
-		private String pathToDoc;
-		private Document referredDoc;
-		private boolean usePOSTagging;
-		private boolean isSerialized;
+    private static List<Metacognition> loadedVervalizations = new Vector<Metacognition>();
+    private JButton btnAddSerializedVerbalization;
 
-		public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
-			super();
-			this.pathToDoc = pathToDoc;
-			this.referredDoc = d;
-			this.usePOSTagging = usePOSTagging;
-			this.isSerialized = isSerialized;
-		}
+    public class VerbalizationProcessingTask extends SwingWorker<Void, Void> {
 
-		public void addSingleVerbalisation(String pathToIndividualFile) {
-			Metacognition v = null;
-			if (isSerialized) {
-				v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
-			} else {
-				v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging, true);
-				v.computeAll(true, true);
-			}
+        private String pathToDoc;
+        private Document referredDoc;
+        private boolean usePOSTagging;
+        private boolean isSerialized;
 
-			if (v != null) {
-				if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
-					ReaderBenchView.RUNTIME_LANGUAGE = v.getLanguage();
-					ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
-				}
-				if (v.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-					VerbalizationProcessingView.getLoadedVervalizations().add(v);
-					addVerbalization(v);
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		}
+        public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
+            super();
+            this.pathToDoc = pathToDoc;
+            this.referredDoc = d;
+            this.usePOSTagging = usePOSTagging;
+            this.isSerialized = isSerialized;
+        }
 
-		public Void doInBackground() {
-			btnAddVerbalization.setEnabled(false);
-			btnAddSerializedVerbalization.setEnabled(false);
+        public void addSingleVerbalisation(String pathToIndividualFile) {
+            Metacognition v = null;
+            if (isSerialized) {
+                v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
+            } else {
+                v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging, true);
+                v.computeAll(true, true);
+            }
 
-			File file = new File(pathToDoc);
-			File[] files = { file };
-			if (isSerialized) {
-				if (file.isDirectory()) {
-					// process each individual ser file
-					files = file.listFiles(new FilenameFilter() {
-						@Override
-						public boolean accept(File dir, String name) {
-							return name.endsWith(".ser");
-						}
-					});
-				}
-			} else {
-				if (file.isDirectory()) {
-					// process each individual xml file
-					files = file.listFiles(new FilenameFilter() {
-						@Override
-						public boolean accept(File dir, String name) {
-							return name.endsWith(".xml");
-						}
-					});
-				}
-			}
-			for (File f : files) {
-				try {
-					addSingleVerbalisation(f.getPath());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return null;
-		}
+            if (v != null) {
+                if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
+                    ReaderBenchView.RUNTIME_LANGUAGE = v.getLanguage();
+                    ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
+                }
+                if (v.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
+                    VerbalizationProcessingView.getLoadedVervalizations().add(v);
+                    addVerbalization(v);
+                } else {
+                    JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
+                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
 
-		@Override
-		public void done() {
-			Toolkit.getDefaultToolkit().beep();
-			btnAddVerbalization.setEnabled(true);
-			btnAddSerializedVerbalization.setEnabled(true);
-		}
-	}
+        public Void doInBackground() {
+            btnAddVerbalization.setEnabled(false);
+            btnAddSerializedVerbalization.setEnabled(false);
 
-	/**
-	 * Create the frame.
-	 */
-	public VerbalizationProcessingView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Verbalization Processing"));
-		setResizable(true);
-		setClosable(true);
-		setMaximizable(true);
-		setIconifiable(true);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 780, 450);
+            File file = new File(pathToDoc);
+            File[] files = {file};
+            if (isSerialized) {
+                if (file.isDirectory()) {
+                    // process each individual ser file
+                    files = file.listFiles(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String name) {
+                            return name.endsWith(".ser");
+                        }
+                    });
+                }
+            } else if (file.isDirectory()) {
+                // process each individual xml file
+                files = file.listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".xml");
+                    }
+                });
+            }
+            for (File f : files) {
+                try {
+                    addSingleVerbalisation(f.getPath());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
 
-		desktopPane = new JDesktopPane() {
-			private static final long serialVersionUID = 8453433109734630086L;
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            btnAddVerbalization.setEnabled(true);
+            btnAddSerializedVerbalization.setEnabled(true);
+        }
+    }
 
-			@Override
-			public void updateUI() {
-				if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
-					UIDefaults map = new UIDefaults();
-					Painter<JComponent> painter = new Painter<JComponent>() {
-						@Override
-						public void paint(Graphics2D g, JComponent c, int w, int h) {
-							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, w, h);
-						}
-					};
-					map.put("DesktopPane[Enabled].backgroundPainter", painter);
-					putClientProperty("Nimbus.Overrides", map);
-				}
-				super.updateUI();
-			}
-		};
-		desktopPane.setBackground(Color.WHITE);
-		setContentPane(desktopPane);
+    /**
+     * Create the frame.
+     */
+    public VerbalizationProcessingView() {
+        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Verbalization Processing"));
+        setResizable(true);
+        setClosable(true);
+        setMaximizable(true);
+        setIconifiable(true);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(100, 100, 780, 450);
 
-		btnAddVerbalization = new JButton(LocalizationUtils.getTranslation("Add verbalization(s)"));
-		btnAddVerbalization.setEnabled(true);
-		btnAddVerbalization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
-					try {
-						JInternalFrame frame = new AddVerbalizationView(VerbalizationProcessingView.this);
-						frame.setVisible(true);
-						desktopPane.add(frame);
-						try {
-							frame.setSelected(true);
-						} catch (java.beans.PropertyVetoException exception) {
-							exception.printStackTrace();
-						}
-					} catch (Exception exception) {
-						exception.printStackTrace();
-					}
-				} else {
-					JOptionPane.showMessageDialog(desktopPane,
-							LocalizationUtils.getTranslation(
-									"At least one document must be already loaded in order to be able to start processing verbalizations!"),
-							LocalizationUtils.getTranslation("Information"), JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+        desktopPane = new JDesktopPane() {
+            private static final long serialVersionUID = 8453433109734630086L;
 
-		btnRemoveVerbalization = new JButton(LocalizationUtils.getTranslation("Remove verbalization"));
-		btnRemoveVerbalization.setEnabled(false);
-		btnRemoveVerbalization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (verbalisationsTable.getSelectedRow() != -1) {
-					loadedVervalizations.remove(verbalisationsTable.getSelectedRow());
-					updateContents();
-				} else {
-					JOptionPane.showMessageDialog(VerbalizationProcessingView.this,
-							LocalizationUtils.getTranslation("Please select a row to be deleted!"), "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+            @Override
+            public void updateUI() {
+                if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
+                    UIDefaults map = new UIDefaults();
+                    Painter<JComponent> painter = new Painter<JComponent>() {
+                        @Override
+                        public void paint(Graphics2D g, JComponent c, int w, int h) {
+                            g.setColor(Color.WHITE);
+                            g.fillRect(0, 0, w, h);
+                        }
+                    };
+                    map.put("DesktopPane[Enabled].backgroundPainter", painter);
+                    putClientProperty("Nimbus.Overrides", map);
+                }
+                super.updateUI();
+            }
+        };
+        desktopPane.setBackground(Color.WHITE);
+        setContentPane(desktopPane);
 
-		btnViewVerbalization = new JButton(LocalizationUtils.getTranslation("View verbalization"));
-		btnViewVerbalization.setEnabled(false);
-		btnViewVerbalization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (verbalisationsTable.getSelectedRow() != -1) {
-					Metacognition v = loadedVervalizations.get(verbalisationsTable.getSelectedRow());
-					VerbalizationView view = new VerbalizationView(v);
-					view.setVisible(true);
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please select a verbalization to be viewed!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+        btnAddVerbalization = new JButton(LocalizationUtils.getTranslation("Add verbalization(s)"));
+        btnAddVerbalization.setEnabled(true);
+        btnAddVerbalization.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
+                    try {
+                        JInternalFrame frame = new AddVerbalizationView(VerbalizationProcessingView.this);
+                        frame.setVisible(true);
+                        desktopPane.add(frame);
+                        try {
+                            frame.setSelected(true);
+                        } catch (java.beans.PropertyVetoException exception) {
+                            exception.printStackTrace();
+                        }
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(desktopPane,
+                            LocalizationUtils.getTranslation(
+                                    "At least one document must be already loaded in order to be able to start processing verbalizations!"),
+                            LocalizationUtils.getTranslation("Information"), JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
 
-		if (verbalizationsTableModel == null)
-			verbalizationsTableModel = new VerbalisationManagementTableModel();
+        btnRemoveVerbalization = new JButton(LocalizationUtils.getTranslation("Remove verbalization"));
+        btnRemoveVerbalization.setEnabled(false);
+        btnRemoveVerbalization.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (verbalisationsTable.getSelectedRow() != -1) {
+                    loadedVervalizations.remove(verbalisationsTable.getSelectedRow());
+                    updateContents();
+                } else {
+                    JOptionPane.showMessageDialog(VerbalizationProcessingView.this,
+                            LocalizationUtils.getTranslation("Please select a row to be deleted!"), "Information",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        btnViewVerbalization = new JButton(LocalizationUtils.getTranslation("View verbalization"));
+        btnViewVerbalization.setEnabled(false);
+        btnViewVerbalization.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (verbalisationsTable.getSelectedRow() != -1) {
+                    Metacognition v = loadedVervalizations.get(verbalisationsTable.getSelectedRow());
+                    VerbalizationView view = new VerbalizationView(v);
+                    view.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(desktopPane, "Please select a verbalization to be viewed!",
+                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
 
-		verbalisationsTable = new JTable(verbalizationsTableModel);
-		verbalisationsTable.setFillsViewportHeight(true);
+        if (verbalizationsTableModel == null) {
+            verbalizationsTableModel = new VerbalisationManagementTableModel();
+        }
 
-		verbalisationsTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					JTable target = (JTable) event.getSource();
-					int row = target.getSelectedRow();
-					if (row >= 0 && row < loadedVervalizations.size()) {
-						Metacognition v = loadedVervalizations.get(row);
-						VerbalizationView view = new VerbalizationView(v);
-						view.setVisible(true);
-					}
-				}
-			}
-		});
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		scrollPane.setViewportView(verbalisationsTable);
+        verbalisationsTable = new JTable(verbalizationsTableModel);
+        verbalisationsTable.setFillsViewportHeight(true);
 
-		btnAddSerializedVerbalization = new JButton("Add serialized verbalization(s)");
-		btnAddSerializedVerbalization.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = null;
-				if (lastDirectory == null)
-					fc = new JFileChooser(new File("resources/in"));
-				else
-					fc = new JFileChooser(lastDirectory);
-				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				fc.setFileFilter(new FileFilter() {
-					public boolean accept(File f) {
-						if (f.isDirectory()) {
-							return true;
-						}
-						return f.getName().endsWith(".ser");
-					}
+        verbalisationsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    JTable target = (JTable) event.getSource();
+                    int row = target.getSelectedRow();
+                    if (row >= 0 && row < loadedVervalizations.size()) {
+                        Metacognition v = loadedVervalizations.get(row);
+                        VerbalizationView view = new VerbalizationView(v);
+                        view.setVisible(true);
+                    }
+                }
+            }
+        });
 
-					public String getDescription() {
-						return "Serialized document (*.ser) or directory";
-					}
-				});
-				int returnVal = fc.showOpenDialog(VerbalizationProcessingView.this);
+        scrollPane.setViewportView(verbalisationsTable);
 
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					lastDirectory = file.getParentFile();
-					VerbalizationProcessingTask task = VerbalizationProcessingView.this.new VerbalizationProcessingTask(
-							file.getPath(), null, false, true);
-					task.execute();
-				}
-			}
-		});
+        btnAddSerializedVerbalization = new JButton("Add serialized verbalization(s)");
+        btnAddSerializedVerbalization.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = null;
+                if (lastDirectory == null) {
+                    fc = new JFileChooser(new File("resources/in"));
+                } else {
+                    fc = new JFileChooser(lastDirectory);
+                }
+                fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+                fc.setFileFilter(new FileFilter() {
+                    public boolean accept(File f) {
+                        if (f.isDirectory()) {
+                            return true;
+                        }
+                        return f.getName().endsWith(".ser");
+                    }
 
-		btnViewDetailedStatistics = new JButton(LocalizationUtils.getTranslation("View detailed statistics"));
-		btnViewDetailedStatistics.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						VerbalizationsDetailedView view = new VerbalizationsDetailedView(loadedVervalizations);
-						view.setVisible(true);
-					}
-				});
-			}
-		});
-		btnViewDetailedStatistics.setEnabled(false);
+                    public String getDescription() {
+                        return "Serialized document (*.ser) or directory";
+                    }
+                });
+                int returnVal = fc.showOpenDialog(VerbalizationProcessingView.this);
 
-		btnViewCummulativeStatistics = new JButton(LocalizationUtils.getTranslation("View cummulative statistics"));
-		btnViewCummulativeStatistics.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(loadedVervalizations);
-						view.setVisible(true);
-					}
-				});
-			}
-		});
-		btnViewCummulativeStatistics.setEnabled(false);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    lastDirectory = file.getParentFile();
+                    VerbalizationProcessingTask task = VerbalizationProcessingView.this.new VerbalizationProcessingTask(
+                            file.getPath(), null, false, true);
+                    task.execute();
+                }
+            }
+        });
 
-		btnComprehensionPrediction = new JButton(LocalizationUtils.getTranslation("Comprehension Prediction"));
-		btnComprehensionPrediction.setEnabled(false);
-		btnComprehensionPrediction.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ComprehensionPredictionView view = new ComprehensionPredictionView(loadedVervalizations);
-				view.setVisible(true);
-			}
-		});
+        btnViewCummulativeStatistics = new JButton(LocalizationUtils.getTranslation("View cummulative statistics"));
+        btnViewCummulativeStatistics.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(loadedVervalizations);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+        btnViewCummulativeStatistics.setEnabled(false);
 
-		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
-						.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-								.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
-								.addGroup(gl_desktopPane.createSequentialGroup()
-										.addPreferredGap(ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
-										.addComponent(btnViewVerbalization, GroupLayout.PREFERRED_SIZE, 142,
-												GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
-										.addComponent(btnViewDetailedStatistics, Alignment.LEADING,
-												GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(btnAddVerbalization, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
-										.addComponent(btnViewCummulativeStatistics, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-										.addComponent(btnAddSerializedVerbalization, GroupLayout.DEFAULT_SIZE,
-												GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
-										.addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 184,
-												GroupLayout.PREFERRED_SIZE)
-										.addComponent(btnComprehensionPrediction, GroupLayout.PREFERRED_SIZE, 185,
-												GroupLayout.PREFERRED_SIZE))))
-						.addContainerGap()));
-		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_desktopPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 27,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnAddSerializedVerbalization)
-								.addComponent(btnAddVerbalization, GroupLayout.PREFERRED_SIZE, 27,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnViewVerbalization))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(
-						gl_desktopPane.createParallelGroup(Alignment.BASELINE).addComponent(btnComprehensionPrediction)
-								.addComponent(btnViewCummulativeStatistics).addComponent(btnViewDetailedStatistics))
-				.addGap(8)));
-		desktopPane.setLayout(gl_desktopPane);
+        GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
+        gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+                .addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+                                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 726, Short.MAX_VALUE)
+                                .addGroup(gl_desktopPane.createSequentialGroup()
+                                        .addPreferredGap(ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                                        .addComponent(btnViewVerbalization, GroupLayout.PREFERRED_SIZE, 142,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
+                                                .addComponent(btnAddVerbalization, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING, false)
+                                                .addComponent(btnViewCummulativeStatistics, GroupLayout.DEFAULT_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(btnAddSerializedVerbalization, GroupLayout.DEFAULT_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
+                                                .addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 184,
+                                                        GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap()));
+        gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+                        .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 339, Short.MAX_VALUE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(btnRemoveVerbalization, GroupLayout.PREFERRED_SIZE, 27,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnAddSerializedVerbalization)
+                                .addComponent(btnAddVerbalization, GroupLayout.PREFERRED_SIZE, 27,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnViewVerbalization))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(
+                                gl_desktopPane.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(btnViewCummulativeStatistics))
+                        .addGap(8)));
+        desktopPane.setLayout(gl_desktopPane);
 
-		updateContents();
-	}
+        updateContents();
+    }
 
-	public static synchronized List<Metacognition> getLoadedVervalizations() {
-		return loadedVervalizations;
-	}
+    public static synchronized List<Metacognition> getLoadedVervalizations() {
+        return loadedVervalizations;
+    }
 
-	public static synchronized void setLoadedVervalizations(List<Metacognition> loadedVervalizations) {
-		VerbalizationProcessingView.loadedVervalizations = loadedVervalizations;
-	}
+    public static synchronized void setLoadedVervalizations(List<Metacognition> loadedVervalizations) {
+        VerbalizationProcessingView.loadedVervalizations = loadedVervalizations;
+    }
 
-	private void updateButtons(boolean isEnabled) {
-		btnRemoveVerbalization.setEnabled(isEnabled);
-		btnViewVerbalization.setEnabled(isEnabled);
-		btnViewDetailedStatistics.setEnabled(isEnabled);
-		btnViewCummulativeStatistics.setEnabled(isEnabled);
-		btnComprehensionPrediction.setEnabled(isEnabled);
-	}
+    private void updateButtons(boolean isEnabled) {
+        btnRemoveVerbalization.setEnabled(isEnabled);
+        btnViewVerbalization.setEnabled(isEnabled);
+        btnViewCummulativeStatistics.setEnabled(isEnabled);
+    }
 
-	public synchronized void addVerbalization(Metacognition v) {
-		if (verbalizationsTableModel != null) {
-			synchronized (verbalizationsTableModel) {
-				synchronized (loadedVervalizations) {
-					Vector<Object> dataRow = new Vector<Object>();
+    public synchronized void addVerbalization(Metacognition v) {
+        if (verbalizationsTableModel != null) {
+            synchronized (verbalizationsTableModel) {
+                synchronized (loadedVervalizations) {
+                    Vector<Object> dataRow = new Vector<Object>();
 
-					String authors = "";
-					for (String author : v.getAuthors())
-						authors += author + ", ";
-					authors = authors.substring(0, authors.length() - 2);
-					dataRow.add(authors);
-					dataRow.add(v.getReferredDoc().getTitleText());
-					dataRow.add(v.getReferredDoc().getLSA().getPath());
-					dataRow.add(v.getReferredDoc().getLDA().getPath());
-					verbalizationsTableModel.addRow(dataRow);
-				}
-				if (loadedVervalizations.size() > 0) {
-					updateButtons(true);
-				} else {
-					updateButtons(false);
-				}
-			}
-		}
-	}
+                    String authors = "";
+                    for (String author : v.getAuthors()) {
+                        authors += author + ", ";
+                    }
+                    authors = authors.substring(0, authors.length() - 2);
+                    dataRow.add(authors);
+                    dataRow.add(v.getReferredDoc().getTitleText());
+                    dataRow.add(v.getReferredDoc().getLSA().getPath());
+                    dataRow.add(v.getReferredDoc().getLDA().getPath());
+                    verbalizationsTableModel.addRow(dataRow);
+                }
+                if (loadedVervalizations.size() > 0) {
+                    updateButtons(true);
+                } else {
+                    updateButtons(false);
+                }
+            }
+        }
+    }
 
-	public synchronized void updateContents() {
-		if (verbalizationsTableModel != null) {
-			verbalisationsTable.clearSelection();
-			// clean table
-			synchronized (verbalizationsTableModel) {
-				while (verbalizationsTableModel.getRowCount() > 0) {
-					verbalizationsTableModel.removeRow(0);
-				}
+    public synchronized void updateContents() {
+        if (verbalizationsTableModel != null) {
+            verbalisationsTable.clearSelection();
+            // clean table
+            synchronized (verbalizationsTableModel) {
+                while (verbalizationsTableModel.getRowCount() > 0) {
+                    verbalizationsTableModel.removeRow(0);
+                }
 
-				synchronized (loadedVervalizations) {
-					for (Metacognition v : loadedVervalizations) {
-						// add rows as loaded documents
-						Vector<Object> dataRow = new Vector<Object>();
+                synchronized (loadedVervalizations) {
+                    for (Metacognition v : loadedVervalizations) {
+                        // add rows as loaded documents
+                        Vector<Object> dataRow = new Vector<Object>();
 
-						String authors = "";
-						for (String author : v.getAuthors())
-							authors += author + ", ";
-						authors = authors.substring(0, authors.length() - 2);
-						dataRow.add(authors);
-						dataRow.add(v.getReferredDoc().getTitleText());
-						dataRow.add(v.getReferredDoc().getLSA().getPath());
-						dataRow.add(v.getReferredDoc().getLDA().getPath());
-						verbalizationsTableModel.addRow(dataRow);
-					}
+                        String authors = "";
+                        for (String author : v.getAuthors()) {
+                            authors += author + ", ";
+                        }
+                        authors = authors.substring(0, authors.length() - 2);
+                        dataRow.add(authors);
+                        dataRow.add(v.getReferredDoc().getTitleText());
+                        dataRow.add(v.getReferredDoc().getLSA().getPath());
+                        dataRow.add(v.getReferredDoc().getLDA().getPath());
+                        verbalizationsTableModel.addRow(dataRow);
+                    }
 
-					if (loadedVervalizations.size() > 0) {
-						updateButtons(true);
-					} else {
-						updateButtons(false);
-					}
-				}
-			}
-		}
-	}
+                    if (loadedVervalizations.size() > 0) {
+                        updateButtons(true);
+                    } else {
+                        updateButtons(false);
+                    }
+                }
+            }
+        }
+    }
 }

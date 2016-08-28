@@ -1,8 +1,11 @@
-#folders synced via OneDrive
+#folders synced via OwnCloud
+resources
 resources/config
 resources/in
 resources/out
 resources/lib
+
+# Output sources #
 out
 
 # Compiled source #
@@ -38,7 +41,6 @@ Thumbs.db
 *.pptx
 /target/
 !/src/main/resources/META-INF/persistence.xml
+!/src/main/resources/
 /db.properties
 /tmp/
-pathToSaveModel.txt
-resources

@@ -101,7 +101,7 @@ public class SentenceView extends JFrame {
         for (Block b : doc.getBlocks()) {
             if (b != null) {
                 for (int index = 0; index < b.getSentences().size(); index++) {
-                    Vector<Object> dataRow = new Vector<Object>();
+                    Vector<Object> dataRow = new Vector<>();
                     Sentence u = b.getSentences().get(index);
 
                     dataRow.add(globalIndex++);
@@ -111,14 +111,11 @@ public class SentenceView extends JFrame {
                             + "]");
                     if (index > 0) {
                         SemanticCohesion coh = b.getSentenceDistances()[index - 1][index];
-                        dataRow.add(Formatting.formatNumber(coh.getLSA()));
-                        dataRow.add(Formatting.formatNumber(coh.getLDASim()));
-                        dataRow.add(Formatting.formatNumber(coh
-                                .getOntologySim().get(SimilarityType.LEACOCK_CHODOROW)));
-                        dataRow.add(Formatting.formatNumber(coh
-                                .getOntologySim().get(SimilarityType.WU_PALMER)));
-                        dataRow.add(Formatting.formatNumber(coh
-                                .getOntologySim().get(SimilarityType.PATH_SIM)));
+                        dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LSA)));
+                        dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LDA)));
+                        dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW)));
+                        dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.WU_PALMER)));
+                        dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.PATH_SIM)));
                         dataRow.add(Formatting.formatNumber(coh.getCohesion()));
                         dataRow.add((int) (coh.getCohesion() * 100));
                     } else {

@@ -18,7 +18,7 @@ import services.complexity.wordComplexity.WordComplexityFactory;
 
 /**
  *
- * @author Stefan
+ * @author Stefan Ruseti
  */
 public enum ComplexityIndexType {
     READABILITY(new ReadabilityFactory()), 
@@ -42,6 +42,4 @@ public enum ComplexityIndexType {
     public ComplexityIndecesFactory getFactory() {
         return factory;
     }
-    
-    
 }

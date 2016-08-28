@@ -42,216 +42,218 @@ import view.widgets.document.DocumentProcessingView;
 import data.AbstractDocument;
 
 public class AddVerbalizationView extends JInternalFrame {
-	private static final long serialVersionUID = 8894652868238113117L;
-	static Logger logger = Logger.getLogger(AddVerbalizationView.class);
 
-	private VerbalizationProcessingView view;
-	private JPanel contentPane;
-	private JTextField textFieldPath;
-	private JComboBox<String> comboBoxDocument;
-	private JCheckBox chckbxUsePosTagging;
-	private static File lastDirectory = null;
+    private static final long serialVersionUID = 8894652868238113117L;
+    static Logger logger = Logger.getLogger(AddVerbalizationView.class);
 
-	/**
-	 * Create the frame.
-	 */
-	public AddVerbalizationView(VerbalizationProcessingView view) {
-		setTitle("ReaderBench - Add a new verbalization");
-		this.view = view;
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 550, 140);
-		contentPane = new JPanel();
-		contentPane.setBackground(Color.WHITE);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+    private VerbalizationProcessingView view;
+    private final JPanel contentPane;
+    private JTextField textFieldPath;
+    private JComboBox<String> comboBoxDocument;
+    private JCheckBox chckbxUsePosTagging;
+    private static File lastDirectory = null;
 
-		JLabel lblPath = new JLabel("Path:");
+    /**
+     * Create the verbalization view frame.
+     *
+     * @param view
+     */
+    public AddVerbalizationView(VerbalizationProcessingView view) {
+        super.setTitle("ReaderBench - Add a new verbalization");
+        super.setResizable(false);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(100, 100, 550, 140);
+        this.view = view;
+        contentPane = new JPanel();
+        contentPane.setBackground(Color.WHITE);
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        super.setContentPane(contentPane);
 
-		JLabel lblDocument = new JLabel("Document:");
+        JLabel lblPath = new JLabel("Path:");
 
-		String[] titles = new String[DocumentProcessingView
-				.getLoadedDocuments().size()];
-		int index = 0;
-		for (AbstractDocument d : DocumentProcessingView.getLoadedDocuments())
-			titles[index++] = d.getDescription();
-		comboBoxDocument = new JComboBox<String>(titles);
-		comboBoxDocument.setSelectedIndex(0);
+        JLabel lblDocument = new JLabel("Document:");
 
-		textFieldPath = new JTextField();
-		textFieldPath.setText("");
-		textFieldPath.setColumns(10);
+        String[] titles = new String[DocumentProcessingView
+                .getLoadedDocuments().size()];
+        int index = 0;
+        for (AbstractDocument d : DocumentProcessingView.getLoadedDocuments()) {
+            titles[index++] = d.getDescription();
+        }
+        comboBoxDocument = new JComboBox<>(titles);
+        comboBoxDocument.setSelectedIndex(0);
 
-		JButton btnSearch = new JButton("...");
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = null;
-				if (lastDirectory == null)
-					fc = new JFileChooser("resources/in");
-				else
-					fc = new JFileChooser(lastDirectory);
-				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				fc.setFileFilter(new FileFilter() {
-					public boolean accept(File f) {
-						if (f.isDirectory()) {
-							return true;
-						}
-						return f.getName().endsWith(".xml");
-					}
+        textFieldPath = new JTextField();
+        textFieldPath.setText("");
+        textFieldPath.setColumns(10);
 
-					public String getDescription() {
-						return "XML file (*.xml) or directory";
-					}
-				});
-				int returnVal = fc.showOpenDialog(AddVerbalizationView.this);
+        JButton btnSearch = new JButton("...");
+        btnSearch.addActionListener((ActionEvent e) -> {
+            JFileChooser fc;
+            if (lastDirectory == null) {
+                fc = new JFileChooser("resources/in");
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml");
+                }
 
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					lastDirectory = file.getParentFile();
-					textFieldPath.setText(file.getPath());
-				}
-			}
-		});
+                @Override
+                public String getDescription() {
+                    return "XML file (*.xml) or directory";
+                }
+            });
+            int returnVal = fc.showOpenDialog(AddVerbalizationView.this);
 
-		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AddVerbalizationView.this.dispose();
-			}
-		});
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                textFieldPath.setText(file.getPath());
+            }
+        });
 
-		JButton btnOk = new JButton("Ok");
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (!textFieldPath.getText().equals("")) {
-					VerbalizationProcessingView.VerbalizationProcessingTask task = AddVerbalizationView.this.view.new VerbalizationProcessingTask(
-							textFieldPath.getText(), DocumentProcessingView
-									.getLoadedDocuments()
-									.get(comboBoxDocument.getSelectedIndex()),
-							chckbxUsePosTagging.isSelected(), false);
-					task.execute();
-					AddVerbalizationView.this.dispose();
-				} else
-					JOptionPane
-							.showMessageDialog(
-									AddVerbalizationView.this,
-									"Please select an appropriate input file to be analysed!",
-									"Error", JOptionPane.WARNING_MESSAGE);
-			}
-		});
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener((ActionEvent e) -> {
+            AddVerbalizationView.this.dispose();
+        });
 
-		chckbxUsePosTagging = new JCheckBox("Use POS tagging");
-		chckbxUsePosTagging.setSelected(true);
+        JButton btnOk = new JButton("Ok");
+        btnOk.addActionListener((ActionEvent e) -> {
+            if (!textFieldPath.getText().equals("")) {
+                VerbalizationProcessingView.VerbalizationProcessingTask task = AddVerbalizationView.this.view.new VerbalizationProcessingTask(
+                        textFieldPath.getText(), DocumentProcessingView
+                        .getLoadedDocuments()
+                        .get(comboBoxDocument.getSelectedIndex()),
+                        chckbxUsePosTagging.isSelected(), false);
+                task.execute();
+                AddVerbalizationView.this.dispose();
+            } else {
+                JOptionPane
+                        .showMessageDialog(
+                                AddVerbalizationView.this,
+                                "Please select an appropriate input file to be analysed!",
+                                "Error", JOptionPane.WARNING_MESSAGE);
+            }
+        });
 
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addComponent(
-																								lblPath)
-																						.addComponent(
-																								lblDocument))
-																		.addGap(18)
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.TRAILING)
-																						.addGroup(
-																								gl_contentPane
-																										.createSequentialGroup()
-																										.addComponent(
-																												textFieldPath,
-																												GroupLayout.DEFAULT_SIZE,
-																												389,
-																												Short.MAX_VALUE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btnSearch,
-																												GroupLayout.PREFERRED_SIZE,
-																												41,
-																												GroupLayout.PREFERRED_SIZE))
-																						.addComponent(
-																								comboBoxDocument,
-																								0,
-																								436,
-																								Short.MAX_VALUE))
-																		.addGap(6))
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				chckbxUsePosTagging)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED,
-																				256,
-																				Short.MAX_VALUE)
-																		.addComponent(
-																				btnOk,
-																				GroupLayout.PREFERRED_SIZE,
-																				73,
-																				GroupLayout.PREFERRED_SIZE)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnCancel)
-																		.addContainerGap()))));
-		gl_contentPane
-				.setVerticalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																textFieldPath,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE)
-														.addComponent(lblPath)
-														.addComponent(btnSearch))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																lblDocument)
-														.addComponent(
-																comboBoxDocument,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
-										.addPreferredGap(
-												ComponentPlacement.UNRELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(btnOk)
-														.addComponent(btnCancel)
-														.addComponent(
-																chckbxUsePosTagging))
-										.addContainerGap(19, Short.MAX_VALUE)));
-		contentPane.setLayout(gl_contentPane);
-	}
+        chckbxUsePosTagging = new JCheckBox("Use POS tagging");
+        chckbxUsePosTagging.setSelected(true);
+
+        GroupLayout gl_contentPane = new GroupLayout(contentPane);
+        gl_contentPane
+                .setHorizontalGroup(gl_contentPane
+                        .createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_contentPane
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.TRAILING)
+                                        .addGroup(
+                                                gl_contentPane
+                                                .createSequentialGroup()
+                                                .addGroup(
+                                                        gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.LEADING)
+                                                        .addComponent(
+                                                                lblPath)
+                                                        .addComponent(
+                                                                lblDocument))
+                                                .addGap(18)
+                                                .addGroup(
+                                                        gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.TRAILING)
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                .createSequentialGroup()
+                                                                .addComponent(
+                                                                        textFieldPath,
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        389,
+                                                                        Short.MAX_VALUE)
+                                                                .addPreferredGap(
+                                                                        ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        btnSearch,
+                                                                        GroupLayout.PREFERRED_SIZE,
+                                                                        41,
+                                                                        GroupLayout.PREFERRED_SIZE))
+                                                        .addComponent(
+                                                                comboBoxDocument,
+                                                                0,
+                                                                436,
+                                                                Short.MAX_VALUE))
+                                                .addGap(6))
+                                        .addGroup(
+                                                gl_contentPane
+                                                .createSequentialGroup()
+                                                .addComponent(
+                                                        chckbxUsePosTagging)
+                                                .addPreferredGap(
+                                                        ComponentPlacement.RELATED,
+                                                        256,
+                                                        Short.MAX_VALUE)
+                                                .addComponent(
+                                                        btnOk,
+                                                        GroupLayout.PREFERRED_SIZE,
+                                                        73,
+                                                        GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(
+                                                        ComponentPlacement.RELATED)
+                                                .addComponent(
+                                                        btnCancel)
+                                                .addContainerGap()))));
+        gl_contentPane
+                .setVerticalGroup(gl_contentPane
+                        .createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_contentPane
+                                .createSequentialGroup()
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.BASELINE)
+                                        .addComponent(
+                                                textFieldPath,
+                                                GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblPath)
+                                        .addComponent(btnSearch))
+                                .addPreferredGap(
+                                        ComponentPlacement.RELATED)
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.BASELINE)
+                                        .addComponent(
+                                                lblDocument)
+                                        .addComponent(
+                                                comboBoxDocument,
+                                                GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(
+                                        ComponentPlacement.UNRELATED)
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.BASELINE)
+                                        .addComponent(btnOk)
+                                        .addComponent(btnCancel)
+                                        .addComponent(
+                                                chckbxUsePosTagging))
+                                .addContainerGap(19, Short.MAX_VALUE)));
+        contentPane.setLayout(gl_contentPane);
+    }
 }

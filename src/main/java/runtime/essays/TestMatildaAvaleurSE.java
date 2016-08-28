@@ -28,12 +28,13 @@ import org.apache.log4j.Logger;
 import data.document.Document;
 import data.document.Metacognition;
 import data.Lang;
+import data.document.ReadingStrategyType;
+import java.util.EnumMap;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
-import view.widgets.selfexplanation.ReadingStrategiesIndicesView;
 import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {
@@ -63,7 +64,7 @@ public class TestMatildaAvaleurSE {
             ReadingStrategies.detReadingStrategies(v);
 
             ComplexityIndices.computeComplexityFactors(v);
-            v.determineComprehesionIndices();
+            v.determineCohesion();
             verbalizations.add(v);
         }
         return verbalizations;
@@ -80,31 +81,33 @@ public class TestMatildaAvaleurSE {
             List<Metacognition> verbalizations = new ArrayList<>();
             try (BufferedWriter out = new BufferedWriter(new FileWriter(folder + "/output.csv"))) {
                 out.write("Filename,Comprehension score,Comprehension class,Fluency");
-                for (String s : ReadingStrategies.STRATEGY_NAMES) {
-                    out.write(",Annotated " + s);
+                for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                    out.write(",Annotated " + rs.getName());
                 }
                 for (ComplexityIndex index : ComplexityIndices.getIndices(Lang.fr)) {
                     out.write("," + index.getAcronym());
                 }
-                for (String s : ReadingStrategiesIndicesView.READING_STRATEGY_INDEX_NAMES) {
-                    out.write(",Automated " + s);
+                for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                    out.write(",Automated " + rs.getName());
                 }
 
-                // verbalizations.addAll(compute(folder + "/Matilda.xml",folder +
-                // "/Matilda verbalizations"));
-                // verbalizations.addAll(compute(folder + "/L'avaleur de
-                // nuages.xml",folder + "/Avaleur verbalizations"));
+                // verbalizations.addAll(compute(folder + "/Matilda.xml",folder + "/Matilda verbalizations"));
+                // verbalizations.addAll(compute(folder + "/L'avaleur de nuages.xml",folder + "/Avaleur verbalizations"));
                 verbalizations.addAll(load(folder + "/Matilda verbalizations"));
                 verbalizations.addAll(load(folder + "/Avaleur verbalizations"));
 
                 for (Metacognition v : verbalizations) {
-                    out.write("\n" + (new File(v.getPath()).getName()) + "," + v.getAnnotatedComprehensionScore() + ","
-                            + v.getComprehensionClass() + "," + v.getAnnotatedFluency());
-                    for (double value : v.getAnnotatedStrategies()) {
-                        out.write("," + value);
+                    out.write("\n" + (new File(v.getPath()).getName()) + "," + v.getAnnotatedComprehensionScore() + "," + v.getComprehensionClass() + "," + v.getAnnotatedFluency());
+                    EnumMap<ReadingStrategyType, Integer> annotatedRS = v.getAllRS(v.getAnnotatedRS());
+                    EnumMap<ReadingStrategyType, Integer> automatedRS = v.getAllRS(v.getAutomatedRS());
+                    for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                        out.write("," + annotatedRS.get(rs));
                     }
-                    for (double value : v.getComprehensionIndices()) {
-                        out.write("," + value);
+                    for (ComplexityIndex index : ComplexityIndices.getIndices(Lang.fr)) {
+                        out.write("," + v.getComplexityIndices().get(index));
+                    }
+                    for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                        out.write("," + automatedRS.get(rs));
                     }
                 }
             }

@@ -31,7 +31,7 @@ public class PronounsBlock extends ComplexityIndex{
     private final ClassesOfWords classes;
     
     public PronounsBlock(Lang lang, ClassesOfWords classes, String category) {
-        super(ComplexityIndecesEnum.PRONOUNS_BLOCK, lang, null, category);
+        super(ComplexityIndecesEnum.AVERAGE_PRONOUNS_BLOCK, lang, null, category);
         this.classes = classes;
     }
 

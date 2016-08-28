@@ -669,7 +669,7 @@ public class SimilarityAnalysis {
 
                                     // ===== LSA =====
                                     // ReaderBench similarity
-                                    sim = sc.getLSA();
+                                    sim = sc.getSemanticSimilarities().get(SimilarityType.LSA);
                                     rowLSA.append(Formatting.formatNumber(sim) + ",");
                                     for (Integer windowSize : windowSizes) {
                                         if (distance <= windowSize && maxLSA.get(windowSize) < sim) {
@@ -706,7 +706,7 @@ public class SimilarityAnalysis {
 
                                     // ===== LDA =====
                                     // ReaderBench similarity
-                                    sim = sc.getLDASim();
+                                    sim = sc.getSemanticSimilarities().get(SimilarityType.LDA);
                                     rowLDA.append(Formatting.formatNumber(sim) + ",");
                                     for (Integer windowSize : windowSizes) {
                                         if (distance <= windowSize && maxLDA.get(windowSize) < sim) {
@@ -743,7 +743,7 @@ public class SimilarityAnalysis {
 
                                     // ===== Leacock =====
                                     // ReaderBench similarity
-                                    sim = sc.getOntologySim().get(SimilarityType.LEACOCK_CHODOROW);
+                                    sim = sc.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW);
                                     // sim =
                                     // OntologySupport.semanticSimilarity(firstUtt,
                                     // secondUtt,
@@ -784,7 +784,7 @@ public class SimilarityAnalysis {
 
                                     // ===== WU PALMER =====
                                     // ReaderBench similarity
-                                    sim = sc.getOntologySim().get(SimilarityType.WU_PALMER);
+                                    sim = sc.getSemanticSimilarities().get(SimilarityType.WU_PALMER);
                                     rowWuPalmer.append(Formatting.formatNumber(sim) + ",");
                                     for (Integer windowSize : windowSizes) {
                                         if (distance <= windowSize && maxWuPalmer.get(windowSize) < sim) {
@@ -821,7 +821,7 @@ public class SimilarityAnalysis {
 
                                     // ===== PATH SIM =====
                                     // ReaderBench similarity
-                                    sim = sc.getOntologySim().get(SimilarityType.PATH_SIM);
+                                    sim = sc.getSemanticSimilarities().get(SimilarityType.PATH_SIM);
                                     rowPathSim.append(Formatting.formatNumber(sim) + ",");
                                     for (Integer windowSize : windowSizes) {
                                         if (distance <= windowSize && maxPathSim.get(windowSize) < sim) {

@@ -40,6 +40,7 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import data.document.Summary;
 import data.Lang;
+import data.document.ReadingStrategyType;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
@@ -51,16 +52,12 @@ import services.semanticModels.WordNet.SimilarityType;
 
 public class Millington {
 
-    static Logger logger = Logger.getLogger(Millington.class);
+    static final Logger LOGGER = Logger.getLogger(Millington.class);
 
     private final String path;
-
     private final Map<String, String> loadedDocuments;
-
     private final LSA lsa;
-
     private final LDA lda;
-
     private final Lang lang;
 
     public Millington(String path) {
@@ -118,8 +115,8 @@ public class Millington {
         // write header
         BufferedWriter out = new BufferedWriter(new FileWriter(path + "/output.csv", false));
         out.write("StudID,Attempt,Time to response,TextID,SentenceID,Score,Garbage,Frozen (binary),Vague/irrelevant,Repeat,Paraphrase,LocalBridging,Elaboration,Global");
-        for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-            out.write("," + ReadingStrategies.STRATEGY_NAMES[i]);
+        for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+            out.write("," + rs.getName());
         }
         for (String type : new String[]{"Previous", "Target", "Next", "Entire text"}) {
             for (String semDist : new String[]{"Wu-Palmer", "LSA", "LDA"}) {
@@ -187,7 +184,7 @@ public class Millington {
             }
 
             if (!content.contains(targetText)) {
-                logger.error("Error processing row " + rowNo);
+                LOGGER.error("Error processing row " + rowNo);
                 continue;
             }
 
@@ -221,13 +218,13 @@ public class Millington {
             out.write(studentID + "," + attempt + "," + timeToResponse + "," + textID + "," + sentenceID);
             out.write("," + finalScore + "," + garbage + "," + frozen + "," + vague + "," + repeat + "," + paraphrase
                     + "," + localBridging + "," + elaboration + "," + global);
-            for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-                out.write("," + se.getAutomatedRS()[0][i]);
+            for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                out.write("," + se.getAutomatedRS().get(0).get(rs));
             }
             for (SemanticCohesion cohesionScore : cohesionScores) {
-                out.write("," + Formatting.formatNumber(cohesionScore.getOntologySim().get(SimilarityType.WU_PALMER)) + ","
-                        + Formatting.formatNumber(cohesionScore.getLSA()) + ","
-                        + Formatting.formatNumber(cohesionScore.getLDASim()));
+                out.write("," + Formatting.formatNumber(cohesionScore.getSemanticSimilarities().get(SimilarityType.WU_PALMER)) + ","
+                        + Formatting.formatNumber(cohesionScore.getSemanticSimilarities().get(SimilarityType.LSA)) + ","
+                        + Formatting.formatNumber(cohesionScore.getSemanticSimilarities().get(SimilarityType.LDA)));
             }
             for (ComplexityIndex index : indices) {
                 out.write("," + se.getComplexityIndices().get(index));
@@ -237,11 +234,11 @@ public class Millington {
             out.close();
 
             if (rowNo % 10 == 0) {
-                logger.info("Finished processing " + rowNo + " rows...");
+                LOGGER.info("Finished processing " + rowNo + " rows...");
             }
             rowNo++;
         }
-        logger.info("Finished processing all rows...");
+        LOGGER.info("Finished processing all rows...");
     }
 
     public static void main(String[] args) {

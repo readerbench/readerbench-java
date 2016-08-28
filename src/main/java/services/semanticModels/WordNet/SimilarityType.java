@@ -20,19 +20,26 @@ package services.semanticModels.WordNet;
  * @author Stefan
  */
 public enum SimilarityType {
-    LEACOCK_CHODOROW("Leackock-Chodorow"),
-    WU_PALMER("Wu-Palmer"),
-    PATH_SIM("Inverse path length"),
-    LSA("Cosine similarity in LSA vector space"),
-    LDA("Inverse JSH in LDA probability distribution");
+    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet"),
+    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet"),
+    PATH_SIM("Path", "Inverse path length in WordNet"),
+    LSA("LSA", "Cosine similarity in LSA vector space"),
+    LDA("LDA", "Inverse JSH in LDA probability distribution"),
+    WORD2VEC("W2V", "Cosine similarity in word2vec space");
 
+    private final String acronym;
     private final String name;
 
-    private SimilarityType(String name) {
+    private SimilarityType(String acronym, String name) {
+        this.acronym = acronym;
         this.name = name;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getAcronym() {
+        return acronym;
     }
 }

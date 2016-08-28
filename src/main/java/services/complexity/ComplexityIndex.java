@@ -10,11 +10,10 @@ import data.Lang;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import services.semanticModels.WordNet.SimilarityType;
-import utils.localization.LocalizationUtils;
 
 /**
  *
- * @author Stefan
+ * @author Stefan Ruseti
  */
 public abstract class ComplexityIndex {
 
@@ -51,22 +50,38 @@ public abstract class ComplexityIndex {
     public String getAcronym() {
         String acronym;
         try {
-            acronym = ResourceBundle.getBundle("utils.localization.index_acronyms").getString(index.name());
-        }
-        catch (Exception ex) {
+            acronym = ResourceBundle.getBundle("utils.localization.textual_complexity_acronyms").getString(index.name());
+        } catch (Exception ex) {
             acronym = null;
         }
         if (acronym == null || acronym.isEmpty()) {
-            return index.name();
+            acronym = index.name();
+        }
+        if (simType != null) {
+            acronym += "_" + simType.getAcronym();
+        }
+        if (param != null) {
+            acronym += "_" + param;
         }
         return acronym;
     }
 
     public String getDescription() {
-        String description = LocalizationUtils.getTranslation(index.name());
-        if (description == null) description = getAcronym();
-        if (simType != null) description += " (" + simType.name() + ")";
-        if (param != null) description += " (" + param + ")";
+        String description;
+        try {
+            description = ResourceBundle.getBundle("utils.localization.textual_complexity_descriptions").getString(index.name());
+        } catch (Exception ex) {
+            description = null;
+        }
+        if (description == null || description.isEmpty()) {
+            return getAcronym();
+        }
+        if (simType != null) {
+            description += " (" + simType.getName() + ")";
+        }
+        if (param != null) {
+            description += " (" + param.replaceAll("_", " ") + ")";
+        }
         return description;
     }
 
@@ -105,14 +120,10 @@ public abstract class ComplexityIndex {
         if (this.lang != other.lang) {
             return false;
         }
-        if (this.simType != other.simType) {
-            return false;
-        }
-        return true;
+        return this.simType == other.simType;
     }
 
     public ComplexityIndecesEnum getIndex() {
         return index;
     }
-    
 }
