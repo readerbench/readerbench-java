@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.lda;
+package services.semanticModels.LDA;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
