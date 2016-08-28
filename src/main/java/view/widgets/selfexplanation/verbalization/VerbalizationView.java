@@ -343,9 +343,9 @@ public class VerbalizationView extends JFrame {
 						.getAlternateText().trim());
 
 				for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-					dataRow.add(verbalization.getAutomaticReadingStrategies()[index][i]);
+					dataRow.add(verbalization.getAutomatedRS()[index][i]);
 					cummulativeStrategies[i] += verbalization
-							.getAutomaticReadingStrategies()[index][i];
+							.getAutomatedRS()[index][i];
 				}
 				dataRow.add("");
 				modelContents.addRow(dataRow);

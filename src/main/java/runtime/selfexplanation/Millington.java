@@ -220,11 +220,11 @@ public class Millington {
             out.write("," + finalScore + "," + garbage + "," + frozen + "," + vague + "," + repeat + "," + paraphrase
                     + "," + localBridging + "," + elaboration + "," + global);
             for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-                out.write("," + se.getAutomaticReadingStrategies()[0][i]);
+                out.write("," + se.getAutomatedRS()[0][i]);
             }
             for (SemanticCohesion cohesionScore : cohesionScores) {
                 out.write("," + Formatting.formatNumber(cohesionScore.getOntologySim().get(SimilarityType.WU_PALMER)) + ","
-                        + Formatting.formatNumber(cohesionScore.getLSASim()) + ","
+                        + Formatting.formatNumber(cohesionScore.getLSA()) + ","
                         + Formatting.formatNumber(cohesionScore.getLDASim()));
             }
             for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {

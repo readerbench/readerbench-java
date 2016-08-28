@@ -77,9 +77,9 @@ public class VerbalizationsDetailedView extends JFrame {
 						.getBlocks().size(); i++) {
 					verbalizationIndex[index] = metaIndex;
 					automaticReadingStrategies[index] = loadedVervalizations
-							.get(metaIndex).getAutomaticReadingStrategies()[i];
+							.get(metaIndex).getAutomatedRS()[i];
 					annotatedReadingStrategies[index] = loadedVervalizations
-							.get(metaIndex).getAnnotatedReadingStrategies()[i];
+							.get(metaIndex).getAnnotatedRS()[i];
 					index++;
 				}
 			}
@@ -131,13 +131,13 @@ public class VerbalizationsDetailedView extends JFrame {
 						file.write(authors + "," + index);
 
 						for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
-							dataRow.add(v.getAutomaticReadingStrategies()[index][i]
+							dataRow.add(v.getAutomatedRS()[index][i]
 									+ " // "
-									+ v.getAnnotatedReadingStrategies()[index][i]);
+									+ v.getAnnotatedRS()[index][i]);
 							file.write(","
-									+ v.getAutomaticReadingStrategies()[index][i]
+									+ v.getAutomatedRS()[index][i]
 									+ ","
-									+ v.getAnnotatedReadingStrategies()[index][i]);
+									+ v.getAnnotatedRS()[index][i]);
 						}
 						modelVerbalizations.addRow(dataRow);
 						file.write("\n");

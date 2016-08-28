@@ -55,7 +55,7 @@ public class StartEndCohesion extends ComplexityIndex{
 		}
 		if (startBlock != null && endBlock != null) {
 			SemanticCohesion coh = new SemanticCohesion(startBlock, endBlock);
-			return coh.getSemanticDistances().get(simType);
+			return coh.getSemanticSimilarities().get(simType);
 		}
 		return ComplexityIndices.IDENTITY;
 	}

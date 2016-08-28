@@ -26,7 +26,7 @@ public class DocumentFlow {
 				int maxIndex = -1;
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
 					if (doc.getBlockDistances()[i][j] != null) {
-						double coh = doc.getBlockDistances()[i][j].getSemanticDistances().get(simType);
+						double coh = doc.getBlockDistances()[i][j].getSemanticSimilarities().get(simType);
 						if (coh > 0) {
 							if (coh > maxVal) {
 								maxVal = coh;
@@ -46,7 +46,7 @@ public class DocumentFlow {
 			for (int i = 0; i < doc.getBlocks().size() - 1; i++) {
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
 					if (doc.getBlockDistances()[i][j] != null) {
-						double coh = doc.getBlockDistances()[i][j].getSemanticDistances().get(simType);
+						double coh = doc.getBlockDistances()[i][j].getSemanticSimilarities().get(simType);
 						if (coh > 0) {
 							s0++;
 							s1 += coh;
@@ -63,7 +63,7 @@ public class DocumentFlow {
 			for (int i = 0; i < doc.getBlocks().size() - 1; i++) {
 				for (int j = i + 1; j < doc.getBlocks().size(); j++) {
 					if (doc.getBlockDistances()[i][j] != null) {
-						double coh = doc.getBlockDistances()[i][j].getSemanticDistances().get(simType);
+						double coh = doc.getBlockDistances()[i][j].getSemanticSimilarities().get(simType);
 						if (coh >= mean + stdev) {
 							graph[i][j] = coh;
 						}

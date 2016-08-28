@@ -73,9 +73,9 @@ public class VerbalizationsCumulativeView extends JFrame {
 						.size(); i++) {
 					for (int j = 0; j < ReadingStrategies.NO_READING_STRATEGIES; j++) {
 						automaticReadingStrategies[index][j] += loadedVervalizations
-								.get(index).getAutomaticReadingStrategies()[i][j];
+								.get(index).getAutomatedRS()[i][j];
 						annotatedReadingStrategies[index][j] += loadedVervalizations
-								.get(index).getAnnotatedReadingStrategies()[i][j];
+								.get(index).getAnnotatedRS()[i][j];
 					}
 				}
 			}

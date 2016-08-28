@@ -493,7 +493,7 @@ public class AnnotateVerbalizationView extends JFrame {
 				textFieldAuthor
 						.setText(loadedVerbalization.getAuthors().get(0));
 			String teachers = "";
-			for (String teacher : loadedVerbalization.getTeachers())
+			for (String teacher : loadedVerbalization.getTutors())
 				teachers += teacher + ", ";
 			textFieldTeachers.setText(teachers.length() > 2 ? teachers
 					.substring(0, teachers.length() - 2) : "");

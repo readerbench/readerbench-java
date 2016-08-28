@@ -44,7 +44,7 @@ public class AvgIntraBlockCohesion extends ComplexityIndex{
                                 if (i != j && b.getSentences().get(j) != null && b.getPrunnedSentenceDistances() != null
                                         && b.getPrunnedSentenceDistances()[i][j] != null
                                         && b.getPrunnedSentenceDistances()[i][j].getCohesion() > 0) {
-                                    sum += b.getPrunnedSentenceDistances()[i][j].getSemanticDistances().get(simType);
+                                    sum += b.getPrunnedSentenceDistances()[i][j].getSemanticSimilarities().get(simType);
                                     no++;
                                 }
                             }

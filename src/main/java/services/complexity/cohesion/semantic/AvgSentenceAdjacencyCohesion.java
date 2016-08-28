@@ -45,7 +45,7 @@ public class AvgSentenceAdjacencyCohesion extends ComplexityIndex{
 							&& b.getPrunnedSentenceDistances() != null
 							&& b.getPrunnedSentenceDistances()[i][i + 1] != null
 							&& b.getPrunnedSentenceDistances()[i][i + 1].getCohesion() > 0) {
-						sum += b.getPrunnedSentenceDistances()[i][i + 1].getSemanticDistances().get(simType);
+						sum += b.getPrunnedSentenceDistances()[i][i + 1].getSemanticSimilarities().get(simType);
 						no++;
 					}
 				}

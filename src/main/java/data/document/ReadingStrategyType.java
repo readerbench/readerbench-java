@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.semanticModels.WordNet;
+package data.document;
 
 /**
  *
- * @author Stefan
+ * @author Mihai Dascalu
  */
-public enum SimilarityType {
-    LEACOCK_CHODOROW("Leackock-Chodorow"),
-    WU_PALMER("Wu-Palmer"),
-    PATH_SIM("Inverse path length"),
-    LSA("Cosine similarity in LSA vector space"),
-    LDA("Inverse JSH in LDA probability distribution");
+public enum ReadingStrategyType {
+    PARAPHRASE("Paraphrase"),
+    CAUSALITY("Causality"),
+    BRIDGING("Bridging"),
+    TEXT_BASED_INFERENCES("Text based inferences"),
+    INFERRED_KNOWLEDGE("Inferred Knowledge"),
+    META_COGNITION("Metacognition");
 
     private final String name;
 
-    private SimilarityType(String name) {
+    private ReadingStrategyType(String name) {
         this.name = name;
     }
 

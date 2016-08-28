@@ -669,7 +669,7 @@ public class SimilarityAnalysis {
 
                                     // ===== LSA =====
                                     // ReaderBench similarity
-                                    sim = sc.getLSASim();
+                                    sim = sc.getLSA();
                                     rowLSA.append(Formatting.formatNumber(sim) + ",");
                                     for (Integer windowSize : windowSizes) {
                                         if (distance <= windowSize && maxLSA.get(windowSize) < sim) {

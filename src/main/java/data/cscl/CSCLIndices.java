@@ -37,7 +37,7 @@ public enum CSCLIndices {
 	NEW_THREADS_INTER_ANIMATION_DEGREE(false),
 	NEW_THREADS_CUMULATIVE_SOCIAL_KB(false);
 
-	private boolean isUsedForTimeModeling;
+	private final boolean isUsedForTimeModeling;
 
 	private CSCLIndices(boolean isUsedForTimeModeling) {
 		this.isUsedForTimeModeling = isUsedForTimeModeling;

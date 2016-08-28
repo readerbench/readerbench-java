@@ -111,7 +111,7 @@ public class SentenceView extends JFrame {
                             + "]");
                     if (index > 0) {
                         SemanticCohesion coh = b.getSentenceDistances()[index - 1][index];
-                        dataRow.add(Formatting.formatNumber(coh.getLSASim()));
+                        dataRow.add(Formatting.formatNumber(coh.getLSA()));
                         dataRow.add(Formatting.formatNumber(coh.getLDASim()));
                         dataRow.add(Formatting.formatNumber(coh
                                 .getOntologySim().get(SimilarityType.LEACOCK_CHODOROW)));

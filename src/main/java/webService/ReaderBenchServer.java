@@ -190,7 +190,7 @@ public class ReaderBenchServer {
 		List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
 		for (int i = 0; i < ReadingStrategies.NO_READING_STRATEGIES; i++) {
 			readingStrategies.add(new ResultReadingStrategy(ReadingStrategies.STRATEGY_NAMES[i],
-					s.getAutomaticReadingStrategies()[0][i]));
+					s.getAutomatedRS()[0][i]));
 		}
 
 		StringBuilder summary = new StringBuilder();

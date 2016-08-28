@@ -58,7 +58,7 @@ public class AvgMiddleEndCohesion extends ComplexityIndex{
 			Block b = d.getBlocks().get(i);
 			if (b != null) {
 				SemanticCohesion coh = new SemanticCohesion(b, endBlock);
-				sum += coh.getSemanticDistances().get(simType) / (endIndex - i);
+				sum += coh.getSemanticSimilarities().get(simType) / (endIndex - i);
 				no += 1D / (endIndex - i);
 			}
 		}

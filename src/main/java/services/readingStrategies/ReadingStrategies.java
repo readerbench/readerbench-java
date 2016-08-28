@@ -25,194 +25,184 @@ import data.Sentence;
 import data.Word;
 import data.document.Summary;
 import data.document.Metacognition;
+import data.document.ReadingStrategyType;
+import java.util.EnumMap;
 
 public class ReadingStrategies {
-	static Logger logger = Logger.getLogger(ReadingStrategies.class);
 
-	public static final int PARAPHRASE = 0;
-	public static final int CAUSALITY = 1;
-	public static final int BRIDGING = 2;
-	public static final int TEXT_BASED_INFERENCES = 3;
-	public static final int INFERRED_KNOWLEDGE = 4;
-	public static final int META_COGNITION = 5;
-	public static final int NO_READING_STRATEGIES = 6;
-	public static final String[] STRATEGY_NAMES = { "Paraphrase", "Causality", "Text based inferences", "Bridging",
-			"Inferred Knowledge", "Metacognition" };
+    static final Logger LOGGER = Logger.getLogger(ReadingStrategies.class);
 
-	public static void detReadingStrategies(Metacognition metacognition) {
-		logger.info("Identifying reading strategies from verbalization...");
+    public static void detReadingStrategies(Metacognition metacognition) {
+        LOGGER.info("Identifying reading strategies from verbalization...");
 
-		metacognition.setAutomaticReadingStrategies(
-				new int[metacognition.getBlocks().size()][ReadingStrategies.NO_READING_STRATEGIES]);
+        // clear references of words in initial document
+        for (Block b : metacognition.getBlocks()) {
+            for (Sentence s : b.getSentences()) {
+                for (Word w : s.getAllWords()) {
+                    w.resetReadingStrategies();
+                }
+                s.setAlternateText(s.getText());
+            }
+            b.setAlternateText(b.getText());
+        }
 
-		// clear references of words in initial document
-		for (Block b : metacognition.getBlocks()) {
-			for (Sentence s : b.getSentences()) {
-				for (Word w : s.getAllWords()) {
-					w.setReadingStrategies(new boolean[ReadingStrategies.NO_READING_STRATEGIES]);
-				}
-				s.setAlternateText(s.getText());
-			}
-			b.setAlternateText(b.getText());
-		}
+        ParaphrasingStrategy paraphrasingStg = new ParaphrasingStrategy();
+        InferredKnowledgeStrategy KIStg = new InferredKnowledgeStrategy();
+        BridgingStrategy bridgingStg = new BridgingStrategy();
 
-		ParaphrasingStrategy paraphrasingStg = new ParaphrasingStrategy();
-		InferredKnowledgeStrategy KIStg = new InferredKnowledgeStrategy();
-		BridgingStrategy bridgingStg = new BridgingStrategy();
+        int startIndex = 0;
+        int endIndex;
+        double threshold = bridgingStg.determineThreshold(metacognition);
+        List<Sentence> prevSentences = null;
 
-		int startIndex = 0;
-		int endIndex = 0;
-		double threshold = bridgingStg.determineThreshold(metacognition);
-		List<Sentence> prevSentences = null;
+        for (int i = 0; i < metacognition.getBlocks().size(); i++) {
+            Block v = metacognition.getBlocks().get(i);
+            metacognition.getAutomatedRS().add(new EnumMap<>(ReadingStrategyType.class));
+            // build list of previous sentences
+            List<Sentence> crtSentences = new LinkedList<>();
+            endIndex = v.getRefBlock().getIndex();
+            for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
+                for (Sentence s : metacognition.getReferredDoc().getBlocks().get(refBlockId).getSentences()) {
+                    crtSentences.add(s);
+                }
+            }
 
-		for (int i = 0; i < metacognition.getBlocks().size(); i++) {
-			Block v = metacognition.getBlocks().get(i);
-			// build list of previous sentences
-			List<Sentence> crtSentences = new LinkedList<Sentence>();
-			endIndex = v.getRefBlock().getIndex();
-			for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-				for (Sentence s : metacognition.getReferredDoc().getBlocks().get(refBlockId).getSentences()) {
-					crtSentences.add(s);
-				}
-			}
+            // afterwards causality and metacognition
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.CAUSALITY, PatternMatching
+                    .containsStrategy(crtSentences, v, ReadingStrategyType.CAUSALITY, true));
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.META_COGNITION, PatternMatching
+                    .containsStrategy(crtSentences, v, ReadingStrategyType.META_COGNITION, true));
 
-			// afterwards causality and control
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.CAUSALITY] = PatternMatching
-					.containsStrategy(crtSentences, v, ReadingStrategies.CAUSALITY, true);
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.META_COGNITION] = PatternMatching
-					.containsStrategy(crtSentences, v, ReadingStrategies.META_COGNITION, true);
+            // in the end determine paraphrases and inferred concepts as links to previous paragraphs
+            crtSentences.stream().forEach((s) -> {
+                paraphrasingStg.conceptsInCommon(v, s);
+            });
 
-			// in the end determine paraphrases and inferred concepts as links
-			// to previous paragraphs
-			for (Sentence s : crtSentences) {
-				paraphrasingStg.conceptsInCommon(v, s);
-			}
+            int noParaphrases = 0;
+            boolean isPrevParaphrase = false;
+            for (Sentence s1 : v.getSentences()) {
+                if (s1 != null) {
+                    for (Word w1 : s1.getWords()) {
+                        if (w1.getReadingStrategies().contains(ReadingStrategyType.PARAPHRASE)) {
+                            if (!isPrevParaphrase) {
+                                noParaphrases++;
+                            }
+                            isPrevParaphrase = true;
+                        } else {
+                            isPrevParaphrase = false;
+                        }
+                    }
+                }
+            }
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.PARAPHRASE, noParaphrases);
 
-			boolean isPrevParaphrase = false;
-			for (Sentence s1 : v.getSentences()) {
-				if (s1 != null) {
-					for (Word w1 : s1.getWords()) {
-						if (w1.getReadingStrategies()[ReadingStrategies.PARAPHRASE]) {
-							if (!isPrevParaphrase) {
-								metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.PARAPHRASE]++;
-							}
-							isPrevParaphrase = true;
-						} else {
-							isPrevParaphrase = false;
-						}
-					}
-				}
-			}
+            if (prevSentences == null) {
+                prevSentences = crtSentences;
+            } else {
+                prevSentences.addAll(crtSentences);
+            }
 
-			if (prevSentences == null)
-				prevSentences = crtSentences;
-			else
-				prevSentences.addAll(crtSentences);
+            // check to all previous sentences
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.INFERRED_KNOWLEDGE, KIStg.getInferredConcepts(v, prevSentences));
 
-			// check to all previous sentences
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.INFERRED_KNOWLEDGE] += KIStg
-					.getInferredConcepts(v, prevSentences);
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.BRIDGING, bridgingStg.containsStrategy(v, prevSentences, threshold));
 
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.BRIDGING] = bridgingStg
-					.containsStrategy(v, prevSentences, threshold);
+            metacognition.getAutomatedRS().get(i).put(ReadingStrategyType.TEXT_BASED_INFERENCES, metacognition.getAutomatedRS().get(i).get(ReadingStrategyType.BRIDGING) + metacognition.getAutomatedRS().get(i).get(ReadingStrategyType.CAUSALITY));
 
-			metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.TEXT_BASED_INFERENCES] = metacognition
-					.getAutomaticReadingStrategies()[i][ReadingStrategies.BRIDGING]
-					+ metacognition.getAutomaticReadingStrategies()[i][ReadingStrategies.CAUSALITY];
+            startIndex = endIndex + 1;
+            prevSentences = crtSentences;
+        }
 
-			startIndex = endIndex + 1;
+        // clear references of words in initial document
+        for (Block b : metacognition.getReferredDoc().getBlocks()) {
+            for (Sentence s : b.getSentences()) {
+                for (Word w : s.getAllWords()) {
+                    w.resetReadingStrategies();
+                }
+                s.setAlternateText(s.getText());
+            }
+        }
+    }
 
-			prevSentences = crtSentences;
-		}
+    public static void detReadingStrategies(Summary essay) {
+        LOGGER.info("Identifying reading strategies from summary ...");
 
-		// clear references of words in initial document
-		for (Block b : metacognition.getReferredDoc().getBlocks()) {
-			for (Sentence s : b.getSentences()) {
-				for (Word w : s.getAllWords()) {
-					w.setReadingStrategies(new boolean[ReadingStrategies.NO_READING_STRATEGIES]);
-				}
-				s.setAlternateText(s.getText());
-			}
-		}
-	}
+        // clear references of words in initial document
+        for (Block b : essay.getBlocks()) {
+            for (Sentence s : b.getSentences()) {
+                for (Word w : s.getAllWords()) {
+                    w.resetReadingStrategies();
+                }
+                s.setAlternateText(s.getText());
+            }
+            b.setAlternateText(b.getText());
+        }
 
-	public static void detReadingStrategies(Summary essay) {
-		logger.info("Identifying reading strategies from essay...");
+        ParaphrasingStrategy paraphrasingStg = new ParaphrasingStrategy();
+        InferredKnowledgeStrategy KIStg = new InferredKnowledgeStrategy();
+        BridgingStrategy bridgingStg = new BridgingStrategy();
 
-		essay.setAutomaticReadingStrategies(new int[1][ReadingStrategies.NO_READING_STRATEGIES]);
+        List<Sentence> originalSentences = new LinkedList<>();
+        for (Block b : essay.getReferredDoc().getBlocks()) {
+            for (Sentence s : b.getSentences()) {
+                originalSentences.add(s);
+            }
+        }
 
-		// clear references of words in initial document
-		for (Block b : essay.getBlocks()) {
-			for (Sentence s : b.getSentences()) {
-				for (Word w : s.getAllWords()) {
-					w.setReadingStrategies(new boolean[ReadingStrategies.NO_READING_STRATEGIES]);
-				}
-				s.setAlternateText(s.getText());
-			}
-			b.setAlternateText(b.getText());
-		}
+        essay.getAutomatedRS().add(new EnumMap<>(ReadingStrategyType.class));
+        for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+            essay.getAutomatedRS().get(0).put(rs, 0);
+        }
 
-		ParaphrasingStrategy paraphrasingStg = new ParaphrasingStrategy();
-		InferredKnowledgeStrategy KIStg = new InferredKnowledgeStrategy();
-		BridgingStrategy bridgingStg = new BridgingStrategy();
+        int causality = 0, metacog = 0, paraphrase = 0, KI = 0;
+        for (int i = 0; i < essay.getBlocks().size(); i++) {
+            Block e = essay.getBlocks().get(i);
 
-		List<Sentence> originalSentences = new LinkedList<Sentence>();
-		for (Block b : essay.getReferredDoc().getBlocks()) {
-			for (Sentence s : b.getSentences()) {
-				originalSentences.add(s);
-			}
-		}
+            // causality and metacognition
+            causality += PatternMatching.containsStrategy(originalSentences, e, ReadingStrategyType.CAUSALITY, false);
+            metacog += PatternMatching.containsStrategy(originalSentences, e, ReadingStrategyType.META_COGNITION, false);
 
-		for (int i = 0; i < essay.getBlocks().size(); i++) {
-			Block e = essay.getBlocks().get(i);
-			// causality and control
-			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.CAUSALITY] += PatternMatching
-					.containsStrategy(originalSentences, e, ReadingStrategies.CAUSALITY, false);
+            // paraphrases and inferred concepts
+            originalSentences.stream().forEach((s) -> {
+                paraphrasingStg.conceptsInCommon(e, s);
+            });
 
-			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.META_COGNITION] += PatternMatching
-					.containsStrategy(originalSentences, e, ReadingStrategies.META_COGNITION, false);
+            boolean isPrevParaphrase = false;
+            for (Sentence s1 : e.getSentences()) {
+                if (s1 != null) {
+                    for (Word w1 : s1.getWords()) {
+                        if (w1.getReadingStrategies().contains(ReadingStrategyType.PARAPHRASE)) {
+                            if (!isPrevParaphrase) {
+                                paraphrase++;
+                            }
+                            isPrevParaphrase = true;
+                        } else {
+                            isPrevParaphrase = false;
+                        }
+                    }
+                }
+            }
 
-			// paraphrases and inferred concepts
-			for (Sentence s : originalSentences) {
-				paraphrasingStg.conceptsInCommon(e, s);
-			}
+            KI += KIStg.getInferredConcepts(e, originalSentences);
+        }
 
-			boolean isPrevParaphrase = false;
-			for (Sentence s1 : e.getSentences()) {
-				if (s1 != null) {
-					for (Word w1 : s1.getWords()) {
-						if (w1.getReadingStrategies()[ReadingStrategies.PARAPHRASE]) {
-							if (!isPrevParaphrase) {
-								essay.getAutomaticReadingStrategies()[0][ReadingStrategies.PARAPHRASE]++;
-							}
-							isPrevParaphrase = true;
-						} else {
-							isPrevParaphrase = false;
-						}
-					}
-				}
-			}
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.CAUSALITY, causality);
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.META_COGNITION, metacog);
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.PARAPHRASE, paraphrase);
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.INFERRED_KNOWLEDGE, KI);
+        // bridging
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.BRIDGING, bridgingStg.containsStrategy(essay, originalSentences));
 
-			essay.getAutomaticReadingStrategies()[0][ReadingStrategies.INFERRED_KNOWLEDGE] += KIStg
-					.getInferredConcepts(e, originalSentences);
-		}
+        essay.getAutomatedRS().get(0).put(ReadingStrategyType.TEXT_BASED_INFERENCES, essay.getAutomatedRS().get(0).get(ReadingStrategyType.BRIDGING) + essay.getAutomatedRS().get(0).get(ReadingStrategyType.CAUSALITY));
 
-		// bridging
-		essay.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING] = bridgingStg.containsStrategy(essay,
-				originalSentences);
-
-		essay.getAutomaticReadingStrategies()[0][ReadingStrategies.TEXT_BASED_INFERENCES] = essay
-				.getAutomaticReadingStrategies()[0][ReadingStrategies.BRIDGING]
-				+ essay.getAutomaticReadingStrategies()[0][ReadingStrategies.CAUSALITY];
-
-		// clear references of words in initial document
-		for (Block b : essay.getReferredDoc().getBlocks()) {
-			for (Sentence s : b.getSentences()) {
-				for (Word w : s.getAllWords()) {
-					w.setReadingStrategies(new boolean[ReadingStrategies.NO_READING_STRATEGIES]);
-				}
-				s.setAlternateText(s.getText());
-			}
-		}
-	}
+        // clear references of words in initial document
+        for (Block b : essay.getReferredDoc().getBlocks()) {
+            for (Sentence s : b.getSentences()) {
+                for (Word w : s.getAllWords()) {
+                    w.resetReadingStrategies();
+                }
+                s.setAlternateText(s.getText());
+            }
+        }
+    }
 }

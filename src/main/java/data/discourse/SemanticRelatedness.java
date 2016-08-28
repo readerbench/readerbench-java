@@ -78,10 +78,9 @@ public class SemanticRelatedness extends SemanticCohesion {
                 rightHandValueLda = 0;
 
         // helper values
-        EnumMap<SimilarityType, Double> 
-            upperValueOntology = new EnumMap<>(SimilarityType.class),
-            leftHandValueOntology = new EnumMap<>(SimilarityType.class),
-            rightHandValueOntology = new EnumMap<>(SimilarityType.class);
+        EnumMap<SimilarityType, Double> upperValueOntology = new EnumMap<>(SimilarityType.class),
+                leftHandValueOntology = new EnumMap<>(SimilarityType.class),
+                rightHandValueOntology = new EnumMap<>(SimilarityType.class);
 
         // iterate through all words of source analysis element
         for (Word w1 : source.getWordOccurences().keySet()) {
@@ -129,8 +128,8 @@ public class SemanticRelatedness extends SemanticCohesion {
             upperValueLsa += maxSimLsa * w1.getIdf();
             upperValueLda += maxSimLda * w1.getIdf();
             for (SimilarityType st : SimilarityType.values()) {
-                upperValueOntology.put(st, 
-                    upperValueOntology.get(st) + maxSimOntology.get(st) * w1.getIdf());
+                upperValueOntology.put(st,
+                        upperValueOntology.get(st) + maxSimOntology.get(st) * w1.getIdf());
             }
             lowerValue += w1.getIdf();
         }
@@ -141,7 +140,7 @@ public class SemanticRelatedness extends SemanticCohesion {
         for (SimilarityType st : SimilarityType.values()) {
             leftHandValueOntology.put(st, upperValueOntology.get(st) / lowerValue);
         }
-        
+
         // helper values reset
         lowerValue = 0;
         upperValueLsa = 0;
@@ -194,8 +193,8 @@ public class SemanticRelatedness extends SemanticCohesion {
             upperValueLsa += maxSimLsa * w1.getIdf();
             upperValueLda += maxSimLda * w1.getIdf();
             for (SimilarityType st : SimilarityType.values()) {
-                upperValueOntology.put(st, upperValueOntology.get(st) +
-                        maxSimOntology.get(st) * w1.getIdf());
+                upperValueOntology.put(st, upperValueOntology.get(st)
+                        + maxSimOntology.get(st) * w1.getIdf());
             }
             lowerValue += w1.getIdf();
         }
@@ -206,18 +205,18 @@ public class SemanticRelatedness extends SemanticCohesion {
         for (SimilarityType st : SimilarityType.values()) {
             rightHandValueOntology.put(st, upperValueOntology.get(st) / lowerValue);
         }
-        
+
         // compute the semantic relatedness values for the three different semantic
         // similarity measurement techniques
-        this.lsaSim = 0.5 * (leftHandValueLsa + rightHandValueLsa);
-        this.ldaSim = 0.5 * (leftHandValueLda + rightHandValueLda);
+        this.similarities.put(SimilarityType.LSA, 0.5 * (leftHandValueLsa + rightHandValueLsa));
+        this.similarities.put(SimilarityType.LDA, 0.5 * (leftHandValueLda + rightHandValueLda));
         for (SimilarityType st : SimilarityType.values()) {
-            ontologySim.put(st, 
+            similarities.put(st,
                     0.5 * (leftHandValueOntology.get(st) + rightHandValueOntology.get(st)));
         }
         // compute the final semantic relatedness value by combining different metrics 
         if (Math.min(source.getWordOccurences().size(), destination.getWordOccurences().size()) > 0) {
-            relatedness = getSimilarityMeasure(ontologySim.get(SimilarityType.WU_PALMER), lsaSim, ldaSim);
+            relatedness = getSimilarityMeasure(similarities.get(SimilarityType.WU_PALMER), similarities.get(SimilarityType.LSA), similarities.get(SimilarityType.LDA));
         }
     }
 
@@ -254,24 +253,5 @@ public class SemanticRelatedness extends SemanticCohesion {
      */
     public void setRelatedness(double relatedness) {
         this.relatedness = relatedness;
-    }
-
-    @Override
-    public String toString() {
-        DecimalFormat formatter = new DecimalFormat("#.##");
-        return "Semantic relatedness [ Leacock-Chodorow=" + 
-                formatter.format(ontologySim.get(SimilarityType.LEACOCK_CHODOROW))
-                + "; WU-Palmer=" + formatter.format(ontologySim.get(SimilarityType.WU_PALMER)) + "; Path="
-                + formatter.format(ontologySim.get(SimilarityType.PATH_SIM)) + "; cos(LSA)=" + formatter.format(lsaSim)
-                + "; sim(LDA)=" + formatter.format(ldaSim) + "]=" + formatter.format(relatedness);
-    }
-
-    @Override
-    public String print() {
-        DecimalFormat formatter = new DecimalFormat("#.######");
-        return formatter.format(lsaSim) + "," + formatter.format(ldaSim) + ","
-                + formatter.format(ontologySim.get(SimilarityType.LEACOCK_CHODOROW)) + ","
-                + formatter.format(ontologySim.get(SimilarityType.WU_PALMER)) + ","
-                + formatter.format(ontologySim.get(SimilarityType.PATH_SIM)) + "," + formatter.format(relatedness);
     }
 }

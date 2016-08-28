@@ -24,6 +24,7 @@ import data.AnalysisElement;
 import data.Block;
 import data.Sentence;
 import data.Word;
+import data.document.ReadingStrategyType;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
@@ -37,7 +38,7 @@ public class InferredKnowledgeStrategy {
     private static double SIMILARITY_THRESHOLD_KI = 0.7;
 
     private int addAssociations(Word word, AnalysisElement e, String usedColor, String annotationText) {
-        word.getReadingStrategies()[ReadingStrategies.INFERRED_KNOWLEDGE] = true;
+        word.getReadingStrategies().add(ReadingStrategyType.INFERRED_KNOWLEDGE);
         int noOccurences = StringUtils.countMatches(" " + e.getAlternateText() + " ", " " + word.getText() + " ");
         e.setAlternateText(
                 PatternMatching.colorTextStar(e.getAlternateText(), word.getText(), usedColor, annotationText));
@@ -73,10 +74,8 @@ public class InferredKnowledgeStrategy {
         probDistribSentences = VectorAlgebra.normalize(probDistribSentences);
 
         for (Word w1 : v.getWordOccurences().keySet()) {
-            // only for words that have not been previously marked as
-            // paraphrases and not previously identified as inferred concepts
-            if (!w1.getReadingStrategies()[ReadingStrategies.PARAPHRASE]
-                    && !w1.getReadingStrategies()[ReadingStrategies.INFERRED_KNOWLEDGE]) {
+            // only for words that have not been previously marked as paraphrases and not previously identified as inferred concepts
+            if (!w1.getReadingStrategies().contains(ReadingStrategyType.PARAPHRASE) && !w1.getReadingStrategies().contains(ReadingStrategyType.INFERRED_KNOWLEDGE)) {
                 // determine if alternative paraphrasing exists
                 boolean hasAssociations = false;
                 loopsentence:
@@ -98,8 +97,7 @@ public class InferredKnowledgeStrategy {
                     double[] vector1 = v.getLSA().getWordVector(w1);
                     Word closestWord = null;
 
-                    // add similarity to sentences as a measure of importance of
-                    // the word
+                    // add similarity to sentences as a measure of importance of the word
                     double simLSASentences = VectorAlgebra.cosineSimilarity(vector1, vectorSentences);
                     double simLDASentences = LDA.getSimilarity(probDistrib1, probDistribSentences);
                     double simMaxSentence = Math.max(simLSASentences, simLDASentences);

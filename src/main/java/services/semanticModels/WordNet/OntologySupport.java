@@ -354,9 +354,9 @@ public class OntologySupport {
         AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.eng, false, false);
 
         SemanticCohesion sc = new SemanticCohesion(d, d1);
-        System.out.println(sc.getOntologySim().get(SimilarityType.LEACOCK_CHODOROW));
-        System.out.println(sc.getOntologySim().get(SimilarityType.WU_PALMER));
-        System.out.println(sc.getOntologySim().get(SimilarityType.PATH_SIM));
-//correctFiles();
+        System.out.println(sc.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW));
+        System.out.println(sc.getSemanticSimilarities().get(SimilarityType.WU_PALMER));
+        System.out.println(sc.getSemanticSimilarities().get(SimilarityType.PATH_SIM));
+        // correctFiles();
     }
 }

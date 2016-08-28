@@ -21,7 +21,6 @@ import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import java.util.EnumMap;
-import java.util.Map;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.WordNet.OntologySupport;
@@ -35,20 +34,14 @@ public class SemanticCohesion implements Serializable {
 
     private static final long serialVersionUID = 7561413289472294392L;
 
-    public static final int NO_COHESION_DIMENSIONS = 6;
-
     public static final int WINDOW_SIZE = 20;
     public static final double WEIGH_WN = 1.0;
     public static final double WEIGH_LSA = 1.0;
     public static final double WEIGH_LDA = 1.0;
 
-    protected AnalysisElement source;
-    protected AnalysisElement destination;
-    protected EnumMap<SimilarityType, Double> ontologySim = new EnumMap<>(SimilarityType.class);
-    protected double lsaSim;
-    protected double ldaSim;
-
-    private double cohesion;
+    protected final AnalysisElement source;
+    protected final AnalysisElement destination;
+    protected final EnumMap<SimilarityType, Double> similarities;
 
     public static double getAggregatedSemanticMeasure(double lsaSim, double ldaSim) {
         double cohesion = 0;
@@ -88,40 +81,26 @@ public class SemanticCohesion implements Serializable {
     public SemanticCohesion(AnalysisElement source, AnalysisElement destination) {
         this.source = source;
         this.destination = destination;
-        this.lsaSim = VectorAlgebra.cosineSimilarity(source.getLSAVector(), destination.getLSAVector());
+        this.similarities = new EnumMap<>(SimilarityType.class);
+        this.similarities.put(SimilarityType.LSA, VectorAlgebra.cosineSimilarity(source.getLSAVector(), destination.getLSAVector()));
         if (source.getLDAProbDistribution() == null || destination.getLDAProbDistribution() == null) {
-            this.ldaSim = 0;
+            this.similarities.put(SimilarityType.LDA, 0d);
         } else {
-            this.ldaSim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(source.getLDAProbDistribution()),
-                    VectorAlgebra.normalize(destination.getLDAProbDistribution()));
+            this.similarities.put(SimilarityType.LDA, 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(source.getLDAProbDistribution()), VectorAlgebra.normalize(destination.getLDAProbDistribution())));
         }
 
-        ontologySim.put(SimilarityType.LEACOCK_CHODOROW,
+        similarities.put(SimilarityType.LEACOCK_CHODOROW,
                 getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
-        ontologySim.put(SimilarityType.WU_PALMER,
+        similarities.put(SimilarityType.WU_PALMER,
                 getOntologySim(source, destination, SimilarityType.WU_PALMER));
-        ontologySim.put(SimilarityType.PATH_SIM,
+        similarities.put(SimilarityType.PATH_SIM,
                 getOntologySim(source, destination, SimilarityType.PATH_SIM));
-
-        if (Math.min(source.getWordOccurences().size(), destination.getWordOccurences().size()) > 0) {
-            cohesion = getCohesionMeasure(ontologySim.get(SimilarityType.WU_PALMER), lsaSim, ldaSim);
-        }
     }
 
-    public AnalysisElement getSource() {
-        return source;
-    }
-
-    public void setSource(AnalysisElement source) {
-        this.source = source;
-    }
-
-    public AnalysisElement getDestination() {
-        return destination;
-    }
-
-    public void setDestination(AnalysisElement destination) {
-        this.destination = destination;
+    public SemanticCohesion(EnumMap<SimilarityType, Double> similarities) {
+        this.source = null;
+        this.destination = null;
+        this.similarities = similarities;
     }
 
     // compute semantic distance between word and Analysis Element
@@ -157,77 +136,39 @@ public class SemanticCohesion implements Serializable {
 
     // compute symmetric measure of similarity
     private double getOntologySim(AnalysisElement u1, AnalysisElement u2, SimilarityType typeOfSimilarity) {
-        return 1.0d / 2
-                * (getMaxSemOntologySim(u1, u2, typeOfSimilarity) + getMaxSemOntologySim(u2, u1, typeOfSimilarity));
+        return 1.0d / 2 * (getMaxSemOntologySim(u1, u2, typeOfSimilarity) + getMaxSemOntologySim(u2, u1, typeOfSimilarity));
     }
 
-    public double getLSASim() {
-        return lsaSim;
+    public AnalysisElement getSource() {
+        return source;
     }
 
-    public void setLSASim(double lsaSim) {
-        this.lsaSim = lsaSim;
-    }
-
-    public double getLDASim() {
-        return ldaSim;
-    }
-
-    public void setLDASim(double ldaSim) {
-        this.ldaSim = ldaSim;
+    public AnalysisElement getDestination() {
+        return destination;
     }
 
     public double getCohesion() {
-        return cohesion;
+        return getCohesionMeasure(similarities.get(SimilarityType.WU_PALMER), similarities.get(SimilarityType.LSA), similarities.get(SimilarityType.LDA));
     }
 
-    public EnumMap<SimilarityType, Double> getSemanticDistances() {
-        EnumMap<SimilarityType, Double> map = new EnumMap<>(SimilarityType.class);
-        for (Map.Entry<SimilarityType, Double> e : ontologySim.entrySet()) {
-            map.put(e.getKey(), e.getValue());
-        }
-        map.put(SimilarityType.LSA, lsaSim);
-        map.put(SimilarityType.LDA, ldaSim);
-        map.put(SimilarityType.COHESION, cohesion);
-        return map;
-    }
-
-    public static String[] getSemanticDistanceNames() {
-        // Normalized Leackock-Chodorow by log(2*ontology depth)
-        return new String[]{"Leackock-Chodorow", "Wu-Palmer", "Inverse path length", "LSA", "LDA",
-            "Aggregated score"};
-    }
-
-    public static String[] getSemanticDistanceAcronyms() {
-        return new String[]{"LckChodo", "WuPalmer", "InvPathLen", "LSA", "LDA", "Aggreg"};
-    }
-
-    public void setCohesion(double cohesion) {
-        this.cohesion = cohesion;
-    }
-
-    public EnumMap<SimilarityType, Double> getOntologySim() {
-        return ontologySim;
-    }
-
-    public void setOntologySim(EnumMap<SimilarityType, Double> ontologySim) {
-        this.ontologySim = ontologySim;
+    public EnumMap<SimilarityType, Double> getSemanticSimilarities() {
+        return similarities;
     }
 
     @Override
     public String toString() {
-        return "Cohesion [ Leacock-Chodorow=" + Formatting.formatNumber(ontologySim.get(SimilarityType.LEACOCK_CHODOROW))
-                + "; WU-Palmer=" + Formatting.formatNumber(ontologySim.get(SimilarityType.WU_PALMER)) + "; Path="
-                + Formatting.formatNumber(ontologySim.get(SimilarityType.PATH_SIM)) + "; cos(LSA)="
-                + Formatting.formatNumber(lsaSim) + "; sim(LDA)=" + Formatting.formatNumber(ldaSim) + "]="
-                + Formatting.formatNumber(cohesion);
+        StringBuilder s = new StringBuilder();
+        for (SimilarityType st : SimilarityType.values()) {
+            s.append(st.getName()).append("=").append(Formatting.formatNumber(similarities.get(st))).append(";");
+        }
+        return s.toString();
     }
 
     public String print() {
-        return Formatting.formatNumber(lsaSim) + "," + Formatting.formatNumber(ldaSim) + ","
-                + Formatting.formatNumber(ontologySim.get(SimilarityType.LEACOCK_CHODOROW)) + ","
-                + Formatting.formatNumber(ontologySim.get(SimilarityType.WU_PALMER)) + ","
-                + Formatting.formatNumber(ontologySim.get(SimilarityType.PATH_SIM)) + ","
-                + Formatting.formatNumber(cohesion);
+        StringBuilder s = new StringBuilder();
+        for (SimilarityType st : SimilarityType.values()) {
+            s.append(Formatting.formatNumber(similarities.get(st))).append(",");
+        }
+        return s.toString();
     }
 }

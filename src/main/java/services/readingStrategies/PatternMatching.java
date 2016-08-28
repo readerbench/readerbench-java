@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import data.AnalysisElement;
 import data.Sentence;
+import data.document.ReadingStrategyType;
 import services.nlp.listOfWords.ListOfWords;
 
 /**
@@ -70,14 +71,13 @@ public class PatternMatching {
     }
 
     // returns the number of occurrences
-    public static int containsStrategy(List<Sentence> sentences, AnalysisElement el, int strategy,
-            boolean alreadyExistentCheck) {
+    public static int containsStrategy(List<Sentence> sentences, AnalysisElement el, ReadingStrategyType strategy, boolean alreadyExistentCheck) {
         String text = " " + el.getAlternateText() + " ";
         int no_occurences = 0;
         ListOfWords usedList = null;
         String usedColor = null;
         switch (strategy) {
-            case ReadingStrategies.CAUSALITY:
+            case CAUSALITY:
                 usedColor = Integer.toHexString(COLOR_CAUSALITY.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
@@ -91,7 +91,7 @@ public class PatternMatching {
                         break;
                 }
                 break;
-            case ReadingStrategies.META_COGNITION:
+            case META_COGNITION:
                 usedColor = Integer.toHexString(COLOR_METACOGNITION.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
@@ -107,10 +107,9 @@ public class PatternMatching {
                 break;
         }
 
-        if (usedList != null && strategy == ReadingStrategies.META_COGNITION) {
+        if (usedList != null && strategy.equals(ReadingStrategyType.META_COGNITION)) {
             for (String pattern : usedList.getWords()) {
-                // check that the pattern does not exist in any of the previous
-                // sentences
+                // check that the pattern does not exist in any of the previous sentences
                 boolean exists = false;
                 if (alreadyExistentCheck) {
                     for (Sentence s : sentences) {
@@ -132,17 +131,15 @@ public class PatternMatching {
                 }
             }
         }
-        if (usedList != null && strategy == ReadingStrategies.CAUSALITY) {
+        if (usedList != null && strategy.equals(ReadingStrategyType.CAUSALITY)) {
             for (String pattern : usedList.getWords()) {
                 if (text.trim().startsWith(pattern + " ")) {
                     Pattern javaPattern = Pattern.compile(" " + pattern + " ");
-                    Matcher matcher = javaPattern
-                            .matcher(" " + text.trim().substring(pattern.length() + 1).trim() + " ");
+                    Matcher matcher = javaPattern.matcher(" " + text.trim().substring(pattern.length() + 1).trim() + " ");
                     while (matcher.find()) {
                         no_occurences++;
                     }
-                    text = pattern + " "
-                            + colorText(text.trim().substring(pattern.length() + 1).trim(), pattern, usedColor);
+                    text = pattern + " " + colorText(text.trim().substring(pattern.length() + 1).trim(), pattern, usedColor);
                 } else {
                     Pattern javaPattern = Pattern.compile(" " + pattern + " ");
                     Matcher matcher = javaPattern.matcher(" " + text.trim() + " ");

@@ -41,7 +41,7 @@ public class AvgBlockAdjacencyCohesion extends ComplexityIndex{
 			if (b != null) {
 				if (d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][i + 1] != null
 						&& d.getPrunnedBlockDistances()[i][i + 1].getCohesion() > 0) {
-					sum += d.getPrunnedBlockDistances()[i][i + 1].getSemanticDistances().get(simType);
+					sum += d.getPrunnedBlockDistances()[i][i + 1].getSemanticSimilarities().get(simType);
 					no++;
 				}
 			}

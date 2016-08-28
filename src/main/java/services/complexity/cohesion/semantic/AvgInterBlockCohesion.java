@@ -42,7 +42,7 @@ public class AvgInterBlockCohesion extends ComplexityIndex{
 				for (int j = 0; j < d.getBlocks().size(); j++) {
 					if (i != j && d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][j] != null
 							&& d.getPrunnedBlockDistances()[i][j].getCohesion() > 0) {
-						sum += d.getPrunnedBlockDistances()[i][j].getSemanticDistances().get(simType);
+						sum += d.getPrunnedBlockDistances()[i][j].getSemanticSimilarities().get(simType);
 						no++;
 					}
 				}

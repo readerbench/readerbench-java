@@ -46,7 +46,7 @@ public class AvgTransitionCohesion extends ComplexityIndex{
 					if (!current.getSentences().isEmpty() && !previous.getSentences().isEmpty()) {
 						SemanticCohesion coh = new SemanticCohesion(current.getSentences().get(0),
 								previous.getSentences().get(previous.getSentences().size() - 1));
-						sum += coh.getSemanticDistances().get(simType);
+						sum += coh.getSemanticSimilarities().get(simType);
 						no++;
 					}
 				}

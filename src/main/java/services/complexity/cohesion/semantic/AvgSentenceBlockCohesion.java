@@ -38,7 +38,7 @@ public class AvgSentenceBlockCohesion extends ComplexityIndex{
                 .filter(b -> b != null)
                 .mapToDouble(b -> Arrays.stream(b.getSentenceBlockDistances())
                         .filter(coh -> coh != null && coh.getCohesion() > 0)
-                        .mapToDouble(coh -> coh.getSemanticDistances().get(simType))
+                        .mapToDouble(coh -> coh.getSemanticSimilarities().get(simType))
                         .average().orElse(-1))
                 .filter(avg -> avg > 0)
                 .average().orElse(ComplexityIndices.IDENTITY);

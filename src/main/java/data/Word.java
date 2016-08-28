@@ -21,332 +21,330 @@ import services.discourse.cohesion.CohesionGraph;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
-import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import dao.WordDAO;
 import data.discourse.SemanticChain;
+import data.document.ReadingStrategyType;
 import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import data.pojo.EntityXValence;
+import java.util.EnumSet;
 
 import org.apache.log4j.Logger;
 
 /**
- * 
+ *
  * @author Mihai Dascalu
  */
 public class Word implements Comparable<Word>, Serializable {
 
-	static Logger logger = Logger.getLogger(CohesionGraph.class);
+    static Logger logger = Logger.getLogger(CohesionGraph.class);
 
-	private static final long serialVersionUID = -3809934014813200184L;
+    private static final long serialVersionUID = -3809934014813200184L;
 
-	private int blockIndex;// the number of the block the word is part of
-	private int utteranceIndex; // the number of the utterance the word is part
-								// of (inside of the block)
-	private transient LSA lsa;
-	private transient LDA lda;
-	private Lang language;
-	private String text;
-	private String POS;
-	private String stem;
-	private String NE;
-	private String lemma;
-	private double[] lsaVector;
-	private double[] ldaProbDistribution;
-	private double idf;
-	private LexicalChainLink lexicalChainLink; // the lexical chain link
-												// associated with the word
-												// after disambiguation
-	private SemanticChain semanticChain;
-	private boolean[] readingStrategies;
+    private int blockIndex;// the number of the block the word is part of
+    private int utteranceIndex; // the number of the utterance the word is part
+    // of (inside of the block)
+    private transient LSA lsa;
+    private transient LDA lda;
+    private Lang language;
+    private String text;
+    private String POS;
+    private String stem;
+    private String NE;
+    private String lemma;
+    private double[] lsaVector;
+    private double[] ldaProbDistribution;
+    private double idf;
+    private LexicalChainLink lexicalChainLink; // the lexical chain link associated with the word after disambiguation
+    private SemanticChain semanticChain;
+    private EnumSet<ReadingStrategyType> usedReadingStrategies;
 
-	private transient SentimentEntity sentiment;
+    private transient SentimentEntity sentiment;
 
-	public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
-		this.text = text;
-		this.lemma = lemma;
-		this.stem = stem;
-		this.POS = POS;
-		this.NE = NE;
-		this.language = lang;
-		this.readingStrategies = new boolean[ReadingStrategies.NO_READING_STRATEGIES];
-		// loadSentimentEntity();
-	}
+    public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
+        this.text = text;
+        this.lemma = lemma;
+        this.stem = stem;
+        this.POS = POS;
+        this.NE = NE;
+        this.language = lang;
+        this.usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
+    }
 
-	private void loadSentimentEntity() {
-		data.pojo.Word word = WordDAO.getInstance().findByLabel(text, language);
-		if (word == null)
-			return; // sentiment entity gol - nu avem info despre cuvant
-		data.pojo.SentimentEntity se = word.getFkSentimentEntity();
-		if (se == null)
-			return;
-		sentiment = new SentimentEntity();
-		for (EntityXValence exv : se.getEntityXValenceList()) {
-			sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
-		}
-	}
+    private void loadSentimentEntity() {
+        data.pojo.Word word = WordDAO.getInstance().findByLabel(text, language);
+        if (word == null) {
+            return; // empty sentiment entity - no info on the current word
+        }
+        data.pojo.SentimentEntity se = word.getFkSentimentEntity();
+        if (se == null) {
+            return;
+        }
+        sentiment = new SentimentEntity();
+        se.getEntityXValenceList().stream().forEach((exv) -> {
+            sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
+        });
+    }
 
-	public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda, Lang lang) {
-		this(text, lemma, stem, POS, NE, lang);
-		this.lsa = lsa;
-		this.lda = lda;
-		if (lsa != null) {
-			this.idf = lsa.getWordIDf(this);
-			this.lsaVector = lsa.getWordVector(this);
-		}
-		if (lda != null) {
-			this.ldaProbDistribution = lda.getWordProbDistribution(this);
-		}
-	}
+    public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda, Lang lang) {
+        this(text, lemma, stem, POS, NE, lang);
+        this.lsa = lsa;
+        this.lda = lda;
+        if (lsa != null) {
+            this.idf = lsa.getWordIDf(this);
+            this.lsaVector = lsa.getWordVector(this);
+        }
+        if (lda != null) {
+            this.ldaProbDistribution = lda.getWordProbDistribution(this);
+        }
+    }
 
-	public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda,
-			SentimentEntity sentiment, Lang lang) {
-		this(text, lemma, stem, POS, NE, lsa, lda, lang);
-		this.sentiment = sentiment;
-	}
+    public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda,
+            SentimentEntity sentiment, Lang lang) {
+        this(text, lemma, stem, POS, NE, lsa, lda, lang);
+        this.sentiment = sentiment;
+    }
 
-	public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
-			LSA lsa, LDA lda, Lang lang) {
-		this(text, lemma, stem, POS, NE, lsa, lda, lang);
-		this.blockIndex = blockIndex;
-		this.utteranceIndex = utteranceIndex;
-	}
+    public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
+            LSA lsa, LDA lda, Lang lang) {
+        this(text, lemma, stem, POS, NE, lsa, lda, lang);
+        this.blockIndex = blockIndex;
+        this.utteranceIndex = utteranceIndex;
+    }
 
-	public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
-			LSA lsa, LDA lda, SentimentEntity sentiment, Lang lang) {
-		this(blockIndex, utteranceIndex, text, lemma, stem, POS, NE, lsa, lda, lang);
-		this.sentiment = sentiment;
-	}
+    public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
+            LSA lsa, LDA lda, SentimentEntity sentiment, Lang lang) {
+        this(blockIndex, utteranceIndex, text, lemma, stem, POS, NE, lsa, lda, lang);
+        this.sentiment = sentiment;
+    }
 
-	public static Word getWordFromConcept(String concept, Lang lang) {
-		Word w = null;
-		if (concept.indexOf("_") > 0) {
-			String word = concept.substring(0, concept.indexOf("_"));
-			String POS = concept.substring(concept.indexOf("_") + 1);
-			w = new Word(word, word, Stemmer.stemWord(word, lang), POS, null, lang);
-		} else {
-			w = new Word(concept, concept, Stemmer.stemWord(concept, lang), null, null, lang);
-		}
-		return w;
-	}
+    public static Word getWordFromConcept(String concept, Lang lang) {
+        Word w;
+        if (concept.indexOf("_") > 0) {
+            String word = concept.substring(0, concept.indexOf("_"));
+            String POS = concept.substring(concept.indexOf("_") + 1);
+            w = new Word(word, word, Stemmer.stemWord(word, lang), POS, null, lang);
+        } else {
+            w = new Word(concept, concept, Stemmer.stemWord(concept, lang), null, null, lang);
+        }
+        return w;
+    }
 
-	public double getDistanceInChain(Word word) {
-		if (!partOfSameLexicalChain(word)) {
-			return Double.MAX_VALUE;
-		} else {
-			LexicalChain chain = word.getLexicalChainLink().getLexicalChain();
-			return chain.getDistance(word.getLexicalChainLink(), word.getLexicalChainLink());
-		}
-	}
+    public double getDistanceInChain(Word word) {
+        if (!partOfSameLexicalChain(word)) {
+            return Double.MAX_VALUE;
+        } else {
+            LexicalChain chain = word.getLexicalChainLink().getLexicalChain();
+            return chain.getDistance(word.getLexicalChainLink(), word.getLexicalChainLink());
+        }
+    }
 
-	public boolean isNoun() {
-		return POS.startsWith("NN");
-	}
+    public boolean isNoun() {
+        return POS.startsWith("NN");
+    }
 
-	public boolean isVerb() {
-		return POS.startsWith("VB");
-	}
+    public boolean isVerb() {
+        return POS.startsWith("VB");
+    }
 
-	public boolean partOfSameLexicalChain(Word word) {
-		if (word.getLexicalChainLink() == null || word.getLexicalChainLink().getLexicalChain() == null
-				|| lexicalChainLink == null || lexicalChainLink.getLexicalChain() == null) {
-			// some words do not have a lexical chain link associated since they
-			// were not found in WordNet
-			return false;
-		}
-		return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
-	}
+    public boolean partOfSameLexicalChain(Word word) {
+        if (word.getLexicalChainLink() == null || word.getLexicalChainLink().getLexicalChain() == null
+                || lexicalChainLink == null || lexicalChainLink.getLexicalChain() == null) {
+            // some words do not have a lexical chain link associated since they
+            // were not found in WordNet
+            return false;
+        }
+        return lexicalChainLink.getLexicalChain().equals(word.getLexicalChainLink().getLexicalChain());
+    }
 
-	public int getBlockIndex() {
-		return blockIndex;
-	}
+    public int getBlockIndex() {
+        return blockIndex;
+    }
 
-	public void setBlockIndex(int blockIndex) {
-		this.blockIndex = blockIndex;
-	}
+    public void setBlockIndex(int blockIndex) {
+        this.blockIndex = blockIndex;
+    }
 
-	public int getUtteranceIndex() {
-		return utteranceIndex;
-	}
+    public int getUtteranceIndex() {
+        return utteranceIndex;
+    }
 
-	public void setUtteranceIndex(int utteranceIndex) {
-		this.utteranceIndex = utteranceIndex;
-	}
+    public void setUtteranceIndex(int utteranceIndex) {
+        this.utteranceIndex = utteranceIndex;
+    }
 
-	public String getPOS() {
-		return POS;
-	}
+    public String getPOS() {
+        return POS;
+    }
 
-	public void setPOS(String POS) {
-		this.POS = POS;
-	}
+    public void setPOS(String POS) {
+        this.POS = POS;
+    }
 
-	public String getStem() {
-		return stem;
-	}
+    public String getStem() {
+        return stem;
+    }
 
-	public void setStem(String stem) {
-		this.stem = stem;
-	}
+    public void setStem(String stem) {
+        this.stem = stem;
+    }
 
-	public String getText() {
-		return text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	public void setText(String text) {
-		this.text = text;
-	}
+    public void setText(String text) {
+        this.text = text;
+    }
 
-	public double getIdf() {
-		return idf;
-	}
+    public double getIdf() {
+        return idf;
+    }
 
-	public void setIdf(double idf) {
-		this.idf = idf;
-	}
+    public void setIdf(double idf) {
+        this.idf = idf;
+    }
 
-	public double[] getLSAVector() {
-		return lsaVector;
-	}
+    public double[] getLSAVector() {
+        return lsaVector;
+    }
 
-	public void setLSAVector(double[] lsaVector) {
-		this.lsaVector = lsaVector;
-	}
+    public void setLSAVector(double[] lsaVector) {
+        this.lsaVector = lsaVector;
+    }
 
-	public double[] getLDAProbDistribution() {
-		return ldaProbDistribution;
-	}
+    public double[] getLDAProbDistribution() {
+        return ldaProbDistribution;
+    }
 
-	public void setLDAProbDistribution(double[] ldaProbDistribution) {
-		this.ldaProbDistribution = ldaProbDistribution;
-	}
+    public void setLDAProbDistribution(double[] ldaProbDistribution) {
+        this.ldaProbDistribution = ldaProbDistribution;
+    }
 
-	public String getLemma() {
-		return lemma;
-	}
+    public String getLemma() {
+        return lemma;
+    }
 
-	public void setLemma(String lemma) {
-		this.lemma = lemma;
-	}
+    public void setLemma(String lemma) {
+        this.lemma = lemma;
+    }
 
-	public LSA getLSA() {
-		return lsa;
-	}
+    public LSA getLSA() {
+        return lsa;
+    }
 
-	public void setLSA(LSA lsa) {
-		this.lsa = lsa;
-	}
+    public void setLSA(LSA lsa) {
+        this.lsa = lsa;
+    }
 
-	public LDA getLDA() {
-		return lda;
-	}
+    public LDA getLDA() {
+        return lda;
+    }
 
-	public void setLDA(LDA lda) {
-		this.lda = lda;
-	}
+    public void setLDA(LDA lda) {
+        this.lda = lda;
+    }
 
-	public Lang getLanguage() {
-		return language;
-	}
+    public Lang getLanguage() {
+        return language;
+    }
 
-	public void setLanguage(Lang language) {
-		this.language = language;
-	}
+    public void setLanguage(Lang language) {
+        this.language = language;
+    }
 
-	public String getNE() {
-		return NE;
-	}
+    public String getNE() {
+        return NE;
+    }
 
-	public void setNE(String nE) {
-		NE = nE;
-	}
+    public void setNE(String nE) {
+        NE = nE;
+    }
 
-	public LexicalChainLink getLexicalChainLink() {
-		return lexicalChainLink;
-	}
+    public LexicalChainLink getLexicalChainLink() {
+        return lexicalChainLink;
+    }
 
-	public void setLexicalChainLink(LexicalChainLink lexicalChainLink) {
-		this.lexicalChainLink = lexicalChainLink;
-	}
+    public void setLexicalChainLink(LexicalChainLink lexicalChainLink) {
+        this.lexicalChainLink = lexicalChainLink;
+    }
 
-	public boolean[] getReadingStrategies() {
-		return readingStrategies;
-	}
+    public EnumSet<ReadingStrategyType> getReadingStrategies() {
+        return usedReadingStrategies;
+    }
 
-	public void setReadingStrategies(boolean[] readingStrategies) {
-		this.readingStrategies = readingStrategies;
-	}
+    public void resetReadingStrategies() {
+        usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
+    }
 
-	public SemanticChain getSemanticChain() {
-		return semanticChain;
-	}
+    public SemanticChain getSemanticChain() {
+        return semanticChain;
+    }
 
-	public void setSemanticChain(SemanticChain semanticChain) {
-		this.semanticChain = semanticChain;
-	}
+    public void setSemanticChain(SemanticChain semanticChain) {
+        this.semanticChain = semanticChain;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		Word w = (Word) obj;
-		if (this.getPOS() != null && w.getPOS() != null)
-			return this.getLemma().equals(w.getLemma()) && this.getPOS().equals(w.getPOS());
-		return this.getLemma().equals(w.getLemma());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Word)) {
+            return false;
+        }
+        Word w = (Word) obj;
+        if (this.getPOS() != null && w.getPOS() != null) {
+            return this.getLemma().equals(w.getLemma()) && this.getPOS().equals(w.getPOS());
+        }
+        return this.getLemma().equals(w.getLemma());
+    }
 
-	@Override
-	public String toString() {
-		return this.text + "(" + this.lemma + ", " + this.stem + ", " + this.POS + ")";
-	}
+    @Override
+    public String toString() {
+        return this.text + "(" + this.lemma + ", " + this.stem + ", " + this.POS + ")";
+    }
 
-	public String getExtendedLemma() {
-		if (this.getPOS() != null) {
-			return this.getLemma() + "_" + this.getPOS();
-		}
-		return this.getLemma();
-	}
+    public String getExtendedLemma() {
+        if (this.getPOS() != null) {
+            return this.getLemma() + "_" + this.getPOS();
+        }
+        return this.getLemma();
+    }
 
-	public boolean isContentWord() {
-		if (this.getText().length() > 1 
-				&& !StopWords.isStopWord(this.getText(), this.language)
-				&& !StopWords.isStopWord(this.getLemma(), this.language) 
-				&& 	(Dictionary.isDictionaryWord(this.getText(), this.language)
-					|| Dictionary.isDictionaryWord(this.getLemma(), this.language))) {
-			if (this.getPOS() != null) {
-				if (this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
-						|| this.getPOS().equals("RB")) {
-					return true;
-				}
-				return false;
-			}
-			return true;
-		}
-		return false;
-	}
+    public boolean isContentWord() {
+        if (this.getText().length() > 1
+                && !StopWords.isStopWord(this.getText(), this.language)
+                && !StopWords.isStopWord(this.getLemma(), this.language)
+                && (Dictionary.isDictionaryWord(this.getText(), this.language)
+                || Dictionary.isDictionaryWord(this.getLemma(), this.language))) {
+            if (this.getPOS() != null) {
+                return this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
+                        || this.getPOS().equals("RB");
+            }
+            return true;
+        }
+        return false;
+    }
 
-	@Override
-	public int compareTo(Word o) {
-		if (this.getPOS() != null && o.getPOS() != null)
-			return (this.getLemma() + "_" + this.getPOS()).compareTo(o.getLemma() + "_" + o.getPOS());
-		return this.getLemma().compareTo(o.getLemma());
-	}
+    @Override
+    public int compareTo(Word o) {
+        if (this.getPOS() != null && o.getPOS() != null) {
+            return (this.getLemma() + "_" + this.getPOS()).compareTo(o.getLemma() + "_" + o.getPOS());
+        }
+        return this.getLemma().compareTo(o.getLemma());
+    }
 
-	public SentimentEntity getSentiment() {
-		if (sentiment == null) {
-			// logger.info("Pentru cuvantul " + this + " nu avem initializate
-			// sentimentele");
-			loadSentimentEntity();
-		}
-		// logger.info("Pentru cuvantul " + this + " avem initializate
-		// sentimentele");
-		return sentiment;
-	}
+    public SentimentEntity getSentiment() {
+        if (sentiment == null) {
+            loadSentimentEntity();
+        }
+        return sentiment;
+    }
 
-	public void setSentiment(SentimentEntity sentimentEntity) {
-		this.sentiment = sentimentEntity;
-	}
+    public void setSentiment(SentimentEntity sentimentEntity) {
+        this.sentiment = sentimentEntity;
+    }
 
 }
