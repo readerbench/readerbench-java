@@ -54,7 +54,7 @@ public class SyntaxFactory implements ComplexityIndecesFactory{
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK, "JJ"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK, "IN"));
         
-        ClassesOfWords classes = Pronouns.getClasses(lang);
+        ClassesOfWords classes = Pronouns.getPronouns(lang);
         if (classes != null) {
             for (String category : classes.getClasses().keySet()) {
                 result.add(new PronounsBlock(lang, classes, category));

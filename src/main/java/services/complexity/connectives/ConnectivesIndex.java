@@ -40,26 +40,7 @@ public class ConnectivesIndex extends ComplexityIndex {
             String connective) {
         super(index, lang, null, connective);
         this.countFunction = countFunction;
-        switch (lang) {
-            case eng:
-                connectives = Connectives.CONNECTIVES_EN;
-                break;
-            case fr:
-                connectives = Connectives.CONNECTIVES_FR;
-                break;
-            case ro:
-                connectives = Connectives.CONNECTIVES_RO;
-                break;
-            case nl:
-                connectives = Connectives.CONNECTIVES_NL;
-                break;
-            case la:
-                connectives = Connectives.CONNECTIVES_LA;
-                break;
-            default:
-                connectives = null;
-                break;
-        }
+        this.connectives = Connectives.getConnectives(lang);
     }
 
     @Override

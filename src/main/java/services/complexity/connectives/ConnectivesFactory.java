@@ -35,40 +35,23 @@ public class ConnectivesFactory implements ComplexityIndecesFactory {
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
         ClassesOfWords connectives;
-        switch (lang) {
-            case eng:
-                connectives = Connectives.CONNECTIVES_EN;
-                break;
-            case fr:
-                connectives = Connectives.CONNECTIVES_FR;
-                break;
-            case ro:
-                connectives = Connectives.CONNECTIVES_RO;
-                break;
-            case nl:
-                connectives = Connectives.CONNECTIVES_NL;
-                break;
-            case la:
-                connectives = Connectives.CONNECTIVES_LA;
-                break;
-            default:
-                connectives = null;
-                break;
+        connectives = Connectives.getConnectives(lang);
+        if (connectives == null) {
+            return result;
         }
-        if (connectives == null) return result;
         for (String className : connectives.getClasses().keySet()) {
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_BLOCK, 
-                    lang, 
-                    AbstractDocument::getNoBlocks, 
+                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_BLOCK,
+                    lang,
+                    AbstractDocument::getNoBlocks,
                     className));
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_SENTENCE, 
-                    lang, 
-                    AbstractDocument::getNoSentences, 
+                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_SENTENCE,
+                    lang,
+                    AbstractDocument::getNoSentences,
                     className));
         }
         return result;
     }
-    
+
 }

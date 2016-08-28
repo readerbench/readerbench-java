@@ -17,52 +17,80 @@ package services.nlp.listOfWords;
 
 import data.Lang;
 
+/**
+ * Class containing all pronoun lists for supported languages that makes use of
+ * lazy initialization
+ *
+ * @author Mihai Dascalu
+ */
 public class Pronouns {
 
-    public static final ClassesOfWords PRONOUNS_EN = new ClassesOfWords(
-            "resources/config/EN/word lists/pronouns_en.txt");
-    public static final ClassesOfWords PRONOUNS_FR = new ClassesOfWords(
-            "resources/config/FR/word lists/pronouns_fr.txt");
-    public static final ClassesOfWords PRONOUNS_RO = new ClassesOfWords(
-            "resources/config/RO/word lists/pronouns_ro.txt");
-    public static final ClassesOfWords PRONOUNS_NL = new ClassesOfWords(
-            "resources/config/NL/word lists/pronouns_nl.txt");
-    public static final ClassesOfWords PRONOUNS_LA = new ClassesOfWords(
-            "resources/config/LA/word lists/pronouns_la.txt");
-    public static final int NO_PRONOUN_TYPES = PRONOUNS_EN.getClasses().size();
+    public static ClassesOfWords pronouns_en = null;
+    public static ClassesOfWords pronouns_fr = null;
+    public static ClassesOfWords pronouns_ro = null;
+    public static ClassesOfWords pronouns_nl = null;
+    public static ClassesOfWords pronouns_la = null;
 
-    public static ClassesOfWords getClasses(Lang lang) {
-        switch (lang) {
-            case eng:
-                return PRONOUNS_EN;
-            case fr:
-                return PRONOUNS_FR;
-            case ro:
-                return PRONOUNS_RO;
-            case nl:
-                return PRONOUNS_NL;
-            case la:
-                return PRONOUNS_LA;
-            default:
-                return null;
-        }
-    }
-    
     public static boolean isConnective(String s, Lang lang) {
         if (lang == null) {
             return false;
         }
-        switch (lang) {
-            case fr:
-                return PRONOUNS_FR.getAllWords().contains(s);
-            case ro:
-                return PRONOUNS_RO.getAllWords().contains(s);
-            case nl:
-                return PRONOUNS_NL.getAllWords().contains(s);
-            case la:
-                return PRONOUNS_LA.getAllWords().contains(s);
-            default:
-                return PRONOUNS_EN.getAllWords().contains(s);
+        ClassesOfWords pronouns = getPronouns(lang);
+        if (pronouns == null) {
+            return false;
         }
+        return pronouns.getAllWords().contains(s);
+    }
+
+    public static ClassesOfWords getPronouns(Lang lang) {
+        switch (lang) {
+            case eng:
+                return getPronounsEn();
+            case fr:
+                return getPronounsFr();
+            case ro:
+                return getPronounsRo();
+            case nl:
+                return getPronounsNl();
+            case la:
+                return getPronounsLa();
+            default:
+                return null;
+        }
+    }
+
+    public static ClassesOfWords getPronounsEn() {
+        if (pronouns_en == null) {
+            pronouns_en = new ClassesOfWords("resources/config/EN/word lists/pronouns_en.txt");
+        }
+        return pronouns_en;
+    }
+
+    public static ClassesOfWords getPronounsFr() {
+        if (pronouns_fr == null) {
+            pronouns_fr = new ClassesOfWords("resources/config/FR/word lists/pronouns_fr.txt");
+        }
+        return pronouns_fr;
+    }
+
+    public static ClassesOfWords getPronounsRo() {
+        if (pronouns_ro == null) {
+            pronouns_ro = new ClassesOfWords("resources/config/RO/word lists/pronouns_ro.txt");
+        }
+        return pronouns_ro;
+    }
+
+    public static ClassesOfWords getPronounsNl() {
+        if (pronouns_nl == null) {
+            pronouns_nl = new ClassesOfWords("resources/config/NL/word lists/pronouns_nl.txt");
+        }
+        return pronouns_nl;
+    }
+
+    public static ClassesOfWords getPronounsLa() {
+        if (pronouns_la == null) {
+            pronouns_la = new ClassesOfWords("resources/config/EN/word lists/pronouns_la.txt");
+        }
+        return pronouns_la;
     }
 }

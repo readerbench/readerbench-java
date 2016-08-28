@@ -41,14 +41,14 @@ public class ListOfWords {
     }
 
     public ListOfWords(String path) {
-        logger.info("Loading " + path + "...");
+        logger.info("Loading file " + path + " ...");
         words = new TreeSet<>();
         try {
             FileInputStream inputFile = new FileInputStream(path);
             //InputStreamReader ir = new InputStreamReader(inputFile, "ISO-8859-1");
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
             try (BufferedReader in = new BufferedReader(ir)) {
-                String line = null;
+                String line;
                 while ((line = in.readLine()) != null) {
                     String word = line.toLowerCase().trim();
                     if (word.length() > 0) {
