@@ -22,7 +22,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,7 +99,7 @@ public class ReaderBenchView extends JFrame {
     public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose Antonio", ""};
     public static final String[] TRAINED_LDA_MODELS_LA = {"resources/config/LA/LDA/Letters", ""};
 
-    private static Lang RUNTIME_LANGUAGE = null;
+    public static Lang RUNTIME_LANGUAGE = Lang.eng;
 
     private final JMenuBar menuBar;
     // File menu item
@@ -164,12 +163,9 @@ public class ReaderBenchView extends JFrame {
             public void updateUI() {
                 if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
                     UIDefaults map = new UIDefaults();
-                    Painter<JComponent> painter = new Painter<JComponent>() {
-                        @Override
-                        public void paint(Graphics2D g, JComponent c, int w, int h) {
-                            g.setColor(Color.WHITE);
-                            g.fillRect(0, 0, w, h);
-                        }
+                    Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0, 0, w, h);
                     };
                     map.put("DesktopPane[Enabled].backgroundPainter", painter);
                     putClientProperty("Nimbus.Overrides", map);
@@ -240,14 +236,12 @@ public class ReaderBenchView extends JFrame {
         btnPreprocessingTrainSemanticModels = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
                 .getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text")); //$NON-NLS-1$
         btnPreprocessingTrainSemanticModels.addActionListener((ActionEvent e) -> {
-            EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        SemanticModelsTraining frame = new SemanticModelsTraining();
-                        frame.setVisible(true);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            EventQueue.invokeLater(() -> {
+                try {
+                    SemanticModelsTraining frame = new SemanticModelsTraining();
+                    frame.setVisible(true);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
                 }
             });
         });
@@ -289,7 +283,7 @@ public class ReaderBenchView extends JFrame {
                 LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnTrainSVMDocs")); //$NON-NLS-1$ //$NON-NLS-2$
         btnPredictTextualComplexity.addActionListener((ActionEvent e) -> {
             if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
-                List<AbstractDocument> abstractDocs = new LinkedList<AbstractDocument>();
+                List<AbstractDocument> abstractDocs = new LinkedList<>();
                 for (Document d : DocumentProcessingView.getLoadedDocuments()) {
                     abstractDocs.add(d);
                 }
@@ -362,11 +356,9 @@ public class ReaderBenchView extends JFrame {
 
         btnEssayProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
                 .getString("ReaderBenchView.btnEssayProcessing.text")); //$NON-NLS-1$
-        btnEssayProcessing.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                EssayProcessingView frame = new EssayProcessingView();
-                frame.setVisible(true);
-            }
+        btnEssayProcessing.addActionListener((ActionEvent e) -> {
+            EssayProcessingView frame = new EssayProcessingView();
+            frame.setVisible(true);
         });
         GroupLayout gl_panel = new GroupLayout(panelTextualComplexity);
         gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.LEADING)

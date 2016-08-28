@@ -35,14 +35,11 @@ public class HeaderRenderer extends JCheckBox implements TableCellRenderer {
 	private final JLabel label = new JLabel();
 	private int targetColumnIndex;
 	private boolean[] selected;
-	private boolean[] isEditable;
-
-	public HeaderRenderer(JTableHeader header, int index, boolean[] selected,
-			boolean[] isEditable) {
+	
+	public HeaderRenderer(JTableHeader header, int index, boolean[] selected) {
 		super((String) null);
 		this.targetColumnIndex = index;
 		this.selected = selected;
-		this.isEditable = isEditable;
 		setOpaque(false);
 		setFont(header.getFont());
 		header.addMouseListener(new MouseAdapter() {
@@ -56,14 +53,12 @@ public class HeaderRenderer extends JCheckBox implements TableCellRenderer {
 				if (mci == targetColumnIndex) {
 					TableColumn column = columnModel.getColumn(vci);
 					Object v = column.getHeaderValue();
-					boolean b = Status.DESELECTED.equals(v) ? true : false;
+					boolean b = Status.DESELECTED.equals(v);
 					TableModel m = table.getModel();
 					for (int i = 0; i < m.getRowCount(); i++) {
 						int index = (Integer) m.getValueAt(i, 0);
-						if (HeaderRenderer.this.isEditable[index]) {
-							m.setValueAt(b, i, mci);
-							HeaderRenderer.this.selected[index] = b;
-						}
+                        m.setValueAt(b, i, mci);
+                        HeaderRenderer.this.selected[index] = b;
 					}
 					column.setHeaderValue(b ? Status.SELECTED
 							: Status.DESELECTED);

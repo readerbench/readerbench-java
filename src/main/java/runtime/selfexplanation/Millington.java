@@ -42,6 +42,7 @@ import data.document.Summary;
 import data.Lang;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
+import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
@@ -125,8 +126,9 @@ public class Millington {
                 out.write("," + type + " (" + semDist + ")");
             }
         }
-        for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-            out.write("," + ComplexityIndices.TEXTUAL_COMPLEXITY_INDEX_ACRONYMS[i]);
+        List<ComplexityIndex> indices = ComplexityIndices.getIndices(Lang.eng);
+        for (ComplexityIndex index : indices) {
+            out.write("," + index.getAcronym());
         }
         out.write("\n");
         out.close();
@@ -227,8 +229,8 @@ public class Millington {
                         + Formatting.formatNumber(cohesionScore.getLSA()) + ","
                         + Formatting.formatNumber(cohesionScore.getLDASim()));
             }
-            for (int i = 0; i < ComplexityIndices.NO_COMPLEXITY_INDICES; i++) {
-                out.write("," + Formatting.formatNumber(se.getComplexityIndices()[i]));
+            for (ComplexityIndex index : indices) {
+                out.write("," + se.getComplexityIndices().get(index));
             }
             out.write("\n");
 
