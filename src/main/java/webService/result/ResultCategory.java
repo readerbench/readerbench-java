@@ -21,10 +21,12 @@ public class ResultCategory implements Comparable<ResultCategory> {
 
 	private String name;
 	private double relevance;
+    private Integer type;
 
-	public ResultCategory(String name, double relevance) {
+	public ResultCategory(String name, double relevance, Integer type) {
 		this.name = name;
 		this.relevance = relevance;
+        this.type = type;
 	}
 
 	public String getName() {
@@ -34,6 +36,10 @@ public class ResultCategory implements Comparable<ResultCategory> {
 	public double getRelevance() {
 		return relevance;
 	}
+    
+    public Integer getType() {
+        return type;
+    }
 
 	@Override
 	public int compareTo(ResultCategory o) {
