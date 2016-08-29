@@ -20,52 +20,62 @@ import java.util.List;
 
 public class ResultvCoP {
 
-		private ResultTopic participantInteractionAllDocuments;
-		private ResultTopic participantInteractionStartEndDate;
-		private List<ResultTopic> participantInteractionInTimeList;
-		//ResultTopic participantInteractionInTime;
-		
-		public ResultvCoP(
-				ResultTopic participantInteractionAllDocuments,
-				ResultTopic participantInteractionStartEndDate,
-				List<ResultTopic> participantInteractionInTimeList
-				) {
-			super();
-			this.participantInteractionAllDocuments = participantInteractionAllDocuments;
-			this.participantInteractionStartEndDate = participantInteractionStartEndDate;
-			this.participantInteractionInTimeList = participantInteractionInTimeList;
-		}
-		
-	//	public ResultvCoP(ResultTopic participantInteractionInTime) {
-	//		super();
-	//		this.participantInteractionInTime = participantInteractionInTime;
-	//	}
+    private ResultTopic participantInteractionAllDocuments;
+    private ResultTopic participantInteractionStartEndDate;
+    private List<ResultTopic> participantInteractionInTimeList;
+    //ResultTopic participantInteractionInTime;
+    private List<ResultGraphPoint> participantEvolution;
 
-		public ResultTopic getParticipantInteractionAllDocuments() {
-			return participantInteractionAllDocuments;
-		}
+    public ResultvCoP(
+            ResultTopic participantInteractionAllDocuments,
+            ResultTopic participantInteractionStartEndDate,
+            List<ResultTopic> participantInteractionInTimeList,
+            List<ResultGraphPoint> participantEvolution
+    ) {
+        super();
+        this.participantInteractionAllDocuments = participantInteractionAllDocuments;
+        this.participantInteractionStartEndDate = participantInteractionStartEndDate;
+        this.participantInteractionInTimeList = participantInteractionInTimeList;
+        this.participantEvolution = participantEvolution;
+    }
 
-		public void setParticipantInteractionAllDocuments(ResultTopic participantInteractionAllDocuments) {
-			this.participantInteractionAllDocuments = participantInteractionAllDocuments;
-		}
+    //	public ResultvCoP(ResultTopic participantInteractionInTime) {
+    //		super();
+    //		this.participantInteractionInTime = participantInteractionInTime;
+    //	}
+    public ResultTopic getParticipantInteractionAllDocuments() {
+        return participantInteractionAllDocuments;
+    }
 
-		public ResultTopic getParticipantInteractionStartEndDate() {
-			return participantInteractionStartEndDate;
-		}
+    public void setParticipantInteractionAllDocuments(ResultTopic participantInteractionAllDocuments) {
+        this.participantInteractionAllDocuments = participantInteractionAllDocuments;
+    }
 
-		public void setParticipantInteractionStartEndDate(ResultTopic participantInteractionStartEndDate) {
-			this.participantInteractionStartEndDate = participantInteractionStartEndDate;
-		}
+    public ResultTopic getParticipantInteractionStartEndDate() {
+        return participantInteractionStartEndDate;
+    }
 
-		public List<ResultTopic> getParticipantInteractionInTimeList() {
-			return participantInteractionInTimeList;
-		}
+    public void setParticipantInteractionStartEndDate(ResultTopic participantInteractionStartEndDate) {
+        this.participantInteractionStartEndDate = participantInteractionStartEndDate;
+    }
 
-		public void setParticipantInteractionInTimeList(List<ResultTopic> participantInteractionInTimeList) {
-			this.participantInteractionInTimeList = participantInteractionInTimeList;
-		}
+    public List<ResultTopic> getParticipantInteractionInTimeList() {
+        return participantInteractionInTimeList;
+    }
 
-	/*	public ResultTopic getParticipantInteractionInTime() {
+    public void setParticipantInteractionInTimeList(List<ResultTopic> participantInteractionInTimeList) {
+        this.participantInteractionInTimeList = participantInteractionInTimeList;
+    }
+    
+    public List<ResultGraphPoint> getParticipantEvolutionData() {
+        return participantEvolution;
+    }
+
+    public void setParticipantEvolutionData(List<ResultGraphPoint> participantEvolution) {
+        this.participantEvolution = participantEvolution;
+    }
+
+    /*	public ResultTopic getParticipantInteractionInTime() {
 			return participantInteractionInTime;
 		}
 

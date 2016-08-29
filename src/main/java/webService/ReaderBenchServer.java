@@ -686,7 +686,7 @@ public class ReaderBenchServer {
 
             QueryResultvCoP queryResult = new QueryResultvCoP();
             ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity, true),
-                    CommunityInteraction.buildParticipantGraph(communityStartEnd, true), participantsInTimeFrame);
+                    CommunityInteraction.buildParticipantGraph(communityStartEnd, true), participantsInTimeFrame, null);
             queryResult.setData(resultVcop);
 
             String result = queryResult.convertToJson();
