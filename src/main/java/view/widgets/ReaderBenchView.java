@@ -93,7 +93,7 @@ public class ReaderBenchView extends JFrame {
     public static final String[] TRAINED_LSA_SPACES_IT = {""};
     public static final String[] TRAINED_LSA_SPACES_ES = {"resources/config/ES/LSA/Jose Antonio", ""};
     public static final String[] TRAINED_LSA_SPACES_LA = {"resources/config/LA/LSA/Letters", ""};
-    public static final String[] TRAINED_LDA_MODELS_EN = {"resources/config/EN/LDA/COCA newspaper", "resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA LAK", "resources/config/EN/LDA/TASA smart cities", ""};
+    public static final String[] TRAINED_LDA_MODELS_EN = {"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA LAK", "resources/config/EN/LDA/TASA smart cities", "resources/config/EN/LDA/COCA newspaper", ""};
     public static final String[] TRAINED_LDA_MODELS_FR = {"resources/config/FR/LDA/Le Monde", "resources/config/FR/LDA/Text Enfants", "resources/config/FR/LDA/Philosophy", ""};
     public static final String[] TRAINED_LDA_MODELS_IT = {"resources/config/IT/LDA/Paisa", ""};
     public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose Antonio", ""};
@@ -174,7 +174,7 @@ public class ReaderBenchView extends JFrame {
             }
         };
         desktopPane.setBackground(Color.WHITE);
-        this.getContentPane().add(desktopPane, BorderLayout.CENTER);
+        super.getContentPane().add(desktopPane, BorderLayout.CENTER);
 
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
@@ -240,8 +240,8 @@ public class ReaderBenchView extends JFrame {
                 try {
                     SemanticModelsTraining frame = new SemanticModelsTraining();
                     frame.setVisible(true);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             });
         });
@@ -284,9 +284,9 @@ public class ReaderBenchView extends JFrame {
         btnPredictTextualComplexity.addActionListener((ActionEvent e) -> {
             if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
                 List<AbstractDocument> abstractDocs = new LinkedList<>();
-                for (Document d : DocumentProcessingView.getLoadedDocuments()) {
+                DocumentProcessingView.getLoadedDocuments().stream().forEach((d) -> {
                     abstractDocs.add(d);
-                }
+                });
                 DocumentEvaluationView view = new DocumentEvaluationView(abstractDocs);
                 view.setVisible(true);
             } else {
@@ -303,8 +303,8 @@ public class ReaderBenchView extends JFrame {
             desktopPane.add(frame);
             try {
                 frame.setSelected(true);
-            } catch (PropertyVetoException e1) {
-                e1.printStackTrace();
+            } catch (PropertyVetoException ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
 
@@ -316,8 +316,8 @@ public class ReaderBenchView extends JFrame {
             desktopPane.add(frame);
             try {
                 frame.setSelected(true);
-            } catch (PropertyVetoException e1) {
-                e1.printStackTrace();
+            } catch (PropertyVetoException ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
 
@@ -495,7 +495,7 @@ public class ReaderBenchView extends JFrame {
         desktopPane.setLayout(gl_desktopPane);
 
         menuBar = new JMenuBar();
-        this.setJMenuBar(menuBar);
+        super.setJMenuBar(menuBar);
 
         mnFile = new JMenu(
                 ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.mnFile.text")); //$NON-NLS-1$

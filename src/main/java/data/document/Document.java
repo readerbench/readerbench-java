@@ -31,7 +31,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -61,6 +60,7 @@ import data.Block;
 import data.Word;
 import data.Lang;
 import data.lexicalChains.DisambiguationGraph;
+import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import services.semanticModels.ISemanticModel;
@@ -69,22 +69,22 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
     private static final long serialVersionUID = 9219491499980439567L;
 
-    private List<String> authors = new LinkedList<>();
+    private List<String> authors;
     private String uri;
     private String source;
     private String complexityLevel;
     private Date date;
     private int noVerbalizationBreakPoints;
-    private List<Word> initialTopics = new LinkedList<>();
+    private List<Word> initialTopics;
     private double keywordAbstractOverlap;
 
     public Document(String path, LSA lsa, LDA lda, Lang lang) {
         super(path, lsa, lda, lang);
-        authors = new LinkedList<>();
+        this.authors = new ArrayList<>();
+        this.initialTopics = new ArrayList<>();
     }
 
-    public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
+    public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
         this(path, lsa, lda, lang);
         this.setText(docTmp.getText());
         setDocTmp(docTmp);
@@ -297,7 +297,9 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Block b = getBlocks().get(i);
             if (b != null) {
                 Element pEl = doc.createElement("p");
-                if (b.getIndex() != -1) pEl.setAttribute("id", b.getIndex() + "");
+                if (b.getIndex() != -1) {
+                    pEl.setAttribute("id", b.getIndex() + "");
+                }
                 if (b.isFollowedByVerbalization()) {
                     pEl.setAttribute("verbalization_after", "true");
                 }
@@ -407,8 +409,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
      * @throws SAXException
      * @throws IOException
      */
-    protected org.w3c.dom.Document generateDOMforXMLexport(String path)
-            throws ParserConfigurationException, SAXException, IOException {
+    protected org.w3c.dom.Document generateDOMforXMLexport(String path) throws ParserConfigurationException, SAXException, IOException {
         // generate a corresponding XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 

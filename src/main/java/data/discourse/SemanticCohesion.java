@@ -88,13 +88,13 @@ public class SemanticCohesion implements Serializable {
         } else {
             this.similarities.put(SimilarityType.LDA, 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(source.getLDAProbDistribution()), VectorAlgebra.normalize(destination.getLDAProbDistribution())));
         }
+        //TODO - add support for Word2Vec
+        similarities.put(SimilarityType.WORD2VEC, 0d);
 
-        similarities.put(SimilarityType.LEACOCK_CHODOROW,
-                getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
-        similarities.put(SimilarityType.WU_PALMER,
-                getOntologySim(source, destination, SimilarityType.WU_PALMER));
-        similarities.put(SimilarityType.PATH_SIM,
-                getOntologySim(source, destination, SimilarityType.PATH_SIM));
+        similarities.put(SimilarityType.LEACOCK_CHODOROW, getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
+        similarities.put(SimilarityType.WU_PALMER, getOntologySim(source, destination, SimilarityType.WU_PALMER));
+        similarities.put(SimilarityType.PATH_SIM, getOntologySim(source, destination, SimilarityType.PATH_SIM));
+        
     }
 
     public SemanticCohesion(EnumMap<SimilarityType, Double> similarities) {

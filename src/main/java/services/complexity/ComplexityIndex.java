@@ -7,6 +7,7 @@ package services.complexity;
 
 import data.AbstractDocument;
 import data.Lang;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import services.semanticModels.WordNet.SimilarityType;
@@ -15,7 +16,7 @@ import services.semanticModels.WordNet.SimilarityType;
  *
  * @author Stefan Ruseti
  */
-public abstract class ComplexityIndex {
+public abstract class ComplexityIndex implements Serializable {
 
     protected ComplexityIndecesEnum index;
     protected Lang lang;

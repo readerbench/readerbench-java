@@ -16,13 +16,14 @@
 package services.complexity;
 
 import data.Lang;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public interface ComplexityIndecesFactory {
+public interface ComplexityIndecesFactory extends Serializable {
     
     public List<ComplexityIndex> build(Lang lang);
     

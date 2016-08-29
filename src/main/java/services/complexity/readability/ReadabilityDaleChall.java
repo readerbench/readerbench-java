@@ -17,7 +17,6 @@ package services.complexity.readability;
 
 import data.AbstractDocument;
 import services.complexity.ComplexityIndecesEnum;
-import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 
 /**
  *
