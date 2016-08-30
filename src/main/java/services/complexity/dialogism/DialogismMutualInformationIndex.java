@@ -34,8 +34,8 @@ import utils.DoubleStatistics;
  */
 public class DialogismMutualInformationIndex extends ComplexityIndex {
 
-    private final Function<Stream<? extends Number>, Double> combine;
-    private final Function<SemanticChain, double[]> listFunction;
+    private transient final Function<Stream<? extends Number>, Double> combine;
+    private transient final Function<SemanticChain, double[]> listFunction;
     
     public DialogismMutualInformationIndex(ComplexityIndecesEnum index,
             Function<SemanticChain, double[]> listFunction,

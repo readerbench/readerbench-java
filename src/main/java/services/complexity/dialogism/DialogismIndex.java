@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
  */
 public class DialogismIndex extends ComplexityIndex {
     
-    private final Function<SemanticChain, Double> mapper;
+    private transient final Function<SemanticChain, Double> mapper;
     
     public DialogismIndex(ComplexityIndecesEnum index, Function<SemanticChain, Double> mapper) {
         super(index);

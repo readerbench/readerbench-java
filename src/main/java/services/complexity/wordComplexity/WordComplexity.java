@@ -31,7 +31,7 @@ import vu.wntools.wordnet.WordnetData;
 
 public class WordComplexity extends ComplexityIndex {
 
-    private final BiFunction<Word, Lang, ? extends Number> f;
+    private transient final BiFunction<Word, Lang, ? extends Number> f;
     
     public WordComplexity(ComplexityIndecesEnum index, Lang lang, BiFunction<Word, Lang, ? extends Number> f) {
         super(index, lang);

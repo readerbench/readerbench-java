@@ -18,9 +18,6 @@ package services.semanticModels.WordNet;
 import data.Lang;
 import java.util.Set;
 import java.util.function.Supplier;
-import org.deeplearning4j.models.word2vec.Word2Vec;
-import services.semanticModels.ISemanticModel;
-import services.semanticModels.LSA.LSA;
 import services.semanticModels.word2vec.Word2VecModel;
 
 /**

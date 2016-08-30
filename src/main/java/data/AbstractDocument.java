@@ -52,6 +52,7 @@ import data.lexicalChains.LexicalChain;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
+import java.io.NotSerializableException;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;

@@ -32,9 +32,9 @@ import utils.DoubleStatistics;
  */
 public class DialogismSynergyIndex extends ComplexityIndex {
 
-    private final Function<Stream<? extends Number>, Double> combine;
-    private final Function<SemanticChain, double[]> listFunction;
-    private final Function<Double, Double> mapper;
+    private transient final Function<Stream<? extends Number>, Double> combine;
+    private transient final Function<SemanticChain, double[]> listFunction;
+    private transient final Function<Double, Double> mapper;
 
     public DialogismSynergyIndex(ComplexityIndecesEnum index,
             Function<SemanticChain, double[]> listFunction,

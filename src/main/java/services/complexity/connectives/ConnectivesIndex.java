@@ -31,7 +31,7 @@ import services.nlp.listOfWords.Connectives;
 public class ConnectivesIndex extends ComplexityIndex {
 
     protected final ClassesOfWords connectives;
-    private final Function<AbstractDocument, Integer> countFunction;
+    private transient final Function<AbstractDocument, Integer> countFunction;
 
     public ConnectivesIndex(
             ComplexityIndecesEnum index,
