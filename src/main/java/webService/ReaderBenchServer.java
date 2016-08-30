@@ -125,22 +125,13 @@ public class ReaderBenchServer {
             StringBuilder sb = new StringBuilder();
             for (CategoryPhrase categoryPhrase : categoryPhrases) {
                 sb.append(categoryPhrase.getLabel());
-                sb.append(", ");
-            }
-        }
-
-        for (Category cat : dbCategories) {
-            List<CategoryPhrase> categoryPhrases = cat.getCategoryPhraseList();
-            StringBuilder sb = new StringBuilder();
-            for (CategoryPhrase categoryPhrase : categoryPhrases) {
-                sb.append(categoryPhrase.getLabel());
                 sb.append(" ");
             }
 
             AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), pathToLSA, pathToLDA, lang,
                     usePOSTagging, computeDialogism);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
-            resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
+            resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
         }
 
         Collections.sort(resultCategories, ResultCategory.ResultCategoryRelevanceComparator);

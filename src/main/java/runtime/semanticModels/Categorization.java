@@ -69,7 +69,7 @@ public class Categorization {
 
             AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), "resources/config/EN/LSA/TASA LAK", "resources/config/EN/LDA/TASA LAK", Lang.eng, false, false);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
-            resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion())));
+            resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
         });
 
         Collections.sort(resultCategories, ResultCategory.ResultCategoryRelevanceComparator);
