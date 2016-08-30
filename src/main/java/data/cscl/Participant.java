@@ -24,98 +24,100 @@ import java.util.Map.Entry;
 import data.AbstractDocument;
 
 public class Participant implements Comparable<Participant>, Serializable {
-	private static final long serialVersionUID = -4515721505776009876L;
 
-	private String name;
-	private transient AbstractDocument interventions;
-	private transient AbstractDocument significantInterventions;
-	private double gradeAnnotator;
-	private double textualComplexityLevel;
-	private EnumMap<CSCLIndices, Double> indices;
-	private Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices;
+    private static final long serialVersionUID = -4515721505776009876L;
 
-	public Participant(String name, AbstractDocument d) {
-		super();
-		this.name = name;
-		this.interventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
-		this.significantInterventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
-		this.indices = new EnumMap<>(CSCLIndices.class);
-		this.longitudinalIndices = new HashMap<Entry<CSCLIndices, CSCLCriteria>, Double>();
-		resetIndices();
-	}
+    private String name;
+    private transient AbstractDocument interventions;
+    private transient AbstractDocument significantInterventions;
+    private double gradeAnnotator;
+    private double textualComplexityLevel;
+    private EnumMap<CSCLIndices, Double> indices;
+    private Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices;
 
-	public String getName() {
-		return name;
-	}
+    public Participant(String name, AbstractDocument d) {
+        super();
+        this.name = name;
+        this.interventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
+        this.significantInterventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
+        this.indices = new EnumMap<>(CSCLIndices.class);
+        this.longitudinalIndices = new HashMap<>();
+        this.resetIndices();
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public AbstractDocument getInterventions() {
-		return interventions;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setInterventions(AbstractDocument interventions) {
-		this.interventions = interventions;
-	}
+    public AbstractDocument getInterventions() {
+        return interventions;
+    }
 
-	public AbstractDocument getSignificantInterventions() {
-		return significantInterventions;
-	}
+    public void setInterventions(AbstractDocument interventions) {
+        this.interventions = interventions;
+    }
 
-	public void setSignificantInterventions(AbstractDocument significantInterventions) {
-		this.significantInterventions = significantInterventions;
-	}
+    public AbstractDocument getSignificantInterventions() {
+        return significantInterventions;
+    }
 
-	public double getGradeAnnotator() {
-		return gradeAnnotator;
-	}
+    public void setSignificantInterventions(AbstractDocument significantInterventions) {
+        this.significantInterventions = significantInterventions;
+    }
 
-	public void setGradeAnnotator(double gradeAnnotator) {
-		this.gradeAnnotator = gradeAnnotator;
-	}
+    public double getGradeAnnotator() {
+        return gradeAnnotator;
+    }
 
-	public double getTextualComplexityLevel() {
-		return textualComplexityLevel;
-	}
+    public void setGradeAnnotator(double gradeAnnotator) {
+        this.gradeAnnotator = gradeAnnotator;
+    }
 
-	public void setTextualComplexityLevel(double textualComplexityLevel) {
-		this.textualComplexityLevel = textualComplexityLevel;
-	}
+    public double getTextualComplexityLevel() {
+        return textualComplexityLevel;
+    }
 
-	public EnumMap<CSCLIndices, Double> getIndices() {
-		return indices;
-	}
+    public void setTextualComplexityLevel(double textualComplexityLevel) {
+        this.textualComplexityLevel = textualComplexityLevel;
+    }
 
-	public void setIndices(EnumMap<CSCLIndices, Double> indices) {
-		this.indices = indices;
-	}
+    public EnumMap<CSCLIndices, Double> getIndices() {
+        return indices;
+    }
 
-	public Map<Entry<CSCLIndices, CSCLCriteria>, Double> getLongitudinalIndices() {
-		return longitudinalIndices;
-	}
+    public void setIndices(EnumMap<CSCLIndices, Double> indices) {
+        this.indices = indices;
+    }
 
-	public void setLongitudinalIndices(Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices) {
-		this.longitudinalIndices = longitudinalIndices;
-	}
+    public Map<Entry<CSCLIndices, CSCLCriteria>, Double> getLongitudinalIndices() {
+        return longitudinalIndices;
+    }
 
-	public void resetIndices() {
-		for (CSCLIndices index : CSCLIndices.values())
-			indices.put(index, 0d);
-	}
+    public void setLongitudinalIndices(Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices) {
+        this.longitudinalIndices = longitudinalIndices;
+    }
 
-	@Override
-	public String toString() {
-		return name;
-	}
+    private void resetIndices() {
+        for (CSCLIndices index : CSCLIndices.values()) {
+            indices.put(index, 0d);
+        }
+    }
 
-	public boolean equals(Object obj) {
-		Participant p = (Participant) obj;
-		return this.getName().equals(p.getName());
-	}
+    @Override
+    public String toString() {
+        return name;
+    }
 
-	public int compareTo(Participant o) {
-		return this.getName().compareTo(o.getName());
-	}
+    public boolean equals(Object obj) {
+        Participant p = (Participant) obj;
+        return this.getName().equals(p.getName());
+    }
+
+    public int compareTo(Participant o) {
+        return this.getName().compareTo(o.getName());
+    }
 }

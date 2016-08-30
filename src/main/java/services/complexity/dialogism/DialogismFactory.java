@@ -31,7 +31,7 @@ import utils.DoubleStatistics;
  *
  * @author Stefan Ruseti
  */
-public class DialogismFactory implements ComplexityIndecesFactory {
+public class DialogismFactory extends ComplexityIndecesFactory {
 
     private static final Function<Stream<? extends Number>, Double> SD
             = s -> s.map(x -> x.doubleValue())
@@ -41,66 +41,65 @@ public class DialogismFactory implements ComplexityIndecesFactory {
     private static final Function<Stream<? extends Number>, Double> AVERAGE
             = s -> s.mapToDouble(x -> x.doubleValue())
             .average().orElse(ComplexityIndices.IDENTITY);
-    
+
     private static final Function<Double, Double> POSITIVE = x -> (x > 0 ? 1. : 0.);
 
-    
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE, 
-                SemanticChain::getBlockDistribution, 
+                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_CO_OCCURRENCE,
+                SemanticChain::getBlockDistribution,
                 AVERAGE,
                 POSITIVE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_CO_OCCURRENCE,
+                SemanticChain::getSentenceDistribution,
                 AVERAGE,
                 POSITIVE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION, 
-                SemanticChain::getBlockDistribution, 
+                ComplexityIndecesEnum.BLOCK_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION,
+                SemanticChain::getBlockDistribution,
                 SD,
                 POSITIVE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.SENTENCE_VOICE_CO_OCCURRENCE_STANDARD_DEVIATION,
+                SemanticChain::getSentenceDistribution,
                 SD,
                 POSITIVE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT, 
-                SemanticChain::getBlockMovingAverage, 
+                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_CUMULATIVE_EFFECT,
+                SemanticChain::getBlockMovingAverage,
                 AVERAGE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_CUMULATIVE_EFFECT,
+                SemanticChain::getSentenceDistribution,
                 AVERAGE));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION, 
-                SemanticChain::getBlockMovingAverage, 
+                ComplexityIndecesEnum.BLOCK_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION,
+                SemanticChain::getBlockMovingAverage,
                 SD));
         result.add(new DialogismSynergyIndex(
-                ComplexityIndecesEnum.SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.SENTENCE_VOICE_CUMULATIVE_EFFECT_STANDARD_DEVIATION,
+                SemanticChain::getSentenceDistribution,
                 SD));
         result.add(new DialogismMutualInformationIndex(
-                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION, 
-                SemanticChain::getBlockMovingAverage, 
+                ComplexityIndecesEnum.AVERAGE_BLOCK_VOICE_MUTUAL_INFORMATION,
+                SemanticChain::getBlockMovingAverage,
                 AVERAGE));
         result.add(new DialogismMutualInformationIndex(
-                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.AVERAGE_SENTENCE_VOICE_MUTUAL_INFORMATION,
+                SemanticChain::getSentenceDistribution,
                 AVERAGE));
         result.add(new DialogismMutualInformationIndex(
-                ComplexityIndecesEnum.BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION, 
-                SemanticChain::getBlockMovingAverage, 
+                ComplexityIndecesEnum.BLOCK_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION,
+                SemanticChain::getBlockMovingAverage,
                 SD));
         result.add(new DialogismMutualInformationIndex(
-                ComplexityIndecesEnum.SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION, 
-                SemanticChain::getSentenceDistribution, 
+                ComplexityIndecesEnum.SENTENCE_VOICE_MUTUAL_INFORMATION_STANDARD_DEVIATION,
+                SemanticChain::getSentenceDistribution,
                 SD));
-        
+
         result.add(new AvgNoVoices());
         result.add(new DialogismIndex(
                 ComplexityIndecesEnum.AVERAGE_VOICE_BLOCK_DISTRIBUTION,
@@ -136,5 +135,4 @@ public class DialogismFactory implements ComplexityIndecesFactory {
         result.add(new VoicesMaxSpan());
         return result;
     }
-    
 }

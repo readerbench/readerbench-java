@@ -26,35 +26,35 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class WordComplexityFactory implements ComplexityIndecesFactory{
+public class WordComplexityFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_DIFF_LEMMA_STEM, lang, 
+                ComplexityIndecesEnum.WORD_DIFF_LEMMA_STEM, lang,
                 WordComplexity::getDifferenceBetweenLemmaAndStem));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_DIFF_WORD_STEM, lang, 
+                ComplexityIndecesEnum.WORD_DIFF_WORD_STEM, lang,
                 WordComplexity::getDifferenceBetweenWordAndStem));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_MAX_DEPTH_HYPERNYM_TREE, lang, 
+                ComplexityIndecesEnum.WORD_MAX_DEPTH_HYPERNYM_TREE, lang,
                 WordComplexity::getMaxDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_AVERAGE_DEPTH_HYPERNYM_TREE, lang, 
+                ComplexityIndecesEnum.WORD_AVERAGE_DEPTH_HYPERNYM_TREE, lang,
                 WordComplexity::getAverageDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_PATH_COUNT_HYPERNYM_TREE, lang, 
+                ComplexityIndecesEnum.WORD_PATH_COUNT_HYPERNYM_TREE, lang,
                 WordComplexity::getPathCountToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_POLYSEMY_COUNT, lang, 
+                ComplexityIndecesEnum.WORD_POLYSEMY_COUNT, lang,
                 WordComplexity::getPolysemyCount));
         if (lang != Lang.fr) {
             result.add(new WordComplexity(
-                    ComplexityIndecesEnum.WORD_SYLLABLE_COUNT, lang, 
+                    ComplexityIndecesEnum.WORD_SYLLABLE_COUNT, lang,
                     WordComplexity::getSyllables));
         }
         return result;
     }
-    
+
 }

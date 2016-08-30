@@ -20,21 +20,19 @@ import java.util.ArrayList;
 import java.util.List;
 import services.complexity.ComplexityIndecesFactory;
 import services.complexity.ComplexityIndex;
-import services.complexity.entityDensity.AvgNamedEntitiesPerBlock;
-import services.complexity.entityDensity.AvgNamedEntitiesPerSentence;
-import services.complexity.entityDensity.AvgNounNamedEntitesPerBlock;
-import services.complexity.entityDensity.AvgUniqueNamedEntitiesPerBlock;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class CoreferenceFactory implements ComplexityIndecesFactory {
+public class CoreferenceFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang == Lang.fr) return result;
+        if (lang == Lang.fr) {
+            return result;
+        }
         result.add(new TotalCorefChains());
         result.add(new AvgCorefsPerChain());
         result.add(new AvgChainSpan());
@@ -43,6 +41,4 @@ public class CoreferenceFactory implements ComplexityIndecesFactory {
         result.add(new CorefChainsWithBigSpan());
         return result;
     }
-    
 }
-

@@ -33,17 +33,15 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
-import data.Block;
 import data.Lang;
-import data.Sentence;
+import java.io.Serializable;
 import services.commons.TextPreprocessing;
-import services.complexity.ComplexityIndices;
 
 /**
  *
  * @author Mihai Dascalu
  */
-public class ClassesOfWords {
+public class ClassesOfWords implements Serializable {
     
     static final Logger LOGGER = Logger.getLogger(ClassesOfWords.class);
     

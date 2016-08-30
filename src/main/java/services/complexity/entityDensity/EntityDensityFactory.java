@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class EntityDensityFactory implements ComplexityIndecesFactory {
+public class EntityDensityFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
