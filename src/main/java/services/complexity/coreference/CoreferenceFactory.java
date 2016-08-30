@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class CoreferenceFactory implements ComplexityIndecesFactory {
+public class CoreferenceFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -39,6 +39,4 @@ public class CoreferenceFactory implements ComplexityIndecesFactory {
         result.add(new CorefChainsWithBigSpan());
         return result;
     }
-    
 }
-

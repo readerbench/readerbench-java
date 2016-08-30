@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class SurfaceFactory implements ComplexityIndecesFactory{
+public class SurfaceFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -50,5 +50,5 @@ public class SurfaceFactory implements ComplexityIndecesFactory{
         result.add(new WordLettersSD());
         return result;
     }
-    
+
 }

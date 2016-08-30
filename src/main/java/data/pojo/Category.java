@@ -54,6 +54,8 @@ public class Category implements Serializable {
     @Basic(optional = false)
     @Column(name = "label")
     private String label;
+    @Column(name = "type")
+    private Integer type;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fkCategory", fetch = FetchType.LAZY)
     private List<CategoryPhrase> categoryPhraseList;
 
@@ -64,9 +66,10 @@ public class Category implements Serializable {
         this.id = id;
     }
 
-    public Category(Integer id, String label) {
+    public Category(Integer id, String label, Integer type) {
         this.id = id;
         this.label = label;
+        this.type = type;
     }
 
     public Integer getId() {
@@ -85,6 +88,14 @@ public class Category implements Serializable {
         this.label = label;
     }
 
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+    
     @XmlTransient
     @JsonIgnore
     public List<CategoryPhrase> getCategoryPhraseList() {

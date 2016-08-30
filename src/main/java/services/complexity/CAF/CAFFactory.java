@@ -25,12 +25,14 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class CAFFactory implements ComplexityIndecesFactory{
+public class CAFFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.eng) return result;
+        if (lang != Lang.eng) {
+            return result;
+        }
         result.add(new LexicalDiversity());
         result.add(new LexicalSophistication());
         result.add(new SyntacticDiversity());
@@ -38,5 +40,5 @@ public class CAFFactory implements ComplexityIndecesFactory{
         result.add(new BalancedCAF());
         return result;
     }
-    
+
 }

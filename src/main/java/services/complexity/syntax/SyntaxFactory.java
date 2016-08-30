@@ -28,7 +28,7 @@ import services.nlp.listOfWords.Pronouns;
  *
  * @author Stefan Ruseti
  */
-public class SyntaxFactory implements ComplexityIndecesFactory{
+public class SyntaxFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -39,21 +39,21 @@ public class SyntaxFactory implements ComplexityIndecesFactory{
         result.add(new AvgPosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_ADVERBS_PER_BLOCK, "RB"));
         result.add(new AvgPosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_ADJECTIVES_PER_BLOCK, "JJ"));
         result.add(new AvgPosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_PREPOSITIONS_PER_BLOCK, "IN"));
-        
+
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_NOUNS_PER_SENTENCE, "NN"));
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_PRONOUNS_PER_SENTENCE, "PR"));
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_VERBS_PER_SENTENCE, "VB"));
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_ADVERBS_PER_SENTENCE, "RB"));
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_ADJECTIVES_PER_SENTENCE, "JJ"));
         result.add(new AvgPosPerSentence(ComplexityIndecesEnum.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE, "IN"));
-        
+
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK, "NN"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK, "PR"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK, "VB"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK, "RB"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK, "JJ"));
         result.add(new AvgUniquePosPerBlock(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK, "IN"));
-        
+
         ClassesOfWords classes = Pronouns.getPronouns(lang);
         if (classes != null) {
             for (String category : classes.getClasses().keySet()) {
@@ -61,7 +61,7 @@ public class SyntaxFactory implements ComplexityIndecesFactory{
                 result.add(new PronounsSentence(lang, classes, category));
             }
         }
-        
+
         if (lang.equals(Lang.eng) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             result.add(new AvgTreeDepth());
             result.add(new AvgTreeSize());
@@ -69,5 +69,5 @@ public class SyntaxFactory implements ComplexityIndecesFactory{
         }
         return result;
     }
-    
+
 }

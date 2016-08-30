@@ -16,6 +16,7 @@
 package services.complexity.cohesion;
 
 import data.Lang;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import services.complexity.ComplexityIndecesEnum;
@@ -48,7 +49,7 @@ import services.semanticModels.WordNet.SimilarityType;
  *
  * @author Stefan Ruseti
  */
-public class CohesionFactory implements ComplexityIndecesFactory{
+public class CohesionFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -61,7 +62,7 @@ public class CohesionFactory implements ComplexityIndecesFactory{
         result.add(new AvgSentenceScore());
         result.add(new BlockScoreSD());
         result.add(new SentenceScoreSD());
-            
+
         for (SimilarityType simType : SimilarityType.values()) {
             if (!simType.getAvailableLanguages().contains(lang)) continue;
             result.add(new AvgBlockAdjacencyCohesion(simType));
@@ -76,32 +77,31 @@ public class CohesionFactory implements ComplexityIndecesFactory{
             result.add(new StartEndCohesion(simType));
             for (DocFlowCriteria crit : DocFlowCriteria.values()) {
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY,
+                        crit, simType,
                         DocumentFlow::getAbsolutePositionAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY,
+                        crit, simType,
                         DocumentFlow::getAbsoluteDistanceAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY,
+                        crit, simType,
                         DocumentFlow::getAdjacencyAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION,
+                        crit, simType,
                         DocumentFlow::getAverageFlowCohesion));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE,
+                        crit, simType,
                         DocumentFlow::getMaxOrderedSequence));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION, 
-                        crit, simType, 
+                        ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION,
+                        crit, simType,
                         DocumentFlow::getSpearmanCorrelation));
             }
         }
         return result;
     }
-    
 }

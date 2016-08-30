@@ -296,7 +296,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveSerializedDocument() {
-        logger.info("Saving serialized document...");
+        logger.info("Saving serialized document ...");
         try {
             FileOutputStream fos;
             fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
@@ -309,7 +309,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveTxtDocument() {
-        logger.info("Saving plain text document...");
+        logger.info("Saving plain text document ...");
         File output = new File(path.replace(".xml", ".txt"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -324,7 +324,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadSerializedDocument(String path) {
-        logger.info("Loading serialized document " + path);
+        logger.info("Loading serialized document " + path + " ...");
         AbstractDocument d = null;
         try (FileInputStream fIn = new FileInputStream(new File(path)); ObjectInputStream oIn = new ObjectInputStream(fIn)) {
             d = (AbstractDocument) oIn.readObject();

@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndex;
  *
  * @author Stefan Ruseti
  */
-public class ReadabilityFactory implements ComplexityIndecesFactory{
+public class ReadabilityFactory extends ComplexityIndecesFactory{
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {

@@ -29,7 +29,7 @@ import services.nlp.listOfWords.Connectives;
  *
  * @author Stefan Ruseti
  */
-public class ConnectivesFactory implements ComplexityIndecesFactory {
+public class ConnectivesFactory extends ComplexityIndecesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {

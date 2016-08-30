@@ -31,7 +31,7 @@ import services.nlp.listOfWords.Connectives;
 public class ConnectivesIndex extends ComplexityIndex {
 
     protected final ClassesOfWords connectives;
-    private Function<AbstractDocument, Integer> countFunction;
+    private final Function<AbstractDocument, Integer> countFunction;
 
     public ConnectivesIndex(
             ComplexityIndecesEnum index,
@@ -49,5 +49,4 @@ public class ConnectivesIndex extends ComplexityIndex {
         int n = countFunction.apply(d);
         return (n != 0) ? (1. * occurances / n) : ComplexityIndices.IDENTITY;
     }
-
 }
