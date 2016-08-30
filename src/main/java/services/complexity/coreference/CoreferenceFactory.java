@@ -20,10 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import services.complexity.ComplexityIndecesFactory;
 import services.complexity.ComplexityIndex;
-import services.complexity.entityDensity.AvgNamedEntitiesPerBlock;
-import services.complexity.entityDensity.AvgNamedEntitiesPerSentence;
-import services.complexity.entityDensity.AvgNounNamedEntitesPerBlock;
-import services.complexity.entityDensity.AvgUniqueNamedEntitiesPerBlock;
 
 /**
  *
@@ -34,7 +30,7 @@ public class CoreferenceFactory implements ComplexityIndecesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang == Lang.fr) return result;
+        if (lang != Lang.eng) return result;
         result.add(new TotalCorefChains());
         result.add(new AvgCorefsPerChain());
         result.add(new AvgChainSpan());

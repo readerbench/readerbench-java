@@ -43,6 +43,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class OntologySupport {
     public static final double SYNONYM_WEIGHT = 1.0;
     public static final double HYPERNYM_WEIGHT = 1.0;
     private static final EnumMap<SimilarityType, Double> THRESHOLDS = new EnumMap<>(SimilarityType.class);
-
+    
     static {
         THRESHOLDS.put(SimilarityType.LEACOCK_CHODOROW, 1.);
         THRESHOLDS.put(SimilarityType.WU_PALMER, 1.);
@@ -328,6 +329,10 @@ public class OntologySupport {
                 });
     }
 
+    public static Set<Lang> getAvailableLanguages() {
+        return wordnetFiles.keySet();
+    }
+    
     public static void main(String[] args) {
         System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
         System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));

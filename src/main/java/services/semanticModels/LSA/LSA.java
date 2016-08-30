@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
+import java.util.EnumSet;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -53,7 +54,10 @@ public class LSA implements ISemanticModel {
     public static final double LSA_THRESHOLD = 0.25;
     public static final int K = 300;
     public static final int NO_KNN_NEIGHBOURS = 100;
-
+    
+    private static final Set<Lang> availableFor = EnumSet.of(Lang.eng, Lang.es, Lang.fr, Lang.la, Lang.ro);
+    
+    
     private Lang language;
     private String path;
     private double[][] Uk;
@@ -333,5 +337,9 @@ public class LSA implements ISemanticModel {
         // System.out.println(entry.getKey().getLemma() + "\t" +
         // entry.getValue());
         // }
+    }
+
+    public static Set<Lang> getAvailableLanguages() {
+        return availableFor;
     }
 }

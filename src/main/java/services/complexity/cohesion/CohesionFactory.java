@@ -63,6 +63,7 @@ public class CohesionFactory implements ComplexityIndecesFactory{
         result.add(new SentenceScoreSD());
             
         for (SimilarityType simType : SimilarityType.values()) {
+            if (!simType.getAvailableLanguages().contains(lang)) continue;
             result.add(new AvgBlockAdjacencyCohesion(simType));
             result.add(new AvgBlockDocCohesion(simType));
             result.add(new AvgInterBlockCohesion(simType));

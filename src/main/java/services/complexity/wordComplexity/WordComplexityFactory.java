@@ -49,7 +49,7 @@ public class WordComplexityFactory implements ComplexityIndecesFactory{
         result.add(new WordComplexity(
                 ComplexityIndecesEnum.WORD_POLYSEMY_COUNT, lang, 
                 WordComplexity::getPolysemyCount));
-        if (lang != Lang.fr) {
+        if (lang == Lang.eng) {
             result.add(new WordComplexity(
                     ComplexityIndecesEnum.WORD_SYLLABLE_COUNT, lang, 
                     WordComplexity::getSyllables));

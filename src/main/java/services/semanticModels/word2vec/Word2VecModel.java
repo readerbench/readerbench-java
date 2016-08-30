@@ -34,6 +34,8 @@ import data.AnalysisElement;
 import data.Lang;
 import data.Word;
 import java.io.FileNotFoundException;
+import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Map;
 import services.commons.ObjectManipulation;
 import services.nlp.stemmer.Stemmer;
@@ -51,7 +53,9 @@ public class Word2VecModel implements ISemanticModel {
 
     private Word2Vec word2vec;
     private Lang lang = Lang.eng;
-
+    
+    private static final Set<Lang> availableFor = EnumSet.of(Lang.eng);
+    
     public static Word2VecModel load() throws IOException {
         return load(MODEL);
     }
@@ -180,5 +184,9 @@ public class Word2VecModel implements ISemanticModel {
 
     public static void main(String[] args) throws FileNotFoundException {
         trainModel("resources/corpora/NL/out.txt", "resources/config/NL/word2vec/nl.txt");
+    }
+
+    public static Set<Lang> getAvailableLanguages() {
+        return availableFor;
     }
 }
