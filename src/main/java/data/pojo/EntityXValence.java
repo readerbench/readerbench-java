@@ -40,8 +40,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
     @NamedQuery(name = "EntityXValence.findAll", query = "SELECT e FROM EntityXValence e"),
     @NamedQuery(name = "EntityXValence.findById", query = "SELECT e FROM EntityXValence e WHERE e.id = :id"),
-    @NamedQuery(name = "EntityXValence.findByValue", query = "SELECT e FROM EntityXValence e WHERE e.value = :value")})
+    @NamedQuery(name = "EntityXValence.findByValue", query = "SELECT e FROM EntityXValence e WHERE e.value = :value"),
+    @NamedQuery(name = "EntityXValence.findBySentimentEntity", query = "SELECT e FROM EntityXValence e WHERE e.fkSentimentEntity = :se")
+})
 public class EntityXValence implements Serializable {
+
     @JoinColumn(name = "fk_sentiment_entity", referencedColumnName = "id")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private SentimentEntity fkSentimentEntity;
@@ -57,7 +60,7 @@ public class EntityXValence implements Serializable {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "value")
     private Double value;
-    
+
     public EntityXValence() {
     }
 
@@ -121,5 +124,5 @@ public class EntityXValence implements Serializable {
     public void setFkSentimentValence(SentimentValence fkSentimentValence) {
         this.fkSentimentValence = fkSentimentValence;
     }
-    
+
 }

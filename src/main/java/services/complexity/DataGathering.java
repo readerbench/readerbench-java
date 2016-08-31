@@ -33,7 +33,6 @@ import data.complexity.Measurement;
 import data.document.Document;
 import data.document.MetaDocument;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -49,11 +48,13 @@ public class DataGathering {
         try {
             FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
             BufferedWriter out = new BufferedWriter(fstream);
-            StringBuffer concat = new StringBuffer();
-            concat.append("Grade Level,File name,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
+            StringBuilder concat = new StringBuilder();
+            concat.append("File name,Grade Level,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
             for (ComplexityIndex factor : ComplexityIndices.getIndices(lang)) {
                 concat.append(",").append(factor.getAcronym());
             }
+            out.write(concat.toString());
+            out.close();
         } catch (Exception e) {
             logger.error("Runtime error while initializing measurements.csv file");
             Exceptions.printStackTrace(e);

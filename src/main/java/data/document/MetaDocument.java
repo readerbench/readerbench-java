@@ -96,6 +96,9 @@ public class MetaDocument extends Document {
                 doc.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
             }
         });
+        if (leaves.isEmpty()) {
+            System.out.println("Error");
+        }
         setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
                 .collect(Collectors.toMap(
                         Function.identity(),

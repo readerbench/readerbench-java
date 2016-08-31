@@ -23,6 +23,7 @@
             <property name="javax.persistence.jdbc.user" value=""/>
             <property name="javax.persistence.jdbc.driver" value=""/>
             <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="hibernate.enable_lazy_load_no_trans" value="true" />
         </properties>
     </persistence-unit>
 </persistence>

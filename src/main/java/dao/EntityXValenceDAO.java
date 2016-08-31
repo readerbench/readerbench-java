@@ -19,6 +19,8 @@ import data.pojo.EntityXValence;
 import data.pojo.SentimentEntity;
 import data.pojo.SentimentValence;
 import data.pojo.Word;
+import java.util.List;
+import javax.persistence.TypedQuery;
 
 /**
  *
@@ -57,4 +59,12 @@ public class EntityXValenceDAO extends AbstractDAO<EntityXValence> {
         });
         return (success != null);
     }
+    
+    public List<EntityXValence> findBySentimentEntity(SentimentEntity se) {
+		return dao.executeQuery(em -> {
+			TypedQuery<EntityXValence> query = em.createNamedQuery("EntityXValence.findBySentimentEntity", EntityXValence.class);
+			query.setParameter("se", se);
+			return query.getResultList();
+		});
+	}
 }

@@ -15,6 +15,7 @@
  */
 package data;
 
+import dao.EntityXValenceDAO;
 import java.io.Serializable;
 
 import services.discourse.cohesion.CohesionGraph;
@@ -85,8 +86,11 @@ public class Word implements Comparable<Word>, Serializable {
             return;
         }
         sentiment = new SentimentEntity();
+//        if (se.getEntityXValenceList() == null) {
+//            se.setEntityXValenceList(EntityXValenceDAO.getInstance().findBySentimentEntity(se));
+//        }
         se.getEntityXValenceList().stream().forEach((exv) -> {
-            sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
+                sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
         });
     }
 
