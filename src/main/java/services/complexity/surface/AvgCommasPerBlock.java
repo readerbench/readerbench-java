@@ -16,15 +16,10 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import data.Block;
-import data.Sentence;
 import org.apache.commons.lang3.StringUtils;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.complexity.readability.Fathom;
-import services.complexity.readability.ReadabilityIndex;
-import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 
 /**
  *
