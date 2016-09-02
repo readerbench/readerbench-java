@@ -89,7 +89,7 @@ public class MetaDocument extends Document {
             return;
         }
         List<Document> leaves = getLeaves();
-        leaves.parallelStream().forEach(doc -> {
+        leaves.stream().forEach(doc -> {
             if (doc instanceof MetaDocument) {
                 ((MetaDocument) doc).computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, false);
             } else {

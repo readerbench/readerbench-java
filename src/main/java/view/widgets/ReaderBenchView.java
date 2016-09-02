@@ -59,7 +59,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
-import data.document.Document;
 import data.Lang;
 import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
@@ -88,15 +87,15 @@ public class ReaderBenchView extends JFrame {
     public static Logger logger = Logger.getLogger(ReaderBenchView.class);
     public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
-    public static final String[] TRAINED_LSA_SPACES_EN = {"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA LAK", "resources/config/EN/LSA/COCA newspaper", ""};
-    public static final String[] TRAINED_LSA_SPACES_FR = {"resources/config/FR/LSA/Le Monde", "resources/config/FR/LSA/Text Enfants Nursery", ""};
+    public static final String[] TRAINED_LSA_SPACES_EN = {"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""};
+    public static final String[] TRAINED_LSA_SPACES_FR = {"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""};
     public static final String[] TRAINED_LSA_SPACES_IT = {""};
-    public static final String[] TRAINED_LSA_SPACES_ES = {"resources/config/ES/LSA/Jose Antonio", ""};
+    public static final String[] TRAINED_LSA_SPACES_ES = {"resources/config/ES/LSA/Jose_Antonio", ""};
     public static final String[] TRAINED_LSA_SPACES_LA = {"resources/config/LA/LSA/Letters", ""};
-    public static final String[] TRAINED_LDA_MODELS_EN = {"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA LAK", "resources/config/EN/LDA/TASA smart cities", "resources/config/EN/LDA/COCA newspaper", ""};
-    public static final String[] TRAINED_LDA_MODELS_FR = {"resources/config/FR/LDA/Le Monde", "resources/config/FR/LDA/Text Enfants", "resources/config/FR/LDA/Philosophy", ""};
+    public static final String[] TRAINED_LDA_MODELS_EN = {"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""};
+    public static final String[] TRAINED_LDA_MODELS_FR = {"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""};
     public static final String[] TRAINED_LDA_MODELS_IT = {"resources/config/IT/LDA/Paisa", ""};
-    public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose Antonio", ""};
+    public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose_Antonio", ""};
     public static final String[] TRAINED_LDA_MODELS_LA = {"resources/config/LA/LDA/Letters", ""};
 
     public static Lang RUNTIME_LANGUAGE = Lang.eng;

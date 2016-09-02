@@ -33,13 +33,12 @@ public class DisambiguationGraph implements Serializable {
 
     private static final long serialVersionUID = 1026969873848700049L;
 
-    public static final int SAME_SENTENCE = 0;
-    public static final int THREE_SENTENCES = 1;
-    public static final int SAME_PARAGRAPH = 2;
-    public static final int OTHER = 3;
+    public enum LexicalChainDistance {
+        SAME_SENTENCE, THREE_SENTENCES, SAME_PARAGRAPH, OTHER;
+    }
 
-    private Lang language;
-    private Map<String, List<LexicalChainLink>> nodes = new TreeMap<>();
+    private final Lang language;
+    private final Map<String, List<LexicalChainLink>> nodes = new TreeMap<>();
 
     public DisambiguationGraph(Lang language) {
         this.language = language;
@@ -62,7 +61,7 @@ public class DisambiguationGraph implements Serializable {
 
         // adds new link to the disambiguation graph
         if (!nodes.containsKey(senseId)) {
-            LinkedList<LexicalChainLink> newList = new LinkedList<LexicalChainLink>();
+            LinkedList<LexicalChainLink> newList = new LinkedList<>();
             newList.add(newLink);
             nodes.put(senseId, newList);
         } else {
@@ -113,12 +112,12 @@ public class DisambiguationGraph implements Serializable {
     }
 
     private void removeConnections(LexicalChainLink remLink) {
-        for (LexicalChainLink link : remLink.getConnections().keySet()) {
+        remLink.getConnections().keySet().stream().forEach((link) -> {
             link.removeConnection(remLink);
-        }
+        });
     }
 
-    private double getWeightSynonyms(int distance) {
+    private double getWeightSynonyms(LexicalChainDistance distance) {
         double weight = 0;
         switch (distance) {
             case SAME_SENTENCE:
@@ -137,11 +136,11 @@ public class DisambiguationGraph implements Serializable {
         return weight;
     }
 
-    private double getWeightAntonyms(int distance) {
+    private double getWeightAntonyms(LexicalChainDistance distance) {
         return getWeightSynonyms(distance);
     }
 
-    private double getWeightHypernyms(int distance) {
+    private double getWeightHypernyms(LexicalChainDistance distance) {
         double weight = 0;
         switch (distance) {
             case SAME_SENTENCE:
@@ -160,11 +159,11 @@ public class DisambiguationGraph implements Serializable {
         return weight;
     }
 
-    private double getWeightHyponyms(int distance) {
+    private double getWeightHyponyms(LexicalChainDistance distance) {
         return getWeightHypernyms(distance);
     }
 
-    private double getWeightSiblings(int distance) {
+    private double getWeightSiblings(LexicalChainDistance distance) {
         double weight = 0;
         switch (distance) {
             case SAME_SENTENCE:
@@ -183,21 +182,20 @@ public class DisambiguationGraph implements Serializable {
         return weight;
     }
 
-    private int getDistance(LexicalChainLink link1, LexicalChainLink link2) {
+    private LexicalChainDistance getDistance(LexicalChainLink link1, LexicalChainLink link2) {
         Word w1 = link1.getWord();
         Word w2 = link2.getWord();
         if (w1.getBlockIndex() == w2.getBlockIndex()) {
             int i1 = w1.getUtteranceIndex();
             int i2 = w2.getUtteranceIndex();
             if (i1 == i2) {
-                return SAME_SENTENCE;
+                return LexicalChainDistance.SAME_SENTENCE;
             } else if (Math.abs(i1 - i2) <= 3) {
-                return THREE_SENTENCES;
+                return LexicalChainDistance.THREE_SENTENCES;
             }
-
-            return SAME_PARAGRAPH;
+            return LexicalChainDistance.SAME_PARAGRAPH;
         }
-        return OTHER;
+        return LexicalChainDistance.OTHER;
     }
 
     public List<LexicalChainLink> extractFromGraph(String senseId) {
@@ -219,14 +217,16 @@ public class DisambiguationGraph implements Serializable {
 
     @Override
     public String toString() {
-        String s = "";
+        StringBuilder s = new StringBuilder();
 
-        for (Map.Entry<String, List<LexicalChainLink>> e : nodes.entrySet()) {
-            s += e.getKey() + ":\n";
-            for (LexicalChainLink link : e.getValue()) {
-                s += "\t" + link.toString() + "\n";
-            }
-        }
-        return s;
+        nodes.entrySet().stream().map((e) -> {
+            s.append(e.getKey()).append(":\n");
+            return e;
+        }).forEach((e) -> {
+            e.getValue().stream().forEach((link) -> {
+                s.append("\t").append(link.toString()).append("\n");
+            });
+        });
+        return s.toString();
     }
 }
