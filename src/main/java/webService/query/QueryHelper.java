@@ -38,7 +38,7 @@ public class QueryHelper {
 
 		// Lang lang = Lang.eng;
 		AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
-				LDA.loadLDA(pathToLDA, lang), lang, posTagging, false);
+				LDA.loadLDA(pathToLDA, lang), lang, posTagging, true);
 		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
 		queryDoc.computeAll(computeDialogism, null, null);
 		ComplexityIndices.computeComplexityFactors(queryDoc);
