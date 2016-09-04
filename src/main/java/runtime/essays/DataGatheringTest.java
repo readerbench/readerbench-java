@@ -25,6 +25,7 @@ import data.Lang;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
 import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class DataGatheringTest {
@@ -75,7 +76,7 @@ public class DataGatheringTest {
 //            DataGathering.processTexts("resources/in/essays/posttest_fall_2009/texts", -1, true, lsa, lda, Lang.eng, true, true);
 //            DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts", -1, true, lsa, lda, Lang.eng, true, true);
 //            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true, true);
-            
+
             DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, lda, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);

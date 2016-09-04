@@ -23,7 +23,6 @@ import java.util.TreeMap;
 
 import data.Word;
 import data.lexicalChains.LexicalChain;
-import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
@@ -32,287 +31,293 @@ import services.semanticModels.LSA.LSA;
 
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
-	private static final long serialVersionUID = -7902005522958585451L;
-	private static final double LSA_SIMILARITY_THRESHOLD = 0.75;
-	private static final double LDA_SIMILARITY_THRESHOLD = 0.85;
+    private static final long serialVersionUID = -7902005522958585451L;
+    private static final double LSA_SIMILARITY_THRESHOLD = 1.1;
+    private static final double LDA_SIMILARITY_THRESHOLD = 1.1;
 
-	private transient LSA lsa;
-	private transient LDA lda;
-	private List<Word> words;
-	private Map<String, Double> termOccurrences;
-	private double[] lsaVector;
-	private double[] ldaProbDistribution;
-	private double[] sentenceDistribution;
-	private double[] blockDistribution;
-	private double[] blockMovingAverage;
-	private double averageImportanceScore;
+    private transient LSA lsa;
+    private transient LDA lda;
+    private List<Word> words;
+    private Map<String, Double> termOccurrences;
+    private double[] lsaVector;
+    private double[] ldaProbDistribution;
+    private double[] sentenceDistribution;
+    private double[] blockDistribution;
+    private double[] blockMovingAverage;
+    private double averageImportanceScore;
 
-	private transient SentimentEntity chainSentiment;
+    private transient SentimentEntity chainSentiment;
 
-	public SemanticChain(LexicalChain chain, LSA lsa, LDA lda) {
-		words = new LinkedList<Word>();
-		this.lsa = lsa;
-		this.lda = lda;
-		for (LexicalChainLink link : chain.getLinks()) {
-			words.add(link.getWord());
-		}
-		this.setChainSentiment(new SentimentEntity());
-	}
+    public SemanticChain(LexicalChain chain, LSA lsa, LDA lda) {
+        words = new LinkedList<>();
+        this.lsa = lsa;
+        this.lda = lda;
+        chain.getLinks().stream().forEach((link) -> {
+            words.add(link.getWord());
+        });
+        this.chainSentiment = new SentimentEntity();
+    }
 
-	public static double similarity(SemanticChain chain1, SemanticChain chain2) {
-		// determines whether 2 chains can be merged
-		if (chain1 == null || chain2 == null)
-			return -1;
+    public static double similarity(SemanticChain chain1, SemanticChain chain2) {
+        // determines whether 2 chains can be merged
+        if (chain1 == null || chain2 == null) {
+            return -1;
+        }
 
-		double dist = -1;
-		// if words have same lemma
-		for (Word w1 : chain1.getWords()) {
-			for (Word w2 : chain2.getWords()) {
-				if (w1.getLemma().equals(w2.getLemma())) {
-					return 1;
-				}
-			}
-		}
+        double dist = -1;
+        // if words have same lemma
+        for (Word w1 : chain1.getWords()) {
+            for (Word w2 : chain2.getWords()) {
+                if (w1.getLemma().equals(w2.getLemma())) {
+                    return 1;
+                }
+            }
+        }
 
-		double distLSA = VectorAlgebra.cosineSimilarity(chain1.getLSAVector(), chain2.getLSAVector());
-		if (distLSA >= LSA_SIMILARITY_THRESHOLD)
-			dist = Math.max(dist, distLSA);
+        double distLSA = VectorAlgebra.cosineSimilarity(chain1.getLSAVector(), chain2.getLSAVector());
+        if (distLSA >= LSA_SIMILARITY_THRESHOLD) {
+            dist = Math.max(dist, distLSA);
+        }
 
-		double distLDA = LDA.getSimilarity(chain1.getLDAProbDistribution(), chain2.getLDAProbDistribution());
-		if (distLDA >= LDA_SIMILARITY_THRESHOLD)
-			dist = Math.max(dist, distLDA);
+        double distLDA = LDA.getSimilarity(chain1.getLDAProbDistribution(), chain2.getLDAProbDistribution());
+        if (distLDA >= LDA_SIMILARITY_THRESHOLD) {
+            dist = Math.max(dist, distLDA);
+        }
 
-		return dist;
-	}
+        return dist;
+    }
 
-	public static SemanticChain merge(SemanticChain chain1, SemanticChain chain2) {
-		// copy words from chain 2, update vector
-		for (Word w2 : chain2.getWords())
-			chain1.getWords().add(w2);
-		chain1.updateSemanticRepresentation();
+    public static SemanticChain merge(SemanticChain chain1, SemanticChain chain2) {
+        // copy words from chain 2, update vector
+        chain2.getWords().stream().forEach((w2) -> {
+            chain1.getWords().add(w2);
+        });
+        chain1.updateSemanticRepresentation();
 
-		return chain1;
-	}
+        return chain1;
+    }
 
-	public void updateSemanticRepresentation() {
-		if (lsa != null) {
-			lsaVector = new double[LSA.K];
-			for (Word word : words) {
-				for (int i = 0; i < LSA.K; i++) {
-					lsaVector[i] += word.getLSAVector()[i];
-				}
-			}
-		}
+    public void updateSemanticRepresentation() {
+        if (lsa != null) {
+            lsaVector = new double[LSA.K];
+            words.stream().forEach((word) -> {
+                for (int i = 0; i < LSA.K; i++) {
+                    lsaVector[i] += word.getLSAVector()[i];
+                }
+            });
+        }
 
-		// determine LDA distribution
-		if (lda != null) {
-			String text = "";
-			for (Word word : words) {
-				text += word.getLemma() + " ";
-			}
-			this.ldaProbDistribution = lda.getProbDistribution(text.trim());
-		}
+        // determine LDA distribution
+        if (lda != null) {
+            String text = "";
+            text = words.stream().map((word) -> word.getLemma() + " ").reduce(text, String::concat);
+            this.ldaProbDistribution = lda.getProbDistribution(text.trim());
+        }
 
-		Map<String, Double> unsortedOccurences = new TreeMap<String, Double>();
-		for (Word word : words) {
-			if (unsortedOccurences.containsKey(word.getLemma()))
-				unsortedOccurences.put(word.getLemma(), unsortedOccurences.get(word.getLemma()) + 1);
-			else
-				unsortedOccurences.put(word.getLemma(), 1.0);
-		}
-		ValueComparator<String> kcvc = new ValueComparator<String>(unsortedOccurences);
-		termOccurrences = new TreeMap<String, Double>(kcvc);
-		termOccurrences.putAll(unsortedOccurences);
-	}
+        Map<String, Double> unsortedOccurences = new TreeMap<>();
+        words.stream().forEach((word) -> {
+            if (unsortedOccurences.containsKey(word.getLemma())) {
+                unsortedOccurences.put(word.getLemma(), unsortedOccurences.get(word.getLemma()) + 1);
+            } else {
+                unsortedOccurences.put(word.getLemma(), 1.0);
+            }
+        });
+        ValueComparator<String> kcvc = new ValueComparator<>(unsortedOccurences);
+        termOccurrences = new TreeMap<>(kcvc);
+        termOccurrences.putAll(unsortedOccurences);
+    }
 
-	public List<Word> getWords() {
-		return words;
-	}
+    public List<Word> getWords() {
+        return words;
+    }
 
-	public void setWords(List<Word> words) {
-		this.words = words;
-	}
+    public void setWords(List<Word> words) {
+        this.words = words;
+    }
 
-	public double[] getLSAVector() {
-		return lsaVector;
-	}
+    public double[] getLSAVector() {
+        return lsaVector;
+    }
 
-	public void setLSAVector(double[] lsaVector) {
-		this.lsaVector = lsaVector;
-	}
+    public void setLSAVector(double[] lsaVector) {
+        this.lsaVector = lsaVector;
+    }
 
-	public double[] getLDAProbDistribution() {
-		return ldaProbDistribution;
-	}
+    public double[] getLDAProbDistribution() {
+        return ldaProbDistribution;
+    }
 
-	public void setLDAProbDistribution(double[] ldaProbDistribution) {
-		this.ldaProbDistribution = ldaProbDistribution;
-	}
+    public void setLDAProbDistribution(double[] ldaProbDistribution) {
+        this.ldaProbDistribution = ldaProbDistribution;
+    }
 
-	public LSA getLSA() {
-		return lsa;
-	}
+    public LSA getLSA() {
+        return lsa;
+    }
 
-	public void setLSA(LSA lsa) {
-		this.lsa = lsa;
-	}
+    public void setLSA(LSA lsa) {
+        this.lsa = lsa;
+    }
 
-	public LDA getLDA() {
-		return lda;
-	}
+    public LDA getLDA() {
+        return lda;
+    }
 
-	public void setLDA(LDA lda) {
-		this.lda = lda;
-	}
+    public void setLDA(LDA lda) {
+        this.lda = lda;
+    }
 
-	public int getNoWords() {
-		return words.size();
-	}
+    public int getNoWords() {
+        return words.size();
+    }
 
-	public int getNoSentences() {
-		int no = 0;
-		for (double d : sentenceDistribution) {
-			if (d > 0) {
-				no++;
-			}
-		}
-		return no;
-	}
+    public int getNoSentences() {
+        int no = 0;
+        for (double d : sentenceDistribution) {
+            if (d > 0) {
+                no++;
+            }
+        }
+        return no;
+    }
 
-	public int getNoBlocks() {
-		int no = 0;
-		for (double d : blockDistribution) {
-			if (d > 0) {
-				no++;
-			}
-		}
-		return no;
-	}
+    public int getNoBlocks() {
+        int no = 0;
+        for (double d : blockDistribution) {
+            if (d > 0) {
+                no++;
+            }
+        }
+        return no;
+    }
 
-	public double getEntropySentence() {
-		return VectorAlgebra.entropy(sentenceDistribution);
-	}
+    public double getEntropySentence() {
+        return VectorAlgebra.entropy(sentenceDistribution);
+    }
 
-	public double getEntropyBlock(boolean useMovingAverage) {
-		if (useMovingAverage)
-			return VectorAlgebra.entropy(blockMovingAverage);
-		return VectorAlgebra.entropy(blockDistribution);
-	}
+    public double getEntropyBlock(boolean useMovingAverage) {
+        if (useMovingAverage) {
+            return VectorAlgebra.entropy(blockMovingAverage);
+        }
+        return VectorAlgebra.entropy(blockDistribution);
+    }
 
-	public double getAvgSentence(boolean useMovingAverage) {
-		return VectorAlgebra.avg(sentenceDistribution);
-	}
+    public double getAvgSentence(boolean useMovingAverage) {
+        return VectorAlgebra.avg(sentenceDistribution);
+    }
 
-	public double getStdevSentence(boolean useMovingAverage) {
-		return VectorAlgebra.stdev(sentenceDistribution);
-	}
+    public double getStdevSentence(boolean useMovingAverage) {
+        return VectorAlgebra.stdev(sentenceDistribution);
+    }
 
-	public double getAvgBlock() {
-		return VectorAlgebra.avg(blockDistribution);
-	}
+    public double getAvgBlock() {
+        return VectorAlgebra.avg(blockDistribution);
+    }
 
-	public double getStdevBlock() {
-		return VectorAlgebra.stdev(blockDistribution);
-	}
+    public double getStdevBlock() {
+        return VectorAlgebra.stdev(blockDistribution);
+    }
 
-	public double getAvgRecurrenceSentence() {
-		return VectorAlgebra.avg(VectorAlgebra.getRecurrence(sentenceDistribution));
-	}
+    public double getAvgRecurrenceSentence() {
+        return VectorAlgebra.avg(VectorAlgebra.getRecurrence(sentenceDistribution));
+    }
 
-	public double getAvgRecurrenceBlock() {
-		return VectorAlgebra.avg(VectorAlgebra.getRecurrence(blockDistribution));
-	}
+    public double getAvgRecurrenceBlock() {
+        return VectorAlgebra.avg(VectorAlgebra.getRecurrence(blockDistribution));
+    }
 
-	public double getStdevRecurrenceSentence() {
-		return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(sentenceDistribution));
-	}
+    public double getStdevRecurrenceSentence() {
+        return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(sentenceDistribution));
+    }
 
-	public double getStdevRecurrenceBlock() {
-		return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(blockDistribution));
-	}
+    public double getStdevRecurrenceBlock() {
+        return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(blockDistribution));
+    }
 
-	public String toString() {
-		String s = "(";
-		int noMax = 3, noCrt = 0;
-		for (String key : termOccurrences.keySet()) {
-			if (noCrt == noMax)
-				break;
-			s += key + ",";
-			noCrt++;
-		}
-		if (noCrt > 0)
-			s = s.substring(0, s.length() - 1);
-		s += ")";
-		return s;
-	}
+    @Override
+    public String toString() {
+        String s = "(";
+        int noMax = 3, noCrt = 0;
+        for (String key : termOccurrences.keySet()) {
+            if (noCrt == noMax) {
+                break;
+            }
+            s += key + ",";
+            noCrt++;
+        }
+        if (noCrt > 0) {
+            s = s.substring(0, s.length() - 1);
+        }
+        s += ")";
+        return s;
+    }
 
-	public String toStringAllWords() {
-		String s = "(";
-		for (Word w : words) {
-			s += w.getText() + "-" + w.getBlockIndex() + "/" + w.getUtteranceIndex() + ",";
-		}
-		if (words.size() > 0)
-			s = s.substring(0, s.length() - 1);
-		s += ")";
-		return s;
-	}
+    public String toStringAllWords() {
+        String s = "(";
+        s = words.stream().map((w) -> w.getText() + "-" + w.getBlockIndex() + "/" + w.getUtteranceIndex() + ",").reduce(s, String::concat);
+        if (words.size() > 0) {
+            s = s.substring(0, s.length() - 1);
+        }
+        s += ")";
+        return s;
+    }
 
-	public double[] getSentenceDistribution() {
-		return sentenceDistribution;
-	}
+    public double[] getSentenceDistribution() {
+        return sentenceDistribution;
+    }
 
-	public void setSentenceDistribution(double[] sentenceDistribution) {
-		this.sentenceDistribution = sentenceDistribution;
-	}
+    public void setSentenceDistribution(double[] sentenceDistribution) {
+        this.sentenceDistribution = sentenceDistribution;
+    }
 
-	public double[] getBlockDistribution() {
-		return blockDistribution;
-	}
+    public double[] getBlockDistribution() {
+        return blockDistribution;
+    }
 
-	public void setBlockDistribution(double[] blockDistribution) {
-		this.blockDistribution = blockDistribution;
-	}
+    public void setBlockDistribution(double[] blockDistribution) {
+        this.blockDistribution = blockDistribution;
+    }
 
-	public double[] getBlockMovingAverage() {
-		return blockMovingAverage;
-	}
+    public double[] getBlockMovingAverage() {
+        return blockMovingAverage;
+    }
 
-	public void setBlockMovingAverage(double[] blockMovingAverage) {
-		this.blockMovingAverage = blockMovingAverage;
-	}
+    public void setBlockMovingAverage(double[] blockMovingAverage) {
+        this.blockMovingAverage = blockMovingAverage;
+    }
 
-	public double getAverageImportanceScore() {
-		return averageImportanceScore;
-	}
+    public double getAverageImportanceScore() {
+        return averageImportanceScore;
+    }
 
-	public void setAverageImportanceScore(double averageImportanceScore) {
-		this.averageImportanceScore = averageImportanceScore;
-	}
+    public void setAverageImportanceScore(double averageImportanceScore) {
+        this.averageImportanceScore = averageImportanceScore;
+    }
 
-	public SentimentEntity getChainSentiment() {
-		return chainSentiment;
-	}
+    public SentimentEntity getChainSentiment() {
+        return chainSentiment;
+    }
 
-	public void setChainSentiment(SentimentEntity chainSentiment) {
-		this.chainSentiment = chainSentiment;
-	}
+    public void setChainSentiment(SentimentEntity chainSentiment) {
+        this.chainSentiment = chainSentiment;
+    }
 
-	public void setChainSentiment(int sentiment) {
-		SentimentEntity sre = new SentimentEntity();
-		String s = "";
-		for (Word w : words) {
-			s = s + w.getText() + " ";
-		}
-		// sre.addSentimentResultEntity(s, sentiment);
-		this.chainSentiment = sre;
-	}
+    public void setChainSentiment(int sentiment) {
+        SentimentEntity sre = new SentimentEntity();
+        String s = "";
+        for (Word w : words) {
+            s = s + w.getText() + " ";
+        }
+        // sre.addSentimentResultEntity(s, sentiment);
+        this.chainSentiment = sre;
+    }
 
-	public double getStdevSentiment() {
-		return VectorAlgebra.stdev(getSentenceDistribution());
-	}
+    public double getStdevSentiment() {
+        return VectorAlgebra.stdev(getSentenceDistribution());
+    }
 
-	@Override
-	public int compareTo(SemanticChain o) {
-		return (int) (Math.signum(o.getNoWords() - this.getNoWords()));
-	}
+    @Override
+    public int compareTo(SemanticChain o) {
+        return (int) (Math.signum(o.getNoWords() - this.getNoWords()));
+    }
 }
