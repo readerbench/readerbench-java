@@ -24,6 +24,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.StreamSupport;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import org.apache.commons.vfs2.FileContent;
 import org.apache.commons.vfs2.FileObject;
@@ -126,33 +128,23 @@ public class PdfToTextConverter {
         File file;
         try {
             if (!isFile) {
-
+                
                 URL url;
-
-                FileSystemManager fsManager = VFS.getManager();
-                FileObject fileobject = fsManager.resolveFile(fileName);
-                fileobject.createFile();
-
-                FileContent filecontent = fileobject.getContent();
-                parser = new PDFParser(new RandomAccessBufferedFileInputStream(filecontent.getInputStream()));
-
-                /*
-				 * java.util.Date date = new java.util.Date(); Timestamp
-				 * timestamp = new Timestamp(date.getTime());
-				 * 
-				 * file = new File("resources/temporar" + timestamp + ".pdf");
-				 * 
-				 * if (!file.exists()) { file.createNewFile(); } filecontent.get
-				 * 
-				 * FileOutputStream out = new FileOutputStream(file);
-				 * out.write(filecontent.getOutputStream()); out.close();
-				 * 
-				 * file = new File(filecontent.toString());
-				 * System.out.println(filecontent.toString());
-                 */
-                URLDecoder.decode(fileName, "UTF-8"); // use this instead
+                URLDecoder.decode(fileName, "UTF-8"); 
                 url = new URL(fileName);
-                file = new File(url.getFile());
+                
+                StringBuilder sb = new StringBuilder();
+                sb.append("tmp/");
+                sb.append(System.currentTimeMillis());
+                sb.append('_');
+                sb.append(FilenameUtils.getBaseName(url.toString()));
+                sb.append('.');
+                sb.append(FilenameUtils.getExtension(url.toString()));
+                fileName = sb.toString();
+                file = new File(fileName);
+                FileUtils.copyURLToFile(url, file);
+
+                parser = new PDFParser(new RandomAccessBufferedFileInputStream(new FileInputStream(file)));                
 
             } else {
                 file = new File(fileName);
