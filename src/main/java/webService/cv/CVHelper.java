@@ -44,38 +44,27 @@ public class CVHelper {
 			PdfToTextConverter pdfConverter,
 			Set<String> keywords,
 			Set<String> ignore,
-			String pathToLSA,
-			String pathToLDA,
-			Lang lang,
-			boolean usePOSTagging,
-			boolean computeDialogism,
-			double threshold,
-			double FANthreshold,
+			Map<String, String> hm,
+            double FANthreshold,
 			double deltaFAN
 			) {
 		
 		ResultCv result = new ResultCv();
 		
 		// topic extraction
-		result.setConcepts(ConceptMap.getTopics(document, threshold, ignore));
+		result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignore));
 		
 		// word occurrences
-		Map<String, Integer> wordOccurences = new HashMap<String, Integer>();
-		List<String> positiveWords = new ArrayList<String>();
-		List<String> negativeWords = new ArrayList<String>();
-		List<String> neutralWords = new ArrayList<String>();
-		Map<String, List<String>> liwcEmotions = new HashMap<String, List<String>>();
-		/*liwcEmotions.put(SentimentValence.get("Affect_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Posemo_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Negemo_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Anx_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Anger_LIWC").getName(), new ArrayList<String>());
-		liwcEmotions.put(SentimentValence.get("Sad_LIWC").getName(), new ArrayList<String>());*/
+		Map<String, Integer> wordOccurences = new HashMap<>();
+		List<String> positiveWords = new ArrayList<>();
+		List<String> negativeWords = new ArrayList<>();
+		List<String> neutralWords = new ArrayList<>();
+		Map<String, List<String>> liwcEmotions = new HashMap<>();
 		
 		List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
 		for(SentimentValence svLiwc : sentimentValences) {
-			if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
-				liwcEmotions.put(svLiwc.getName(), new ArrayList<String>());
+			if (svLiwc.getName().contains("LIWC")) {
+				liwcEmotions.put(svLiwc.getName(), new ArrayList<>());
 			}
 		}
 		
@@ -112,59 +101,10 @@ public class CVHelper {
 			
 			// LIWC
 			Double liwcSentimnet; 
-			/*
-			// 125 - affect
-			sv = SentimentValence.get("Affect_LIWC");
-			if (sv != null) {
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			
-			// 126 - emopos
-			sv = SentimentValence.get("Posemo_LIWC");
-			if (sv != null) {
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			
-			// 127 - emoneg
-			if (sv != null) {
-				sv = SentimentValence.get("Negemo_LIWC");
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			
-			// 128 - anxiete
-			if (sv != null) {
-				sv = SentimentValence.get("Anx_LIWC");
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			
-			// 129 - colere
-			sv = SentimentValence.get("Anger_LIWC");
-			if (sv != null) {
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			
-			// 130 - tristesse
-			if (sv != null) {
-				sv = SentimentValence.get("Sad_LIWC");
-				liwcSentimnet = se.get(sv);
-				if (liwcSentimnet != null && liwcSentimnet > 0) 
-					liwcEmotions.get(sv.getName()).add(word.getLemma());
-			}
-			*/
 			
 			//sentimentValences = SentimentValence.getAllValences();
 			for(SentimentValence svLiwc : sentimentValences) {
-				if (svLiwc.getName().contains("LIWC") && svLiwc != null) {
+				if (svLiwc.getName().contains("LIWC")) {
 					liwcSentimnet = se.get(svLiwc);
 					if (liwcSentimnet != null && liwcSentimnet > 0) 
 						liwcEmotions.get(svLiwc.getName()).add(word.getLemma());
@@ -174,7 +114,8 @@ public class CVHelper {
 		}
 		
 		// textual complexity
-		TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePOSTagging, computeDialogism);
+        Lang lang = Lang.getLang(hm.get("lang"));
+		TextualComplexity textualComplexity = new TextualComplexity(document, lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
 		result.setTextualComplexity(textualComplexity.getComplexityIndices());
 		
 		// number of images
@@ -211,9 +152,7 @@ public class CVHelper {
 		result.setLiwcEmotions(liwcEmotions);
 		
 		// specific keywords
-		result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords,
-				pathToLSA, pathToLDA, lang,
-				usePOSTagging, computeDialogism, threshold));
+		result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, hm));
 		
 		// (keywords, document) relevance
 		SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

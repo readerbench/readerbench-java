@@ -21,29 +21,33 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
 import data.document.Document;
+import java.util.Iterator;
+import java.util.Map;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
 
 public class QueryHelper {
-	
-	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 
-	public static AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, Lang lang,
-			boolean posTagging, boolean computeDialogism) {
-		
-		logger.info("Processign query ...");
-		AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(query);
+    private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+    
+    public static AbstractDocument processQuery(Map<String, String> hm) {
+        logger.info("Processign query ...");
+        Lang lang = Lang.getLang(hm.get("lang"));
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(hm.get("text"));
+        AbstractDocument document = new Document(
+                null,
+                template,
+                LSA.loadLSA(hm.get("lsa"), lang),
+                LDA.loadLDA(hm.get("lda"), lang),
+                lang,
+                Boolean.parseBoolean(hm.get("postagging")),
+                true);
+        logger.info("Built document has " + document.getBlocks().size() + " blocks.");
+        document.computeAll(Boolean.parseBoolean(hm.get("dialogism")), null, null);
+        ComplexityIndices.computeComplexityFactors(document);
+        return document;
+    }
 
-		// Lang lang = Lang.eng;
-		AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
-				LDA.loadLDA(pathToLDA, lang), lang, posTagging, true);
-		logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-		queryDoc.computeAll(computeDialogism, null, null);
-		ComplexityIndices.computeComplexityFactors(queryDoc);
-
-		return queryDoc;
-	}
-	
 }

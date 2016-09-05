@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 import data.AbstractDocument;
 import data.Lang;
 import data.discourse.SemanticCohesion;
+import java.util.HashMap;
+import java.util.Map;
 import services.commons.Formatting;
 import services.nlp.listOfWords.ListOfWords;
 import webService.query.QueryHelper;
@@ -33,8 +35,10 @@ import webService.result.ResultKeyword;
 public class KeywordsHelper {
 
     public static List<ResultKeyword> getKeywords(
-            AbstractDocument document, AbstractDocument keywordsDocument, Set<String> keywords,
-            String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
+            AbstractDocument document,
+            AbstractDocument keywordsDocument,
+            Set<String> keywords,
+            Map<String, String> hm) {
 
         ArrayList<ResultKeyword> resultKeywords = new ArrayList<>();
 
@@ -42,7 +46,8 @@ public class KeywordsHelper {
         usedList.setWords(keywords);
 
         usedList.getWords().stream().forEach((pattern) -> {
-            AbstractDocument patterDocument = QueryHelper.processQuery(pattern, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism);
+            hm.put("text", pattern);
+            AbstractDocument patterDocument = QueryHelper.processQuery(hm);
             int occ = 0;
             Pattern javaPattern = Pattern.compile(" " + pattern + " ");
             Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");

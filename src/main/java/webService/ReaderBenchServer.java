@@ -65,10 +65,12 @@ import services.converters.PdfToTextConverter;
 import services.mail.SendMail;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import spark.Request;
 import spark.Spark;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
+import webService.queryResult.QueryResult;
 import webService.queryResult.QueryResultCscl;
 import webService.queryResult.QueryResultCv;
 import webService.queryResult.QueryResultCvCover;
@@ -95,9 +97,11 @@ import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
+import webService.services.SentimentAnalysis;
 import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
 import webService.services.utils.FileProcessor;
+import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
 
 public class ReaderBenchServer {
@@ -111,13 +115,12 @@ public class ReaderBenchServer {
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
 
-    public List<ResultCategory> getCategories(String documentContent, String pathToLSA, String pathToLDA, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism, double threshold) {
+    public List<ResultCategory> getCategories(String documentContent, Map<String, String> hm) {
 
         List<ResultCategory> resultCategories = new ArrayList<>();
 
-        AbstractDocument queryDoc = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang, usePOSTagging,
-                computeDialogism);
+        hm.put("text", documentContent);
+        AbstractDocument queryDoc = QueryHelper.processQuery(hm);
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
 
         for (Category cat : dbCategories) {
@@ -128,8 +131,8 @@ public class ReaderBenchServer {
                 sb.append(" ");
             }
 
-            AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
+            hm.put("text", sb.toString());
+            AbstractDocument queryCategory = QueryHelper.processQuery(hm);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
             resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
         }
@@ -138,16 +141,17 @@ public class ReaderBenchServer {
         return resultCategories;
     }
 
-    private ResultSemanticAnnotation getSemanticAnnotation(AbstractDocument abstractDocument,
-            AbstractDocument keywordsDocument, AbstractDocument document, Set<String> keywordsList, String pathToLSA,
-            String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold) {
+    private ResultSemanticAnnotation getSemanticAnnotation(
+            AbstractDocument abstractDocument,
+            AbstractDocument keywordsDocument,
+            AbstractDocument document,
+            Set<String> keywordsList,
+            Map<String, String> hm) {
 
         // concepts
-        ResultTopic resultTopic = ConceptMap.getTopics(document, threshold, null);
-        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList,
-                pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold);
-        List<ResultCategory> resultCategories = getCategories(document.getText(), pathToLSA, pathToLDA, lang,
-                usePOSTagging, computeDialogism, threshold);
+        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null);
+        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, hm);
+        List<ResultCategory> resultCategories = getCategories(document.getText(), hm);
 
         // (abstract, document) relevance
         SemanticCohesion scAbstractDocument = new SemanticCohesion(abstractDocument, document);
@@ -166,15 +170,19 @@ public class ReaderBenchServer {
         return rsa;
     }
 
-    private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, String pathToLSA,
-            String pathToLDA, Lang lang, boolean usePOSTagging, boolean computeDialogism) {
-
-        Document queryInitialText = new Document(null, AbstractDocumentTemplate.getDocumentModel(initialText),
-                LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
+    private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, Map<String, String> hm) {
+        Lang lang = Lang.getLang(hm.get("lang"));
+        Document queryInitialText = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(initialText),
+                LSA.loadLSA(hm.get("lsa"), lang),
+                LDA.loadLDA(hm.get("lda"), lang),
+                lang,
+                Boolean.parseBoolean(hm.get("postagging")),
+                false);
 
         Summary s = new Summary(selfExplanation, queryInitialText, true, true);
-
-        s.computeAll(computeDialogism, false);
+        s.computeAll(Boolean.parseBoolean(hm.get("dialogism")), false);
 
         List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
         for (ReadingStrategyType rs : ReadingStrategyType.values()) {
@@ -205,7 +213,62 @@ public class ReaderBenchServer {
         }
     }
 
+    /**
+     * Returns an error result if there are any required parameters in the first
+     * set missing in the second set.
+     *
+     * @param requiredParams a set of required key parameters
+     * @param params a set of provided key parameters
+     * @return an error message if there are any required parameters in the
+     * first set missing in the second set or null otherwise
+     */
+    private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
+        Set<String> requiredParamsMissing;
+        if (null == (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+            // if not return an error showing the missing parameters
+            return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
+        }
+        return null;
+    }
+
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param request the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(Request request) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : request.queryParams()) {
+            hm.put(paramKey, request.queryParams(paramKey));
+        }
+        return null;
+    }
+    
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param request the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(JSONObject json) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : (Set<String>) json.keySet()) {
+            hm.put(paramKey, json.get(paramKey).toString());
+        }
+        return null;
+    }
+
     public void start() {
+
+        Set<String> requiredParams = new HashSet<>();
+        requiredParams.add("lang");
+        requiredParams.add("lsa");
+        requiredParams.add("lda");
+        requiredParams.add("postagging");
+        requiredParams.add("dialogism");
+        requiredParams.add("threshold");
+
         Spark.port(PORT);
 
         Spark.staticFileLocation("/public");
@@ -219,57 +282,61 @@ public class ReaderBenchServer {
             response.header("Access-Control-Allow-Headers", "*");
         });
         Spark.get("/getTopics", (request, response) -> {
-            response.type("application/json");
+            // additional required parameters
+            requiredParams.add("text");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String text = request.queryParams("text");
-            String language = request.queryParams("lang");
-            String pathToLSA = request.queryParams("lsa");
-            String pathToLDA = request.queryParams("lda");
-            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = Double.parseDouble(request.queryParams("threshold"));
-
+            Map<String, String> hm = hmParams(request);
             QueryResultTopic queryResult = new QueryResultTopic();
-            queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(text, pathToLSA, pathToLDA,
-                    Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null));
-            String result = queryResult.convertToJson();
-            // return Charset.forName("UTF-8").encode(result);
-            return result;
+            queryResult.setData(
+                    ConceptMap.getTopics(
+                            QueryHelper.processQuery(hm),
+                            Double.parseDouble(hm.get("threshold")),
+                            null)
+            );
+
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
         Spark.get("/getSentiment", (request, response) -> {
-            response.type("application/json");
+            // additional required parameters
+            requiredParams.add("text");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String text = request.queryParams("text");
-            String language = request.queryParams("lang");
-            String pathToLSA = request.queryParams("lsa");
-            String pathToLDA = request.queryParams("lda");
-            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-
+            Map<String, String> hm = hmParams(request);
             QueryResultSentiment queryResult = new QueryResultSentiment();
-            queryResult.setData(webService.services.SentimentAnalysis.getSentiment(QueryHelper.processQuery(text,
-                    pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism)));
+            queryResult.setData(
+                    SentimentAnalysis.getSentiment(
+                            QueryHelper.processQuery(hm)
+                    )
+            );
+
+            response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.get("/getComplexity", (request, response) -> {
-            response.type("application/json");
+            // additional required parameters
+            requiredParams.add("text");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String text = request.queryParams("text");
-            String language = request.queryParams("lang");
-            String pathToLSA = request.queryParams("lsa");
-            String pathToLDA = request.queryParams("lda");
-            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-
+            Map<String, String> hm = hmParams(request);
             QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
-            TextualComplexity textualComplexity = new TextualComplexity(QueryHelper.processQuery(text, pathToLSA,
-                    pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism), Lang.getLang(language),
-                    usePOSTagging, computeDialogism);
+            TextualComplexity textualComplexity = new TextualComplexity(
+                    QueryHelper.processQuery(hm),
+                    Lang.getLang(hm.get("lang")),
+                    Boolean.parseBoolean(hm.get("postagging")),
+                    Boolean.parseBoolean(hm.get("dialogism"))
+            );
             queryResult.setData(textualComplexity.getComplexityIndices());
+
+            response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.get("/search", (request, response) -> {
-
+            // TODO: refactor here similar to other endpoints
             response.type("application/json");
 
             String text = request.queryParams("text");
@@ -286,243 +353,197 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
-            response.type("application/json");
+            // additional required parameters
+            requiredParams.add("uri");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String uri = request.queryParams("uri");
-            LOGGER.info("URI primit");
-            LOGGER.info(uri);
-
-            /*
-			 * QueryResultPdfToText queryResult = new QueryResultPdfToText();
-			 * queryResult.data = getTextFromPdf(uri); String result =
-			 * convertToJson(queryResult);
-             */
-            String q = getTextFromPdf(uri, true).getContent();
-            String pathToLSA = request.queryParams("lsa");
-            String pathToLDA = request.queryParams("lda");
-            String language = request.queryParams("lang");
-            boolean usePOSTagging = Boolean.parseBoolean(request.queryParams("postagging"));
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = Double.parseDouble(request.queryParams("threshold"));
+            Map<String, String> hm = hmParams(request);
+            LOGGER.info("URI primit: " + hm.get("uri"));
+            hm.put("text", getTextFromPdf(hm.get("contents"), true).getContent());
+            hm.remove("uri");
 
             QueryResultTopic queryResult = new QueryResultTopic();
-            queryResult.setData(ConceptMap.getTopics(QueryHelper.processQuery(q, pathToLSA, pathToLDA,
-                    Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null));
-            String result = queryResult.convertToJson();
-            // return Charset.forName("UTF-8").encode(result);
-            return result;
+            queryResult.setData(
+                    ConceptMap.getTopics(
+                            QueryHelper.processQuery(hm),
+                            Double.parseDouble(hm.get("threshold")),
+                            null)
+            );
+
+            response.type("application/json");
+            return queryResult.convertToJson();
 
         });
         Spark.post("/semanticProcessUri", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            String uri = (String) json.get("uri");
+            // additional required parameters
+            requiredParams.add("uri");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
             String documentContent;
-            if (uri == null || uri.isEmpty()) {
-                LOGGER.error("URI an URL are empty. Aborting...");
-                System.exit(-1);
-            }
-            if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
-                documentContent = getTextFromPdf(uri, false).getContent();
+            if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
+                documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
             } else {
-                documentContent = getTextFromPdf(uri, true).getContent();
+                documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
             }
 
-            String documentAbstract = (String) json.get("abstract");
-            String keywords = (String) json.get("keywords");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (double) json.get("threshold");
-
-            Lang lang = Lang.getLang(language);
-
-            Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
-
-            AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
-            AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
-            AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
+            Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
+            
+            hm.put("text", documentContent);
+            AbstractDocument document = QueryHelper.processQuery(hm);
+            
+            hm.put("text", hm.get("keywords"));
+            AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
+            
+            hm.put("text", hm.get("abstract"));
+            AbstractDocument abstractDocument = QueryHelper.processQuery(hm);
 
             QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList,
-                    pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
-            String result = queryResult.convertToJson();
-            // return Charset.forName("UTF-8").encode(result);
-            return result;
+            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, hm));
+            
+            response.type("application/json");
+            return queryResult.convertToJson();
 
         });
         Spark.post("/semanticProcess", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("file");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
+            String documentContent = getTextFromPdf("tmp/" + hm.get("file"), true).getContent();
+            if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
+                documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
+            } else {
+                documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
+            }
 
-            response.type("application/json");
+            Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
 
-            String file = (String) json.get("file");
-            String documentContent = getTextFromPdf("tmp/" + file, true).getContent();
-
-            String documentAbstract = (String) json.get("abstract");
-            String keywords = (String) json.get("keywords");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (double) json.get("threshold");
-
-            Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
-
-            Lang lang = Lang.getLang(language);
-
-            AbstractDocument document = QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
-            AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
-            AbstractDocument abstractDocument = QueryHelper.processQuery(documentAbstract, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
-
+            hm.put("text", documentContent);
+            AbstractDocument document = QueryHelper.processQuery(hm);
+            
+            hm.put("text", hm.get("keywords"));
+            AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
+            
+            hm.put("text", hm.get("abstract"));
+            AbstractDocument abstractDocument = QueryHelper.processQuery(hm);
+            
             QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList,
-                    pathToLSA, pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism, threshold));
-
-            String result = queryResult.convertToJson();
-            // return Charset.forName("UTF-8").encode(result);
-            return result;
+            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, hm));
+            
+            response.type("application/json");
+            return queryResult.convertToJson();
 
         });
         Spark.post("/selfExplanation", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("text");
+            requiredParams.add("explanation");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            response.type("application/json");
-
-            String text = (String) json.get("text");
-            String explanation = (String) json.get("explanation");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-
-            Lang lang = Lang.getLang(language);
-
+            Map<String, String> hm = hmParams(json);
+            
             QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-            queryResult.setData(
-                    getSelfExplanation(text, explanation, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism));
-            String result = queryResult.convertToJson();
-            // return Charset.forName("UTF-8").encode(result);
-            return result;
+            queryResult.setData(getSelfExplanation(hm.get("text"), hm.get("explanation"), hm));
+            
+            response.type("application/json");
+            return queryResult.convertToJson();
 
         });
         Spark.post("/csclProcessing", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("csclFile");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            response.type("application/json");
-
-            // String conversationText = (String) json.get("conversation");
-            // String conversationPath = (String) json.get("conversationPath");
-            String csclFile = (String) json.get("csclFile");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (Double) json.get("threshold");
-
-            Lang lang = Lang.getLang(language);
-            Conversation conversation = Conversation.load(new File("tmp/" + csclFile), LSA.loadLSA(pathToLSA, lang),
-                    LDA.loadLDA(pathToLDA, lang), lang, usePOSTagging, false);
-            conversation.computeAll(computeDialogism, null, null, SaveType.NONE);
-            AbstractDocument conversationDocument = QueryHelper.processQuery(conversation.getText(), pathToLSA,
-                    pathToLDA, Lang.getLang(language), usePOSTagging, computeDialogism);
+            Map<String, String> hm = hmParams(json);
+            
+            Lang lang = Lang.getLang(hm.get("lang"));
+            Conversation conversation = Conversation.load(
+                    new File("tmp/" + json.get("csclFile")),
+                    LSA.loadLSA(hm.get("lsa"), lang),
+                    LDA.loadLDA(hm.get("lda"), lang),
+                    lang,
+                    Boolean.parseBoolean(hm.get("postagging")),
+                    true
+            );
+            conversation.computeAll(Boolean.parseBoolean(hm.get("dialogism")), null, null, SaveType.NONE);
+            hm.put("text", conversation.getText());
+            AbstractDocument conversationDocument = QueryHelper.processQuery(hm);
 
             QueryResultCscl queryResult = new QueryResultCscl();
-            queryResult.setData(CSCL.getAll(conversationDocument, conversation, threshold));
+            queryResult.setData(CSCL.getAll(conversationDocument, conversation, Double.parseDouble(hm.get("threshold"))));
 
+            response.type("application/json");
             return queryResult.convertToJson();
 
         });
         Spark.post("/textCategorization", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("uri");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            response.type("application/json");
-
-            String uri = (String) json.get("uri");
-
+            Map<String, String> hm = hmParams(json);
+            
             String documentContent;
-            if (uri == null || uri.isEmpty()) {
-                LOGGER.error("URI an URL are empty. Aborting...");
-                System.exit(-1);
-            }
-            if (uri.contains("http") || uri.contains("https") || uri.contains("ftp")) {
-                documentContent = getTextFromPdf(uri, false).getContent();
+            if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
+                documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
             } else {
-                documentContent = getTextFromPdf(uri, true).getContent();
+                documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
             }
 
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (double) json.get("threshold");
-
-            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(documentContent, pathToLSA, pathToLDA,
-                    Lang.getLang(language), usePOSTagging, computeDialogism), threshold, null);
-            List<ResultCategory> resultCategories = getCategories(documentContent, pathToLSA, pathToLDA, Lang.getLang(language),
-                    usePOSTagging, computeDialogism, threshold);
+            hm.put("text", documentContent);
+            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null);
+            List<ResultCategory> resultCategories = getCategories(documentContent, hm);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
             queryResult.setData(new ResultTextCategorization(resultTopic, resultCategories));
 
+            response.type("application/json");
             return queryResult.convertToJson();
 
         });
         Spark.post("/cvCoverProcessing", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("cvFile");
+            requiredParams.add("coverFile");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            response.type("application/json");
-
-            String cvFile = (String) json.get("cvFile");
-            String coverFile = (String) json.get("coverFile");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (Double) json.get("threshold");
-
-            Lang lang = Lang.getLang(language);
+            Map<String, String> hm = hmParams(json);
+            
             Map<String, Integer> commonWords = new HashMap<>();
-            String cvContent = getTextFromPdf("tmp/" + cvFile, true).getContent();
-            AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA,
-                    Lang.getLang(language), usePOSTagging, computeDialogism);
+            String cvContent = getTextFromPdf("tmp/" + hm.get("cvFile"), true).getContent();
+            hm.put("text", cvContent);
+            AbstractDocument cvDocument = QueryHelper.processQuery(hm);
             Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
 
             QueryResultCvCover queryResult = new QueryResultCvCover();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-            resultCv.setConcepts(ConceptMap.getTopics(
-                    QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
-                    threshold, null));
-            resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(
-                    QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(cvDocument));
             result.setCv(resultCv);
 
-            String coverContent = getTextFromPdf("tmp/" + coverFile, true).getContent();
-            AbstractDocument coverDocument = QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
+            String coverContent = getTextFromPdf("tmp/" + hm.get("coverFile"), true).getContent();
+            hm.put("text", coverContent);
+            AbstractDocument coverDocument = QueryHelper.processQuery(hm);
 
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-            resultCover.setConcepts(ConceptMap.getTopics(
-                    QueryHelper.processQuery(coverContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism),
-                    threshold, null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(
-                    QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism)));
+            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(coverDocument));
             result.setCover(resultCover);
 
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
@@ -536,59 +557,41 @@ public class ReaderBenchServer {
                     commonWords.put(cvWord.getLemma(), cvWordOccurences + coverWords.get(cvWord));
                 }
             }
-
             result.setWordOccurences(commonWords);
-            // semantic similarity between Cover Letter & CV
-            /*
-			 * Map<String, Double> similarity = new HashMap<String, Double>();
-			 * SemanticCohesion sc = new SemanticCohesion(cvDocument,
-			 * coverDocument); similarity.put(sc.getSemanticDistances()[1],
-			 * Formatting.formatNumber(sc.getLSASim())); similarity.put("LDA",
-			 * Formatting.formatNumber(sc.getLDASim()));
-			 * sc.getSemanticDistances()[0]=0; for(int i = 0; i <
-			 * sc.getOntologySim().length; i++) similarity.put("LDA",
-			 * Formatting.formatNumber(sc.getOntologySim()[i]));
-			 * result.setSimilarity(similarity); 1 3 4
-             */
-
             queryResult.setData(result);
+            
+            response.type("application/json");            
             return queryResult.convertToJson();
 
         });
         Spark.post("/cvProcessing", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            // additional required parameters
+            requiredParams.add("cvFile");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            response.type("application/json");
+            Map<String, String> hm = hmParams(json);
+            
+            Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
+            Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
 
-            String cvFile = (String) json.get("cvFile");
-            String keywords = (String) json.get("keywords");
-            String ignore = (String) json.get("ignore");
-            String language = (String) json.get("lang");
-            String pathToLSA = (String) json.get("lsa");
-            String pathToLDA = (String) json.get("lda");
-            boolean usePOSTagging = (boolean) json.get("postagging");
-            boolean computeDialogism = Boolean.parseBoolean(request.queryParams("dialogism"));
-            double threshold = (Double) json.get("threshold");
-
-            Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
-            Set<String> ignoreList = new HashSet<>(Arrays.asList(ignore.split(",")));
-
-            Lang lang = Lang.getLang(language);
             PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + cvFile, true);
+            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cvFile"), true);
 
             LOGGER.info("Continut cv: " + cvContent);
-            AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang, usePOSTagging,
-                    computeDialogism);
-            AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
-                    usePOSTagging, computeDialogism);
+            hm.put("text", cvContent);
+            AbstractDocument cvDocument = QueryHelper.processQuery(hm);
+            hm.put("text", hm.get("keywords"));
+            AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, 5, 1);
+                    hm, 5, 1);
 
             queryResult.setData(result);
 
+            response.type("application/json");
             return queryResult.convertToJson();
 
         });

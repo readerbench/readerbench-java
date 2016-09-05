@@ -27,6 +27,8 @@ import data.Lang;
 import data.discourse.SemanticCohesion;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
+import java.util.HashMap;
+import java.util.Map;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import webService.query.QueryHelper;
@@ -37,7 +39,14 @@ public class Categorization {
     private static final Logger logger = Logger.getLogger(Categorization.class);
 
     public static void performCategorization(String description) {
-        AbstractDocument queryDoc = QueryHelper.processQuery(description, "resources/config/EN/LSA/TASA LAK", "resources/config/EN/LDA/TASA LAK", Lang.getLang("eng"), false, false);
+        Map<String, String> hm = new HashMap<>();
+        hm.put("text", description);
+        hm.put("lsa", "resources/config/EN/LSA/TASA LAK");
+        hm.put("lsa", "resources/config/EN/LDA/TASA LAK");
+        hm.put("lang", "English");
+        hm.put("postagging", "false");
+        hm.put("dialogism", "false");
+        AbstractDocument queryDoc = QueryHelper.processQuery(hm);
 
         logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
         queryDoc.computeAll(false, null, null);
@@ -67,7 +76,8 @@ public class Categorization {
                 sb.append(" ");
             });
 
-            AbstractDocument queryCategory = QueryHelper.processQuery(sb.toString(), "resources/config/EN/LSA/TASA LAK", "resources/config/EN/LDA/TASA LAK", Lang.eng, false, false);
+            hm.put("text", sb.toString());
+            AbstractDocument queryCategory = QueryHelper.processQuery(hm);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
             resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
         });

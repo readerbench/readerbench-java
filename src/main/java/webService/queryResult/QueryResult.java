@@ -35,8 +35,12 @@ public class QueryResult {
 	private String errorMsg; // custom error message (optional)
 
 	protected QueryResult() {
-		success = true;
-		errorMsg = "";
+        this(true, "");
+	}
+    
+    public QueryResult(boolean success, String errorMsg) {
+		this.success = success;
+		this.errorMsg = errorMsg;
 	}
 	
 	public String convertToJson() {

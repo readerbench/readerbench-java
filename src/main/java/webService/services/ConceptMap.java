@@ -32,6 +32,10 @@ import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
 
+/**
+ *
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
 public class ConceptMap {
 	
 	private static final double MIN_SIZE = 5;
@@ -40,25 +44,25 @@ public class ConceptMap {
 	/**
 	 * Get document topics
 	 *
-	 * @param query
+	 * @param queryDoc
+     * @param threshold
+     * @param ignoredWords
 	 * @return List of keywords and corresponding relevance scores for results
 	 */
 	public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold, Set<String> ignoredWords) {
 
-		List<ResultNode> nodes = new ArrayList<ResultNode>();
-		List<ResultEdge> links = new ArrayList<ResultEdge>();
+		List<ResultNode> nodes = new ArrayList<>();
+		List<ResultEdge> links = new ArrayList<>();
 
 		// List<Topic> topics = queryDoc.getTopics();
 		List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 		if (ignoredWords != null) topics = TopicModeling.filterTopics(queryDoc, ignoredWords);
 
 		// build connected graph
-		Map<Word, Boolean> visibleConcepts = new TreeMap<Word, Boolean>();
+		Map<Word, Boolean> visibleConcepts = new TreeMap<>();
 		// build nodes
-		Map<Word, Double> nodeSizes = new TreeMap<Word, Double>();
-		Map<Word, Integer> nodeGroups = new TreeMap<Word, Integer>();
 		SentimentGrid<Double> edges = new SentimentGrid<>(topics.size(), topics.size());
-		Map<Word, Integer> nodeIndexes = new TreeMap<Word, Integer>();
+		Map<Word, Integer> nodeIndexes = new TreeMap<>();
 
 		for (Topic t : topics) {
 			visibleConcepts.put(t.getWord(), false);
@@ -123,7 +127,7 @@ public class ConceptMap {
 					}
 					double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 					if (sim >= threshold) {
-						double distance = Double.MAX_VALUE;
+						double distance;
 						if (sim > .9)
 							distance = 1;
 						else

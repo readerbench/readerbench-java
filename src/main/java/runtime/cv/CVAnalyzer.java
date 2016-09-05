@@ -32,6 +32,7 @@ import data.AbstractDocument;
 import data.Lang;
 import data.sentiment.SentimentValence;
 import java.io.IOException;
+import java.util.HashMap;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
@@ -49,29 +50,21 @@ import webService.services.TextualComplexity;
 public class CVAnalyzer {
 
     public Logger logger = Logger.getLogger(CVAnalyzer.class);
+    private Map<String, String> hm;
     private String path;
 
     private String pathToLSA;
     private String pathToLDA;
     private Lang lang;
-    private boolean usePOSTagging = false;
-    private boolean computeDialogism = false;
-    private double threshold = 0.3;
     private double FANthreshold = 5;
     private double FANdelta = 1;
-
+    
     private String keywords = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
     private String ignore = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
 
-    public CVAnalyzer(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-            boolean computeDialogism, double threshold) {
+    public CVAnalyzer(String path, Map<String, String> hm) {
         this.path = path;
-        this.pathToLSA = pathToLSA;
-        this.pathToLDA = pathToLDA;
-        this.lang = lang;
-        this.usePOSTagging = usePOSTagging;
-        this.computeDialogism = computeDialogism;
-        this.threshold = threshold;
+        this.hm = hm;
     }
 
     public void process() {
@@ -95,16 +88,19 @@ public class CVAnalyzer {
             List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
             for (SentimentValence svLiwc : sentimentValences) {
                 if (svLiwc != null && svLiwc.getName().contains("LIWC")) {
-                    sb.append(svLiwc.getName() + ",");
-                    sb.append(svLiwc.getName() + " percentage,");
+                    sb.append(svLiwc.getName());
+                    sb.append(",");
+                    sb.append(svLiwc.getName());
+                    sb.append(" percentage,");
                 }
             }
 
             // textual complexity factors
-            TextualComplexity textualComplexity = new TextualComplexity(lang, usePOSTagging, computeDialogism);
+            TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
             for (ComplexityIndexType cat : textualComplexity.getList()) {
                 for (ComplexityIndex index : cat.getFactory().build(lang)) {
-                    sb.append(index.getAcronym() + ',');
+                    sb.append(index.getAcronym());
+                    sb.append(',');
                 }
             }
             sb.append("keywords document relevance,");
@@ -132,17 +128,19 @@ public class CVAnalyzer {
                     String cvContent = pdfConverter.pdftoText(filePathString, true);
 
                     logger.info("Continut cv: " + cvContent);
-                    AbstractDocument cvDocument = QueryHelper.processQuery(cvContent, pathToLSA, pathToLDA, lang,
-                            usePOSTagging, computeDialogism);
-                    AbstractDocument keywordsDocument = QueryHelper.processQuery(keywords, pathToLSA, pathToLDA, lang,
-                            usePOSTagging, computeDialogism);
+                    
+                    hm.put("text", cvContent);
+                    AbstractDocument cvDocument = QueryHelper.processQuery(hm);
+                    hm.put("text", keywords);
+                    AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
 
                     logger.info("Lista de ignore contine " + ignore);
                     ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                            pathToLSA, pathToLDA, lang, usePOSTagging, computeDialogism, threshold, FANthreshold, FANdelta);
+                            hm, FANthreshold, FANdelta);
 
                     // CV
-                    sb.append(filePath.getFileName().toString() + ",");
+                    sb.append(filePath.getFileName().toString());
+                    sb.append(",");
 
                     // pages
                     sb.append(result.getPages());
@@ -302,13 +300,19 @@ public class CVAnalyzer {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         ReaderBenchServer.initializeDB();
+        
+        Map<String, String> hm = new HashMap<>();
+        hm.put("lsa", "resources/config/FR/LSA/Le Monde");
+        hm.put("lda", "resources/config/FR/LDA/Le Monde");
+        hm.put("lang", "French");
+        hm.put("postagging", "false");
+        hm.put("dialogism", "false");
+        hm.put("threshold", "0.3");
 
-        CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", "resources/config/FR/LSA/Le Monde",
-                "resources/config/FR/LDA/Le Monde", Lang.getLang("French"), false, false, 0.3);
+        CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", hm);
         cvAnalyzerSample.process();
 
-        /*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", "resources/config/FR/LSA/Le Monde",
-				"resources/config/FR/LDA/Le Monde", Lang.getLang("French"), false, false, 0.3);
+        /*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", hm);
 		cvAnalyzerPositifs.process();*/
     }
 
