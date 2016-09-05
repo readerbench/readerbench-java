@@ -96,7 +96,7 @@ public class SummaryProcessingView extends JInternalFrame {
             if (isSerialized) {
                 e = (Summary) Summary.loadSerializedDocument(pathToIndividualFile);
             } else {
-                e = Summary.loadEssay(pathToIndividualFile, referredDoc, usePOSTagging, true);
+                e = Summary.loadSummary(pathToIndividualFile, referredDoc, usePOSTagging, true);
                 if (e != null) {
                     e.computeAll(usePOSTagging, true);
                 }
