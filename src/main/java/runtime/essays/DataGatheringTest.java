@@ -63,9 +63,11 @@ public class DataGatheringTest {
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
 //        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.eng);
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
+        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde_Nursery", Lang.fr);
-        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
+//        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
         try {
 //            DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
 //            DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
@@ -77,7 +79,10 @@ public class DataGatheringTest {
 //            DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts", -1, true, lsa, lda, Lang.eng, true, true);
 //            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true, true);
 
-            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, lda, Lang.nl, false, true);
+            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
+            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);
+
+//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, lda, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 1", null, null, Lang.nl, false, true);

@@ -52,7 +52,7 @@ public class Summary extends Metacognition {
         cohesion = new SemanticCohesion(this, initialReadingMaterial);
     }
 
-    public static Summary loadEssay(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+    public static Summary loadSummary(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -69,7 +69,7 @@ public class Summary extends Metacognition {
                 return null;
             }
 
-            LOGGER.info("Building essay internal representation");
+            LOGGER.info("Building summary internal representation ...");
             Summary meta = new Summary(pathToDoc, contents,
                     initialReadingMaterial, usePOSTagging, cleanInput);
 

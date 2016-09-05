@@ -98,7 +98,7 @@ public class ReaderBenchView extends JFrame {
     public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose_Antonio", ""};
     public static final String[] TRAINED_LDA_MODELS_LA = {"resources/config/LA/LDA/Letters", ""};
 
-    public static Lang RUNTIME_LANGUAGE = Lang.eng;
+    public static Lang RUNTIME_LANGUAGE = Lang.fr;
 
     private final JMenuBar menuBar;
     // File menu item
