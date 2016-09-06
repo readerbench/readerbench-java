@@ -224,7 +224,7 @@ public class ReaderBenchServer {
      */
     private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
         Set<String> requiredParamsMissing;
-        if (null == (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
         }
@@ -242,7 +242,7 @@ public class ReaderBenchServer {
         for (String paramKey : request.queryParams()) {
             hm.put(paramKey, request.queryParams(paramKey));
         }
-        return null;
+        return hm;
     }
     
     /**
@@ -256,18 +256,25 @@ public class ReaderBenchServer {
         for (String paramKey : (Set<String>) json.keySet()) {
             hm.put(paramKey, json.get(paramKey).toString());
         }
-        return null;
+        return hm;
     }
-
-    public void start() {
-
+    
+    /**
+     * Returns a Set of initial required parameters.
+     *
+     * @return the set of initial required parameters
+     */
+    public static Set<String> setInitialRequiredParams() {
         Set<String> requiredParams = new HashSet<>();
         requiredParams.add("lang");
         requiredParams.add("lsa");
         requiredParams.add("lda");
         requiredParams.add("postagging");
         requiredParams.add("dialogism");
-        requiredParams.add("threshold");
+        return requiredParams;
+    }
+
+    public void start() {
 
         Spark.port(PORT);
 
@@ -282,8 +289,10 @@ public class ReaderBenchServer {
             response.header("Access-Control-Allow-Headers", "*");
         });
         Spark.get("/getTopics", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, request.queryParams());
 
@@ -300,6 +309,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getSentiment", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             // check whether all the required parameters are available
@@ -317,6 +327,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getComplexity", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             // check whether all the required parameters are available
@@ -336,6 +347,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/search", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             // TODO: refactor here similar to other endpoints
             response.type("application/json");
 
@@ -353,8 +365,10 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("uri");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, request.queryParams());
 
@@ -376,9 +390,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/semanticProcessUri", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("uri");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
             
@@ -409,19 +425,16 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/semanticProcess", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("file");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
             
             Map<String, String> hm = hmParams(json);
             String documentContent = getTextFromPdf("tmp/" + hm.get("file"), true).getContent();
-            if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
-                documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
-            } else {
-                documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
-            }
 
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
 
@@ -442,6 +455,7 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/selfExplanation", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("text");
@@ -459,9 +473,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/csclProcessing", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("csclFile");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
 
@@ -474,7 +490,7 @@ public class ReaderBenchServer {
                     LDA.loadLDA(hm.get("lda"), lang),
                     lang,
                     Boolean.parseBoolean(hm.get("postagging")),
-                    true
+                    false
             );
             conversation.computeAll(Boolean.parseBoolean(hm.get("dialogism")), null, null, SaveType.NONE);
             hm.put("text", conversation.getText());
@@ -488,9 +504,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/textCategorization", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("uri");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
 
@@ -515,10 +533,12 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/cvCoverProcessing", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("cvFile");
             requiredParams.add("coverFile");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
 
@@ -565,9 +585,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/cvProcessing", (request, response) -> {
+            Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
             requiredParams.add("cvFile");
+            requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
 
