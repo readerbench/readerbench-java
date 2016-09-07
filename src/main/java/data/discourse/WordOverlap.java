@@ -134,7 +134,7 @@ public class WordOverlap {
 			CoreMap keywordSentence = keywordDocument.get(SentencesAnnotation.class).get(0);
 
 			Sentence docKeywords = Parsing_EN.getInstance()
-					.processSentence(new Block(null, 0, "", doc.getLSA(), doc.getLDA(), Lang.eng), 0, keywordSentence);
+					.processSentence(new Block(null, 0, "", doc.getLSA(), doc.getLDA(), Lang.en), 0, keywordSentence);
 
 			SemanticCohesion semanticCohesion = new SemanticCohesion(docAbstract, docKeywords);
 			double cohesionVal = (float) semanticCohesion.getCohesion();

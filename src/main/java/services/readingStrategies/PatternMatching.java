@@ -81,7 +81,7 @@ public class PatternMatching {
                 usedColor = Integer.toHexString(COLOR_CAUSALITY.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
-                    case eng:
+                    case en:
                         usedList = getCausalityEn();
                         break;
                     case fr:
@@ -95,7 +95,7 @@ public class PatternMatching {
                 usedColor = Integer.toHexString(COLOR_METACOGNITION.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
-                    case eng:
+                    case en:
                         usedList = getMetacognitionEn();
                         break;
                     case fr:
@@ -169,8 +169,7 @@ public class PatternMatching {
     }
 
     public static String underlineIntalicsText(String text, String color) {
-        return " <font color=\"" + color + "\" style=\"text-decoration: underline, italics;\">" + text.trim()
-                + "</font>";
+        return " <font color=\"" + color + "\" style=\"text-decoration: underline, italics;\">" + text.trim() + "</font>";
     }
 
     public static String colorTextIndex(String text, String pattern, String color, int index) {

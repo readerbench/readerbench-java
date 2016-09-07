@@ -54,7 +54,7 @@ public class TimeStatistics {
                     logger.info("Processing file " + filePath.getFileName().toString());
 
                     Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
-                            "resources/config/LDA/tasa_en", Lang.eng, false, true);
+                            "resources/config/LDA/tasa_en", Lang.en, false, true);
                     c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     logger.info("Conversation has " + c.getBlocks().size() + " blocks.");

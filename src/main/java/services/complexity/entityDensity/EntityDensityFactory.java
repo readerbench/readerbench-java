@@ -30,7 +30,7 @@ public class EntityDensityFactory extends ComplexityIndecesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.eng) return result;
+        if (lang != Lang.en) return result;
         result.add(new AvgNamedEntitiesPerBlock());
         result.add(new AvgNounNamedEntitesPerBlock());
         result.add(new AvgUniqueNamedEntitiesPerBlock());

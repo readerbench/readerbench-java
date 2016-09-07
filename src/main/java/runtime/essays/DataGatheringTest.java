@@ -43,7 +43,7 @@ public class DataGatheringTest {
 
         for (File file : files) {
             try {
-                Document d = Document.load(file, null, null, Lang.eng, false, true);
+                Document d = Document.load(file, null, null, Lang.en, false, true);
                 d.saveTxtDocument();
             } catch (Exception e) {
                 Exceptions.printStackTrace(e);

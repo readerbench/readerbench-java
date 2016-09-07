@@ -438,7 +438,7 @@ public class SemSpaceView extends JFrame {
 
         ReaderBenchView.adjustToSystemGraphics();
 
-        JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.eng));
+        JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.en));
 //		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

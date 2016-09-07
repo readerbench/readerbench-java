@@ -30,7 +30,7 @@ public class CoreferenceFactory extends ComplexityIndecesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.eng) return result;
+        if (lang != Lang.en) return result;
         result.add(new TotalCorefChains());
         result.add(new AvgCorefsPerChain());
         result.add(new AvgChainSpan());

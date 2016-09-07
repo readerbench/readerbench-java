@@ -30,7 +30,6 @@ import data.document.ReadingStrategyType;
 public class ParaphrasingStrategy {
 
     private static final Color COLOR_PARAPHRASING = new Color(0, 100, 17);
-    private static final double SIMILARITY_THRESHOLD_PARAPHRASING = 0.3d;
 
     private int addAssociations(Word word, AnalysisElement e, String usedColor) {
         word.getReadingStrategies().add(ReadingStrategyType.PARAPHRASE);
@@ -47,12 +46,6 @@ public class ParaphrasingStrategy {
     }
 
     public void conceptsInCommon(Block v, Sentence s) {
-        // if above a minimum threshold determine similarity
-        SemanticCohesion sim = new SemanticCohesion(v, s);
-        if (sim.getCohesion() < SIMILARITY_THRESHOLD_PARAPHRASING) {
-            return;
-        }
-
         String usedColor = Integer.toHexString(COLOR_PARAPHRASING.getRGB());
         usedColor = usedColor.substring(2, usedColor.length());
 

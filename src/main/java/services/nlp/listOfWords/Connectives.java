@@ -38,7 +38,7 @@ public class Connectives {
 
     public static ClassesOfWords getConnectives(Lang lang) {
         switch (lang) {
-            case eng:
+            case en:
                 return Connectives.getConnectivesEn();
             case fr:
                 return Connectives.getConnectivesFr();

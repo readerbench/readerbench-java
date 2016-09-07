@@ -65,7 +65,7 @@ public class LDA implements ISemanticModel, Serializable {
     private static int MIN_NO_WORDS_PER_DOCUMENT = 5;
 
     private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.eng, Lang.es, Lang.fr, Lang.it, Lang.la, Lang.nl);
+    private static final Set<Lang> availableFor = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.it, Lang.la, Lang.nl);
     
     private Lang language;
     private String path;

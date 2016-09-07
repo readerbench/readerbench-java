@@ -30,7 +30,7 @@ public class ReadabilityFactory extends ComplexityIndecesFactory{
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.eng) return result;
+        if (lang != Lang.en) return result;
         result.add(new ReadabilityFlesch());
         result.add(new ReadabilityFog());
         result.add(new ReadabilityKincaid());

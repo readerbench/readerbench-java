@@ -495,9 +495,9 @@ public class SpaceStatistics {
         // }
         // compareSpaces("resources/in/HDP/comparison HDP 12-.csv", corpora);
         int gradeLevel = 0;
-        LDA matureSpace = LDA.loadLDA("resources/in/HDP/grade12", Lang.eng);
+        LDA matureSpace = LDA.loadLDA("resources/in/HDP/grade12", Lang.en);
         determineWLP("resources/in/HDP/WLP HDP " + gradeLevel + ".csv",
-                new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + gradeLevel, Lang.eng)), matureSpace);
+                new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + gradeLevel, Lang.en)), matureSpace);
     }
 
 }

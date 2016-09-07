@@ -42,6 +42,6 @@ public class Stemmer {
 	}
 
 	public static void main(String[] args) {
-		System.out.println(stemWord("information", Lang.eng));
+		System.out.println(stemWord("information", Lang.en));
 	}
 }

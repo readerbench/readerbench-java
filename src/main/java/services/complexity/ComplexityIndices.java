@@ -60,7 +60,7 @@ public class ComplexityIndices {
     }
 
     public static void main(String[] args) {
-        List<ComplexityIndex> factors = getIndices(Lang.eng);
+        List<ComplexityIndex> factors = getIndices(Lang.en);
         factors.stream().forEachOrdered(f -> {
             System.out.println(f.getCategoryName() + "\t" + f.getAcronym() + "\t"
                     + f.getDescription());

@@ -132,7 +132,7 @@ public class Seanse {
     }
 
     public void saveWordValence(String wordLabel, SentimentValence valence, double value) {
-        saveWordValence(wordLabel, Lang.eng, valence, value);
+        saveWordValence(wordLabel, Lang.en, valence, value);
     }
 
     public void saveWordValence(String wordLabel, Lang lang, SentimentValence valence, double value) {

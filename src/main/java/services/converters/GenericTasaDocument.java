@@ -175,7 +175,7 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 			block.setContent(st.nextToken().trim());
 			docTmp.getBlocks().add(block);
 		}
-		Document d = new Document(null, docTmp, null, null, Lang.eng,
+		Document d = new Document(null, docTmp, null, null, Lang.en,
 				usePOStagging, false);
 		d.setTitleText("TASA");
 		List<String> authors = new LinkedList<String>();

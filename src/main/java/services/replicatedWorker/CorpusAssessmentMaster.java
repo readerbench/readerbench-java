@@ -49,7 +49,7 @@ public class CorpusAssessmentMaster extends Master {
 
     public static final String PATH_TO_LSA = "resources/config/EN/LSA/TASA";
     public static final String PATH_TO_LDA = "resources/config/EN/LDA/TASA";
-    public static final Lang PROCESSING_LANGUAGE = Lang.eng;
+    public static final Lang PROCESSING_LANGUAGE = Lang.en;
     public static final boolean USE_POS_TAGGING = true;
     public static final boolean COMPUTE_DIALOGISM = true;
     public static final boolean CLEAN_INPUT = true;

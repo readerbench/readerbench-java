@@ -44,7 +44,7 @@ public class Pronouns {
 
     public static ClassesOfWords getPronouns(Lang lang) {
         switch (lang) {
-            case eng:
+            case en:
                 return getPronounsEn();
             case fr:
                 return getPronounsFr();

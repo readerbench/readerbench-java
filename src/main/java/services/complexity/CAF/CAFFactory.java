@@ -30,7 +30,7 @@ public class CAFFactory extends ComplexityIndecesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.eng) {
+        if (lang != Lang.en) {
             return result;
         }
         result.add(new LexicalDiversity());

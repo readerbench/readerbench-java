@@ -28,7 +28,7 @@ public class RunHDP {
 		BasicConfigurator.configure();
 
 		try {
-			LDA lda = new LDA(Lang.eng);
+			LDA lda = new LDA(Lang.en);
 			String path = "resources/in/AoE/grade" + 0;
 			int noTopics = lda.createHDPModel(path, 100, 20000);
 			logger.info("Inferred optimal number of topics is for " + path + " is " + noTopics);

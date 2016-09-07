@@ -292,8 +292,8 @@ public class SemanticModelsTraining extends JFrame {
         JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
 
         comboBoxLanguage = new JComboBox<>();
-        for (String lang : Lang.SUPPORTED_LANGUAGES) {
-            comboBoxLanguage.addItem(lang);
+        for (Lang l : Lang.values()) {
+            comboBoxLanguage.addItem(l.getDescription());
         }
 
         JLabel lblOutputFileName = new JLabel(LocalizationUtils.getTranslation("Output file name") + ":");
@@ -303,37 +303,34 @@ public class SemanticModelsTraining extends JFrame {
         textFieldOutput.setColumns(10);
 
         btnPreProcess = new JButton(LocalizationUtils.getTranslation("Process"));
-        btnPreProcess.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (textFieldInput.getText().equals("")) {
-                    JOptionPane.showMessageDialog(SemanticModelsTraining.this,
-                            LocalizationUtils.getTranslation(
-                                    "Please select an appropriate input folder to be preprocessed") + "!",
-                            "Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                File input = new File(textFieldInput.getText());
-                if (textFieldOutput.getText().equals("")) {
-                    JOptionPane.showMessageDialog(SemanticModelsTraining.this,
-                            LocalizationUtils.getTranslation(
-                                    "Please select an appropriate output file to save the preprocessing results"),
-                            "Error", JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                Lang lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLanguage.getSelectedItem()));
-                int minNoWords = 20;
-                try {
-                    minNoWords = Integer.parseInt(textFieldMinWords.getText());
-                } catch (Exception exc) {
-                    minNoWords = 20;
-                }
-
-                PreProcessingTask task = new PreProcessingTask(input.getPath(), textFieldOutput.getText(), lang,
-                        minNoWords, chckbxUsePosTagging.isSelected(),
-                        SemanticModelsTraining.this.comboBoxFormat.getSelectedIndex());
-                task.execute();
+        btnPreProcess.addActionListener((ActionEvent e) -> {
+            if (textFieldInput.getText().equals("")) {
+                JOptionPane.showMessageDialog(SemanticModelsTraining.this,
+                        LocalizationUtils.getTranslation(
+                                "Please select an appropriate input folder to be preprocessed") + "!",
+                        "Error", JOptionPane.WARNING_MESSAGE);
+                return;
             }
+            File input = new File(textFieldInput.getText());
+            if (textFieldOutput.getText().equals("")) {
+                JOptionPane.showMessageDialog(SemanticModelsTraining.this,
+                        LocalizationUtils.getTranslation(
+                                "Please select an appropriate output file to save the preprocessing results"),
+                        "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            Lang lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLanguage.getSelectedItem()));
+            int minNoWords = 20;
+            try {
+                minNoWords = Integer.parseInt(textFieldMinWords.getText());
+            } catch (Exception exc) {
+                minNoWords = 20;
+            }
+
+            PreProcessingTask task = new PreProcessingTask(input.getPath(), textFieldOutput.getText(), lang,
+                    minNoWords, chckbxUsePosTagging.isSelected(),
+                    SemanticModelsTraining.this.comboBoxFormat.getSelectedIndex());
+            task.execute();
         });
 
         JLabel lblMinWords = new JLabel(LocalizationUtils.getTranslation("Min no words") + ":");
@@ -464,9 +461,9 @@ public class SemanticModelsTraining extends JFrame {
         textFieldLSAPowerIterations.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSAPowerIterations.setColumns(10);
 
-        comboBoxLSALanguage = new JComboBox<String>();
-        for (String lang : Lang.SUPPORTED_LANGUAGES) {
-            comboBoxLSALanguage.addItem(lang);
+        comboBoxLSALanguage = new JComboBox<>();
+        for (Lang l : Lang.values()) {
+            comboBoxLSALanguage.addItem(l.getDescription());
         }
 
         chckbxLSAUseHalfSigma = new JCheckBox(LocalizationUtils.getTranslation("Use half sigma for final comutations"));
@@ -642,8 +639,8 @@ public class SemanticModelsTraining extends JFrame {
         JLabel lblLDALanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
 
         comboBoxLDALanguage = new JComboBox<>();
-        for (String lang : Lang.SUPPORTED_LANGUAGES) {
-            comboBoxLDALanguage.addItem(lang);
+        for (Lang l : Lang.values()) {
+            comboBoxLDALanguage.addItem(l.getDescription());
         }
 
         JLabel lblLDANoTopics = new JLabel(LocalizationUtils.getTranslation("No topics") + ":");

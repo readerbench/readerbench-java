@@ -63,7 +63,7 @@ public class Millington {
     public Millington(String path) {
         this.path = path;
         this.loadedDocuments = new TreeMap<>();
-        this.lang = Lang.eng;
+        this.lang = Lang.en;
         this.lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", lang);
         this.lda = LDA.loadLDA("resources/config/EN/LDA/TASA", lang);
     }
@@ -123,7 +123,7 @@ public class Millington {
                 out.write("," + type + " (" + semDist + ")");
             }
         }
-        List<ComplexityIndex> indices = ComplexityIndices.getIndices(Lang.eng);
+        List<ComplexityIndex> indices = ComplexityIndices.getIndices(Lang.en);
         for (ComplexityIndex index : indices) {
             out.write("," + index.getAcronym());
         }

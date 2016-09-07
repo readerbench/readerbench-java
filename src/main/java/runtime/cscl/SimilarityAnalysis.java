@@ -1460,8 +1460,8 @@ public class SimilarityAnalysis {
         BasicConfigurator.configure();
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.eng);
-        LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/LDA/tasa_lak_en", Lang.en);
 
         List<Integer> windowSizes = new ArrayList<>();
         windowSizes.add(20);

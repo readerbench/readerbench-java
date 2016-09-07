@@ -16,29 +16,46 @@
 package data;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 public enum Lang implements Serializable {
-	eng, fr, it, jpn, ro, es, nl, la;
+    en("English", Locale.ENGLISH),
+    fr("French", Locale.FRENCH),
+    it("Italian", Locale.ENGLISH),
+    ro("Romanian", Locale.ENGLISH),
+    es("Spanish", Locale.ENGLISH),
+    nl("Dutch", Locale.ENGLISH),
+    la("Latin", Locale.ENGLISH);
 
-	public static final String[] SUPPORTED_LANGUAGES = { "English", "French", "Italian", "Spanish", "Romanian", "Dutch",
-			"Latin" };
+    private final String description;
+    private final Locale defaultLocale;
 
-	public static Lang getLang(String language) {
-		switch (language) {
-		case "French":
-			return Lang.fr;
-		case "Italian":
-			return Lang.it;
-		case "Spanish":
-			return Lang.es;
-		case "Romanian":
-			return Lang.ro;
-		case "Dutch":
-			return Lang.nl;
-		case "Latin":
-			return Lang.la;
-		default:
-			return Lang.eng;
-		}
-	}
+    private Lang(String description, Locale locale) {
+        this.description = description;
+        this.defaultLocale = locale;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Locale getLocale() {
+        return defaultLocale;
+    }
+
+    public static Lang getLang(String language) {
+        for (Lang l : Lang.values()) {
+            if (l.getDescription().equals(language)) {
+                return l;
+            }
+        }
+
+        try {
+            Lang l = Lang.valueOf(language);
+            return l;
+        } catch (IllegalArgumentException ex) {
+            //default English
+            return Lang.en;
+        }
+    }
 }

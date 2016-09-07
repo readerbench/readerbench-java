@@ -102,20 +102,16 @@ public class VerbalizationProcessingView extends JInternalFrame {
             }
 
             if (v != null) {
-                if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
-                    ReaderBenchView.RUNTIME_LANGUAGE = v.getLanguage();
-                    ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
-                }
                 if (v.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
                     VerbalizationProcessingView.getLoadedVervalizations().add(v);
                     addVerbalization(v);
                 } else {
-                    JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
-                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!", "Information", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }
 
+        @Override
         public Void doInBackground() {
             btnAddVerbalization.setEnabled(false);
             btnAddSerializedVerbalization.setEnabled(false);

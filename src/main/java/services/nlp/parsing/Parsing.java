@@ -76,7 +76,7 @@ public abstract class Parsing {
                 return Parsing_NL.getInstance();
             case ro:
                 return Parsing_RO.getInstance();
-            case eng:
+            case en:
                 return Parsing_EN.getInstance();
             case la:
                 return Parsing_LA.getInstance();
@@ -217,7 +217,7 @@ public abstract class Parsing {
 						}
 					}
 
-                    if (usePOSTagging && lang.equals(Lang.eng)) {
+                    if (usePOSTagging && lang.equals(Lang.en)) {
                         // Build the co-reference link graph
                         // Each chain stores a set of mentions that link to each other, along with a method for getting the most representative mention.
                     	b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
@@ -281,7 +281,7 @@ public abstract class Parsing {
             }
         });
 
-        if (lang.equals(Lang.eng) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
+        if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             // parse tree corresponding to the current sentence
             Tree tree = sentence.get(TreeAnnotation.class);
             s.setPOSTreeDepth(tree.depth());
@@ -289,10 +289,10 @@ public abstract class Parsing {
             s.setParseTree(tree);
             // TreePrint tp = new TreePrint("penn");
             // tp.printTree(tree);
-            if (lang.equals(Lang.eng) || lang.equals(Lang.fr)) {
+            if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
                 s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
             }
-            if (lang.equals(Lang.eng)) {
+            if (lang.equals(Lang.en)) {
                 tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
                 // Stanford Valence

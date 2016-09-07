@@ -289,7 +289,7 @@ public class RdfToDocumentParser {
 
 	private static void addSingleDocument(String filePath) {
 		ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0],
-				ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.eng, false, true);
+				ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.en, false, true);
 		d.computeAll(false, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
 	}
 }

@@ -32,7 +32,7 @@ public class Parsing_EN extends Parsing {
 	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_EN());
 
 	private Parsing_EN() {
-		lang = Lang.eng;
+		lang = Lang.en;
 	}
 
 	public static Parsing_EN getInstance() {
@@ -57,7 +57,7 @@ public class Parsing_EN extends Parsing {
 						+ "System and human system engineering testing of EPS. "
 						+ "Relation of user perceived response time to error measurement.");
 
-		AbstractDocument d = new Document(null, docTmp, null, null, Lang.eng, true, false);
+		AbstractDocument d = new Document(null, docTmp, null, null, Lang.en, true, false);
 		System.out.println(d);
 	}
 }

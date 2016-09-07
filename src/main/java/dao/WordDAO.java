@@ -50,7 +50,7 @@ public class WordDAO extends AbstractDAO<Word> {
     }
     
     public Word findByLabel(String label) {
-        return findByLabel(label, Lang.eng);
+        return findByLabel(label, Lang.en);
     }
 
     public Word findByLabel(String label, Lang lang) {
@@ -104,7 +104,7 @@ public class WordDAO extends AbstractDAO<Word> {
     }
     
     public List<Word> findByPrefix(String label) {
-        return findByPrefix(label, Language.fromLang(Lang.eng));
+        return findByPrefix(label, Language.fromLang(Lang.en));
     }
 
     public void load(Lang lang) {

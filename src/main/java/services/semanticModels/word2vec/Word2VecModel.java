@@ -52,9 +52,9 @@ public class Word2VecModel implements ISemanticModel {
     static Logger logger = Logger.getLogger(LDA.class);
 
     private Word2Vec word2vec;
-    private Lang lang = Lang.eng;
+    private Lang lang = Lang.en;
     
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.eng);
+    private static final Set<Lang> availableFor = EnumSet.of(Lang.en);
     
     public static Word2VecModel load() throws IOException {
         return load(MODEL);

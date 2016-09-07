@@ -95,7 +95,7 @@ public class EvaluateTASA {
 							values[i - 1] = Double.parseDouble(tokens[i]);
 
 					wordWCIndexesValues.put(
-							Word.getWordFromConcept(word, Lang.eng), values);
+							Word.getWordFromConcept(word, Lang.en), values);
 				}
 			}
 			br.close();

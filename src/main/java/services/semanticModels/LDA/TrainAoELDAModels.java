@@ -46,7 +46,7 @@ public class TrainAoELDAModels {
 
 		for (int i = 0; i < noGrades; i++) {
 			String classPath = path + "/grade" + i;
-			LDA lda = new LDA(Lang.eng);
+			LDA lda = new LDA(Lang.en);
 			lda.processCorpus(classPath, noTopics, noThreads, noIterations);
 			lda.printTopics(classPath, 100);
 		}

@@ -52,8 +52,10 @@ import data.lexicalChains.LexicalChain;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
-import java.io.NotSerializableException;
+import java.io.FileNotFoundException;
+import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
+import org.xml.sax.SAXException;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
@@ -242,14 +244,11 @@ public abstract class AbstractDocument extends AnalysisElement {
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
-    public static AbstractDocument loadGenericDocument(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean cleanInput,
-            SaveType saveOutput) {
-        // parse the XML file
-        logger.info("Loading " + docFile.getPath() + " file for processing");
+    public static boolean checkTagsDocument(File f, String tag) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        InputSource input;
         try {
-            InputSource input = new InputSource(new FileInputStream(docFile));
+            input = new InputSource(new FileInputStream(f));
             input.setEncoding("UTF-8");
             DocumentBuilder db = dbf.newDocumentBuilder();
             org.w3c.dom.Document dom = db.parse(input);
@@ -258,41 +257,45 @@ public abstract class AbstractDocument extends AnalysisElement {
 
             // determine whether the document is a document or a chat
             NodeList nl;
-            boolean isDocument = false;
-            nl = doc.getElementsByTagName("p");
+            nl = doc.getElementsByTagName(tag);
             if (nl.getLength() > 0) {
-                isDocument = true;
+                return true;
             }
-
-            boolean isChat = false;
-            nl = doc.getElementsByTagName("Utterance");
-            if (nl.getLength() > 0) {
-                isChat = true;
-            }
-
-            if (isChat && isDocument) {
-                throw new Exception(
-                        "Input file has an innapropriate structure as it contains tags for both documents and chats!");
-            }
-            if (!isChat && !isDocument) {
-                throw new Exception(
-                        "Input file has an innapropriate structure as it not contains any tags for documents or chats!");
-            }
-
-            if (isDocument) {
-                Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-                d.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
-                return d;
-            }
-            if (isChat) {
-                Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-                c.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
-                return c;
-            }
-        } catch (Exception e) {
-            logger.error("Error evaluating input file " + docFile.getName() + " - " + e.getMessage());
-            Exceptions.printStackTrace(e);
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
+        return false;
+    }
+
+    public static AbstractDocument loadGenericDocument(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
+            boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean cleanInput,
+            SaveType saveOutput) {
+        // parse the XML file
+        logger.info("Loading " + docFile.getPath() + " file for processing");
+        boolean isDocument = checkTagsDocument(docFile, "p");
+
+        boolean isChat = checkTagsDocument(docFile, "Utterance");
+
+        if (isChat && isDocument) {
+            throw new RuntimeException("Input file has an innapropriate structure as it contains tags for both documents and chats!");
+        }
+        if (!isChat && !isDocument) {
+            throw new RuntimeException("Input file has an innapropriate structure as it not contains any tags for documents or chats!");
+        }
+
+        if (isDocument) {
+            Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
+            d.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+            return d;
+        }
+        if (isChat) {
+            Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
+            c.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+            return c;
+        }
+
         return null;
     }
 

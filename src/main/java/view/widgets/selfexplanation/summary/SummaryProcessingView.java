@@ -103,10 +103,6 @@ public class SummaryProcessingView extends JInternalFrame {
             }
 
             if (e != null) {
-                if (ReaderBenchView.RUNTIME_LANGUAGE == null) {
-                    ReaderBenchView.RUNTIME_LANGUAGE = e.getLanguage();
-                    ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
-                }
                 if (e.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
                     SummaryProcessingView.getLoadedSummaries().add(e);
                     addSummary(e);

@@ -63,7 +63,7 @@ public class TextPreprocessing {
         LANG_PATTERNS.put(Lang.nl, patterns);
 
         patterns = new Pair[]{new Pair<>(Pattern.compile("[^a-z ,:;'\\-\\.\\!\\?\n]"), " ")};
-        LANG_PATTERNS.put(Lang.eng, patterns);
+        LANG_PATTERNS.put(Lang.en, patterns);
 
         patterns = new Pair[]{ // replace accents
             new Pair<>(Pattern.compile("[áàâä]"), "a"), new Pair<>(Pattern.compile("[èéêë]"), "e"),
@@ -92,7 +92,7 @@ public class TextPreprocessing {
         if (LANG_PATTERNS.containsKey(lang)) {
             patterns = LANG_PATTERNS.get(lang);
         } else {
-            patterns = LANG_PATTERNS.get(Lang.eng);
+            patterns = LANG_PATTERNS.get(Lang.en);
         }
         for (Pair<Pattern, String> p : patterns) {
             result = p.first.matcher(result).replaceAll(p.second);

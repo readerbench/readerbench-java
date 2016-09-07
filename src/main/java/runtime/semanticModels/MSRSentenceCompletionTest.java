@@ -141,13 +141,13 @@ public class MSRSentenceCompletionTest {
 
         MSRSentenceCompletionTest test = new MSRSentenceCompletionTest();
 
-        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
+        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
         test.process("resources/in/MSR sentence completion", lsa1);
-        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.eng);
+        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
         test.process("resources/in/MSR sentence completion", lsa2);
-        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
+        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         test.process("resources/in/MSR sentence completion", lda1);
-        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.eng);
+        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
         test.process("resources/in/MSR sentence completion", lda2);
     }
 }

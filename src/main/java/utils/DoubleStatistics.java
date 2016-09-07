@@ -26,8 +26,7 @@ public class DoubleStatistics extends DoubleSummaryStatistics {
 
     private double sumOfSquare = 0.0d;
     private double sumOfSquareCompensation; // Low order bits of sum
-    private double simpleSumOfSquare; // Used to compute right sum for
-                                        // non-finite inputs
+    private double simpleSumOfSquare; // Used to compute right sum for non-finite inputs
 
     @Override
     public void accept(double value) {
@@ -63,12 +62,12 @@ public class DoubleStatistics extends DoubleSummaryStatistics {
     public final double getStandardDeviation() {
         return getStandardDeviation(0);
     }
-    
+
     public final double getStandardDeviation(double orElse) {
         long count = getCount();
-        double sumOfSquare = getSumOfSquare();
+        double _sumOfSquare = getSumOfSquare();
         double average = getAverage();
-        return count > 1 ? Math.sqrt((sumOfSquare - count * Math.pow(average, 2)) / (count - 1)) : orElse;
+        return count > 1 ? Math.sqrt((_sumOfSquare - count * Math.pow(average, 2)) / (count - 1)) : orElse;
     }
 
     public static Collector<Double, ?, DoubleStatistics> collector() {

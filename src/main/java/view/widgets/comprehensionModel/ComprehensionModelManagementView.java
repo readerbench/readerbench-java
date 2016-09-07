@@ -203,7 +203,7 @@ public class ComprehensionModelManagementView extends JFrame {
 
         EventQueue.invokeLater(() -> {
             ComprehensionModel cm = new ComprehensionModel(text,
-                    LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.eng), semanticThreshold, noTopConcepts,
+                    LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.en), semanticThreshold, noTopConcepts,
                     activationThreshold, noActiveWords, noActiveWordsIncrement);
             ComprehensionModelView view = new ComprehensionModelView(cm);
             view.setVisible(true);

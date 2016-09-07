@@ -15,14 +15,24 @@
  */
 package utils.settings;
 
+import data.Lang;
 import java.util.ResourceBundle;
 
 public class SettingsUtils {
-	public static String getReaderBenchVersion() {
-		String text = ResourceBundle.getBundle("utils.localization.settings").getString("ReaderBenchVersion");
-		if(text == null || text.length() == 0) {
-			return "";
-		}
-		return text;
-	}
+    
+    public static String getReaderBenchVersion() {
+        String text = ResourceBundle.getBundle("utils.localization.settings").getString("ReaderBenchVersion");
+        if (text == null || text.length() == 0) {
+            return "";
+        }
+        return text;
+    }
+    
+    public static Lang getReaderBenchRungimeLanguage() {
+        String text = ResourceBundle.getBundle("utils.localization.settings").getString("Language");
+        if (text == null || text.length() == 0) {
+            return Lang.en;
+        }
+        return Lang.getLang(text);
+    }
 }

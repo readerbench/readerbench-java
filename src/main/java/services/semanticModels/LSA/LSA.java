@@ -55,7 +55,7 @@ public class LSA implements ISemanticModel {
     public static final int K = 300;
     public static final int NO_KNN_NEIGHBOURS = 100;
     
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.eng, Lang.es, Lang.fr, Lang.la, Lang.ro);
+    private static final Set<Lang> availableFor = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.la, Lang.ro);
     
     
     private Lang language;
@@ -326,10 +326,10 @@ public class LSA implements ISemanticModel {
         // + entry.getValue());
         // }
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
 
-        Word w1 = Word.getWordFromConcept("men", Lang.eng);
-        Word w2 = Word.getWordFromConcept("address", Lang.eng);
+        Word w1 = Word.getWordFromConcept("men", Lang.en);
+        Word w2 = Word.getWordFromConcept("address", Lang.en);
         System.out.println(lsa.getSimilarity(w1, w2));
 
         // for (Entry<Word, Double> entry :

@@ -62,7 +62,7 @@ public class SyntaxFactory extends ComplexityIndecesFactory {
             }
         }
 
-        if (lang.equals(Lang.eng) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
+        if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             result.add(new AvgTreeDepth());
             result.add(new AvgTreeSize());
             result.add(new AvgNoDependencies());

@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.ImageIcon;
@@ -43,7 +42,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
@@ -85,7 +83,6 @@ public class ReaderBenchView extends JFrame {
 
     private static final long serialVersionUID = 4565038532352428650L;
     public static Logger logger = Logger.getLogger(ReaderBenchView.class);
-    public static Locale LOADED_LOCALE = LocalizationUtils.LOADED_LOCALE;
 
     public static final String[] TRAINED_LSA_SPACES_EN = {"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""};
     public static final String[] TRAINED_LSA_SPACES_FR = {"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""};
@@ -98,17 +95,13 @@ public class ReaderBenchView extends JFrame {
     public static final String[] TRAINED_LDA_MODELS_ES = {"resources/config/ES/LDA/Jose_Antonio", ""};
     public static final String[] TRAINED_LDA_MODELS_LA = {"resources/config/LA/LDA/Letters", ""};
 
-    public static Lang RUNTIME_LANGUAGE = Lang.fr;
+    public static final Lang RUNTIME_LANGUAGE = SettingsUtils.getReaderBenchRungimeLanguage();
+    public static Locale LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
 
     private final JMenuBar menuBar;
     // File menu item
     private final JMenu mnFile;
     private final JMenuItem mntmQuit;
-    // Options menu item
-    private final JMenu mnOptions;
-    private final JMenu mnLanguage;
-    private final JRadioButtonMenuItem rdbtnmntmEnglish;
-    private final JRadioButtonMenuItem rdbtnmntmFrench;
 
     // tabbed panel
     private final JTabbedPane tabbedPane;
@@ -181,26 +174,26 @@ public class ReaderBenchView extends JFrame {
         panelDataInput.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
         panelDataInput.setBackground(Color.WHITE);
         tabbedPane.addTab(
-                ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.panelDataInput.title"), //$NON-NLS-1$
+                ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.panelDataInput.title"),
                 null, panelDataInput, null);
 
-        btnCreateDocument = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnCreateDocument.text")); //$NON-NLS-1$
+        btnCreateDocument = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnCreateDocument.text"));
         btnCreateDocument.addActionListener((ActionEvent arg0) -> {
             DocumentManagementView view = new DocumentManagementView();
             view.setVisible(true);
         });
 
-        btnCreateVerbalization = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnCreateVerbalization.text")); //$NON-NLS-1$
+        btnCreateVerbalization = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnCreateVerbalization.text"));
         btnCreateVerbalization.addActionListener((ActionEvent e) -> {
             CreateVerbalizationView view = new CreateVerbalizationView();
             view.setVisible(true);
         });
 
-        btnAnnotateVerbalization = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnAnnotateVerbalization.text")); //$NON-NLS-1$
+        btnAnnotateVerbalization = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnAnnotateVerbalization.text"));
         btnAnnotateVerbalization.addActionListener((ActionEvent e) -> {
             AnnotateVerbalizationView view = new AnnotateVerbalizationView();
             view.setVisible(true);
@@ -232,8 +225,8 @@ public class ReaderBenchView extends JFrame {
                 LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelPreProcessing"),
                 null, panelPreProcessing, null);
 
-        btnPreprocessingTrainSemanticModels = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text")); //$NON-NLS-1$
+        btnPreprocessingTrainSemanticModels = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text"));
         btnPreprocessingTrainSemanticModels.addActionListener((ActionEvent e) -> {
             EventQueue.invokeLater(() -> {
                 try {
@@ -245,8 +238,8 @@ public class ReaderBenchView extends JFrame {
             });
         });
 
-        btnRunTextualComplexityIndices = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnRunTextualComplexityIndices.text")); //$NON-NLS-1$
+        btnRunTextualComplexityIndices = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnRunTextualComplexityIndices.text"));
         btnRunTextualComplexityIndices.addActionListener((ActionEvent e) -> {
             RunMeasurementsView frame = new RunMeasurementsView();
             frame.setVisible(true);
@@ -269,17 +262,15 @@ public class ReaderBenchView extends JFrame {
         panelPreProcessing.setLayout(gl_panelPreProcessing);
 
         JPanel panelDocument = new JPanel();
-        // tabbedPane.addTab("New tab", null, panelDocSpecific, null);
         tabbedPane.addTab(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDocument"), //$NON-NLS-1$ //$NON-NLS-2$
+                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDocument"),
                 null, panelDocument, null);
 
         panelDocument.setBackground(Color.WHITE);
         panelDocument.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-        btnPredictTextualComplexity = new JButton(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnTrainSVMDocs")); //$NON-NLS-1$ //$NON-NLS-2$
+        btnPredictTextualComplexity = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnTrainSVMDocs"));
         btnPredictTextualComplexity.addActionListener((ActionEvent e) -> {
             if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
                 List<AbstractDocument> abstractDocs = new LinkedList<>();
@@ -295,7 +286,7 @@ public class ReaderBenchView extends JFrame {
             }
         });
 
-        btnDocProcessing = new JButton();
+        btnDocProcessing = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnDocProcessing"));
         btnDocProcessing.addActionListener((ActionEvent e) -> {
             DocumentProcessingView frame = new DocumentProcessingView();
             frame.setVisible(true);
@@ -307,8 +298,8 @@ public class ReaderBenchView extends JFrame {
             }
         });
 
-        btnDocumentSemanticSearch = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnDocumentSemanticSearch.text")); //$NON-NLS-1$
+        btnDocumentSemanticSearch = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnDocumentSemanticSearch.text"));
         btnDocumentSemanticSearch.addActionListener((ActionEvent e) -> {
             DocumentSemanticSearchView frame = new DocumentSemanticSearchView();
             frame.setVisible(true);
@@ -341,20 +332,20 @@ public class ReaderBenchView extends JFrame {
         panelDocument.setLayout(gl_panelDocSpecific);
 
         JPanel panelTextualComplexity = new JPanel();
-        tabbedPane.addTab("New tab", null, panelTextualComplexity, null);
+        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelTextualComplexity"), null, panelTextualComplexity, null);
         panelTextualComplexity.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelTextualComplexity.setBackground(Color.WHITE);
 
-        btnCorpusEvaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnCorpusEvaluation.text")); //$NON-NLS-1$
+        btnCorpusEvaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnCorpusEvaluation.text"));
         btnCorpusEvaluation.addActionListener((ActionEvent e) -> {
             CorpusEvaluationView frame = new CorpusEvaluationView();
             frame.setVisible(true);
         });
 
-        btnEssayProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnEssayProcessing.text")); //$NON-NLS-1$
+        btnEssayProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnEssayProcessing.text"));
         btnEssayProcessing.addActionListener((ActionEvent e) -> {
             EssayProcessingView frame = new EssayProcessingView();
             frame.setVisible(true);
@@ -376,13 +367,13 @@ public class ReaderBenchView extends JFrame {
         panelTextualComplexity.setLayout(gl_panel);
 
         JPanel panelSelfExplanations = new JPanel();
-        tabbedPane.addTab("New tab", null, panelSelfExplanations, null);
+        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelSelfExplanations"), null, panelSelfExplanations, null);
         panelSelfExplanations.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelSelfExplanations.setBackground(Color.WHITE);
 
-        btnVerbaProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnVerbaProcessing.text")); //$NON-NLS-1$
+        btnVerbaProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnVerbaProcessing.text"));
         btnVerbaProcessing.addActionListener((ActionEvent e) -> {
             VerbalizationProcessingView frame = new VerbalizationProcessingView();
             frame.setVisible(true);
@@ -394,8 +385,8 @@ public class ReaderBenchView extends JFrame {
             }
         });
 
-        btnSummaryProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnSummaryProcessing.text")); //$NON-NLS-1$
+        btnSummaryProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnSummaryProcessing.text"));
         btnSummaryProcessing.addActionListener((ActionEvent e) -> {
             SummaryProcessingView frame = new SummaryProcessingView();
             frame.setVisible(true);
@@ -442,27 +433,27 @@ public class ReaderBenchView extends JFrame {
                         .addContainerGap()));
 
         JPanel panelCSCL = new JPanel();
-        tabbedPane.addTab("New tab", null, panelCSCL, null);
+        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelCSCL"), null, panelCSCL, null);
         panelCSCL.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelCSCL.setBackground(Color.WHITE);
 
-        btnVCoPProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnVCoPProcessing.text")); //$NON-NLS-1$
+        btnVCoPProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnVCoPProcessing.text"));
         btnVCoPProcessing.addActionListener((ActionEvent e) -> {
             VCoPView frame = new VCoPView();
             frame.setVisible(true);
         });
 
-        btnVcopprocessingevaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnVcopprocessingevaluation.text")); //$NON-NLS-1$
+        btnVcopprocessingevaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnVcopprocessingevaluation.text"));
         btnVcopprocessingevaluation.addActionListener((ActionEvent e) -> {
             VCoPEvaluationView frame = new VCoPEvaluationView();
             frame.setVisible(true);
         });
 
-        btnConversationProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.btnConversationProcessing.text")); //$NON-NLS-1$
+        btnConversationProcessing = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnConversationProcessing.text"));
         btnConversationProcessing.addActionListener((ActionEvent e) -> {
             ConversationProcessingView frame = new ConversationProcessingView();
             frame.setVisible(true);
@@ -497,7 +488,7 @@ public class ReaderBenchView extends JFrame {
         super.setJMenuBar(menuBar);
 
         mnFile = new JMenu(
-                ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.mnFile.text")); //$NON-NLS-1$
+                ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.mnFile.text"));
         menuBar.add(mnFile);
 
         String quitText = ResourceBundle.getBundle("utils.localization.messages")
@@ -508,110 +499,6 @@ public class ReaderBenchView extends JFrame {
             System.exit(0);
         });
         mnFile.add(mntmQuit);
-
-        mnOptions = new JMenu(
-                ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.mnOptions.text")); //$NON-NLS-1$
-        menuBar.add(mnOptions);
-
-        mnLanguage = new JMenu(
-                ResourceBundle.getBundle("utils.localization.messages").getString("ReaderBenchView.mnLanguage.text")); //$NON-NLS-1$
-        mnOptions.add(mnLanguage);
-
-        // ButtonGroup for radio buttons
-        ButtonGroup languageGroup = new ButtonGroup();
-
-        rdbtnmntmEnglish = new JRadioButtonMenuItem(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.rdbtnmntmEnglish.text"), true);
-        rdbtnmntmEnglish.addActionListener((ActionEvent e) -> {
-            if (LOADED_LOCALE != Locale.ENGLISH) {
-                updateLocale(Locale.ENGLISH);
-            }
-            LocalizationUtils.saveLocaleInBundle(Locale.ENGLISH);
-        });
-        mnLanguage.add(rdbtnmntmEnglish);
-        languageGroup.add(rdbtnmntmEnglish);
-
-        rdbtnmntmFrench = new JRadioButtonMenuItem(ResourceBundle.getBundle("utils.localization.messages") //$NON-NLS-1$
-                .getString("ReaderBenchView.rdbtnmntmFrench.text"));
-        rdbtnmntmFrench.addActionListener((ActionEvent e) -> {
-            if (LOADED_LOCALE != Locale.FRENCH) {
-                updateLocale(Locale.FRENCH);
-            }
-            LocalizationUtils.saveLocaleInBundle(Locale.FRENCH);
-        });
-        mnLanguage.add(rdbtnmntmFrench);
-        languageGroup.add(rdbtnmntmFrench);
-
-        updateNames();
-    }
-
-    private void updateNames() {
-        this.mnFile.setText(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "mnFile"));
-        this.mntmQuit
-                .setText(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "mntmQuit"));
-        this.mnOptions
-                .setText(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "mnOptions"));
-        this.mnLanguage
-                .setText(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "mnLanguage"));
-        this.rdbtnmntmEnglish.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "rdbtnmntmEnglish"));
-        this.rdbtnmntmFrench.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "rdbtnmntmFrench"));
-
-        // data input panel
-        this.tabbedPane.setTitleAt(0,
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDataInput"));
-        this.btnCreateDocument.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnCreateDocument"));
-        this.btnCreateVerbalization.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnCreateVerbalization"));
-        this.btnAnnotateVerbalization.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnAnnotateVerbalization"));
-
-        // document analysis
-        this.tabbedPane.setTitleAt(1,
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelPreProcessing"));
-        this.btnPreprocessingTrainSemanticModels.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnPreprocessingTrainSemanticModels"));
-        this.btnRunTextualComplexityIndices.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnRunTextualComplexityIndices"));
-        this.btnDocProcessing.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnDocProcessing"));
-        this.btnDocumentSemanticSearch.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnDocumentSemanticSearch"));
-
-        this.tabbedPane.setTitleAt(3, LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE,
-                "panelTextualComplexity"));
-        this.btnPredictTextualComplexity.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnPredictTextualComplexity"));
-        this.tabbedPane.setTitleAt(2,
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDocument"));
-        this.btnCorpusEvaluation.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnCorpusEvaluation"));
-        this.btnEssayProcessing.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnEssayProcessing"));
-        this.tabbedPane.setTitleAt(4, LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE,
-                "panelSelfExplanations"));
-        this.btnVerbaProcessing.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnVerbaProcessing"));
-        this.btnSummaryProcessing.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnSummaryProcessing"));
-        this.tabbedPane.setTitleAt(5,
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelCSCL"));
-        this.btnVCoPProcessing.setText(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnVCoPProcessing"));
-        this.btnVcopprocessingevaluation.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnVcopprocessingevaluation"));
-        this.btnConversationProcessing.setText(LocalizationUtils.getLocalizedString(this.getClass(),
-                LocalizationUtils.TEXT, "btnConversationProcessing"));
-    }
-
-    public void updateLocale(Locale newLocale) {
-        LOADED_LOCALE = newLocale;
-        Locale.setDefault(LOADED_LOCALE);
-        ResourceBundle.clearCache();
-        updateNames();
-        ReaderBenchView.this.revalidate();
     }
 
     public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, Lang lang) {

@@ -75,7 +75,7 @@ public class TASAAnalyzerFull {
 		for (int i = 0; i < noClasses; i++) {
 			String classPath = path + "/grade" + i;
 			logger.info("Loading model " + classPath + "...");
-			models.put(i, LDA.loadLDA(classPath, Lang.eng));
+			models.put(i, LDA.loadLDA(classPath, Lang.en));
 		}
 	}
 

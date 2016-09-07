@@ -85,7 +85,7 @@ public class StaticLemmatizer {
     public static String lemmaStatic(String w, Lang lang) {
         String lemma;
         switch (lang) {
-            case eng:
+            case en:
                 lemma = getLemmasEn().get(w);
                 break;
             case fr:
@@ -118,7 +118,7 @@ public class StaticLemmatizer {
 
     public static Map<String, String> getLemmasEn() {
         if (lemmas_en == null) {
-            lemmas_en = initialize("resources/config/EN/word lists/lemmas_en.txt", Lang.eng);
+            lemmas_en = initialize("resources/config/EN/word lists/lemmas_en.txt", Lang.en);
         }
         return lemmas_en;
     }

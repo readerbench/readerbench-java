@@ -74,7 +74,7 @@ public class OntologySupport {
 
     static {
         wordnetFiles.put(Lang.ro, "resources/config/RO/WN/wn-ron-lmf.xml");
-        wordnetFiles.put(Lang.eng, "resources/config/EN/WN/wn-eng-lmf.xml");
+        wordnetFiles.put(Lang.en, "resources/config/EN/WN/wn-eng-lmf.xml");
         wordnetFiles.put(Lang.fr, "resources/config/FR/WN/wn-fra-lmf.xml");
         wordnetFiles.put(Lang.nl, "resources/config/NL/WN/wn-nld-lmf.xml");
         wordnetFiles.put(Lang.it, "resources/config/IT/WN/wn-ita-lmf.xml");
@@ -334,9 +334,9 @@ public class OntologySupport {
     }
     
     public static void main(String[] args) {
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
-        System.out.println(dictionaries.get(Lang.eng).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
+        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
+        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
+        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
         System.out.println(exists("final", "JJ", Lang.fr));
 
         /*Word w1 = Word.getWordFromConcept("horse", Lang.eng);
@@ -352,11 +352,11 @@ public class OntologySupport {
                 + " The EPS user interface management system. "
                 + "System and human system engineering testing of EPS. "
                 + "Relation of user perceived response time to error measurement.");
-        AbstractDocument d = new Document(null, docTmp, null, null, Lang.eng, true, false);
+        AbstractDocument d = new Document(null, docTmp, null, null, Lang.en, true, false);
 
         AbstractDocumentTemplate docTmp1 = AbstractDocumentTemplate.getDocumentModel(
                 "RAGE, Realising an Applied Gaming Eco-system, aims to develop, transform and enrich advanced technologies from the leisure games industry into self-contained gaming assets that support game studios at developing applied games easier, faster and more cost-effectively. These assets will be available along with a large volume of high-quality knowledge resources through a self-sustainable Ecosystem, which is a social space that connects research, gaming industries, intermediaries, education providers, policy makers and end-users.");
-        AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.eng, false, false);
+        AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.en, false, false);
 
         SemanticCohesion sc = new SemanticCohesion(d, d1);
         System.out.println(sc.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW));

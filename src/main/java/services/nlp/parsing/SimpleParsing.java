@@ -79,7 +79,7 @@ public class SimpleParsing {
             }
         }
 
-        if (s.getLanguage().equals(Lang.eng)) {
+        if (s.getLanguage().equals(Lang.en)) {
             SentimentEntity se = new SentimentEntity();
             s.setSentimentEntity(se);
         }

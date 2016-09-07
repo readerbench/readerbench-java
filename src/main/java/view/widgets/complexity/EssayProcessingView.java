@@ -47,199 +47,201 @@ import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
 public class EssayProcessingView extends JFrame {
-	private static final long serialVersionUID = 8894652868238113117L;
 
-	public static final String C_BASE_FOLDER_NAME = "grade";
+    private static final long serialVersionUID = 8894652868238113117L;
 
-	static Logger logger = Logger.getLogger(RunMeasurementsView.class);
+    public static final String C_BASE_FOLDER_NAME = "grade";
 
-	private JPanel contentPane;
-	private JTextField textFieldPath;
-	private JComboBox<String> comboBoxLSA;
-	private JComboBox<String> comboBoxLDA;
-	private JComboBox<String> comboBoxLanguage;
-	private JButton btnRun;
-	private JCheckBox chckbxUsePosTagging;
-	private Lang lang = null;
+    static Logger logger = Logger.getLogger(RunMeasurementsView.class);
 
-	private class Task extends SwingWorker<Void, Void> {
-		private String path;
-		private String pathToLSA;
-		private String pathToLDA;
-		private Lang lang;
-		private boolean usePOSTagging;
-		private boolean computeDialogism;
+    private JPanel contentPane;
+    private JTextField textFieldPath;
+    private JComboBox<String> comboBoxLSA;
+    private JComboBox<String> comboBoxLDA;
+    private JComboBox<String> comboBoxLanguage;
+    private JButton btnRun;
+    private JCheckBox chckbxUsePosTagging;
+    private Lang lang = null;
 
-		public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-				boolean computeDialogism) {
-			super();
-			this.path = path;
-			this.pathToLSA = pathToLSA;
-			this.pathToLDA = pathToLDA;
-			this.lang = lang;
-			this.usePOSTagging = usePOSTagging;
-			this.computeDialogism = computeDialogism;
-		}
+    private class Task extends SwingWorker<Void, Void> {
 
-		public Void doInBackground() {
-			try {
-				logger.info("Processing all documents found in " + path);
-				try {
-					LSA lsa = LSA.loadLSA(pathToLSA, lang);
-					LDA lda = LDA.loadLDA(pathToLDA, lang);
+        private String path;
+        private String pathToLSA;
+        private String pathToLDA;
+        private Lang lang;
+        private boolean usePOSTagging;
+        private boolean computeDialogism;
 
-					DataGathering.processTexts(path, -1, true, lsa, lda, lang, usePOSTagging, computeDialogism);
-				} catch (Exception e) {
-					System.err.println("Error: " + e.getMessage());
-					e.printStackTrace();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
+        public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+                boolean computeDialogism) {
+            super();
+            this.path = path;
+            this.pathToLSA = pathToLSA;
+            this.pathToLDA = pathToLDA;
+            this.lang = lang;
+            this.usePOSTagging = usePOSTagging;
+            this.computeDialogism = computeDialogism;
+        }
 
-		@Override
-		public void done() {
-			Toolkit.getDefaultToolkit().beep();
-			btnRun.setEnabled(true);
-			setCursor(null); // turn off the wait cursor
-		}
-	}
+        public Void doInBackground() {
+            try {
+                logger.info("Processing all documents found in " + path);
+                try {
+                    LSA lsa = LSA.loadLSA(pathToLSA, lang);
+                    LDA lda = LDA.loadLDA(pathToLDA, lang);
 
-	/**
-	 * Create the frame.
-	 */
-	public EssayProcessingView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Essay Processing"));
-		setResizable(false);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 570, 240);
-		contentPane = new JPanel();
-		contentPane.setBackground(Color.WHITE);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+                    DataGathering.processTexts(path, -1, true, lsa, lda, lang, usePOSTagging, computeDialogism);
+                } catch (Exception e) {
+                    System.err.println("Error: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-		JLabel lblPath = new JLabel("Path:");
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            btnRun.setEnabled(true);
+            setCursor(null); // turn off the wait cursor
+        }
+    }
 
-		JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
+    /**
+     * Create the frame.
+     */
+    public EssayProcessingView() {
+        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Essay Processing"));
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(100, 100, 570, 240);
+        contentPane = new JPanel();
+        contentPane.setBackground(Color.WHITE);
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
 
-		JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation("LDA model") + ":");
+        JLabel lblPath = new JLabel("Path:");
 
-		comboBoxLSA = new JComboBox<String>();
-		comboBoxLSA.setEnabled(false);
-		comboBoxLDA = new JComboBox<String>();
-		comboBoxLDA.setEnabled(false);
+        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
 
-		textFieldPath = new JTextField();
-		textFieldPath.setText("");
-		textFieldPath.setColumns(10);
+        JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation("LDA model") + ":");
 
-		JButton btnSearch = new JButton("...");
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser(new File("in"));
-				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				int returnVal = fc.showOpenDialog(EssayProcessingView.this);
+        comboBoxLSA = new JComboBox<String>();
+        comboBoxLSA.setEnabled(false);
+        comboBoxLDA = new JComboBox<String>();
+        comboBoxLDA.setEnabled(false);
 
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					textFieldPath.setText(file.getPath());
-				}
-			}
-		});
+        textFieldPath = new JTextField();
+        textFieldPath.setText("");
+        textFieldPath.setColumns(10);
 
-		btnRun = new JButton(LocalizationUtils.getTranslation("Generate Measurements File"));
-		btnRun.setEnabled(false);
-		btnRun.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (!textFieldPath.getText().equals("")) {
-					Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(), EssayProcessingView.this.lang,
-							chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected());
-					btnRun.setEnabled(false);
-					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-					task.execute();
-				} else
-					JOptionPane
-							.showMessageDialog(EssayProcessingView.this,
-									LocalizationUtils.getTranslation(
-											"Please select an appropriate directory to be analysed") + "!",
-									"Error", JOptionPane.WARNING_MESSAGE);
-			}
-		});
+        JButton btnSearch = new JButton("...");
+        btnSearch.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fc = new JFileChooser(new File("in"));
+                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                int returnVal = fc.showOpenDialog(EssayProcessingView.this);
 
-		chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
-		chckbxUsePosTagging.setSelected(true);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    textFieldPath.setText(file.getPath());
+                }
+            }
+        });
 
-		JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
+        btnRun = new JButton(LocalizationUtils.getTranslation("Generate Measurements File"));
+        btnRun.setEnabled(false);
+        btnRun.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (!textFieldPath.getText().equals("")) {
+                    Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+                            (String) comboBoxLDA.getSelectedItem(), EssayProcessingView.this.lang,
+                            chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected());
+                    btnRun.setEnabled(false);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    task.execute();
+                } else {
+                    JOptionPane
+                            .showMessageDialog(EssayProcessingView.this,
+                                    LocalizationUtils.getTranslation(
+                                            "Please select an appropriate directory to be analysed") + "!",
+                                    "Error", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
 
-		comboBoxLanguage = new JComboBox<String>();
-		comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
-		for (String lang : Lang.SUPPORTED_LANGUAGES)
-			comboBoxLanguage.addItem(lang);
+        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
+        chckbxUsePosTagging.setSelected(true);
 
-		comboBoxLanguage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (comboBoxLanguage.getSelectedIndex() > 0) {
-					// set final analysis language
-					lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
+        JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
 
-					ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
-					btnRun.setEnabled(true);
-				}
-			}
-		});
+        comboBoxLanguage = new JComboBox<>();
+        comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
+        for (Lang l : Lang.values()) {
+            comboBoxLanguage.addItem(l.getDescription());
+        }
 
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(
-						gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
-								.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_contentPane.createSequentialGroup()
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-												.addComponent(lblPath).addComponent(lblLsaVectorSpace).addComponent(
-														lblLdaModel))
-										.addGap(13)
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-												.addComponent(comboBoxLDA, 0, 420, Short.MAX_VALUE)
-												.addGroup(gl_contentPane.createSequentialGroup()
-														.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 372,
-																Short.MAX_VALUE)
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
-																GroupLayout.PREFERRED_SIZE))
-												.addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE).addComponent(
-														comboBoxLanguage, Alignment.LEADING, 0, 420, Short.MAX_VALUE))
-										.addGap(6))
-								.addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
-										.addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
-										.addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 242,
-												GroupLayout.PREFERRED_SIZE)
-										.addContainerGap())
-								.addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage)
-										.addContainerGap(482, Short.MAX_VALUE)))));
-		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
-				.createSequentialGroup().addContainerGap()
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
-						comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-						GroupLayout.PREFERRED_SIZE))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
-						.addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
-								GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
-						.addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-						.addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.PREFERRED_SIZE)
-						.addComponent(lblLdaModel))
-				.addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
-						.createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
-				.addContainerGap(38, Short.MAX_VALUE)));
-		contentPane.setLayout(gl_contentPane);
-	}
+        comboBoxLanguage.addActionListener((ActionEvent e) -> {
+            if (comboBoxLanguage.getSelectedIndex() > 0) {
+                // set final analysis language
+                lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
+
+                ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
+                btnRun.setEnabled(true);
+            }
+        });
+
+        GroupLayout gl_contentPane = new GroupLayout(contentPane);
+        gl_contentPane
+                .setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(
+                        gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
+                                .createParallelGroup(Alignment.LEADING)
+                                .addGroup(gl_contentPane.createSequentialGroup()
+                                        .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+                                                .addComponent(lblPath).addComponent(lblLsaVectorSpace).addComponent(
+                                                lblLdaModel))
+                                        .addGap(13)
+                                        .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+                                                .addComponent(comboBoxLDA, 0, 420, Short.MAX_VALUE)
+                                                .addGroup(gl_contentPane.createSequentialGroup()
+                                                        .addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 372,
+                                                                Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
+                                                                GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE).addComponent(
+                                                comboBoxLanguage, Alignment.LEADING, 0, 420, Short.MAX_VALUE))
+                                        .addGap(6))
+                                .addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+                                        .addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
+                                        .addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 242,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap())
+                                .addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage)
+                                        .addContainerGap(482, Short.MAX_VALUE)))));
+        gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
+                .createSequentialGroup().addContainerGap()
+                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
+                        comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                        GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
+                        .addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
+                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
+                        .addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblLdaModel))
+                .addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
+                .createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
+                .addContainerGap(38, Short.MAX_VALUE)));
+        contentPane.setLayout(gl_contentPane);
+    }
 }

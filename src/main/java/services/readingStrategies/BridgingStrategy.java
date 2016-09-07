@@ -34,8 +34,7 @@ public class BridgingStrategy {
 
     private static final Color COLOR_BRIDGING = new Color(221, 8, 6);
     private static double MIN_COHESION = 0.3;
-    // minimum percentage of words that can be paraphrases in order to consider
-    // a whole phrase a paraphrase
+    // minimum percentage of words that can be paraphrases in order to consider a whole phrase a paraphrase
     private static double MAX_PARAPHRASING = 0.7;
 
     public boolean isParaphrase(Sentence s) {

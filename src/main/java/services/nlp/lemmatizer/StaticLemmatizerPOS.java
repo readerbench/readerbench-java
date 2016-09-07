@@ -67,8 +67,8 @@ public class StaticLemmatizerPOS {
 			break;
 		case es:
 			return StaticLemmatizer.lemmaStatic(w, Lang.es);
-		case eng:
-			return StaticLemmatizer.lemmaStatic(w, Lang.eng);
+		case en:
+			return StaticLemmatizer.lemmaStatic(w, Lang.en);
 		// return Morphology.lemmaStatic(w, pos, true);
 		default:
 			lemmas = null;

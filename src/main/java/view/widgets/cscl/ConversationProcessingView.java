@@ -27,7 +27,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
@@ -68,232 +67,234 @@ import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.awt.event.ActionListener;
+import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
 import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.complexity.ComplexityIndicesView;
 
 public class ConversationProcessingView extends JInternalFrame {
-	private static final long serialVersionUID = -8772215709851320157L;
-	static Logger logger = Logger.getLogger(ConversationProcessingView.class);
 
-	private JLabel lblLanguage;
-	private JComboBox<String> comboBoxLanguage;
-	private JButton btnRemoveDocument = null;
-	private JButton btnAddDocument = null;
-	private JButton btnViewDocument = null;
-	private JButton btnAddSerializedDocument = null;
-	private JTable docTable;
-	private ConversationManagementTableModel docTableModel = null;
-	private TableRowSorter<ConversationManagementTableModel> docSorter;
-	private JScrollPane scrollPane;
-	private JDesktopPane desktopPane;
-	private static File lastDirectory = null;
+    private static final long serialVersionUID = -8772215709851320157L;
+    static Logger logger = Logger.getLogger(ConversationProcessingView.class);
 
-	private static List<Conversation> loadedConversations = new LinkedList<Conversation>();
-	private CustomTextField articleTextField;
-	private String queryArticleName;
+    private JLabel lblLanguage;
+    private JComboBox<String> comboBoxLanguage;
+    private JButton btnRemoveDocument = null;
+    private JButton btnAddDocument = null;
+    private JButton btnViewDocument = null;
+    private JButton btnAddSerializedDocument = null;
+    private JTable docTable;
+    private ConversationManagementTableModel docTableModel = null;
+    private final TableRowSorter<ConversationManagementTableModel> docSorter;
+    private final JScrollPane scrollPane;
+    private JDesktopPane desktopPane;
+    private static File lastDirectory = null;
 
-	public class DocumentProcessingTask extends SwingWorker<Void, Void> {
-		private String pathToDoc;
-		private String pathToLSA;
-		private String pathToLDA;
-		private boolean usePOSTagging;
-		private boolean isSerialized;
+    private static final List<Conversation> LOADED_CONVERSATIONS = new ArrayList<>();
+    private CustomTextField articleTextField;
+    private String queryArticleName;
 
-		public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-				boolean isSerialized) {
-			super();
-			this.pathToDoc = pathToDoc;
-			this.pathToLSA = pathToLSA;
-			this.pathToLDA = pathToLDA;
-			this.usePOSTagging = usePOSTagging;
-			this.isSerialized = isSerialized;
-		}
+    public class DocumentProcessingTask extends SwingWorker<Void, Void> {
 
-		public void addSingleDocument(String pathToIndividualFile) {
-			AbstractDocument d;
-			if (isSerialized) {
-				d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
-			} else {
-				d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
-						ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, null, null, true,
-						SaveType.SERIALIZED_AND_CSV_EXPORT);
-			}
-			if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-				if (d instanceof Conversation) {
-					addConversation((Conversation) d);
-				} else {
-					JOptionPane.showMessageDialog(desktopPane, "Please load only a conversation!", "Information",
-							JOptionPane.INFORMATION_MESSAGE);
-				}
+        private final String pathToDoc;
+        private final String pathToLSA;
+        private final String pathToLDA;
+        private final boolean usePOSTagging;
+        private final boolean isSerialized;
 
-			} else {
-				JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
+        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+                boolean isSerialized) {
+            super();
+            this.pathToDoc = pathToDoc;
+            this.pathToLSA = pathToLSA;
+            this.pathToLDA = pathToLDA;
+            this.usePOSTagging = usePOSTagging;
+            this.isSerialized = isSerialized;
+        }
+
+        public void addSingleDocument(String pathToIndividualFile) {
+            AbstractDocument d = null;
+            if (isSerialized) {
+                d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
+            } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
+                d = Conversation.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
+                        ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, null, null, true,
+                        SaveType.SERIALIZED_AND_CSV_EXPORT);
+            }
+            if (d == null) {
+                JOptionPane.showMessageDialog(desktopPane, "Please load an appropriate conversation input file!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
+                addConversation((Conversation) d);
+            } else {
+                JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
 
         @Override
-		public Void doInBackground() {
-			btnAddDocument.setEnabled(false);
-			btnAddSerializedDocument.setEnabled(false);
+        public Void doInBackground() {
+            btnAddDocument.setEnabled(false);
+            btnAddSerializedDocument.setEnabled(false);
 
-			File file = new File(pathToDoc);
-			File[] files = { file };
-			if (isSerialized) {
-				if (file.isDirectory()) {
-					// process each individual ser file
-					files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
-				}
-			} else {
-				if (file.isDirectory()) {
-					// process each individual xml file
-					files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
-				}
-			}
-			for (File f : files) {
-				try {
-					addSingleDocument(f.getPath());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-			return null;
-		}
+            File file = new File(pathToDoc);
+            File[] files = {file};
+            if (isSerialized) {
+                if (file.isDirectory()) {
+                    // process each individual ser file
+                    files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
+                }
+            } else if (file.isDirectory()) {
+                // process each individual xml file
+                files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
+            }
+            for (File f : files) {
+                try {
+                    addSingleDocument(f.getPath());
+                } catch (Exception ex) {
+                    logger.error(f.getName() + ": " + ex.getMessage());
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            return null;
+        }
 
-		@Override
-		public void done() {
-			Toolkit.getDefaultToolkit().beep();
-			btnAddDocument.setEnabled(true);
-			btnAddSerializedDocument.setEnabled(true);
-		}
-	}
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            btnAddDocument.setEnabled(true);
+            btnAddSerializedDocument.setEnabled(true);
+        }
+    }
 
-	private class CustomTextField extends JTextField {
-		private static final long serialVersionUID = 1L;
+    private class CustomTextField extends JTextField {
 
-		private Font originalFont;
-		private Color originalForeground;
-		/**
-		 * Grey by default*
-		 */
-		private Color placeholderForeground = new Color(160, 160, 160);
-		private boolean textWrittenIn;
+        private static final long serialVersionUID = 1L;
 
-		public CustomTextField(int columns) {
-			super(columns);
-		}
+        private Font originalFont;
+        private Color originalForeground;
+        /**
+         * Grey by default*
+         */
+        private Color placeholderForeground = new Color(160, 160, 160);
+        private boolean textWrittenIn;
 
-		@Override
-		public void setFont(Font f) {
-			super.setFont(f);
-			if (!isTextWrittenIn()) {
-				originalFont = f;
-			}
-		}
+        public CustomTextField(int columns) {
+            super(columns);
+        }
 
-		@Override
-		public void setForeground(Color fg) {
-			super.setForeground(fg);
-			if (!isTextWrittenIn()) {
-				originalForeground = fg;
-			}
-		}
+        @Override
+        public void setFont(Font f) {
+            super.setFont(f);
+            if (!isTextWrittenIn()) {
+                originalFont = f;
+            }
+        }
 
-		public Color getPlaceholderForeground() {
-			return placeholderForeground;
-		}
+        @Override
+        public void setForeground(Color fg) {
+            super.setForeground(fg);
+            if (!isTextWrittenIn()) {
+                originalForeground = fg;
+            }
+        }
 
-		public void setPlaceholderForeground(Color placeholderForeground) {
-			this.placeholderForeground = placeholderForeground;
-		}
+        public Color getPlaceholderForeground() {
+            return placeholderForeground;
+        }
 
-		public boolean isTextWrittenIn() {
-			return textWrittenIn;
-		}
+        public void setPlaceholderForeground(Color placeholderForeground) {
+            this.placeholderForeground = placeholderForeground;
+        }
 
-		public void setTextWrittenIn(boolean textWrittenIn) {
-			this.textWrittenIn = textWrittenIn;
-		}
+        public boolean isTextWrittenIn() {
+            return textWrittenIn;
+        }
 
-		public void setPlaceholder(final String text) {
-			this.customizeText(text);
-			this.getDocument().addDocumentListener(new DocumentListener() {
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					warn();
-				}
+        public void setTextWrittenIn(boolean textWrittenIn) {
+            this.textWrittenIn = textWrittenIn;
+        }
 
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					warn();
-				}
+        public void setPlaceholder(final String text) {
+            this.customizeText(text);
+            this.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					warn();
-				}
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-				public void warn() {
-					if (getText().trim().length() != 0) {
-						setFont(originalFont);
-						setForeground(originalForeground);
-						setTextWrittenIn(true);
-					}
-				}
-			});
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-			this.addFocusListener(new FocusListener() {
-				@Override
-				public void focusGained(FocusEvent e) {
-					if (!isTextWrittenIn()) {
-						setText("");
-					}
-				}
+                public void warn() {
+                    if (getText().trim().length() != 0) {
+                        setFont(originalFont);
+                        setForeground(originalForeground);
+                        setTextWrittenIn(true);
+                    }
+                }
+            });
 
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (getText().trim().length() == 0) {
-						customizeText(text);
-					}
-				}
-			});
-		}
+            this.addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    if (!isTextWrittenIn()) {
+                        setText("");
+                    }
+                }
 
-		private void customizeText(String text) {
-			setText(text);
-			setFont(new Font(getFont().getFamily(), getFont().getStyle(), getFont().getSize()));
-			setForeground(getPlaceholderForeground());
-			setTextWrittenIn(false);
-		}
-	}
+                @Override
+                public void focusLost(FocusEvent e) {
+                    if (getText().trim().length() == 0) {
+                        customizeText(text);
+                    }
+                }
+            });
+        }
 
-	/**
-	 * Create the frame.
-	 */
-	public ConversationProcessingView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setResizable(true);
-		setClosable(true);
-		setMaximizable(true);
-		setIconifiable(true);
-		setBounds(20, 20, 950, 350);
-		queryArticleName = "";
+        private void customizeText(String text) {
+            setText(text);
+            setFont(new Font(getFont().getFamily(), getFont().getStyle(), getFont().getSize()));
+            setForeground(getPlaceholderForeground());
+            setTextWrittenIn(false);
+        }
+    }
 
-		lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-		lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
-		lblLanguage.setForeground(Color.BLACK);
+    /**
+     * Create the frame.
+     */
+    public ConversationProcessingView() {
+        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setResizable(true);
+        setClosable(true);
+        setMaximizable(true);
+        setIconifiable(true);
+        setBounds(20, 20, 950, 350);
+        queryArticleName = "";
 
-		comboBoxLanguage = new JComboBox<>();
-		comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
-		for (String lang : Lang.SUPPORTED_LANGUAGES)
-			comboBoxLanguage.addItem(lang);
+        lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
+        lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
+        lblLanguage.setForeground(Color.BLACK);
 
-		btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
-		btnAddDocument.setEnabled(false);
-		btnAddDocument.addActionListener((ActionEvent e) -> {
+        comboBoxLanguage = new JComboBox<>();
+        for (Lang l : Lang.values()) {
+            comboBoxLanguage.addItem(l.getDescription());
+        }
+        comboBoxLanguage.setEnabled(false);
+        comboBoxLanguage.setSelectedItem(ReaderBenchView.RUNTIME_LANGUAGE.getDescription());
+
+        btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
+        btnAddDocument.addActionListener((ActionEvent e) -> {
             try {
                 JInternalFrame frame = new AddConversationView(ReaderBenchView.RUNTIME_LANGUAGE,
                         ConversationProcessingView.this);
@@ -309,29 +310,31 @@ public class ConversationProcessingView extends JInternalFrame {
             }
         });
 
-		btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed conversation(s)"));
-		btnAddSerializedDocument.setEnabled(false);
-		btnAddSerializedDocument.addActionListener((ActionEvent e) -> {
+        btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed conversation(s)"));
+        btnAddSerializedDocument.addActionListener((ActionEvent e) -> {
             JFileChooser fc = null;
-            if (lastDirectory == null)
+            if (lastDirectory == null) {
                 fc = new JFileChooser(new File("resources/in"));
-            else
+            } else {
                 fc = new JFileChooser(lastDirectory);
+            }
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             fc.setFileFilter(new FileFilter() {
+                @Override
                 public boolean accept(File f) {
                     if (f.isDirectory()) {
                         return true;
                     }
                     return f.getName().endsWith(".ser");
                 }
-                
+
+                @Override
                 public String getDescription() {
                     return "Serialized documents (*.ser) or directory";
                 }
             });
             int returnVal = fc.showOpenDialog(ConversationProcessingView.this);
-            
+
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
@@ -341,157 +344,130 @@ public class ConversationProcessingView extends JInternalFrame {
             }
         });
 
-		comboBoxLanguage.addActionListener((ActionEvent e) -> {
-            if (comboBoxLanguage.getSelectedIndex() > 0) {
-                // set final analysis language
-                ReaderBenchView.RUNTIME_LANGUAGE = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
-                ComplexityIndicesView.updateSelectedIndices(ReaderBenchView.RUNTIME_LANGUAGE);
-                comboBoxLanguage.setEnabled(false);
-                btnAddDocument.setEnabled(true);
-                btnAddSerializedDocument.setEnabled(true);
+        docTableModel = new ConversationManagementTableModel();
+        docTable = new JTable(docTableModel);
+        docTable.setFillsViewportHeight(true);
+        docSorter = new TableRowSorter<>(docTableModel);
+        docTable.setRowSorter(docSorter);
+
+        docTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    JTable target = (JTable) event.getSource();
+                    int row = target.getSelectedRow();
+                    if (row >= 0 && row < LOADED_CONVERSATIONS.size()) {
+                        int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
+                        AbstractDocument d = LOADED_CONVERSATIONS.get(modelRow);
+                        if (d instanceof Conversation) {
+                            ChatView view = new ChatView((Conversation) d);
+                            view.setVisible(true);
+                        }
+                    }
+                }
             }
         });
 
-		if (ReaderBenchView.RUNTIME_LANGUAGE != null) {
-			comboBoxLanguage.setEnabled(false);
-			switch (ReaderBenchView.RUNTIME_LANGUAGE) {
-			case fr:
-				comboBoxLanguage.setSelectedItem("French");
-				break;
-			case it:
-				comboBoxLanguage.setSelectedItem("Italian");
-				break;
-			case es:
-				comboBoxLanguage.setSelectedItem("Spanish");
-				break;
-			default:
-				comboBoxLanguage.setSelectedItem("English");
-			}
-		}
+        scrollPane = new JScrollPane();
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setViewportView(docTable);
 
-		docTableModel = new ConversationManagementTableModel();
-		docTable = new JTable(docTableModel);
-		docTable.setFillsViewportHeight(true);
-		docSorter = new TableRowSorter<>(docTableModel);
-		docTable.setRowSorter(docSorter);
+        desktopPane = new JDesktopPane() {
+            private static final long serialVersionUID = 8453433109734630086L;
 
-		docTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					JTable target = (JTable) event.getSource();
-					int row = target.getSelectedRow();
-					if (row >= 0 && row < loadedConversations.size()) {
-						int modelRow = target.convertRowIndexToModel(target.getSelectedRow());
-						AbstractDocument d = loadedConversations.get(modelRow);
-						if (d instanceof Conversation) {
-							ChatView view = new ChatView((Conversation) d);
-							view.setVisible(true);
-						}
-					}
-				}
-			}
-		});
-
-		scrollPane = new JScrollPane();
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setViewportView(docTable);
-
-		desktopPane = new JDesktopPane() {
-			private static final long serialVersionUID = 8453433109734630086L;
-
-			@Override
-			public void updateUI() {
-				if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
-					UIDefaults map = new UIDefaults();
-					Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
+            @Override
+            public void updateUI() {
+                if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
+                    UIDefaults map = new UIDefaults();
+                    Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
                         g.setColor(Color.WHITE);
                         g.fillRect(0, 0, w, h);
                     };
-					map.put("DesktopPane[Enabled].backgroundPainter", painter);
-					putClientProperty("Nimbus.Overrides", map);
-				}
-				super.updateUI();
-			}
-		};
-		desktopPane.setBackground(Color.WHITE);
+                    map.put("DesktopPane[Enabled].backgroundPainter", painter);
+                    putClientProperty("Nimbus.Overrides", map);
+                }
+                super.updateUI();
+            }
+        };
+        desktopPane.setBackground(Color.WHITE);
 
-		JPanel panelSingleDoc = new JPanel();
-		panelSingleDoc.setBackground(Color.WHITE);
-		panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-				LocalizationUtils.getTranslation("Specific conversation operations"), TitledBorder.LEFT,
-				TitledBorder.TOP, null, null));
+        JPanel panelSingleDoc = new JPanel();
+        panelSingleDoc.setBackground(Color.WHITE);
+        panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+                LocalizationUtils.getTranslation("Specific conversation operations"), TitledBorder.LEFT,
+                TitledBorder.TOP, null, null));
 
-		JPanel panelSearch = new JPanel();
-		panelSearch.setBackground(Color.WHITE);
-		panelSearch.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Filter",
-				TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
+        JPanel panelSearch = new JPanel();
+        panelSearch.setBackground(Color.WHITE);
+        panelSearch.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Filter",
+                TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
 
-		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(gl_desktopPane
-				.createSequentialGroup().addContainerGap()
-				.addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-						.addComponent(scrollPane, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
-						.addComponent(panelSearch, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
-						.addGroup(Alignment.LEADING,
-								gl_desktopPane.createSequentialGroup().addComponent(lblLanguage).addGap(2)
-										.addComponent(comboBoxLanguage, 0, 804, Short.MAX_VALUE))
-						.addComponent(panelSingleDoc, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
-								GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-				.addContainerGap()));
-		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
-				.createSequentialGroup().addContainerGap()
-				.addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-						.addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
-				.addPreferredGap(ComponentPlacement.RELATED).addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE,
-						GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addContainerGap()));
+        GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
+        gl_desktopPane.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(gl_desktopPane
+                .createSequentialGroup().addContainerGap()
+                .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+                        .addComponent(scrollPane, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
+                        .addComponent(panelSearch, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
+                        .addGroup(Alignment.LEADING,
+                                gl_desktopPane.createSequentialGroup().addComponent(lblLanguage).addGap(2)
+                                .addComponent(comboBoxLanguage, 0, 804, Short.MAX_VALUE))
+                        .addComponent(panelSingleDoc, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap()));
+        gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
+                .createSequentialGroup().addContainerGap()
+                .addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
+                        .addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
+                .addPreferredGap(ComponentPlacement.RELATED).addComponent(panelSingleDoc, GroupLayout.PREFERRED_SIZE,
+                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()));
 
-		articleTextField = new CustomTextField(1);
-		articleTextField.setPlaceholder("Insert Conversation Name");
-		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
-		articleTextField.setPlaceholderForeground(Color.gray);
-		articleTextField.getDocument().addDocumentListener(new DocumentListener() {
+        articleTextField = new CustomTextField(1);
+        articleTextField.setPlaceholder("Insert Conversation Name");
+        articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
+        articleTextField.setPlaceholderForeground(Color.gray);
+        articleTextField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
-			public void changedUpdate(DocumentEvent e) {
-				warn();
-			}
-
-            @Override
-			public void removeUpdate(DocumentEvent e) {
-				warn();
-			}
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
 
             @Override
-			public void insertUpdate(DocumentEvent e) {
-				warn();
-			}
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
 
-			public void warn() {
-				queryArticleName = articleTextField.getText();
-				if (queryArticleName.equalsIgnoreCase("Insert Conversation Name"))
-					queryArticleName = "";
-				newFilter();
-			}
-		});
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
 
-		// JSplitPane splitPane = new JSplitPane();
-		// splitPane.setBackground(Color.WHITE);
-		panelSearch.add(articleTextField);
-		// splitPane.setLeftComponent(articleTextField);
-		articleTextField.setColumns(25);
+            public void warn() {
+                queryArticleName = articleTextField.getText();
+                if (queryArticleName.equalsIgnoreCase("Insert Conversation Name")) {
+                    queryArticleName = "";
+                }
+                newFilter();
+            }
+        });
 
-		btnViewDocument = new JButton(LocalizationUtils.getTranslation("View conversation"));
-		btnViewDocument.setEnabled(false);
-		btnViewDocument.addActionListener((ActionEvent e) -> {
+        // JSplitPane splitPane = new JSplitPane();
+        // splitPane.setBackground(Color.WHITE);
+        panelSearch.add(articleTextField);
+        // splitPane.setLeftComponent(articleTextField);
+        articleTextField.setColumns(25);
+
+        btnViewDocument = new JButton(LocalizationUtils.getTranslation("View conversation"));
+        btnViewDocument.setEnabled(false);
+        btnViewDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
                 int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-                AbstractDocument d = loadedConversations.get(modelRow);
+                AbstractDocument d = LOADED_CONVERSATIONS.get(modelRow);
                 if (d instanceof Conversation) {
                     ChatView view = new ChatView((Conversation) d);
                     view.setVisible(true);
@@ -502,151 +478,126 @@ public class ConversationProcessingView extends JInternalFrame {
             }
         });
 
-		btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove conversation"));
-		btnRemoveDocument.setEnabled(false);
-		GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
-		gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(2).addComponent(btnViewDocument).addGap(18)
-						.addComponent(btnAddDocument).addGap(18).addComponent(btnAddSerializedDocument).addGap(18)
-						.addComponent(btnRemoveDocument).addGap(131)));
-		gl_panelSingleDoc.setVerticalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(5)
-						.addGroup(gl_panelSingleDoc.createParallelGroup(Alignment.BASELINE)
-								.addComponent(btnViewDocument).addComponent(btnAddDocument)
-								.addComponent(btnAddSerializedDocument).addComponent(btnRemoveDocument))));
-		panelSingleDoc.setLayout(gl_panelSingleDoc);
-		btnRemoveDocument.addActionListener((ActionEvent e) -> {
+        btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove conversation"));
+        btnRemoveDocument.setEnabled(false);
+        GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
+        gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(2).addComponent(btnViewDocument).addGap(18)
+                        .addComponent(btnAddDocument).addGap(18).addComponent(btnAddSerializedDocument).addGap(18)
+                        .addComponent(btnRemoveDocument).addGap(131)));
+        gl_panelSingleDoc.setVerticalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelSingleDoc.createSequentialGroup().addGap(5)
+                        .addGroup(gl_panelSingleDoc.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(btnViewDocument).addComponent(btnAddDocument)
+                                .addComponent(btnAddSerializedDocument).addComponent(btnRemoveDocument))));
+        panelSingleDoc.setLayout(gl_panelSingleDoc);
+        btnRemoveDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
                 int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-                AbstractDocument toRemove = loadedConversations.get(modelRow);
-                loadedConversations.remove(toRemove);
+                Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
+                LOADED_CONVERSATIONS.remove(toRemove);
                 docTableModel.removeRow(modelRow);
             } else {
                 JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
                         JOptionPane.INFORMATION_MESSAGE);
             }
         });
-		desktopPane.setLayout(gl_desktopPane);
+        desktopPane.setLayout(gl_desktopPane);
 
-		setContentPane(desktopPane);
-		updateContents();
-	}
+        super.setContentPane(desktopPane);
+        updateContents();
+    }
 
-	public static List<Conversation> getLoadedConversations() {
-		return loadedConversations;
-	}
+    public static List<Conversation> getLoadedConversations() {
+        return LOADED_CONVERSATIONS;
+    }
 
-	public void addConversation(Conversation c) {
-		if (docTableModel != null) {
-			synchronized (loadedConversations) {
-				// add rows as loaded documents
-				Vector<Object> dataRow = new Vector<Object>();
+    public void addConversation(Conversation c) {
+        if (docTableModel != null) {
+            synchronized (LOADED_CONVERSATIONS) {
+                // add rows as loaded documents
+                Vector<Object> dataRow = new Vector<>();
 
-				dataRow.add(c.getTitleText());
+                dataRow.add(c.getTitleText());
 
-				if (c.getLSA() != null) {
-					dataRow.add(c.getLSA().getPath());
-				} else {
-					dataRow.add("");
-				}
-				if (c.getLDA() != null) {
-					dataRow.add(c.getLDA().getPath());
-				} else {
-					dataRow.add("");
-				}
+                if (c.getLSA() != null) {
+                    dataRow.add(c.getLSA().getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (c.getLDA() != null) {
+                    dataRow.add(c.getLDA().getPath());
+                } else {
+                    dataRow.add("");
+                }
 
-				docTableModel.addRow(dataRow);
-				loadedConversations.add(c);
-			}
+                docTableModel.addRow(dataRow);
+                LOADED_CONVERSATIONS.add(c);
+            }
 
-			if (loadedConversations.size() > 0) {
-				btnRemoveDocument.setEnabled(true);
-				btnViewDocument.setEnabled(true);
-			} else {
-				btnRemoveDocument.setEnabled(false);
-				btnViewDocument.setEnabled(false);
-			}
+            if (LOADED_CONVERSATIONS.size() > 0) {
+                btnRemoveDocument.setEnabled(true);
+                btnViewDocument.setEnabled(true);
+            } else {
+                btnRemoveDocument.setEnabled(false);
+                btnViewDocument.setEnabled(false);
+            }
 
-			docTableModel.fireTableDataChanged();
-		}
-	}
+            docTableModel.fireTableDataChanged();
+        }
+    }
 
-	public void updateContents() {
-		if (docTableModel != null) {
-			synchronized (docTableModel) {
-				// clean table
-				while (docTableModel.getRowCount() > 0) {
-					docTableModel.removeRow(0);
-				}
+    private void updateContents() {
+        if (docTableModel != null) {
+            synchronized (docTableModel) {
+                // clean table
+                while (docTableModel.getRowCount() > 0) {
+                    docTableModel.removeRow(0);
+                }
 
-				synchronized (loadedConversations) {
-					for (Conversation c : loadedConversations) {
-						// add rows as loaded documents
-						Vector<Object> dataRow = new Vector<>();
-						dataRow.add(c.getTitleText());
-						if (c.getLSA() != null) {
-							dataRow.add(c.getLSA().getPath());
-						} else {
-							dataRow.add("");
-						}
-						if (c.getLDA() != null) {
-							dataRow.add(c.getLDA().getPath());
-						} else {
-							dataRow.add("");
-						}
-						docTableModel.addRow(dataRow);
-					}
+                synchronized (LOADED_CONVERSATIONS) {
+                    for (Conversation c : LOADED_CONVERSATIONS) {
+                        // add rows as loaded documents
+                        Vector<Object> dataRow = new Vector<>();
+                        dataRow.add(c.getTitleText());
+                        if (c.getLSA() != null) {
+                            dataRow.add(c.getLSA().getPath());
+                        } else {
+                            dataRow.add("");
+                        }
+                        if (c.getLDA() != null) {
+                            dataRow.add(c.getLDA().getPath());
+                        } else {
+                            dataRow.add("");
+                        }
+                        docTableModel.addRow(dataRow);
+                    }
 
-					if (loadedConversations.size() > 0) {
-						btnRemoveDocument.setEnabled(true);
-						btnViewDocument.setEnabled(true);
-					} else {
-						btnRemoveDocument.setEnabled(false);
-						btnViewDocument.setEnabled(false);
-					}
+                    if (LOADED_CONVERSATIONS.size() > 0) {
+                        btnRemoveDocument.setEnabled(true);
+                        btnViewDocument.setEnabled(true);
+                    } else {
+                        btnRemoveDocument.setEnabled(false);
+                        btnViewDocument.setEnabled(false);
+                    }
 
-					docTableModel.fireTableDataChanged();
-				}
-			}
-		}
-	}
+                    docTableModel.fireTableDataChanged();
+                }
+            }
+        }
+    }
 
-	private void newFilter() {
-		List<RowFilter<ConversationManagementTableModel, Object>> rfs = new ArrayList<>(
-				2);
-		RowFilter<ConversationManagementTableModel, Object> rf;
-		// If current expression doesn't parse, don't update.
-		try {
-			rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);
-			rfs.add(rf);
-
-		} catch (java.util.regex.PatternSyntaxException e) {
-			return;
-		}
-		rf = RowFilter.andFilter(rfs);
-		docSorter.setRowFilter(rf);
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(() -> {
-            ConversationProcessingView view = new ConversationProcessingView();
-            view.setVisible(true);
-        });
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    private void newFilter() {
+        List<RowFilter<ConversationManagementTableModel, Object>> rfs = new ArrayList<>(2);
+        RowFilter<ConversationManagementTableModel, Object> rf;
+        // If current expression doesn't parse, don't update.
+        try {
+            rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);
+            rfs.add(rf);
+        } catch (java.util.regex.PatternSyntaxException e) {
+            return;
+        }
+        rf = RowFilter.andFilter(rfs);
+        docSorter.setRowFilter(rf);
+    }
 }

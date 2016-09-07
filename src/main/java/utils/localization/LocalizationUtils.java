@@ -15,6 +15,7 @@
  */
 package utils.localization;
 
+import data.Lang;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
@@ -25,32 +26,16 @@ import org.openide.util.Exceptions;
 
 public class LocalizationUtils {
 
-    private static HashMap<Locale, String> localeStringMap = new HashMap<Locale, String>();
-    private static HashMap<String, Locale> stringLocaleMap = new HashMap<String, Locale>();
-
-    static {
-        localeStringMap.put(Locale.ENGLISH, "English");
-        localeStringMap.put(Locale.FRENCH, "French");
-
-        stringLocaleMap.put("English", Locale.ENGLISH);
-        stringLocaleMap.put("French", Locale.FRENCH);
-    }
-
-    public static Locale LOADED_LOCALE = Locale.ENGLISH;
-
-    static {
-        String language = ResourceBundle.getBundle("utils.localization.settings").getString("SelectedLanguage");
-        Locale detectedLanguage = stringLocaleMap.get(language);
-        LOADED_LOCALE = detectedLanguage;
-        Locale.setDefault(LOADED_LOCALE);
-        ResourceBundle.clearCache();
-    }
-
     public static final int TITLE = 0;
     public static final int TEXT = 1;
 
     public static void saveLocaleInBundle(Locale locale) {
-        String localeToSave = localeStringMap.get(locale);
+        String localeToSave = "";
+        for (Lang l : Lang.values()) {
+            if (l.getLocale().equals(locale)) {
+                localeToSave = l.getDescription();
+            }
+        }
 
         try {
             Properties props;
@@ -60,12 +45,11 @@ public class LocalizationUtils {
             }
 
             try (FileOutputStream out = new FileOutputStream("src/main/resources/utils/localization/settings.properties")) {
-                props.setProperty("SelectedLanguage", localeToSave);
+                props.setProperty("Language", localeToSave);
                 props.store(out, null);
             }
 
-            LOADED_LOCALE = locale;
-            Locale.setDefault(LOADED_LOCALE);
+            Locale.setDefault(locale);
             ResourceBundle.clearCache();
         } catch (Exception e) {
             Exceptions.printStackTrace(e);
@@ -99,8 +83,7 @@ public class LocalizationUtils {
     public static String getTranslation(String text) {
         try {
             return ResourceBundle.getBundle("utils.localization.translations").getString(text);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return null;
         }
     }

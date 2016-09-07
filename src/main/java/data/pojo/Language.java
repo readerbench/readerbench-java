@@ -50,9 +50,9 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "Language.findByShortLabel", query = "SELECT l FROM Language l WHERE l.shortLabel = :shortLabel"),
     @NamedQuery(name = "Language.findByLabel", query = "SELECT l FROM Language l WHERE l.label = :label")})
 public class Language implements Serializable {
+
     private static Map<Lang, Language> convertion = null;
-    
-    
+
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -74,17 +74,16 @@ public class Language implements Serializable {
     public Language(Integer id) {
         this.id = id;
     }
-    
+
     public static synchronized Language fromLang(Lang lang) {
         if (convertion == null) {
             convertion = new HashMap<>();
-            convertion.put(Lang.eng, LanguageDAO.getInstance().findById(1));
+            convertion.put(Lang.en, LanguageDAO.getInstance().findById(1));
             convertion.put(Lang.es, LanguageDAO.getInstance().findById(2));
             convertion.put(Lang.fr, LanguageDAO.getInstance().findById(3));
             convertion.put(Lang.it, LanguageDAO.getInstance().findById(4));
-            convertion.put(Lang.jpn, LanguageDAO.getInstance().findById(5));
-            convertion.put(Lang.nl, LanguageDAO.getInstance().findById(6));
-            convertion.put(Lang.ro, LanguageDAO.getInstance().findById(7));
+            convertion.put(Lang.nl, LanguageDAO.getInstance().findById(5));
+            convertion.put(Lang.ro, LanguageDAO.getInstance().findById(6));
         }
         return convertion.get(lang);
     }
@@ -153,5 +152,5 @@ public class Language implements Serializable {
     public String toString() {
         return "data.pojo.Language[ id=" + id + " ]";
     }
-    
+
 }
