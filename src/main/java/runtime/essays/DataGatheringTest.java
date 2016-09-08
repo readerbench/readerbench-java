@@ -53,8 +53,8 @@ public class DataGatheringTest {
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
-
         ReaderBenchServer.initializeDB();
+        
 //        LSA lsa = LSA.loadLSA("resources/config/LA/LSA/Letters", Lang.la);
 //        LDA lda = LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la);
 //        LSA lsa = LSA.loadLSA("resources/config/RO/LSA/Religie", Lang.ro);

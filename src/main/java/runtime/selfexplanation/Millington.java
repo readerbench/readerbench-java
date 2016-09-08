@@ -41,6 +41,7 @@ import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
+import org.apache.log4j.BasicConfigurator;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
@@ -49,6 +50,7 @@ import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.SimilarityType;
+import webService.ReaderBenchServer;
 
 public class Millington {
 
@@ -243,6 +245,9 @@ public class Millington {
 
     public static void main(String[] args) {
         try {
+            BasicConfigurator.configure();
+            ReaderBenchServer.initializeDB();
+
             Millington m = new Millington("resources/in/Millington");
             m.parseMillington(50);
         } catch (IOException e) {

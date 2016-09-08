@@ -26,12 +26,14 @@ import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
+import org.apache.log4j.BasicConfigurator;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.SimilarityType;
+import webService.ReaderBenchServer;
 
 public class ChaponRougeTest {
 
@@ -88,6 +90,8 @@ public class ChaponRougeTest {
     }
 
     public static void main(String[] args) {
+        BasicConfigurator.configure();
+        ReaderBenchServer.initializeDB();
 
         Lang lang = Lang.fr;
         String pathToOriginalFile = "resources/in/Philippe/chaprou/chaprou-original.xml";
