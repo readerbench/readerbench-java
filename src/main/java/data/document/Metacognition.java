@@ -249,7 +249,15 @@ public class Metacognition extends Document {
             for (int i = 0; i < nl.getLength(); i++) {
                 el = (Element) nl.item(i);
                 BlockTemplate block = tmp.new BlockTemplate();
-                block.setId(Integer.parseInt(el.getAttribute("id")));
+                if (el.hasAttribute("id")) {
+                    try {
+                        block.setId(Integer.parseInt(el.getAttribute("id")));
+                    } catch (Exception e) {
+                        block.setId(i);
+                    }
+                } else {
+                    block.setId(i);
+                }
                 block.setRefId(0);
                 block.setContent(TextPreprocessing.doubleCleanVerbalization(el
                         .getFirstChild().getNodeValue()));
@@ -328,9 +336,9 @@ public class Metacognition extends Document {
     }
 
     public void determineCohesion() {
-        LOGGER.info("Identyfing average cohesion to previous paragraphs ..");
+        LOGGER.info("Identyfing average cohesion to previous paragraphs ...");
         // add average cohesion between verbalization and text paragraphs
-        int startIndex = 0, endIndex = 0, noBlocks;
+        int startIndex = 0, endIndex, noBlocks;
 
         for (int i = 0; i < this.getBlocks().size(); i++) {
             endIndex = this.getBlocks().get(i).getRefBlock().getIndex();
@@ -357,11 +365,9 @@ public class Metacognition extends Document {
     }
 
     public void exportMetacognition() {
-        try {
-            LOGGER.info("Writing advanced document export");
-            File output = new File(getPath().replace(".xml", ".csv"));
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768);
-
+        LOGGER.info("Writing advanced document export");
+        File output = new File(getPath().replace(".xml", ".csv"));
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             out.write("Referred document:," + getReferredDoc().getTitleText() + "\n");
             out.write("Author:");
             for (String author : getAuthors()) {
@@ -413,8 +419,6 @@ public class Metacognition extends Document {
                 out.write(allAutomatedRS.get(rs) + ",");
             }
             out.write("\n");
-
-            out.close();
             LOGGER.info("Successfully finished writing file " + output.getName());
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -456,16 +460,16 @@ public class Metacognition extends Document {
 
     //global count of reading strategies given as input argument
     public EnumMap<ReadingStrategyType, Integer> getAllRS(List<EnumMap<ReadingStrategyType, Integer>> rsList) {
-        EnumMap<ReadingStrategyType, Integer> annotatedRS = new EnumMap<>(ReadingStrategyType.class);
+        EnumMap<ReadingStrategyType, Integer> cumulativeRS = new EnumMap<>(ReadingStrategyType.class);
         for (ReadingStrategyType rs : ReadingStrategyType.values()) {
-            annotatedRS.put(rs, 0);
+            cumulativeRS.put(rs, 0);
         }
-        for (int i = 0; i < this.getBlocks().size(); i++) {
+        for (int i = 0; i < rsList.size(); i++) {
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
-                annotatedRS.put(rs, annotatedRS.get(rs) + rsList.get(i).get(rs));
+                cumulativeRS.put(rs, cumulativeRS.get(rs) + rsList.get(i).get(rs));
             }
         }
-        return annotatedRS;
+        return cumulativeRS;
     }
 
     public Document getReferredDoc() {

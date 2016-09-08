@@ -27,11 +27,8 @@ import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
 import org.openide.util.Exceptions;
-import static runtime.essays.TestMatildaAvaleurSE.logger;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.discourse.selfExplanations.VerbalizationAssessment;
-import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.SimilarityType;
@@ -53,17 +50,14 @@ public class ChaponRougeTest {
     public void process() {
         File folder = new File(path);
         for (File f : folder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
+            LOGGER.info("Processing file " + f.getAbsolutePath() + " ...");
             Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true, true);
-            VerbalizationAssessment.detRefBlockSimilarities(summary);
-            ReadingStrategies.detReadingStrategies(summary);
-
-            ComplexityIndices.computeComplexityFactors(summary);
-            summary.determineCohesion();
+            summary.computeAll(true, false);
             loadedSummaries.add(summary);
         }
 
         try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/measurements_rs.csv"))) {
-            out.write("Filename,");
+            out.write("Filename");
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
                 out.write("," + rs.getName());
             }
@@ -83,16 +77,11 @@ public class ChaponRougeTest {
                 for (SimilarityType semDist : SimilarityType.values()) {
                     out.write("," + summary.getCohesion().getSemanticSimilarities().get(semDist));
                 }
-                for (ComplexityIndex index : ComplexityIndices.getIndices(refDoc.getLanguage())) {
-                    out.write("," + summary.getComplexityIndices().get(index));
-                }
-
                 for (ComplexityIndex index : indices) {
                     out.write("," + summary.getComplexityIndices().get(index));
                 }
-                out.write("\n");
             }
-            logger.info("Finished all files for processing!");
+            LOGGER.info("Finished all files for processing ...");
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -109,7 +98,7 @@ public class ChaponRougeTest {
         ChaponRougeTest crt = new ChaponRougeTest("resources/in/Philippe/chaprou/pretest", chaprouge);
         crt.process();
 
-//        crt = new ChaponRougeTest("resources/in/Philippe/chaprou/postTest", chaprouge);
-//        crt.process();
+        crt = new ChaponRougeTest("resources/in/Philippe/chaprou/postTest", chaprouge);
+        crt.process();
     }
 }

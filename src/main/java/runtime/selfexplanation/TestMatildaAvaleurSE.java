@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package runtime.essays;
+package runtime.selfexplanation;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -60,11 +60,7 @@ public class TestMatildaAvaleurSE {
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".ser"))) {
             Metacognition v = (Metacognition) Metacognition.loadSerializedDocument(f.getAbsolutePath());
-            VerbalizationAssessment.detRefBlockSimilarities(v);
-            ReadingStrategies.detReadingStrategies(v);
-
-            ComplexityIndices.computeComplexityFactors(v);
-            v.determineCohesion();
+            v.computeAll(true, false);
             verbalizations.add(v);
         }
         return verbalizations;

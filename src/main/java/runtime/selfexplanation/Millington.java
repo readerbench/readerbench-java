@@ -183,7 +183,7 @@ public class Millington {
                 content = loadedDocuments.get(fileName);
             }
 
-            if (!content.contains(targetText)) {
+            if (content == null || !content.contains(targetText)) {
                 LOGGER.error("Error processing row " + rowNo);
                 continue;
             }

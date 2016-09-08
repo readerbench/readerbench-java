@@ -34,6 +34,7 @@ import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
+import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
 
 public class Summary extends Metacognition {
@@ -114,8 +115,8 @@ public class Summary extends Metacognition {
 
     @Override
     public void computeAll(boolean computeDialogism, boolean saveOutput) {
-        ReadingStrategies.detReadingStrategies(this);
         computeDiscourseAnalysis(computeDialogism);
+        ReadingStrategies.detReadingStrategies(this);
         ComplexityIndices.computeComplexityFactors(this);
 
         if (saveOutput) {

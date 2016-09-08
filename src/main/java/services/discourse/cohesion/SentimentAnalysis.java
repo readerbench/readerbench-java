@@ -92,17 +92,12 @@ public class SentimentAnalysis {
 		// initialize sentiment valence map for document
 		SentimentEntity se = new SentimentEntity();
 		se.init();
-		// logger.info("Valence map has " +
-		// DAO.sentiment.SentimentValence.getValenceMap().size() + "
-		// sentiments.");
 		d.setSentimentEntity(se);
 
 		Map<SentimentValence, Double> avgDoc = new HashMap<>();
 		Map<SentimentValence, Double> sumWeightsDoc = new HashMap<>();
 		// perform weighted sentiment per block and per document
 
-		// logger.info("[Weighting] I have " + d.getBlocks().size() + "
-		// blocks.");
 		for (int i = 0; i < d.getBlocks().size(); i++) {
 			Block b = d.getBlocks().get(i);
 			if (b != null) {
@@ -115,8 +110,6 @@ public class SentimentAnalysis {
 							+ value * d.getBlockDocDistances()[i].getCohesion());
 					sumWeightsDoc.put(sv, (sumWeightsDoc.get(sv) == null ? 0 : sumWeightsDoc.get(sv))
 							+ d.getBlockDocDistances()[i].getCohesion());
-					// logger.info("Adding sentiment " + sv.getIndexLabel()
-					// + " to block " + b.getIndex());
 				}
 
 			}
@@ -126,8 +119,6 @@ public class SentimentAnalysis {
 			SentimentValence sv = pair.getKey();
 			if (sumWeightsDoc.get(sv) != null) {
 				d.getSentimentEntity().add(sv, avgDoc.get(sv) / sumWeightsDoc.get(sv));
-				// logger.info("Adding sentiment " + sv.getIndexLabel() + " to
-				// document ");
 			}
 		}
 	}
