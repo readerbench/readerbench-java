@@ -16,7 +16,6 @@
 package services.commons;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.util.EnumMap;
 import java.util.regex.Pattern;
@@ -32,6 +31,11 @@ import org.xml.sax.InputSource;
 
 import data.Lang;
 import edu.stanford.nlp.util.Pair;
+import java.io.IOException;
+import javax.xml.parsers.ParserConfigurationException;
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 import services.readingStrategies.PatternMatching;
 
 public class TextPreprocessing {
@@ -151,7 +155,8 @@ public class TextPreprocessing {
             new Pair<>(Pattern.compile(" d' venait "), " devenait "),
             // eliminate text within ()
             new Pair<>(Pattern.compile("\\(indicible\\)"), " "),
-            new Pair<>(Pattern.compile("\\(d' accord\\)"), " "), new Pair<>(Pattern.compile("\\(.*\\)"), ""),
+            new Pair<>(Pattern.compile("\\(d' accord\\)"), " "),
+            new Pair<>(Pattern.compile("\\([^\\)]*\\)"), ""),
             // eliminate surplus spaces
             new Pair<>(Pattern.compile("\\s+"), " ")};
 
@@ -184,13 +189,11 @@ public class TextPreprocessing {
         try {
             File directory = new File(pathToDirectory);
             if (directory.isDirectory()) {
-                File[] files = directory.listFiles(new FileFilter() {
-                    public boolean accept(File pathname) {
-                        if (pathname.getName().endsWith(".xml")) {
-                            return true;
-                        }
-                        return false;
+                File[] files = directory.listFiles((File pathname) -> {
+                    if (pathname.getName().endsWith(".xml")) {
+                        return true;
                     }
+                    return false;
                 });
                 for (File f : files) {
                     try {
@@ -213,7 +216,7 @@ public class TextPreprocessing {
                         }
                         System.out.println(author);
                         // determine contents
-                        String contents = "";
+                        String contents;
 
                         nl = doc.getElementsByTagName("verbalisation");
                         if (nl != null && nl.getLength() > 0) {
@@ -224,22 +227,21 @@ public class TextPreprocessing {
                                         + cleanText(doubleCleanVerbalization(contents), Lang.fr) + "\n");
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {
                         logger.error("Error processing " + f.getName() + ": " + e.getMessage());
                     }
                 }
             }
-
-        } catch (Exception e) {
+        } catch (Exception ex) {
             System.err.print("Error evaluating input directory " + pathToDirectory + "!");
-            e.printStackTrace();
+            Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
         BasicConfigurator.configure();
         System.out.println(cleanVerbalisation(
-                "alors parce que i mangent i zarrete devant alors e alors la pace qu pusqu' télé et iii .. i et  ii  puis???"));
+                "alors parce que i mangent i zarrete (a a ) devant (a) alors e alors la pace qu pusqu' télé et iii .. i et  ii  puis???"));
         // displayCleaningResults("in/Matilda/MATILDA_CE2/parts");
     }
 }

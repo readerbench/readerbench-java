@@ -33,8 +33,6 @@ import java.util.EnumMap;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.discourse.selfExplanations.VerbalizationAssessment;
-import services.readingStrategies.ReadingStrategies;
 import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {

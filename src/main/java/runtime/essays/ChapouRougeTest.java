@@ -35,15 +35,15 @@ import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.SimilarityType;
 import webService.ReaderBenchServer;
 
-public class ChaponRougeTest {
+public class ChapouRougeTest {
 
-    static final Logger LOGGER = Logger.getLogger(ChaponRougeTest.class);
+    static final Logger LOGGER = Logger.getLogger(ChapouRougeTest.class);
 
     private final String path;
     private final Document refDoc;
     private final List<Summary> loadedSummaries;
 
-    public ChaponRougeTest(String path, Document refDoc) {
+    public ChapouRougeTest(String path, Document refDoc) {
         this.path = path;
         this.loadedSummaries = new ArrayList<>();
         this.refDoc = refDoc;
@@ -99,10 +99,10 @@ public class ChaponRougeTest {
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", lang);
 
         Document chaprouge = Document.load(new File(pathToOriginalFile), lsa, lda, lang, true, true);
-        ChaponRougeTest crt = new ChaponRougeTest("resources/in/Philippe/chaprou/pretest", chaprouge);
+        ChapouRougeTest crt = new ChapouRougeTest("resources/in/Philippe/chaprou/pretest", chaprouge);
         crt.process();
 
-        crt = new ChaponRougeTest("resources/in/Philippe/chaprou/postTest", chaprouge);
+        crt = new ChapouRougeTest("resources/in/Philippe/chaprou/postTest", chaprouge);
         crt.process();
     }
 }

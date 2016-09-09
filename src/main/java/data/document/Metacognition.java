@@ -259,8 +259,8 @@ public class Metacognition extends Document {
                     block.setId(i);
                 }
                 block.setRefId(0);
-                block.setContent(TextPreprocessing.doubleCleanVerbalization(el
-                        .getFirstChild().getNodeValue()));
+//                block.setContent(TextPreprocessing.doubleCleanVerbalization(el.getFirstChild().getNodeValue()));
+                block.setContent(el.getFirstChild().getNodeValue());
                 tmp.getBlocks().add(block);
             }
         }
