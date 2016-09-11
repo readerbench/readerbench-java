@@ -53,7 +53,10 @@ import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
+import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
 import services.semanticModels.ISemanticModel;
@@ -66,7 +69,7 @@ public class LDA implements ISemanticModel, Serializable {
 
     private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();
     private static final Set<Lang> availableFor = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.it, Lang.la, Lang.nl);
-    
+
     private Lang language;
     private String path;
     private ParallelTopicModel model;
@@ -86,8 +89,8 @@ public class LDA implements ISemanticModel, Serializable {
         try {
             model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
             buildWordVectors();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException | IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
@@ -125,10 +128,9 @@ public class LDA implements ISemanticModel, Serializable {
                 try {
                     fileReader = new InputStreamReader(new FileInputStream(f), "UTF-8");
                     // data, label, name fields
-                    instances.addThruPipe(
-                            new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
+                } catch (FileNotFoundException | UnsupportedEncodingException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             }
         }
@@ -248,7 +250,7 @@ public class LDA implements ISemanticModel, Serializable {
         ObjectManipulation.saveObject(model, path + "/LDA.model");
     }
 
-    public void buildWordVectors() {
+    private void buildWordVectors() {
         ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
         wordProbDistributions = new TreeMap<>();
 

@@ -100,7 +100,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         } else if (semModel instanceof LDA) {
             lda = (LDA) semModel;
         } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
+            LOGGER.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
         }
 
         setLanguage(semModel.getLanguage());
@@ -132,7 +132,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Element doc = dom.getDocumentElement();
             return load(docFile.getAbsolutePath(), doc, lsa, lda, lang, usePOSTagging, cleanInput);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
         }
         return null;
@@ -373,7 +373,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

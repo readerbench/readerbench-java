@@ -204,7 +204,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         // assign sentiment values
         SentimentAnalysis.weightSemanticValences(this);
 
-        logger.info("Finished all discourse analysis processes...");
+        LOGGER.info("Finished all discourse analysis processes...");
     }
 
     public void setDocumentTitle(String title, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
@@ -273,7 +273,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean cleanInput,
             SaveType saveOutput) {
         // parse the XML file
-        logger.info("Loading " + docFile.getPath() + " file for processing");
+        LOGGER.info("Loading " + docFile.getPath() + " file for processing");
         boolean isDocument = checkTagsDocument(docFile, "p");
 
         boolean isChat = checkTagsDocument(docFile, "Utterance");
@@ -300,7 +300,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveSerializedDocument() {
-        logger.info("Saving serialized document ...");
+        LOGGER.info("Saving serialized document ...");
         try {
             FileOutputStream fos;
             fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
@@ -313,7 +313,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveTxtDocument() {
-        logger.info("Saving plain text document ...");
+        LOGGER.info("Saving plain text document ...");
         File output = new File(path.replace(".xml", ".txt"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -328,7 +328,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadSerializedDocument(String path) {
-        logger.info("Loading serialized document " + path + " ...");
+        LOGGER.info("Loading serialized document " + path + " ...");
         AbstractDocument d = null;
         try (FileInputStream fIn = new FileInputStream(new File(path)); ObjectInputStream oIn = new ObjectInputStream(fIn)) {
             d = (AbstractDocument) oIn.readObject();
@@ -362,7 +362,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void exportDocument() {
-        logger.info("Writing document export");
+        LOGGER.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             if (titleText != null) {
@@ -561,13 +561,13 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
             out.write("\n");
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
 
     public void exportDocumentAdvanced() {
-        logger.info("Writing advanced document export");
+        LOGGER.info("Writing advanced document export");
         File output = new File(path.replace(".xml", "_adv.csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -593,7 +593,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

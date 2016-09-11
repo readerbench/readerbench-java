@@ -229,7 +229,7 @@ public class ResearchArticle extends Document {
 
             return d;
         } catch (Exception e) {
-            logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             e.printStackTrace();
         }
         return null;

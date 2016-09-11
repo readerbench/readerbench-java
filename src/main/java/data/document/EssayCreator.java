@@ -169,7 +169,7 @@ public class EssayCreator extends Document {
 			}
 			return d;
 		} catch (Exception e) {
-			logger.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+			LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
@@ -254,7 +254,7 @@ public class EssayCreator extends Document {
 
 			writeDOMforXMLexport(path, dom);
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			LOGGER.error(e.getMessage());
 			e.printStackTrace();
 		}
 	}

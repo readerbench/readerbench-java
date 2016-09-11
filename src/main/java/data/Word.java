@@ -15,7 +15,6 @@
  */
 package data;
 
-import dao.EntityXValenceDAO;
 import java.io.Serializable;
 
 import services.discourse.cohesion.CohesionGraph;
@@ -31,10 +30,10 @@ import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
-import data.pojo.EntityXValence;
 import java.util.EnumSet;
 
 import org.apache.log4j.Logger;
+import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
@@ -51,6 +50,7 @@ public class Word implements Comparable<Word>, Serializable {
     // of (inside of the block)
     private transient LSA lsa;
     private transient LDA lda;
+    private transient Word2VecModel w2vModel;
     private Lang language;
     private String text;
     private String POS;
@@ -59,6 +59,7 @@ public class Word implements Comparable<Word>, Serializable {
     private String lemma;
     private double[] lsaVector;
     private double[] ldaProbDistribution;
+    private double[] w2v;
     private double idf;
     private LexicalChainLink lexicalChainLink; // the lexical chain link associated with the word after disambiguation
     private SemanticChain semanticChain;
@@ -90,7 +91,7 @@ public class Word implements Comparable<Word>, Serializable {
 //            se.setEntityXValenceList(EntityXValenceDAO.getInstance().findBySentimentEntity(se));
 //        }
         se.getEntityXValenceList().stream().forEach((exv) -> {
-                sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
+            sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
         });
     }
 
@@ -227,6 +228,14 @@ public class Word implements Comparable<Word>, Serializable {
 
     public void setLDAProbDistribution(double[] ldaProbDistribution) {
         this.ldaProbDistribution = ldaProbDistribution;
+    }
+
+    public double[] getWord2Vec() {
+        return w2v;
+    }
+
+    public void setWord2Vec(double[] w2v) {
+        this.w2v = w2v;
     }
 
     public String getLemma() {

@@ -27,6 +27,7 @@ import data.discourse.Topic;
 import data.sentiment.SentimentEntity;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  * This abstract class is the base for all type of elements. It is extended
@@ -37,35 +38,28 @@ import services.semanticModels.LSA.LSA;
  */
 public abstract class AnalysisElement implements Serializable {
 
-    /**
-     * A version number for the AnaylisElement class
-     */
     private static final long serialVersionUID = -8110285459013257550L;
-
-    /**
-     * The logger instance
-     */
-    public static Logger logger = Logger.getLogger(AnalysisElement.class);
+    protected static final Logger LOGGER = Logger.getLogger(AnalysisElement.class);
 
     private int index;
     private transient LSA lsa;
     private transient LDA lda;
+    private transient Word2VecModel w2vModel;
     private Lang language;
-    private AnalysisElement container; // the upper level element in the
-    // analysis hierarchy: document > block
-    // > utterance
+    // the upper level element in the analysis hierarchy: document > block / utterance > sentence
+    private AnalysisElement container;
     private String text;
     private String processedText; // lemmas without stop-words and punctuation
     private String alternateText; // text used for display in different colors
     private Map<Word, Integer> wordOccurences;
     private double[] lsaVector;
     private double[] ldaProbDistribution;
+    private double[] w2v;
     private double individualScore;
     private double overallScore;
     private double[] voiceDistribution;
-
-    private transient double specificity; // specificity score computed for a
-    // specific class of topics
+    // specificity score computed for a specific class of topics
+    private transient double specificity;
 
     private List<Topic> topics;
     private List<Topic> inferredConcepts;
@@ -79,9 +73,9 @@ public abstract class AnalysisElement implements Serializable {
         this.processedText = "";
         this.alternateText = "";
         this.lsaVector = new double[LSA.K];
-        this.wordOccurences = new TreeMap<Word, Integer>();
-        this.topics = new LinkedList<Topic>();
-        this.inferredConcepts = new LinkedList<Topic>();
+        this.wordOccurences = new TreeMap<>();
+        this.topics = new LinkedList<>();
+        this.inferredConcepts = new LinkedList<>();
         this.sentimentEntity = new SentimentEntity();
     }
 
@@ -163,26 +157,23 @@ public abstract class AnalysisElement implements Serializable {
      * Determines number of occurrences for each word in a list of analysis
      * elements. The method goes through all elements and, for each word,
      * increments the number of occurrences in a local variable. TODO: word
-     * occurences from (Documents from Blocks), (Blocks from Sentences) (mai
-     * spunem?)
+     * occurrences from (Documents from Blocks), (Blocks from Sentences)
      *
      * @param elements The list of analysis elements
      */
     public void determineWordOccurences(List<? extends AnalysisElement> elements) {
         // add all word occurrences from lower level analysis elements
         // (Documents from Blocks), (Blocks from Utterances)
-        wordOccurences = new TreeMap<Word, Integer>();
-        for (AnalysisElement el : elements) {
-            if (el != null) {
-                for (Word w : el.getWordOccurences().keySet()) {
-                    if (wordOccurences.containsKey(w)) {
-                        wordOccurences.put(w, wordOccurences.get(w) + el.getWordOccurences().get(w));
-                    } else {
-                        wordOccurences.put(w, el.getWordOccurences().get(w));
-                    }
+        wordOccurences = new TreeMap<>();
+        elements.stream().filter((el) -> (el != null)).forEach((el) -> {
+            el.getWordOccurences().keySet().stream().forEach((w) -> {
+                if (wordOccurences.containsKey(w)) {
+                    wordOccurences.put(w, wordOccurences.get(w) + el.getWordOccurences().get(w));
+                } else {
+                    wordOccurences.put(w, el.getWordOccurences().get(w));
                 }
-            }
-        }
+            });
+        });
     }
 
     /**
@@ -193,7 +184,8 @@ public abstract class AnalysisElement implements Serializable {
     }
 
     /**
-     * @param wordOccurences map of (word, no_occurences) associations to be set
+     * @param wordOccurences map of (word, no_occurrences) associations to be
+     * set
      */
     public void setWordOccurences(Map<Word, Integer> wordOccurences) {
         this.wordOccurences = wordOccurences;
@@ -228,6 +220,20 @@ public abstract class AnalysisElement implements Serializable {
     }
 
     /**
+     * @return word2Vec object
+     */
+    public Word2VecModel getW2vModel() {
+        return w2vModel;
+    }
+
+    /**
+     * @param w2vModel word2Vec object to be set
+     */
+    public void setW2vModel(Word2VecModel w2vModel) {
+        this.w2vModel = w2vModel;
+    }
+
+    /**
      * @return the language the text is written in
      */
     public Lang getLanguage() {
@@ -256,8 +262,6 @@ public abstract class AnalysisElement implements Serializable {
     }
 
     /**
-     * TODO: e ok explicatia?
-     *
      * @return Latent Dirichlet Allocation Probability Distribution vector
      */
     public double[] getLDAProbDistribution() {
@@ -270,6 +274,20 @@ public abstract class AnalysisElement implements Serializable {
      */
     public void setLDAProbDistribution(double[] ldaProbDistribution) {
         this.ldaProbDistribution = ldaProbDistribution;
+    }
+
+    /**
+     * @return word2vec vector
+     */
+    public double[] getWord2Vec() {
+        return w2v;
+    }
+
+    /**
+     * @param w2v word2vec vector to be set
+     */
+    public void setWord2Vec(double[] w2v) {
+        this.w2v = w2v;
     }
 
     /**
@@ -399,7 +417,7 @@ public abstract class AnalysisElement implements Serializable {
         this.inferredConcepts = inferredConcepts;
     }
 
-	/**
+    /**
      * @return
      */
     public double getSpecificity() {

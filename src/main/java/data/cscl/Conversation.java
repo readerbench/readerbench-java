@@ -288,7 +288,7 @@ public class Conversation extends AbstractDocument {
                                         }
                                     }
                                 } catch (Exception e) {
-                                    logger.info("Incorrect annotated collaboration zone format");
+                                    LOGGER.info("Incorrect annotated collaboration zone format");
                                 }
                             }
                         }
@@ -408,7 +408,7 @@ public class Conversation extends AbstractDocument {
      *
      */
     public void exportIM() {
-        logger.info("Writing document export in IM format");
+        LOGGER.info("Writing document export in IM format");
         File output = new File(getPath().replace(".xml", "_IM.txt"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -422,7 +422,7 @@ public class Conversation extends AbstractDocument {
                 }
             }
         } catch (Exception ex) {
-            logger.error(ex.getMessage());
+            LOGGER.error(ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
     }

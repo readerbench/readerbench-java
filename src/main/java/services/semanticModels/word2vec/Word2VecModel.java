@@ -31,90 +31,141 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFac
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import data.AnalysisElement;
-import data.Lang;
 import data.Word;
 import java.io.FileNotFoundException;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.Map;
 import services.commons.ObjectManipulation;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
+import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import org.openide.util.Exceptions;
+import services.commons.VectorAlgebra;
 
 /**
  *
- * @author Stefan
+ * @author Stefan Ruseti, Mihai Dascalu
  */
 public class Word2VecModel implements ISemanticModel {
 
-    private static final String MODEL = "resources/config/EN/word2vec/Google news/GoogleNews-vectors-negative300.bin";
-    static Logger logger = Logger.getLogger(LDA.class);
+    static final Logger LOGGER = Logger.getLogger(Word2VecModel.class);
+    private static final List<Word2VecModel> LOADED_WORD2VEC_MODELS = new ArrayList<>();
+    private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en);
 
-    private Word2Vec word2vec;
-    private Lang lang = Lang.en;
-    
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.en);
-    
-    public static Word2VecModel load() throws IOException {
-        return load(MODEL);
+    private final Lang language;
+    private final String path;
+    private Map<Word, double[]> wordVectors;
+
+    private Word2VecModel(String path, Lang language, Word2Vec word2vec) {
+        this.language = language;
+        this.path = path;
+        this.wordVectors = new TreeMap<>();
+        word2vec.vocab().words().stream().map(w -> new Word(w, w, Stemmer.stemWord(w, language), null, null, language)).collect(Collectors.toSet())
+                .stream().forEach((w) -> {
+                    wordVectors.put(w, word2vec.getWordVector(w.getLemma()));
+                });
     }
 
-    public static Word2VecModel load(String fileName) throws IOException {
-        File gModel = new File(fileName);
-        Word2VecModel w2vm = new Word2VecModel();
-        w2vm.word2vec = (Word2Vec) WordVectorSerializer.loadGoogleModel(gModel, true);
+    public static Word2Vec loadWord2Vec(String path) {
+        LOGGER.info("Loading word2vec model " + path + " ...");
+        Word2Vec word2Vec = null;
+        try {
+            word2Vec = (Word2Vec) ObjectManipulation.loadObject(path + "/word2vec.model");
+        } catch (ClassNotFoundException | IOException e) {
+            LOGGER.error(e);
+        }
+        return word2Vec;
+    }
+
+    public static Word2VecModel loadWord2Vec(String path, Lang language) {
+        for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
+            if (path.equals(w2v.getPath())) {
+                return w2v;
+            }
+        }
+        Word2VecModel w2v = new Word2VecModel(path, language, loadWord2Vec(path));
+        LOADED_WORD2VEC_MODELS.add(w2v);
+
+        return w2v;
+    }
+
+    public static Word2VecModel loadGoogleNewsModel() {
+        String path = "resources/config/EN/word2vec/Google news";
+        for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
+            if (path.equals(w2v.getPath())) {
+                return w2v;
+            }
+        }
+        Word2VecModel w2vm = null;
+        try {
+            w2vm = new Word2VecModel(path, Lang.en, (Word2Vec) WordVectorSerializer.loadGoogleModel(new File(path + "GoogleNews-vectors-negative300.bin"), true));
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         return w2vm;
     }
 
     @Override
     public double getSimilarity(Word w1, Word w2) {
-        return word2vec.similarity(w1.getText(), w2.getText());
+        return VectorAlgebra.cosineSimilarity(w1.getWord2Vec(), w2.getWord2Vec());
     }
 
     @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return VectorAlgebra.cosineSimilarity(e1.getWord2Vec(), e2.getWord2Vec());
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getSimilarConcepts(w.getWord2Vec(), minThreshold);
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getSimilarConcepts(e.getWord2Vec(), minThreshold);
+    }
+
+    private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
+        TreeMap<Word, Double> similarConcepts = new TreeMap<>();
+        double sim;
+        for (Entry<Word, double[]> entry : wordVectors.entrySet()) {
+            sim = VectorAlgebra.cosineSimilarity(vector, entry.getValue());
+            if (sim >= minThreshold) {
+                similarConcepts.put(entry.getKey(), sim);
+            }
+        }
+        return similarConcepts;
     }
 
     @Override
     public Map<Word, double[]> getWordRepresentation() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return wordVectors;
     }
 
     @Override
     public Set<Word> getWordSet() {
-        return word2vec.vocab().words().stream()
-                .map(w -> new Word(w, w, Stemmer.stemWord(w, lang), null, null, lang))
-                .collect(Collectors.toSet());
+        return wordVectors.keySet();
     }
 
     @Override
     public String getPath() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return path;
     }
 
     @Override
     public Lang getLanguage() {
-        return lang;
+        return language;
     }
 
-    public static void trainModel(String inputFile, String outputFile) throws FileNotFoundException {
+    public static void trainModel(String inputFile) throws FileNotFoundException {
         SentenceIterator iter = new BasicLineIterator(inputFile);
         // Split on white spaces in the line to get words
         TokenizerFactory t = new DefaultTokenizerFactory();
         t.setTokenPreProcessor(new CommonPreprocessor());
-        logger.info("Building word2vec model");
+        LOGGER.info("Building word2vec model ...");
         Word2Vec word2Vec = new Word2Vec.Builder()
                 .minWordFrequency(5)
                 .iterations(5)
@@ -125,68 +176,14 @@ public class Word2VecModel implements ISemanticModel {
                 .iterate(iter)
                 .tokenizerFactory(t)
                 .build();
-
         word2Vec.fit();
 
-        logger.info("Writing word vectors to text file....");
-
-        WordVectorSerializer.writeFullModel(word2Vec, outputFile);
-    }
-
-    public void processCorpus(String path) throws IOException {
-        File corpusDir = new File(path);
-        String corpusFileName = "";
-
-        if (corpusDir.isDirectory()) {
-            for (String fileName : corpusDir.list()) {
-                if (fileName.startsWith("alltexts")) {
-                    corpusFileName = path + "/" + fileName;
-                }
-            }
-        }
-
-        logger.info("Corpus file is: " + corpusFileName);
-        // Strip white space before and after for each line
-        SentenceIterator iter = new BasicLineIterator(corpusFileName);
-        // Split on white spaces in the line to get words
-        TokenizerFactory t = new DefaultTokenizerFactory();
-        t.setTokenPreProcessor(new CommonPreprocessor());
-
-        logger.info("Building word2vec model");
-        Word2Vec word2Vec = new Word2Vec.Builder()
-                .minWordFrequency(5)
-                .iterations(1)
-                .layerSize(300)
-                .seed(42)
-                .windowSize(5)
-                .negativeSample(10)
-                .iterate(iter)
-                .tokenizerFactory(t)
-                .build();
-
-        word2Vec.fit();
-
-        logger.info("Writing word vectors to text file....");
-
-        // save the trained model
-        ObjectManipulation.saveObject(word2Vec, path + "/word2vec.model");
-    }
-
-    public static Word2Vec loadWord2Vec(String path) {
-        Word2Vec word2Vec = null;
-        try {
-            word2Vec = (Word2Vec) ObjectManipulation.loadObject(path + "/word2vec.model");
-        } catch (ClassNotFoundException | IOException e) {
-            logger.error(e);
-        }
-        return word2Vec;
-    }
-
-    public static void main(String[] args) throws FileNotFoundException {
-        trainModel("resources/corpora/NL/out.txt", "resources/config/NL/word2vec/nl.txt");
+        LOGGER.info("Writing word vectors to text file ...");
+        String outputPath = new File(inputFile).getParentFile().getAbsolutePath() + "/word2vec.model";
+        WordVectorSerializer.writeFullModel(word2Vec, outputPath);
     }
 
     public static Set<Lang> getAvailableLanguages() {
-        return availableFor;
+        return AVAILABLE_FOR;
     }
 }

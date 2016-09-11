@@ -223,7 +223,7 @@ public class LSA implements ISemanticModel {
         return getSimilarConcepts(e.getLSAVector(), minThreshold);
     }
 
-    public TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
+    private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
         TreeMap<Word, Double> similarConcepts = new TreeMap<>();
         double[] vector2;
         double sim;

@@ -16,7 +16,6 @@
 package data.document;
 
 import data.AbstractDocument;
-import static data.AnalysisElement.logger;
 import data.Lang;
 import java.io.File;
 import java.io.FileInputStream;
@@ -97,7 +96,7 @@ public class MetaDocument extends Document {
             }
         });
         if (leaves.isEmpty()) {
-            System.out.println("Error");
+            LOGGER.error("Error while processing document - empty leaf documents!");
         }
         setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
                 .collect(Collectors.toMap(
@@ -106,7 +105,6 @@ public class MetaDocument extends Document {
                         .mapToDouble(d -> d.getComplexityIndices().get(index))
                         .filter(x -> x != -1)
                         .average().orElse((double) ComplexityIndices.IDENTITY))));
-
     }
 
     public static MetaDocument load(File file, LSA lsa, LDA lda, Lang lang,
@@ -124,8 +122,8 @@ public class MetaDocument extends Document {
             Element root = (Element) doc.getElementsByTagName("section").item(0);
             return load(file.getPath(), root, lsa, lda, lang, usePOSTagging, cleanInput, maxLevel, maxDepth);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            logger.error("Error evaluating input file " + file.getPath() + " - " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.error("Error evaluating input file " + file.getPath() + " - " + e.getMessage());
+            Exceptions.printStackTrace(e);
         }
         return null;
     }
