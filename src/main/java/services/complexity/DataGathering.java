@@ -45,16 +45,13 @@ public class DataGathering {
 
     public static void writeHeader(String path, Lang lang) {
         // create measurements.csv header
-        try {
-            FileWriter fstream = new FileWriter(path + "/measurements.csv", false);
-            BufferedWriter out = new BufferedWriter(fstream);
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/measurements.csv", false))) {
             StringBuilder concat = new StringBuilder();
             concat.append("File name,Grade Level,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
-            for (ComplexityIndex factor : ComplexityIndices.getIndices(lang)) {
-                concat.append(",").append(factor.getAcronym());
-            }
+            ComplexityIndices.getIndices(lang).stream().forEach((factor) -> {
+                concat.append(",RB.").append(factor.getAcronym());
+            });
             out.write(concat.toString());
-            out.close();
         } catch (Exception e) {
             logger.error("Runtime error while initializing measurements.csv file");
             Exceptions.printStackTrace(e);
@@ -107,9 +104,7 @@ public class DataGathering {
             }
 
             if (d != null) {
-                try {
-                    FileWriter fstream = new FileWriter(saveLocation + "/measurements.csv", true);
-                    BufferedWriter out = new BufferedWriter(fstream);
+                try (BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements.csv", true))) {
                     StringBuilder concat = new StringBuilder();
                     String fileName = FilenameUtils.removeExtension(file.getName().replaceAll(",", ""));
                     concat.append("\n").append(fileName).append(",").append(gradeLevel)
@@ -123,7 +118,6 @@ public class DataGathering {
                         concat.append(",").append(d.getComplexityIndices().get(factor));
                     }
                     out.write(concat.toString());
-                    out.close();
                 } catch (IOException ex) {
                     logger.error("Runtime error while initializing measurements.csv file");
                     Exceptions.printStackTrace(ex);
@@ -141,23 +135,21 @@ public class DataGathering {
     public static Map<Double, List<Measurement>> getMeasurements(String fileName) {
         Map<Double, List<Measurement>> result = new TreeMap<>();
 
-        try {
-            try (BufferedReader input = new BufferedReader(new FileReader(fileName))) {
-                // disregard first line
-                String line = input.readLine();
-                while ((line = input.readLine()) != null) {
-                    String[] fields = line.split("[;,]");
-                    double[] values = new double[fields.length - 4];
+        try (BufferedReader input = new BufferedReader(new FileReader(fileName))) {
+            // disregard first line
+            String line = input.readLine();
+            while ((line = input.readLine()) != null) {
+                String[] fields = line.split("[;,]");
+                double[] values = new double[fields.length - 4];
 
-                    double classNumber = Double.parseDouble(fields[0]);
-                    for (int i = 4; i < fields.length; i++) {
-                        values[i - 4] = Double.parseDouble(fields[i]);
-                    }
-                    if (!result.containsKey(classNumber)) {
-                        result.put(classNumber, new ArrayList<>());
-                    }
-                    result.get(classNumber).add(new Measurement(classNumber, values));
+                double classNumber = Double.parseDouble(fields[0]);
+                for (int i = 4; i < fields.length; i++) {
+                    values[i - 4] = Double.parseDouble(fields[i]);
                 }
+                if (!result.containsKey(classNumber)) {
+                    result.put(classNumber, new ArrayList<>());
+                }
+                result.get(classNumber).add(new Measurement(classNumber, values));
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);

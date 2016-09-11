@@ -26,34 +26,34 @@ import org.apache.log4j.Logger;
  */
 public class Parsing_RO extends Parsing {
 
-	static Logger logger = Logger.getLogger(Parsing_RO.class);
+    static final Logger LOGGER = Logger.getLogger(Parsing_RO.class);
 
-	private static Parsing_RO instance = null;
-	private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_RO());
+    private static Parsing_RO instance = null;
+    private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_RO());
 
-	private Parsing_RO() {
-		lang = Lang.ro;
-	}
+    private Parsing_RO() {
+        lang = Lang.ro;
+    }
 
-	public static Parsing_RO getInstance() {
-		if (instance == null) {
-			instance = new Parsing_RO();
-		}
-		return instance;
-	}
+    public static Parsing_RO getInstance() {
+        if (instance == null) {
+            instance = new Parsing_RO();
+        }
+        return instance;
+    }
 
-	@Override
-	public StanfordCoreNLP getPipeline() {
-		return pipeline;
-	}
+    @Override
+    public StanfordCoreNLP getPipeline() {
+        return pipeline;
+    }
 
-	class ParsingParams_RO extends Properties {
+    class ParsingParams_RO extends Properties {
 
-		private static final long serialVersionUID = -161579346323407322L;
+        private static final long serialVersionUID = -161579346323407322L;
 
-		public ParsingParams_RO() {
-			super();
-		}
-	}
-
+        public ParsingParams_RO() {
+            super();
+            this.put("annotators", "");
+        }
+    }
 }

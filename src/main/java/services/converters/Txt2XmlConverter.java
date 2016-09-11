@@ -41,7 +41,6 @@ import java.io.OutputStreamWriter;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,10 +53,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFSDT;
-import org.apache.poi.xwpf.usermodel.XWPFSDTContent;
-import org.apache.poi.xwpf.usermodel.XWPFStyle;
-import org.apache.poi.xwpf.usermodel.XWPFStyles;
 import org.apache.tools.ant.filters.StringInputStream;
 import org.openide.util.Exceptions;
 import org.w3c.dom.Element;
@@ -66,18 +61,17 @@ import org.xml.sax.SAXException;
 
 public class Txt2XmlConverter {
 
-    static Logger logger = Logger.getLogger(Txt2XmlConverter.class);
-    private static DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    static final Logger LOGGER = Logger.getLogger(Txt2XmlConverter.class);
+    private final static DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
 
     private int currentBlock = 0;
     private org.w3c.dom.Document doc;
-    private DocumentBuilder builder;
-    private Lang lang;
+    private final DocumentBuilder builder;
+    private final Lang lang;
 
     public Txt2XmlConverter(Lang lang) throws ParserConfigurationException {
         this.lang = lang;
-        builder = dbf.newDocumentBuilder();
-
+        builder = DBF.newDocumentBuilder();
     }
 
     public static void processContent(String title, String content, Lang lang, String path) {
@@ -94,7 +88,6 @@ public class Txt2XmlConverter {
         Document d = new Document(null, docTmp, null, null, lang, false, false);
         d.setTitleText(title);
         d.setDate(new Date());
-
         d.exportXML(path);
     }
 
@@ -106,13 +99,11 @@ public class Txt2XmlConverter {
         }
         File output = new File(path);
         if (!output.exists()) {
-            try {
-                output.createNewFile();
-                BufferedWriter in = new BufferedWriter(new FileWriter(output));
+            output.createNewFile();
+            try (BufferedWriter in = new BufferedWriter(new FileWriter(output))) {
                 in.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<document/>");
-                in.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
         doc = builder.parse(output);
@@ -223,31 +214,31 @@ public class Txt2XmlConverter {
             System.out.println("Error on: " + inputFile.getPath());
             return;
         }
-        
+
         File output = new File(outputPath);
-        if (output.exists()) output.delete();
-        try {
-            output.createNewFile();
-            BufferedWriter in = new BufferedWriter(new FileWriter(output));
+        if (output.exists()) {
+            output.delete();
+        }
+        output.createNewFile();
+        try (BufferedWriter in = new BufferedWriter(new FileWriter(output))) {
             in.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<document/>");
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
         doc = builder.parse(output);
         Element root = (Element) doc.getElementsByTagName("document").item(0);
         root.setAttribute("language", lang.name());
-        
+
         //set title
         Paragraph titleParagraph = content.peek();
         String title = "UNKNOWN";
         if (titleParagraph.getLevel() == 0) {
-             title = titleParagraph.getText();
+            title = titleParagraph.getText();
         }
         Element titleElem = doc.createElement("title");
         titleElem.setTextContent(title);
         root.appendChild(titleElem);
-        
+
         //set authors
         String[] nameSplit = inputFile.getName().split("_");
         String author = nameSplit[3] + "_" + nameSplit[4];
@@ -256,7 +247,7 @@ public class Txt2XmlConverter {
         authorEl.setTextContent(author);
         authors.appendChild(authorEl);
         root.appendChild(authors);
-        
+
         if (titleParagraph.getLevel() != 0) {
             Element section = doc.createElement("section");
             section.setAttribute("title", title);
@@ -330,7 +321,7 @@ public class Txt2XmlConverter {
             int total_docs_to_process = new File(path).listFiles((File pathname)
                     -> pathname.getName().endsWith(".txt")
             ).length;
-            logger.info("Processing " + total_docs_to_process + " documents in total");
+            LOGGER.info("Processing " + total_docs_to_process + " documents in total");
 
             int current_doc_to_process = 0;
 
@@ -343,19 +334,14 @@ public class Txt2XmlConverter {
                 converter.currentBlock = 0;
                 // process each file
                 String content = "";
-                FileInputStream inputFile;
-                InputStreamReader ir;
-                try {
-                    inputFile = new FileInputStream(f);
-                    ir = new InputStreamReader(inputFile, encoding);
-                    BufferedReader in = new BufferedReader(ir);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding))) {
                     while ((line = in.readLine()) != null) {
                         if (line.trim().length() > 0) {
                             content += line.trim() + "\n";
                         }
                     }
                     if ((++current_doc_to_process) % 1000 == 0) {
-                        logger.info("Finished processing " + (current_doc_to_process) + " documents of "
+                        LOGGER.info("Finished processing " + (current_doc_to_process) + " documents of "
                                 + total_docs_to_process);
                     }
                     if (meta) {
@@ -365,20 +351,17 @@ public class Txt2XmlConverter {
                         processContent(prefix + f.getName().replaceAll("\\.txt", ""),
                                 new String(content.getBytes("UTF-8"), "UTF-8"), lang, f.getPath().replace(".txt", ".xml"));
                     }
-                    in.close();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    Exceptions.printStackTrace(e);
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    Exceptions.printStackTrace(e);
                 } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (SAXException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (TransformerException ex) {
+                    Exceptions.printStackTrace(e);
+                } catch (SAXException | TransformerException ex) {
                     Exceptions.printStackTrace(ex);
                 }
             }
-            logger.info("Finished processing all files.");
+            LOGGER.info("Finished processing all files.");
         } catch (ParserConfigurationException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -393,7 +376,7 @@ public class Txt2XmlConverter {
             int total_docs_to_process = new File(path).listFiles((File pathname)
                     -> pathname.getName().endsWith(".docx")
             ).length;
-            logger.info("Processing " + total_docs_to_process + " documents in total");
+            LOGGER.info("Processing " + total_docs_to_process + " documents in total");
 
             int current_doc_to_process = 0;
 
@@ -403,24 +386,20 @@ public class Txt2XmlConverter {
             Txt2XmlConverter converter = new Txt2XmlConverter(lang);
             for (File f : listFiles) {
                 if ((++current_doc_to_process) % 1000 == 0) {
-                    logger.info("Finished processing " + (current_doc_to_process) + " documents of "
+                    LOGGER.info("Finished processing " + (current_doc_to_process) + " documents of "
                             + total_docs_to_process);
                 }
 
                 converter.processMetaDocFile(f, f.getPath().replace(".docx", ".xml"));
             }
-            logger.info("Finished processing all files.");
+            LOGGER.info("Finished processing all files.");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SAXException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (TransformerException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (ParserConfigurationException ex) {
+            Exceptions.printStackTrace(e);
+        } catch (SAXException | TransformerException | ParserConfigurationException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -436,7 +415,7 @@ public class Txt2XmlConverter {
                 (File pathname) -> pathname.getName().endsWith(".txt"));
 
         for (File f : listFiles) {
-            logger.info("Processing " + f.getPath());
+            LOGGER.info("Processing " + f.getPath());
             // see if there are folders with genre names
             File dir = new File(path + "/" + f.getName().replaceAll("\\.txt", ""));
             if (dir.exists()) {
@@ -451,14 +430,9 @@ public class Txt2XmlConverter {
             String content = "";
             String title = "";
             String line;
-            FileInputStream inputFile;
-            InputStreamReader ir;
             Pattern p = Pattern.compile("^[0-9]+");
 
-            try {
-                inputFile = new FileInputStream(f);
-                ir = new InputStreamReader(inputFile, encoding);
-                BufferedReader in = new BufferedReader(ir);
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding))) {
                 while ((line = in.readLine()) != null) {
                     if (line.trim().length() > 0) {
                         Matcher m = p.matcher(line);
@@ -475,16 +449,15 @@ public class Txt2XmlConverter {
                         }
                     }
                 }
-                in.close();
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
         }
-        logger.info("Finished processing all files.");
+        LOGGER.info("Finished processing all files.");
     }
 
     public static class Paragraph {
@@ -511,7 +484,7 @@ public class Txt2XmlConverter {
         public void combine(Paragraph other) {
             text += "\n" + other.text;
         }
-        
+
         public String getText() {
             return text;
         }
@@ -546,6 +519,6 @@ public class Txt2XmlConverter {
 //        parseDocFiles("resources/in/ViBOA_nl/evaluation task 2/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/final task/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/Test/", Lang.nl);
-        
+
     }
 }

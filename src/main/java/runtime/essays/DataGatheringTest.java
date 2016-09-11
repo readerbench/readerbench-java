@@ -24,6 +24,7 @@ import data.document.Document;
 import data.Lang;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
+import services.converters.Txt2XmlConverter;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -54,34 +55,37 @@ public class DataGatheringTest {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         ReaderBenchServer.initializeDB();
-        
+
 //        LSA lsa = LSA.loadLSA("resources/config/LA/LSA/Letters", Lang.la);
 //        LDA lda = LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la);
 //        LSA lsa = LSA.loadLSA("resources/config/RO/LSA/Religie", Lang.ro);
 //        LDA lda = LDA.loadLDA("resources/config/RO/LDA/Religie", Lang.ro);
-//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
-//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
-//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.eng);
-//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.eng);
-        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
-        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.en);
+//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.en);
+//        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
+//        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
+
+//        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
         try {
-//            DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/SEvsTA/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/posttest_fall_2009/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/SEvsTA/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/posttest_fall_2009/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.en, true, true);
 
-            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
-            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);
+            DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", -1, true, lsa, lda, Lang.en, true, true);
 
+//            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
+//            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, lda, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
@@ -91,12 +95,12 @@ public class DataGatheringTest {
 //
 //            DataGathering.processTexts("resources/in/essays/nursery_fr", -1, true, lsa, lda, Lang.fr, true, true);
 //
-//            DataGathering.processTexts("resources/in/Elvira/users 2010", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/Elvira/users 2011", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/Elvira/users 2012", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/Elvira/users 2013", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/Elvira/users 2014", -1, true, lsa, lda, Lang.eng, true, true);
-//            DataGathering.processTexts("resources/in/Elvira/users 2015", -1, true, lsa, lda, Lang.eng, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2010", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2011", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2012", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2013", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2014", -1, true, lsa, lda, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/Elvira/users 2015", -1, true, lsa, lda, Lang.en, true, true);
 //
 //            DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Eminescu 1877 - 1880", -1, true, lsa, lda, Lang.ro, false, false);
 //            DataGathering.processTexts("resources/in/Eminescu vs Bratianu/Bratianu 1857 - 1875", -1, true, lsa, lda, Lang.ro, false, false);
