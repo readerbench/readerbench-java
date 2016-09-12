@@ -50,6 +50,10 @@ import webService.services.TextualComplexity;
 public class CVAnalyzer {
 
     public Logger logger = Logger.getLogger(CVAnalyzer.class);
+    
+    private static String CV_PATH_SAMPLE = "resources/in/cv/cv_sample/";
+    private static String CV_PATH = "resources/in/cv_new/cv_analyse/";
+    
     private Map<String, String> hm;
     private String path;
 
@@ -73,6 +77,7 @@ public class CVAnalyzer {
 
             StringBuilder sb = new StringBuilder();
             sb.append("CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page,")
+                    .append("font types,avg font types per page,simple font types,simple font types per page,font sizes,avg font sizes per page,min font size,max font size,bold characters,avg bold characters per page,bold chars by total chars,italic characters,italic characters per pace,italic chars by total chars,bold italic characters,bold italic characters per page,bold italic chars by total chars,")
                     .append("positive words (FAN >= ")
                     .append(FANthreshold + FANdelta)
                     .append("),pos words percentage," + "negative words (FAN <= ")
@@ -96,6 +101,7 @@ public class CVAnalyzer {
             }
 
             // textual complexity factors
+            lang = Lang.getLang(hm.get("lang"));
             TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
             for (ComplexityIndexType cat : textualComplexity.getList()) {
                 for (ComplexityIndex index : cat.getFactory().build(lang)) {
@@ -135,6 +141,7 @@ public class CVAnalyzer {
                     AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
 
                     logger.info("Lista de ignore contine " + ignore);
+                    hm.put("text", cvContent);
                     ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
                             hm, FANthreshold, FANdelta);
 
@@ -192,6 +199,57 @@ public class CVAnalyzer {
 
                     // avg content words per page
                     sb.append(Formatting.formatNumber(result.getContentWords() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(result.getFontTypes());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getFontTypes() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(result.getFontTypesSimple());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getFontTypesSimple() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(result.getFontSizes());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getFontSizes() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(result.getMinFontSize());
+                    sb.append(',');
+                    
+                    sb.append(result.getMaxFontSize());
+                    sb.append(',');
+                    
+                    sb.append(result.getBoldCharacters());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getBoldCharacters() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getBoldCharacters() * 1.0 / result.getTotalCharacters()));
+                    sb.append(',');
+                    
+                    sb.append(result.getItalicCharacters());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getItalicCharacters() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getItalicCharacters() * 1.0 / result.getTotalCharacters()));
+                    sb.append(',');
+                    
+                    sb.append(result.getBoldItalicCharacters());
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getBoldItalicCharacters() * 1.0 / result.getPages()));
+                    sb.append(',');
+                    
+                    sb.append(Formatting.formatNumber(result.getBoldItalicCharacters() * 1.0 / result.getTotalCharacters()));
                     sb.append(',');
 
                     // positive words
@@ -302,18 +360,16 @@ public class CVAnalyzer {
         ReaderBenchServer.initializeDB();
         
         Map<String, String> hm = new HashMap<>();
-        hm.put("lsa", "resources/config/FR/LSA/Le Monde");
-        hm.put("lda", "resources/config/FR/LDA/Le Monde");
+        hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
+        hm.put("lda", "resources/config/FR/LDA/Le_Monde");
         hm.put("lang", "French");
         hm.put("postagging", "false");
         hm.put("dialogism", "false");
         hm.put("threshold", "0.3");
 
-        CVAnalyzer cvAnalyzerSample = new CVAnalyzer("resources/in/cv/cv_sample/", hm);
+        //CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH_SAMPLE, hm);
+        CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH, hm);
         cvAnalyzerSample.process();
-
-        /*CVAnalyzer cvAnalyzerPositifs = new CVAnalyzer("resources/in/cv/", hm);
-		cvAnalyzerPositifs.process();*/
     }
 
 }

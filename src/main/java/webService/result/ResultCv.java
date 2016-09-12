@@ -34,6 +34,16 @@ public class ResultCv {
 	private Integer sentences;
 	private Integer words;
 	private Integer contentWords;
+    
+    private Integer fontTypes; // contains font types with text styles
+    private Integer fontTypesSimple; // contains font types withouth text styles
+    private Integer fontSizes;
+    private Float minFontSize;
+    private Float maxFontSize;
+    private Integer totalCharacters;
+    private Integer boldCharacters;
+    private Integer italicCharacters;
+    private Integer boldItalicCharacters;
 	
 	private List<String> positiveWords;
 	private List<String> negativeWords;
@@ -271,5 +281,77 @@ public class ResultCv {
 	public void setNeutralWords(List<String> neutralWords) {
 		this.neutralWords = neutralWords;
 	}
+    
+    public Integer getFontTypes() {
+        return fontTypes;
+    }
+
+    public void setFontTypes(Integer fontTypes) {
+        this.fontTypes = fontTypes;
+    }
+
+    public Integer getFontTypesSimple() {
+        return fontTypesSimple;
+    }
+    
+    public void setFontTypesSimple(Integer fontTypesSimple) {
+        this.fontTypesSimple = fontTypesSimple;
+    }
+    
+    public Integer getFontSizes() {
+        return fontSizes;
+    }
+
+    public void setFontSizes(Integer fontSizes) {
+        this.fontSizes = fontSizes;
+    }
+
+    public Float getMinFontSize() {
+        return minFontSize;
+    }
+
+    public void setMinFontSize(Float minFontSize) {
+        this.minFontSize = minFontSize;
+    }
+
+    public Float getMaxFontSize() {
+        return maxFontSize;
+    }
+
+    public void setMaxFontSize(Float maxFontSize) {
+        this.maxFontSize = maxFontSize;
+    }    
+    
+    public Integer getTotalCharacters() {
+        return totalCharacters;
+    }
+
+    public void setTotalCharacters(Integer totalCharacters) {
+        this.totalCharacters = totalCharacters;
+    }
+
+    public Integer getBoldCharacters() {
+        return boldCharacters;
+    }
+
+    public void setBoldCharacters(Integer boldCharacters) {
+        this.boldCharacters = boldCharacters;
+    }
+
+    public Integer getItalicCharacters() {
+        return italicCharacters;
+    }
+
+    public void setItalicCharacters(Integer italicCharacters) {
+        this.italicCharacters = italicCharacters;
+    }
+    
+    public Integer getBoldItalicCharacters() {
+        return boldItalicCharacters;
+    }
+    
+    public void setBoldItalicCharacters(Integer boldItalicCharacters) {
+        this.boldItalicCharacters = boldItalicCharacters;
+    }
 
 }

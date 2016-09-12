@@ -138,6 +138,16 @@ public class CVHelper {
 		
 		// number of content words
 		result.setContentWords(document.getNoContentWords());
+        
+        result.setFontTypes(pdfConverter.getFontTypes());
+        result.setFontTypesSimple(pdfConverter.getFontTypesSimple());
+        result.setFontSizes(pdfConverter.getFontSizes());
+        result.setMinFontSize(pdfConverter.getMinFontSize());
+        result.setMaxFontSize(pdfConverter.getMaxFontSize());
+        result.setTotalCharacters(pdfConverter.getTotalCharacters());
+        result.setBoldCharacters(pdfConverter.getBoldCharacters());
+        result.setItalicCharacters(pdfConverter.getItalicCharacters());
+        result.setBoldItalicCharacters(pdfConverter.getBoldItalicCharacters());
 		
 		// positive words
 		result.setPositiveWords(positiveWords);

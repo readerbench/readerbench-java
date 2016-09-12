@@ -21,7 +21,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.FileUtils;
@@ -41,6 +44,7 @@ import org.apache.pdfbox.pdmodel.PDResources;
 
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.TextPosition;
 
 import services.commons.Formatting;
 import webService.ReaderBenchServer;
@@ -109,6 +113,88 @@ public class PdfToTextConverter {
 
     // number of colors
     private Integer colors;
+    
+    private Integer fontTypes; // contains font types with text styles
+    private Integer fontTypesSimple; // contains font types withouth text styles
+    private Integer fontSizes;
+    private Float minFontSize;
+    private Float maxFontSize;
+    private Integer totalCharacters;
+    private Integer boldCharacters;
+    private Integer italicCharacters;
+    private Integer boldItalicCharacters;
+
+    public Integer getFontTypes() {
+        return fontTypes;
+    }
+
+    public void setFontTypes(Integer fontTypes) {
+        this.fontTypes = fontTypes;
+    }
+
+    public Integer getFontTypesSimple() {
+        return fontTypesSimple;
+    }
+    
+    public void setFontTypesSimple(Integer fontTypesSimple) {
+        this.fontTypesSimple = fontTypesSimple;
+    }
+    
+    public Integer getFontSizes() {
+        return fontSizes;
+    }
+
+    public void setFontSizes(Integer fontSizes) {
+        this.fontSizes = fontSizes;
+    }
+
+    public Float getMinFontSize() {
+        return minFontSize;
+    }
+
+    public void setMinFontSize(Float minFontSize) {
+        this.minFontSize = minFontSize;
+    }
+
+    public Float getMaxFontSize() {
+        return maxFontSize;
+    }
+
+    public void setMaxFontSize(Float maxFontSize) {
+        this.maxFontSize = maxFontSize;
+    }   
+    
+    public Integer getTotalCharacters() {
+        return totalCharacters;
+    }
+
+    public void setTotalCharacters(Integer totalCharacters) {
+        this.totalCharacters = totalCharacters;
+    }
+
+    public Integer getBoldCharacters() {
+        return boldCharacters;
+    }
+
+    public void setBoldCharacters(Integer boldCharacters) {
+        this.boldCharacters = boldCharacters;
+    }
+
+    public Integer getItalicCharacters() {
+        return italicCharacters;
+    }
+
+    public void setItalicCharacters(Integer italicCharacters) {
+        this.italicCharacters = italicCharacters;
+    }
+    
+    public Integer getBoldItalicCharacters() {
+        return boldItalicCharacters;
+    }
+    
+    public void setBoldItalicCharacters(Integer boldItalicCharacters) {
+        this.boldItalicCharacters = boldItalicCharacters;
+    }
 
     public Integer getColors() {
         return colors;
@@ -117,6 +203,8 @@ public class PdfToTextConverter {
     public void setColors(Integer colors) {
         this.colors = colors;
     }
+    
+    final StringBuffer extractedText = new StringBuffer();
 
     // Extract text from PDF Document
     public String pdftoText(String fileName, boolean isFile) {
@@ -157,10 +245,30 @@ public class PdfToTextConverter {
             }
 
             PrintWriter out = new PrintWriter(fileName.replace(".pdf", ".txt"), "UTF-8");
+            
+             // structures used for extraction
+            Map<Float, Integer> fontSizes = new HashMap<>();
+            Map<String, Integer> fontStats = new HashMap<>();
 
             parser.parse();
             cosDoc = parser.getDocument();
-            pdfStripper = new PDFTextStripper();
+            pdfStripper = new PDFTextStripper() {
+                @Override
+                protected void processTextPosition(TextPosition text) {
+                    String fontName = text.getFont().getName();
+                    float fontSize = text.getFontSize();
+                    if (!fontStats.containsKey(fontName)) {
+                        fontStats.put(fontName, 1);
+                    } else {
+                        fontStats.put(fontName, fontStats.get(fontName) + 1);
+                    }
+                    if (!fontSizes.containsKey(fontSize)) {
+                        fontSizes.put(fontSize, 1);
+                    } else {
+                        fontSizes.put(fontSize, fontSizes.get(fontSize) + 1);
+                    }
+                }
+            };
             pdfStripper.setLineSeparator(" ");
             pdfStripper.setParagraphEnd("\n");
             pdDoc = new PDDocument(cosDoc);
@@ -225,9 +333,133 @@ public class PdfToTextConverter {
             this.colors = stripper.getCharsPerColor().size();
 
             parsedText = pdfStripper.getText(pdDoc);
+            out.write(parsedText);
+            out.close();
+
+            
+            Iterator<String> it = fontStats.keySet().iterator();
+            Map<String, Integer> simpleFonts = new HashMap<>();
+           
+            int totalCharacters = 0, bold = 0, italic = 0, boldItalic = 0;
+            
+            while (it.hasNext()) {
+                String fontKey = it.next();
+                String fontType;
+ 
+                // Parsing fontNames which contain Bold, Italic in name and
+                // adding the number of chars to the actual total
+                if (fontKey.contains("+")) {
+                    if (fontKey.contains("-")) {
+                        if (fontKey.toLowerCase().contains("bold")) {
+                            fontType = fontKey.substring(fontKey.indexOf("+") + 1, fontKey.indexOf("-"))
+                                    + fontKey.substring(fontKey.lastIndexOf("d") + 1);
+                            // System.out.println("fontType1.0: " + fontType);
+                        } else if (fontKey.toLowerCase().contains("italic")) {
+                            fontType = fontKey.substring(fontKey.indexOf("+") + 1, fontKey.indexOf("-"))
+                                    + fontKey.substring(fontKey.lastIndexOf("c") + 1);
+                            // System.out.println("fontType1.1: " + fontType);
+                        } else {
+                            fontType = fontKey.substring(fontKey.indexOf("+") + 1, fontKey.indexOf("-"));
+                        }
+                    } else if (fontKey.contains(",")) {
+                        fontType = fontKey.substring(fontKey.indexOf("+") + 1, fontKey.indexOf(","));
+                        // System.out.println("fontType2: " + fontType);
+                    } else {
+                        fontType = fontKey.substring(fontKey.indexOf("+") + 1);
+                        // System.out.println("fontType3: " + fontType);
+                    }
+                } else {
+                    if (fontKey.contains("-")) {
+                        if (fontKey.toLowerCase().contains("bold")) {
+                            fontType = fontKey.substring(0, fontKey.indexOf("-"))
+                                    + fontKey.substring(fontKey.lastIndexOf("d") + 1);
+                            // System.out.println("fontType4.0: " + fontType);
+                        } else if (fontKey.toLowerCase().contains("italic")) {
+                            fontType = fontKey.substring(0, fontKey.indexOf("-"))
+                                    + fontKey.substring(fontKey.lastIndexOf("c") + 1);
+                            // System.out.println("fontType4.1: " + fontType);
+                        } else {
+                            fontType = fontKey.substring(0, fontKey.indexOf("-"));
+                        }
+                    } else if (fontKey.contains(",")) {
+                        fontType = fontKey.substring(0, fontKey.indexOf(","));
+                        // System.out.println("fontType5: " + fontType);
+                    } else {
+                        fontType = fontKey;
+                        // System.out.println("fontType6: " + fontKey);
+                    }
+                }
+ 
+                // System.out.println("Remastered " + fontKey.toLowerCase());
+                if (simpleFonts.containsKey(fontType)) {
+                    // System.out.println("The Value: " +
+                    // simpleFonts.get(fontType) + " " +
+                    // fontStats.get(fontKey));
+                    // fontStats.put(fontKey, simpleFonts.get(fontType) +
+                    // fontStats.get(fontKey));
+                    simpleFonts.put(fontType, simpleFonts.get(fontType) + fontStats.get(fontKey));
+                } else {
+                    simpleFonts.put(fontType, fontStats.get(fontKey));
+                }
+ 
+                if (fontKey.toLowerCase().contains("bolditalic")) {
+                    // System.out.println("BOLDITALIC Style: " + fontKey + ".
+                    // And number of chars: " + fontStats.get(fontKey));
+                    boldItalic += fontStats.get(fontKey);
+                } else if (fontKey.toLowerCase().contains("bold")) {
+                    // System.out.println("BOLD Style: " + fontKey + ". And
+                    // number of chars: " + fontStats.get(fontKey));
+                    bold += fontStats.get(fontKey);
+                } else if (fontKey.toLowerCase().contains("italic")) {
+                    // System.out.println("ITALIC Style: " + fontKey + ". And
+                    // number of chars: " + fontStats.get(fontKey));
+                    italic += fontStats.get(fontKey);
+                }
+                totalCharacters += fontStats.get(fontKey);
+            }
+            
+            Iterator<String> fit = simpleFonts.keySet().iterator();
+            while (fit.hasNext()) {
+                String ffontKey = fit.next();
+                System.out.println("font: " + ffontKey + ", and number of chars: " + simpleFonts.get(ffontKey));
+ 
+            }
+            
+            this.setFontTypes(fontStats.size());
+            this.setFontSizes(fontSizes.size());
+            logger.info("*****Styles*****");
+            logger.info("Total: " + totalCharacters + " characters");
+            this.setTotalCharacters(totalCharacters);
+            logger.info("Bold: " + bold + " characters");
+            this.setBoldCharacters(bold);
+            logger.info("Italic: " + italic + " characters");
+            this.setItalicCharacters(italic);
+            logger.info("BoldItalic: " + boldItalic + " characters");
+            this.setBoldItalicCharacters(boldItalic);
+            logger.info("How many fonts did I find: " + simpleFonts.size());
+            this.setFontTypesSimple(simpleFonts.size());
+            
+            // Sort FontSizes
+            logger.info("\n*****FontSizes*****");
+            
+            if (fontSizes.size() > 0) {
+                Collections.max(fontSizes.keySet());
+                logger.info("MaxFont: " + Collections.max(fontSizes.keySet()));
+                this.setMaxFontSize(Collections.max(fontSizes.keySet()));
+                logger.info("MinFont: " + Collections.min(fontSizes.keySet()));
+                this.setMinFontSize(Collections.min(fontSizes.keySet()));
+            }
+            else {
+                logger.info("MaxFont: " + "N/A");
+                this.setMaxFontSize(new Float(0.0));
+                logger.info("MinFont: " + "N/A");
+                this.setMinFontSize(new Float(0.0));
+            }          
+            
+            
             // replace all single \n's with space; multiple \ns means new paragraph
             // OLD method - should be replaced
-            parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
+            //parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
             // OLD method ends here
             
             // NEW method
@@ -270,10 +502,7 @@ public class PdfToTextConverter {
 				}
 			}*/
             // debug purposes
-            out.write(parsedText);
-
-            out.close();
-
+            
             pdDoc.close();
 
         } catch (IOException e) {
