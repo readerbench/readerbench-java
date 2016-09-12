@@ -67,7 +67,8 @@ public class DoubleStatistics extends DoubleSummaryStatistics {
         long count = getCount();
         double _sumOfSquare = getSumOfSquare();
         double average = getAverage();
-        return count > 1 ? Math.sqrt((_sumOfSquare - count * Math.pow(average, 2)) / (count - 1)) : orElse;
+        if (count == 0) return orElse;
+        return count > 1 ? Math.sqrt((_sumOfSquare - count * Math.pow(average, 2)) / (count - 1)) : 0.;
     }
 
     public static Collector<Double, ?, DoubleStatistics> collector() {
