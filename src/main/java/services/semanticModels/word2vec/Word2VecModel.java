@@ -42,6 +42,7 @@ import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import org.openide.util.Exceptions;
 import services.commons.VectorAlgebra;
 
@@ -63,10 +64,12 @@ public class Word2VecModel implements ISemanticModel {
         this.language = language;
         this.path = path;
         this.wordVectors = new TreeMap<>();
-        word2vec.vocab().words().stream().map(w -> new Word(w, w, Stemmer.stemWord(w, language), null, null, language)).collect(Collectors.toSet())
-                .stream().forEach((w) -> {
-                    wordVectors.put(w, word2vec.getWordVector(w.getLemma()));
-                });
+        word2vec.vocab().words().stream()
+                .map(w -> new Word(w, w, Stemmer.stemWord(w, language), null, null, language))
+                .distinct()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        w -> word2vec.getWordVector(w.getLemma())));
     }
 
     public static Word2Vec loadWord2Vec(String path) {
