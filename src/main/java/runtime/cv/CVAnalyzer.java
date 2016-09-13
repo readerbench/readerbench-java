@@ -361,8 +361,8 @@ public class CVAnalyzer {
         hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
         hm.put("lda", "resources/config/FR/LDA/Le_Monde");
         hm.put("lang", "French");
-        hm.put("postagging", "false");
-        hm.put("dialogism", "false");
+        hm.put("postagging", "true");
+        hm.put("dialogism", "true");
         hm.put("threshold", "0.3");
         return hm;
     }
