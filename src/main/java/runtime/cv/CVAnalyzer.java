@@ -33,6 +33,7 @@ import data.Lang;
 import data.sentiment.SentimentValence;
 import java.io.IOException;
 import java.util.HashMap;
+import org.junit.Test;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
@@ -354,11 +355,8 @@ public class CVAnalyzer {
         }
 
     }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-        ReaderBenchServer.initializeDB();
-        
+    
+    private static Map<String, String> loadDefaultParameters() {
         Map<String, String> hm = new HashMap<>();
         hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
         hm.put("lda", "resources/config/FR/LDA/Le_Monde");
@@ -366,10 +364,26 @@ public class CVAnalyzer {
         hm.put("postagging", "false");
         hm.put("dialogism", "false");
         hm.put("threshold", "0.3");
+        return hm;
+    }
 
-        CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH_SAMPLE, hm);
-        //CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH, hm);
-        cvAnalyzerSample.process();
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
+        ReaderBenchServer.initializeDB();
+             
+        Map<String, String> hm = loadDefaultParameters();
+        CVAnalyzer cvAnalyzer = new CVAnalyzer(CV_PATH, hm);
+        cvAnalyzer.process();
+    }
+    
+    @Test
+    public static void cvSampleTest() {
+        BasicConfigurator.configure();
+        ReaderBenchServer.initializeDB();
+        
+        Map<String, String> hm = loadDefaultParameters();
+        CVAnalyzer cvAnalyzer = new CVAnalyzer(CV_PATH_SAMPLE, hm);
+        cvAnalyzer.process();
     }
 
 }
