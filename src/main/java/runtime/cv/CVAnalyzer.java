@@ -367,8 +367,8 @@ public class CVAnalyzer {
         hm.put("dialogism", "false");
         hm.put("threshold", "0.3");
 
-        //CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH_SAMPLE, hm);
-        CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH, hm);
+        CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH_SAMPLE, hm);
+        //CVAnalyzer cvAnalyzerSample = new CVAnalyzer(CV_PATH, hm);
         cvAnalyzerSample.process();
     }
 

@@ -267,6 +267,7 @@ public class PdfToTextConverter {
                     } else {
                         fontSizes.put(fontSize, fontSizes.get(fontSize) + 1);
                     }
+                    super.processTextPosition(text);
                 }
             };
             pdfStripper.setLineSeparator(" ");
