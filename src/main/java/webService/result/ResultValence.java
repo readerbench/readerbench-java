@@ -15,12 +15,10 @@
  */
 package webService.result;
 
-import java.util.List;
-
 public class ResultValence implements Comparable<ResultValence> {
 
 	private String content;
-	private double score;
+	private final double score;
 
 	public ResultValence(String content, double score) {
 		super();

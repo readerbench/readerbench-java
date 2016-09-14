@@ -26,6 +26,8 @@ import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.sentiment.SentimentValence;
+import java.util.Collections;
+import org.apache.poi.ss.formula.CollaboratingWorkbooksEnvironment;
 import services.commons.Formatting;
 import webService.ReaderBenchServer;
 import webService.result.ResultSentiment;
@@ -38,20 +40,14 @@ public class SentimentAnalysis {
 	/**
 	 * Get sentiment values for the entire document and for each paragraph
 	 *
-	 * @param query
+	 * @param queryDoc The document to be analyzed
 	 * @return List of sentiment values per entity
 	 */
 	public static List<ResultSentiment> getSentiment(AbstractDocument queryDoc) {
-
-		List<ResultValence> results = new ArrayList<ResultValence>();
-		List<ResultSentiment> resultsSentiments = new ArrayList<ResultSentiment>();
+		List<ResultSentiment> resultsSentiments = new ArrayList<>();
 
 		logger.info("Starting building sentiments...");
-		// results.add(new Result("Document",
-		// Formatting.formatNumber(queryDoc.getSentimentEntity().getAggregatedValue())));
 		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-		// logger.info("There are " + rageSentimentsValues.size() + " rage
-		// setiments.");
 		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
 		List<ResultValence> localResults = new ArrayList<>();
 		while (it.hasNext()) {
@@ -63,57 +59,39 @@ public class SentimentAnalysis {
 				Formatting.formatNumber(sentimentValue)
 			));
 		}
+        Collections.sort(localResults);
 
-		List<ResultSentiment> blockSentiments = new ArrayList<ResultSentiment>();
-		
+		List<ResultSentiment> blockSentiments = new ArrayList<>();		
 		for (Block b : queryDoc.getBlocks()) {
-			/*
-			 * results.add(new Result("Paragraph " + b.getIndex(),
-			 * Formatting.formatNumber(b.getSentimentEntity().getAggregatedValue
-			 * ())));
-			 */
-
 			rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
 			it = rageSentimentsValues.entrySet().iterator();
-			localResults = new ArrayList<ResultValence>();
+			localResults = new ArrayList<>();
 			while (it.hasNext()) {
 				Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 				SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-				Double sentimentValue = (Double) pair.getValue();
 				localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-						Formatting.formatNumber(sentimentValue)));
+						Formatting.formatNumber(pair.getValue())));
 			}
+            Collections.sort(localResults);
 
-			List<ResultSentiment> sentencesSentiments = new ArrayList<ResultSentiment>();
-			
+			List<ResultSentiment> sentencesSentiments = new ArrayList<>();
 			for (Sentence s : b.getSentences()) {
-				/*
-				 * results.add(new Result("Paragraph " + b.getIndex() +
-				 * " / Sentence " + s.getIndex(),
-				 * Formatting.formatNumber(s.getSentimentEntity().
-				 * getAggregatedValue())));
-				 */
-
 				rageSentimentsValues = s.getSentimentEntity().getAggregatedValue();
 				it = rageSentimentsValues.entrySet().iterator();
-				localResults = new ArrayList<ResultValence>();
+				localResults = new ArrayList<>();
 				while (it.hasNext()) {
 					Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
 					SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-					Double sentimentValue = (Double) pair.getValue();
 					localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-							Formatting.formatNumber(sentimentValue)));
-				}
-				
-				sentencesSentiments.add(new ResultSentiment("\t\tSentence " + s.getIndex(), localResults, null));
+							Formatting.formatNumber(pair.getValue())));
+                }
+                Collections.sort(localResults);
+				sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, null));
 			}
-			
-			blockSentiments.add(new ResultSentiment("\tParagraph " + b.getIndex(), localResults, sentencesSentiments));
+			blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments));
 		}
-		
 		resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments));
 
 		return resultsSentiments;
 	}
-	
 }

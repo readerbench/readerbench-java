@@ -35,7 +35,6 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
