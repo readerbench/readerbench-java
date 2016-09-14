@@ -19,7 +19,7 @@ import data.AbstractDocument;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import utils.DoubleStatistics;
+import services.commons.DoubleStatistics;
 
 /**
  *

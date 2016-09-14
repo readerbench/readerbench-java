@@ -220,10 +220,6 @@
             <version>${coreNLP.version}</version>
             <classifier>models-german</classifier>
         </dependency>
-        <!--<dependency> <groupId>edu.stanford.nlp</groupId> <artifactId>stanford-corenlp-caseless</artifactId> 
-        <version>3.5.2</version> </dependency> -->
-        <!--<dependency> <groupId>edu.stanford.nlp</groupId> <artifactId>stanford-parser</artifactId> 
-        <version>3.5.2</version> <classifier>models</classifier> </dependency> -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
@@ -350,12 +346,6 @@
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
             <version>1.1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>canova-api</artifactId>
-            <version>0.0.0.14</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.deeplearning4j</groupId>
