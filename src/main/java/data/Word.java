@@ -78,7 +78,7 @@ public class Word implements Comparable<Word>, Serializable {
     }
 
     private void loadSentimentEntity() {
-        data.pojo.Word word = WordDAO.getInstance().findByLabel(text, language);
+        data.pojo.Word word = WordDAO.getInstance().findByLabel(lemma, language);
         if (word == null) {
             return; // empty sentiment entity - no info on the current word
         }
@@ -87,9 +87,6 @@ public class Word implements Comparable<Word>, Serializable {
             return;
         }
         sentiment = new SentimentEntity();
-//        if (se.getEntityXValenceList() == null) {
-//            se.setEntityXValenceList(EntityXValenceDAO.getInstance().findBySentimentEntity(se));
-//        }
         se.getEntityXValenceList().stream().forEach((exv) -> {
             sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
         });
@@ -359,5 +356,4 @@ public class Word implements Comparable<Word>, Serializable {
     public void setSentiment(SentimentEntity sentimentEntity) {
         this.sentiment = sentimentEntity;
     }
-
 }
