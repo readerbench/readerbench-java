@@ -27,9 +27,7 @@ import data.Block;
 import data.Sentence;
 import data.sentiment.SentimentValence;
 import java.util.Collections;
-import org.apache.poi.ss.formula.CollaboratingWorkbooksEnvironment;
 import services.commons.Formatting;
-import webService.ReaderBenchServer;
 import webService.result.ResultSentiment;
 import webService.result.ResultValence;
 

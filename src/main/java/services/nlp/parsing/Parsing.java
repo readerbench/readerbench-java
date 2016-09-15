@@ -296,7 +296,7 @@ public abstract class Parsing {
                 tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
                 // Stanford Valence
-                int score = RNNCoreAnnotations.getPredictedClass(tree);
+                int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
                 se.add(new data.sentiment.SentimentValence(10000, "Stanford", "STANFORD", false), score);
                 s.setSentimentEntity(se);
             }

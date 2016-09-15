@@ -54,8 +54,7 @@ public class CVAnalyzer {
     private static final String CV_PATH = "resources/in/cv_new/cv_analyse/";
     private static final String STATS_FILE = "global_stats.csv";
 
-    private static final double FAN_THRESHOLD = 5;
-    private static final double FAN_DELTA = 1;
+    public static final double FAN_DELTA = 1;
 
     private static final String KEYWORDS = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
     private static final String IGNORE = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
@@ -101,13 +100,13 @@ public class CVAnalyzer {
         sb.append("CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page,")
                 .append("font types,avg font types per page,simple font types,simple font types per page,font sizes,avg font sizes per page,min font size,max font size,bold characters,avg bold characters per page,bold chars by total chars,italic characters,italic characters per pace,italic chars by total chars,bold italic characters,bold italic characters per page,bold italic chars by total chars,")
                 .append("positive words (FAN >= ")
-                .append(FAN_THRESHOLD + FAN_DELTA)
+                .append(FAN_DELTA)
                 .append("),pos words percentage," + "negative words (FAN <= ")
-                .append(FAN_THRESHOLD - FAN_DELTA)
+                .append(-FAN_DELTA)
                 .append("),neg words percentage," + "neutral words (FAN > ")
-                .append(FAN_THRESHOLD - FAN_DELTA)
+                .append(-FAN_DELTA)
                 .append(" & FAN < ")
-                .append(FAN_THRESHOLD + FAN_DELTA)
+                .append(FAN_DELTA)
                 .append("),neutral words percentage,")
                 .append("FAN weighted average,");
 
@@ -376,7 +375,7 @@ public class CVAnalyzer {
 
         hm.put("text", cvContent);
         ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, FAN_THRESHOLD, FAN_DELTA);
+                hm, FAN_DELTA);
 
         return result;
     }

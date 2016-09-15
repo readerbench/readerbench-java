@@ -34,8 +34,6 @@ public class SentimentValence {
 	
 	private static final Map<String, SentimentValence> valenceMap;
     private static final List<SentimentValence> valences = new ArrayList<>();
-    public static final Map<SentimentValence, Double> maxValues = new HashMap<>();
-    public static final Map<SentimentValence, Double> minValues = new HashMap<>();
     
 	static {
 		Map<String, SentimentValence> valenceMaplocal = new HashMap<>();
@@ -46,21 +44,7 @@ public class SentimentValence {
 			valenceMaplocal.put(v.getIndexLabel(), sv);
 		}
 		valenceMap = Collections.unmodifiableMap(valenceMaplocal);
-        maxValues.put(valenceMap.get("scared_RAGE"), 7.7);
-        maxValues.put(valenceMap.get("angry_RAGE"), 8.8);
-        maxValues.put(valenceMap.get("sad_RAGE"), 16.9);
-        maxValues.put(valenceMap.get("happy_RAGE"), 20.8);
-        maxValues.put(valenceMap.get("excited_RAGE"), 8.7);
-        maxValues.put(valenceMap.get("tender_RAGE"), 10.8);
-        
-        minValues.put(valenceMap.get("scared_RAGE"), -3.2);
-        minValues.put(valenceMap.get("angry_RAGE"), -7.1);
-        minValues.put(valenceMap.get("sad_RAGE"), -7.7);
-        minValues.put(valenceMap.get("happy_RAGE"), -13.6);
-        minValues.put(valenceMap.get("excited_RAGE"), -3.3);
-        minValues.put(valenceMap.get("tender_RAGE"), -3.6);
-        
-	}
+    }
 	
 	private Integer id;
 	private String name;

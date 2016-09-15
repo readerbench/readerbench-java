@@ -15,9 +15,11 @@
  */
 package data.sentiment;
 
+import edu.stanford.nlp.math.SloppyMath;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 
@@ -136,9 +138,8 @@ public class SentimentEntity {
      * @return aggregated score of sentiments
      */
     public Map<SentimentValence, Double> getAggregatedValue() {
-        Map<SentimentValence, Double> rageSentimentsValues = new HashMap<SentimentValence, Double>();
+        Map<SentimentValence, Double> rageSentimentsValues = new HashMap<>();
         Iterator<Map.Entry<SentimentValence, Double>> itRageSentiments = sentiments.entrySet().iterator();
-        logger.info("There are " + sentiments.size() + " sentiments in my sentiment entity object.");
         // iterate all rage sentiments
         while (itRageSentiments.hasNext()) {
             Map.Entry<SentimentValence, Double> pairRage = (Map.Entry<SentimentValence, Double>) itRageSentiments
@@ -150,7 +151,7 @@ public class SentimentEntity {
                     Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>) itPrimarySentiments
                             .next();
                     SentimentValence primarySentimentValence = (SentimentValence) pairPrimary.getKey();
-                    Double primarySentimentValue = (Double) pairPrimary.getValue();
+                    Double primarySentimentValue = pairPrimary.getValue();
                     if (!primarySentimentValence.getRage()) {
                         Double rageValence = rageSentimentsValues.get(rageSentimentValence);
                         Double weight = SentimentWeights.getSentimentsWeight(primarySentimentValence.getIndexLabel(),
@@ -165,17 +166,19 @@ public class SentimentEntity {
     }
 
     public static Map<SentimentValence, Double> normalizeValues(Map<SentimentValence, Double> valences) {
-        //double max = valences.values().stream().mapToDouble(d -> d).max().getAsDouble();
-        //double min = valences.values().stream().mapToDouble(d -> d).min().getAsDouble();
         Map<SentimentValence, Double> result = new HashMap<>();
         valences.entrySet().stream().forEach(e -> {
-            double min = SentimentValence.minValues.get(e.getKey()) * 0.3; //don't ask why
-            double max = SentimentValence.maxValues.get(e.getKey()) * 0.3;
-            result.put(e.getKey(), (e.getValue() - min) / (max - min));
+            result.put(e.getKey(), Math.exp(e.getValue()));
         });
-        return result;
+        double sum = result.entrySet().stream()
+                .mapToDouble(e -> e.getValue())
+                .sum();
+        return result.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey, 
+                e -> e.getValue() / sum));
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
