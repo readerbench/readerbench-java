@@ -31,12 +31,14 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.discourse.topicMining.TopicModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import webService.ReaderBenchServer;
 
 /**
  *
@@ -47,13 +49,13 @@ public class TopicRankings {
     static final Logger LOGGER = Logger.getLogger(TopicRankings.class);
     public static final int NO_TOP_KEYWORDS = 30;
 
-    private String processingPath;
-    private LSA lsa;
-    private LDA lda;
-    private Lang lang;
-    private boolean usePOSTagging;
-    private boolean computeDialogism;
-    private boolean meta;
+    private final String processingPath;
+    private final LSA lsa;
+    private final LDA lda;
+    private final Lang lang;
+    private final boolean usePOSTagging;
+    private final boolean computeDialogism;
+    private final boolean meta;
 
     public TopicRankings(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
         this.processingPath = processingPath;
@@ -175,6 +177,9 @@ public class TopicRankings {
     }
 
     public static void main(String[] args) {
+        BasicConfigurator.configure();
+        ReaderBenchServer.initializeDB();
+
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
         TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", lsa, lda, Lang.fr, true, true, false);
