@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 
 import data.discourse.Topic;
 import data.sentiment.SentimentEntity;
+import java.util.ArrayList;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.word2vec.Word2VecModel;
@@ -74,8 +75,8 @@ public abstract class AnalysisElement implements Serializable {
         this.alternateText = "";
         this.lsaVector = new double[LSA.K];
         this.wordOccurences = new TreeMap<>();
-        this.topics = new LinkedList<>();
-        this.inferredConcepts = new LinkedList<>();
+        this.topics = new ArrayList<>();
+        this.inferredConcepts = new ArrayList<>();
         this.sentimentEntity = new SentimentEntity();
     }
 
