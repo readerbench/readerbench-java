@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Set;
 
 import data.Word;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * 
@@ -31,8 +34,8 @@ import data.Word;
 public class LexicalChain implements Serializable {
 	private static final long serialVersionUID = -4724528858130546429L;
 
-	private Set<LexicalChainLink> links = new HashSet<LexicalChainLink>();
-	private HashMap<LexicalChainLink, HashMap<LexicalChainLink, Double>> distanceMap = new HashMap<LexicalChainLink, HashMap<LexicalChainLink, Double>>();
+	private final Set<LexicalChainLink> links = new HashSet<>();
+	private final HashMap<LexicalChainLink, HashMap<LexicalChainLink, Double>> distanceMap = new HashMap<>();
 
 	public boolean addLink(LexicalChainLink link) {
 		link.setLexicalChain(this);
@@ -109,17 +112,19 @@ public class LexicalChain implements Serializable {
 		distanceMap.get(link1).put(link2, distance);
 	}
 
+    @Override
 	public String toString() {
-		String s = "(";
-		for (LexicalChainLink link : links) {
-			s += link.getWord().getText() + "-"
-					+ link.getWord().getBlockIndex() + "/"
-					+ link.getWord().getUtteranceIndex() + ",";
-		}
-		if (links.size() > 0)
-			s = s.substring(0, s.length() - 1);
-		s += ")";
-		return s;
+        Map<String, Integer> count = new HashMap<>();
+        for (LexicalChainLink link : links) {
+            String word = link.getWord().getLemma();
+            if (!count.containsKey(word)) count.put(word, 1);
+            else count.put(word, count.get(word) + 1);
+        }
+        List<String> entries = count.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue() - e1.getValue())
+                .map(e -> e.getKey() + "(" + e.getValue() + ")")
+                .collect(Collectors.toList());
+        return "(" + StringUtils.join(entries, ", ") + ")";
 	}
 
 	@Override

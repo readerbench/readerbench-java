@@ -29,16 +29,16 @@ public class LexicalChainLink implements Serializable {
 
     private static final long serialVersionUID = 63732297667987014L;
 
-    private Word word;
-    private String senseId;
+    private final Word word;
+    private final String senseId;
     private LexicalChain lexicalChain;
-    private HashMap<LexicalChainLink, Double> connections;
+    private final HashMap<LexicalChainLink, Double> connections;
     private double value = 0;
 
     public LexicalChainLink(Word word, String senseId) {
         this.word = word;
         this.senseId = senseId;
-        this.connections = new HashMap<LexicalChainLink, Double>();
+        this.connections = new HashMap<>();
     }
 
     public void addConnection(LexicalChainLink link, double weight) {
@@ -81,6 +81,7 @@ public class LexicalChainLink implements Serializable {
         this.lexicalChain = lexicalChain;
     }
 
+    @Override
     public String toString() {
         String s = "";
         s += getWord().getText() + "[" + getSenseId() + "]: ";

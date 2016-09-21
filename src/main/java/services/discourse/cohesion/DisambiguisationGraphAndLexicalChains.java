@@ -137,7 +137,7 @@ public class DisambiguisationGraphAndLexicalChains {
             // create a new chain
             LexicalChain chain = new LexicalChain();
             // create a queue
-            LinkedList<LexicalChainLink> q = new LinkedList<LexicalChainLink>();
+            LinkedList<LexicalChainLink> q = new LinkedList<>();
 
             // add all links for this sense to the chain
             for (LexicalChainLink link : listLinks) {

@@ -24,6 +24,9 @@ import java.util.TreeMap;
 import data.Word;
 import data.lexicalChains.LexicalChain;
 import data.sentiment.SentimentEntity;
+import java.util.HashMap;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
@@ -253,13 +256,17 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     }
 
     public String toStringAllWords() {
-        String s = "(";
-        s = words.stream().map((w) -> w.getText() + "-" + w.getBlockIndex() + "/" + w.getUtteranceIndex() + ",").reduce(s, String::concat);
-        if (words.size() > 0) {
-            s = s.substring(0, s.length() - 1);
+        Map<String, Integer> count = new HashMap<>();
+        for (Word word : words) {
+            String lemma = word.getLemma();
+            if (!count.containsKey(lemma)) count.put(lemma, 1);
+            else count.put(lemma, count.get(lemma) + 1);
         }
-        s += ")";
-        return s;
+        List<String> entries = count.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue() - e1.getValue())
+                .map(e -> e.getKey() + "(" + e.getValue() + ")")
+                .collect(Collectors.toList());
+        return "(" + StringUtils.join(entries, ", ") + ")";
     }
 
     public double[] getSentenceDistribution() {
