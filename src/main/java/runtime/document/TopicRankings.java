@@ -15,6 +15,7 @@
  */
 package runtime.document;
 
+import data.AbstractDocument;
 import data.Lang;
 import data.Word;
 import data.discourse.Topic;
@@ -24,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,41 +105,52 @@ public class TopicRankings {
         return keywordOccurrences;
     }
 
-    public void processTexts() {
+    public void processTexts(boolean useSerialized) {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
             throw new RuntimeException("Inexistent Folder: " + dir.getPath());
         }
 
-        File[] files = dir.listFiles((File pathname) -> {
-            return pathname.getName().toLowerCase().endsWith(".xml");
-        });
-
         List<Document> documents = new ArrayList<>();
-        for (File file : files) {
-            LOGGER.info("Processing " + file.getName() + " file");
-            // Create file
 
-            Document d;
-            try {
-                if (meta) {
-                    d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
-                } else {
-                    d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
-                }
-                d.computeAll(computeDialogism, null, null);
+        if (useSerialized) {
+            File[] files = dir.listFiles((File pathname) -> {
+                return pathname.getName().toLowerCase().endsWith(".ser");
+            });
+
+            for (File file : files) {
+                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
                 documents.add(d);
-                d.saveSerializedDocument();
-            } catch (Exception e) {
-                LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
-                Exceptions.printStackTrace(e);
+            }
+        } else {
+            File[] files = dir.listFiles((File pathname) -> {
+                return pathname.getName().toLowerCase().endsWith(".xml");
+            });
+
+            for (File file : files) {
+                LOGGER.info("Processing " + file.getName() + " file");
+                // Create file
+
+                Document d;
+                try {
+                    if (meta) {
+                        d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
+                    } else {
+                        d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
+                    }
+                    d.computeAll(computeDialogism, null, null);
+                    documents.add(d);
+                    d.saveSerializedDocument();
+                } catch (Exception e) {
+                    LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
+                    Exceptions.printStackTrace(e);
+                }
             }
         }
 
         //determing joint keywords
         Set<Word> keywords = getCommonKeywords(documents);
-
         Map<Document, Map<Word, Double>> docRelevance = new TreeMap<>();
         Map<Document, Map<Word, Integer>> docIndex = new TreeMap<>();
         for (Document d : documents) {
@@ -149,14 +162,14 @@ public class TopicRankings {
                 BufferedWriter outIndex = new BufferedWriter(new FileWriter(processingPath + "/index.csv", true));) {
             StringBuilder header = new StringBuilder("Filename");
             documents.stream().forEach((d) -> {
-                header.append(FilenameUtils.removeExtension(d.getPath()));
+                header.append(",").append(FilenameUtils.removeExtension(Paths.get(d.getPath()).getFileName().toString()));
             });
             outRelevance.write(header.toString());
             outIndex.write(header.toString());
 
             for (Word w : keywords) {
-                StringBuilder lineRelevance = new StringBuilder("\n" + w.toString());
-                StringBuilder lineIndex = new StringBuilder("\n" + w.toString());
+                StringBuilder lineRelevance = new StringBuilder("\n" + w.getExtendedLemma());
+                StringBuilder lineIndex = new StringBuilder("\n" + w.getExtendedLemma());
 
                 for (Document d : documents) {
                     lineRelevance.append(",");
@@ -171,7 +184,7 @@ public class TopicRankings {
             }
 
         } catch (IOException ex) {
-            LOGGER.error("Runtime error while analyzing selected folder");
+            LOGGER.error("Runtime error while analyzing selected folder ...");
             Exceptions.printStackTrace(ex);
         }
     }
@@ -183,6 +196,6 @@ public class TopicRankings {
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
         TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", lsa, lda, Lang.fr, true, true, false);
-        tr.processTexts();
+        tr.processTexts(true);
     }
 }
