@@ -185,11 +185,20 @@ public class OntologySupport {
         return visited;
     }
 
+    public static boolean areDirectHypernyms(String s1, String s2, Lang language) {
+        return getDictionary(language).hyperRelations.getOrDefault(s2, new ArrayList<>()).stream()
+                .anyMatch(s -> s.equals(s1));
+    }
+    
     public static boolean areHypernym(String s1, String s2, Lang language) {
         return getAllHypernyms(s2, language).contains(s1);
 
     }
 
+    public static boolean areDirectHyponyms(String s1, String s2, Lang language) {
+        return areDirectHypernyms(s2, s1, language);
+    }
+    
     public static boolean areHyponym(String s1, String s2, Lang language) {
         return getAllHypernyms(s1, language).contains(s2);
 
@@ -290,6 +299,10 @@ public class OntologySupport {
 
     public static String getFirstSense(Word word) {
         return getDictionary(word).getFirstSynsetString(word.getLemma());
+    }
+    
+    public static Set<String> getRootSenses(Lang lang){
+        return new HashSet<>(getDictionary(lang).getTopNodes());
     }
 
     public static void correctFiles() {

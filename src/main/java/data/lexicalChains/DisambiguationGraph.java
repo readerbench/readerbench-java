@@ -55,7 +55,7 @@ public class DisambiguationGraph implements Serializable {
         return null;
     }
 
-    public void addToGraph(String senseId, LexicalChainLink newLink) {
+    public synchronized void addToGraph(String senseId, LexicalChainLink newLink) {
         // build connections between the link and the other nodes in the graph
         buildConnections(newLink);
 
@@ -74,12 +74,12 @@ public class DisambiguationGraph implements Serializable {
             double weight = 0;
             for (LexicalChainLink link : nodes.get(senseId)) {
                 if (!newLink.hasSameWord(link)) {
-                    // determine weight of the connection
+                    // determine weight of the connection)
                     if (OntologySupport.areSynonyms(newLink.getSenseId(), senseId, language)) {
                         weight = getWeightSynonyms(getDistance(newLink, link));
-                    } else if (OntologySupport.areHypernym(newLink.getSenseId(), senseId, language)) {
+                    } else if (OntologySupport.areDirectHypernyms(newLink.getSenseId(), senseId, language)) {
                         weight = getWeightHypernyms(getDistance(newLink, link));
-                    } else if (OntologySupport.areHyponym(newLink.getSenseId(), senseId, language)) {
+                    } else if (OntologySupport.areDirectHyponyms(newLink.getSenseId(), senseId, language)) {
                         weight = getWeightHyponyms(getDistance(newLink, link));
                     } else if (newLink.getWord().getBlockIndex() == link.getWord().getBlockIndex()
                             && OntologySupport.areSiblings(newLink.getSenseId(), senseId, language)) {
@@ -97,7 +97,7 @@ public class DisambiguationGraph implements Serializable {
         }
     }
 
-    public void removeFromGraph(String senseId, LexicalChainLink remLink) {
+    public synchronized void removeFromGraph(String senseId, LexicalChainLink remLink) {
         // remove connections
         removeConnections(remLink);
 
@@ -111,7 +111,7 @@ public class DisambiguationGraph implements Serializable {
         }
     }
 
-    private void removeConnections(LexicalChainLink remLink) {
+    private synchronized void removeConnections(LexicalChainLink remLink) {
         remLink.getConnections().keySet().stream().forEach((link) -> {
             link.removeConnection(remLink);
         });
@@ -198,7 +198,7 @@ public class DisambiguationGraph implements Serializable {
         return LexicalChainDistance.OTHER;
     }
 
-    public List<LexicalChainLink> extractFromGraph(String senseId) {
+    public synchronized List<LexicalChainLink> extractFromGraph(String senseId) {
         if (nodes.isEmpty()) {
             return null;
         }
