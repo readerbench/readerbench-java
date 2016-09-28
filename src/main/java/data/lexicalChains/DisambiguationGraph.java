@@ -44,7 +44,7 @@ public class DisambiguationGraph implements Serializable {
         this.language = language;
     }
 
-    public LexicalChainLink getLink(String senseId, Word word) {
+    public synchronized LexicalChainLink getLink(String senseId, Word word) {
         if (nodes.get(senseId) != null) {
             for (LexicalChainLink link : nodes.get(senseId)) {
                 if (link.getWord() == word) {
