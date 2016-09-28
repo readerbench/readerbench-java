@@ -49,6 +49,8 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
+import java.util.HashMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
 import services.commons.TextPreprocessing;
 import services.nlp.lemmatizer.StaticLemmatizerPOS;
@@ -155,6 +157,7 @@ public abstract class Parsing {
     }
 
     public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging, boolean cleanInput) {
+        Map<BlockTemplate, Annotation> annotations = new HashMap<>();
         try {
             if (!adt.getBlocks().isEmpty()) {
                 for (BlockTemplate blockTmp : adt.getBlocks()) {
@@ -163,8 +166,15 @@ public abstract class Parsing {
                     // extract block text
                     String text = cleanInput ? TextPreprocessing.cleanText(blockTmp.getContent(), lang)
                             : blockTmp.getContent().toLowerCase().replaceAll("\\s+", " ").trim();
-
-					// get block ID
+                    Annotation document = new Annotation(text);
+                    annotations.put(blockTmp, document);
+                }
+                if (usePOSTagging) {
+                    getPipeline().annotate(annotations.values());
+                }
+                for (BlockTemplate blockTmp : adt.getBlocks()) {
+                	String text = annotations.get(blockTmp).toString();
+                    // get block ID
 					int id = 0;
 					try {
 						id = Double.valueOf(blockTmp.getId()).intValue();
@@ -191,13 +201,9 @@ public abstract class Parsing {
 
                     Block b;
                     Annotation document = null;
-
-					if (usePOSTagging) {
-						// create an empty Annotation just with the given text
-						document = new Annotation(text);
-						// run all Annotators on this text
-						getPipeline().annotate(document);
-						// add corresponding block
+                    if (usePOSTagging) {
+                        document = annotations.get(blockTmp);
+                        // create an empty Annotation just with the given text
 						b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
 					} else {
 						b = SimpleParsing.processBlock(d, id, text);
