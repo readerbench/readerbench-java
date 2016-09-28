@@ -32,10 +32,15 @@ import data.Lang;
 import data.complexity.Measurement;
 import data.document.Document;
 import data.document.MetaDocument;
+import java.util.HashMap;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import webService.query.QueryHelper;
+import webService.result.ResultNode;
+import webService.result.ResultTopic;
+import webService.services.ConceptMap;
 
 public class DataGathering {
 
@@ -120,6 +125,35 @@ public class DataGathering {
                     out.write(concat.toString());
                 } catch (IOException ex) {
                     logger.error("Runtime error while initializing measurements.csv file");
+                    Exceptions.printStackTrace(ex);
+                    throw ex;
+                }
+
+                // [Gabi] added for quick concept map generation
+                try (BufferedWriter outConcept = new BufferedWriter(new FileWriter(d.getPath() + "_concepts.csv"))) {
+                    Map<String, String> hm = new HashMap<>();
+                    hm.put("text", d.getProcessedText());
+                    hm.put("lang", "French");
+                    hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
+                    hm.put("lda", "resources/config/FR/LDA/Le_Monde");
+                    hm.put("postagging", "false");
+                    hm.put("dialogism", "false");
+                    hm.put("threshold", "0.3");
+                    ResultTopic resultTopic = ConceptMap.getTopics(
+                            QueryHelper.processQuery(hm),
+                            Double.parseDouble(hm.get("threshold")),
+                            null);
+                    StringBuilder concat = new StringBuilder();
+                    for (ResultNode node : resultTopic.getNodes()) {
+                        concat.append(node.getName());
+                        concat.append(',');
+                        concat.append(node.getValue());
+                        concat.append(',');
+                    }
+                    outConcept.write(concat.toString());
+                    outConcept.close();
+                } catch (IOException ex) {
+                    logger.error("Runtime error while initializing " + d.getPath() + " concept map file");
                     Exceptions.printStackTrace(ex);
                     throw ex;
                 }

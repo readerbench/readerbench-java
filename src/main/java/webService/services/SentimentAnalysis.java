@@ -84,11 +84,11 @@ public class SentimentAnalysis {
 							Formatting.formatNumber(pair.getValue())));
                 }
                 Collections.sort(localResults);
-				sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, null));
+				sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, null, s.getText()));
 			}
-			blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments));
+			blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments, b.getText()));
 		}
-		resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments));
+		resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText()));
 
 		return resultsSentiments;
 	}
