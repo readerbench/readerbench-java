@@ -99,4 +99,8 @@ public class SemanticAuthorDistanceStrategy extends AAuthorDistanceStrategy {
 				lsaSim, ldaSim);
 		return sim;
 	}
+        @Override
+        public AuthorDistanceStrategyType getStrategyType() {
+            return AuthorDistanceStrategyType.SemanticDistance;
+        }
 }

@@ -95,4 +95,8 @@ public class CoAuthorshipDistanceStrategy extends AAuthorDistanceStrategy {
 	public String getStrategyKey() {
 		return "CoAuthorship";
 	}
+        @Override
+        public AuthorDistanceStrategyType getStrategyType() {
+            return AuthorDistanceStrategyType.CoAuthorshipDistance;
+        }
 }

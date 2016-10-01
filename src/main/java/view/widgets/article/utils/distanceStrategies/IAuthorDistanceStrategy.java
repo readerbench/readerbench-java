@@ -27,4 +27,5 @@ public interface IAuthorDistanceStrategy {
 	public double getThreshold();
 	public String getStrategyName();
 	public String getStrategyKey();
+        public AuthorDistanceStrategyType getStrategyType();
 }

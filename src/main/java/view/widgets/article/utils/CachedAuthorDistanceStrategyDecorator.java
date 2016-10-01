@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import data.article.ResearchArticle;
+import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStrategy {
@@ -93,4 +94,8 @@ public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStr
 	public String getStrategyKey() {
 		return this.distanceStrategy.getStrategyKey();
 	}
+        @Override
+        public AuthorDistanceStrategyType getStrategyType() {
+            return this.distanceStrategy.getStrategyType();
+        }
 }

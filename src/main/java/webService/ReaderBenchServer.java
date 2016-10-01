@@ -100,6 +100,9 @@ import webService.services.ConceptMap;
 import webService.services.SentimentAnalysis;
 import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
+import webService.services.lak.TwoModeGraphBuilder;
+import webService.services.lak.result.QueryResultTwoModeGraph;
+import webService.services.lak.result.TwoModeGraph;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
@@ -747,6 +750,23 @@ public class ReaderBenchServer {
             String result = queryResult.convertToJson();
             LOGGER.info("queryResult" + result);
 
+            return result;
+        });
+        
+        Spark.post("/lakCorpus", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            
+            response.type("application/json");
+            String centerUri = (String) json.get("centerUri");
+            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+            graphBuilder.loadGraph(centerUri);
+            TwoModeGraph graph = graphBuilder.getTwoModeGraph();
+            
+            LOGGER.info("no nodes = " + graph.nodeList.size());
+            LOGGER.info("no edges = " + graph.edgeList.size());
+            
+            QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
+            String result = queryResult.convertToJson();
             return result;
         });
     }

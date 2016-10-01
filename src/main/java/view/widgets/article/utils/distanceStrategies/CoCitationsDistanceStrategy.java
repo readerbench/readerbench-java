@@ -69,4 +69,8 @@ public class CoCitationsDistanceStrategy extends AAuthorDistanceStrategy {
 	public String getStrategyKey() {
 		return "CoCitations";
 	}
+        @Override
+        public AuthorDistanceStrategyType getStrategyType() {
+            return AuthorDistanceStrategyType.CoCitationsDistance;
+        }
 }
