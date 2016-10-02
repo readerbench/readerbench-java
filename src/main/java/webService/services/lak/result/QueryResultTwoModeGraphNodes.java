@@ -5,6 +5,7 @@
  */
 package webService.services.lak.result;
 
+import java.util.List;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
 import webService.queryResult.QueryResult;
@@ -13,22 +14,22 @@ import webService.queryResult.QueryResult;
  *
  * @author ionutparaschiv
  */
-public class QueryResultTwoModeGraph extends QueryResult {
+public class QueryResultTwoModeGraphNodes extends QueryResult {
 
     @Path("data")
     @ElementList(inline = true, entry = "result")
-    private TwoModeGraph data;
+    private List<TwoModeGraphNode> data;
 
-    public TwoModeGraph getData() {
+    public List<TwoModeGraphNode> getData() {
         return data;
     }
 
-    public void setData(TwoModeGraph data) {
+    public void setData(List<TwoModeGraphNode> data) {
         this.data = data;
     }
 
-    public QueryResultTwoModeGraph(TwoModeGraph twoModeGraph) {
+    public QueryResultTwoModeGraphNodes(List<TwoModeGraphNode> twoModeGraphNodeList) {
         super();
-        data = twoModeGraph;
+        data = twoModeGraphNodeList;
     }
 }

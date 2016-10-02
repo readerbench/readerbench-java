@@ -35,15 +35,24 @@ public class TwoModeGraphBuilder {
         };
     }
 
-    public void loadGraph(String centerUri) {
+    public TwoModeGraph getGraph(String centerUri) {
+        this.graph = new TwoModeGraph();
         try {
-            this.graph = new TwoModeGraph();
             List<GraphNodeItem> nodeItemList = this.loadAllNodes();
             nodeItemList = this.restrictNodesLinkedToCenter(centerUri, nodeItemList);
             this.loadEdges(nodeItemList);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return this.graph;
+    }
+    
+    public List<TwoModeGraphNode> getAuthorNodes() {
+        List<TwoModeGraphNode> nodeList = new ArrayList<>();
+        this.authorContainer.getAuthorContainers().stream().forEach((author) -> {
+            nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Author, author.getAuthor().getAuthorUri(), author.getAuthor().getAuthorName()));
+        });
+        return nodeList;
     }
 
     private List<GraphNodeItem> loadAllNodes() {
@@ -108,10 +117,6 @@ public class TwoModeGraphBuilder {
                 }
             }
         }
-    }
-
-    public TwoModeGraph getTwoModeGraph() {
-        return this.graph;
     }
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {
