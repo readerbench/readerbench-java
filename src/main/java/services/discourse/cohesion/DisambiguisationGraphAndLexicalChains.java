@@ -80,10 +80,7 @@ public class DisambiguisationGraphAndLexicalChains {
                     for (String senseId : senseIds) {
                         LexicalChainLink link = d.getDisambiguationGraph().getLink(senseId, word);
                         if (link != null) {
-                            double value = d
-                                    .getDisambiguationGraph()
-                                    .getLink(senseId, word)
-                                    .getValue();
+                            double value = link.getValue();
                             if (value > maxValue) {
                                 maxValue = value;
                                 bestSenseId = senseId;

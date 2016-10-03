@@ -22,12 +22,14 @@ public class ResultSentiment {
 	private String content;
 	private List<ResultValence> valences;
 	private List<ResultSentiment> innerObjects;
+    private String text;
 
-	public ResultSentiment(String content, List<ResultValence> valences, List<ResultSentiment> innerObjects) {
+	public ResultSentiment(String content, List<ResultValence> valences, List<ResultSentiment> innerObjects, String text) {
 		super();
 		this.content = content;
 		this.valences = valences;
 		this.innerObjects = innerObjects;
+        this.text = text;
 	}
 
 	public String getContent() {
@@ -41,4 +43,9 @@ public class ResultSentiment {
 	public List<ResultValence> getValences() {
 		return valences;
 	}
+
+    public String getText() {
+        return text;
+    }
+    
 }

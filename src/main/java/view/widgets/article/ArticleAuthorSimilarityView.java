@@ -81,6 +81,8 @@ import data.AbstractDocument;
 import data.Word;
 import data.article.ResearchArticle;
 import data.discourse.Topic;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import view.models.PreviewSketch;
 import view.widgets.article.utils.ArticleContainer;
 import view.widgets.article.utils.ArticleAuthorParameterLogger;
@@ -135,7 +137,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		JLabel lblThreshold = new JLabel("Threshold");
 		lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		sliderThreshold = new JSlider(0, 100, 80);
+		sliderThreshold = new JSlider(0, 100, 90);
 		sliderThreshold.setBackground(Color.WHITE);
 		sliderThreshold.setPaintTicks(true);
 		sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -304,9 +306,21 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		UndirectedGraph graph = graphModel.getUndirectedGraph();
 		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
 		AppearanceModel appearanceModel = appearanceController.getModel();
+                
+                HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel);
+                
+                YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+		layout.setGraphModel(graphModel);
+		layout.initAlgo();
+		layout.resetPropertiesValues();
+		layout.setOptimalDistance(100f);
 
-		HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel);
+		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+			layout.goAlgo();
+		}
+		layout.endAlgo();
 
+		layout.setGraphModel(graphModel);
 		// Get Centrality
 		GraphDistance distance = new GraphDistance();
 		distance.setDirected(true);
@@ -342,18 +356,18 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		}
 		paramLogger.logGraphMeasures(graphMeasures);
 
-		// run ForceAtlas 2 layout
-		ForceAtlas2 layout = new ForceAtlas2(null);
-		layout.setGraphModel(graphModel);
-		layout.resetPropertiesValues();
-
-		layout.setOutboundAttractionDistribution(false);
-		layout.setEdgeWeightInfluence(1.5d);
-		layout.setGravity(10d);
-		layout.setJitterTolerance(.02);
-		layout.setScalingRatio(15.0);
-		layout.initAlgo();
-
+//		// run ForceAtlas 2 layout
+//		ForceAtlas2 layout = new ForceAtlas2(null);
+//		layout.setGraphModel(graphModel);
+//		layout.resetPropertiesValues();
+//
+//		layout.setOutboundAttractionDistribution(false);
+//		layout.setEdgeWeightInfluence(1.5d);
+//		layout.setGravity(10d);
+//		layout.setJitterTolerance(.02);
+//		layout.setScalingRatio(15.0);
+//		layout.initAlgo();
+                
 		// Rank size by centrality
 		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
 		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
@@ -382,7 +396,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		PreviewSketch previewSketch = new PreviewSketch(target);
 		previewController.refreshPreview();
 		previewSketch.resetZoom();
-		if (panelGraph.getComponents().length > 0) {
+                if (panelGraph.getComponents().length > 0) {
 			panelGraph.removeAll();
 			panelGraph.revalidate();
 		}
@@ -391,7 +405,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		logger.info("Saving export...");
 		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
 		try {
-			ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
+			ec.exportFile(new File("resources/out/graph_doc_corpus_view.pdf"));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			return;
@@ -430,7 +444,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				String inDir = "in/LAK_corpus/parsed-documents";
+				String inDir = "resources/in/LAK_corpus/parsed-documents";
 
 				ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
 				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
@@ -450,10 +464,10 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
 
-//				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
+				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
 //				String centerUri = "http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker";
 //				String centerUri = "http://data.linkededucation.org/resource/lak/conference/edm2009/paper/202";
-				String centerUri = null;
+//				String centerUri = null;
 				
 				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger, centerUri);
 				view.setVisible(true);
