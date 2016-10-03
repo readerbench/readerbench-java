@@ -19,30 +19,29 @@ import org.apache.log4j.Logger;
 
 import data.AnalysisElement;
 import data.Word;
-import data.Lang;
 import services.nlp.listOfWords.MapOfWordWeights;
 import services.readingStrategies.PatternMatching;
 
 public class TopicCoverage {
 
-	static Logger logger = Logger.getLogger(PatternMatching.class);
+    static Logger logger = Logger.getLogger(PatternMatching.class);
 
-	// returns the coverage with the predefined topic class
-	public static double coverage(MapOfWordWeights usedMap, AnalysisElement el) {
-		double coverage = 0;
+    // returns the coverage with the predefined topic class
+    public static double coverage(MapOfWordWeights usedMap, AnalysisElement el) {
+        double coverage = 0;
 
-		if (usedMap != null && el != null) {
-			int noOccurrences = 0, totalOccurrences = 0;
-			for (Word w : el.getWordOccurences().keySet()) {
-				totalOccurrences += el.getWordOccurences().get(w);
-				if (usedMap.getWords().containsKey(w.getLemma())) {
-					noOccurrences += usedMap.getWords().get(w.getLemma()) * el.getWordOccurences().get(w);
-				}
-			}
-			if (totalOccurrences != 0) {
-				coverage = ((double) noOccurrences) / totalOccurrences;
-			}
-		}
-		return coverage;
-	}
+        if (usedMap != null && el != null) {
+            int noOccurrences = 0, totalOccurrences = 0;
+            for (Word w : el.getWordOccurences().keySet()) {
+                totalOccurrences += el.getWordOccurences().get(w);
+                if (usedMap.getWords().containsKey(w.getLemma())) {
+                    noOccurrences += usedMap.getWords().get(w.getLemma()) * el.getWordOccurences().get(w);
+                }
+            }
+            if (totalOccurrences != 0) {
+                coverage = ((double) noOccurrences) / totalOccurrences;
+            }
+        }
+        return coverage;
+    }
 }

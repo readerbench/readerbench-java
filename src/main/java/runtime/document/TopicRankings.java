@@ -49,9 +49,9 @@ import webService.ReaderBenchServer;
 public class TopicRankings {
 
     static final Logger LOGGER = Logger.getLogger(TopicRankings.class);
-    public static final int NO_TOP_KEYWORDS = 30;
 
     private final String processingPath;
+    private final int noTopKeyWords;
     private final LSA lsa;
     private final LDA lda;
     private final Lang lang;
@@ -59,8 +59,9 @@ public class TopicRankings {
     private final boolean computeDialogism;
     private final boolean meta;
 
-    public TopicRankings(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
+    public TopicRankings(String processingPath, int noTopKeyWords, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
         this.processingPath = processingPath;
+        this.noTopKeyWords = noTopKeyWords;
         this.lsa = lsa;
         this.lda = lda;
         this.lang = lang;
@@ -69,11 +70,11 @@ public class TopicRankings {
         this.meta = meta;
     }
 
-    public Set<Word> getCommonKeywords(List<Document> documents) {
+    public Set<Word> getTopKeywords(List<Document> documents, int noTopKeyWords) {
         Set<Word> words = new TreeSet<>();
 
         for (Document d : documents) {
-            List<Topic> topics = TopicModeling.getSublist(d.getTopics(), NO_TOP_KEYWORDS, false, false);
+            List<Topic> topics = TopicModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
             for (Topic t : topics) {
                 words.add(t.getWord());
             }
@@ -86,8 +87,11 @@ public class TopicRankings {
 
         List<Topic> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
-            if (keywords.contains(topics.get(i).getWord())) {
-                keywordOccurrences.put(topics.get(i).getWord(), topics.get(i).getRelevance());
+            for (Word keyword : keywords) {
+                //determine identical stem
+                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                    keywordOccurrences.put(topics.get(i).getWord(), topics.get(i).getRelevance());
+                }
             }
         }
         return keywordOccurrences;
@@ -98,8 +102,11 @@ public class TopicRankings {
 
         List<Topic> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
-            if (keywords.contains(topics.get(i).getWord())) {
-                keywordOccurrences.put(topics.get(i).getWord(), i);
+            for (Word keyword : keywords) {
+                //determine identical stem
+                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                    keywordOccurrences.put(topics.get(i).getWord(), i);
+                }
             }
         }
         return keywordOccurrences;
@@ -150,7 +157,7 @@ public class TopicRankings {
         }
 
         //determing joint keywords
-        Set<Word> keywords = getCommonKeywords(documents);
+        Set<Word> keywords = getTopKeywords(documents, noTopKeyWords);
         Map<Document, Map<Word, Double>> docRelevance = new TreeMap<>();
         Map<Document, Map<Word, Integer>> docIndex = new TreeMap<>();
         for (Document d : documents) {
@@ -195,7 +202,7 @@ public class TopicRankings {
 
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
-        TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", lsa, lda, Lang.fr, true, true, false);
+        TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", 30, lsa, lda, Lang.fr, true, true, false);
         tr.processTexts(true);
     }
 }

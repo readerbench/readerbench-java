@@ -35,8 +35,7 @@ import services.semanticModels.LSA.LSA;
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
-    private static final double LSA_SIMILARITY_THRESHOLD = 1.1;
-    private static final double LDA_SIMILARITY_THRESHOLD = 1.1;
+    private static final double SIMILARITY_THRESHOLD = 0.8;
 
     private transient LSA lsa;
     private transient LDA lda;
@@ -78,12 +77,9 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         }
 
         double distLSA = VectorAlgebra.cosineSimilarity(chain1.getLSAVector(), chain2.getLSAVector());
-        if (distLSA >= LSA_SIMILARITY_THRESHOLD) {
-            dist = Math.max(dist, distLSA);
-        }
-
         double distLDA = LDA.getSimilarity(chain1.getLDAProbDistribution(), chain2.getLDAProbDistribution());
-        if (distLDA >= LDA_SIMILARITY_THRESHOLD) {
+
+        if (SemanticCohesion.getAggregatedSemanticMeasure(distLSA, distLDA) >= SIMILARITY_THRESHOLD) {
             dist = Math.max(dist, distLDA);
         }
 
@@ -259,8 +255,11 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         Map<String, Integer> count = new HashMap<>();
         for (Word word : words) {
             String lemma = word.getLemma();
-            if (!count.containsKey(lemma)) count.put(lemma, 1);
-            else count.put(lemma, count.get(lemma) + 1);
+            if (!count.containsKey(lemma)) {
+                count.put(lemma, 1);
+            } else {
+                count.put(lemma, count.get(lemma) + 1);
+            }
         }
         List<String> entries = count.entrySet().stream()
                 .sorted((e1, e2) -> e2.getValue() - e1.getValue())
