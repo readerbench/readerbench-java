@@ -141,27 +141,22 @@ public class SentimentEntity {
         Map<SentimentValence, Double> rageSentimentsValues = new HashMap<>();
         Iterator<Map.Entry<SentimentValence, Double>> itRageSentiments = sentiments.entrySet().iterator();
         // iterate all rage sentiments
-        while (itRageSentiments.hasNext()) {
-            Map.Entry<SentimentValence, Double> pairRage = (Map.Entry<SentimentValence, Double>) itRageSentiments
-                    .next();
-            SentimentValence rageSentimentValence = (SentimentValence) pairRage.getKey();
-            if (rageSentimentValence != null && rageSentimentValence.getRage()) {
-                Iterator<Map.Entry<SentimentValence, Double>> itPrimarySentiments = sentiments.entrySet().iterator();
-                while (itPrimarySentiments.hasNext()) {
-                    Map.Entry<SentimentValence, Double> pairPrimary = (Map.Entry<SentimentValence, Double>) itPrimarySentiments
-                            .next();
-                    SentimentValence primarySentimentValence = (SentimentValence) pairPrimary.getKey();
-                    Double primarySentimentValue = pairPrimary.getValue();
-                    if (!primarySentimentValence.getRage()) {
-                        Double rageValence = rageSentimentsValues.get(rageSentimentValence);
-                        Double weight = SentimentWeights.getSentimentsWeight(primarySentimentValence.getIndexLabel(),
-                                rageSentimentValence.getIndexLabel());
-                        rageSentimentsValues.put(rageSentimentValence, (rageValence == null ? 0.0 : rageValence)
-                                + (weight == null ? 0.0 : weight) * primarySentimentValue);
+        SentimentValence.getAllValences().stream()
+            .filter(SentimentValence::getRage)
+            .forEach(rage -> {
+                for (Map.Entry<SentimentValence, Double> e : sentiments.entrySet()) {
+                    if (!e.getKey().getRage()) {
+                        Double rageValence = rageSentimentsValues.get(rage);
+                        Double weight = SentimentWeights.getSentimentsWeight(
+                                e.getKey().getIndexLabel(),
+                                rage.getIndexLabel());
+                        rageSentimentsValues.put(rage, (rageValence == null ? 0.0 : rageValence)
+                                + (weight == null ? 0.0 : weight) * e.getValue());
                     }
+
                 }
-            }
-        }
+            });
+
         return normalizeValues(rageSentimentsValues);
     }
 
@@ -174,7 +169,7 @@ public class SentimentEntity {
                 .mapToDouble(e -> e.getValue())
                 .sum();
         return result.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey, 
+                Map.Entry::getKey,
                 e -> e.getValue() / sum));
     }
 
