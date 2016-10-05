@@ -1,7 +1,9 @@
 package webService.services.lak;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import view.widgets.article.utils.ArticleContainer;
@@ -16,6 +18,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
 
 public class TwoModeGraphBuilder {
+    private static final Map<String, TwoModeGraphBuilder> LOADED_GRAPH_BUILDERS = new HashMap<>();
 
     private final ArticleContainer authorContainer;
     private final IAuthorDistanceStrategy[] distanceStrategyList;
@@ -121,6 +124,11 @@ public class TwoModeGraphBuilder {
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {
         String LAK_CORPUS_FOLDER = "resources/in/LAK_corpus/parsed-documents";
-        return new TwoModeGraphBuilder(LAK_CORPUS_FOLDER);
+        if(LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER)) {
+            return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER);
+        }
+        TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER);
+        LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER, gaphBuilder);
+        return gaphBuilder;
     }
 }
