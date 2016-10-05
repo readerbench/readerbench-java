@@ -18,4 +18,10 @@ public class TwoModeGraphEdge {
         this.sourceUri = sourceUri;
         this.targetUri = targetUri;
     }
+    public String getSourceUri() {
+        return this.sourceUri;
+    }
+    public String getTargetUri() {
+        return this.targetUri;
+    }
 }

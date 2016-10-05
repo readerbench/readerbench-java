@@ -101,6 +101,7 @@ import webService.services.SentimentAnalysis;
 import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
 import webService.services.lak.TwoModeGraphBuilder;
+import webService.services.lak.TwoModeGraphFilter;
 import webService.services.lak.result.QueryResultTwoModeGraph;
 import webService.services.lak.result.QueryResultTwoModeGraphNodes;
 import webService.services.lak.result.TwoModeGraph;
@@ -769,15 +770,14 @@ public class ReaderBenchServer {
         
         Spark.post("/lak/graph", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri);
-            
-            LOGGER.info("no nodes = " + graph.nodeList.size());
-            LOGGER.info("no edges = " + graph.edgeList.size());
-            
+            TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
+            LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
+            graph = graphFilter.filterGraph(graph);
+            LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
             return result;
