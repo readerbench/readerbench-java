@@ -204,12 +204,12 @@ public abstract class AbstractDocument extends AnalysisElement {
         // assign sentiment values
         SentimentAnalysis.weightSemanticValences(this);
 
-        LOGGER.info("Finished all discourse analysis processes...");
+        LOGGER.info("Finished all discourse analysis processes ...");
     }
 
     public void setDocumentTitle(String title, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         this.titleText = title;
-        Annotation document = null;
+        Annotation document;
         String processedText = title.replaceAll("\\s+", " ");
 
         if (processedText.length() > 0) {
@@ -344,11 +344,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         if (title != null) {
             s += title + "\n";
         }
-        for (Block b : blocks) {
-            if (b != null) {
-                s += b + "\n";
-            }
-        }
+        s = blocks.stream().filter((b) -> (b != null)).map((b) -> b + "\n").reduce(s, String::concat);
         return s;
     }
 
@@ -375,8 +371,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write("LDA model:," + getLDA().getPath() + "\n");
             }
 
-            out.write(
-                    "\nBlock Index,Ref Block Index,Participant,Date,Score,Personal Knowledge Building,Social Knowledge Building,Initial Text,Processed Text\n");
+            out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Personal Knowledge Building,Social Knowledge Building,Initial Text,Processed Text\n");
             for (Block b : blocks) {
                 if (b != null) {
                     out.write(b.getIndex() + ",");
@@ -406,9 +401,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
             // print topics
             out.write("\nTopics - Relevance\n");
-            List<Topic> topics = TopicModeling.getSublist(getTopics(), 100, false, false);
             out.write("Keyword, Relevance,Tf,LSA Sim, LDA Sim\n");
-            for (Topic t : topics) {
+            for (Topic t : this.getTopics()) {
                 out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getLSASim())
@@ -419,14 +413,14 @@ public abstract class AbstractDocument extends AnalysisElement {
             if (this.getLDA() != null) {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Topic>> topicClusters = new TreeMap<>();
-                for (Topic t : this.getTopics()) {
+                this.getTopics().stream().forEach((t) -> {
                     Integer probClass = LDA.findMaxResemblance(t.getWord().getLDAProbDistribution(),
                             this.getLDAProbDistribution());
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
                     topicClusters.get(probClass).add(t);
-                }
+                });
                 for (Integer cluster : topicClusters.keySet()) {
                     out.write(cluster + ":,");
                     for (Topic t : topicClusters.get(cluster)) {
@@ -441,9 +435,8 @@ public abstract class AbstractDocument extends AnalysisElement {
                 Conversation c = (Conversation) this;
                 if (c.getParticipants().size() > 0) {
                     for (Participant p : c.getParticipants()) {
-                        topics = TopicModeling.getSublist(p.getInterventions().getTopics(), 100, false, false);
                         out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ":");
-                        for (Topic t : topics) {
+                        for (Topic t : p.getInterventions().getTopics()) {
                             out.write("," + t.getWord().getLemma() + " (" + t.getWord().getPOS() + ") - "
                                     + Formatting.formatNumber(t.getRelevance()));
                         }
@@ -571,8 +564,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         File output = new File(path.replace(".xml", "_adv.csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
-            out.write(
-                    "ID,Block,Text,Score,Cosine Sim LSA,Divergence LDA,Leacok Chodorow,Wu Palmer,Path Sim,Dist,Cohesion\n");
+            out.write("ID,Block,Text,Score,Cosine Sim LSA,Divergence LDA,Leacok Chodorow,Wu Palmer,Path Sim,Dist,Cohesion\n");
             int globalIndex = 0;
             for (Block b : blocks) {
                 if (b != null) {

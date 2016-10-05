@@ -149,6 +149,7 @@ public class TopicRankings {
                     d.computeAll(computeDialogism, null, null);
                     documents.add(d);
                     d.saveSerializedDocument();
+                    d.exportDocument();
                 } catch (Exception e) {
                     LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
                     Exceptions.printStackTrace(e);
