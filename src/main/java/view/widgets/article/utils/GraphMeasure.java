@@ -15,7 +15,7 @@
  */
 package view.widgets.article.utils;
 
-public class GraphMeasure {
+public class GraphMeasure implements Comparable<GraphMeasure> {
 	private String name;
 	private Double betwenness;
 	private Double eccentricity;
@@ -82,4 +82,14 @@ public class GraphMeasure {
 	public int getNoOfReferences() {
 		return this.noOfReferences;
 	}
+
+    @Override
+    public int compareTo(GraphMeasure o) {
+        return o.betwenness.compareTo(this.betwenness);
+    }
+    
+    @Override
+    public String toString() {
+        return "{" + this.name + " - " + this.betwenness + "}";
+    }
 }
