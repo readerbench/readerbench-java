@@ -25,6 +25,8 @@ import org.apache.log4j.Logger;
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
+import data.Word;
+import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import java.util.Collections;
 import services.commons.Formatting;
@@ -33,63 +35,83 @@ import webService.result.ResultValence;
 
 public class SentimentAnalysis {
 
-	private static Logger logger = Logger.getLogger(SentimentAnalysis.class);
-	
-	/**
-	 * Get sentiment values for the entire document and for each paragraph
-	 *
-	 * @param queryDoc The document to be analyzed
-	 * @return List of sentiment values per entity
-	 */
-	public static List<ResultSentiment> getSentiment(AbstractDocument queryDoc) {
-		List<ResultSentiment> resultsSentiments = new ArrayList<>();
+    private static Logger logger = Logger.getLogger(SentimentAnalysis.class);
 
-		logger.info("Starting building sentiments...");
-		Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-		Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
-		List<ResultValence> localResults = new ArrayList<>();
-		while (it.hasNext()) {
-			Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-			SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-			Double sentimentValue = pair.getValue();
-			localResults.add(new ResultValence(
-				sentimentValence.getIndexLabel().replace("_RAGE", ""),
-				Formatting.formatNumber(sentimentValue)
-			));
-		}
+    /**
+     * Get sentiment values for the entire document and for each paragraph
+     *
+     * @param queryDoc The document to be analyzed
+     * @return List of sentiment values per entity
+     * @throws java.lang.Exception
+     */
+    public static List<ResultSentiment> getSentiment(AbstractDocument queryDoc) throws Exception {
+        List<ResultSentiment> resultsSentiments = new ArrayList<>();
+
+        logger.info("Starting building sentiments...");
+        Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
+        Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
+        List<ResultValence> localResults = new ArrayList<>();
+        while (it.hasNext()) {
+            Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+            SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+            Double sentimentValue = pair.getValue();
+            localResults.add(new ResultValence(
+                    sentimentValence.getIndexLabel().replace("_RAGE", ""),
+                    Formatting.formatNumber(sentimentValue)
+            ));
+        }
         Collections.sort(localResults);
 
-		List<ResultSentiment> blockSentiments = new ArrayList<>();		
-		for (Block b : queryDoc.getBlocks()) {
-			rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
-			it = rageSentimentsValues.entrySet().iterator();
-			localResults = new ArrayList<>();
-			while (it.hasNext()) {
-				Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-				SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-				localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-						Formatting.formatNumber(pair.getValue())));
-			}
+        List<ResultSentiment> blockSentiments = new ArrayList<>();
+        for (Block b : queryDoc.getBlocks()) {
+            rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
+            it = rageSentimentsValues.entrySet().iterator();
+            localResults = new ArrayList<>();
+            while (it.hasNext()) {
+                Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+                SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+                localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
+                        Formatting.formatNumber(pair.getValue())));
+            }
             Collections.sort(localResults);
 
-			List<ResultSentiment> sentencesSentiments = new ArrayList<>();
-			for (Sentence s : b.getSentences()) {
-				rageSentimentsValues = s.getSentimentEntity().getAggregatedValue();
-				it = rageSentimentsValues.entrySet().iterator();
-				localResults = new ArrayList<>();
-				while (it.hasNext()) {
-					Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-					SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-					localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-							Formatting.formatNumber(pair.getValue())));
+            List<ResultSentiment> sentencesSentiments = new ArrayList<>();
+            for (Sentence s : b.getSentences()) {
+                rageSentimentsValues = s.getSentimentEntity().getAggregatedValue();
+                it = rageSentimentsValues.entrySet().iterator();
+                localResults = new ArrayList<>();
+                while (it.hasNext()) {
+                    Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+                    SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+                    localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
+                            Formatting.formatNumber(pair.getValue())));
                 }
                 Collections.sort(localResults);
-				sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, null, s.getText()));
-			}
-			blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments, b.getText()));
-		}
-		resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText()));
 
-		return resultsSentiments;
-	}
+                List<ResultSentiment> wordsSentiments = new ArrayList<>();
+                for (Word w : s.getAllWords()) {
+                    SentimentEntity se = w.getSentiment();
+                    if (se == null) continue;
+                    rageSentimentsValues = se.getAggregatedValue();
+                    it = rageSentimentsValues.entrySet().iterator();
+                    localResults = new ArrayList<>();
+                    while (it.hasNext()) {
+                        Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+                        SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+                        localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
+                                Formatting.formatNumber(pair.getValue())));
+                    }
+                    if (!localResults.isEmpty()) {
+                        Collections.sort(localResults);
+                        wordsSentiments.add(new ResultSentiment("Word " + w.getText(), localResults, null, w.getText()));
+                    }
+                }
+                sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, wordsSentiments, s.getText()));
+            }
+            blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments, b.getText()));
+        }
+        resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText()));
+
+        return resultsSentiments;
+    }
 }
