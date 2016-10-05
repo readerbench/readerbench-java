@@ -104,8 +104,8 @@ class ParsingParams_FR extends Properties {
     public ParsingParams_FR() {
         this.put("tokenize.language", "fr");
         this.put("pos.model", "edu/stanford/nlp/models/pos-tagger/french/french.tagger");
-        this.put("parse.model", "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
+        //this.put("parse.model", "edu/stanford/nlp/models/lexparser/frenchFactored.ser.gz");
         this.put("depparse.model", "edu/stanford/nlp/models/parser/nndep/UD_French.gz");
-        this.put("annotators", "tokenize, ssplit, pos, parse, depparse");
+        this.put("annotators", "tokenize, ssplit, pos, depparse");
     }
 }

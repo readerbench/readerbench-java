@@ -35,9 +35,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
 	private List<Word> words;
 	private List<Word> allWords;
-	private int POSTreeDepth;
-	private int POSTreeSize;
-	private transient Tree parseTree;
 	private transient SemanticGraph dependencies;
 	private Map<Word, Word> pronimialReplacementMap;
 
@@ -74,32 +71,8 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 	public void setWords(List<Word> words) {
 		this.words = words;
 	}
-
-	public int getPOSTreeDepth() {
-		return POSTreeDepth;
-	}
-
-	public void setPOSTreeDepth(int pOSTreeDepth) {
-		POSTreeDepth = pOSTreeDepth;
-	}
-
-	public int getPOSTreeSize() {
-		return POSTreeSize;
-	}
-
-	public void setPOSTreeSize(int pOSTreeSize) {
-		POSTreeSize = pOSTreeSize;
-	}
-
-	public Tree getParseTree() {
-		return parseTree;
-	}
-
-	public void setParseTree(Tree parseTree) {
-		this.parseTree = parseTree;
-	}
-
-	public SemanticGraph getDependencies() {
+        
+        public SemanticGraph getDependencies() {
 		return dependencies;
 	}
 

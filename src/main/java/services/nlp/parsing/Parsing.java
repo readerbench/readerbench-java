@@ -43,7 +43,9 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.DependencyParseAnnotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
@@ -288,18 +290,11 @@ public abstract class Parsing {
         });
 
         if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
-            // parse tree corresponding to the current sentence
-            Tree tree = sentence.get(TreeAnnotation.class);
-            s.setPOSTreeDepth(tree.depth());
-            s.setPOSTreeSize(tree.size());
-            s.setParseTree(tree);
-            // TreePrint tp = new TreePrint("penn");
-            // tp.printTree(tree);
             if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
                 s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
             }
             if (lang.equals(Lang.en)) {
-                tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
                 // Stanford Valence
                 int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;

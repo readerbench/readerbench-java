@@ -129,6 +129,7 @@ public class TopicRankings {
             for (File file : files) {
                 Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
                 documents.add(d);
+                d.exportDocument();
             }
         } else {
             File[] files = dir.listFiles((File pathname) -> {
