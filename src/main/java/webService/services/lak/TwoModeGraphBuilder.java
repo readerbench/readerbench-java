@@ -18,25 +18,27 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
 
 public class TwoModeGraphBuilder {
-
     private static final Map<String, TwoModeGraphBuilder> LOADED_GRAPH_BUILDERS = new HashMap<>();
-
+    private static final IAuthorDistanceStrategy[] distanceStrategyList = new IAuthorDistanceStrategy[3];
+    
     private final ArticleContainer authorContainer;
-    private final IAuthorDistanceStrategy[] distanceStrategyList;
 
     private TwoModeGraph graph;
 
     public TwoModeGraphBuilder(String inputDirectory) {
         this.authorContainer = ArticleContainer.buildAuthorContainerFromDirectory(inputDirectory);
         AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(authorContainer);
-        this.distanceStrategyList = new IAuthorDistanceStrategy[]{
-            new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance)),
-            new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance)),
-            new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance))
-        };
+        
+        if(distanceStrategyList[0] == null) {
+            distanceStrategyList[0] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance));
+            
+            distanceStrategyList[1] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance));
+            
+            distanceStrategyList[2] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance));  
+        }
     }
 
     public TwoModeGraph getGraph(String centerUri) {
