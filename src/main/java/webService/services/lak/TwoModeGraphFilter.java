@@ -5,11 +5,13 @@
  */
 package webService.services.lak;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import view.widgets.article.utils.OrderedAuthorsArticlesByBetweenness;
+import view.widgets.article.utils.GraphMeasure;
+import view.widgets.article.utils.GraphNodeItemType;
 import webService.services.lak.result.TwoModeGraph;
 import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
@@ -24,13 +26,15 @@ public class TwoModeGraphFilter {
     public static int MaxNoArticles = 20;
 
     private static final Logger LOGGER = Logger.getLogger(TwoModeGraphFilter.class);
-    private static OrderedAuthorsArticlesByBetweenness authorsArticlesByBetweenness;
+    private static List<GraphMeasure> graphMeasures;
+    private static List<String> articleUriList = new ArrayList<>();
+    private static List<String> authorUriList = new ArrayList<>();
 
     public TwoModeGraphFilter() {
     }
 
     public TwoModeGraph filterGraph(TwoModeGraph graph) {
-        if (authorsArticlesByBetweenness == null) {
+        if (graphMeasures == null || graphMeasures.size() == 0) {
             LOGGER.info("TwoModeGraphFilter did not manage to load the OrderedAuthorsArticlesByBetweenness !!!");
             return graph;
         }
@@ -65,8 +69,8 @@ public class TwoModeGraphFilter {
     }
 
     private Set<String> getRestrictedSet(TwoModeGraph graph, Set<String> fullSet) {
-        Set<String> articlesUriSet = this.restrictSetFromList(authorsArticlesByBetweenness.getArticleUriList(), fullSet, MaxNoArticles);
-        Set<String> authorsUriSet = this.restrictSetFromList(authorsArticlesByBetweenness.getAuthorUriList(), fullSet, MaxNoAuthors);
+        Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, MaxNoArticles);
+        Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, MaxNoAuthors);
         articlesUriSet.addAll(authorsUriSet);
         return articlesUriSet;
     }
@@ -87,8 +91,15 @@ public class TwoModeGraphFilter {
     }
 
     public static TwoModeGraphFilter getTwoModeGraphFilter() {
-        if (TwoModeGraphFilter.authorsArticlesByBetweenness == null) {
-            TwoModeGraphFilter.authorsArticlesByBetweenness = OrderedAuthorsArticlesByBetweenness.readSerializedObject();
+        if (graphMeasures == null) {
+            graphMeasures = GraphMeasure.readGraphMeasures();
+            graphMeasures.stream().forEach(measure -> {
+                if (measure.getNodeType() == GraphNodeItemType.Article) {
+                    articleUriList.add(measure.getUri());
+                } else if (measure.getNodeType() == GraphNodeItemType.Author) {
+                    authorUriList.add(measure.getUri());
+                }
+            });
         }
         return new TwoModeGraphFilter();
     }

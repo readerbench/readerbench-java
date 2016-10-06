@@ -15,6 +15,7 @@
  */
 package view.widgets.article;
 
+import com.itextpdf.text.log.SysoLogger;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -78,7 +79,6 @@ import view.widgets.article.utils.ArticleAuthorParameterLogger;
 import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
 import view.widgets.article.utils.GraphMeasure;
 import view.widgets.article.utils.GraphNodeItem;
-import view.widgets.article.utils.OrderedAuthorsArticlesByBetweenness;
 import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
@@ -345,9 +345,9 @@ public class ArticleAuthorSimilarityView extends JFrame {
 		}
 		paramLogger.logGraphMeasures(graphMeasures);
                 Collections.sort(graphMeasures);
+                GraphMeasure.saveSerializedObject(graphMeasures);
                 
-                OrderedAuthorsArticlesByBetweenness articlesAuthors = new OrderedAuthorsArticlesByBetweenness(graphMeasures);
-                articlesAuthors.saveSerializedObject();
+                System.out.println(graphMeasures);
                 
                 // Rank size by centrality
 		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);

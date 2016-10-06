@@ -18,6 +18,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
 
 public class TwoModeGraphBuilder {
+
     private static final Map<String, TwoModeGraphBuilder> LOADED_GRAPH_BUILDERS = new HashMap<>();
 
     private final ArticleContainer authorContainer;
@@ -49,7 +50,7 @@ public class TwoModeGraphBuilder {
         }
         return this.graph;
     }
-    
+
     public List<TwoModeGraphNode> getAuthorNodes() {
         List<TwoModeGraphNode> nodeList = new ArrayList<>();
         this.authorContainer.getAuthorContainers().stream().forEach((author) -> {
@@ -73,7 +74,7 @@ public class TwoModeGraphBuilder {
 
     private List<GraphNodeItem> restrictNodesLinkedToCenter(String centerUri, List<GraphNodeItem> nodeItemList) {
         Set<GraphNodeItem> restrictedSet = new TreeSet<>();
-        Set<String> uriSet = new TreeSet<String>();
+        Set<String> uriSet = new TreeSet<>();
 
         for (IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
             double threshold = distanceStrategy.getThreshold();
@@ -81,21 +82,32 @@ public class TwoModeGraphBuilder {
                 for (int j = i + 1; j < nodeItemList.size(); j++) {
                     GraphNodeItem firstNodeItem = nodeItemList.get(i);
                     GraphNodeItem secondNodeItem = nodeItemList.get(j);
+
+                    double distance = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
+                    if (distance < threshold) {
+                        continue;
+                    }
+
+                    if (centerUri == null || centerUri.length() == 0) {
+                        restrictedSet.add(firstNodeItem);
+                        uriSet.add(firstNodeItem.getURI());
+                        restrictedSet.add(secondNodeItem);
+                        uriSet.add(secondNodeItem.getURI());
+                        continue;
+                    }
+
                     if (firstNodeItem.getURI().equals(centerUri) || secondNodeItem.getURI().equals(centerUri)) {
-                        double distance = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
-                        if (distance >= threshold) {
-                            restrictedSet.add(firstNodeItem);
-                            uriSet.add(firstNodeItem.getURI());
-                            restrictedSet.add(secondNodeItem);
-                            uriSet.add(secondNodeItem.getURI());
-                        }
+                        restrictedSet.add(firstNodeItem);
+                        uriSet.add(firstNodeItem.getURI());
+                        restrictedSet.add(secondNodeItem);
+                        uriSet.add(secondNodeItem.getURI());
                     }
                 }
             }
         }
         List<TwoModeGraphNode> restrictedTMNodeList = new ArrayList<>();
         this.graph.nodeList.forEach(node -> {
-            if(uriSet.contains(node.getUri())) {
+            if (uriSet.contains(node.getUri())) {
                 restrictedTMNodeList.add(node);
             }
         });
@@ -124,7 +136,7 @@ public class TwoModeGraphBuilder {
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {
         String LAK_CORPUS_FOLDER = "resources/in/LAK_corpus/parsed-documents";
-        if(LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER)) {
+        if (LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER)) {
             return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER);
         }
         TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER);

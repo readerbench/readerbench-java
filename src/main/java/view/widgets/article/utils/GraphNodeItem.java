@@ -18,11 +18,6 @@ package view.widgets.article.utils;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 import data.article.ResearchArticle;
 
-enum GraphNodeItemType {
-	Author,
-	Article
-}
-
 public class GraphNodeItem implements Comparable<GraphNodeItem> {
 	private GraphNodeItemType nodeType;
 	
