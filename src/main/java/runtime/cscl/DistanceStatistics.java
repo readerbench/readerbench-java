@@ -67,8 +67,9 @@ public class DistanceStatistics {
                     logger.info("Processing file " + filePath.getFileName().toString());
 
                     Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
-                            "resources/config/LDA/tasa_en", Lang.en, false, true);
-                    c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
+                            "resources/config/LDA/tasa_en", Lang.en, false);
+                    c.computeAll(true);
+                    c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     Utterance firstUtt = null;
                     for (int i = 1; i < c.getBlocks().size(); i++) {

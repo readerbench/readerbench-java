@@ -40,70 +40,70 @@ import webService.result.ResultSearch;
 
 public class SearchClient {
 
-	private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+    private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
 
-	public static final double MIN_THRESHOLD = 0.2d;
-	public static final int NO_RESULTS = 20;
+    public static final double MIN_THRESHOLD = 0.2d;
+    public static final int NO_RESULTS = 20;
 
-	/**
-	 * Search for query in documents
-	 *
-	 * @param documents
-	 * @param query
-	 * @return List of urls for results
-	 */
-	public static List<ResultSearch> search(String query, List<AbstractDocument> documents, int maxContentSize) {
-		logger.info("Processign query:" + query);
-		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-		BlockTemplate block = contents.new BlockTemplate();
-		block.setId(0);
-		block.setContent(query);
-		contents.getBlocks().add(block);
+    /**
+     * Search for query in documents
+     *
+     * @param documents
+     * @param query
+     * @return List of urls for results
+     */
+    public static List<ResultSearch> search(String query, List<AbstractDocument> documents, int maxContentSize) {
+        logger.info("Processign query:" + query);
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        BlockTemplate block = contents.new BlockTemplate();
+        block.setId(0);
+        block.setContent(query);
+        contents.getBlocks().add(block);
 
-		AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(),
-				documents.get(0).getLanguage(), false, false);
-		queryDoc.computeAll(true, null, null);
-		queryDoc.setTitleText(query);
+        AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(), documents.get(0).getLanguage(), false);
+        queryDoc.computeAll(true);
+        queryDoc.setTitleText(query);
 
-		List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);
-		List<ResultSearch> searchResults = new ArrayList<ResultSearch>();
-		for (SemanticSearchResult r : results) {
-			String content = r.getDoc().getText();
-			if (content.length() > maxContentSize) {
-				content = content.substring(0, maxContentSize);
-				if (content.lastIndexOf(" ") != -1)
-					content = content.substring(0, content.lastIndexOf(" "));
-				content += "...";
-			}
-			searchResults
-					.add(new ResultSearch(r.getDoc().getPath(), content, Formatting.formatNumber(r.getRelevance())));
-		}
+        List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);
+        List<ResultSearch> searchResults = new ArrayList<ResultSearch>();
+        for (SemanticSearchResult r : results) {
+            String content = r.getDoc().getText();
+            if (content.length() > maxContentSize) {
+                content = content.substring(0, maxContentSize);
+                if (content.lastIndexOf(" ") != -1) {
+                    content = content.substring(0, content.lastIndexOf(" "));
+                }
+                content += "...";
+            }
+            searchResults
+                    .add(new ResultSearch(r.getDoc().getPath(), content, Formatting.formatNumber(r.getRelevance())));
+        }
 
-		return searchResults;
-	}
+        return searchResults;
+    }
 
-	private static void performQuery(String query, int port) {
-		try {
-			int mcs = 50;
-			HttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet(
-					"http://localhost:" + port + "/search?q=" + URLEncoder.encode(query, "UTF-8") + "&mcs=" + mcs);
-			HttpResponse response = client.execute(request);
-			BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-			String line = "";
-			while ((line = rd.readLine()) != null) {
-				System.out.println(line);
-			}
-			System.out.println("\n\n");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+    private static void performQuery(String query, int port) {
+        try {
+            int mcs = 50;
+            HttpClient client = new DefaultHttpClient();
+            HttpGet request = new HttpGet(
+                    "http://localhost:" + port + "/search?q=" + URLEncoder.encode(query, "UTF-8") + "&mcs=" + mcs);
+            HttpResponse response = client.execute(request);
+            BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            String line = "";
+            while ((line = rd.readLine()) != null) {
+                System.out.println(line);
+            }
+            System.out.println("\n\n");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		performQuery("money", 5656);
-		performQuery("financial", 5858);
-	}
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
+        performQuery("money", 5656);
+        performQuery("financial", 5858);
+    }
 
 }

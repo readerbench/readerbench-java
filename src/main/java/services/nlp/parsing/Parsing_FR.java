@@ -46,7 +46,7 @@ public class Parsing_FR extends Parsing {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         AbstractDocumentTemplate docTmp = getDocumentModel();
-        AbstractDocument d = new Document(null, docTmp, null, null, Lang.fr, true, false);
+        AbstractDocument d = new Document(null, docTmp, null, null, Lang.fr, true);
         System.out.println(d);
     }
 

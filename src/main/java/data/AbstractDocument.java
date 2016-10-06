@@ -162,9 +162,28 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors) {
+    public void computeAll(boolean computeDialogism) {
         computeDiscourseAnalysis(computeDialogism);
         ComplexityIndices.computeComplexityFactors(this);
+    }
+
+    public void save(SaveType saveOutput) {
+        switch (saveOutput) {
+            case SERIALIZED:
+                saveSerializedDocument();
+                break;
+            case SERIALIZED_AND_CSV_EXPORT:
+                saveSerializedDocument();
+                exportDocument();
+                break;
+            case FULL:
+                exportDocument();
+                exportDocumentAdvanced();
+                saveSerializedDocument();
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -286,13 +305,15 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
 
         if (isDocument) {
-            Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-            d.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+            Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging);
+            d.computeAll(computeDialogism);
+            d.save(saveOutput);
             return d;
         }
         if (isChat) {
-            Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging, cleanInput);
-            c.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors, saveOutput);
+            Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging);
+            c.computeAll(computeDialogism);
+            c.save(saveOutput);
             return c;
         }
 

@@ -330,8 +330,7 @@ public class Word implements Comparable<Word>, Serializable {
                 && (Dictionary.isDictionaryWord(this.getText(), this.language)
                 || Dictionary.isDictionaryWord(this.getLemma(), this.language))) {
             if (this.getPOS() != null) {
-                return this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ")
-                        || this.getPOS().equals("RB");
+                return this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ") || this.getPOS().equals("RB");
             }
             return true;
         }

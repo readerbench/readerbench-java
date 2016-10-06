@@ -68,7 +68,7 @@ public class LDA implements ISemanticModel, Serializable {
     private static int MIN_NO_WORDS_PER_DOCUMENT = 5;
 
     private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.it, Lang.la, Lang.nl);
+    private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.it, Lang.la, Lang.nl);
 
     private Lang language;
     private String path;
@@ -85,7 +85,7 @@ public class LDA implements ISemanticModel, Serializable {
     private LDA(String path, Lang language) {
         this(language);
         this.path = path;
-        logger.info("Loading LDA model " + path + "...");
+        logger.info("Loading LDA model " + path + " ...");
         try {
             model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
             buildWordVectors();
@@ -522,6 +522,6 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     public static Set<Lang> getAvailableLanguages() {
-        return availableFor;
+        return AVAILABLE_FOR;
     }
 }

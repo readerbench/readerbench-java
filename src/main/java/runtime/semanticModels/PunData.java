@@ -57,15 +57,12 @@ public class PunData {
         if (semModel instanceof LDA) {
             lda = (LDA) semModel;
         }
-        Document d1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1), lsa, lda,
-                semModel.getLanguage(), true, false);
-        Document d2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s2), lsa, lda,
-                semModel.getLanguage(), true, false);
-        Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), lsa, lda,
-                semModel.getLanguage(), true, false);
+        Document d1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1), lsa, lda, semModel.getLanguage(), true);
+        Document d2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s2), lsa, lda, semModel.getLanguage(), true);
+        Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), lsa, lda, semModel.getLanguage(), true);
         String out = s1 + "-" + s2 + "," + Formatting.formatNumber(semModel.getSimilarity(d1, d2));
 
-        List<Topic> inferredConcepts = new ArrayList<Topic>();
+        List<Topic> inferredConcepts = new ArrayList<>();
 
         TreeMap<Word, Double> simWords = semModel.getSimilarConcepts(merge, minThreshold);
 
@@ -92,19 +89,8 @@ public class PunData {
     }
 
     public void comparePuns(String pathToFile, ISemanticModel semModel, double minThreshold) {
-        try {
-            FileInputStream inputFile = new FileInputStream(pathToFile);
-            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            BufferedReader in = new BufferedReader(ir);
-
-            BufferedWriter out = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream(
-                                    pathToFile
-                                    .replace(".csv",
-                                            "_" + semModel.getClass().getSimpleName() + "_"
-                                            + (new File(semModel.getPath()).getName()) + ".csv")),
-                            "UTF-8"));
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile), "UTF-8"));
+                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pathToFile.replace(".csv", "_" + semModel.getClass().getSimpleName() + "_" + (new File(semModel.getPath()).getName()) + ".csv")), "UTF-8"))) {
             // read first line apriori
             String line = in.readLine();
             while ((line = in.readLine()) != null) {
@@ -114,13 +100,11 @@ public class PunData {
                         String s1 = st.nextToken(), s2 = st.nextToken(), s3 = st.nextToken();
                         out.write(compareDocs(s1, s3, semModel, minThreshold) + "\n");
                         out.write(compareDocs(s2, s3, semModel, minThreshold) + "\n");
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
                     }
                 }
             }
-
-            in.close();
             out.close();
         } catch (IOException e) {
             Exceptions.printStackTrace(e);

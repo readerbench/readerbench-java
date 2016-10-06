@@ -348,8 +348,8 @@ public class SimilarityAnalysis {
                     }
 
                     logger.info("Processing chat " + filePath.getFileName());
-                    Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging, true);
-                    c.computeAll(computeDialogism, null, null, SaveType.NONE);
+                    Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging);
+                    c.computeAll(computeDialogism);
 
                     Utterance firstUtt = null, secondUtt = null;
                     for (int i = 1; i < c.getBlocks().size(); i++) {

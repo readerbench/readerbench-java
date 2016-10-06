@@ -43,13 +43,10 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.DependencyParseAnnotator;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +55,8 @@ import services.commons.TextPreprocessing;
 import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.stemmer.Stemmer;
 
-/** General NLP parsing class relying on the Stanford Core NLP
+/**
+ * General NLP parsing class relying on the Stanford Core NLP
  *
  * @author Mihai Dascalu
  */
@@ -158,38 +156,32 @@ public abstract class Parsing {
         return u;
     }
 
-    public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging, boolean cleanInput) {
+    public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
         Map<BlockTemplate, Annotation> annotations = new HashMap<>();
         try {
             if (!adt.getBlocks().isEmpty()) {
-                for (BlockTemplate blockTmp : adt.getBlocks()) {
-                    // extract name (if applicable)
-
-                    // extract block text
-                    String text = cleanInput ? TextPreprocessing.cleanText(blockTmp.getContent(), lang)
-                            : blockTmp.getContent().toLowerCase().replaceAll("\\s+", " ").trim();
-                    Annotation document = new Annotation(text);
-                    annotations.put(blockTmp, document);
-                }
+                adt.getBlocks().stream().forEach((blockTmp) -> {
+                    annotations.put(blockTmp, new Annotation(TextPreprocessing.basicTextCleaning(blockTmp.getContent(), lang)));
+                });
                 if (usePOSTagging) {
                     getPipeline().annotate(annotations.values());
                 }
                 for (BlockTemplate blockTmp : adt.getBlocks()) {
-                	String text = annotations.get(blockTmp).toString();
+                    String text = annotations.get(blockTmp).toString();
                     // get block ID
-					int id = 0;
-					try {
-						id = Double.valueOf(blockTmp.getId()).intValue();
-					} catch (Exception e) {
-						id = -1;
-					}
-					// get ref ID
-					int ref = 0;
-					try {
-						ref = Double.valueOf(blockTmp.getRefId()).intValue();
-					} catch (Exception e) {
-						ref = 0;
-					}
+                    int id;
+                    try {
+                        id = Double.valueOf(blockTmp.getId()).intValue();
+                    } catch (Exception e) {
+                        id = -1;
+                    }
+                    // get ref ID
+                    int ref;
+                    try {
+                        ref = Double.valueOf(blockTmp.getRefId()).intValue();
+                    } catch (Exception e) {
+                        ref = 0;
+                    }
 
                     boolean followedByVerbalization = false;
                     // mark if the block has a verbalization afterwards
@@ -206,29 +198,29 @@ public abstract class Parsing {
                     if (usePOSTagging) {
                         document = annotations.get(blockTmp);
                         // create an empty Annotation just with the given text
-						b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
-					} else {
-						b = SimpleParsing.processBlock(d, id, text);
-					}
-					if (d instanceof Conversation) {
-						b = getUtterance((Conversation) d, blockTmp, b);
-					}
-					b.setFollowedByVerbalization(followedByVerbalization);
-					Block.addBlock(d, b);
+                        b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
+                    } else {
+                        b = SimpleParsing.processBlock(d, id, text);
+                    }
+                    if (d instanceof Conversation) {
+                        b = getUtterance((Conversation) d, blockTmp, b);
+                    }
+                    b.setFollowedByVerbalization(followedByVerbalization);
+                    Block.addBlock(d, b);
                     // add explicit reference, if the case
-					if (ref > 0) {
-						for (Block refB : d.getBlocks()) {
-							if (refB != null && refB.getIndex() == ref) {
-								b.setRefBlock(refB);
-								break;
-							}
-						}
-					}
+                    if (ref > 0) {
+                        for (Block refB : d.getBlocks()) {
+                            if (refB != null && refB.getIndex() == ref) {
+                                b.setRefBlock(refB);
+                                break;
+                            }
+                        }
+                    }
 
                     if (usePOSTagging && lang.equals(Lang.en)) {
                         // Build the co-reference link graph
                         // Each chain stores a set of mentions that link to each other, along with a method for getting the most representative mention.
-                    	b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
+                        b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
                     }
                 }
             }
@@ -273,9 +265,9 @@ public abstract class Parsing {
             String word = token.get(OriginalTextAnnotation.class);
             String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
             String ne = token.get(NamedEntityTagAnnotation.class);
-            if (!word.matches("[,:;'\\.\\!\\?\\-]")) {
+            if (TextPreprocessing.isWord(word, lang)) {
                 Word w = new Word(b.getIndex(), s.getIndex(), word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang),
-                        Stemmer.stemWord(word.toLowerCase(), lang), Parsing.getParser(lang).convertToPenn(pos), ne,
+                        Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne,
                         s.getLSA(), s.getLDA(), lang);
                 s.getAllWords().add(w);
                 if (w.isContentWord()) {

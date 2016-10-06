@@ -85,7 +85,7 @@ public class Txt2XmlConverter {
             block.setContent(st.nextToken().trim());
             docTmp.getBlocks().add(block);
         }
-        Document d = new Document(null, docTmp, null, null, lang, false, false);
+        Document d = new Document(null, docTmp, null, null, lang, false);
         d.setTitleText(title);
         d.setDate(new Date());
         d.exportXML(path);
@@ -128,7 +128,7 @@ public class Txt2XmlConverter {
     }
 
     private void addTextToElement(AbstractDocumentTemplate docTmp, Lang lang, Element parent) {
-        Document d = new Document(null, docTmp, null, null, lang, false, false);
+        Document d = new Document(null, docTmp, null, null, lang, false);
         d.addToXML(doc, parent);
     }
 

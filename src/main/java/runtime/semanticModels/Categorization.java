@@ -23,7 +23,6 @@ import org.apache.log4j.Logger;
 
 import dao.CategoryDAO;
 import data.AbstractDocument;
-import data.Lang;
 import data.discourse.SemanticCohesion;
 import data.pojo.Category;
 import data.pojo.CategoryPhrase;
@@ -49,7 +48,7 @@ public class Categorization {
         AbstractDocument queryDoc = QueryHelper.processQuery(hm);
 
         logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-        queryDoc.computeAll(false, null, null);
+        queryDoc.computeAll(false);
         ComplexityIndices.computeComplexityFactors(queryDoc);
 
         List<ResultCategory> resultCategories = new ArrayList<>();

@@ -79,10 +79,10 @@ public class TopicModeling {
             if (results.size() >= noTopics || t.getRelevance() < 0) {
                 break;
             }
-            if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("N")) {
+            if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("NN")) {
                 results.add(t);
             }
-            if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("V")) {
+            if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
                 results.add(t);
             }
             if (!nounsOnly && !verbsOnly) {

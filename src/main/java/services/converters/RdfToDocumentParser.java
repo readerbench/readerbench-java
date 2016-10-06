@@ -37,259 +37,262 @@ import data.article.ResearchArticle;
 import view.widgets.ReaderBenchView;
 
 class Author {
-	public String authorUri;
-	public String authorName = "";
-	public String affiliationUri = "";
-	public String affiliationName = "";
 
-	public Author(String authorUri, Model rdfModel) {
-		this.authorUri = authorUri;
-		this.buildAuthorDataFromModel(rdfModel);
-	}
+    public String authorUri;
+    public String authorName = "";
+    public String affiliationUri = "";
+    public String affiliationName = "";
 
-	private void buildAuthorDataFromModel(Model rdfModel) {
-		this.buildAuthorName(rdfModel);
-		this.buildAuthorUniversityUri(rdfModel);
-		this.buildAffiliationName(rdfModel);
-	}
+    public Author(String authorUri, Model rdfModel) {
+        this.authorUri = authorUri;
+        this.buildAuthorDataFromModel(rdfModel);
+    }
 
-	private void buildAuthorName(Model rdfModel) {
-		Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.FoafNS + "name");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(this.authorUri)) {
-				this.authorName = s.getObject().toString();
-				break;
-			}
-		}
-	}
+    private void buildAuthorDataFromModel(Model rdfModel) {
+        this.buildAuthorName(rdfModel);
+        this.buildAuthorUniversityUri(rdfModel);
+        this.buildAffiliationName(rdfModel);
+    }
 
-	private void buildAuthorUniversityUri(Model rdfModel) {
-		Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.FoafNS + "member");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getObject().toString().equals(this.authorUri)) {
-				this.affiliationUri = s.getSubject().getURI();
-				break;
-			}
-		}
-	}
+    private void buildAuthorName(Model rdfModel) {
+        Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.FoafNS + "name");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(this.authorUri)) {
+                this.authorName = s.getObject().toString();
+                break;
+            }
+        }
+    }
 
-	private void buildAffiliationName(Model rdfModel) {
-		Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.RDFSchemaNS + "label");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(this.affiliationUri)) {
-				this.affiliationName = s.getObject().toString();
-				break;
-			}
-		}
-	}
+    private void buildAuthorUniversityUri(Model rdfModel) {
+        Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.FoafNS + "member");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getObject().toString().equals(this.authorUri)) {
+                this.affiliationUri = s.getSubject().getURI();
+                break;
+            }
+        }
+    }
 
-	@Override
-	public String toString() {
-		return "{" + this.authorUri + ", " + this.authorName + ", " + this.affiliationUri + ", " + this.affiliationName
-				+ "}";
-	}
+    private void buildAffiliationName(Model rdfModel) {
+        Property typeProperty = rdfModel.getProperty(RdfToDocumentParser.RDFSchemaNS + "label");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(this.affiliationUri)) {
+                this.affiliationName = s.getObject().toString();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "{" + this.authorUri + ", " + this.authorName + ", " + this.affiliationUri + ", " + this.affiliationName
+                + "}";
+    }
 }
 
 public class RdfToDocumentParser {
-	public static String RdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-	public static String OntowareNS = "http://swrc.ontoware.org/ontology#";
-	public static String PureNS = "http://purl.org/dc/elements/1.1/";
-	public static String FoafNS = "http://xmlns.com/foaf/0.1/";
-	public static String RDFSchemaNS = "http://www.w3.org/2000/01/rdf-schema#";
-	public static String TermsNS = "http://ns.nature.com/terms/";
 
-	private Model rdfModel;
-	private String outputDirectory;
+    public static String RdfNS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+    public static String OntowareNS = "http://swrc.ontoware.org/ontology#";
+    public static String PureNS = "http://purl.org/dc/elements/1.1/";
+    public static String FoafNS = "http://xmlns.com/foaf/0.1/";
+    public static String RDFSchemaNS = "http://www.w3.org/2000/01/rdf-schema#";
+    public static String TermsNS = "http://ns.nature.com/terms/";
 
-	public RdfToDocumentParser(String rdfFilePath, String outputDirectory) {
-		this.rdfModel = FileManager.get().loadModel(rdfFilePath);
-		this.outputDirectory = outputDirectory;
-	}
+    private Model rdfModel;
+    private String outputDirectory;
 
-	public void parseRdf() {
-		List<String> articleUris = this.indexArticleURI();
-		for (int i = 0; i < articleUris.size(); i++) {
-			String articleUri = articleUris.get(i);
-			String title = this.getArticleTitle(articleUri);
-			List<Author> authorList = getAuthors(articleUri);
-			List<String> topics = getTopics(articleUri);
-			String articleAbstract = getArticleAbstract(articleUri);
-			String articleYear = getArticleYear(articleUri);
-			List<String> citationUris = getCitationUris(articleUri);
-			this.saveArticle(i, articleUri, title, authorList, topics, articleAbstract, articleYear, citationUris);
-		}
-	}
+    public RdfToDocumentParser(String rdfFilePath, String outputDirectory) {
+        this.rdfModel = FileManager.get().loadModel(rdfFilePath);
+        this.outputDirectory = outputDirectory;
+    }
 
-	private List<String> indexArticleURI() {
-		Property typeProperty = rdfModel.getProperty(RdfNS + "type");
-		Resource articleResource = rdfModel.getResource(OntowareNS + "InProceedings");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		HashSet<String> articleUriSet = new HashSet<String>();
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getResource().equals(articleResource)) {
-				articleUriSet.add(s.getSubject().getURI());
-			}
-		}
-		return new ArrayList<String>(articleUriSet);
-	}
+    public void parseRdf() {
+        List<String> articleUris = this.indexArticleURI();
+        for (int i = 0; i < articleUris.size(); i++) {
+            String articleUri = articleUris.get(i);
+            String title = this.getArticleTitle(articleUri);
+            List<Author> authorList = getAuthors(articleUri);
+            List<String> topics = getTopics(articleUri);
+            String articleAbstract = getArticleAbstract(articleUri);
+            String articleYear = getArticleYear(articleUri);
+            List<String> citationUris = getCitationUris(articleUri);
+            this.saveArticle(i, articleUri, title, authorList, topics, articleAbstract, articleYear, citationUris);
+        }
+    }
 
-	private String getArticleTitle(String articleUri) {
-		Property typeProperty = rdfModel.getProperty(PureNS + "title");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(articleUri)) {
-				return s.getObject().toString();
-			}
-		}
-		return "";
-	}
+    private List<String> indexArticleURI() {
+        Property typeProperty = rdfModel.getProperty(RdfNS + "type");
+        Resource articleResource = rdfModel.getResource(OntowareNS + "InProceedings");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        HashSet<String> articleUriSet = new HashSet<String>();
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getResource().equals(articleResource)) {
+                articleUriSet.add(s.getSubject().getURI());
+            }
+        }
+        return new ArrayList<String>(articleUriSet);
+    }
 
-	private List<Author> getAuthors(String articleUri) {
-		String authorListUri = articleUri + "/authorlist";
-		StmtIterator stmtIt = rdfModel.listStatements();
-		HashSet<String> authorUriSet = new HashSet<String>();
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(authorListUri)) {
-				authorUriSet.add(s.getObject().toString());
-			}
-		}
-		List<Author> authorList = new ArrayList<Author>();
-		for (String authorUri : authorUriSet) {
-			authorList.add(new Author(authorUri, this.rdfModel));
-		}
-		return authorList;
-	}
+    private String getArticleTitle(String articleUri) {
+        Property typeProperty = rdfModel.getProperty(PureNS + "title");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(articleUri)) {
+                return s.getObject().toString();
+            }
+        }
+        return "";
+    }
 
-	private List<String> getTopics(String articleUri) {
-		List<String> topics = new ArrayList<String>();
-		Property typeProperty = rdfModel.getProperty(PureNS + "subject");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(articleUri)) {
-				RDFNode node = s.getObject();
-				if (!node.isURIResource()) {
-					topics.add(s.getObject().toString());
-				}
-			}
-		}
-		return topics;
-	}
+    private List<Author> getAuthors(String articleUri) {
+        String authorListUri = articleUri + "/authorlist";
+        StmtIterator stmtIt = rdfModel.listStatements();
+        HashSet<String> authorUriSet = new HashSet<String>();
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(authorListUri)) {
+                authorUriSet.add(s.getObject().toString());
+            }
+        }
+        List<Author> authorList = new ArrayList<Author>();
+        for (String authorUri : authorUriSet) {
+            authorList.add(new Author(authorUri, this.rdfModel));
+        }
+        return authorList;
+    }
 
-	private String getArticleAbstract(String articleUri) {
-		Property typeProperty = rdfModel.getProperty(OntowareNS + "abstract");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(articleUri)) {
-				return s.getObject().toString();
-			}
-		}
-		return "";
-	}
+    private List<String> getTopics(String articleUri) {
+        List<String> topics = new ArrayList<String>();
+        Property typeProperty = rdfModel.getProperty(PureNS + "subject");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(articleUri)) {
+                RDFNode node = s.getObject();
+                if (!node.isURIResource()) {
+                    topics.add(s.getObject().toString());
+                }
+            }
+        }
+        return topics;
+    }
 
-	private String getArticleYear(String articleUri) {
-		Property typeProperty = rdfModel.getProperty(OntowareNS + "year");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(articleUri)) {
-				return s.getObject().toString();
-			}
-		}
-		return "";
-	}
+    private String getArticleAbstract(String articleUri) {
+        Property typeProperty = rdfModel.getProperty(OntowareNS + "abstract");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(articleUri)) {
+                return s.getObject().toString();
+            }
+        }
+        return "";
+    }
 
-	private List<String> getCitationUris(String articleUri) {
-		HashSet<String> citations = new HashSet<String>();
-		Property typeProperty = rdfModel.getProperty(TermsNS + "hasCitation");
-		StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
-		while (stmtIt.hasNext()) {
-			Statement s = stmtIt.next();
-			if (s.getSubject().getURI().equals(articleUri)) {
-				citations.add(s.getObject().toString());
-			}
-		}
-		return new ArrayList<String>(citations);
-	}
+    private String getArticleYear(String articleUri) {
+        Property typeProperty = rdfModel.getProperty(OntowareNS + "year");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(articleUri)) {
+                return s.getObject().toString();
+            }
+        }
+        return "";
+    }
 
-	private void saveArticle(int index, String articleUri, String title, List<Author> authorList, List<String> topics,
-			String articleAbstract, String articleYear, List<String> citationUris) {
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<document language=\"EN\">\n" + "<meta>\n"
-				+ "<title>" + title + "</title>\n" + "<authors>\n";
-		for (Author author : authorList) {
-			xml += "<author>" + "<authorName>" + author.authorName + "</authorName>" + "<authorUri>" + author.authorUri
-					+ "</authorUri>" + "<affiliationName>" + author.affiliationName + "</affiliationName>"
-					+ "<affiliationUri>" + author.affiliationUri + "</affiliationUri>" + "</author>\n";
-		}
-		xml += "</authors>\n" + "<date>" + articleYear + "</date>\n";
-		xml += "<source>LAK</source>\n" + "<complexity_level></complexity_level>\n" + "<uri>" + articleUri + "</uri>\n"
-				+ "<Topics>\n";
-		for (String topic : topics) {
-			xml += "<Topic>" + topic + "</Topic>\n";
-		}
-		xml += "</Topics>\n";
-		xml += "<Citations>";
-		for (String citationUri : citationUris) {
-			xml += "<citationUri>" + citationUri + "</citationUri>\n";
-		}
-		xml += "</Citations>";
-		xml += "</meta>\n" + "<body>\n" + "<p id=\"" + 0 + "\">" + articleAbstract + "</p>\n" + "</body>\n"
-				+ "</document>";
-		this.writeToFile(this.outputDirectory + File.separator + index + ".xml", xml);
-	}
+    private List<String> getCitationUris(String articleUri) {
+        HashSet<String> citations = new HashSet<String>();
+        Property typeProperty = rdfModel.getProperty(TermsNS + "hasCitation");
+        StmtIterator stmtIt = rdfModel.listStatements(null, typeProperty, (RDFNode) null);
+        while (stmtIt.hasNext()) {
+            Statement s = stmtIt.next();
+            if (s.getSubject().getURI().equals(articleUri)) {
+                citations.add(s.getObject().toString());
+            }
+        }
+        return new ArrayList<String>(citations);
+    }
 
-	private void writeToFile(String fileName, String content) {
-		try {
-			FileWriter fw = new FileWriter(new File(fileName));
-			BufferedWriter bfrw = new BufferedWriter(fw);
-			bfrw.write(content);
-			bfrw.close();
-			fw.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private void saveArticle(int index, String articleUri, String title, List<Author> authorList, List<String> topics,
+            String articleAbstract, String articleYear, List<String> citationUris) {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<document language=\"EN\">\n" + "<meta>\n"
+                + "<title>" + title + "</title>\n" + "<authors>\n";
+        for (Author author : authorList) {
+            xml += "<author>" + "<authorName>" + author.authorName + "</authorName>" + "<authorUri>" + author.authorUri
+                    + "</authorUri>" + "<affiliationName>" + author.affiliationName + "</affiliationName>"
+                    + "<affiliationUri>" + author.affiliationUri + "</affiliationUri>" + "</author>\n";
+        }
+        xml += "</authors>\n" + "<date>" + articleYear + "</date>\n";
+        xml += "<source>LAK</source>\n" + "<complexity_level></complexity_level>\n" + "<uri>" + articleUri + "</uri>\n"
+                + "<Topics>\n";
+        for (String topic : topics) {
+            xml += "<Topic>" + topic + "</Topic>\n";
+        }
+        xml += "</Topics>\n";
+        xml += "<Citations>";
+        for (String citationUri : citationUris) {
+            xml += "<citationUri>" + citationUri + "</citationUri>\n";
+        }
+        xml += "</Citations>";
+        xml += "</meta>\n" + "<body>\n" + "<p id=\"" + 0 + "\">" + articleAbstract + "</p>\n" + "</body>\n"
+                + "</document>";
+        this.writeToFile(this.outputDirectory + File.separator + index + ".xml", xml);
+    }
 
-	public static void main(String[] args) {
-		String rdfFile = "in/LAK_corpus/LAK-DATASET-DUMP.rdf";
-		String outputFolder = "in/LAK_corpus/parsed-documents";
-		RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
-		parser.parseRdf();
+    private void writeToFile(String fileName, String content) {
+        try {
+            FileWriter fw = new FileWriter(new File(fileName));
+            BufferedWriter bfrw = new BufferedWriter(fw);
+            bfrw.write(content);
+            bfrw.close();
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-		serializeDocuments(outputFolder);
-	}
+    public static void main(String[] args) {
+        String rdfFile = "in/LAK_corpus/LAK-DATASET-DUMP.rdf";
+        String outputFolder = "in/LAK_corpus/parsed-documents";
+        RdfToDocumentParser parser = new RdfToDocumentParser(rdfFile, outputFolder);
+        parser.parseRdf();
 
-	private static void serializeDocuments(String dirName) {
-		File[] files;
-		files = new File(dirName).listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".xml");
-			}
-		});
+        serializeDocuments(outputFolder);
+    }
 
-		for (File f : files) {
-			try {
-				addSingleDocument(f.getPath());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    private static void serializeDocuments(String dirName) {
+        File[] files;
+        files = new File(dirName).listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".xml");
+            }
+        });
 
-	private static void addSingleDocument(String filePath) {
-		ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0],
-				ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.en, false, true);
-		d.computeAll(false, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
-	}
+        for (File f : files) {
+            try {
+                addSingleDocument(f.getPath());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void addSingleDocument(String filePath) {
+        ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0],
+                ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.en, false, true);
+        d.computeAll(false);
+        d.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
+    }
 }

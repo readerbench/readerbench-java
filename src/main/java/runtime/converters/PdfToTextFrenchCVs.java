@@ -162,10 +162,9 @@ public class PdfToTextFrenchCVs {
 
         // Lang lang = Lang.eng;
         Lang lang = Lang.getLang(language);
-        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang),
-                LDA.loadLDA(pathToLDA, lang), lang, posTagging, false);
+        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang, posTagging);
         logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-        queryDoc.computeAll(computeDialogism, null, null);
+        queryDoc.computeAll(computeDialogism);
         ComplexityIndices.computeComplexityFactors(queryDoc);
 
         return queryDoc;

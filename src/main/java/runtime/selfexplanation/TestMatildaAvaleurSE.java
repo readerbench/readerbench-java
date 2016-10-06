@@ -15,6 +15,7 @@
  */
 package runtime.selfexplanation;
 
+import data.AbstractDocument;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -41,13 +42,14 @@ public class TestMatildaAvaleurSE {
 
     public static List<Metacognition> compute(String filename, String folder) {
         List<Metacognition> verbalizations = new ArrayList<>();
-        Document doc = Document.load(filename, "resources/config/FR/LSA/Le Monde", "resources/config/FR/LDA/Le Monde", Lang.fr, true, true);
+        Document doc = Document.load(filename, "resources/config/FR/LSA/Le Monde", "resources/config/FR/LDA/Le Monde", Lang.fr, true);
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
-            Metacognition v = Metacognition.loadVerbalization(f.getAbsolutePath(), doc, true, true);
+            Metacognition v = Metacognition.loadVerbalization(f.getAbsolutePath(), doc, true);
             // Metacognition v = (Metacognition)
             // Metacognition.loadSerializedDocument(f.getAbsolutePath());
-            v.computeAll(true, true);
+            v.computeAll(true);
+            v.save(AbstractDocument.SaveType.SERIALIZED);
             verbalizations.add(v);
         }
         return verbalizations;
@@ -58,7 +60,7 @@ public class TestMatildaAvaleurSE {
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".ser"))) {
             Metacognition v = (Metacognition) Metacognition.loadSerializedDocument(f.getAbsolutePath());
-            v.computeAll(true, false);
+            v.computeAll(true);
             verbalizations.add(v);
         }
         return verbalizations;

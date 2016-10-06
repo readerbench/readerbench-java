@@ -102,50 +102,46 @@ public class AnnotateVerbalizationView extends JFrame {
         menuBar.add(mnFile);
 
         mntmOpenDocument = new JMenuItem(LocalizationUtils.getTranslation("Open Document"));
-        mntmOpenDocument.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
+        mntmOpenDocument.addActionListener((ActionEvent e) -> {
+            JFileChooser fc;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml");
                 }
-                fc.setFileFilter(new FileFilter() {
-                    @Override
-                    public boolean accept(File f) {
-                        if (f.isDirectory()) {
-                            return true;
-                        }
-                        return f.getName().endsWith(".xml");
+
+                @Override
+                public String getDescription() {
+                    return "XML files (*.xml)";
+                }
+            });
+            int returnVal = fc.showOpenDialog(AnnotateVerbalizationView.this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                loadedDocument = Document.load(file, null, null, null, false);
+                if (loadedDocument != null) {
+                    mntmOpenDocument.setEnabled(false);
+                    mntmOpenVerbalization.setEnabled(true);
+
+                    if (loadedDocument.getAuthors().size() > 0) {
+                        textFieldAuthor
+                                .setText(loadedDocument.getAuthors().get(0));
                     }
 
-                    @Override
-                    public String getDescription() {
-                        return "XML files (*.xml)";
-                    }
-                });
-                int returnVal = fc.showOpenDialog(AnnotateVerbalizationView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    loadedDocument = Document.load(file, null, null, null,
-                            false, false);
-                    if (loadedDocument != null) {
-                        mntmOpenDocument.setEnabled(false);
-                        mntmOpenVerbalization.setEnabled(true);
-
-                        if (loadedDocument.getAuthors().size() > 0) {
-                            textFieldAuthor
-                                    .setText(loadedDocument.getAuthors().get(0));
-                        }
-
-                        DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-                        textFieldDate.setText(df.format(loadedDocument.getDate()));
-                        textFieldURI.setText(loadedDocument.getURI());
-                        textFieldSource.setText(loadedDocument.getSource());
-                    }
+                    DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
+                    textFieldDate.setText(df.format(loadedDocument.getDate()));
+                    textFieldURI.setText(loadedDocument.getURI());
+                    textFieldSource.setText(loadedDocument.getSource());
                 }
             }
         });
@@ -181,9 +177,7 @@ public class AnnotateVerbalizationView extends JFrame {
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
                     lastDirectory = file.getParentFile();
-                    loadedVerbalization = Metacognition.loadVerbalization(
-                            file.getAbsolutePath(), loadedDocument, false,
-                            false);
+                    loadedVerbalization = Metacognition.loadVerbalization(file.getAbsolutePath(), loadedDocument, false);
                     if (tableContents == null) {
                         determineRowType();
                         modelContents = new VerbalizationAnnotationTableModel(

@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.openide.util.Exceptions;
 
 public class TimeStatistics {
 
@@ -42,20 +43,18 @@ public class TimeStatistics {
 
     public static void main(String[] args) {
 
-        // Map<String, TimeStats> timeStatsPerChat = new HashMap<String,
-        // TimeStats>();
+        // Map<String, TimeStats> timeStatsPerChat = new HashMap<String, TimeStats>();
         Map<Integer, TimeStats> timeStatsGlobal = new TreeMap<>();
 
         try {
             Files.walk(Paths.get(TimeStatistics.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
+                    logger.info("Processing file " + filePath.getFileName().toString() + " ...");
 
-                    logger.info("Processing file " + filePath.getFileName().toString());
-
-                    Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
-                            "resources/config/LDA/tasa_en", Lang.en, false, true);
-                    c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.en, false);
+                    c.computeAll(true);
+                    c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     logger.info("Conversation has " + c.getBlocks().size() + " blocks.");
 
@@ -127,9 +126,7 @@ public class TimeStatistics {
             StringBuilder sb = new StringBuilder();
             sb.append("sep=,\ntime,explicit links,same speaker,different speaker\n");
 
-            Iterator it = timeStatsGlobal.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
+            for (Map.Entry pair : timeStatsGlobal.entrySet()) {
                 TimeStats cs = (TimeStats) pair.getValue();
                 sb.append(pair.getKey());
                 sb.append(",");
@@ -146,13 +143,12 @@ public class TimeStatistics {
                 FileUtils.writeStringToFile(file, sb.toString());
             } catch (Exception e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
             logger.info("Printed conversation time stats to CSV file: " + file.getAbsolutePath());
-
         } catch (Exception e) {
             logger.info("Exception: " + e.getMessage());
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
 
     }

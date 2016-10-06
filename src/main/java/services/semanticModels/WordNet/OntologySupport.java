@@ -43,7 +43,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class OntologySupport {
     public static final double SYNONYM_WEIGHT = 1.0;
     public static final double HYPERNYM_WEIGHT = 1.0;
     private static final EnumMap<SimilarityType, Double> THRESHOLDS = new EnumMap<>(SimilarityType.class);
-    
+
     static {
         THRESHOLDS.put(SimilarityType.LEACOCK_CHODOROW, 1.);
         THRESHOLDS.put(SimilarityType.WU_PALMER, 1.);
@@ -69,20 +68,20 @@ public class OntologySupport {
     private static final int MAX_NO_SYNONYMS = 2;
     private static final int MAX_NO_HYPERNYMS = 1;
 
-    private static final Map<Lang, WordnetPOSData> dictionaries = new EnumMap<>(Lang.class);
-    private static final Map<Lang, String> wordnetFiles = new EnumMap<>(Lang.class);
+    private static final Map<Lang, WordnetPOSData> DICTIONARIES = new EnumMap<>(Lang.class);
+    private static final Map<Lang, String> WORDNET_FILEs = new EnumMap<>(Lang.class);
 
     static {
-        wordnetFiles.put(Lang.ro, "resources/config/RO/WN/wn-ron-lmf.xml");
-        wordnetFiles.put(Lang.en, "resources/config/EN/WN/wn-eng-lmf.xml");
-        wordnetFiles.put(Lang.fr, "resources/config/FR/WN/wn-fra-lmf.xml");
-        wordnetFiles.put(Lang.nl, "resources/config/NL/WN/wn-nld-lmf.xml");
-        wordnetFiles.put(Lang.it, "resources/config/IT/WN/wn-ita-lmf.xml");
-        wordnetFiles.put(Lang.es, "resources/config/ES/WN/wn-spa-lmf.xml");
-        wordnetFiles.put(Lang.la, "resources/config/LA/WN/wn-la-lmf.xml");
-        for (Map.Entry<Lang, String> e : wordnetFiles.entrySet()) {
-            dictionaries.put(e.getKey(), new WordnetPOSData(e.getValue()));
-        }
+        WORDNET_FILEs.put(Lang.ro, "resources/config/RO/WN/wn-ron-lmf.xml");
+        WORDNET_FILEs.put(Lang.en, "resources/config/EN/WN/wn-eng-lmf.xml");
+        WORDNET_FILEs.put(Lang.fr, "resources/config/FR/WN/wn-fra-lmf.xml");
+        WORDNET_FILEs.put(Lang.nl, "resources/config/NL/WN/wn-nld-lmf.xml");
+        WORDNET_FILEs.put(Lang.it, "resources/config/IT/WN/wn-ita-lmf.xml");
+        WORDNET_FILEs.put(Lang.es, "resources/config/ES/WN/wn-spa-lmf.xml");
+        WORDNET_FILEs.put(Lang.la, "resources/config/LA/WN/wn-la-lmf.xml");
+        WORDNET_FILEs.entrySet().stream().forEach((e) -> {
+            DICTIONARIES.put(e.getKey(), new WordnetPOSData(e.getValue()));
+        });
     }
 
     public static POS getPOS(String posTag) {
@@ -108,10 +107,10 @@ public class OntologySupport {
         if (!w1.getLanguage().equals(w2.getLanguage())) {
             return 0;
         }
-        if (w1 == null || w2 == null || w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
+        if (w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
             return 0;
         }
-        double sim = dictionaries.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);
+        double sim = DICTIONARIES.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);
         if (sim > THRESHOLDS.get(type)) {
             sim = THRESHOLDS.get(type);
         }
@@ -132,11 +131,11 @@ public class OntologySupport {
     }
 
     public static WordnetData getDictionary(Lang lang) {
-        return dictionaries.get(lang).getDictionary();
+        return DICTIONARIES.get(lang).getDictionary();
     }
 
     public static WordnetData getDictionary(Lang lang, POS pos) {
-        return dictionaries.get(lang).getByPOS(pos);
+        return DICTIONARIES.get(lang).getByPOS(pos);
     }
 
     public static WordnetData getDictionary(Word word) {
@@ -161,8 +160,8 @@ public class OntologySupport {
         if (getPOS(w1.getPOS()) == null || getPOS(w2.getPOS()) == null) {
             return false;
         }
-        Set<String> synonyms1 = dictionaries.get(language).getSynonyms(w1.getLemma(), getPOS(w1.getPOS()));
-        Set<String> synonyms2 = dictionaries.get(language).getSynonyms(w2.getLemma(), getPOS(w2.getPOS()));
+        Set<String> synonyms1 = DICTIONARIES.get(language).getSynonyms(w1.getLemma(), getPOS(w1.getPOS()));
+        Set<String> synonyms2 = DICTIONARIES.get(language).getSynonyms(w2.getLemma(), getPOS(w2.getPOS()));
 
         return synonyms1.contains(w2.getLemma()) || synonyms2.contains(w1.getLemma());
     }
@@ -189,7 +188,7 @@ public class OntologySupport {
         return getDictionary(language).hyperRelations.getOrDefault(s2, new ArrayList<>()).stream()
                 .anyMatch(s -> s.equals(s1));
     }
-    
+
     public static boolean areHypernym(String s1, String s2, Lang language) {
         return getAllHypernyms(s2, language).contains(s1);
 
@@ -198,7 +197,7 @@ public class OntologySupport {
     public static boolean areDirectHyponyms(String s1, String s2, Lang language) {
         return areDirectHypernyms(s2, s1, language);
     }
-    
+
     public static boolean areHyponym(String s1, String s2, Lang language) {
         return getAllHypernyms(s1, language).contains(s2);
 
@@ -232,7 +231,7 @@ public class OntologySupport {
         if (word.getPOS() == null) {
             return null;
         }
-        return dictionaries.get(word.getLanguage()).getSynonyms(word.getLemma(), getPOS(word.getPOS()));
+        return DICTIONARIES.get(word.getLanguage()).getSynonyms(word.getLemma(), getPOS(word.getPOS()));
     }
 
     public static Set<String> getHypernyms(Word word) {
@@ -300,14 +299,14 @@ public class OntologySupport {
     public static String getFirstSense(Word word) {
         return getDictionary(word).getFirstSynsetString(word.getLemma());
     }
-    
-    public static Set<String> getRootSenses(Lang lang){
+
+    public static Set<String> getRootSenses(Lang lang) {
         return new HashSet<>(getDictionary(lang).getTopNodes());
     }
 
     public static void correctFiles() {
         final Pattern find = Pattern.compile("relType='hype'");
-        wordnetFiles.values().parallelStream()
+        WORDNET_FILEs.values().parallelStream()
                 .forEach(fileName -> {
                     BufferedReader in = null;
                     BufferedWriter out = null;
@@ -343,13 +342,13 @@ public class OntologySupport {
     }
 
     public static Set<Lang> getAvailableLanguages() {
-        return wordnetFiles.keySet();
+        return WORDNET_FILEs.keySet();
     }
-    
+
     public static void main(String[] args) {
-        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
-        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
-        System.out.println(dictionaries.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
+        System.out.println(DICTIONARIES.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
+        System.out.println(DICTIONARIES.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.WU_PALMER));
+        System.out.println(DICTIONARIES.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.PATH_SIM));
         System.out.println(exists("final", "JJ", Lang.fr));
 
         /*Word w1 = Word.getWordFromConcept("horse", Lang.eng);
@@ -365,11 +364,11 @@ public class OntologySupport {
                 + " The EPS user interface management system. "
                 + "System and human system engineering testing of EPS. "
                 + "Relation of user perceived response time to error measurement.");
-        AbstractDocument d = new Document(null, docTmp, null, null, Lang.en, true, false);
+        AbstractDocument d = new Document(null, docTmp, null, null, Lang.en, true);
 
         AbstractDocumentTemplate docTmp1 = AbstractDocumentTemplate.getDocumentModel(
                 "RAGE, Realising an Applied Gaming Eco-system, aims to develop, transform and enrich advanced technologies from the leisure games industry into self-contained gaming assets that support game studios at developing applied games easier, faster and more cost-effectively. These assets will be available along with a large volume of high-quality knowledge resources through a self-sustainable Ecosystem, which is a social space that connects research, gaming industries, intermediaries, education providers, policy makers and end-users.");
-        AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.en, false, false);
+        AbstractDocument d1 = new Document(null, docTmp1, null, null, Lang.en, false);
 
         SemanticCohesion sc = new SemanticCohesion(d, d1);
         System.out.println(sc.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW));

@@ -24,7 +24,6 @@ import data.document.Document;
 import data.Lang;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
-import services.converters.Txt2XmlConverter;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -44,7 +43,7 @@ public class DataGatheringTest {
 
         for (File file : files) {
             try {
-                Document d = Document.load(file, null, null, Lang.en, false, true);
+                Document d = Document.load(file, null, null, Lang.en, false);
                 d.saveTxtDocument();
             } catch (Exception e) {
                 Exceptions.printStackTrace(e);

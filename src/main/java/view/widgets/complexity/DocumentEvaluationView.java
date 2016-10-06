@@ -62,221 +62,217 @@ import services.complexity.ComplexityIndex;
 
 public class DocumentEvaluationView extends JFrame {
 
-	private static final long serialVersionUID = -4518616508590444786L;
-	static Logger logger = Logger.getLogger(DocumentEvaluationView.class);
-	private List<AbstractDocument> documents;
+    private static final long serialVersionUID = -4518616508590444786L;
+    static Logger logger = Logger.getLogger(DocumentEvaluationView.class);
+    private List<AbstractDocument> documents;
 
-	private JPanel contentPane;
-	private JTextField textFieldDirectory;
-	private JLabel lblResults;
-	private JButton btnSelectComplexityFactors;
-	private JButton btnTrainSVM;
-	private JScrollPane scrollPane;
-	private DefaultTableModel tableModel;
-	private JTable table;
+    private JPanel contentPane;
+    private JTextField textFieldDirectory;
+    private JLabel lblResults;
+    private JButton btnSelectComplexityFactors;
+    private JButton btnTrainSVM;
+    private JScrollPane scrollPane;
+    private DefaultTableModel tableModel;
+    private JTable table;
 
-	private class Task extends SwingWorker<Void, Void> {
-		private String path;
-		private int noClasses;
+    private class Task extends SwingWorker<Void, Void> {
 
-		public Task(String path) {
-			super();
-			this.path = path;
-		}
+        private String path;
+        private int noClasses;
 
-		@Override
-		public Void doInBackground() {
-			btnTrainSVM.setEnabled(false);
-			setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-			try {
-				// Open the file
-				FileWriter fstream = new FileWriter(
-						"out/doc_complexity_evaluation_"
-								+ System.currentTimeMillis() + ".csv", true);
-				BufferedWriter out = new BufferedWriter(fstream);
+        public Task(String path) {
+            super();
+            this.path = path;
+        }
 
-				// determine number of classes
-				Map<Double, List<Measurement>> measurements = DataGathering
-						.getMeasurements(path + "/measurements.csv");
-				Set<Double> classes = measurements.keySet();
-				this.noClasses = classes.size();
+        @Override
+        public Void doInBackground() {
+            btnTrainSVM.setEnabled(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            try {
+                // Open the file
+                FileWriter fstream = new FileWriter(
+                        "out/doc_complexity_evaluation_"
+                        + System.currentTimeMillis() + ".csv", true);
+                BufferedWriter out = new BufferedWriter(fstream);
 
-				if (this.noClasses == 0) {
-					JOptionPane
-							.showMessageDialog(
-									contentPane,
-									"There are no complexity classes within the \"measurements.csv\" file!",
-									"Error", JOptionPane.ERROR_MESSAGE);
-					out.close();
-					return null;
-				}
+                // determine number of classes
+                Map<Double, List<Measurement>> measurements = DataGathering
+                        .getMeasurements(path + "/measurements.csv");
+                Set<Double> classes = measurements.keySet();
+                this.noClasses = classes.size();
 
-				logger.info("Started to train the SVM model on " + noClasses
-						+ " classes");
+                if (this.noClasses == 0) {
+                    JOptionPane
+                            .showMessageDialog(
+                                    contentPane,
+                                    "There are no complexity classes within the \"measurements.csv\" file!",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                    out.close();
+                    return null;
+                }
 
-				// build the table
-				String[] names = new String[documents.size() + 1];
-				names[0] = "<html>Factor<br/><br/><br/></html>";
-				out.write("Factor");
-				for (int i = 0; i < documents.size(); i++) {
-					names[i + 1] = "<html>"
-							+ (documents.get(i).getTitleText().length() > 30 ? documents
-									.get(i).getTitleText().substring(0, 27)
-									+ "..."
-									: documents.get(i).getTitleText())
-							+ "<br/>" + documents.get(i).getLSA().getPath()
-							+ "<br/>" + documents.get(i).getLDA().getPath()
-							+ "</html>";
-					out.write(","
-							+ documents.get(i).getTitleText()
-									.replaceAll(",", "") + "("
-							+ documents.get(i).getLSA().getPath() + "/"
-							+ documents.get(i).getLDA().getPath() + ")");
-				}
-				out.write("\n");
+                logger.info("Started to train the SVM model on " + noClasses
+                        + " classes");
 
-				tableModel = new DefaultTableModel(new Object[][] {}, names) {
-					private static final long serialVersionUID = 8537729224173332503L;
+                // build the table
+                String[] names = new String[documents.size() + 1];
+                names[0] = "<html>Factor<br/><br/><br/></html>";
+                out.write("Factor");
+                for (int i = 0; i < documents.size(); i++) {
+                    names[i + 1] = "<html>"
+                            + (documents.get(i).getTitleText().length() > 30 ? documents
+                            .get(i).getTitleText().substring(0, 27)
+                            + "..."
+                            : documents.get(i).getTitleText())
+                            + "<br/>" + documents.get(i).getLSA().getPath()
+                            + "<br/>" + documents.get(i).getLDA().getPath()
+                            + "</html>";
+                    out.write(","
+                            + documents.get(i).getTitleText()
+                            .replaceAll(",", "") + "("
+                            + documents.get(i).getLSA().getPath() + "/"
+                            + documents.get(i).getLDA().getPath() + ")");
+                }
+                out.write("\n");
 
-					@Override
-					public boolean isCellEditable(int rowIndex, int columnIndex) {
-						return false;
-					}
+                tableModel = new DefaultTableModel(new Object[][]{}, names) {
+                    private static final long serialVersionUID = 8537729224173332503L;
 
-					@Override
-					public Class<?> getColumnClass(int columnIndex) {
-						if (columnIndex == 0)
-							return String.class;
-						return Double.class;
-					}
-				};
+                    @Override
+                    public boolean isCellEditable(int rowIndex, int columnIndex) {
+                        return false;
+                    }
 
-				table = new JTable(tableModel);
-				table.setFillsViewportHeight(true);
-				table.setAutoCreateRowSorter(true);
+                    @Override
+                    public Class<?> getColumnClass(int columnIndex) {
+                        if (columnIndex == 0) {
+                            return String.class;
+                        }
+                        return Double.class;
+                    }
+                };
 
-				for (int i = 1; i < documents.size() + 1; i++) {
-					// set width for ID and selected
-					table.getColumnModel()
-							.getColumn(i)
-							.setMinWidth(
-									Math.min(contentPane.getWidth()
-											/ (documents.size() + 1), 200));
-					table.getColumnModel()
-							.getColumn(i)
-							.setMaxWidth(
-									Math.min(contentPane.getWidth()
-											/ (documents.size() + 1), 200));
-					table.getColumnModel()
-							.getColumn(i)
-							.setPreferredWidth(
-									Math.min(contentPane.getWidth()
-											/ (documents.size() + 1), 200));
-				}
+                table = new JTable(tableModel);
+                table.setFillsViewportHeight(true);
+                table.setAutoCreateRowSorter(true);
 
-				// perform actual computations
-				for (AbstractDocument d : documents) {
-					ComplexityIndices.computeComplexityFactors(d);
-				}
+                for (int i = 1; i < documents.size() + 1; i++) {
+                    // set width for ID and selected
+                    table.getColumnModel()
+                            .getColumn(i)
+                            .setMinWidth(
+                                    Math.min(contentPane.getWidth()
+                                            / (documents.size() + 1), 200));
+                    table.getColumnModel()
+                            .getColumn(i)
+                            .setMaxWidth(
+                                    Math.min(contentPane.getWidth()
+                                            / (documents.size() + 1), 200));
+                    table.getColumnModel()
+                            .getColumn(i)
+                            .setPreferredWidth(
+                                    Math.min(contentPane.getWidth()
+                                            / (documents.size() + 1), 200));
+                }
 
-				double[] predictions = ComputeBalancedMeasure
-						.evaluateTextualComplexity(documents,
-								textFieldDirectory.getText(),
-								ComplexityIndicesView.getSelectedMeasurements());
+                double[] predictions = ComputeBalancedMeasure
+                        .evaluateTextualComplexity(documents,
+                                textFieldDirectory.getText(),
+                                ComplexityIndicesView.getSelectedMeasurements());
 
-				// display results
-				// first line = SVM predictions
-				Vector<Object> dataRow = new Vector<>();
-				dataRow.add("Complexity prediction");
-				out.write("Complexity prediction");
-				for (int i = 0; i < documents.size(); i++) {
-					dataRow.add(predictions[i]);
-					out.write("," + predictions[i]);
-				}
-				tableModel.addRow(dataRow);
-				out.write("\n");
+                // display results
+                // first line = SVM predictions
+                Vector<Object> dataRow = new Vector<>();
+                dataRow.add("Complexity prediction");
+                out.write("Complexity prediction");
+                for (int i = 0; i < documents.size(); i++) {
+                    dataRow.add(predictions[i]);
+                    out.write("," + predictions[i]);
+                }
+                tableModel.addRow(dataRow);
+                out.write("\n");
 
-				// display comparative information for all documents based on
-				// the selected evaluation factors
-
-				for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
-					dataRow = new Vector<>();
+                // display comparative information for all documents based on
+                // the selected evaluation factors
+                for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
+                    dataRow = new Vector<>();
                     ComplexityIndex index = ComplexityIndicesView.getAllIndices()[i];
-					dataRow.add(index.getAcronym());
-					out.write(index.getAcronym());
-					for (AbstractDocument d : documents) {
-						dataRow.add(d.getComplexityIndices().get(index));
-						out.write("," + d.getComplexityIndices().get(index));
-					}
-					tableModel.addRow(dataRow);
-					out.write("\n");
-				}
+                    dataRow.add(index.getAcronym());
+                    out.write(index.getAcronym());
+                    for (AbstractDocument d : documents) {
+                        dataRow.add(d.getComplexityIndices().get(index));
+                        out.write("," + d.getComplexityIndices().get(index));
+                    }
+                    tableModel.addRow(dataRow);
+                    out.write("\n");
+                }
 
-				scrollPane.setViewportView(table);
-				out.close();
+                scrollPane.setViewportView(table);
+                out.close();
 
-				Clustering.performKMeansClustering(documents,
-						Math.min(6, (documents.size() + 1) / 2));
-				Clustering.performAglomerativeClustering(documents);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return null;
-		}
+                Clustering.performKMeansClustering(documents,
+                        Math.min(6, (documents.size() + 1) / 2));
+                Clustering.performAglomerativeClustering(documents);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-		/*
+        /*
 		 * Executed in event dispatching thread
-		 */
-		@Override
-		public void done() {
-			Toolkit.getDefaultToolkit().beep();
-			btnTrainSVM.setEnabled(true);
-			setCursor(null); // turn off the wait cursor
-		}
-	}
+         */
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            btnTrainSVM.setEnabled(true);
+            setCursor(null); // turn off the wait cursor
+        }
+    }
 
-	public DocumentEvaluationView(List<AbstractDocument> documents) {
-		setTitle("ReaderBench - Document Complexity Evaluation");
-		setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(50, 50, 1000, 600);
-		this.documents = documents;
+    public DocumentEvaluationView(List<AbstractDocument> documents) {
+        setTitle("ReaderBench - Document Complexity Evaluation");
+        setBackground(Color.WHITE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setBounds(50, 50, 1000, 600);
+        this.documents = documents;
 
-		contentPane = new JPanel();
-		contentPane.setBackground(Color.WHITE);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+        contentPane = new JPanel();
+        contentPane.setBackground(Color.WHITE);
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
 
-		JLabel lblPath = new JLabel("Path:");
-		lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
+        JLabel lblPath = new JLabel("Path:");
+        lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		textFieldDirectory = new JTextField();
-		textFieldDirectory.setText("in/corpus_complexity_tasa_en");
-		textFieldDirectory.setColumns(10);
+        textFieldDirectory = new JTextField();
+        textFieldDirectory.setText("in/corpus_complexity_tasa_en");
+        textFieldDirectory.setColumns(10);
 
-		JButton btnPath = new JButton("...");
-		btnPath.addActionListener((ActionEvent e) -> {
+        JButton btnPath = new JButton("...");
+        btnPath.addActionListener((ActionEvent e) -> {
             JFileChooser fc = new JFileChooser(new File("in"));
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(DocumentEvaluationView.this);
-            
+
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 textFieldDirectory.setText(file.getPath());
             }
         });
 
-		lblResults = new JLabel("Results");
-		lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
+        lblResults = new JLabel("Results");
+        lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		btnSelectComplexityFactors = new JButton("Select complexity factors");
-		btnSelectComplexityFactors.addActionListener((ActionEvent e) -> {
+        btnSelectComplexityFactors = new JButton("Select complexity factors");
+        btnSelectComplexityFactors.addActionListener((ActionEvent e) -> {
             ComplexityIndicesView view = new ComplexityIndicesView();
             view.setVisible(true);
         });
 
-		btnTrainSVM = new JButton("Train SVM Model");
-		btnTrainSVM.addActionListener((ActionEvent e) -> {
+        btnTrainSVM = new JButton("Train SVM Model");
+        btnTrainSVM.addActionListener((ActionEvent e) -> {
             String path = textFieldDirectory.getText();
             if (!new File(path).isDirectory()) {
                 JOptionPane.showMessageDialog(contentPane,
@@ -284,7 +280,7 @@ public class DocumentEvaluationView extends JFrame {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
+
             if (!new File(path + "/measurements.csv").exists()) {
                 JOptionPane
                         .showMessageDialog(
@@ -293,173 +289,136 @@ public class DocumentEvaluationView extends JFrame {
                                 "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            
+
             Task task = new Task(path);
             task.execute();
         });
 
-		scrollPane = new JScrollPane();
-		scrollPane
-				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		table = new JTable();
-		table.setFillsViewportHeight(true);
-		scrollPane.setViewportView(table);
+        scrollPane = new JScrollPane();
+        scrollPane
+                .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        table = new JTable();
+        table.setFillsViewportHeight(true);
+        scrollPane.setViewportView(table);
 
-		JSeparator separator = new JSeparator();
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.LEADING)
-																						.addGroup(
-																								gl_contentPane
-																										.createSequentialGroup()
-																										.addComponent(
-																												lblPath)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												textFieldDirectory,
-																												GroupLayout.DEFAULT_SIZE,
-																												662,
-																												Short.MAX_VALUE)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)
-																										.addComponent(
-																												btnPath,
-																												GroupLayout.PREFERRED_SIZE,
-																												40,
-																												GroupLayout.PREFERRED_SIZE)
-																										.addGap(31))
-																						.addGroup(
-																								gl_contentPane
-																										.createSequentialGroup()
-																										.addComponent(
-																												lblResults)
-																										.addPreferredGap(
-																												ComponentPlacement.RELATED)))
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addGroup(
-																				gl_contentPane
-																						.createParallelGroup(
-																								Alignment.TRAILING,
-																								false)
-																						.addComponent(
-																								btnTrainSVM,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE)
-																						.addComponent(
-																								btnSelectComplexityFactors,
-																								GroupLayout.DEFAULT_SIZE,
-																								GroupLayout.DEFAULT_SIZE,
-																								Short.MAX_VALUE)))
-														.addComponent(
-																scrollPane,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																978,
-																Short.MAX_VALUE)
-														.addComponent(
-																separator,
-																GroupLayout.DEFAULT_SIZE,
-																978,
-																Short.MAX_VALUE))
-										.addContainerGap()));
-		gl_contentPane
-				.setVerticalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								gl_contentPane
-										.createSequentialGroup()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.BASELINE)
-														.addComponent(
-																textFieldDirectory,
-																GroupLayout.PREFERRED_SIZE,
-																GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE)
-														.addComponent(lblPath)
-														.addComponent(btnPath)
-														.addComponent(
-																btnSelectComplexityFactors))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																lblResults)
-														.addComponent(
-																btnTrainSVM))
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(separator,
-												GroupLayout.PREFERRED_SIZE,
-												GroupLayout.DEFAULT_SIZE,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(
-												ComponentPlacement.RELATED)
-										.addComponent(scrollPane,
-												GroupLayout.DEFAULT_SIZE, 473,
-												Short.MAX_VALUE)
-										.addContainerGap()));
+        JSeparator separator = new JSeparator();
+        GroupLayout gl_contentPane = new GroupLayout(contentPane);
+        gl_contentPane
+                .setHorizontalGroup(gl_contentPane
+                        .createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_contentPane
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.TRAILING)
+                                        .addGroup(
+                                                gl_contentPane
+                                                .createSequentialGroup()
+                                                .addGroup(
+                                                        gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.LEADING)
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                .createSequentialGroup()
+                                                                .addComponent(
+                                                                        lblPath)
+                                                                .addPreferredGap(
+                                                                        ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        textFieldDirectory,
+                                                                        GroupLayout.DEFAULT_SIZE,
+                                                                        662,
+                                                                        Short.MAX_VALUE)
+                                                                .addPreferredGap(
+                                                                        ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        btnPath,
+                                                                        GroupLayout.PREFERRED_SIZE,
+                                                                        40,
+                                                                        GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(31))
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                .createSequentialGroup()
+                                                                .addComponent(
+                                                                        lblResults)
+                                                                .addPreferredGap(
+                                                                        ComponentPlacement.RELATED)))
+                                                .addPreferredGap(
+                                                        ComponentPlacement.RELATED)
+                                                .addGroup(
+                                                        gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.TRAILING,
+                                                                false)
+                                                        .addComponent(
+                                                                btnTrainSVM,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                btnSelectComplexityFactors,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                Short.MAX_VALUE)))
+                                        .addComponent(
+                                                scrollPane,
+                                                Alignment.LEADING,
+                                                GroupLayout.DEFAULT_SIZE,
+                                                978,
+                                                Short.MAX_VALUE)
+                                        .addComponent(
+                                                separator,
+                                                GroupLayout.DEFAULT_SIZE,
+                                                978,
+                                                Short.MAX_VALUE))
+                                .addContainerGap()));
+        gl_contentPane
+                .setVerticalGroup(gl_contentPane
+                        .createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_contentPane
+                                .createSequentialGroup()
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.BASELINE)
+                                        .addComponent(
+                                                textFieldDirectory,
+                                                GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblPath)
+                                        .addComponent(btnPath)
+                                        .addComponent(
+                                                btnSelectComplexityFactors))
+                                .addPreferredGap(
+                                        ComponentPlacement.RELATED)
+                                .addGroup(
+                                        gl_contentPane
+                                        .createParallelGroup(
+                                                Alignment.TRAILING)
+                                        .addComponent(
+                                                lblResults)
+                                        .addComponent(
+                                                btnTrainSVM))
+                                .addPreferredGap(
+                                        ComponentPlacement.RELATED)
+                                .addComponent(separator,
+                                        GroupLayout.PREFERRED_SIZE,
+                                        GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(
+                                        ComponentPlacement.RELATED)
+                                .addComponent(scrollPane,
+                                        GroupLayout.DEFAULT_SIZE, 473,
+                                        Short.MAX_VALUE)
+                                .addContainerGap()));
 
-		contentPane.setLayout(gl_contentPane);
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					DocumentEvaluationView frame = new DocumentEvaluationView(
-							null);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager
-				.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+        contentPane.setLayout(gl_contentPane);
+    }
 }

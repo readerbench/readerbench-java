@@ -43,17 +43,17 @@ public class Summary extends Metacognition {
 
     private final SemanticCohesion cohesion;
 
-    public Summary(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
-        super(path, docTmp, initialReadingMaterial, usePOSTagging, cleanInput);
+    public Summary(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging) {
+        super(path, docTmp, initialReadingMaterial, usePOSTagging);
         cohesion = new SemanticCohesion(this, initialReadingMaterial);
     }
 
-    public Summary(String content, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
-        super(null, AbstractDocumentTemplate.getDocumentModel(content), initialReadingMaterial, usePOSTagging, cleanInput);
+    public Summary(String content, Document initialReadingMaterial, boolean usePOSTagging) {
+        super(null, AbstractDocumentTemplate.getDocumentModel(content), initialReadingMaterial, usePOSTagging);
         cohesion = new SemanticCohesion(this, initialReadingMaterial);
     }
 
-    public static Summary loadSummary(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+    public static Summary loadSummary(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -71,8 +71,7 @@ public class Summary extends Metacognition {
             }
 
             LOGGER.info("Building summary internal representation ...");
-            Summary meta = new Summary(pathToDoc, contents,
-                    initialReadingMaterial, usePOSTagging, cleanInput);
+            Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging);
 
             extractDocumentDescriptors(doc, meta);
             return meta;
@@ -114,14 +113,10 @@ public class Summary extends Metacognition {
     }
 
     @Override
-    public void computeAll(boolean computeDialogism, boolean saveOutput) {
+    public void computeAll(boolean computeDialogism) {
         computeDiscourseAnalysis(computeDialogism);
         ReadingStrategies.detReadingStrategies(this);
         ComplexityIndices.computeComplexityFactors(this);
-
-        if (saveOutput) {
-            saveSerializedDocument();
-        }
         LOGGER.info("Finished processing summary ...");
     }
 }

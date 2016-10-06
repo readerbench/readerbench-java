@@ -15,6 +15,7 @@
  */
 package view.widgets.selfexplanation.summary;
 
+import data.AbstractDocument;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
@@ -78,10 +79,10 @@ public class SummaryProcessingView extends JInternalFrame {
 
     public class EssayProcessingTask extends SwingWorker<Void, Void> {
 
-        private String pathToDoc;
-        private Document referredDoc;
-        private boolean usePOSTagging;
-        private boolean isSerialized;
+        private final String pathToDoc;
+        private final Document referredDoc;
+        private final boolean usePOSTagging;
+        private final boolean isSerialized;
 
         public EssayProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
             super();
@@ -96,9 +97,10 @@ public class SummaryProcessingView extends JInternalFrame {
             if (isSerialized) {
                 e = (Summary) Summary.loadSerializedDocument(pathToIndividualFile);
             } else {
-                e = Summary.loadSummary(pathToIndividualFile, referredDoc, usePOSTagging, true);
+                e = Summary.loadSummary(pathToIndividualFile, referredDoc, usePOSTagging);
                 if (e != null) {
-                    e.computeAll(usePOSTagging, true);
+                    e.computeAll(usePOSTagging);
+                    e.save(AbstractDocument.SaveType.SERIALIZED);
                 }
             }
 

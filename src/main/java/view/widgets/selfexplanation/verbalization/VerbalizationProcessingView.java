@@ -15,6 +15,7 @@
  */
 package view.widgets.selfexplanation.verbalization;
 
+import data.AbstractDocument;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
@@ -79,10 +80,10 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
     public class VerbalizationProcessingTask extends SwingWorker<Void, Void> {
 
-        private String pathToDoc;
-        private Document referredDoc;
-        private boolean usePOSTagging;
-        private boolean isSerialized;
+        private final String pathToDoc;
+        private final Document referredDoc;
+        private final boolean usePOSTagging;
+        private final boolean isSerialized;
 
         public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
             super();
@@ -93,12 +94,13 @@ public class VerbalizationProcessingView extends JInternalFrame {
         }
 
         public void addSingleVerbalisation(String pathToIndividualFile) {
-            Metacognition v = null;
+            Metacognition v;
             if (isSerialized) {
                 v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
             } else {
-                v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging, true);
-                v.computeAll(true, true);
+                v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging);
+                v.computeAll(true);
+                v.save(AbstractDocument.SaveType.SERIALIZED);
             }
 
             if (v != null) {
@@ -218,31 +220,27 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
         btnRemoveVerbalization = new JButton(LocalizationUtils.getTranslation("Remove verbalization"));
         btnRemoveVerbalization.setEnabled(false);
-        btnRemoveVerbalization.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (verbalisationsTable.getSelectedRow() != -1) {
-                    loadedVervalizations.remove(verbalisationsTable.getSelectedRow());
-                    updateContents();
-                } else {
-                    JOptionPane.showMessageDialog(VerbalizationProcessingView.this,
-                            LocalizationUtils.getTranslation("Please select a row to be deleted!"), "Information",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+        btnRemoveVerbalization.addActionListener((ActionEvent e) -> {
+            if (verbalisationsTable.getSelectedRow() != -1) {
+                loadedVervalizations.remove(verbalisationsTable.getSelectedRow());
+                updateContents();
+            } else {
+                JOptionPane.showMessageDialog(VerbalizationProcessingView.this,
+                        LocalizationUtils.getTranslation("Please select a row to be deleted!"), "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
         btnViewVerbalization = new JButton(LocalizationUtils.getTranslation("View verbalization"));
         btnViewVerbalization.setEnabled(false);
-        btnViewVerbalization.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (verbalisationsTable.getSelectedRow() != -1) {
-                    Metacognition v = loadedVervalizations.get(verbalisationsTable.getSelectedRow());
-                    VerbalizationView view = new VerbalizationView(v);
-                    view.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(desktopPane, "Please select a verbalization to be viewed!",
-                            "Information", JOptionPane.INFORMATION_MESSAGE);
-                }
+        btnViewVerbalization.addActionListener((ActionEvent e) -> {
+            if (verbalisationsTable.getSelectedRow() != -1) {
+                Metacognition v = loadedVervalizations.get(verbalisationsTable.getSelectedRow());
+                VerbalizationView view = new VerbalizationView(v);
+                view.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(desktopPane, "Please select a verbalization to be viewed!",
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 

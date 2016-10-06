@@ -192,28 +192,23 @@ public class Millington {
 
             String seRefText = content.substring(0, content.indexOf(targetText) + targetText.length());
 
-            Document refDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(seRefText), lsa, lda, lang,
-                    true, true);
-            Summary se = new Summary(studentSE, refDoc, true, true);
-            se.computeAll(true, false);
+            Document refDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(seRefText), lsa, lda, lang, true);
+            Summary se = new Summary(studentSE, refDoc, true);
+            se.computeAll(true);
             List<SemanticCohesion> cohesionScores = new ArrayList<>();
 
             String prevText = content.substring(0, content.indexOf(targetText));
-            Document prevDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(prevText), lsa, lda, lang,
-                    true, true);
+            Document prevDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(prevText), lsa, lda, lang, true);
             cohesionScores.add(new SemanticCohesion(se, prevDoc));
 
-            Document targetDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(targetText), lsa, lda,
-                    lang, true, true);
+            Document targetDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(targetText), lsa, lda, lang, true);
             cohesionScores.add(new SemanticCohesion(se, targetDoc));
 
             String nextText = content.substring(content.indexOf(targetText) + targetText.length());
-            Document nextDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(nextText), lsa, lda, lang,
-                    true, true);
+            Document nextDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(nextText), lsa, lda, lang, true);
             cohesionScores.add(new SemanticCohesion(se, nextDoc));
 
-            Document entireDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(content), lsa, lda, lang,
-                    true, true);
+            Document entireDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(content), lsa, lda, lang, true);
             cohesionScores.add(new SemanticCohesion(se, entireDoc));
 
             out = new BufferedWriter(new FileWriter(path + "/output.csv", true));
@@ -236,7 +231,7 @@ public class Millington {
             out.close();
 
             if (rowNo % 10 == 0) {
-                LOGGER.info("Finished processing " + rowNo + " rows...");
+                LOGGER.info("Finished processing " + rowNo + " rows ...");
             }
             rowNo++;
         }

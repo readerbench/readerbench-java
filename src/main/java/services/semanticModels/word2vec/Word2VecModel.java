@@ -58,7 +58,7 @@ public class Word2VecModel implements ISemanticModel {
 
     private final Lang language;
     private final String path;
-    private Map<Word, double[]> wordVectors;
+    private final Map<Word, double[]> wordVectors;
 
     private Word2VecModel(String path, Lang language, Word2Vec word2vec) {
         this.language = language;

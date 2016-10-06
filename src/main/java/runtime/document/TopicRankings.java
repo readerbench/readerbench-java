@@ -143,14 +143,13 @@ public class TopicRankings {
                 Document d;
                 try {
                     if (meta) {
-                        d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
+                        d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                     } else {
-                        d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
+                        d = Document.load(file, lsa, lda, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism, null, null);
+                    d.computeAll(computeDialogism);
+                    d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
-                    d.saveSerializedDocument();
-                    d.exportDocument();
                 } catch (Exception e) {
                     LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
                     Exceptions.printStackTrace(e);

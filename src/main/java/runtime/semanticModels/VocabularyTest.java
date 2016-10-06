@@ -139,7 +139,7 @@ public class VocabularyTest {
 
     public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-        Document doc = new Document(null, contents, lsa, lda, lang, true, true);
+        Document doc = new Document(null, contents, lsa, lda, lang, true);
         return doc;
     }
 

@@ -59,7 +59,7 @@ public class CMIndexer {
 
     private void loadDocument() {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(this.text);
-        this.document = new Document(contents, this.semanticModel, true, false);
+        this.document = new Document(contents, this.semanticModel, true);
     }
 
     private void indexFullSemanticSpaceDistances(double threshold, int noTopSimilarWords) {

@@ -54,10 +54,9 @@ public class LSA implements ISemanticModel {
     public static final double LSA_THRESHOLD = 0.25;
     public static final int K = 300;
     public static final int NO_KNN_NEIGHBOURS = 100;
-    
-    private static final Set<Lang> availableFor = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.la, Lang.ro);
-    
-    
+
+    private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.la, Lang.ro);
+
     private Lang language;
     private String path;
     private double[][] Uk;
@@ -76,7 +75,7 @@ public class LSA implements ISemanticModel {
                 }
             }
 
-            logger.info("Loading LSA semantic space " + path + "...");
+            logger.info("Loading LSA semantic space " + path + " ...");
             LSA lsaLoad = new LSA();
             lsaLoad.setLanguage(language);
             lsaLoad.setPath(path);
@@ -340,6 +339,6 @@ public class LSA implements ISemanticModel {
     }
 
     public static Set<Lang> getAvailableLanguages() {
-        return availableFor;
+        return AVAILABLE_FOR;
     }
 }

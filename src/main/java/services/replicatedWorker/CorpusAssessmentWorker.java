@@ -27,54 +27,54 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class CorpusAssessmentWorker extends Worker {
-	static Logger logger = Logger.getLogger(CorpusAssessmentWorker.class);
-	private LSA lsa;
-	private LDA lda;
 
-	public CorpusAssessmentWorker() {
-		// load also LSA vector space and LDA model
-		lsa = LSA.loadLSA(CorpusAssessmentMaster.PATH_TO_LSA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
-		lda = LDA.loadLDA(CorpusAssessmentMaster.PATH_TO_LDA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
-	}
+    static Logger logger = Logger.getLogger(CorpusAssessmentWorker.class);
+    private LSA lsa;
+    private LDA lda;
 
-	public void performTask(Serializable task) throws Exception {
-		TaskMsg taskMsg = (TaskMsg) task;
-		if (taskMsg.isFinish()) {
-			logger.info(workerID + " finished working. Good bye");
-			connection.close();
-			System.exit(-1);
-		}
+    public CorpusAssessmentWorker() {
+        // load also LSA vector space and LDA model
+        lsa = LSA.loadLSA(CorpusAssessmentMaster.PATH_TO_LSA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
+        lda = LDA.loadLDA(CorpusAssessmentMaster.PATH_TO_LDA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
+    }
 
-		// Map<String, Integer> wordOccurences = new TreeMap<String, Integer>();
-		try {
-			send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
-					null));
+    public void performTask(Serializable task) throws Exception {
+        TaskMsg taskMsg = (TaskMsg) task;
+        if (taskMsg.isFinish()) {
+            logger.info(workerID + " finished working. Good bye");
+            connection.close();
+            System.exit(-1);
+        }
 
-			Conversation d = Conversation.load(new File(taskMsg.getArgs()[0].toString()), lsa, lda,
-					CorpusAssessmentMaster.PROCESSING_LANGUAGE, CorpusAssessmentMaster.USE_POS_TAGGING,
-					CorpusAssessmentMaster.CLEAN_INPUT);
-			if (CorpusAssessmentMaster.PROCESS_INPUT) {
-				d.computeAll(CorpusAssessmentMaster.COMPUTE_DIALOGISM, CorpusAssessmentMaster.PATH_TO_COMPLEXITY_MODEL,
-						CorpusAssessmentMaster.SELECTED_COMPLEXITY_FACTORS, CorpusAssessmentMaster.SAVE_OUTPUT);
-			}
+        // Map<String, Integer> wordOccurences = new TreeMap<String, Integer>();
+        try {
+            send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE, new String[]{taskMsg.getArgs()[0].toString()},
+                    null));
 
-			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
-					null));
-		} catch (Exception e) {
-			e.printStackTrace();
-			send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[] { taskMsg.getArgs()[0].toString() },
-					null));
-		}
+            Conversation d = Conversation.load(new File(taskMsg.getArgs()[0].toString()), lsa, lda, CorpusAssessmentMaster.PROCESSING_LANGUAGE, CorpusAssessmentMaster.USE_POS_TAGGING
+            );
+            if (CorpusAssessmentMaster.PROCESS_INPUT) {
+                d.computeAll(CorpusAssessmentMaster.COMPUTE_DIALOGISM);
+                d.save(CorpusAssessmentMaster.SAVE_OUTPUT);
+            }
 
-		logger.info("Finished analysing " + taskMsg.getArgs()[0].toString());
-	}
+            send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[]{taskMsg.getArgs()[0].toString()},
+                    null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            send(new StatusMsg(workerID, StatusMsg.FINISHED_MESSAGE, new String[]{taskMsg.getArgs()[0].toString()},
+                    null));
+        }
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.INFO);
+        logger.info("Finished analysing " + taskMsg.getArgs()[0].toString());
+    }
 
-		Worker consumerTool = new CorpusAssessmentWorker();
-		consumerTool.run();
-	}
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
+        Logger.getRootLogger().setLevel(Level.INFO);
+
+        Worker consumerTool = new CorpusAssessmentWorker();
+        consumerTool.run();
+    }
 
 }

@@ -47,6 +47,7 @@ import java.io.FileNotFoundException;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 import services.commons.VectorAlgebra;
 import services.complexity.ComputeBalancedMeasure;
 import services.discourse.CSCL.Collaboration;
@@ -102,14 +103,12 @@ public class Conversation extends AbstractDocument {
      * @param lda
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      */
-    public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang,
-            boolean usePOSTagging, boolean cleanInput) {
+    public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         this(path, lsa, lda, lang);
         this.setText(contents.getText());
         setDocTmp(contents);
-        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging, cleanInput);
+        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
         this.determineParticipantInterventions();
     }
 
@@ -119,15 +118,13 @@ public class Conversation extends AbstractDocument {
      * @param pathToLDA
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      * @return
      */
-    public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
-            boolean usePOSTagging, boolean cleanInput) {
+    public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
         // load also LSA vector space and LDA model
         LSA lsa = LSA.loadLSA(pathToLSA, lang);
         LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging);
     }
 
     /**
@@ -138,11 +135,9 @@ public class Conversation extends AbstractDocument {
      * @param lda
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      * @return
      */
-    public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
+    public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Conversation c = null;
@@ -159,7 +154,7 @@ public class Conversation extends AbstractDocument {
             org.w3c.dom.Document dom = null;
             try {
                 dom = db.parse(input);
-            } catch (Exception ex) {
+            } catch (SAXException | IOException ex) {
                 Exceptions.printStackTrace(ex);
             }
 
@@ -217,7 +212,7 @@ public class Conversation extends AbstractDocument {
             }
 
             contents.setBlocks(blocks);
-            c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
+            c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging);
             // set title as a concatenation of topics
             String title = "";
             nl1 = doc.getElementsByTagName("Topic");
@@ -356,13 +351,10 @@ public class Conversation extends AbstractDocument {
 
     /**
      * @param computeDialogism
-     * @param pathToComplexityModel
-     * @param selectedComplexityFactors
-     * @param saveOutput
      */
-    public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
-            SaveType saveOutput) {
-        super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
+    @Override
+    public void computeAll(boolean computeDialogism) {
+        super.computeAll(computeDialogism);
 
         this.getParticipants().stream().forEach((p) -> {
             TopicModeling.determineTopics(p.getInterventions());
@@ -379,34 +371,14 @@ public class Conversation extends AbstractDocument {
         ParticipantEvaluation.evaluateInvolvement(this);
         ParticipantEvaluation.performSNA(this);
         ParticipantEvaluation.evaluateUsedConcepts(this);
+    }
 
-        // compute all textual complexity factors
+    public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
         if (pathToComplexityModel != null && selectedComplexityFactors != null) {
             ComputeBalancedMeasure.evaluateTextualComplexityParticipants(this, pathToComplexityModel, selectedComplexityFactors);
         }
-
-        // writing exports
-        switch (saveOutput) {
-            case SERIALIZED:
-                saveSerializedDocument();
-                break;
-            case SERIALIZED_AND_CSV_EXPORT:
-                saveSerializedDocument();
-                exportDocument();
-                break;
-            case FULL:
-                exportDocument();
-                exportDocumentAdvanced();
-                saveSerializedDocument();
-                break;
-            default:
-                break;
-        }
     }
 
-    /**
-     *
-     */
     public void exportIM() {
         LOGGER.info("Writing document export in IM format");
         File output = new File(getPath().replace(".xml", "_IM.txt"));

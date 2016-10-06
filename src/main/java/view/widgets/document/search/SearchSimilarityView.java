@@ -97,584 +97,598 @@ import view.models.PreviewSketch;
 import view.widgets.ReaderBenchView;
 
 public class SearchSimilarityView extends JFrame {
-	public static final double INITIAL_DOC_THRESHOLD = 0.4;
 
-	private static final long serialVersionUID = -8582615231233815258L;
-	static Logger logger = Logger.getLogger(SearchSimilarityView.class);
-	public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
+    public static final double INITIAL_DOC_THRESHOLD = 0.4;
 
-	private List<Document> docs;
-	private AbstractDocument query;
-	private Map<AbstractDocument, Boolean> visibleDocs;
-	private JSlider sliderThreshold;
-	private JPanel panelGraph;
-	private JLabel lblThreshold;
-	private int graphDepthLevel;
-	private JTable tableCentrality;
-	private DefaultTableModel tableCentralityModel;
+    private static final long serialVersionUID = -8582615231233815258L;
+    static Logger logger = Logger.getLogger(SearchSimilarityView.class);
+    public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
-	private class CompareDocsSim implements Comparable<CompareDocsSim> {
-		private AbstractDocument doc;
-		private double sim;
+    private List<Document> docs;
+    private AbstractDocument query;
+    private Map<AbstractDocument, Boolean> visibleDocs;
+    private JSlider sliderThreshold;
+    private JPanel panelGraph;
+    private JLabel lblThreshold;
+    private int graphDepthLevel;
+    private JTable tableCentrality;
+    private DefaultTableModel tableCentralityModel;
 
-		public CompareDocsSim(AbstractDocument doc, double sim) {
-			super();
-			this.doc = doc;
-			this.sim = sim;
-		}
+    private class CompareDocsSim implements Comparable<CompareDocsSim> {
 
-		public AbstractDocument getDoc() {
-			return doc;
-		}
+        private AbstractDocument doc;
+        private double sim;
 
-		public double getSim() {
-			return sim;
-		}
+        public CompareDocsSim(AbstractDocument doc, double sim) {
+            super();
+            this.doc = doc;
+            this.sim = sim;
+        }
 
-		@Override
-		public int compareTo(CompareDocsSim o) {
-			return new Double(o.getSim()).compareTo(new Double(this.getSim()));
-		}
+        public AbstractDocument getDoc() {
+            return doc;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == null || obj == null)
-				return false;
-			CompareDocsSim o = (CompareDocsSim) obj;
-			return this.getDoc().equals(o.getDoc());
-		}
+        public double getSim() {
+            return sim;
+        }
 
-		@Override
-		public String toString() {
-			return Formatting.formatNumber(this.getSim()) + ": " + new File(this.getDoc().getPath()).getName() + " >> "
-					+ this.getDoc().getText();
-		}
-	}
+        @Override
+        public int compareTo(CompareDocsSim o) {
+            return new Double(o.getSim()).compareTo(new Double(this.getSim()));
+        }
 
-	private void computeSimilarTopics() {
-		Map<Word, Double> topicScoreMap = new TreeMap<Word, Double>();
+        @Override
+        public boolean equals(Object obj) {
+            if (this == null || obj == null) {
+                return false;
+            }
+            CompareDocsSim o = (CompareDocsSim) obj;
+            return this.getDoc().equals(o.getDoc());
+        }
 
-		// List<Topic> topicL = new ArrayList<Topic>();
-		for (AbstractDocument d : docs) {
-			List<Topic> docTopics = d.getTopics();
-			Collections.sort(docTopics, new Comparator<Topic>() {
-				public int compare(Topic t1, Topic t2) {
-					return -Double.compare(t1.getRelevance(), t2.getRelevance());
-				}
-			});
-			for (int i = 0; i < Math.min(20, docTopics.size()); i++) {
-				if (!topicScoreMap.containsKey(docTopics.get(i).getWord())) {
-					topicScoreMap.put(docTopics.get(i).getWord(), docTopics.get(i).getRelevance());
-				} else {
-					double topicRel = topicScoreMap.get(docTopics.get(i).getWord()) + docTopics.get(i).getRelevance();
-					topicScoreMap.put(docTopics.get(i).getWord(), topicRel);
-				}
-			}
-		}
+        @Override
+        public String toString() {
+            return Formatting.formatNumber(this.getSim()) + ": " + new File(this.getDoc().getPath()).getName() + " >> "
+                    + this.getDoc().getText();
+        }
+    }
 
-		List<Topic> topicL = new ArrayList<Topic>();
-		Iterator<Map.Entry<Word, Double>> mapIter = topicScoreMap.entrySet().iterator();
-		while (mapIter.hasNext()) {
-			Map.Entry<Word, Double> entry = mapIter.next();
-			topicL.add(new Topic(entry.getKey(), entry.getValue()));
-		}
-		Collections.sort(topicL);
-		for (Topic t : topicL) {
-			double relevance = this.computeDistanceFromRefDoc(t.getWord(), this.query);
-			t.setRelevance(relevance);
-			System.out.print(relevance + " ");
-		}
-		Collections.sort(topicL, new Comparator<Topic>() {
-			public int compare(Topic t1, Topic t2) {
-				return -Double.compare(t1.getRelevance(), t2.getRelevance());
-			}
-		});
+    private void computeSimilarTopics() {
+        Map<Word, Double> topicScoreMap = new TreeMap<Word, Double>();
 
-		for (Topic t : topicL) {
-			System.out.print(t.getWord().getText() + "->" + t.getRelevance() + " ");
-		}
+        // List<Topic> topicL = new ArrayList<Topic>();
+        for (AbstractDocument d : docs) {
+            List<Topic> docTopics = d.getTopics();
+            Collections.sort(docTopics, new Comparator<Topic>() {
+                public int compare(Topic t1, Topic t2) {
+                    return -Double.compare(t1.getRelevance(), t2.getRelevance());
+                }
+            });
+            for (int i = 0; i < Math.min(20, docTopics.size()); i++) {
+                if (!topicScoreMap.containsKey(docTopics.get(i).getWord())) {
+                    topicScoreMap.put(docTopics.get(i).getWord(), docTopics.get(i).getRelevance());
+                } else {
+                    double topicRel = topicScoreMap.get(docTopics.get(i).getWord()) + docTopics.get(i).getRelevance();
+                    topicScoreMap.put(docTopics.get(i).getWord(), topicRel);
+                }
+            }
+        }
 
-		for (Topic t : this.query.getTopics()) {
-			System.out.println("-> " + t.getWord());
-		}
-	}
+        List<Topic> topicL = new ArrayList<Topic>();
+        Iterator<Map.Entry<Word, Double>> mapIter = topicScoreMap.entrySet().iterator();
+        while (mapIter.hasNext()) {
+            Map.Entry<Word, Double> entry = mapIter.next();
+            topicL.add(new Topic(entry.getKey(), entry.getValue()));
+        }
+        Collections.sort(topicL);
+        for (Topic t : topicL) {
+            double relevance = this.computeDistanceFromRefDoc(t.getWord(), this.query);
+            t.setRelevance(relevance);
+            System.out.print(relevance + " ");
+        }
+        Collections.sort(topicL, new Comparator<Topic>() {
+            public int compare(Topic t1, Topic t2) {
+                return -Double.compare(t1.getRelevance(), t2.getRelevance());
+            }
+        });
 
-	private double computeDistanceFromRefDoc(Word word, AnalysisElement e) {
+        for (Topic t : topicL) {
+            System.out.print(t.getWord().getText() + "->" + t.getRelevance() + " ");
+        }
+
+        for (Topic t : this.query.getTopics()) {
+            System.out.println("-> " + t.getWord());
+        }
+    }
+
+    private double computeDistanceFromRefDoc(Word word, AnalysisElement e) {
+        try {
+            double lsa, lda;
+            double[] probDistrib = e.getLDA().getWordProbDistribution(word);
+
+            // determine importance within analysis element
+            lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
+            lda = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
+            return SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
+        } catch (Exception ex) {
+            return 0.0;
+        }
+    }
+
+    public SearchSimilarityView(List<Document> docs, String query) {
+        this.setGraphDepthLevel(1);
+        setTitle("Search Graph");
+        getContentPane().setBackground(Color.WHITE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.docs = docs;
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        BlockTemplate block = contents.new BlockTemplate();
+        block.setId(0);
+        block.setContent(query);
+        contents.getBlocks().add(block);
+
+        this.query = new Document(null, contents, docs.get(0).getLSA(), docs.get(0).getLDA(), docs.get(0).getLanguage(), true);
+        this.query.computeAll(true);
+        this.query.setTitleText(query);
+
+        this.computeSimilarTopics();
+        // adjust view to desktop size
+        int margin = 50;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
+
+        generateLayout();
+        generateGraph();
+    }
+
+    private void generateLayout() {
+        lblThreshold = new JLabel("Threshold among documents");
+        lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
+
+        sliderThreshold = new JSlider(30, 80, 50);
+        sliderThreshold.setBackground(Color.WHITE);
+        sliderThreshold.setPaintTicks(true);
+        sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        sliderThreshold.setPaintLabels(true);
+        sliderThreshold.setMinorTickSpacing(10);
+        sliderThreshold.setMajorTickSpacing(50);
+        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
+        labelTableThreshold.put(new Integer(80), new JLabel("80%"));
+        labelTableThreshold.put(new Integer(50), new JLabel("50%"));
+        labelTableThreshold.put(new Integer(30), new JLabel("30%"));
+        sliderThreshold.setLabelTable(labelTableThreshold);
+        sliderThreshold.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                generateGraph();
+            }
+        });
+
+        panelGraph = new JPanel();
+        panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        panelGraph.setBackground(Color.WHITE);
+        panelGraph.setLayout(new BorderLayout());
+
+        JLabel lblCentrality = new JLabel("Top similar documents");
+        lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
+        String[] header2 = {"Article", "Similarity"};
+        String[][] data2 = new String[0][2];
+        tableCentralityModel = new DefaultTableModel(data2, header2);
+        tableCentrality = new JTable(tableCentralityModel) {
+            private static final long serialVersionUID = 1L;
+
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        ;
+        };
 		try {
-			double lsa, lda;
-			double[] probDistrib = e.getLDA().getWordProbDistribution(word);
+            tableCentrality.setAutoCreateRowSorter(true);
+        } catch (Exception continuewithNoSort) {
+        }
+        tableCentrality.setFillsViewportHeight(true);
+        tableCentrality.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent me) {
+                JTable table = (JTable) me.getSource();
+                Point p = me.getPoint();
+                int row = table.rowAtPoint(p);
+                if (me.getClickCount() == 2) {
+                    try {
+                        String docC = query.getText();
+                        String doc2 = tableCentrality.getValueAt(row, 0).toString();
+                        String score = tableCentrality.getValueAt(row, 1).toString();
 
-			// determine importance within analysis element
-			lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
-			lda = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
-			return SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
-		} catch (Exception ex) {
-			return 0.0;
-		}
-	}
+                        JOptionPane.showMessageDialog(SearchSimilarityView.this,
+                                "<html><b>Query:</b> " + docC + "<br> <b>Selected document:</b> " + doc2
+                                + "<br> <b>Semantic Distance:</b> " + score + "</html>");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
-	public SearchSimilarityView(List<Document> docs, String query) {
-		this.setGraphDepthLevel(1);
-		setTitle("Search Graph");
-		getContentPane().setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		this.docs = docs;
-		AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-		BlockTemplate block = contents.new BlockTemplate();
-		block.setId(0);
-		block.setContent(query);
-		contents.getBlocks().add(block);
+        JScrollPane tableScrollCentrality = new JScrollPane(tableCentrality);
+        tableScrollCentrality.setBackground(Color.white);
+        Dimension tablePreferredCentrality = tableScrollCentrality.getPreferredSize();
+        tableScrollCentrality.setPreferredSize(
+                new Dimension(tablePreferredCentrality.width / 2, tablePreferredCentrality.height / 3));
 
-		this.query = new Document(null, contents, docs.get(0).getLSA(), docs.get(0).getLDA(), docs.get(0).getLanguage(),
-				true, false);
-		this.query.computeAll(true, null, null);
-		this.query.setTitleText(query);
+        Integer[] graphLevels = {1, 2, 3};
 
-		this.computeSimilarTopics();
-		// adjust view to desktop size
-		int margin = 50;
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
+        JLabel lblComboBox = new JLabel("Depth Level");
+        lblComboBox.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		generateLayout();
-		generateGraph();
-	}
+        JComboBox<Integer> docLevelsCombo = new JComboBox<Integer>(graphLevels);
+        docLevelsCombo.setSelectedIndex(0);
+        docLevelsCombo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JComboBox<?> cb = (JComboBox<?>) e.getSource();
+                int levelSelected = (Integer) cb.getSelectedItem();
+                SearchSimilarityView.this.setGraphDepthLevel(levelSelected);
+                generateGraph();
+            }
+        });
 
-	private void generateLayout() {
-		lblThreshold = new JLabel("Threshold among documents");
-		lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
+        JButton btnNewButton = new JButton("Show Concepts");
+        btnNewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (visibleDocs == null) {
+                    return;
+                }
+                List<AbstractDocument> docList = new ArrayList<AbstractDocument>();
+                Iterator<Entry<AbstractDocument, Boolean>> docIterator = visibleDocs.entrySet().iterator();
+                while (docIterator.hasNext()) {
+                    Entry<AbstractDocument, Boolean> docEntry = docIterator.next();
+                    if (docEntry.getValue() && !query.equals(docEntry.getKey())) {
+                        docList.add(docEntry.getKey());
+                    }
+                }
 
-		sliderThreshold = new JSlider(30, 80, 50);
-		sliderThreshold.setBackground(Color.WHITE);
-		sliderThreshold.setPaintTicks(true);
-		sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
-		sliderThreshold.setPaintLabels(true);
-		sliderThreshold.setMinorTickSpacing(10);
-		sliderThreshold.setMajorTickSpacing(50);
-		java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
-		labelTableThreshold.put(new Integer(80), new JLabel("80%"));
-		labelTableThreshold.put(new Integer(50), new JLabel("50%"));
-		labelTableThreshold.put(new Integer(30), new JLabel("30%"));
-		sliderThreshold.setLabelTable(labelTableThreshold);
-		sliderThreshold.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				generateGraph();
-			}
-		});
+                SearchConceptView view = new SearchConceptView(docList, query);
+                view.setVisible(true);
+            }
+        });
 
-		panelGraph = new JPanel();
-		panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panelGraph.setBackground(Color.WHITE);
-		panelGraph.setLayout(new BorderLayout());
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
+                .createSequentialGroup().addContainerGap()
+                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
+                        .addGroup(groupLayout.createSequentialGroup()
+                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                                .addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblComboBox))
+                                        .addComponent(lblThreshold))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(docLevelsCombo, GroupLayout.PREFERRED_SIZE, 51,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addGap(55).addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 182,
+                                GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(ComponentPlacement.RELATED)
+                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING).addComponent(lblCentrality).addComponent(
+                        tableScrollCentrality, GroupLayout.PREFERRED_SIZE, 331, GroupLayout.PREFERRED_SIZE))
+                .addContainerGap()));
+        groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
+                .createSequentialGroup()
+                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup().addContainerGap().addComponent(lblThreshold)
+                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(sliderThreshold,
+                                GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
+                        .addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10)
+                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                                        .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                                                                .addComponent(lblComboBox).addComponent(docLevelsCombo,
+                                                                GroupLayout.PREFERRED_SIZE, 30,
+                                                                GroupLayout.PREFERRED_SIZE))
+                                                        .addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 27,
+                                                                GroupLayout.PREFERRED_SIZE))
+                                                .addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627,
+                                                Short.MAX_VALUE))
+                                        .addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
+                                                tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671,
+                                                Short.MAX_VALUE)))))
+                .addContainerGap()));
+        getContentPane().setLayout(groupLayout);
+    }
 
-		JLabel lblCentrality = new JLabel("Top similar documents");
-		lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
-		String[] header2 = { "Article", "Similarity" };
-		String[][] data2 = new String[0][2];
-		tableCentralityModel = new DefaultTableModel(data2, header2);
-		tableCentrality = new JTable(tableCentralityModel) {
-			private static final long serialVersionUID = 1L;
+    public void buildConceptGraph(UndirectedGraph graph, GraphModel graphModel, double threshold, int currentLevel,
+            AbstractDocument refDoc, Map<AbstractDocument, Node> nodes) {
+        if (currentLevel > this.graphDepthLevel) {
+            return;
+        }
+        visibleDocs = new TreeMap<AbstractDocument, Boolean>();
+        for (AbstractDocument d : docs) {
+            visibleDocs.put(d, false);
+        }
+        visibleDocs.put(refDoc, true);
 
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			};
-		};
-		try {
-			tableCentrality.setAutoCreateRowSorter(true);
-		} catch (Exception continuewithNoSort) {
-		}
-		tableCentrality.setFillsViewportHeight(true);
-		tableCentrality.addMouseListener(new MouseAdapter() {
-			public void mousePressed(MouseEvent me) {
-				JTable table = (JTable) me.getSource();
-				Point p = me.getPoint();
-				int row = table.rowAtPoint(p);
-				if (me.getClickCount() == 2) {
-					try {
-						String docC = query.getText();
-						String doc2 = tableCentrality.getValueAt(row, 0).toString();
-						String score = tableCentrality.getValueAt(row, 1).toString();
+        logger.info("Starting to build the document graph");
+        // build connected graph
 
-						JOptionPane.showMessageDialog(SearchSimilarityView.this,
-								"<html><b>Query:</b> " + docC + "<br> <b>Selected document:</b> " + doc2
-										+ "<br> <b>Semantic Distance:</b> " + score + "</html>");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		});
+        // determine similarities in order to determine eligible candidates for
+        // visualisation
+        for (AbstractDocument d : docs) {
+            if (!refDoc.equals(d)) {
+                // difference between documents
+                double lsaSim = 0;
+                double ldaSim = 0;
+                if (refDoc.getLSA() != null && d.getLSA() != null) {
+                    lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
+                }
+                if (refDoc.getLDA() != null && d.getLDA() != null) {
+                    ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
+                            d.getLDAProbDistribution());
+                }
+                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 
-		JScrollPane tableScrollCentrality = new JScrollPane(tableCentrality);
-		tableScrollCentrality.setBackground(Color.white);
-		Dimension tablePreferredCentrality = tableScrollCentrality.getPreferredSize();
-		tableScrollCentrality.setPreferredSize(
-				new Dimension(tablePreferredCentrality.width / 2, tablePreferredCentrality.height / 3));
+                // difference to initial document
+                double simRef = 1.0;
+                if (currentLevel > 1) {
+                    lsaSim = 0;
+                    ldaSim = 0;
+                    if (this.query.getLSA() != null && d.getLSA() != null) {
+                        lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
+                    }
+                    if (this.query.getLDA() != null && d.getLDA() != null) {
+                        ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
+                                d.getLDAProbDistribution());
+                    }
+                    simRef = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                }
 
-		Integer[] graphLevels = { 1, 2, 3 };
+                if (sim >= threshold && simRef >= INITIAL_DOC_THRESHOLD
+                        && !refDoc.getProcessedText().equals(d.getProcessedText())) {
+                    visibleDocs.put(d, true);
+                }
+            }
+        }
 
-		JLabel lblComboBox = new JLabel("Depth Level");
-		lblComboBox.setFont(new Font("SansSerif", Font.BOLD, 12));
+        for (AbstractDocument d : docs) {
+            if (nodes.get(d) == null && visibleDocs.get(d) == true) {
+                createGraphNode(graph, graphModel, currentLevel, nodes, d, false);
+            }
+        }
 
-		JComboBox<Integer> docLevelsCombo = new JComboBox<Integer>(graphLevels);
-		docLevelsCombo.setSelectedIndex(0);
-		docLevelsCombo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JComboBox<?> cb = (JComboBox<?>) e.getSource();
-				int levelSelected = (Integer) cb.getSelectedItem();
-				SearchSimilarityView.this.setGraphDepthLevel(levelSelected);
-				generateGraph();
-			}
-		});
+        // determine similarities
+        for (AbstractDocument d : docs) {
+            if (!refDoc.equals(d) && visibleDocs.get(d)) {
+                double lsaSim = 0;
+                double ldaSim = 0;
+                if (refDoc.getLSA() != null && d.getLSA() != null) {
+                    lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
+                }
+                if (refDoc.getLDA() != null && d.getLDA() != null) {
+                    ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
+                            d.getLDAProbDistribution());
+                }
+                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
+                    Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
+                    e.setLabel(sim + "");
+                    graph.addEdge(e);
+                }
+            }
+        }
 
-		JButton btnNewButton = new JButton("Show Concepts");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (visibleDocs == null)
-					return;
-				List<AbstractDocument> docList = new ArrayList<AbstractDocument>();
-				Iterator<Entry<AbstractDocument, Boolean>> docIterator = visibleDocs.entrySet().iterator();
-				while (docIterator.hasNext()) {
-					Entry<AbstractDocument, Boolean> docEntry = docIterator.next();
-					if (docEntry.getValue() && !query.equals(docEntry.getKey())) {
-						docList.add(docEntry.getKey());
-					}
-				}
+        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
 
-				SearchConceptView view = new SearchConceptView(docList, query);
-				view.setVisible(true);
-			}
-		});
+        for (AbstractDocument d : docs) {
+            if (visibleDocs.get(d) == true) {
+                buildConceptGraph(graph, graphModel, threshold, currentLevel + 1, d, nodes);
+            }
+        }
+    }
 
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
-				.createSequentialGroup().addContainerGap()
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
-						.addGroup(groupLayout.createSequentialGroup()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE,
-														GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblComboBox))
-										.addComponent(lblThreshold))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(docLevelsCombo, GroupLayout.PREFERRED_SIZE, 51,
-										GroupLayout.PREFERRED_SIZE)
-								.addGap(55).addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 182,
-										GroupLayout.PREFERRED_SIZE)))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING).addComponent(lblCentrality).addComponent(
-						tableScrollCentrality, GroupLayout.PREFERRED_SIZE, 331, GroupLayout.PREFERRED_SIZE))
-				.addContainerGap()));
-		groupLayout.setVerticalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout
-				.createSequentialGroup()
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addContainerGap().addComponent(lblThreshold)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(sliderThreshold,
-										GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-						.addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10)
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup()
-												.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-														.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-																.addComponent(lblComboBox).addComponent(docLevelsCombo,
-																		GroupLayout.PREFERRED_SIZE, 30,
-																		GroupLayout.PREFERRED_SIZE))
-												.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 27,
-														GroupLayout.PREFERRED_SIZE))
-												.addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627,
-														Short.MAX_VALUE))
-										.addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
-												tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671,
-												Short.MAX_VALUE)))))
-				.addContainerGap()));
-		getContentPane().setLayout(groupLayout);
-	}
+    /**
+     * @param graph
+     * @param graphModel
+     * @param currentLevel
+     * @param nodes
+     * @param d
+     * @param text
+     */
+    private void createGraphNode(UndirectedGraph graph, GraphModel graphModel, int currentLevel,
+            Map<AbstractDocument, Node> nodes, AbstractDocument d, boolean isQuery) {
+        if (!nodes.containsKey(d)) {
+            if (isQuery) {
+                Node n = graphModel.factory().newNode(d.getTitleText());
+                n.setLabel(d.getTitleText());
+                n.setSize(20);
+                n.setColor(new Color(1.0f, 0.0f, 0.0f));
+                n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+                n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+                graph.addNode(n);
+                nodes.put(d, n);
+            } else {
+                String text = "";
+                if (d.getTitleText() != null) {
+                    text += d.getTitleText();
+                }
+                text += "(" + d.getText();
+                text = ((text.length() > 40) ? (text.substring(0, 40) + "...") : text) + ")";
 
-	public void buildConceptGraph(UndirectedGraph graph, GraphModel graphModel, double threshold, int currentLevel,
-			AbstractDocument refDoc, Map<AbstractDocument, Node> nodes) {
-		if (currentLevel > this.graphDepthLevel)
-			return;
-		visibleDocs = new TreeMap<AbstractDocument, Boolean>();
-		for (AbstractDocument d : docs) {
-			visibleDocs.put(d, false);
-		}
-		visibleDocs.put(refDoc, true);
+                Node n = graphModel.factory().newNode(text);
+                n.setLabel(text);
+                n.setSize(10);
+                n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+                n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
+                n.setColor(new Color(1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * (currentLevel + 1))),
+                        1.0f - ((float) (COLOR_CONCEPT.getGreen()) / (256 * (currentLevel + 1))),
+                        1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * (currentLevel + 1)))));
+                graph.addNode(nodes.get(d));
+                nodes.put(d, n);
+            }
+        }
+    }
 
-		logger.info("Starting to build the document graph");
-		// build connected graph
+    private void generateGraph() {
+        double threshold = ((double) sliderThreshold.getValue()) / 100;
 
-		// determine similarities in order to determine eligible candidates for
-		// visualisation
-		for (AbstractDocument d : docs) {
-			if (!refDoc.equals(d)) {
-				// difference between documents
-				double lsaSim = 0;
-				double ldaSim = 0;
-				if (refDoc.getLSA() != null && d.getLSA() != null)
-					lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
-				if (refDoc.getLDA() != null && d.getLDA() != null)
-					ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
-							d.getLDAProbDistribution());
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+        ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
+        pc.newProject();
 
-				// difference to initial document
-				double simRef = 1.0;
-				if (currentLevel > 1) {
-					lsaSim = 0;
-					ldaSim = 0;
-					if (this.query.getLSA() != null && d.getLSA() != null)
-						lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
-					if (this.query.getLDA() != null && d.getLDA() != null)
-						ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
-								d.getLDAProbDistribution());
-					simRef = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-				}
+        // get models
+        GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+        UndirectedGraph graph = graphModel.getUndirectedGraph();
+        AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+        AppearanceModel appearanceModel = appearanceController.getModel();
 
-				if (sim >= threshold && simRef >= INITIAL_DOC_THRESHOLD
-						&& !refDoc.getProcessedText().equals(d.getProcessedText())) {
-					visibleDocs.put(d, true);
-				}
-			}
-		}
+        // build nodes
+        Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
 
-		for (AbstractDocument d : docs) {
-			if (nodes.get(d) == null && visibleDocs.get(d) == true) {
-				createGraphNode(graph, graphModel, currentLevel, nodes, d, false);
-			}
-		}
+        // create root node
+        createGraphNode(graph, graphModel, 0, nodes, this.query, true);
+        // visibleDocs.put(this.referenceDoc, true);
+        buildConceptGraph(graph, graphModel, threshold, 1, this.query, nodes);
 
-		// determine similarities
-		for (AbstractDocument d : docs) {
-			if (!refDoc.equals(d) && visibleDocs.get(d)) {
-				double lsaSim = 0;
-				double ldaSim = 0;
-				if (refDoc.getLSA() != null && d.getLSA() != null)
-					lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
-				if (refDoc.getLDA() != null && d.getLDA() != null)
-					ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
-							d.getLDAProbDistribution());
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-				if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-					Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
-					e.setLabel(sim + "");
-					graph.addEdge(e);
-				}
-			}
-		}
+        // Run YifanHuLayout for 100 passes - The layout always takes the
+        // current visible view
+        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+        layout.setGraphModel(graphModel);
+        layout.resetPropertiesValues();
+        layout.setOptimalDistance(200f);
 
-		logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        layout.initAlgo();
+        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+            layout.goAlgo();
+        }
+        layout.endAlgo();
 
-		for (AbstractDocument d : docs) {
-			if (visibleDocs.get(d) == true) {
-				buildConceptGraph(graph, graphModel, threshold, currentLevel + 1, d, nodes);
-			}
-		}
-	}
+        /* similarity to the central article */
+        List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
+        Iterator<AbstractDocument> docIt = nodes.keySet().iterator();
+        while (docIt.hasNext()) {
+            AbstractDocument d = docIt.next();
+            if (d != this.query) {
+                double lsaSim = 0;
+                double ldaSim = 0;
+                if (this.query.getLSA() != null && d.getLSA() != null) {
+                    lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
+                }
+                if (this.query.getLDA() != null && d.getLDA() != null) {
+                    ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
+                            d.getLDAProbDistribution());
+                }
+                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                similarities.add(new CompareDocsSim(d, sim));
+            }
+        }
 
-	/**
-	 * @param graph
-	 * @param graphModel
-	 * @param currentLevel
-	 * @param nodes
-	 * @param d
-	 * @param text
-	 */
-	private void createGraphNode(UndirectedGraph graph, GraphModel graphModel, int currentLevel,
-			Map<AbstractDocument, Node> nodes, AbstractDocument d, boolean isQuery) {
-		if (!nodes.containsKey(d)) {
-			if (isQuery) {
-				Node n = graphModel.factory().newNode(d.getTitleText());
-				n.setLabel(d.getTitleText());
-				n.setSize(20);
-				n.setColor(new Color(1.0f, 0.0f, 0.0f));
-				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
-				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-				graph.addNode(n);
-				nodes.put(d, n);
-			} else {
-				String text = "";
-				if (d.getTitleText() != null)
-					text += d.getTitleText();
-				text += "(" + d.getText();
-				text = ((text.length() > 40) ? (text.substring(0, 40) + "...") : text) + ")";
+        Collections.sort(similarities);
+        if (tableCentralityModel.getRowCount() > 0) {
+            for (int i = tableCentralityModel.getRowCount() - 1; i >= 0; i--) {
+                tableCentralityModel.removeRow(i);
+            }
+        }
+        for (CompareDocsSim sim : similarities) {
+            String row[] = new String[2];
+            row[0] = sim.doc.getTitleText();
+            row[1] = Formatting.formatNumber(sim.sim) + "";
+            tableCentralityModel.addRow(row);
+        }
+        tableCentralityModel.fireTableDataChanged();
+        /* end similarity to central article */
 
-				Node n = graphModel.factory().newNode(text);
-				n.setLabel(text);
-				n.setSize(10);
-				n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
-				n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-				n.setColor(new Color(1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * (currentLevel + 1))),
-						1.0f - ((float) (COLOR_CONCEPT.getGreen()) / (256 * (currentLevel + 1))),
-						1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * (currentLevel + 1)))));
-				graph.addNode(nodes.get(d));
-				nodes.put(d, n);
-			}
-		}
-	}
+        // Get Centrality
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(false);
+        distance.execute(graphModel);
 
-	private void generateGraph() {
-		double threshold = ((double) sliderThreshold.getValue()) / 100;
+        // Rank size by centrality
+        Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+                RankingNodeSizeTransformer.class);
+        RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+                .getTransformer();
+        centralityTransformer.setMinSize(5);
+        centralityTransformer.setMaxSize(40);
+        appearanceController.transform(centralityRanking);
 
-		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-		pc.newProject();
+        // Rank label size - set a multiplier size
+        Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
+                RankingLabelSizeTransformer.class);
+        RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
+                .getTransformer();
+        labelSizeTransformer.setMinSize(1);
+        labelSizeTransformer.setMaxSize(5);
+        appearanceController.transform(centralityRanking2);
 
-		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
-		UndirectedGraph graph = graphModel.getUndirectedGraph();
-		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-		AppearanceModel appearanceModel = appearanceController.getModel();
+        // Preview configuration
+        PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
+        PreviewModel previewModel = previewController.getModel();
 
-		// build nodes
-		Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT,
+                previewModel.getProperties().getFontValue(PreviewProperty.NODE_LABEL_FONT).deriveFont(Font.PLAIN, 30));
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewController.refreshPreview();
 
-		// create root node
-		createGraphNode(graph, graphModel, 0, nodes, this.query, true);
-		// visibleDocs.put(this.referenceDoc, true);
-		buildConceptGraph(graph, graphModel, threshold, 1, this.query, nodes);
+        // New Processing target, get the PApplet
+        G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+        PreviewSketch previewSketch = new PreviewSketch(target);
+        previewController.refreshPreview();
+        previewSketch.resetZoom();
+        if (panelGraph.getComponents().length > 0) {
+            panelGraph.removeAll();
+            panelGraph.revalidate();
+        }
+        panelGraph.add(previewSketch, BorderLayout.CENTER);
 
-		// Run YifanHuLayout for 100 passes - The layout always takes the
-		// current visible view
-		YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
-		layout.setGraphModel(graphModel);
-		layout.resetPropertiesValues();
-		layout.setOptimalDistance(200f);
+        // Export
+        ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+        try {
+            ec.exportFile(new File("out/graph_doc_centered_view.pdf"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
+        this.pack();
+        logger.info("Finished building the graph " + this.graphDepthLevel);
+    }
 
-		layout.initAlgo();
-		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-			layout.goAlgo();
-		}
-		layout.endAlgo();
+    public int getGraphDepthLevel() {
+        return graphDepthLevel;
+    }
 
-		/* similarity to the central article */
-		List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
-		Iterator<AbstractDocument> docIt = nodes.keySet().iterator();
-		while (docIt.hasNext()) {
-			AbstractDocument d = docIt.next();
-			if (d != this.query) {
-				double lsaSim = 0;
-				double ldaSim = 0;
-				if (this.query.getLSA() != null && d.getLSA() != null)
-					lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
-				if (this.query.getLDA() != null && d.getLDA() != null)
-					ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
-							d.getLDAProbDistribution());
-				double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-				similarities.add(new CompareDocsSim(d, sim));
-			}
-		}
+    public void setGraphDepthLevel(int graphDepthLevel) {
+        this.graphDepthLevel = graphDepthLevel;
+    }
 
-		Collections.sort(similarities);
-		if (tableCentralityModel.getRowCount() > 0) {
-			for (int i = tableCentralityModel.getRowCount() - 1; i >= 0; i--) {
-				tableCentralityModel.removeRow(i);
-			}
-		}
-		for (CompareDocsSim sim : similarities) {
-			String row[] = new String[2];
-			row[0] = sim.doc.getTitleText();
-			row[1] = Formatting.formatNumber(sim.sim) + "";
-			tableCentralityModel.addRow(row);
-		}
-		tableCentralityModel.fireTableDataChanged();
-		/* end similarity to central article */
+    public static void main(String[] args) {
+        BasicConfigurator.configure();
 
-		// Get Centrality
-		GraphDistance distance = new GraphDistance();
-		distance.setDirected(false);
-		distance.execute(graphModel);
+        ReaderBenchView.adjustToSystemGraphics();
 
-		// Rank size by centrality
-		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingNodeSizeTransformer.class);
-		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-				.getTransformer();
-		centralityTransformer.setMinSize(5);
-		centralityTransformer.setMaxSize(40);
-		appearanceController.transform(centralityRanking);
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Document> docs = new LinkedList<Document>();
 
-		// Rank label size - set a multiplier size
-		Function centralityRanking2 = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingLabelSizeTransformer.class);
-		RankingLabelSizeTransformer labelSizeTransformer = (RankingLabelSizeTransformer) centralityRanking2
-				.getTransformer();
-		labelSizeTransformer.setMinSize(1);
-		labelSizeTransformer.setMaxSize(5);
-		appearanceController.transform(centralityRanking2);
+                File dir = new File("in/test");
+                File[] files = dir.listFiles(new FilenameFilter() {
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".ser");
+                    }
+                });
 
-		// Preview configuration
-		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
-		PreviewModel previewModel = previewController.getModel();
+                for (File file : files) {
+                    Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                    docs.add(d);
+                }
 
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT,
-				previewModel.getProperties().getFontValue(PreviewProperty.NODE_LABEL_FONT).deriveFont(Font.PLAIN, 30));
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
-		previewController.refreshPreview();
+                String query = "food meat";
 
-		// New Processing target, get the PApplet
-		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
-		PreviewSketch previewSketch = new PreviewSketch(target);
-		previewController.refreshPreview();
-		previewSketch.resetZoom();
-		if (panelGraph.getComponents().length > 0) {
-			panelGraph.removeAll();
-			panelGraph.revalidate();
-		}
-		panelGraph.add(previewSketch, BorderLayout.CENTER);
-
-		// Export
-		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-		try {
-			ec.exportFile(new File("out/graph_doc_centered_view.pdf"));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return;
-		}
-		this.pack();
-		logger.info("Finished building the graph " + this.graphDepthLevel);
-	}
-
-	public int getGraphDepthLevel() {
-		return graphDepthLevel;
-	}
-
-	public void setGraphDepthLevel(int graphDepthLevel) {
-		this.graphDepthLevel = graphDepthLevel;
-	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		ReaderBenchView.adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				List<Document> docs = new LinkedList<Document>();
-
-				File dir = new File("in/test");
-				File[] files = dir.listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.endsWith(".ser");
-					}
-				});
-
-				for (File file : files) {
-					Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-					docs.add(d);
-				}
-
-				String query = "food meat";
-
-				SearchSimilarityView view = new SearchSimilarityView(docs, query);
-				view.setVisible(true);
-			}
-		});
-	}
+                SearchSimilarityView view = new SearchSimilarityView(docs, query);
+                view.setVisible(true);
+            }
+        });
+    }
 }

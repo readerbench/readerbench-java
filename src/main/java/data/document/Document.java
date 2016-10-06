@@ -84,15 +84,14 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         this.initialTopics = new ArrayList<>();
     }
 
-    public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+    public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         this(path, lsa, lda, lang);
         this.setText(docTmp.getText());
         setDocTmp(docTmp);
-        Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging, cleanInput);
+        Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public Document(AbstractDocumentTemplate docTmp, ISemanticModel semModel, boolean usePOSTagging,
-            boolean cleanInput) {
+    public Document(AbstractDocumentTemplate docTmp, ISemanticModel semModel, boolean usePOSTagging) {
         LSA lsa = null;
         LDA lda = null;
         if (semModel instanceof LSA) {
@@ -110,18 +109,17 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         setText(docTmp.getText());
 
         setDocTmp(docTmp);
-        Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging, cleanInput);
+        Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
+    public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
         // load also LSA vector space and LDA model
         LSA lsa = LSA.loadLSA(pathToLSA, lang);
         LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging);
     }
 
-    public static Document load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+    public static Document load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             InputSource input = new InputSource(new FileInputStream(docFile));
@@ -130,7 +128,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            return load(docFile.getAbsolutePath(), doc, lsa, lda, lang, usePOSTagging, cleanInput);
+            return load(docFile.getAbsolutePath(), doc, lsa, lda, lang, usePOSTagging);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
@@ -138,7 +136,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         return null;
     }
 
-    public static Document load(String inputPath, Element root, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+    public static Document load(String inputPath, Element root, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         Element el;
         NodeList nl;
@@ -173,7 +171,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
                 }
             }
         }
-        Document d = new Document(inputPath, contents, lsa, lda, lang, usePOSTagging, cleanInput);
+        Document d = new Document(inputPath, contents, lsa, lda, lang, usePOSTagging);
         d.setNoVerbalizationBreakPoints(noBreakPoints);
 
         // determine title
@@ -257,7 +255,6 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             }
         }
         return d;
-
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
@@ -436,29 +433,6 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             }
         }
         return dom;
-    }
-
-    public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
-            SaveType saveOutput) {
-        super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
-        // writing exports if document
-        // if chat there are additional computations to perform
-        switch (saveOutput) {
-            case SERIALIZED:
-                saveSerializedDocument();
-                break;
-            case SERIALIZED_AND_CSV_EXPORT:
-                saveSerializedDocument();
-                exportDocument();
-                break;
-            case FULL:
-                exportDocument();
-                exportDocumentAdvanced();
-                saveSerializedDocument();
-                break;
-            default:
-                break;
-        }
     }
 
     public List<String> getAuthors() {

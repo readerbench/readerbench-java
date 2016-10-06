@@ -98,11 +98,11 @@ public class DataGathering {
             Document d = null;
             try {
                 if (meta) {
-                    d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
+                    d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                 } else {
-                    d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
+                    d = Document.load(file, lsa, lda, lang, usePOSTagging);
                 }
-                d.computeAll(computeDialogism, null, null);
+                d.computeAll(computeDialogism);
             } catch (Exception e) {
                 logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
                 Exceptions.printStackTrace(e);
@@ -145,10 +145,7 @@ public class DataGathering {
                             null);
                     StringBuilder concat = new StringBuilder();
                     for (ResultNode node : resultTopic.getNodes()) {
-                        concat.append(node.getName());
-                        concat.append(',');
-                        concat.append(node.getValue());
-                        concat.append(',');
+                        concat.append(node.getName()).append(',').append(node.getValue()).append(',');
                     }
                     outConcept.write(concat.toString());
                     outConcept.close();
