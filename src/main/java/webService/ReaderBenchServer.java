@@ -67,6 +67,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import spark.Request;
 import spark.Spark;
+import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
@@ -102,6 +103,7 @@ import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
+import webService.services.lak.result.QueryResultGraphMeasures;
 import webService.services.lak.result.QueryResultTwoModeGraph;
 import webService.services.lak.result.QueryResultTwoModeGraphNodes;
 import webService.services.lak.result.TwoModeGraph;
@@ -781,6 +783,13 @@ public class ReaderBenchServer {
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
             return result;
+        });
+        
+        Spark.get("/lak/measures", (request, response) -> {
+            response.type("application/json");
+            List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
+            QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
+            return qResult.convertToJson();
         });
     }
     
