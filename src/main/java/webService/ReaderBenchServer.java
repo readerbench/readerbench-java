@@ -774,11 +774,12 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
+            String searchText = (String) json.get("searchText");
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            TwoModeGraph graph = graphBuilder.getGraph(centerUri);
+            TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
             TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
-            graph = graphFilter.filterGraph(graph);
+            graph = graphFilter.filterGraph(graph, centerUri);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
