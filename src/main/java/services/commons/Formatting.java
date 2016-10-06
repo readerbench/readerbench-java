@@ -20,11 +20,18 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 
 public class Formatting {
+    
 	public static Double formatNumber(double scoreValue) {
+		return Formatting.formatNumber(scoreValue, 3);
+	}
+    
+    public static Double formatNumber(double scoreValue, int decimals) {
 		DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
 	    decimalFormatSymbols.setDecimalSeparator('.');
 	    
-		DecimalFormat formatter = new DecimalFormat("#.###");
+        StringBuilder sbDecimalFormat = new StringBuilder("#.");
+        for (int i = 0; i < decimals; i++) sbDecimalFormat.append('#');
+		DecimalFormat formatter = new DecimalFormat(sbDecimalFormat.toString());
 		try {
 			return formatter.parse(formatter.format(scoreValue)).doubleValue();
 		} catch (ParseException e) {
@@ -32,4 +39,5 @@ public class Formatting {
 		}
 		return 0.0;
 	}
+    
 }
