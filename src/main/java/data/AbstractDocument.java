@@ -45,7 +45,7 @@ import data.cscl.Utterance;
 import data.discourse.SemanticChain;
 import data.discourse.SemanticCohesion;
 import data.discourse.SemanticRelatedness;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.lexicalChains.DisambiguationGraph;
 import data.lexicalChains.LexicalChain;
@@ -65,8 +65,8 @@ import services.discourse.cohesion.CohesionGraph;
 import services.discourse.cohesion.DisambiguisationGraphAndLexicalChains;
 import services.discourse.cohesion.SentimentAnalysis;
 import services.discourse.dialogism.DialogismComputations;
-import services.discourse.topicMining.Scoring;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.Scoring;
+import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
 import services.nlp.parsing.SimpleParsing;
 import services.semanticModels.LDA.LDA;
@@ -216,7 +216,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         CohesionGraph.buildCohesionGraph(this);
 
         // determine topics
-        TopicModeling.determineTopics(this);
+        KeywordModeling.determineTopics(this);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
@@ -423,7 +423,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             // print topics
             out.write("\nTopics - Relevance\n");
             out.write("Keyword, Relevance,Tf,LSA Sim, LDA Sim\n");
-            for (Topic t : this.getTopics()) {
+            for (Keyword t : this.getTopics()) {
                 out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getLSASim())
@@ -433,7 +433,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 
             if (this.getLDA() != null) {
                 out.write("\nTopics - Clusters\n");
-                Map<Integer, List<Topic>> topicClusters = new TreeMap<>();
+                Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
                     Integer probClass = LDA.findMaxResemblance(t.getWord().getLDAProbDistribution(),
                             this.getLDAProbDistribution());
@@ -444,7 +444,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 });
                 for (Integer cluster : topicClusters.keySet()) {
                     out.write(cluster + ":,");
-                    for (Topic t : topicClusters.get(cluster)) {
+                    for (Keyword t : topicClusters.get(cluster)) {
                         out.write(t.getWord().getLemma() + " (" + t.getRelevance() + "),");
                     }
                     out.write("\n");
@@ -457,7 +457,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 if (c.getParticipants().size() > 0) {
                     for (Participant p : c.getParticipants()) {
                         out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ":");
-                        for (Topic t : p.getInterventions().getTopics()) {
+                        for (Keyword t : p.getInterventions().getTopics()) {
                             out.write("," + t.getWord().getLemma() + " (" + t.getWord().getPOS() + ") - "
                                     + Formatting.formatNumber(t.getRelevance()));
                         }

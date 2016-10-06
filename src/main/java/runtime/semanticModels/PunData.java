@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 
 import data.AbstractDocumentTemplate;
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
 import org.openide.util.Exceptions;
@@ -62,16 +62,16 @@ public class PunData {
         Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), lsa, lda, semModel.getLanguage(), true);
         String out = s1 + "-" + s2 + "," + Formatting.formatNumber(semModel.getSimilarity(d1, d2));
 
-        List<Topic> inferredConcepts = new ArrayList<>();
+        List<Keyword> inferredConcepts = new ArrayList<>();
 
         TreeMap<Word, Double> simWords = semModel.getSimilarConcepts(merge, minThreshold);
 
         for (Entry<Word, Double> entry : simWords.entrySet()) {
             if (!merge.getWordOccurences().keySet().contains(entry.getKey())) {
-                Topic t = new Topic(entry.getKey(), entry.getValue());
+                Keyword t = new Keyword(entry.getKey(), entry.getValue());
 
                 if (inferredConcepts.contains(t)) {
-                    Topic updatedTopic = inferredConcepts.get(inferredConcepts.indexOf(t));
+                    Keyword updatedTopic = inferredConcepts.get(inferredConcepts.indexOf(t));
                     updatedTopic.setRelevance(Math.max(updatedTopic.getRelevance(), entry.getValue()));
                 } else {
                     inferredConcepts.add(t);
@@ -81,7 +81,7 @@ public class PunData {
 
         Collections.sort(inferredConcepts);
 
-        for (Topic t : inferredConcepts) {
+        for (Keyword t : inferredConcepts) {
             out += "," + t.getWord().getLemma() + "," + Formatting.formatNumber(t.getRelevance());
         }
 

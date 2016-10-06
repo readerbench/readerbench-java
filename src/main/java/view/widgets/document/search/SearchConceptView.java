@@ -76,7 +76,7 @@ import data.AbstractDocument;
 import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
@@ -152,9 +152,9 @@ public class SearchConceptView extends JFrame {
 	private void computeSimilarTerms() {
 		Map<Word, Double> topicScoreMap = new TreeMap<Word, Double>();
 		for (AbstractDocument d : docs) {
-			List<Topic> docTopics = d.getTopics();
-			Collections.sort(docTopics, new Comparator<Topic>() {
-				public int compare(Topic t1, Topic t2) {
+			List<Keyword> docTopics = d.getTopics();
+			Collections.sort(docTopics, new Comparator<Keyword>() {
+				public int compare(Keyword t1, Keyword t2) {
 					return -Double.compare(t1.getRelevance(), t2.getRelevance());
 				}
 			});
@@ -168,11 +168,11 @@ public class SearchConceptView extends JFrame {
 			}
 		}
 
-		List<Topic> topicL = new ArrayList<Topic>();
+		List<Keyword> topicL = new ArrayList<Keyword>();
 		Iterator<Map.Entry<Word, Double>> mapIter = topicScoreMap.entrySet().iterator();
 		while (mapIter.hasNext()) {
 			Map.Entry<Word, Double> entry = mapIter.next();
-			topicL.add(new Topic(entry.getKey(), entry.getValue()));
+			topicL.add(new Keyword(entry.getKey(), entry.getValue()));
 		}
 		Collections.sort(topicL);
 
@@ -183,7 +183,7 @@ public class SearchConceptView extends JFrame {
 			if (wordList.size() >= 50 || count >= topicL.size())
 				break;
 
-			Topic t = topicL.get(count);
+			Keyword t = topicL.get(count);
 			if (!isReferencedWordStem(t.getWord()) && !containsStem(wordList, t.getWord())) {
 				wordList.add(t.getWord());
 			}
@@ -194,7 +194,7 @@ public class SearchConceptView extends JFrame {
 		similarWordL = wordList;
 		referenceWordL = new ArrayList<Word>();
 
-		for (Topic t : this.referenceDoc.getTopics()) {
+		for (Keyword t : this.referenceDoc.getTopics()) {
 			referenceWordL.add(t.getWord());
 		}
 

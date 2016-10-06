@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.discourse.topicMining;
+package services.discourse.keywordMining;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,25 +30,25 @@ import data.AbstractDocument;
 import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import services.commons.VectorAlgebra;
 import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
 
-public class TopicModeling {
+public class KeywordModeling {
 
-    static Logger logger = Logger.getLogger(TopicModeling.class);
+    static Logger logger = Logger.getLogger(KeywordModeling.class);
 
     public static final double LSA_WEIGHT = 1.0;
     public static final double LDA_WEIGHT = 1.0;
     public static final double WN_WEIGHT = 1.0;
 
-    public static List<Topic> filterTopics(AnalysisElement e, Set<String> ignoredWords) {
+    public static List<Keyword> filterTopics(AnalysisElement e, Set<String> ignoredWords) {
         logger.info("Filtering toppics");
-        List<Topic> filteredTopics = new ArrayList<>();
-        for (Topic t : e.getTopics()) {
+        List<Keyword> filteredTopics = new ArrayList<>();
+        for (Keyword t : e.getTopics()) {
             if (!ignoredWords.contains(t.getWord().getText())) {
                 filteredTopics.add(t);
             }
@@ -57,14 +57,14 @@ public class TopicModeling {
     }
 
     public static void determineTopics(AnalysisElement e) {
-        logger.info("Determining topics using Tf-IDf, LSA and LDA ...");
+        logger.info("Determining keywords using Tf-IDf, LSA and LDA ...");
         // determine topics by using Tf-IDF and (LSA & LDA)
         for (Word w : e.getWordOccurences().keySet()) {
-            Topic newTopic = new Topic(w, e);
+            Keyword newTopic = new Keyword(w, e);
             int index = e.getTopics().indexOf(newTopic);
             if (index >= 0) {
                 // update frequency for identical lemmas
-                Topic refTopic = e.getTopics().get(index);
+                Keyword refTopic = e.getTopics().get(index);
                 refTopic.updateRelevance(e);
             } else {
                 e.getTopics().add(newTopic);
@@ -73,9 +73,9 @@ public class TopicModeling {
         Collections.sort(e.getTopics());
     }
 
-    public static List<Topic> getSublist(List<Topic> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
-        List<Topic> results = new ArrayList<>();
-        for (Topic t : topics) {
+    public static List<Keyword> getSublist(List<Keyword> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
+        List<Keyword> results = new ArrayList<>();
+        for (Keyword t : topics) {
             if (results.size() >= noTopics || t.getRelevance() < 0) {
                 break;
             }
@@ -108,56 +108,52 @@ public class TopicModeling {
 
     public static Map<Word, Double> getCollectionTopics(List<? extends AbstractDocument> loadedDocuments) {
         Map<String, Double> topicScoreMap = new TreeMap<>();
-        Map<String, Word> stemToWord = new TreeMap<>();
+        Map<String, Word> lemmaToWord = new TreeMap<>();
 
         for (AbstractDocument d : loadedDocuments) {
-            List<Topic> docTopics = d.getTopics();
-            Collections.sort(docTopics, (Topic t1, Topic t2) -> -Double.compare(t1.getRelevance(), t2.getRelevance()));
+            List<Keyword> docTopics = d.getTopics();
+            Collections.sort(docTopics, (Keyword t1, Keyword t2) -> -Double.compare(t1.getRelevance(), t2.getRelevance()));
             for (int i = 0; i < docTopics.size(); i++) {
-                String stem = docTopics.get(i).getWord().getStem();
-                if (!topicScoreMap.containsKey(stem)) {
-                    topicScoreMap.put(stem, docTopics.get(i).getRelevance());
-                    stemToWord.put(stem, docTopics.get(i).getWord());
+                String lemma = docTopics.get(i).getWord().getLemma();
+                if (!topicScoreMap.containsKey(lemma)) {
+                    topicScoreMap.put(lemma, docTopics.get(i).getRelevance());
+                    lemmaToWord.put(lemma, docTopics.get(i).getWord());
                 } else {
-                    double topicRel = topicScoreMap.get(stem)
+                    double topicRel = topicScoreMap.get(lemma)
                             + docTopics.get(i).getRelevance();
-                    topicScoreMap.put(stem, topicRel);
-                    // shorter lemmas are stored
-                    if (stemToWord.get(stem).getLemma().length() > docTopics.get(i).getWord().getLemma().length()) {
-                        stemToWord.put(stem, docTopics.get(i).getWord());
-                    }
+                    topicScoreMap.put(lemma, topicRel);
                 }
             }
         }
 
-        List<Topic> topicL = new ArrayList<>();
+        List<Keyword> topicL = new ArrayList<>();
         Iterator<Map.Entry<String, Double>> mapIter = topicScoreMap.entrySet().iterator();
         while (mapIter.hasNext()) {
             Map.Entry<String, Double> entry = mapIter.next();
-            topicL.add(new Topic(stemToWord.get(entry.getKey()), entry.getValue()));
+            topicL.add(new Keyword(lemmaToWord.get(entry.getKey()), entry.getValue()));
         }
         Collections.sort(topicL);
         Map<Word, Double> newTopicScoreMap = new HashMap<>();
 
-        for (Topic t : topicL) {
+        for (Keyword t : topicL) {
             newTopicScoreMap.put(t.getWord(), t.getRelevance());
         }
 
         return newTopicScoreMap;
     }
 
-    private static boolean containsStem(Word word, Set<Word> words) {
+    private static boolean containsLemma(Word word, Set<Word> words) {
         for (Word w : words) {
-            if (w.getStem().equals(word.getStem())) {
+            if (w.getLemma().equals(word.getLemma())) {
                 return true;
             }
         }
         return false;
     }
 
-    public static void determineInferredConcepts(AnalysisElement e, List<Topic> topics, double minThreshold) {
+    public static void determineInferredConcepts(AnalysisElement e, List<Keyword> topics, double minThreshold) {
         logger.info("Determining inferred concepts ...");
-        List<Topic> inferredConcepts = new ArrayList<>();
+        List<Keyword> inferredConcepts = new ArrayList<>();
         double[] topicsLSAVector = null;
         String topicString = "";
         double[] topicsLDAProbDistribution = null;
@@ -165,7 +161,7 @@ public class TopicModeling {
         // determine corresponding LSA vector for all selected topics
         if (e.getLSA() != null) {
             topicsLSAVector = new double[LSA.K];
-            for (Topic t : topics) {
+            for (Keyword t : topics) {
                 if (t.getRelevance() > 0) {
                     for (int i = 0; i < LSA.K; i++) {
                         topicsLSAVector[i] += t.getWord().getLSAVector()[i] * t.getRelevance();
@@ -187,7 +183,7 @@ public class TopicModeling {
         if (e.getLSA() != null) {
             TreeMap<Word, Double> listLSA;
 
-            for (Topic t : topics) {
+            for (Keyword t : topics) {
                 listLSA = e.getLSA().getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLSA, LSA_WEIGHT);
             }
@@ -197,7 +193,7 @@ public class TopicModeling {
         logger.info("Determining similar concepts using LDA ...");
         if (e.getLDA() != null) {
             TreeMap<Word, Double> listLDA;
-            for (Topic t : topics) {
+            for (Keyword t : topics) {
                 listLDA = e.getLDA().getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLDA, LDA_WEIGHT);
             }
@@ -206,7 +202,7 @@ public class TopicModeling {
         // 3 WN
         logger.info("Determining similar concepts using WN ...");
         TreeMap<Word, Double> listWN;
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             listWN = OntologySupport.getSimilarConcepts(t.getWord());
             mergeMaps(inferredConceptsCandidates, listWN, WN_WEIGHT);
         }
@@ -214,14 +210,14 @@ public class TopicModeling {
         // rearrange previously identified concepts
         logger.info("Building final list of inferred concepts ...");
         for (Word w : inferredConceptsCandidates.keySet()) {
-            if (!containsStem(w, e.getWordOccurences().keySet())) {
+            if (!containsLemma(w, e.getWordOccurences().keySet())) {
                 // possible candidate as inferred concept
                 double lsaSim = 0;
                 double ldaSim = 0;
 
                 // sim to each topic
                 double sumRelevance = 0;
-                for (Topic t : topics) {
+                for (Keyword t : topics) {
                     if (t.getRelevance() > 0) {
                         if (e.getLSA() != null) {
                             lsaSim += VectorAlgebra.cosineSimilarity(e.getLSA().getWordVector(w),
@@ -264,10 +260,10 @@ public class TopicModeling {
                 double relevance = inferredConceptsCandidates.get(w)
                         * (SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim)) / (1 + height);
 
-                Topic t = new Topic(w, relevance);
+                Keyword t = new Keyword(w, relevance);
 
                 if (inferredConcepts.contains(t)) {
-                    Topic updatedTopic = inferredConcepts.get(inferredConcepts.indexOf(t));
+                    Keyword updatedTopic = inferredConcepts.get(inferredConcepts.indexOf(t));
                     updatedTopic.setRelevance(updatedTopic.getRelevance() + relevance);
                 } else {
                     inferredConcepts.add(t);

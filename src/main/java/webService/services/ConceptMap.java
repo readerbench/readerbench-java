@@ -24,10 +24,10 @@ import java.util.TreeMap;
 import data.AbstractDocument;
 import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.sentiment.SentimentGrid;
 import services.commons.Formatting;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
@@ -55,9 +55,9 @@ public class ConceptMap {
         List<ResultEdge> links = new ArrayList<>();
 
         // List<Topic> topics = queryDoc.getTopics();
-        List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, true, true);
+        List<Keyword> topics = KeywordModeling.getSublist(queryDoc.getTopics(), 50, true, true);
         if (ignoredWords != null) {
-            topics = TopicModeling.filterTopics(queryDoc, ignoredWords);
+            topics = KeywordModeling.filterTopics(queryDoc, ignoredWords);
         }
 
         // build connected graph
@@ -66,7 +66,7 @@ public class ConceptMap {
         SentimentGrid<Double> edges = new SentimentGrid<>(topics.size(), topics.size());
         Map<Word, Integer> nodeIndexes = new TreeMap<>();
 
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             visibleConcepts.put(t.getWord(), false);
         }
 
@@ -91,7 +91,7 @@ public class ConceptMap {
 
         // determine optimal sizes
         double min = Double.MAX_VALUE, max = Double.MIN_VALUE;
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             if (visibleConcepts.get(t.getWord()) && t.getRelevance() >= 0) {
                 min = Math.min(min, Math.log(1 + t.getRelevance()));
                 max = Math.max(max, Math.log(1 + t.getRelevance()));
@@ -99,7 +99,7 @@ public class ConceptMap {
         }
 
         int i = 0, j;
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             if (visibleConcepts.get(t.getWord())) {
                 double nodeSize = 0;
                 if (max != min && t.getRelevance() >= 0) {

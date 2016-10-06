@@ -33,14 +33,14 @@ import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
 import java.util.function.Consumer;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -107,7 +107,7 @@ public class PdfToTextFrenchCVs {
         List<ResultNode> nodes = new ArrayList<>();
         AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism);
 
-        List<Topic> topics = TopicModeling.getSublist(queryDoc.getTopics(), 50, false, false);
+        List<Keyword> topics = KeywordModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 
         // build connected graph
         Map<Word, Boolean> visibleConcepts = new TreeMap<>();
@@ -138,7 +138,7 @@ public class PdfToTextFrenchCVs {
             }
         });
 
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             if (visibleConcepts.get(t.getWord())) {
                 nodes.add(new ResultNode(t.getWord().getLemma(), Formatting.formatNumber(t.getRelevance())));
             }

@@ -33,7 +33,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
 import java.util.ArrayList;
@@ -160,13 +160,13 @@ public class WordAssociationTest {
                             : ","));
                     if (printSimilarConcepts) {
                         // determine most similar concepts;
-                        List<Topic> similarConcepts = new ArrayList<>();
+                        List<Keyword> similarConcepts = new ArrayList<>();
                         TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(doc, minThreshold);
                         for (Entry<Word, Double> entry : listLSA.entrySet()) {
                             for (Word word : doc.getWordOccurences().keySet()) {
                                 if (!entry.getKey().getLemma().equals(word.getLemma())
                                         && !entry.getKey().getStem().equals(word.getStem())) {
-                                    similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+                                    similarConcepts.add(new Keyword(entry.getKey(), entry.getValue()));
                                 }
                             }
                         }

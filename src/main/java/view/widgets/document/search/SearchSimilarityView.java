@@ -88,7 +88,7 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
@@ -159,9 +159,9 @@ public class SearchSimilarityView extends JFrame {
 
         // List<Topic> topicL = new ArrayList<Topic>();
         for (AbstractDocument d : docs) {
-            List<Topic> docTopics = d.getTopics();
-            Collections.sort(docTopics, new Comparator<Topic>() {
-                public int compare(Topic t1, Topic t2) {
+            List<Keyword> docTopics = d.getTopics();
+            Collections.sort(docTopics, new Comparator<Keyword>() {
+                public int compare(Keyword t1, Keyword t2) {
                     return -Double.compare(t1.getRelevance(), t2.getRelevance());
                 }
             });
@@ -175,29 +175,29 @@ public class SearchSimilarityView extends JFrame {
             }
         }
 
-        List<Topic> topicL = new ArrayList<Topic>();
+        List<Keyword> topicL = new ArrayList<Keyword>();
         Iterator<Map.Entry<Word, Double>> mapIter = topicScoreMap.entrySet().iterator();
         while (mapIter.hasNext()) {
             Map.Entry<Word, Double> entry = mapIter.next();
-            topicL.add(new Topic(entry.getKey(), entry.getValue()));
+            topicL.add(new Keyword(entry.getKey(), entry.getValue()));
         }
         Collections.sort(topicL);
-        for (Topic t : topicL) {
+        for (Keyword t : topicL) {
             double relevance = this.computeDistanceFromRefDoc(t.getWord(), this.query);
             t.setRelevance(relevance);
             System.out.print(relevance + " ");
         }
-        Collections.sort(topicL, new Comparator<Topic>() {
-            public int compare(Topic t1, Topic t2) {
+        Collections.sort(topicL, new Comparator<Keyword>() {
+            public int compare(Keyword t1, Keyword t2) {
                 return -Double.compare(t1.getRelevance(), t2.getRelevance());
             }
         });
 
-        for (Topic t : topicL) {
+        for (Keyword t : topicL) {
             System.out.print(t.getWord().getText() + "->" + t.getRelevance() + " ");
         }
 
-        for (Topic t : this.query.getTopics()) {
+        for (Keyword t : this.query.getTopics()) {
             System.out.println("-> " + t.getWord());
         }
     }

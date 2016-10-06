@@ -54,7 +54,7 @@ import services.discourse.CSCL.Collaboration;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.dialogism.DialogismComputations;
 import services.discourse.dialogism.DialogismMeasures;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -357,7 +357,7 @@ public class Conversation extends AbstractDocument {
         super.computeAll(computeDialogism);
 
         this.getParticipants().stream().forEach((p) -> {
-            TopicModeling.determineTopics(p.getInterventions());
+            KeywordModeling.determineTopics(p.getInterventions());
         });
 
         Collaboration.evaluateSocialKB(this);
@@ -443,7 +443,7 @@ public class Conversation extends AbstractDocument {
         determineParticipantInterventions();
         // determine topics for each participant
         for (Participant p : participants) {
-            TopicModeling.determineTopics(p.getInterventions());
+            KeywordModeling.determineTopics(p.getInterventions());
         }
 
         for (Participant p : getParticipants()) {

@@ -43,7 +43,7 @@ import data.AnalysisElement;
 import data.Block;
 import data.Lang;
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import services.commons.Formatting;
@@ -53,7 +53,7 @@ import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import services.replicatedWorker.SerialCorpusAssessment;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
@@ -146,7 +146,7 @@ public class Community extends AnalysisElement {
 						}
 
 						int noSelectedTopics = 0;
-						for (Topic topic : c.getTopics()) {
+						for (Keyword topic : c.getTopics()) {
 							if (topic.getWord().getPOS() == null || (topic.getWord().getPOS().startsWith("N")
 									|| topic.getWord().getPOS().startsWith("V"))) {
 								noSelectedTopics++;
@@ -402,7 +402,7 @@ public class Community extends AnalysisElement {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				PaperConceptView conceptView = new PaperConceptView(TopicModeling.getCollectionTopics(documents), path);
+				PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
 				conceptView.setVisible(true);
 			}
 		});
@@ -465,15 +465,15 @@ public class Community extends AnalysisElement {
 					// print discussed topics
 					out.write("\nDiscussed topics\n");
 					out.write("Concept,Relevance\n");
-					List<Topic> topicL = new ArrayList<Topic>();
-					Iterator<Map.Entry<Word, Double>> mapIter = TopicModeling.getCollectionTopics(documents).entrySet()
+					List<Keyword> topicL = new ArrayList<Keyword>();
+					Iterator<Map.Entry<Word, Double>> mapIter = KeywordModeling.getCollectionTopics(documents).entrySet()
 							.iterator();
 					while (mapIter.hasNext()) {
 						Map.Entry<Word, Double> entry = mapIter.next();
-						topicL.add(new Topic(entry.getKey(), entry.getValue()));
+						topicL.add(new Keyword(entry.getKey(), entry.getValue()));
 					}
 					Collections.sort(topicL);
-					for (Topic t : topicL) {
+					for (Keyword t : topicL) {
 						out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
 					}
 

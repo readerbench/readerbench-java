@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import data.AnalysisElement;
 import data.Word;
+import java.util.Objects;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 
@@ -26,7 +27,7 @@ import services.semanticModels.LDA.LDA;
  *
  * @author Mihai Dascalu
  */
-public class Topic implements Comparable<Topic>, Serializable {
+public class Keyword implements Comparable<Keyword>, Serializable {
 
     private static final long serialVersionUID = -2955989168004509623L;
 
@@ -36,7 +37,7 @@ public class Topic implements Comparable<Topic>, Serializable {
     private double lsaSim;
     private double ldaSim;
 
-    public Topic(Word word, AnalysisElement e) {
+    public Keyword(Word word, AnalysisElement e) {
         this.word = word;
         this.updateRelevance(e);
     }
@@ -68,7 +69,7 @@ public class Topic implements Comparable<Topic>, Serializable {
         return ldaSim;
     }
 
-    public Topic(Word word, double relevance) {
+    public Keyword(Word word, double relevance) {
         super();
         this.word = word;
         this.relevance = relevance;
@@ -92,15 +93,20 @@ public class Topic implements Comparable<Topic>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Topic)) {
+        if (!(obj instanceof Keyword)) {
             return false;
         }
-        Topic t = (Topic) obj;
-        return this.getWord().getStem().equals(t.getWord().getStem());
+        Keyword t = (Keyword) obj;
+        return this.getWord().getLemma().equals(t.getWord().getLemma());
     }
 
     @Override
-    public int compareTo(Topic o) {
+    public int hashCode() {
+        return word.getLemma().hashCode();
+    }
+
+    @Override
+    public int compareTo(Keyword o) {
         return (int) Math.signum(o.getRelevance() - this.getRelevance());
     }
 

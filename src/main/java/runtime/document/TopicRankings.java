@@ -18,7 +18,7 @@ package runtime.document;
 import data.AbstractDocument;
 import data.Lang;
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.document.MetaDocument;
 import java.io.BufferedWriter;
@@ -37,7 +37,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -74,8 +74,8 @@ public class TopicRankings {
         Set<Word> words = new TreeSet<>();
 
         for (Document d : documents) {
-            List<Topic> topics = TopicModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
-            for (Topic t : topics) {
+            List<Keyword> topics = KeywordModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
+            for (Keyword t : topics) {
                 words.add(t.getWord());
             }
         }
@@ -85,11 +85,11 @@ public class TopicRankings {
     public Map<Word, Double> getRelevance(Document d, Set<Word> keywords) {
         Map<Word, Double> keywordOccurrences = new TreeMap<>();
 
-        List<Topic> topics = d.getTopics();
+        List<Keyword> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
             for (Word keyword : keywords) {
                 //determine identical stem
-                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                if (keyword.getLemma().equals(topics.get(i).getWord().getLemma())) {
                     keywordOccurrences.put(topics.get(i).getWord(), topics.get(i).getRelevance());
                 }
             }
@@ -100,11 +100,11 @@ public class TopicRankings {
     public Map<Word, Integer> getIndex(Document d, Set<Word> keywords) {
         Map<Word, Integer> keywordOccurrences = new TreeMap<>();
 
-        List<Topic> topics = d.getTopics();
+        List<Keyword> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
             for (Word keyword : keywords) {
                 //determine identical stem
-                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                if (keyword.getLemma().equals(topics.get(i).getWord().getLemma())) {
                     keywordOccurrences.put(topics.get(i).getWord(), i);
                 }
             }

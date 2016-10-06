@@ -23,7 +23,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
 import java.util.ArrayList;
 import services.semanticModels.LDA.LDA;
@@ -62,8 +62,8 @@ public abstract class AnalysisElement implements Serializable {
     // specificity score computed for a specific class of topics
     private transient double specificity;
 
-    private List<Topic> topics;
-    private List<Topic> inferredConcepts;
+    private List<Keyword> topics;
+    private List<Keyword> inferredConcepts;
 
     private transient SentimentEntity sentimentEntity;
 
@@ -393,28 +393,28 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @return
      */
-    public List<Topic> getTopics() {
+    public List<Keyword> getTopics() {
         return topics;
     }
 
     /**
      * @param topics
      */
-    public void setTopics(List<Topic> topics) {
+    public void setTopics(List<Keyword> topics) {
         this.topics = topics;
     }
 
     /**
      * @return
      */
-    public List<Topic> getInferredConcepts() {
+    public List<Keyword> getInferredConcepts() {
         return inferredConcepts;
     }
 
     /**
      * @param inferredConcepts
      */
-    public void setInferredConcepts(List<Topic> inferredConcepts) {
+    public void setInferredConcepts(List<Keyword> inferredConcepts) {
         this.inferredConcepts = inferredConcepts;
     }
 
