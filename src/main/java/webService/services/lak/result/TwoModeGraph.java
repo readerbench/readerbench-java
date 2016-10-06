@@ -12,8 +12,8 @@ public class TwoModeGraph {
     public List<TwoModeGraphNode> nodeList; 
     
     public TwoModeGraph() {
-        this.edgeList = new ArrayList<TwoModeGraphEdge>();
-        this.nodeList = new ArrayList<TwoModeGraphNode>();
+        this.edgeList = new ArrayList<>();
+        this.nodeList = new ArrayList<>();
     }
     
     public void addEdge(TwoModeGraphEdge edge) {

@@ -21,4 +21,8 @@ public class TwoModeGraphNode {
     public TwoModeGraphNodeType getType() {
         return this.type;
     }
+    @Override
+    public String toString() {
+        return "{" + this.uri  + "}";
+    }
 }

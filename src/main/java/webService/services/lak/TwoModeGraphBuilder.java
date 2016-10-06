@@ -18,9 +18,10 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
 
 public class TwoModeGraphBuilder {
+
     private static final Map<String, TwoModeGraphBuilder> LOADED_GRAPH_BUILDERS = new HashMap<>();
     private static final IAuthorDistanceStrategy[] distanceStrategyList = new IAuthorDistanceStrategy[3];
-    
+
     private final ArticleContainer authorContainer;
 
     private TwoModeGraph graph;
@@ -28,37 +29,31 @@ public class TwoModeGraphBuilder {
     public TwoModeGraphBuilder(String inputDirectory) {
         this.authorContainer = ArticleContainer.buildAuthorContainerFromDirectory(inputDirectory);
         AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(authorContainer);
-        
-        if(distanceStrategyList[0] == null) {
-            distanceStrategyList[0] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance));
-            
-            distanceStrategyList[1] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance));
-            
-            distanceStrategyList[2] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
-            distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance));  
+
+        if (TwoModeGraphBuilder.distanceStrategyList[0] == null) {
+            TwoModeGraphBuilder.distanceStrategyList[0] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+                    distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance));
+
+            TwoModeGraphBuilder.distanceStrategyList[1] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+                    distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance));
+
+            TwoModeGraphBuilder.distanceStrategyList[2] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+                    distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance));
         }
     }
 
-    public TwoModeGraph getGraph(String centerUri) {
+    public TwoModeGraph getGraph(String centerUri, String searchText) {
         this.graph = new TwoModeGraph();
         try {
-            List<GraphNodeItem> nodeItemList = this.loadAllNodes();
-            nodeItemList = this.restrictNodesLinkedToCenter(centerUri, nodeItemList);
-            this.loadEdges(nodeItemList);
+            List<GraphNodeItem> allGraphNodeItemList = this.loadAllNodes();
+            this.loadAllEdges(allGraphNodeItemList);
+            Set<String> restrictedUriSet = this.getNodeUriSetLinkedToCenter(centerUri);
+            this.filterGraphEdges(restrictedUriSet);
+            this.filterGraphNodes(restrictedUriSet);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return this.graph;
-    }
-
-    public List<TwoModeGraphNode> getAuthorNodes() {
-        List<TwoModeGraphNode> nodeList = new ArrayList<>();
-        this.authorContainer.getAuthorContainers().stream().forEach((author) -> {
-            nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Author, author.getAuthor().getAuthorUri(), author.getAuthor().getAuthorName()));
-        });
-        return nodeList;
     }
 
     private List<GraphNodeItem> loadAllNodes() {
@@ -74,53 +69,8 @@ public class TwoModeGraphBuilder {
         return nodeList;
     }
 
-    private List<GraphNodeItem> restrictNodesLinkedToCenter(String centerUri, List<GraphNodeItem> nodeItemList) {
-        Set<GraphNodeItem> restrictedSet = new TreeSet<>();
-        Set<String> uriSet = new TreeSet<>();
-
-        for (IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
-            double threshold = distanceStrategy.getThreshold();
-            for (int i = 0; i < nodeItemList.size() - 1; i++) {
-                for (int j = i + 1; j < nodeItemList.size(); j++) {
-                    GraphNodeItem firstNodeItem = nodeItemList.get(i);
-                    GraphNodeItem secondNodeItem = nodeItemList.get(j);
-
-                    double distance = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
-                    if (distance < threshold) {
-                        continue;
-                    }
-
-                    if (centerUri == null || centerUri.length() == 0) {
-                        restrictedSet.add(firstNodeItem);
-                        uriSet.add(firstNodeItem.getURI());
-                        restrictedSet.add(secondNodeItem);
-                        uriSet.add(secondNodeItem.getURI());
-                        continue;
-                    }
-
-                    if (firstNodeItem.getURI().equals(centerUri) || secondNodeItem.getURI().equals(centerUri)) {
-                        restrictedSet.add(firstNodeItem);
-                        uriSet.add(firstNodeItem.getURI());
-                        restrictedSet.add(secondNodeItem);
-                        uriSet.add(secondNodeItem.getURI());
-                    }
-                }
-            }
-        }
-        List<TwoModeGraphNode> restrictedTMNodeList = new ArrayList<>();
-        this.graph.nodeList.forEach(node -> {
-            if (uriSet.contains(node.getUri())) {
-                restrictedTMNodeList.add(node);
-            }
-        });
-        this.graph.nodeList = restrictedTMNodeList;
-
-        List<GraphNodeItem> restrictedList = new ArrayList<>(restrictedSet);
-        return restrictedList;
-    }
-
-    private void loadEdges(List<GraphNodeItem> nodeItemList) {
-        for (IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
+    private void loadAllEdges(List<GraphNodeItem> nodeItemList) {
+        for (IAuthorDistanceStrategy distanceStrategy : TwoModeGraphBuilder.distanceStrategyList) {
             double threshold = distanceStrategy.getThreshold();
             for (int i = 0; i < nodeItemList.size() - 1; i++) {
                 for (int j = i + 1; j < nodeItemList.size(); j++) {
@@ -134,6 +84,48 @@ public class TwoModeGraphBuilder {
                 }
             }
         }
+    }
+
+    private Set<String> getNodeUriSetLinkedToCenter(String centerUri) {
+        Set<String> nodeUriSet = new TreeSet<>();
+        graph.edgeList.stream().forEach(edge -> {
+            if (centerUri == null || centerUri.length() == 0) {
+                nodeUriSet.add(edge.getSourceUri());
+                nodeUriSet.add(edge.getTargetUri());
+            } else if (edge.getSourceUri().equalsIgnoreCase(centerUri) || edge.getTargetUri().equalsIgnoreCase(centerUri)) {
+                nodeUriSet.add(edge.getSourceUri());
+                nodeUriSet.add(edge.getTargetUri());
+            }
+        });
+        return nodeUriSet;
+    }
+
+    private void filterGraphEdges(Set<String> restrictedUriSet) {
+        List<TwoModeGraphEdge> edgeList = new ArrayList<>();
+        this.graph.edgeList.stream().forEach(edge -> {
+            if (restrictedUriSet.contains(edge.getSourceUri()) || restrictedUriSet.contains(edge.getTargetUri())) {
+                edgeList.add(edge);
+            }
+        });
+        graph.edgeList = edgeList;
+    }
+
+    private void filterGraphNodes(Set<String> restrictedUriSet) {
+        List<TwoModeGraphNode> nodeList = new ArrayList<>();
+        this.graph.nodeList.stream().forEach(node -> {
+            if (restrictedUriSet.contains(node.getUri())) {
+                nodeList.add(node);
+            }
+        });
+        graph.nodeList = nodeList;
+    }
+
+    public List<TwoModeGraphNode> getAuthorNodes() {
+        List<TwoModeGraphNode> nodeList = new ArrayList<>();
+        this.authorContainer.getAuthorContainers().stream().forEach((author) -> {
+            nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Author, author.getAuthor().getAuthorUri(), author.getAuthor().getAuthorName()));
+        });
+        return nodeList;
     }
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {

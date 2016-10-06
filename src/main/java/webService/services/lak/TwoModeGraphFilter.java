@@ -5,6 +5,7 @@
  */
 package webService.services.lak;
 
+import com.itextpdf.text.log.SysoLogger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,22 +34,28 @@ public class TwoModeGraphFilter {
     public TwoModeGraphFilter() {
     }
 
-    public TwoModeGraph filterGraph(TwoModeGraph graph) {
+    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri) {
         if (graphMeasures == null || graphMeasures.size() == 0) {
             LOGGER.info("TwoModeGraphFilter did not manage to load the OrderedAuthorsArticlesByBetweenness !!!");
             return graph;
         }
         Set<String> uriSet = this.getUriSet(graph);
-        Set<String> restrictedUriSet = this.getRestrictedSet(graph, uriSet);
-        restrictedUriSet.add("");
+        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet);
+        if (centerUri != null && centerUri.length() > 0) {
+            restrictedUriSet.add(centerUri);
+        }
 
+        Set<String> addedUriSet = new HashSet<>();
         TwoModeGraph newGraph = new TwoModeGraph();
         graph.nodeList.stream().filter((node) -> (this.nodeIsValid(node, restrictedUriSet))).forEach((node) -> {
             newGraph.addNode(node);
+            addedUriSet.add(node.getUri());
         });
 
-        graph.edgeList.stream().filter((edge) -> (restrictedUriSet.contains(edge.getSourceUri()) && restrictedUriSet.contains(edge.getTargetUri()))).forEach((edge) -> {
-            newGraph.addEdge(edge);
+        graph.edgeList.stream().forEach(edge -> {
+            if (addedUriSet.contains(edge.getSourceUri()) && addedUriSet.contains(edge.getTargetUri())) {
+                newGraph.addEdge(edge);
+            }
         });
 
         return newGraph;
@@ -68,7 +75,7 @@ public class TwoModeGraphFilter {
         return uriSet;
     }
 
-    private Set<String> getRestrictedSet(TwoModeGraph graph, Set<String> fullSet) {
+    private Set<String> getRestrictedSet(Set<String> fullSet) {
         Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, MaxNoArticles);
         Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, MaxNoAuthors);
         articlesUriSet.addAll(authorsUriSet);
