@@ -24,7 +24,7 @@ import java.util.List;
 
 public class GraphMeasure implements Comparable<GraphMeasure>, java.io.Serializable {
 
-    public static String SerializedFileLocation = "resources/in/LAK_corpus/parsed-documents/graphMeasures.ser";
+    public static String SerializedFileLocation = "resources/in/LAK_corpus/graphMeasures.ser";
 
     private String name;
     private Double betwenness;
