@@ -85,7 +85,7 @@ public class KeywordModeling {
             if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
                 results.add(t);
             }
-            if (!nounsOnly && !verbsOnly) {
+            if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
                 results.add(t);
             }
         }
