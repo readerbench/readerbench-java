@@ -38,6 +38,7 @@ import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.query.QueryHelper;
+import webService.queryResult.QueryResultTopic;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
 import webService.services.ConceptMap;
@@ -149,6 +150,20 @@ public class DataGathering {
                     }
                     outConcept.write(concat.toString());
                     outConcept.close();
+
+                    QueryResultTopic queryResult = new QueryResultTopic();
+                    queryResult.setData(
+                            ConceptMap.getTopics(
+                                    QueryHelper.processQuery(hm),
+                                    Double.parseDouble(hm.get("threshold")),
+                                    null));
+                    
+                    try (BufferedWriter outResult = new BufferedWriter(new FileWriter(d.getPath() + "_response.json"))) {
+                        outResult.write(queryResult.convertToJson());
+                        outResult.close();
+                    }
+                    catch (IOException ex) {
+                    }
                 } catch (IOException ex) {
                     logger.error("Runtime error while initializing " + d.getPath() + " concept map file");
                     Exceptions.printStackTrace(ex);
