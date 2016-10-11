@@ -104,7 +104,7 @@ public class Word2VecModel implements ISemanticModel {
         }
         Word2VecModel w2vm = null;
         try {
-            w2vm = new Word2VecModel(path, Lang.en, (Word2Vec) WordVectorSerializer.loadGoogleModel(new File(path + "GoogleNews-vectors-negative300.bin"), true));
+            w2vm = new Word2VecModel(path, Lang.en, (Word2Vec) WordVectorSerializer.loadGoogleModel(new File(path + "/GoogleNews-vectors-negative300.bin"), true));
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }

@@ -31,6 +31,7 @@ import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 public class MSRSentenceCompletionTest {
@@ -149,5 +150,14 @@ public class MSRSentenceCompletionTest {
         test.process("resources/in/MSR sentence completion", lda1);
         ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
         test.process("resources/in/MSR sentence completion", lda2);
+
+//        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
+//        test.process("resources/in/vocabulary_test/", w2v1);
+//        Word2VecModel w2v2 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
+//        test.process("resources/in/vocabulary_test/", w2v2);
+//        Word2VecModel w2v3 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
+//        test.process("resources/in/vocabulary_test/", w2v3);
+        Word2VecModel w2v4 = Word2VecModel.loadGoogleNewsModel();
+        test.process("resources/in/MSR sentence completion", w2v4);
     }
 }
