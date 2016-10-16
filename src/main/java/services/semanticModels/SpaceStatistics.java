@@ -84,10 +84,10 @@ public class SpaceStatistics {
         double s00 = 0, s10 = 0, s20 = 0;
         double s01 = 0, s11 = 0, s21 = 0;
         List<WordPairSimilarity> allWordSimilarityPairList = new ArrayList<>();
-        for (Entry<Word, double[]> e1 : semModel.getWordRepresentation().entrySet()) {
-            for (Entry<Word, double[]> e2 : semModel.getWordRepresentation().entrySet()) {
+        for (Entry<Word, double[]> e1 : semModel.getWordRepresentations().entrySet()) {
+            for (Entry<Word, double[]> e2 : semModel.getWordRepresentations().entrySet()) {
                 if (e1.getKey().getLemma().compareTo(e2.getKey().getLemma()) > 0) {
-                    sim = LDA.getSimilarity(e1.getValue(), e2.getValue());
+                    sim = semModel.getSimilarity(e1.getValue(), e2.getValue());
                     s00++;
                     s10 += sim;
                     s20 += Math.pow(sim, 2);
@@ -190,7 +190,7 @@ public class SpaceStatistics {
         Map<String, Node> associations = new TreeMap<>();
 
         // build all nodes
-        semModel.getWordRepresentation().keySet().stream().map((w) -> {
+        semModel.getWordRepresentations().keySet().stream().map((w) -> {
             Node wordNode = graphModel.factory().newNode(w.getLemma());
             wordNode.setLabel(w.getLemma());
             associations.put(w.getLemma(), wordNode);
@@ -363,7 +363,7 @@ public class SpaceStatistics {
             associations = new TreeMap<>();
 
             // build all nodes
-            space.getSemModel().getWordRepresentation().keySet().stream().map((w) -> {
+            space.getSemModel().getWordRepresentations().keySet().stream().map((w) -> {
                 Node wordNode = graphModel.factory().newNode(w.getLemma());
                 wordNode.setLabel(w.getLemma());
                 associations.put(w.getLemma(), wordNode);

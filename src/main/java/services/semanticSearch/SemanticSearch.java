@@ -21,32 +21,29 @@ import java.util.List;
 
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
-import cc.mallet.util.Maths;
-import services.commons.VectorAlgebra;
-import services.semanticModels.SemanticModel;
+import java.util.EnumMap;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class SemanticSearch {
 
-	public static List<SemanticSearchResult> search(AbstractDocument query, List<AbstractDocument> docs,
-			double threshold, int noResults) {
-		List<SemanticSearchResult> results = new ArrayList<SemanticSearchResult>();
-		for (AbstractDocument d : docs) {
-			// difference between documents
-			double lsaSim = 0;
-			double ldaSim = 0;
-			if (query.getSemanticModel(SemanticModel.LSA) != null && 
-                    d.getSemanticModel(SemanticModel.LSA) != null)
-				lsaSim = VectorAlgebra.cosineSimilarity(query.getLSAVector(), d.getLSAVector());
-			if (query.getSemanticModel(SemanticModel.LDA) != null && 
-                    d.getSemanticModel(SemanticModel.LDA) != null)
-				ldaSim = 1 - Maths.jensenShannonDivergence(query.getLDAProbDistribution(), d.getLDAProbDistribution());
-			double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+    public static List<SemanticSearchResult> search(AbstractDocument query, List<AbstractDocument> docs,
+            double threshold, int noResults) {
+        List<SemanticSearchResult> results = new ArrayList<>();
+        for (AbstractDocument d : docs) {
+            // difference between documents
+            EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+            for (ISemanticModel model : query.getSemanticModels()) {
+                similarities.put(model.getType(), model.getSimilarity(query.getModelVectors().get(model.getType()), d.getModelVectors().get(model.getType())));
+            }
 
-			if (sim >= threshold) {
-				results.add(new SemanticSearchResult(d, sim));
-			}
-		}
-		Collections.sort(results);
-		return results.subList(0, Math.min(results.size(), noResults));
-	}
+            double sim = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
+
+            if (sim >= threshold) {
+                results.add(new SemanticSearchResult(d, sim));
+            }
+        }
+        Collections.sort(results);
+        return results.subList(0, Math.min(results.size(), noResults));
+    }
 }

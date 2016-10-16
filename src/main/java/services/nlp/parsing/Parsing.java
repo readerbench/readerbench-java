@@ -48,7 +48,6 @@ import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcess
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -56,8 +55,6 @@ import org.openide.util.Exceptions;
 import services.commons.TextPreprocessing;
 import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.stemmer.Stemmer;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.SemanticModel;
 
 /**
  * General NLP parsing class relying on the Stanford Core NLP
@@ -231,12 +228,7 @@ public abstract class Parsing {
             }
             // determine overall word occurrences
             d.determineWordOccurences(d.getBlocks());
-
-            if (d.getSemanticModel(SemanticModel.LDA) != null) {
-                d.getModelVectors().put(
-                        SemanticModel.LDA, 
-                        ((LDA)d.getSemanticModel(SemanticModel.LDA)).getProbDistribution(d));
-            }
+            d.determineSemanticDimensions();
         } catch (Exception e) {
             logger.error(e.getMessage());
             Exceptions.printStackTrace(e);
@@ -302,7 +294,7 @@ public abstract class Parsing {
             }
         }
 
-        s.finalProcessing(b, sentence);
+        s.finalProcessing();
         return s;
     }
 }

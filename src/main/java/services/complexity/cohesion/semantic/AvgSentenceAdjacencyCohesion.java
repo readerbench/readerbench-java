@@ -20,13 +20,13 @@ import data.Block;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgSentenceAdjacencyCohesion extends ComplexityIndex{
+public class AvgSentenceAdjacencyCohesion extends ComplexityIndex {
 
     public AvgSentenceAdjacencyCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_SENTENCE_ADJACENCY_COHESION, simType);
@@ -34,29 +34,33 @@ public class AvgSentenceAdjacencyCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         int noBlocks = 0;
-		double sumBlocks = 0;
-		for (Block b : d.getBlocks()) {
-			if (b != null) {
-				int no = 0;
-				double sum = 0;
-				for (int i = 0; i < b.getSentences().size() - 1; i++) {
-					if (b.getSentences().get(i) != null && b.getSentences().get(i + 1) != null
-							&& b.getPrunnedSentenceDistances() != null
-							&& b.getPrunnedSentenceDistances()[i][i + 1] != null
-							&& b.getPrunnedSentenceDistances()[i][i + 1].getCohesion() > 0) {
-						sum += b.getPrunnedSentenceDistances()[i][i + 1].getSemanticSimilarities().get(simType);
-						no++;
-					}
-				}
-				if (no != 0) {
-					sumBlocks += sum / no;
-					noBlocks++;
-				}
-			}
-		}
-		if (noBlocks != 0)
-			return sumBlocks / noBlocks;
-		return ComplexityIndices.IDENTITY;
+        double sumBlocks = 0;
+        for (Block b : d.getBlocks()) {
+            if (b != null) {
+                int no = 0;
+                double sum = 0;
+                for (int i = 0; i < b.getSentences().size() - 1; i++) {
+                    if (b.getSentences().get(i) != null && b.getSentences().get(i + 1) != null
+                            && b.getPrunnedSentenceDistances() != null
+                            && b.getPrunnedSentenceDistances()[i][i + 1] != null
+                            && b.getPrunnedSentenceDistances()[i][i + 1].getCohesion() > 0) {
+                        sum += b.getPrunnedSentenceDistances()[i][i + 1].getSemanticSimilarities().get(simType);
+                        no++;
+                    }
+                }
+                if (no != 0) {
+                    sumBlocks += sum / no;
+                    noBlocks++;
+                }
+            }
+        }
+        if (noBlocks != 0) {
+            return sumBlocks / noBlocks;
+        }
+        return ComplexityIndices.IDENTITY;
     }
 }

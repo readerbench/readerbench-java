@@ -31,11 +31,10 @@ import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
-import services.commons.VectorAlgebra;
+import java.util.EnumMap;
 import services.complexity.wordComplexity.WordComplexity;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import services.semanticModels.WordNet.OntologySupport;
 
 public class KeywordModeling {
@@ -44,6 +43,7 @@ public class KeywordModeling {
 
     public static final double LSA_WEIGHT = 1.0;
     public static final double LDA_WEIGHT = 1.0;
+    public static final double W2V_WEIGHT = 1.0;
     public static final double WN_WEIGHT = 1.0;
 
     public static List<Keyword> filterTopics(AnalysisElement e, Set<String> ignoredWords) {
@@ -155,52 +155,53 @@ public class KeywordModeling {
     public static void determineInferredConcepts(AnalysisElement e, List<Keyword> topics, double minThreshold) {
         logger.info("Determining inferred concepts ...");
         List<Keyword> inferredConcepts = new ArrayList<>();
-        double[] topicsLSAVector = null;
-        String topicString = "";
-        double[] topicsLDAProbDistribution = null;
 
-        // determine corresponding LSA vector for all selected topics
-        if (e.getSemanticModel(SemanticModel.LSA) != null) {
-            topicsLSAVector = new double[LSA.K];
-            for (Keyword t : topics) {
-                if (t.getRelevance() > 0) {
-                    for (int i = 0; i < LSA.K; i++) {
-                        topicsLSAVector[i] += t.getWord().getLSAVector()[i] * t.getRelevance();
-                    }
-                    topicString += t.getWord().getLemma() + " ";
+        Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
+
+        for (ISemanticModel model : e.getSemanticModels()) {
+            double[] vec = new double[model.getNoDimensions()];
+            topics.stream().forEach((topic) -> {
+                for (int i = 0; i < model.getNoDimensions(); i++) {
+                    vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
                 }
-            }
-        }
-        topicString = topicString.trim();
-        if (e.getSemanticModel(SemanticModel.LDA) != null) {
-            topicsLDAProbDistribution = ((LDA)e.getSemanticModel(SemanticModel.LDA)).getProbDistribution(topicString);
+            });
+            modelVectors.put(model.getType(), vec);
         }
 
         TreeMap<Word, Double> inferredConceptsCandidates = new TreeMap<>();
 
         // create possible matches by exploring 3 alternatives
         // 1 LSA
-        logger.info("Determining similar concepts using LSA ...");
-        if (e.getSemanticModel(SemanticModel.LSA) != null) {
+        if (e.getSemanticModel(SimilarityType.LSA) != null) {
+            logger.info("Determining similar concepts using LSA ...");
             TreeMap<Word, Double> listLSA;
-
             for (Keyword t : topics) {
-                listLSA = e.getSemanticModel(SemanticModel.LSA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLSA, LSA_WEIGHT);
             }
         }
 
         // 2 LDA
-        logger.info("Determining similar concepts using LDA ...");
-        if (e.getSemanticModel(SemanticModel.LDA) != null) {
+        if (e.getSemanticModel(SimilarityType.LDA) != null) {
+            logger.info("Determining similar concepts using LDA ...");
             TreeMap<Word, Double> listLDA;
             for (Keyword t : topics) {
-                listLDA = e.getSemanticModel(SemanticModel.LDA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLDA, LDA_WEIGHT);
             }
         }
 
-        // 3 WN
+        // 3 Word2Vec
+        if (e.getSemanticModel(SimilarityType.LDA) != null) {
+            logger.info("Determining similar concepts using word2vec ...");
+            TreeMap<Word, Double> listLDA;
+            for (Keyword t : topics) {
+                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getWord(), minThreshold);
+                mergeMaps(inferredConceptsCandidates, listLDA, W2V_WEIGHT);
+            }
+        }
+
+        // 4 WN
         logger.info("Determining similar concepts using WN ...");
         TreeMap<Word, Double> listWN;
         for (Keyword t : topics) {
@@ -212,59 +213,13 @@ public class KeywordModeling {
         logger.info("Building final list of inferred concepts ...");
         for (Word w : inferredConceptsCandidates.keySet()) {
             if (!containsLemma(w, e.getWordOccurences().keySet())) {
-                // possible candidate as inferred concept
-                double lsaSim = 0;
-                double ldaSim = 0;
-
-                // sim to each topic
-                double sumRelevance = 0;
-                for (Keyword t : topics) {
-                    if (t.getRelevance() > 0) {
-                        if (e.getSemanticModel(SemanticModel.LSA) != null) {
-                            lsaSim += VectorAlgebra.cosineSimilarity(
-                                    ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w),
-                                    t.getWord().getLSAVector()) * t.getRelevance();
-                        }
-                        sumRelevance += t.getRelevance();
-                        if (e.getSemanticModel(SemanticModel.LDA) != null) {
-                            ldaSim = LDA.getSimilarity(w.getLDAProbDistribution(),
-                                    t.getWord().getLDAProbDistribution());
-                        }
-                    }
-                }
-                if (sumRelevance != 0) {
-                    lsaSim /= sumRelevance;
-                    ldaSim /= sumRelevance;
-                }
-
-                // sim to topic vector
-                if (e.getSemanticModel(SemanticModel.LSA) != null) {
-                    lsaSim += VectorAlgebra.cosineSimilarity(
-                            ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w), 
-                            topicsLSAVector);
-                }
-                if (e.getSemanticModel(SemanticModel.LDA) != null) {
-                    ldaSim += LDA.getSimilarity(w.getLDAProbDistribution(), topicsLDAProbDistribution);
-                }
-
-                // sim to analysis element
-                if (e.getSemanticModel(SemanticModel.LSA) != null) {
-                    lsaSim += VectorAlgebra.cosineSimilarity(
-                            ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w), 
-                            e.getLSAVector());
-                }
-                if (e.getSemanticModel(SemanticModel.LDA) != null) {
-                    ldaSim += LDA.getSimilarity(w.getLDAProbDistribution(), e.getLDAProbDistribution());
-                }
-
                 // penalty for specificity
                 double height = WordComplexity.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
                 if (height == -1) {
                     height = 10;
                 }
 
-                double relevance = inferredConceptsCandidates.get(w)
-                        * (SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim)) / (1 + height);
+                double relevance = inferredConceptsCandidates.get(w) * (SemanticCohesion.getAverageSemanticModelSimilarity(w, e)) / (1 + height);
 
                 Keyword t = new Keyword(w, relevance);
 
@@ -279,6 +234,6 @@ public class KeywordModeling {
 
         Collections.sort(inferredConcepts);
         e.setInferredConcepts(inferredConcepts);
-        logger.info("Finished building list of inferred concepts");
+        logger.info("Finished building list of inferred concepts ...");
     }
 }

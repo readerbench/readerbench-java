@@ -36,6 +36,7 @@ import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
+import java.util.EnumMap;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;
@@ -43,6 +44,7 @@ import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SimilarityType;
 
 public class PdfToTextFrenchCVs {
 
@@ -121,13 +123,13 @@ public class PdfToTextFrenchCVs {
             for (Word w2 : visibleConcepts.keySet()) {
                 double lsaSim = 0;
                 double ldaSim = 0;
-                if (queryDoc.getLSA() != null) {
-                    lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
+
+                EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+                for (ISemanticModel model : queryDoc.getSemanticModels()) {
+                    similarities.put(model.getType(), model.getSimilarity(w1.getModelVectors().get(model.getType()), w2.getModelVectors().get(model.getType())));
                 }
-                if (queryDoc.getLDA() != null) {
-                    ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+
+                double sim = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
                 if (!w1.equals(w2) && sim >= threshold) {
                     visibleConcepts.put(w1, true);
                     visibleConcepts.put(w2, true);
@@ -162,7 +164,7 @@ public class PdfToTextFrenchCVs {
         List<ISemanticModel> models = new ArrayList<>();
         models.add(LSA.loadLSA(pathToLSA, lang));
         models.add(LDA.loadLDA(pathToLDA, lang));
-        
+
         AbstractDocument queryDoc = new Document(null, contents, models, lang, posTagging);
         logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
         queryDoc.computeAll(computeDialogism);

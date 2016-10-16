@@ -47,6 +47,7 @@ import data.document.Document;
 import data.document.Metacognition;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
+import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -336,7 +337,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     for (int i = 0; i < LOADED_VERBALIZATIONS.size(); i++) {
                         int modelRow = verbalizationsTable.convertRowIndexToModel(i);
                         Metacognition toRemove = LOADED_VERBALIZATIONS.get(modelRow);
-                        if (toRemove.getPath().equals(v.getPath()) && toRemove.getLSA().getPath().equals(v.getLSA().getPath()) && toRemove.getLDA().getPath().equals(v.getLDA().getPath())) {
+                        if (toRemove.getPath().equals(v.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(v.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(v.getSemanticModel(SimilarityType.LDA).getPath())) {
                             LOADED_VERBALIZATIONS.remove(toRemove);
                             verbalizationsTableModel.removeRow(modelRow);
                         }
@@ -352,8 +353,8 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     authors = authors.substring(0, authors.length() - 2);
                     dataRow.add(authors);
                     dataRow.add(v.getReferredDoc().getTitleText());
-                    dataRow.add(v.getReferredDoc().getLSA().getPath());
-                    dataRow.add(v.getReferredDoc().getLDA().getPath());
+                    dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
+                    dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                     verbalizationsTableModel.addRow(dataRow.toArray());
                 }
                 if (LOADED_VERBALIZATIONS.size() > 0) {
@@ -386,8 +387,8 @@ public class VerbalizationProcessingView extends JInternalFrame {
                         authors = authors.substring(0, authors.length() - 2);
                         dataRow.add(authors);
                         dataRow.add(v.getReferredDoc().getTitleText());
-                        dataRow.add(v.getReferredDoc().getLSA().getPath());
-                        dataRow.add(v.getReferredDoc().getLDA().getPath());
+                        dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
+                        dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                         verbalizationsTableModel.addRow(dataRow.toArray());
                     }
 

@@ -29,35 +29,35 @@ import java.util.TreeMap;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
 import java.util.EnumSet;
+import java.util.function.BiFunction;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Mihai Dascalu
  */
 public class LSA implements ISemanticModel {
-
+    
     static Logger logger = Logger.getLogger(LSA.class);
-
+    
     private static final List<LSA> LOADED_LSA_SPACES = new LinkedList<>();
     public static final int LOWER_BOUND = 50;
     public static final double LSA_THRESHOLD = 0.25;
-    public static final int K = 300;
+    public int K = 300;
     public static final int NO_KNN_NEIGHBOURS = 100;
-
+    
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.la, Lang.ro);
-
+    
     private Lang language;
     private String path;
     private double[][] Uk;
@@ -67,7 +67,7 @@ public class LSA implements ISemanticModel {
     private Map<Word, Double> mapIdf;
     private double[] vectorSpaceMean;
     private Map<Word, double[]> wordVectors;
-
+    
     public static LSA loadLSA(String path, Lang language) {
         try {
             for (LSA lsa : LOADED_LSA_SPACES) {
@@ -75,7 +75,7 @@ public class LSA implements ISemanticModel {
                     return lsa;
                 }
             }
-
+            
             logger.info("Loading LSA semantic space " + path + " ...");
             LSA lsaLoad = new LSA();
             lsaLoad.setLanguage(language);
@@ -83,6 +83,8 @@ public class LSA implements ISemanticModel {
             lsaLoad.loadWordList(path);
             lsaLoad.loadIdf(path);
             lsaLoad.Uk = (double[][]) ObjectManipulation.loadObject(path + "/U.ser");
+            //update K if different dimensionality
+            lsaLoad.K = lsaLoad.Uk[0].length;
             lsaLoad.determineSpaceMean();
             lsaLoad.determineWordRepresentations();
             LOADED_LSA_SPACES.add(lsaLoad);
@@ -93,7 +95,7 @@ public class LSA implements ISemanticModel {
             return null;
         }
     }
-
+    
     protected void loadIdf(String path) throws FileNotFoundException, IOException {
         // loads IDf matrix from file
         FileInputStream inputFile = new FileInputStream(path + "/idf.txt");
@@ -108,7 +110,7 @@ public class LSA implements ISemanticModel {
             }
         }
     }
-
+    
     protected void loadWordList(String path) throws FileNotFoundException, IOException {
         // loads IDf matrix from file
         FileInputStream inputFile = new FileInputStream(path + "/wordlist.txt");
@@ -117,14 +119,14 @@ public class LSA implements ISemanticModel {
             words = new DualTreeBidiMap<>();
             String str_linie;
             StringTokenizer strk;
-
+            
             while ((str_linie = in.readLine()) != null) {
                 strk = new StringTokenizer(str_linie, " ");
                 words.put(Word.getWordFromConcept(strk.nextToken(), language), Integer.parseInt(strk.nextToken()));
             }
         }
     }
-
+    
     public double getWordIDf(Word word) {
         double idf = 0;
         if (words.containsKey(word)) {
@@ -146,13 +148,13 @@ public class LSA implements ISemanticModel {
         }
         return idf;
     }
-
+    
     public double[] getWordVector(Word word) {
         double[] vector = new double[K];
         if (words.containsKey(word)) {
             // words exist in learning space
             int index = words.get(word);
-            System.arraycopy(Uk[index], 0, vector, 0, LSA.K);
+            System.arraycopy(Uk[index], 0, vector, 0, K);
         } else {
             // extract all words from the semantic space that have the same
             // stem
@@ -160,21 +162,21 @@ public class LSA implements ISemanticModel {
             for (Word w : words.keySet()) {
                 if (w.getStem().equals(word.getStem())) {
                     int index = words.get(w);
-                    for (int i = 0; i < LSA.K; i++) {
+                    for (int i = 0; i < K; i++) {
                         vector[i] += Uk[index][i];
                     }
                     no++;
                 }
             }
             if (no != 0) {
-                for (int i = 0; i < LSA.K; i++) {
+                for (int i = 0; i < K; i++) {
                     vector[i] /= no;
                 }
             }
         }
         return vector;
     }
-
+    
     private void determineSpaceMean() {
         // determine space median
         vectorSpaceMean = new double[K];
@@ -189,7 +191,7 @@ public class LSA implements ISemanticModel {
             vectorSpaceMean[i] /= words.size();
         }
     }
-
+    
     private void determineWordRepresentations() {
         // determine space median
         wordVectors = new TreeMap<>();
@@ -202,27 +204,27 @@ public class LSA implements ISemanticModel {
             wordVectors.put(w, vector);
         });
     }
-
+    
     @Override
-    public double getSimilarity(Word w1, Word w2) {
-        return VectorAlgebra.cosineSimilarity(getWordVector(w1), getWordVector(w2));
+    public double getSimilarity(double[] v1, double[] v2) {
+        return VectorAlgebra.cosineSimilarity(v1, v2);
     }
-
+    
     @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-        return VectorAlgebra.cosineSimilarity(e1.getLSAVector(), e2.getLSAVector());
+        return this.getSimilarity(e1.getModelRepresentation(SimilarityType.LSA), e2.getModelRepresentation(SimilarityType.LSA));
     }
-
+    
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
         return getSimilarConcepts(getWordVector(w), minThreshold);
     }
-
+    
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-        return getSimilarConcepts(e.getLSAVector(), minThreshold);
+        return getSimilarConcepts(e.getModelRepresentation(SimilarityType.LSA), minThreshold);
     }
-
+    
     private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
         TreeMap<Word, Double> similarConcepts = new TreeMap<>();
         double[] vector2;
@@ -236,115 +238,104 @@ public class LSA implements ISemanticModel {
         }
         return similarConcepts;
     }
-
+    
     @Override
     public Lang getLanguage() {
         return language;
     }
-
+    
     public void setLanguage(Lang language) {
         this.language = language;
     }
-
+    
     @Override
     public String getPath() {
         return path;
     }
-
+    
     public void setPath(String path) {
         this.path = path;
     }
-
+    
     public double[][] getUk() {
         return Uk;
     }
-
+    
     public void setUk(double[][] uk) {
         Uk = uk;
     }
-
+    
     public double[] getSk() {
         return Sk;
     }
-
+    
     public void setSk(double[] sk) {
         Sk = sk;
     }
-
+    
     public double[][] getVtk() {
         return Vtk;
     }
-
+    
     public void setVtk(double[][] vtk) {
         Vtk = vtk;
     }
-
+    
     public BidiMap<Word, Integer> getWords() {
         return words;
     }
-
+    
     @Override
     public Set<Word> getWordSet() {
         return words.keySet();
     }
-
+    
     @Override
-    public Map<Word, double[]> getWordRepresentation() {
+    public Map<Word, double[]> getWordRepresentations() {
         return wordVectors;
     }
-
+    
+    @Override
+    public double[] getWordRepresentation(Word w) {
+        return wordVectors.get(w);
+    }
+    
     public void setWords(BidiMap<Word, Integer> words) {
         this.words = words;
     }
-
+    
     public Map<Word, Double> getMapIdf() {
         return mapIdf;
     }
-
+    
     public void setMapIdf(Map<Word, Double> mapIdf) {
         this.mapIdf = mapIdf;
     }
-
+    
     public double[] getVectorSpaceMean() {
         return vectorSpaceMean;
     }
-
+    
     public void setVectorSpaceMean(double[] vectorSpaceMean) {
         this.vectorSpaceMean = vectorSpaceMean;
     }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
-        //
-        // Word w1 = Word.getWordFromConcept("cat", Lang.eng);
-        // Word w2 = Word.getWordFromConcept("dog", Lang.eng);
-        // System.out.println(lsa.getSimilarity(w1, w2));
-        //
-        // for (Entry<Word, Double> entry : lsa.getSimilarConcepts(Word.getWordFromConcept("cat", Lang.eng), 0.3).entrySet()) {
-        // System.out.println(entry.getKey().getLemma() + "\t"
-        // + entry.getValue());
-        // }
-
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-
-        Word w1 = Word.getWordFromConcept("men", Lang.en);
-        Word w2 = Word.getWordFromConcept("address", Lang.en);
-        System.out.println(lsa.getSimilarity(w1, w2));
-
-        // for (Entry<Word, Double> entry :
-        // lsa.getSimilarConcepts(Word.getWordFromConcept("psicología", Lang.es), 0.3).entrySet()) {
-        // System.out.println(entry.getKey().getLemma() + "\t" +
-        // entry.getValue());
-        // }
-    }
-
+    
     public static Set<Lang> getAvailableLanguages() {
         return AVAILABLE_FOR;
     }
-
+    
     @Override
-    public SemanticModel getType() {
-        return SemanticModel.LSA;
+    public SimilarityType getType() {
+        return SimilarityType.LSA;
+    }
+    
+    @Override
+    public BiFunction<double[], double[], Double> getSimilarityFuction() {
+        return VectorAlgebra::cosineSimilarity;
+    }
+    
+    @Override
+    public int getNoDimensions() {
+        return this.K;
     }
 }

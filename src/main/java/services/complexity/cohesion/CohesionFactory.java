@@ -43,7 +43,7 @@ import services.complexity.cohesion.semantic.AvgSentenceBlockCohesion;
 import services.complexity.cohesion.semantic.AvgStartMiddleCohesion;
 import services.complexity.cohesion.semantic.AvgTransitionCohesion;
 import services.complexity.cohesion.semantic.StartEndCohesion;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *

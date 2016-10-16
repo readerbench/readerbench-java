@@ -20,13 +20,13 @@ import java.util.Arrays;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgSentenceBlockCohesion extends ComplexityIndex{
+public class AvgSentenceBlockCohesion extends ComplexityIndex {
 
     public AvgSentenceBlockCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_SENTENCE_BLOCK_COHESION, simType);
@@ -34,6 +34,9 @@ public class AvgSentenceBlockCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .filter(b -> b.getSentenceBlockDistances() != null)
@@ -44,6 +47,5 @@ public class AvgSentenceBlockCohesion extends ComplexityIndex{
                 .filter(avg -> avg > 0)
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
-    
-    
+
 }

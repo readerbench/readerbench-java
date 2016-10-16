@@ -18,22 +18,17 @@ package view.widgets.document.search;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +51,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -81,20 +75,15 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
-import data.AnalysisElement;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
 import view.models.PreviewSketch;
-import view.widgets.ReaderBenchView;
 
 public class SearchSimilarityView extends JFrame {
 
@@ -135,7 +124,7 @@ public class SearchSimilarityView extends JFrame {
 
         @Override
         public int compareTo(CompareDocsSim o) {
-            return new Double(o.getSim()).compareTo(new Double(this.getSim()));
+            return new Double(o.getSim()).compareTo(this.getSim());
         }
 
         @Override
@@ -155,16 +144,12 @@ public class SearchSimilarityView extends JFrame {
     }
 
     private void computeSimilarTopics() {
-        Map<Word, Double> topicScoreMap = new TreeMap<Word, Double>();
+        Map<Word, Double> topicScoreMap = new TreeMap<>();
 
         // List<Topic> topicL = new ArrayList<Topic>();
         for (AbstractDocument d : docs) {
             List<Keyword> docTopics = d.getTopics();
-            Collections.sort(docTopics, new Comparator<Keyword>() {
-                public int compare(Keyword t1, Keyword t2) {
-                    return -Double.compare(t1.getRelevance(), t2.getRelevance());
-                }
-            });
+            Collections.sort(docTopics, (Keyword t1, Keyword t2) -> -Double.compare(t1.getRelevance(), t2.getRelevance()));
             for (int i = 0; i < Math.min(20, docTopics.size()); i++) {
                 if (!topicScoreMap.containsKey(docTopics.get(i).getWord())) {
                     topicScoreMap.put(docTopics.get(i).getWord(), docTopics.get(i).getRelevance());
@@ -175,7 +160,7 @@ public class SearchSimilarityView extends JFrame {
             }
         }
 
-        List<Keyword> topicL = new ArrayList<Keyword>();
+        List<Keyword> topicL = new ArrayList<>();
         Iterator<Map.Entry<Word, Double>> mapIter = topicScoreMap.entrySet().iterator();
         while (mapIter.hasNext()) {
             Map.Entry<Word, Double> entry = mapIter.next();
@@ -183,15 +168,11 @@ public class SearchSimilarityView extends JFrame {
         }
         Collections.sort(topicL);
         for (Keyword t : topicL) {
-            double relevance = this.computeDistanceFromRefDoc(t.getWord(), this.query);
+            double relevance = SemanticCohesion.getAverageSemanticModelSimilarity(t.getWord(), this.query);
             t.setRelevance(relevance);
             System.out.print(relevance + " ");
         }
-        Collections.sort(topicL, new Comparator<Keyword>() {
-            public int compare(Keyword t1, Keyword t2) {
-                return -Double.compare(t1.getRelevance(), t2.getRelevance());
-            }
-        });
+        Collections.sort(topicL, (Keyword t1, Keyword t2) -> -Double.compare(t1.getRelevance(), t2.getRelevance()));
 
         for (Keyword t : topicL) {
             System.out.print(t.getWord().getText() + "->" + t.getRelevance() + " ");
@@ -199,20 +180,6 @@ public class SearchSimilarityView extends JFrame {
 
         for (Keyword t : this.query.getTopics()) {
             System.out.println("-> " + t.getWord());
-        }
-    }
-
-    private double computeDistanceFromRefDoc(Word word, AnalysisElement e) {
-        try {
-            double lsa, lda;
-            double[] probDistrib = e.getLDA().getWordProbDistribution(word);
-
-            // determine importance within analysis element
-            lsa = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
-            lda = LDA.getSimilarity(probDistrib, e.getLDAProbDistribution());
-            return SemanticCohesion.getAggregatedSemanticMeasure(lsa, lda);
-        } catch (Exception ex) {
-            return 0.0;
         }
     }
 
@@ -321,33 +288,29 @@ public class SearchSimilarityView extends JFrame {
 
         JComboBox<Integer> docLevelsCombo = new JComboBox<Integer>(graphLevels);
         docLevelsCombo.setSelectedIndex(0);
-        docLevelsCombo.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JComboBox<?> cb = (JComboBox<?>) e.getSource();
-                int levelSelected = (Integer) cb.getSelectedItem();
-                SearchSimilarityView.this.setGraphDepthLevel(levelSelected);
-                generateGraph();
-            }
+        docLevelsCombo.addActionListener((ActionEvent e) -> {
+            JComboBox<?> cb = (JComboBox<?>) e.getSource();
+            int levelSelected = (Integer) cb.getSelectedItem();
+            SearchSimilarityView.this.setGraphDepthLevel(levelSelected);
+            generateGraph();
         });
 
         JButton btnNewButton = new JButton("Show Concepts");
-        btnNewButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (visibleDocs == null) {
-                    return;
-                }
-                List<AbstractDocument> docList = new ArrayList<AbstractDocument>();
-                Iterator<Entry<AbstractDocument, Boolean>> docIterator = visibleDocs.entrySet().iterator();
-                while (docIterator.hasNext()) {
-                    Entry<AbstractDocument, Boolean> docEntry = docIterator.next();
-                    if (docEntry.getValue() && !query.equals(docEntry.getKey())) {
-                        docList.add(docEntry.getKey());
-                    }
-                }
-
-                SearchConceptView view = new SearchConceptView(docList, query);
-                view.setVisible(true);
+        btnNewButton.addActionListener((ActionEvent e) -> {
+            if (visibleDocs == null) {
+                return;
             }
+            List<AbstractDocument> docList = new ArrayList<>();
+            Iterator<Entry<AbstractDocument, Boolean>> docIterator = visibleDocs.entrySet().iterator();
+            while (docIterator.hasNext()) {
+                Entry<AbstractDocument, Boolean> docEntry = docIterator.next();
+                if (docEntry.getValue() && !query.equals(docEntry.getKey())) {
+                    docList.add(docEntry.getKey());
+                }
+            }
+
+            SearchConceptView view = new SearchConceptView(docList, query);
+            view.setVisible(true);
         });
 
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -401,7 +364,7 @@ public class SearchSimilarityView extends JFrame {
         if (currentLevel > this.graphDepthLevel) {
             return;
         }
-        visibleDocs = new TreeMap<AbstractDocument, Boolean>();
+        visibleDocs = new TreeMap<>();
         for (AbstractDocument d : docs) {
             visibleDocs.put(d, false);
         }
@@ -415,30 +378,12 @@ public class SearchSimilarityView extends JFrame {
         for (AbstractDocument d : docs) {
             if (!refDoc.equals(d)) {
                 // difference between documents
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (refDoc.getLSA() != null && d.getLSA() != null) {
-                    lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
-                }
-                if (refDoc.getLDA() != null && d.getLDA() != null) {
-                    ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
-                            d.getLDAProbDistribution());
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
 
                 // difference to initial document
                 double simRef = 1.0;
                 if (currentLevel > 1) {
-                    lsaSim = 0;
-                    ldaSim = 0;
-                    if (this.query.getLSA() != null && d.getLSA() != null) {
-                        lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
-                    }
-                    if (this.query.getLDA() != null && d.getLDA() != null) {
-                        ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
-                                d.getLDAProbDistribution());
-                    }
-                    simRef = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                    simRef = SemanticCohesion.getAverageSemanticModelSimilarity(this.query, d);
                 }
 
                 if (sim >= threshold && simRef >= INITIAL_DOC_THRESHOLD
@@ -457,16 +402,7 @@ public class SearchSimilarityView extends JFrame {
         // determine similarities
         for (AbstractDocument d : docs) {
             if (!refDoc.equals(d) && visibleDocs.get(d)) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (refDoc.getLSA() != null && d.getLSA() != null) {
-                    lsaSim = VectorAlgebra.cosineSimilarity(refDoc.getLSAVector(), d.getLSAVector());
-                }
-                if (refDoc.getLDA() != null && d.getLDA() != null) {
-                    ldaSim = 1 - Maths.jensenShannonDivergence(refDoc.getLDAProbDistribution(),
-                            d.getLDAProbDistribution());
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                 if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
                     Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
                     e.setLabel(sim + "");
@@ -539,7 +475,7 @@ public class SearchSimilarityView extends JFrame {
         AppearanceModel appearanceModel = appearanceController.getModel();
 
         // build nodes
-        Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
+        Map<AbstractDocument, Node> nodes = new TreeMap<>();
 
         // create root node
         createGraphNode(graph, graphModel, 0, nodes, this.query, true);
@@ -560,21 +496,12 @@ public class SearchSimilarityView extends JFrame {
         layout.endAlgo();
 
         /* similarity to the central article */
-        List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
+        List<CompareDocsSim> similarities = new ArrayList<>();
         Iterator<AbstractDocument> docIt = nodes.keySet().iterator();
         while (docIt.hasNext()) {
             AbstractDocument d = docIt.next();
             if (d != this.query) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (this.query.getLSA() != null && d.getLSA() != null) {
-                    lsaSim = VectorAlgebra.cosineSimilarity(this.query.getLSAVector(), d.getLSAVector());
-                }
-                if (this.query.getLDA() != null && d.getLDA() != null) {
-                    ldaSim = 1 - Maths.jensenShannonDivergence(this.query.getLDAProbDistribution(),
-                            d.getLDAProbDistribution());
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(this.query, d);
                 similarities.add(new CompareDocsSim(d, sim));
             }
         }
@@ -659,36 +586,5 @@ public class SearchSimilarityView extends JFrame {
 
     public void setGraphDepthLevel(int graphDepthLevel) {
         this.graphDepthLevel = graphDepthLevel;
-    }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        ReaderBenchView.adjustToSystemGraphics();
-
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                List<Document> docs = new LinkedList<Document>();
-
-                File dir = new File("in/test");
-                File[] files = dir.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        return name.endsWith(".ser");
-                    }
-                });
-
-                for (File file : files) {
-                    Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-                    docs.add(d);
-                }
-
-                String query = "food meat";
-
-                SearchSimilarityView view = new SearchSimilarityView(docs, query);
-                view.setVisible(true);
-            }
-        });
     }
 }

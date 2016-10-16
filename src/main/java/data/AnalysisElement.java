@@ -26,13 +26,8 @@ import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
-import services.semanticModels.word2vec.Word2VecModel;
+import services.semanticModels.SimilarityType;
 
 /**
  * This abstract class is the base for all type of elements. It is extended
@@ -47,10 +42,9 @@ public abstract class AnalysisElement implements Serializable {
     protected static final Logger LOGGER = Logger.getLogger(AnalysisElement.class);
 
     private int index;
-    protected transient Map<SemanticModel, ISemanticModel> semanticModels;
-    
-    protected Map<SemanticModel, double[]> modelVectors;
-    
+    protected transient Map<SimilarityType, ISemanticModel> semanticModels;
+    protected Map<SimilarityType, double[]> modelVectors;
+
     private Lang language;
     // the upper level element in the analysis hierarchy: document > block / utterance > sentence
     protected AnalysisElement container;
@@ -62,7 +56,7 @@ public abstract class AnalysisElement implements Serializable {
     private double overallScore;
     private double[] voiceDistribution;
     // specificity score computed for a specific class of topics
-    
+
     private List<Keyword> topics;
     private List<Keyword> inferredConcepts;
 
@@ -78,8 +72,8 @@ public abstract class AnalysisElement implements Serializable {
         this.topics = new ArrayList<>();
         this.inferredConcepts = new ArrayList<>();
         this.sentimentEntity = new SentimentEntity();
-        this.semanticModels = new EnumMap<>(SemanticModel.class);
-        this.modelVectors = new EnumMap<>(SemanticModel.class);
+        this.semanticModels = new EnumMap<>(SimilarityType.class);
+        this.modelVectors = new EnumMap<>(SimilarityType.class);
     }
 
     /**
@@ -131,29 +125,20 @@ public abstract class AnalysisElement implements Serializable {
     }
 
     /**
-     * Determines the LSA vector for the corresponding analysis element by using
-     * local tf-idf * LSA Determines the LDA probability distribution. TODO:
-     * explain better
+     * Determine vector representations for all semantic models by relying on Tf
+     * * individual word representation
      */
     public void determineSemanticDimensions() {
-        // determine the vector for the corresponding analysis element by using
-        // local TfIdf * LSA
-        if (semanticModels.containsKey(SemanticModel.LSA)) {
-            double[] lsaVector = new double[LSA.K];
-            modelVectors.put(SemanticModel.LSA, lsaVector);
+        for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+            double[] vec = new double[e.getValue().getNoDimensions()];
             for (Word word : wordOccurences.keySet()) {
-                double factor = (1 + Math.log(wordOccurences.get(word)) * word.getIdf());
-                double[] vector = word.modelVectors.get(SemanticModel.LSA);
-                for (int i = 0; i < LSA.K; i++) {
-                    lsaVector[i] += vector[i] * factor;
+                if (word.getModelRepresentation(e.getKey()) != null) {
+                    for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                        vec[i] += (1 + Math.log(wordOccurences.get(word))) * word.getModelRepresentation(e.getKey())[i];
+                    }
                 }
             }
-        }
-
-        // determine LDA distribution
-        if (semanticModels.containsKey(SemanticModel.LDA)) {
-            LDA lda = (LDA)semanticModels.get(SemanticModel.LDA);
-            modelVectors.put(SemanticModel.LDA, lda.getProbDistribution(this));
+            modelVectors.put(e.getKey(), vec);
         }
     }
 
@@ -367,43 +352,27 @@ public abstract class AnalysisElement implements Serializable {
     public List<ISemanticModel> getSemanticModels() {
         return new ArrayList<>(semanticModels.values());
     }
-    
-    public void setSemanticModels(List<ISemanticModel> models) {
-        semanticModels = new EnumMap<>(SemanticModel.class);
+
+    public final void setSemanticModels(List<ISemanticModel> models) {
+        semanticModels = new EnumMap<>(SimilarityType.class);
         for (ISemanticModel model : models) {
             semanticModels.put(model.getType(), model);
         }
     }
 
-    public Map<SemanticModel, double[]> getModelVectors() {
+    public Map<SimilarityType, double[]> getModelVectors() {
         return modelVectors;
     }
 
-    public void setModelVectors(Map<SemanticModel, double[]> modelVectors) {
+    public void setModelVectors(Map<SimilarityType, double[]> modelVectors) {
         this.modelVectors = modelVectors;
     }
-    
-    public double[] getLDAProbDistribution() {
-        return modelVectors.get(SemanticModel.LDA);
+
+    public double[] getModelRepresentation(SimilarityType type) {
+        return modelVectors.get(type);
     }
-    
-    public double[] getLSAVector() {
-        return modelVectors.get(SemanticModel.LSA);
-    }
-    
-    public double[] getWord2VecVector() {
-        return modelVectors.get(SemanticModel.Word2Vec);
-    }
-    
-    public ISemanticModel getSemanticModel(SemanticModel type) {
+
+    public ISemanticModel getSemanticModel(SimilarityType type) {
         return semanticModels.get(type);
-    }
-    
-    public LSA getLSA() {
-        return (LSA)semanticModels.get(SemanticModel.LSA);
-    }
-    
-    public LDA getLDA() {
-        return (LDA)semanticModels.get(SemanticModel.LDA);
     }
 }

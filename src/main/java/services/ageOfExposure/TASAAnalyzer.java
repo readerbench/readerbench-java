@@ -47,7 +47,7 @@ import org.openide.util.Exceptions;
 
 public class TASAAnalyzer {
 
-    private static final Logger logger = Logger.getLogger("TASAAnalyzer");
+    private static final Logger LOGGER = Logger.getLogger("TASAAnalyzer");
     private final double MIN_SEM_SIMILARITY = 0.3;
     private final double MIN_THRESHOLD = 0.4;
     private final double MAX_THRESHOLD = 0.7;
@@ -73,35 +73,35 @@ public class TASAAnalyzer {
         models = new TreeMap<>();
         for (int i = 0; i < noGrades; i++) {
             String classPath = path + "/grade" + i;
-            logger.log(Level.INFO, "Loading model {0}...", classPath);
+            LOGGER.log(Level.INFO, "Loading model {0}...", classPath);
             models.put(i, LDA.loadLDA(classPath, Lang.en));
-            logger.log(Level.INFO, "Loaded model with {0} topics.", models.get(i).getNoTopics());
+            LOGGER.log(Level.INFO, "Loaded model with {0} topics.", models.get(i).getNoDimensions());
         }
     }
 
     public Integer[] computeMatchTask(LDA modelA, LDA modelB) {
-        logger.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
+        LOGGER.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
 
         /* Find best topic matches */
-        TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoTopics() + modelB.getNoTopics());
+        TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoDimensions() + modelB.getNoDimensions());
         int i, j, x, y;
         double distance;
 
-        for (i = 0; i < modelA.getNoTopics(); i++) {
-            for (j = 0; j < modelB.getNoTopics(); j++) {
+        for (i = 0; i < modelA.getNoDimensions(); i++) {
+            for (j = 0; j < modelB.getNoDimensions(); j++) {
                 distance = LDASupport.topicDistance(modelA, i, modelB, j);
                 if (distance <= 1 - MIN_SEM_SIMILARITY) {
                     x = i;
-                    y = j + modelA.getNoTopics();
+                    y = j + modelA.getNoDimensions();
                     graph.addEdge(x, y, distance);
                 }
             }
         }
         /* Compute Matches */
-        Integer[] matches = graph.computeAssociations(modelA.getNoTopics());
+        Integer[] matches = graph.computeAssociations(modelA.getNoDimensions());
         for (i = 0; i < matches.length; i++) {
             if (matches[i] != null) {
-                matches[i] -= modelA.getNoTopics();
+                matches[i] -= modelA.getNoDimensions();
             }
         }
 
@@ -130,19 +130,19 @@ public class TASAAnalyzer {
         Integer[] matches;
         List<Double> stats;
         AoEEvolution = new HashMap<>();
-        for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
+        for (Word analyzedWord : matureModel.getWordRepresentations().keySet()) {
             AoEEvolution.put(analyzedWord, new ArrayList<>());
         }
 
         for (int cLevel = 0; cLevel < noGrades - 1; cLevel++) {
-            logger.log(Level.INFO, "Building word distributions for grade level {0}...", cLevel);
+            LOGGER.log(Level.INFO, "Building word distributions for grade level {0}...", cLevel);
             intermediateModel = models.get(cLevel);
             matches = asyncResults.remove(0).get();
 
             Map<Integer, Map<Word, Double>> intermediateModelDistrib = new TreeMap<>();
             Map<Integer, Map<Word, Double>> matureModelDistrib = new TreeMap<>();
 
-            for (int i = 0; i < intermediateModel.getNoTopics(); i++) {
+            for (int i = 0; i < intermediateModel.getNoDimensions(); i++) {
                 intermediateModelDistrib.put(i, LDASupport.getWordWeights(intermediateModel, i));
                 if (matches[i] != null) {
                     matureModelDistrib.put(i, LDASupport.getWordWeights(matureModel, matches[i]));
@@ -155,10 +155,10 @@ public class TASAAnalyzer {
 			 * Iterate all words from mature space and extract topic
 			 * distribution
              */
-            logger.log(Level.INFO, "Matching all words for grade level {0}...", cLevel);
-            for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
-                double intermediateTopicDistr[] = new double[intermediateModel.getNoTopics()];
-                double matureTopicDistr[] = new double[intermediateModel.getNoTopics()];
+            LOGGER.log(Level.INFO, "Matching all words for grade level {0} ...", cLevel);
+            for (Word analyzedWord : matureModel.getWordRepresentations().keySet()) {
+                double intermediateTopicDistr[] = new double[intermediateModel.getNoDimensions()];
+                double matureTopicDistr[] = new double[intermediateModel.getNoDimensions()];
 
                 double sumI = 0, sumM = 0, noI = 0, noM = 0;
                 for (int i = 0; i < intermediateTopicDistr.length; i++) {
@@ -201,7 +201,7 @@ public class TASAAnalyzer {
 
     public static Map<String, Double> getWordAcquisitionAge(String normFile) {
         Map<String, Double> aoaWords = new HashMap<>();
-        logger.log(Level.INFO, "Loading file {0}...", normFile);
+        LOGGER.log(Level.INFO, "Loading file {0}...", normFile);
 
         /* Compute the AgeOfAcquisition Dictionary */
         String tokens[];
@@ -260,7 +260,7 @@ public class TASAAnalyzer {
                 loweStats.write(content);
                 loweValues.write(content);
                 List<Double> stats;
-                for (Word analyzedWord : matureModel.getWordRepresentation().keySet()) {
+                for (Word analyzedWord : matureModel.getWordRepresentations().keySet()) {
                     stats = AoEEvolution.get(analyzedWord);
                     content = analyzedWord.getExtendedLemma() + ",";
                     // AoA indices

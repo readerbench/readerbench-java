@@ -20,13 +20,13 @@ import data.Block;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgBlockAdjacencyCohesion extends ComplexityIndex{
+public class AvgBlockAdjacencyCohesion extends ComplexityIndex {
 
     public AvgBlockAdjacencyCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_BLOCK_ADJACENCY_COHESION, simType);
@@ -34,20 +34,24 @@ public class AvgBlockAdjacencyCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         int no = 0;
-		double sum = 0;
-		for (int i = 0; i < d.getBlocks().size() - 1; i++) {
-			Block b = d.getBlocks().get(i);
-			if (b != null) {
-				if (d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][i + 1] != null
-						&& d.getPrunnedBlockDistances()[i][i + 1].getCohesion() > 0) {
-					sum += d.getPrunnedBlockDistances()[i][i + 1].getSemanticSimilarities().get(simType);
-					no++;
-				}
-			}
-		}
-		if (no != 0)
-			return sum / no;
-		return ComplexityIndices.IDENTITY;
+        double sum = 0;
+        for (int i = 0; i < d.getBlocks().size() - 1; i++) {
+            Block b = d.getBlocks().get(i);
+            if (b != null) {
+                if (d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][i + 1] != null
+                        && d.getPrunnedBlockDistances()[i][i + 1].getCohesion() > 0) {
+                    sum += d.getPrunnedBlockDistances()[i][i + 1].getSemanticSimilarities().get(simType);
+                    no++;
+                }
+            }
+        }
+        if (no != 0) {
+            return sum / no;
+        }
+        return ComplexityIndices.IDENTITY;
     }
 }

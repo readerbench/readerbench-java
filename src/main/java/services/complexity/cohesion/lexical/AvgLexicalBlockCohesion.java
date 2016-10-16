@@ -17,7 +17,7 @@ package services.complexity.cohesion.lexical;
 
 import data.AbstractDocument;
 import services.complexity.ComplexityIndecesEnum;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *

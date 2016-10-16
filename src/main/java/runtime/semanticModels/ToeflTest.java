@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
@@ -115,20 +113,19 @@ public class ToeflTest {
 
 //        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
 //        test.process("resources/in/toefl_test/", lsa1);
-//        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
-//        test.process("resources/in/toefl_test/", lsa2);
+//        lsa1 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
+//        test.process("resources/in/toefl_test/", lsa1);
 //        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
 //        test.process("resources/in/toefl_test/", lda1);
-//        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
-//        test.process("resources/in/toefl_test/", lda2);
-
+//        lda1 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
+//        test.process("resources/in/toefl_test/", lda1);
         Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
-//        test.process("resources/in/toefl_test/", w2v1);
-//        Word2VecModel w2v2 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
-//        test.process("resources/in/toefl_test/", w2v2);
-//        Word2VecModel w2v3 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
-//        test.process("resources/in/toefl_test/", w2v3);
-        Word2VecModel w2v4 = Word2VecModel.loadGoogleNewsModel();
+        test.process("resources/in/toefl_test/", w2v1);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
+        test.process("resources/in/toefl_test/", w2v1);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
+        test.process("resources/in/toefl_test/", w2v1);
+        w2v1 = Word2VecModel.loadGoogleNewsModel();
         test.process("resources/in/toefl_test", w2v1);
     }
 }

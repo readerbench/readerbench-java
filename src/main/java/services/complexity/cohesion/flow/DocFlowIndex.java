@@ -19,7 +19,7 @@ import data.AbstractDocument;
 import java.util.function.Function;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *

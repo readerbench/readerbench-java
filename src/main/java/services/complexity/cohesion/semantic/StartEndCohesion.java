@@ -21,13 +21,13 @@ import data.discourse.SemanticCohesion;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class StartEndCohesion extends ComplexityIndex{
+public class StartEndCohesion extends ComplexityIndex {
 
     public StartEndCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.START_END_COHESION, simType);
@@ -35,29 +35,32 @@ public class StartEndCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         Block startBlock = null;
-		Block endBlock = null;
-		int startIndex = 0;
-		int endIndex = d.getBlocks().size() - 1;
-		for (; startIndex < d.getBlocks().size(); startIndex++) {
-			Block b = d.getBlocks().get(startIndex);
-			if (b != null) {
-				startBlock = b;
-				break;
-			}
-		}
-		for (; endIndex >= 0; endIndex--) {
-			Block b = d.getBlocks().get(endIndex);
-			if (b != null) {
-				endBlock = b;
-				break;
-			}
-		}
-		if (startBlock != null && endBlock != null) {
-			SemanticCohesion coh = new SemanticCohesion(startBlock, endBlock);
-			return coh.getSemanticSimilarities().get(simType);
-		}
-		return ComplexityIndices.IDENTITY;
-	}
-    
+        Block endBlock = null;
+        int startIndex = 0;
+        int endIndex = d.getBlocks().size() - 1;
+        for (; startIndex < d.getBlocks().size(); startIndex++) {
+            Block b = d.getBlocks().get(startIndex);
+            if (b != null) {
+                startBlock = b;
+                break;
+            }
+        }
+        for (; endIndex >= 0; endIndex--) {
+            Block b = d.getBlocks().get(endIndex);
+            if (b != null) {
+                endBlock = b;
+                break;
+            }
+        }
+        if (startBlock != null && endBlock != null) {
+            SemanticCohesion coh = new SemanticCohesion(startBlock, endBlock);
+            return coh.getSemanticSimilarities().get(simType);
+        }
+        return ComplexityIndices.IDENTITY;
+    }
+
 }

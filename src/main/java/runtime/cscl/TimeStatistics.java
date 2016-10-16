@@ -27,7 +27,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class TimeStatistics {
 
@@ -53,9 +52,9 @@ public class TimeStatistics {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
                     logger.info("Processing file " + filePath.getFileName().toString() + " ...");
-                    Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-                    modelPaths.put(SemanticModel.LSA, "resources/config/LSA/tasa_en");
-                    modelPaths.put(SemanticModel.LDA, "resources/config/LDA/tasa_en");
+                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                    modelPaths.put(SimilarityType.LSA, "resources/config/LSA/tasa_en");
+                    modelPaths.put(SimilarityType.LDA, "resources/config/LDA/tasa_en");
                     
                     Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
                     c.computeAll(true);

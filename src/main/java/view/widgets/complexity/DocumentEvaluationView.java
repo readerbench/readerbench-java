@@ -17,7 +17,6 @@ package view.widgets.complexity;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -44,21 +43,18 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import services.complexity.Clustering;
-import services.complexity.ComplexityIndices;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import data.AbstractDocument;
 import data.complexity.Measurement;
 import services.complexity.ComplexityIndex;
+import services.semanticModels.SimilarityType;
 
 public class DocumentEvaluationView extends JFrame {
 
@@ -125,14 +121,14 @@ public class DocumentEvaluationView extends JFrame {
                             .get(i).getTitleText().substring(0, 27)
                             + "..."
                             : documents.get(i).getTitleText())
-                            + "<br/>" + documents.get(i).getLSA().getPath()
-                            + "<br/>" + documents.get(i).getLDA().getPath()
+                            + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath()
+                            + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath()
                             + "</html>";
                     out.write(","
                             + documents.get(i).getTitleText()
                             .replaceAll(",", "") + "("
-                            + documents.get(i).getLSA().getPath() + "/"
-                            + documents.get(i).getLDA().getPath() + ")");
+                            + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath() + "/"
+                            + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath() + ")");
                 }
                 out.write("\n");
 

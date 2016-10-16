@@ -44,3 +44,5 @@ Thumbs.db
 !/src/main/resources/
 /db.properties
 /tmp/
+/nbactions.xml
+/nb-configuration.xml

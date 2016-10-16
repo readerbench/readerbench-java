@@ -26,8 +26,11 @@ import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import data.sentiment.SentimentGrid;
+import java.util.EnumMap;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
@@ -73,15 +76,7 @@ public class ConceptMap {
         // determine similarities
         for (Word w1 : visibleConcepts.keySet()) {
             for (Word w2 : visibleConcepts.keySet()) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (queryDoc.getLSA() != null) {
-                    lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
-                }
-                if (queryDoc.getLDA() != null) {
-                    ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                 if (!w1.equals(w2) && sim >= threshold) {
                     visibleConcepts.put(w1, true);
                     visibleConcepts.put(w2, true);
@@ -121,15 +116,7 @@ public class ConceptMap {
             for (Word w2 : visibleConcepts.keySet()) {
                 edges.setIndex(w2.toString(), j++);
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
-                    double lsaSim = 0;
-                    double ldaSim = 0;
-                    if (queryDoc.getLSA() != null) {
-                        lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
-                    }
-                    if (queryDoc.getLDA() != null) {
-                        ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-                    }
-                    double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
                         double distance;
                         if (sim > .9) {

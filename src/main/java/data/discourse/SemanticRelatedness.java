@@ -15,15 +15,13 @@
  */
 package data.discourse;
 
-import java.text.DecimalFormat;
-
 import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import java.util.EnumMap;
 import services.commons.VectorAlgebra;
 import services.semanticModels.WordNet.OntologySupport;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  * Computes a semantic relatedness value of two analysis element by combining
@@ -43,21 +41,6 @@ public class SemanticRelatedness extends SemanticCohesion {
      * type AnalysisElement: source and destination.
      */
     private double relatedness;
-
-    /**
-     * Combines similarity metrics with different weights in order to compute a
-     * final semantic relatedness score.
-     *
-     * @param WNSim computed WordNet similarity
-     * @param lsaSim computed LatentSemanticAnalysis similarity
-     * @param ldaSim computed Latent Dirichlet similarity
-     * @return computed semantic relatedness score
-     */
-    public static double getSimilarityMeasure(double WNSim, double lsaSim, double ldaSim) {
-        double relatedness = (WEIGH_WN * WNSim + WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim)
-                / (WEIGH_WN + WEIGH_LSA + WEIGH_LDA);
-        return relatedness > 0 ? relatedness : 0;
-    }
 
     /**
      * @param source The first element for which semantic relatedness should be
@@ -94,7 +77,7 @@ public class SemanticRelatedness extends SemanticCohesion {
                 // determine the word of the destination analysis element for whom
                 // the Latent Semantic Analysis value is the highest with the word
                 // of the source analysis element
-                double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getLSAVector(), w2.getLSAVector());
+                double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getModelRepresentation(SimilarityType.LSA), w2.getModelRepresentation(SimilarityType.LSA));
                 if (localSimLsa > maxSimLsa) {
                     maxSimLsa = localSimLsa;
                 }
@@ -103,11 +86,11 @@ public class SemanticRelatedness extends SemanticCohesion {
                 // the Latent Dirichlet Allocation value is the highest with the word
                 // of the source analysis element 
                 double localSimLda;
-                if (w1.getLDAProbDistribution() == null || w2.getLDAProbDistribution() == null) {
+                if (w1.getModelRepresentation(SimilarityType.LDA) == null || w2.getModelRepresentation(SimilarityType.LDA) == null) {
                     localSimLda = 0;
                 } else {
-                    localSimLda = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(w1.getLDAProbDistribution()),
-                            VectorAlgebra.normalize(w2.getLDAProbDistribution()));
+                    localSimLda = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(w1.getModelRepresentation(SimilarityType.LDA)),
+                            VectorAlgebra.normalize(w2.getModelRepresentation(SimilarityType.LDA)));
                 }
                 if (localSimLda > maxSimLda) {
                     maxSimLda = localSimLda;
@@ -159,7 +142,7 @@ public class SemanticRelatedness extends SemanticCohesion {
                 // determine the word of the destination analysis element for whom
                 // the Latent Semantic Analysis value is the highest with the word
                 // of the source analysis element				
-                double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getLSAVector(), w2.getLSAVector());
+                double localSimLsa = VectorAlgebra.cosineSimilarity(w1.getModelRepresentation(SimilarityType.LSA), w2.getModelRepresentation(SimilarityType.LSA));
                 if (localSimLsa > maxSimLsa) {
                     maxSimLsa = localSimLsa;
                 }
@@ -168,11 +151,11 @@ public class SemanticRelatedness extends SemanticCohesion {
                 // the Latent Dirichlet Allocation value is the highest with the word
                 // of the source analysis element 
                 double localSimLda;
-                if (w1.getLDAProbDistribution() == null || w2.getLDAProbDistribution() == null) {
+                if (w1.getModelRepresentation(SimilarityType.LDA) == null || w2.getModelRepresentation(SimilarityType.LDA) == null) {
                     localSimLda = 0;
                 } else {
-                    localSimLda = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(w1.getLDAProbDistribution()),
-                            VectorAlgebra.normalize(w2.getLDAProbDistribution()));
+                    localSimLda = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(w1.getModelRepresentation(SimilarityType.LDA)),
+                            VectorAlgebra.normalize(w2.getModelRepresentation(SimilarityType.LDA)));
                 }
                 if (localSimLda > maxSimLda) {
                     maxSimLda = localSimLda;
@@ -216,7 +199,7 @@ public class SemanticRelatedness extends SemanticCohesion {
         }
         // compute the final semantic relatedness value by combining different metrics 
         if (Math.min(source.getWordOccurences().size(), destination.getWordOccurences().size()) > 0) {
-            relatedness = getSimilarityMeasure(similarities.get(SimilarityType.WU_PALMER), similarities.get(SimilarityType.LSA), similarities.get(SimilarityType.LDA));
+            relatedness = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
         }
     }
 

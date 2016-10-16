@@ -50,7 +50,7 @@ import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class Millington {

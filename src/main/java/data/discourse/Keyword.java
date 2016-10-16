@@ -19,9 +19,7 @@ import java.io.Serializable;
 
 import data.AnalysisElement;
 import data.Word;
-import java.util.Objects;
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
+import services.semanticModels.ISemanticModel;
 
 /**
  *
@@ -34,12 +32,17 @@ public class Keyword implements Comparable<Keyword>, Serializable {
     private Word word;
     private double relevance;
     private double termFrequency;
-    private double lsaSim;
-    private double ldaSim;
+    private double semanticSimilarity;
 
     public Keyword(Word word, AnalysisElement e) {
         this.word = word;
         this.updateRelevance(e);
+    }
+
+    public Keyword(Word word, double relevance) {
+        super();
+        this.word = word;
+        this.relevance = relevance;
     }
 
     public final void updateRelevance(AnalysisElement e) {
@@ -47,32 +50,19 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
         if (e.getSemanticModels().isEmpty()) {
-            this.relevance = termFrequency;
+            this.relevance += termFrequency;
             return;
         }
 
-        // determine importance within analysis element
-        lsaSim = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
-        ldaSim = LDA.getSimilarity(word.getLDAProbDistribution(), e.getLDAProbDistribution());
-        this.relevance += termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+        this.relevance += termFrequency * SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
     }
 
     public double getTermFrequency() {
         return termFrequency;
     }
 
-    public double getLSASim() {
-        return lsaSim;
-    }
-
-    public double getLDASim() {
-        return ldaSim;
-    }
-
-    public Keyword(Word word, double relevance) {
-        super();
-        this.word = word;
-        this.relevance = relevance;
+    public double getSemanticSimilarity() {
+        return semanticSimilarity;
     }
 
     public Word getWord() {

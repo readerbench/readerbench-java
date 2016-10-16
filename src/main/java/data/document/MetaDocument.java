@@ -38,13 +38,11 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  *
- * @author Stefan
+ * @author Stefan Ruseti
  */
 public class MetaDocument extends Document {
 
@@ -129,8 +127,8 @@ public class MetaDocument extends Document {
         return null;
     }
 
-    public static MetaDocument load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
-        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+    public static MetaDocument load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return load(new File(pathToDoc), models, lang, usePOSTagging, maxLevel, maxDepth);
     }
 
@@ -171,7 +169,7 @@ public class MetaDocument extends Document {
                     Method setter = MetaDocument.class.getMethod("s" + getter.getName().substring(1), getter.getReturnType());
                     setter.invoke(this, getter.invoke(doc));
                 } catch (NoSuchMethodException ex) {
-                    //Exceptions.printStackTrace(ex);
+                    Exceptions.printStackTrace(ex);
                 } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                     Exceptions.printStackTrace(ex);
                 }

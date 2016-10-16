@@ -15,26 +15,20 @@
  */
 package webService.cvCover;
 
-import cc.mallet.util.Maths;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
-import services.commons.VectorAlgebra;
+import java.util.EnumMap;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class CvCoverHelper {
 
-	public static double computeSemanticSimilarity(
-			AbstractDocument document1,
-			AbstractDocument document2
-		) {
-		
-		double
-			lsaSim = 0,
-			ldaSim = 0;
-		if (document1.getLSA() != null && document2.getLSA() != null)
-			lsaSim = VectorAlgebra.cosineSimilarity(document1.getLSAVector(), document2.getLSAVector());
-		if (document1.getLDA() != null && document2.getLDA() != null)
-			ldaSim = 1 - Maths.jensenShannonDivergence(document1.getLDAProbDistribution(), document2.getLDAProbDistribution());
-		return SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-	}
-	
+    public static double computeSemanticSimilarity(AbstractDocument document1, AbstractDocument document2) {
+        EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+        for (ISemanticModel model : document1.getSemanticModels()) {
+            similarities.put(model.getType(), model.getSimilarity(document1.getModelVectors().get(model.getType()), document2.getModelVectors().get(model.getType())));
+        }
+        return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
+    }
+
 }

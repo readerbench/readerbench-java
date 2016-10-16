@@ -72,8 +72,7 @@ import services.nlp.parsing.Parsing;
 import services.nlp.parsing.SimpleParsing;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  *
@@ -111,8 +110,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     private AbstractDocumentTemplate docTmp;
     private String genre;
     // useful for time series analysis - 0 for documents and the difference in
-    // - measures the distance between the current & the previous utterance, in
-    // ms
+    // - measures the distance between the current & the previous utterance, in ms
     private long[] blockOccurrencePattern;
 
     private List<LexicalChain> lexicalChains;
@@ -134,7 +132,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         this.path = path;
         setLanguage(lang);
         this.disambiguationGraph = new DisambiguationGraph(lang);
-        setSemanticModels(models);
+        super.setSemanticModels(models);
     }
 
     public void rebuildSemanticSpaces(List<ISemanticModel> models) {
@@ -244,11 +242,11 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public static AbstractDocument loadGenericDocument(String pathToDoc, 
-            Map<SemanticModel, String> modelPaths, Lang lang,
+    public static AbstractDocument loadGenericDocument(String pathToDoc,
+            Map<SimilarityType, String> modelPaths, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
             int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
-        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
@@ -278,9 +276,9 @@ public abstract class AbstractDocument extends AnalysisElement {
         return false;
     }
 
-    public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models, 
-            Lang lang, boolean usePOSTagging, boolean computeDialogism, 
-            String pathToComplexityModel, int[] selectedComplexityFactors, 
+    public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
+            Lang lang, boolean usePOSTagging, boolean computeDialogism,
+            String pathToComplexityModel, int[] selectedComplexityFactors,
             boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
         LOGGER.info("Loading " + docFile.getPath() + " file for processing");
@@ -342,8 +340,8 @@ public abstract class AbstractDocument extends AnalysisElement {
     public static AbstractDocument loadSerializedDocument(String path) {
         LOGGER.info("Loading serialized document " + path + " ...");
         AbstractDocument d = null;
-        try (FileInputStream fIn = new FileInputStream(new File(path)); 
-             ObjectInputStream oIn = new ObjectInputStream(fIn)) {
+        try (FileInputStream fIn = new FileInputStream(new File(path));
+                ObjectInputStream oIn = new ObjectInputStream(fIn)) {
             d = (AbstractDocument) oIn.readObject();
         } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
@@ -380,7 +378,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             for (ISemanticModel model : getSemanticModels()) {
                 out.write(model.getType() + " space:," + model.getPath() + "\n");
             }
-            
+
             out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Personal Knowledge Building,Social Knowledge Building,Initial Text,Processed Text\n");
             for (Block b : blocks) {
                 if (b != null) {
@@ -411,21 +409,19 @@ public abstract class AbstractDocument extends AnalysisElement {
 
             // print topics
             out.write("\nTopics - Relevance\n");
-            out.write("Keyword, Relevance,Tf,LSA Sim, LDA Sim\n");
+            out.write("Keyword, Relevance,Tf,Average semantic similarity\n");
             for (Keyword t : this.getTopics()) {
                 out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
-                        + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getLSASim())
-                        + "," + Formatting.formatNumber(t.getLDASim()) + "\n");
+                        + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
             out.write("\n");
 
-            if (semanticModels.containsKey(SemanticModel.LDA)) {
+            if (semanticModels.containsKey(SimilarityType.LDA)) {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getWord().getLDAProbDistribution(),
-                            this.getLDAProbDistribution());
+                    Integer probClass = LDA.findMaxResemblance(t.getWord().getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
@@ -513,7 +509,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 }
 
                 // print statistics
-                double[] results = null;
+                double[] results;
                 if (c.getAnnotatedCollabZones() != null && c.getAnnotatedCollabZones().size() > 0) {
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesSocialKB());
@@ -730,12 +726,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public String getDescription() {
         String s = this.getTitleText();
-        
+
         if (!getSemanticModels().isEmpty()) {
             StringJoiner sj = new StringJoiner(", ", " [", "]");
-            for (ISemanticModel model : getSemanticModels()) {
+            getSemanticModels().stream().forEach((model) -> {
                 sj.add(model.getPath());
-            }
+            });
             s += sj;
         }
         return s;

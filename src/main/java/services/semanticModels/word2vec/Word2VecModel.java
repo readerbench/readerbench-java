@@ -35,17 +35,17 @@ import data.Word;
 import java.io.FileNotFoundException;
 import java.util.EnumSet;
 import java.util.Map;
-import services.commons.ObjectManipulation;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import org.openide.util.Exceptions;
 import services.commons.VectorAlgebra;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  *
@@ -59,6 +59,7 @@ public class Word2VecModel implements ISemanticModel {
 
     private final Lang language;
     private final String path;
+    private final int noDimensions;
     private final Map<Word, double[]> wordVectors;
 
     private Word2VecModel(String path, Lang language, Word2Vec word2vec) {
@@ -71,9 +72,10 @@ public class Word2VecModel implements ISemanticModel {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         w -> word2vec.getWordVector(w.getLemma())));
+        this.noDimensions = word2vec.getLayerSize();
     }
 
-    public static Word2Vec loadWord2Vec(String path) {
+    private static Word2Vec loadWord2Vec(String path) {
         LOGGER.info("Loading word2vec model " + path + " ...");
         Word2Vec word2Vec = null;
         try {
@@ -113,23 +115,23 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     @Override
-    public double getSimilarity(Word w1, Word w2) {
-        return VectorAlgebra.cosineSimilarity(w1.getWord2VecVector(), w2.getWord2VecVector());
+    public double getSimilarity(double[] v1, double[] v2) {
+        return VectorAlgebra.cosineSimilarity(v1, v2);
     }
 
     @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-        return VectorAlgebra.cosineSimilarity(e1.getWord2VecVector(), e2.getWord2VecVector());
+        return this.getSimilarity(e1.getModelRepresentation(SimilarityType.WORD2VEC), e2.getModelRepresentation(SimilarityType.WORD2VEC));
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
-        return getSimilarConcepts(w.getWord2VecVector(), minThreshold);
+        return getSimilarConcepts(w.getModelRepresentation(SimilarityType.WORD2VEC), minThreshold);
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-        return getSimilarConcepts(e.getWord2VecVector(), minThreshold);
+        return getSimilarConcepts(e.getModelRepresentation(SimilarityType.WORD2VEC), minThreshold);
     }
 
     private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
@@ -145,8 +147,13 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     @Override
-    public Map<Word, double[]> getWordRepresentation() {
+    public Map<Word, double[]> getWordRepresentations() {
         return wordVectors;
+    }
+
+    @Override
+    public double[] getWordRepresentation(Word w) {
+        return wordVectors.get(w);
     }
 
     @Override
@@ -192,7 +199,17 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     @Override
-    public SemanticModel getType() {
-        return SemanticModel.Word2Vec;
+    public SimilarityType getType() {
+        return SimilarityType.WORD2VEC;
+    }
+
+    @Override
+    public BiFunction<double[], double[], Double> getSimilarityFuction() {
+        return VectorAlgebra::cosineSimilarity;
+    }
+
+    @Override
+    public int getNoDimensions() {
+        return noDimensions;
     }
 }

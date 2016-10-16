@@ -26,7 +26,6 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -62,7 +61,7 @@ import data.AbstractDocument.SaveType;
 import java.util.EnumMap;
 import java.util.Map;
 import org.openide.util.Exceptions;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -112,9 +111,9 @@ public class ConversationProcessingView extends JInternalFrame {
             if (isSerialized) {
                 d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
-                Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-                modelPaths.put(SemanticModel.LSA, pathToLSA);
-                modelPaths.put(SemanticModel.LDA, pathToLDA);
+                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
                 d = Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
                         ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, null, null, true,
                         SaveType.SERIALIZED_AND_CSV_EXPORT);
@@ -493,7 +492,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_CONVERSATIONS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
-                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getLSA().getPath().equals(c.getLSA().getPath()) && toRemove.getLDA().getPath().equals(c.getLDA().getPath())) {
+                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())) {
                         LOADED_CONVERSATIONS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -504,13 +503,13 @@ public class ConversationProcessingView extends JInternalFrame {
 
                 dataRow.add(c.getTitleText());
 
-                if (c.getLSA() != null) {
-                    dataRow.add(c.getLSA().getPath());
+                if (c.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
                 } else {
                     dataRow.add("");
                 }
-                if (c.getLDA() != null) {
-                    dataRow.add(c.getLDA().getPath());
+                if (c.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
                 } else {
                     dataRow.add("");
                 }
@@ -544,13 +543,13 @@ public class ConversationProcessingView extends JInternalFrame {
                         // add rows as loaded documents
                         List<Object> dataRow = new ArrayList<>();
                         dataRow.add(c.getTitleText());
-                        if (c.getLSA() != null) {
-                            dataRow.add(c.getLSA().getPath());
+                        if (c.getSemanticModel(SimilarityType.LSA) != null) {
+                            dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
                         } else {
                             dataRow.add("");
                         }
-                        if (c.getLDA() != null) {
-                            dataRow.add(c.getLDA().getPath());
+                        if (c.getSemanticModel(SimilarityType.LDA) != null) {
+                            dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
                         } else {
                             dataRow.add("");
                         }

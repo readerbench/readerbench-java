@@ -35,7 +35,7 @@ import java.util.Map;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {
@@ -44,9 +44,9 @@ public class TestMatildaAvaleurSE {
 
     public static List<Metacognition> compute(String filename, String folder) {
         List<Metacognition> verbalizations = new ArrayList<>();
-        Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-        modelPaths.put(SemanticModel.LSA, "resources/config/FR/LSA/Le Monde");
-        modelPaths.put(SemanticModel.LDA, "resources/config/FR/LDA/Le Monde");
+        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+        modelPaths.put(SimilarityType.LSA, "resources/config/FR/LSA/Le Monde");
+        modelPaths.put(SimilarityType.LDA, "resources/config/FR/LDA/Le Monde");
         Document doc = Document.load(filename, modelPaths, Lang.fr, true);
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {

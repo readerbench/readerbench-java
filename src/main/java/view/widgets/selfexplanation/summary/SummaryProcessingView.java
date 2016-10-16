@@ -51,6 +51,7 @@ import data.document.Document;
 import data.document.Summary;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
+import services.semanticModels.SimilarityType;
 
 public class SummaryProcessingView extends JInternalFrame {
 
@@ -312,7 +313,7 @@ public class SummaryProcessingView extends JInternalFrame {
                     for (int i = 0; i < LOADED_SUMMARIES.size(); i++) {
                         int modelRow = summariesTable.convertRowIndexToModel(i);
                         Summary toRemove = LOADED_SUMMARIES.get(modelRow);
-                        if (toRemove.getPath().equals(e.getPath()) && toRemove.getLSA().getPath().equals(e.getLSA().getPath()) && toRemove.getLDA().getPath().equals(e.getLDA().getPath())) {
+                        if (toRemove.getPath().equals(e.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(e.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(e.getSemanticModel(SimilarityType.LDA).getPath())) {
                             LOADED_SUMMARIES.remove(toRemove);
                             summariesTableModel.removeRow(modelRow);
                         }
@@ -330,8 +331,8 @@ public class SummaryProcessingView extends JInternalFrame {
                     }
                     dataRow.add(authors);
                     dataRow.add(e.getReferredDoc().getTitleText());
-                    dataRow.add(e.getReferredDoc().getLSA().getPath());
-                    dataRow.add(e.getReferredDoc().getLDA().getPath());
+                    dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
+                    dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                     summariesTableModel.addRow(dataRow.toArray());
                 }
                 if (LOADED_SUMMARIES.size() > 0) {
@@ -366,8 +367,8 @@ public class SummaryProcessingView extends JInternalFrame {
                         authors = authors.substring(0, authors.length() - 2);
                         dataRow.add(authors);
                         dataRow.add(e.getReferredDoc().getTitleText());
-                        dataRow.add(e.getReferredDoc().getLSA().getPath());
-                        dataRow.add(e.getReferredDoc().getLDA().getPath());
+                        dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
+                        dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                         summariesTableModel.addRow(dataRow.toArray());
                     }
 

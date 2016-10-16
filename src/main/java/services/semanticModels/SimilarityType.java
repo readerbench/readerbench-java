@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.semanticModels.WordNet;
+package services.semanticModels;
 
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
+import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.word2vec.Word2VecModel;
 
 /**
@@ -49,8 +56,32 @@ public enum SimilarityType {
     public String getAcronym() {
         return acronym;
     }
-    
+
     public Set<Lang> getAvailableLanguages() {
         return supplier.get();
+    }
+
+    public static List<ISemanticModel> loadVectorModels(Map<SimilarityType, String> modelPaths, Lang lang) {
+        // load also LSA vector space and LDA model
+        List<ISemanticModel> models = new ArrayList<>();
+        if (modelPaths != null) {
+            for (Map.Entry<SimilarityType, String> e : modelPaths.entrySet()) {
+                switch (e.getKey()) {
+                    case LDA:
+                        LDA lda = services.semanticModels.LDA.LDA.loadLDA(e.getValue(), lang);
+                        models.add(lda);
+                        break;
+                    case LSA:
+                        LSA lsa = services.semanticModels.LSA.LSA.loadLSA(e.getValue(), lang);
+                        models.add(lsa);
+                        break;
+                    case WORD2VEC:
+                        Word2VecModel w2v = services.semanticModels.word2vec.Word2VecModel.loadWord2Vec(e.getValue(), lang);
+                        models.add(w2v);
+                        break;
+                }
+            }
+        }
+        return models;
     }
 }

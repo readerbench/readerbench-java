@@ -22,8 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -51,8 +49,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import services.nlp.parsing.Parsing;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -65,7 +61,7 @@ import java.util.Map;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 
@@ -97,7 +93,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         setLanguage(semModel.getLanguage());
         List<ISemanticModel> models = new ArrayList<>();
         models.add(semModel);
-        setSemanticModels(models);
+        super.setSemanticModels(models);
         setDisambiguationGraph(new DisambiguationGraph(semModel.getLanguage()));
         setText(docTmp.getText());
 
@@ -105,8 +101,8 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public static Document load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging) {
-        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+    public static Document load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 

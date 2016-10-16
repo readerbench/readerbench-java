@@ -10,7 +10,7 @@ import data.Lang;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.ResourceBundle;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *

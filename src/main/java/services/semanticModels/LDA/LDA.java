@@ -56,11 +56,12 @@ import data.Lang;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
+import java.util.function.BiFunction;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class LDA implements ISemanticModel, Serializable {
 
@@ -309,18 +310,20 @@ public class LDA implements ISemanticModel, Serializable {
             double[] distrib = new double[model.getNumTopics()];
             for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
                 distrib = VectorAlgebra.sum(distrib, VectorAlgebra
-                        .scalarProduct(entry.getKey().getLDAProbDistribution(), (1 + Math.log(entry.getValue()))));
+                        .scalarProduct(entry.getKey().getModelRepresentation(SimilarityType.LDA), (1 + Math.log(entry.getValue()))));
             }
             return VectorAlgebra.normalize(distrib);
         }
         return getProbDistribution(e.getProcessedText());
     }
 
-    public int getNoTopics() {
+    @Override
+    public int getNoDimensions() {
         return model.getNumTopics();
     }
 
-    public static double getSimilarity(double[] prob1, double[] prob2) {
+    @Override
+    public double getSimilarity(double[] prob1, double[] prob2) {
         if (prob1 == null || prob2 == null) {
             return 0;
         }
@@ -331,12 +334,6 @@ public class LDA implements ISemanticModel, Serializable {
             return 0;
         }
         double sim = 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(prob1), VectorAlgebra.normalize(prob2));
-        // double sim =
-        // VectorAlgebra.cosineSimilarity(VectorAlgebra.normalize(prob1),
-        // VectorAlgebra.normalize(prob2));
-        // double sim = 1.0
-        // / VectorAlgebra.mutualInformation(VectorAlgebra.normalize(prob1),
-        // VectorAlgebra.normalize(prob2));
         if (sim >= 0) {
             return sim;
         }
@@ -344,13 +341,8 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     @Override
-    public double getSimilarity(Word w1, Word w2) {
-        return getSimilarity(getWordProbDistribution(w1), getWordProbDistribution(w2));
-    }
-
-    @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-        return getSimilarity(e1.getLDAProbDistribution(), e2.getLDAProbDistribution());
+        return this.getSimilarity(e1.getModelRepresentation(SimilarityType.LDA), e2.getModelRepresentation(SimilarityType.LDA));
     }
 
     @Override
@@ -361,7 +353,7 @@ public class LDA implements ISemanticModel, Serializable {
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-        return getSimilarConcepts(e.getLDAProbDistribution(), minThreshold);
+        return getSimilarConcepts(e.getModelRepresentation(SimilarityType.LDA), minThreshold);
     }
 
     public TreeMap<Word, Double> getSimilarConcepts(double[] probDistribution, double minThreshold) {
@@ -369,7 +361,7 @@ public class LDA implements ISemanticModel, Serializable {
             return null;
         }
         TreeMap<Word, Double> similarConcepts = new TreeMap<>();
-        double[] prob2 = null;
+        double[] prob2;
         double sim;
         for (Word c : wordProbDistributions.keySet()) {
             prob2 = getWordProbDistribution(c);
@@ -381,37 +373,30 @@ public class LDA implements ISemanticModel, Serializable {
         return similarConcepts;
     }
 
-    public void printSimilarities(String s, double[] prob1, double[] prob2) {
-        System.out.println(s);
-        System.out.println("Cosine:" + VectorAlgebra.cosineSimilarity(prob1, prob2));
-        System.out.println("sim JSH:" + (1 - Maths.jensenShannonDivergence(prob1, prob2)));
-        System.out.println("KL:" + Maths.klDivergence(prob1, prob2));
-        System.out.println("Sim KL:"
-                + Math.pow(Math.E, -(Maths.klDivergence(prob1, prob2) + Maths.klDivergence(prob2, prob1))) + "\n");
-    }
-
-    public void printTopics(String path, int noWordsPerTopic) throws IOException {
+    public void printTopics(String path, int noWordsPerTopic) {
         logger.info("Starting to write topics for trained model");
-        BufferedWriter out = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"));
-
         // Get an array of sorted sets of word ID/count pairs
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+        try (BufferedWriter out = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
+            // Get an array of sorted sets of word ID/count pairs
+            ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
 
-        // Show top <<noTopics>> concepts
-        for (int topic = 0; topic < model.getNumTopics(); topic++) {
-            Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
+            // Show top <<noTopics>> concepts
+            for (int topic = 0; topic < model.getNumTopics(); topic++) {
+                Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
 
-            out.write(topic + "\t");
-            int rank = 0;
-            while (iterator.hasNext() && rank < noWordsPerTopic) {
-                IDSorter idCountPair = iterator.next();
-                out.write(model.getAlphabet().lookupObject(idCountPair.getID()) + "(" + idCountPair.getWeight() + ") ");
-                rank++;
+                out.write(topic + "\t");
+                int rank = 0;
+                while (iterator.hasNext() && rank < noWordsPerTopic) {
+                    IDSorter idCountPair = iterator.next();
+                    out.write(model.getAlphabet().lookupObject(idCountPair.getID()) + "(" + idCountPair.getWeight() + ") ");
+                    rank++;
+                }
+                out.write("\n\n");
             }
-            out.write("\n\n");
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
         }
-        out.close();
         logger.info("Successfully finished writing topics");
     }
 
@@ -448,9 +433,9 @@ public class LDA implements ISemanticModel, Serializable {
     public void findDeepLearningRules(Word w1, Word w2, double minThreshold) {
         double[] prob1 = getWordProbDistribution(w1);
         double[] prob2 = getWordProbDistribution(w2);
-        double[] sum = new double[getNoTopics()];
-        double[] difference = new double[getNoTopics()];
-        for (int i = 0; i < getNoTopics(); i++) {
+        double[] sum = new double[getNoDimensions()];
+        double[] difference = new double[getNoDimensions()];
+        for (int i = 0; i < getNoDimensions(); i++) {
             sum[i] = prob1[i] + prob2[i];
             difference[i] = Math.max(prob1[i] - prob2[i], 0);
         }
@@ -509,8 +494,13 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     @Override
-    public Map<Word, double[]> getWordRepresentation() {
+    public Map<Word, double[]> getWordRepresentations() {
         return wordProbDistributions;
+    }
+
+    @Override
+    public double[] getWordRepresentation(Word w) {
+        return wordProbDistributions.get(w);
     }
 
     @Override
@@ -527,7 +517,12 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     @Override
-    public SemanticModel getType() {
-        return SemanticModel.LDA;
+    public SimilarityType getType() {
+        return SimilarityType.LDA;
+    }
+
+    @Override
+    public BiFunction<double[], double[], Double> getSimilarityFuction() {
+        return Maths::jensenShannonDivergence;
     }
 }

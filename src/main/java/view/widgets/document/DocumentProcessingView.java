@@ -63,7 +63,7 @@ import data.AbstractDocument.SaveType;
 import java.util.EnumMap;
 import java.util.Map;
 import org.openide.util.Exceptions;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -119,9 +119,9 @@ public class DocumentProcessingView extends JInternalFrame {
             if (isSerialized) {
                 d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
-                Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-                modelPaths.put(SemanticModel.LSA, pathToLSA);
-                modelPaths.put(SemanticModel.LDA, pathToLDA);
+                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
                 d = AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
                         ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
                         SaveType.SERIALIZED_AND_CSV_EXPORT);
@@ -564,7 +564,7 @@ public class DocumentProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_DOCUMENTS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Document toRemove = LOADED_DOCUMENTS.get(modelRow);
-                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getLSA().getPath().equals(d.getLSA().getPath()) && toRemove.getLDA().getPath().equals(d.getLDA().getPath())) {
+                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())) {
                         LOADED_DOCUMENTS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -575,13 +575,13 @@ public class DocumentProcessingView extends JInternalFrame {
 
                 dataRow.add(d.getTitleText());
                 dataRow.add(getStringFromList(((Document) d).getAuthors()));
-                if (d.getLSA() != null) {
-                    dataRow.add(d.getLSA().getPath());
+                if (d.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
                 } else {
                     dataRow.add("");
                 }
-                if (d.getLDA() != null) {
-                    dataRow.add(d.getLDA().getPath());
+                if (d.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
                 } else {
                     dataRow.add("");
                 }
@@ -638,13 +638,13 @@ public class DocumentProcessingView extends JInternalFrame {
                         } else {
                             dataRow.add("");
                         }
-                        if (d.getLSA() != null) {
-                            dataRow.add(d.getLSA().getPath());
+                        if (d.getSemanticModel(SimilarityType.LSA) != null) {
+                            dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
                         } else {
                             dataRow.add("");
                         }
-                        if (d.getLDA() != null) {
-                            dataRow.add(d.getLDA().getPath());
+                        if (d.getSemanticModel(SimilarityType.LDA) != null) {
+                            dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
                         } else {
                             dataRow.add("");
                         }

@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,9 +56,7 @@ import services.discourse.dialogism.DialogismMeasures;
 import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  * @author Mihai Dascalu
@@ -115,14 +111,13 @@ public class Conversation extends AbstractDocument {
 
     /**
      * @param pathToDoc
-     * @param pathToLSA
-     * @param pathToLDA
+     * @param modelPaths
      * @param lang
      * @param usePOSTagging
      * @return
      */
-    public static Conversation load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging) {
-        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+    public static Conversation load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 
@@ -149,16 +144,11 @@ public class Conversation extends AbstractDocument {
             input.setEncoding("UTF-8");
 
             DocumentBuilder db = dbf.newDocumentBuilder();
-            org.w3c.dom.Document dom = null;
-            try {
-                dom = db.parse(input);
-            } catch (SAXException | IOException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            Element el = null;
-            NodeList nl1 = null, nl2 = null;
+            Element el;
+            NodeList nl1, nl2;
 
             // reformat input accordingly to evaluation model
             nl1 = doc.getElementsByTagName("Turn");
@@ -236,7 +226,7 @@ public class Conversation extends AbstractDocument {
                         for (int j = 0; j < nl1.getLength(); j++) {
                             el = (Element) nl1.item(j);
                             if (!el.getAttribute("nickname").equals("")) {
-                                double nr = 0;
+                                double nr;
                                 try {
                                     nr = Double.valueOf(el.getAttribute("value"));
                                 } catch (Exception e) {
@@ -293,6 +283,10 @@ public class Conversation extends AbstractDocument {
         } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
             System.err.print("Error evaluating input file " + docFile.getPath() + "!");
             Exceptions.printStackTrace(ex);
+        } catch (SAXException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
         return c;
     }
@@ -343,8 +337,7 @@ public class Conversation extends AbstractDocument {
     public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getParticipantBlockDistribution(voice, p);
 
-        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(),
-                DialogismComputations.MAXIMUM_INTERVAL);
+        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
     }
 
     /**

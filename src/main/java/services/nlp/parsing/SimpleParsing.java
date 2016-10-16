@@ -84,7 +84,7 @@ public class SimpleParsing {
             s.setSentimentEntity(se);
         }
 
-        s.finalProcessing(b, null);
+        s.finalProcessing();
         return s;
     }
 }

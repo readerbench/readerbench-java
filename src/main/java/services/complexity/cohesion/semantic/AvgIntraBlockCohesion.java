@@ -19,13 +19,13 @@ import data.AbstractDocument;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgIntraBlockCohesion extends ComplexityIndex{
+public class AvgIntraBlockCohesion extends ComplexityIndex {
 
     public AvgIntraBlockCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_INTRA_BLOCK_COHESION, simType);
@@ -33,6 +33,9 @@ public class AvgIntraBlockCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .mapToDouble(b -> {
@@ -59,4 +62,3 @@ public class AvgIntraBlockCohesion extends ComplexityIndex{
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 }
-

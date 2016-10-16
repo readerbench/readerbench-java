@@ -44,7 +44,7 @@ import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.SemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class ResearchArticle extends Document {
 
@@ -57,14 +57,14 @@ public class ResearchArticle extends Document {
         super(path, models, lang);
     }
 
-    public ResearchArticle(String path, AbstractDocumentTemplate docTmp, 
+    public ResearchArticle(String path, AbstractDocumentTemplate docTmp,
             List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         super(path, docTmp, models, lang, usePOSTagging);
     }
 
-    public static ResearchArticle load(String pathToDoc, Map<SemanticModel, String> modelPaths, 
+    public static ResearchArticle load(String pathToDoc, Map<SimilarityType, String> modelPaths,
             Lang lang, boolean usePOSTagging, boolean cleanInput) {
-        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return load(new File(pathToDoc), models, lang, usePOSTagging, cleanInput);
     }
 

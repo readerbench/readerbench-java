@@ -41,7 +41,7 @@ public class LDAWordComplexity {
             TreeMap<Word, Double> concepts = new TreeMap<>();
             ValueComparator<Word> kcvc = new ValueComparator<>(concepts);
             TreeMap<Word, Double> sortedConcepts = new TreeMap<>(kcvc);
-            lda.getWordRepresentation().keySet().stream().forEach((w) -> {
+            lda.getWordRepresentations().keySet().stream().forEach((w) -> {
                 concepts.put(w, VectorAlgebra.avg(lda.getWordProbDistribution(w)));
             });
             
@@ -60,7 +60,7 @@ public class LDAWordComplexity {
             TreeMap<Word, Double> concepts = new TreeMap<>();
             ValueComparator<Word> kcvc = new ValueComparator<>(concepts);
             TreeMap<Word, Double> sortedConcepts = new TreeMap<>(kcvc);
-            lda.getWordRepresentation().keySet().stream().forEach((w) -> {
+            lda.getWordRepresentations().keySet().stream().forEach((w) -> {
                 concepts.put(w, VectorAlgebra.stdev(lda.getWordProbDistribution(w)));
             });
             
@@ -79,7 +79,7 @@ public class LDAWordComplexity {
         TreeMap<Word, Double> concepts = new TreeMap<Word, Double>();
         ValueComparator<Word> kcvc = new ValueComparator<Word>(concepts);
         TreeMap<Word, Double> sortedConcepts = new TreeMap<Word, Double>(kcvc);
-        for (Word w : lda.getWordRepresentation().keySet()) {
+        for (Word w : lda.getWordRepresentations().keySet()) {
             concepts.put(w,
                     VectorAlgebra.entropy(lda.getWordProbDistribution(w)));
         }

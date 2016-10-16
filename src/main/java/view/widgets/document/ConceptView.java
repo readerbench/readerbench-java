@@ -67,7 +67,10 @@ import data.Word;
 import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
+import java.util.EnumMap;
 import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import view.models.PreviewSketch;
 
 public class ConceptView extends JFrame {
@@ -133,10 +136,8 @@ public class ConceptView extends JFrame {
 
         checkBoxNoun = new JCheckBox("Nouns");
         checkBoxNoun.setBackground(Color.WHITE);
-        checkBoxNoun.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                generateGraph();
-            }
+        checkBoxNoun.addActionListener((ActionEvent e) -> {
+            generateGraph();
         });
         checkBoxNoun.setSelected(true);
 
@@ -293,15 +294,7 @@ public class ConceptView extends JFrame {
         // determine similarities
         for (Word w1 : visibleConcepts.keySet()) {
             for (Word w2 : visibleConcepts.keySet()) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (d.getLSA() != null) {
-                    lsaSim = d.getLSA().getSimilarity(w1, w2);
-                }
-                if (d.getLDA() != null) {
-                    ldaSim = d.getLDA().getSimilarity(w1, w2);
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                 if (!w1.equals(w2) && sim >= threshold) {
                     visibleConcepts.put(w1, true);
                     visibleConcepts.put(w2, true);
@@ -370,15 +363,7 @@ public class ConceptView extends JFrame {
         for (Word w1 : visibleConcepts.keySet()) {
             for (Word w2 : visibleConcepts.keySet()) {
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
-                    double lsaSim = 0;
-                    double ldaSim = 0;
-                    if (d.getLSA() != null) {
-                        lsaSim = d.getLSA().getSimilarity(w1, w2);
-                    }
-                    if (d.getLDA() != null) {
-                        ldaSim = d.getLDA().getSimilarity(w1, w2);
-                    }
-                    double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
                         Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 1 - sim, false);
                         e.setLabel(sim + "");

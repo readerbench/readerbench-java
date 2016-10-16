@@ -18,7 +18,6 @@ package services.converters;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +35,8 @@ import data.Lang;
 import data.article.ResearchArticle;
 import java.util.EnumMap;
 import java.util.Map;
-import services.semanticModels.SemanticModel;
+import org.openide.util.Exceptions;
+import services.semanticModels.SimilarityType;
 import view.widgets.ReaderBenchView;
 
 class Author {
@@ -276,26 +276,21 @@ public class RdfToDocumentParser {
 
     private static void serializeDocuments(String dirName) {
         File[] files;
-        files = new File(dirName).listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".xml");
-            }
-        });
+        files = new File(dirName).listFiles((File dir, String name) -> name.endsWith(".xml"));
 
         for (File f : files) {
             try {
                 addSingleDocument(f.getPath());
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
     }
 
     private static void addSingleDocument(String filePath) {
-        Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-        modelPaths.put(SemanticModel.LSA, ReaderBenchView.TRAINED_LSA_SPACES_EN[0]);
-        modelPaths.put(SemanticModel.LDA, ReaderBenchView.TRAINED_LDA_MODELS_EN[0]);
+        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+        modelPaths.put(SimilarityType.LSA, ReaderBenchView.TRAINED_LSA_SPACES_EN[0]);
+        modelPaths.put(SimilarityType.LDA, ReaderBenchView.TRAINED_LDA_MODELS_EN[0]);
         ResearchArticle d = ResearchArticle.load(filePath, modelPaths,
                 Lang.en, false, true);
         d.computeAll(false);

@@ -33,12 +33,10 @@ import data.sentiment.SentimentValence;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.SemanticModel;
-import services.semanticModels.word2vec.Word2VecModel;
+import services.semanticModels.SimilarityType;
 
 /**
  *
@@ -89,15 +87,15 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
         setSemanticModels(models);
-        LSA lsa = (LSA)semanticModels.get(SemanticModel.LSA);
-        modelVectors = new EnumMap<>(SemanticModel.class);
+        LSA lsa = (LSA)semanticModels.get(SimilarityType.LSA);
+        modelVectors = new EnumMap<>(SimilarityType.class);
         if (lsa != null) {
             this.idf = lsa.getWordIDf(this);
-            modelVectors.put(SemanticModel.LSA, lsa.getWordVector(this));
+            modelVectors.put(SimilarityType.LSA, lsa.getWordVector(this));
         }
-        LDA lda = (LDA)semanticModels.get(SemanticModel.LDA);
+        LDA lda = (LDA)semanticModels.get(SimilarityType.LDA);
         if (lda != null) {
-            modelVectors.put(SemanticModel.LDA, lda.getWordProbDistribution(this));
+            modelVectors.put(SimilarityType.LDA, lda.getWordProbDistribution(this));
         }
     }
 

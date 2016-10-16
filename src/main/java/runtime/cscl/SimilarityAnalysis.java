@@ -15,7 +15,6 @@
  */
 package runtime.cscl;
 
-import data.AbstractDocument.SaveType;
 import data.Lang;
 import data.Word;
 import data.cscl.Conversation;
@@ -40,9 +39,8 @@ import org.apache.log4j.Logger;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.SemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class SimilarityAnalysis {
@@ -350,9 +348,9 @@ public class SimilarityAnalysis {
                     }
 
                     logger.info("Processing chat " + filePath.getFileName());
-                    Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
-                    modelPaths.put(SemanticModel.LSA, pathToLSA);
-                    modelPaths.put(SemanticModel.LDA, pathToLDA);
+                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                    modelPaths.put(SimilarityType.LSA, pathToLSA);
+                    modelPaths.put(SimilarityType.LDA, pathToLDA);
                     
                     Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
                     c.computeAll(computeDialogism);
