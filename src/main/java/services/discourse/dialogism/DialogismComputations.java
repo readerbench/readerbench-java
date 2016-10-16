@@ -100,9 +100,10 @@ public class DialogismComputations {
         }
 
         // specify for each word its corresponding semantic chain
-        for (SemanticChain chain : semanticChains) {
-            if (chain.getWords().size() >= SEMANTIC_CHAIN_MIN_NO_WORDS) {
-                semanticChains.remove(chain);
+        for (Iterator<SemanticChain> iterator = semanticChains.iterator(); iterator.hasNext();) {
+            SemanticChain chain = iterator.next();
+            if (chain.getWords().size() < SEMANTIC_CHAIN_MIN_NO_WORDS) {
+                iterator.remove();
             } else {
                 for (Word w : chain.getWords()) {
                     w.setSemanticChain(chain);
