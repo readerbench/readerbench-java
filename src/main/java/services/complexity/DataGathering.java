@@ -35,8 +35,7 @@ import data.document.MetaDocument;
 import java.util.HashMap;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
 import webService.query.QueryHelper;
 import webService.queryResult.QueryResultTopic;
 import webService.result.ResultNode;
@@ -64,19 +63,26 @@ public class DataGathering {
         }
     }
 
-    public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(path, path, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism);
+    public static void processTexts(String path, int gradeLevel, boolean writeHeader, 
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging, 
+            boolean computeDialogism) throws IOException {
+        processTexts(path, path, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, saveLocation, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism, false);
+    public static void processTexts(String processingPath, String saveLocation, 
+            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, 
+            Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+        processTexts(processingPath, saveLocation, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism, false);
     }
 
-    public static void processMetaDocuments(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, processingPath, 0, true, lsa, lda, lang, usePOSTagging, computeDialogism, true);
+    public static void processMetaDocuments(String processingPath, List<ISemanticModel> models, 
+            Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+        processTexts(processingPath, processingPath, 0, true, models, lang, usePOSTagging, computeDialogism, true);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
+    public static void processTexts(String processingPath, String saveLocation, 
+            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, Lang lang, 
+            boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -99,9 +105,9 @@ public class DataGathering {
             Document d = null;
             try {
                 if (meta) {
-                    d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
+                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                 } else {
-                    d = Document.load(file, lsa, lda, lang, usePOSTagging);
+                    d = Document.load(file, models, lang, usePOSTagging);
                 }
                 d.computeAll(computeDialogism);
             } catch (Exception e) {

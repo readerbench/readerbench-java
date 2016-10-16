@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,6 +40,7 @@ import org.apache.log4j.Logger;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.WordNet.SimilarityType;
 import webService.ReaderBenchServer;
@@ -348,7 +350,11 @@ public class SimilarityAnalysis {
                     }
 
                     logger.info("Processing chat " + filePath.getFileName());
-                    Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging);
+                    Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+                    modelPaths.put(SemanticModel.LSA, pathToLSA);
+                    modelPaths.put(SemanticModel.LDA, pathToLDA);
+                    
+                    Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
                     c.computeAll(computeDialogism);
 
                     Utterance firstUtt = null, secondUtt = null;

@@ -24,6 +24,7 @@ import data.AbstractDocumentTemplate;
 import data.Lang;
 import data.document.Document;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import java.util.ArrayList;
 
 public class Parsing_EN extends Parsing {
 
@@ -57,7 +58,7 @@ public class Parsing_EN extends Parsing {
                 + "System and human system engineering testing of EPS haven’t got a clue. "
                 + "Relation of user perceived response time to error measurement.");
 
-        AbstractDocument d = new Document(null, docTmp, null, null, Lang.en, true);
+        AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), Lang.en, true);
         System.out.println(d);
     }
 }

@@ -26,8 +26,7 @@ import data.discourse.SemanticRelatedness;
 import edu.stanford.nlp.hcoref.data.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
 
 /**
  *
@@ -68,8 +67,8 @@ public class Block extends AnalysisElement implements Serializable {
     private SemanticRelatedness[] sentenceBlockRelatedness;
     private SemanticRelatedness prevSentenceBlockRelatedness, nextSentenceBlockRelatedness;
 
-    public Block(AnalysisElement d, int index, String text, LSA lsa, LDA lda, Lang lang) {
-        super(d, index, text.trim(), lsa, lda, lang);
+    public Block(AnalysisElement d, int index, String text, List<ISemanticModel> models, Lang lang) {
+        super(d, index, text.trim(), models, lang);
         this.sentences = new ArrayList<>();
     }
 
@@ -116,10 +115,6 @@ public class Block extends AnalysisElement implements Serializable {
         }
         d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
 
-        // sum block vectors
-        for (int i = 0; i < LSA.K; i++) {
-            d.getLSAVector()[i] += b.getLSAVector()[i];
-        }
     }
 
     public List<Sentence> getSentences() {

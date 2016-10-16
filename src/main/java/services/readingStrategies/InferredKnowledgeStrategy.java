@@ -29,6 +29,7 @@ import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.WordNet.SimilarityType;
 
@@ -61,13 +62,13 @@ public class InferredKnowledgeStrategy {
 
         // determine vectors for collections of sentences
         double[] vectorSentences = new double[LSA.K];
-        double[] probDistribSentences = new double[v.getLDA().getNoTopics()];
+        double[] probDistribSentences = new double[((LDA)v.getSemanticModel(SemanticModel.LDA)).getNoTopics()];
 
         for (Sentence s : sentences) {
             for (int i = 0; i < LSA.K; i++) {
                 vectorSentences[i] += s.getLSAVector()[i];
             }
-            for (int i = 0; i < v.getLDA().getNoTopics(); i++) {
+            for (int i = 0; i < probDistribSentences.length; i++) {
                 probDistribSentences[i] += s.getLDAProbDistribution()[i];
             }
         }
@@ -94,7 +95,7 @@ public class InferredKnowledgeStrategy {
                     // determine maximum likelihood
                     double maxSim = 0;
                     double[] probDistrib1 = w1.getLDAProbDistribution();
-                    double[] vector1 = v.getLSA().getWordVector(w1);
+                    double[] vector1 = w1.getLSAVector();
                     Word closestWord = null;
 
                     // add similarity to sentences as a measure of importance of the word
@@ -105,7 +106,7 @@ public class InferredKnowledgeStrategy {
                     for (Sentence s : sentences) {
                         for (Word w2 : s.getWordOccurences().keySet()) {
                             // determine semantic proximity
-                            double simLSAWord = VectorAlgebra.cosineSimilarity(vector1, v.getLSA().getWordVector(w2));
+                            double simLSAWord = VectorAlgebra.cosineSimilarity(vector1, w2.getLSAVector());
                             double simLDAWord = LDA.getSimilarity(probDistrib1, w2.getLDAProbDistribution());
                             double simWNWord = OntologySupport.semanticSimilarity(w1, w2, SimilarityType.WU_PALMER);
                             double simMaxWord = Math.max(simWNWord, Math.max(simLSAWord, simLDAWord));

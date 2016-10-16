@@ -39,6 +39,9 @@ import org.w3c.dom.NodeList;
 import data.AbstractDocument;
 import data.AbstractDocument.SaveType;
 import data.Lang;
+import java.util.EnumMap;
+import java.util.Map;
+import services.semanticModels.SemanticModel;
 
 public class SerialCorpusAssessment {
 	static Logger logger = Logger.getLogger(SerialCorpusAssessment.class);
@@ -83,16 +86,12 @@ public class SerialCorpusAssessment {
 	public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
 			boolean usePOSTagging, boolean computeDialogism, boolean cleanInput, SaveType saveOutput) {
 		logger.info("Analysing all files in \"" + rootPath + "\"");
-		List<File> files = new LinkedList<File>();
+		List<File> files = new LinkedList<>();
 
-		FileFilter filter = new FileFilter() {
-			public boolean accept(File f) {
-				return f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
-			}
-		};
+		FileFilter filter = (File f) -> f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
 
 		// verify checkpoint
-		List<String> alreadyAnalysedFiles = new LinkedList<String>();
+		List<String> alreadyAnalysedFiles = new LinkedList<>();
 		File checkpoint = new File(rootPath + "/checkpoint.xml");
 		if (!checkpoint.exists()) {
 			try {
@@ -133,12 +132,15 @@ public class SerialCorpusAssessment {
 				files.add(f);
 		}
 
+        Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+        modelPaths.put(SemanticModel.LSA, pathToLSA);
+		modelPaths.put(SemanticModel.LDA, pathToLDA);
 		// process all remaining files
 		for (File f : files) {
 			try {
 				logger.info("Processing file " + f.getName());
 				Long start = System.currentTimeMillis();
-				AbstractDocument.loadGenericDocument(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+				AbstractDocument.loadGenericDocument(f.getAbsolutePath(), modelPaths, lang, usePOSTagging,
 						computeDialogism, null, null, cleanInput, saveOutput);
 				Long end = System.currentTimeMillis();
 

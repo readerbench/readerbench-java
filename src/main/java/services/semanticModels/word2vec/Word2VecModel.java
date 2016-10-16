@@ -45,6 +45,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import org.openide.util.Exceptions;
 import services.commons.VectorAlgebra;
+import services.semanticModels.SemanticModel;
 
 /**
  *
@@ -76,8 +77,8 @@ public class Word2VecModel implements ISemanticModel {
         LOGGER.info("Loading word2vec model " + path + " ...");
         Word2Vec word2Vec = null;
         try {
-            word2Vec = (Word2Vec) ObjectManipulation.loadObject(path + "/word2vec.model");
-        } catch (ClassNotFoundException | IOException e) {
+            word2Vec = WordVectorSerializer.loadFullModel(path + "/word2vec.model");
+        } catch (IOException e) {
             LOGGER.error(e);
         }
         return word2Vec;
@@ -113,22 +114,22 @@ public class Word2VecModel implements ISemanticModel {
 
     @Override
     public double getSimilarity(Word w1, Word w2) {
-        return VectorAlgebra.cosineSimilarity(w1.getWord2Vec(), w2.getWord2Vec());
+        return VectorAlgebra.cosineSimilarity(w1.getWord2VecVector(), w2.getWord2VecVector());
     }
 
     @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
-        return VectorAlgebra.cosineSimilarity(e1.getWord2Vec(), e2.getWord2Vec());
+        return VectorAlgebra.cosineSimilarity(e1.getWord2VecVector(), e2.getWord2VecVector());
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
-        return getSimilarConcepts(w.getWord2Vec(), minThreshold);
+        return getSimilarConcepts(w.getWord2VecVector(), minThreshold);
     }
 
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
-        return getSimilarConcepts(e.getWord2Vec(), minThreshold);
+        return getSimilarConcepts(e.getWord2VecVector(), minThreshold);
     }
 
     private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
@@ -188,5 +189,10 @@ public class Word2VecModel implements ISemanticModel {
 
     public static Set<Lang> getAvailableLanguages() {
         return AVAILABLE_FOR;
+    }
+
+    @Override
+    public SemanticModel getType() {
+        return SemanticModel.Word2Vec;
     }
 }

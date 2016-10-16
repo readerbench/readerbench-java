@@ -39,4 +39,7 @@ public interface ISemanticModel {
 	public String getPath();
 
 	public Lang getLanguage();
+    
+    public SemanticModel getType();
+    
 }

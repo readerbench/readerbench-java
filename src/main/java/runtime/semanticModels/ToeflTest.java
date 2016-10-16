@@ -24,6 +24,8 @@ import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -40,16 +42,8 @@ public class ToeflTest {
     public void process(String path, ISemanticModel semModel) {
         logger.info("Starting vocabulary tests processing...");
 
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
 
         try {
             if (!new File(path).isDirectory()) {
@@ -73,7 +67,7 @@ public class ToeflTest {
                             if ((line = br.readLine()) == null) {
                                 break outer;
                             }
-                            concepts[i] = VocabularyTest.processDoc(line, lsa, lda, semModel.getLanguage());
+                            concepts[i] = VocabularyTest.processDoc(line, models, semModel.getLanguage());
                         }
 
                         // read blank line
@@ -119,22 +113,22 @@ public class ToeflTest {
 
         ToeflTest test = new ToeflTest();
 
-        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        test.process("resources/in/toefl_test/", lsa1);
-        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
-        test.process("resources/in/toefl_test/", lsa2);
-        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-        test.process("resources/in/toefl_test/", lda1);
-        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
-        test.process("resources/in/toefl_test/", lda2);
+//        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+//        test.process("resources/in/toefl_test/", lsa1);
+//        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
+//        test.process("resources/in/toefl_test/", lsa2);
+//        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        test.process("resources/in/toefl_test/", lda1);
+//        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
+//        test.process("resources/in/toefl_test/", lda2);
 
-//        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
+        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
 //        test.process("resources/in/toefl_test/", w2v1);
 //        Word2VecModel w2v2 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
 //        test.process("resources/in/toefl_test/", w2v2);
 //        Word2VecModel w2v3 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
 //        test.process("resources/in/toefl_test/", w2v3);
         Word2VecModel w2v4 = Word2VecModel.loadGoogleNewsModel();
-        test.process("resources/in/toefl_test", w2v4);
+        test.process("resources/in/toefl_test", w2v1);
     }
 }

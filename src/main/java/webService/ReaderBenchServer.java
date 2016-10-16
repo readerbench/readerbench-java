@@ -63,6 +63,7 @@ import runtime.cv.CVAnalyzer;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import services.mail.SendMail;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import spark.Request;
@@ -180,11 +181,13 @@ public class ReaderBenchServer {
 
     private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, Map<String, String> hm) {
         Lang lang = Lang.getLang(hm.get("lang"));
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(LSA.loadLSA(hm.get("lsa"), lang));
+        models.add(LDA.loadLDA(hm.get("lda"), lang));
         Document queryInitialText = new Document(
                 null,
                 AbstractDocumentTemplate.getDocumentModel(initialText),
-                LSA.loadLSA(hm.get("lsa"), lang),
-                LDA.loadLDA(hm.get("lda"), lang),
+                models,
                 lang,
                 Boolean.parseBoolean(hm.get("postagging")));
 
@@ -495,10 +498,13 @@ public class ReaderBenchServer {
             Map<String, String> hm = hmParams(json);
 
             Lang lang = Lang.getLang(hm.get("lang"));
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(LSA.loadLSA(hm.get("lsa"), lang));
+            models.add(LDA.loadLDA(hm.get("lda"), lang));
+        
             Conversation conversation = Conversation.load(
                     new File("tmp/" + json.get("csclFile")),
-                    LSA.loadLSA(hm.get("lsa"), lang),
-                    LDA.loadLDA(hm.get("lda"), lang),
+                    models,
                     lang,
                     Boolean.parseBoolean(hm.get("postagging")));
             conversation.computeAll(Boolean.parseBoolean(hm.get("dialogism")));

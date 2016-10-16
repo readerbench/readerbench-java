@@ -26,6 +26,8 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.document.Document;
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
@@ -43,16 +45,8 @@ public class MSRSentenceCompletionTest {
     public void process(String path, ISemanticModel semModel) {
         logger.info("Starting sentence completion test...");
 
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
 
         try {
             String line;
@@ -92,7 +86,7 @@ public class MSRSentenceCompletionTest {
                         if ((line = questions.readLine()) == null) {
                             break outer;
                         }
-                        concepts[i] = processDoc(line, lsa, lda, semModel.getLanguage());
+                        concepts[i] = processDoc(line, models, semModel.getLanguage());
                     }
 
                     // read blank lines
@@ -131,9 +125,9 @@ public class MSRSentenceCompletionTest {
         }
     }
 
-    public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
+    public static Document processDoc(String line, List<ISemanticModel> models, Lang lang) {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-        Document doc = new Document(null, contents, lsa, lda, lang, true);
+        Document doc = new Document(null, contents, models, lang, true);
         return doc;
     }
 

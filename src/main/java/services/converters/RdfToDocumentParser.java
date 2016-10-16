@@ -34,6 +34,9 @@ import org.apache.jena.util.FileManager;
 import data.AbstractDocument.SaveType;
 import data.Lang;
 import data.article.ResearchArticle;
+import java.util.EnumMap;
+import java.util.Map;
+import services.semanticModels.SemanticModel;
 import view.widgets.ReaderBenchView;
 
 class Author {
@@ -290,8 +293,11 @@ public class RdfToDocumentParser {
     }
 
     private static void addSingleDocument(String filePath) {
-        ResearchArticle d = ResearchArticle.load(filePath, ReaderBenchView.TRAINED_LSA_SPACES_EN[0],
-                ReaderBenchView.TRAINED_LDA_MODELS_EN[0], Lang.en, false, true);
+        Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+        modelPaths.put(SemanticModel.LSA, ReaderBenchView.TRAINED_LSA_SPACES_EN[0]);
+        modelPaths.put(SemanticModel.LDA, ReaderBenchView.TRAINED_LDA_MODELS_EN[0]);
+        ResearchArticle d = ResearchArticle.load(filePath, modelPaths,
+                Lang.en, false, true);
         d.computeAll(false);
         d.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
     }

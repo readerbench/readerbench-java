@@ -24,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,8 +37,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 
 /**
  *
@@ -52,8 +55,8 @@ public class MetaDocument extends Document {
     private final List<AbstractDocument> children = new ArrayList<>();
     private DocumentLevel level;
 
-    public MetaDocument(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public MetaDocument(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
         //authors = new LinkedList<String>();
     }
 
@@ -107,7 +110,7 @@ public class MetaDocument extends Document {
                         .average().orElse((double) ComplexityIndices.IDENTITY))));
     }
 
-    public static MetaDocument load(File file, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
+    public static MetaDocument load(File file, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -118,7 +121,7 @@ public class MetaDocument extends Document {
 
             Element doc = (Element) dom.getElementsByTagName("document").item(0);
             Element root = (Element) doc.getElementsByTagName("section").item(0);
-            return load(file.getPath(), root, lsa, lda, lang, usePOSTagging, maxLevel, maxDepth);
+            return load(file.getPath(), root, models, lang, usePOSTagging, maxLevel, maxDepth);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOGGER.error("Error evaluating input file " + file.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
@@ -126,15 +129,13 @@ public class MetaDocument extends Document {
         return null;
     }
 
-    public static MetaDocument load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
-        // load also LSA vector space and LDA model
-        LSA lsa = (pathToLSA == null) ? null : LSA.loadLSA(pathToLSA, lang);
-        LDA lda = (pathToLDA == null) ? null : LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, maxLevel, maxDepth);
+    public static MetaDocument load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
+        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging, maxLevel, maxDepth);
     }
 
-    public static MetaDocument load(String inputPath, Element root, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
-        MetaDocument doc = new MetaDocument(inputPath, lsa, lda, lang);
+    public static MetaDocument load(String inputPath, Element root, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
+        MetaDocument doc = new MetaDocument(inputPath, models, lang);
         doc.level = getDocumentLevelOfElement(root);
         doc.setTitleText(root.getAttribute("title"));
         NodeList childNodes = root.getChildNodes();
@@ -150,14 +151,14 @@ public class MetaDocument extends Document {
             }
             DocumentLevel dl = getDocumentLevelOfElement(subsection);
             if (maxDepth > 0 && maxLevel.compareTo(dl) >= 0) {
-                doc.children.add(load(inputPath, subsection, lsa, lda, lang, usePOSTagging, maxLevel, maxDepth - 1));
+                doc.children.add(load(inputPath, subsection, models, lang, usePOSTagging, maxLevel, maxDepth - 1));
                 root.removeChild(subsection);
             } else {
                 extraText = true;
             }
         }
         if (extraText) {
-            doc.addInfo(Document.load(inputPath, root, lsa, lda, lang, usePOSTagging));
+            doc.addInfo(Document.load(inputPath, root, models, lang, usePOSTagging));
         }
 
         return doc;

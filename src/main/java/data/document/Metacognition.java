@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.SimilarityType;
@@ -80,7 +81,7 @@ public class Metacognition extends Document {
 
     public Metacognition(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging) {
         // build the corresponding structure of verbalizations
-        super(path, docTmp, initialReadingMaterial.getLSA(), initialReadingMaterial.getLDA(), initialReadingMaterial.getLanguage(), usePOSTagging);
+        super(path, docTmp, initialReadingMaterial.getSemanticModels(), initialReadingMaterial.getLanguage(), usePOSTagging);
         this.referredDoc = initialReadingMaterial;
         automatedReadingStrategies = new ArrayList<>();
         annotatedReadingStrategies = new ArrayList<>();
@@ -362,9 +363,11 @@ public class Metacognition extends Document {
                 out.write("," + author);
             }
             out.write("\n");
-            out.write("LSA space:," + getLSA().getPath() + "\n");
-            out.write("LDA model:," + getLDA().getPath() + "\n");
-
+            for (ISemanticModel model : getSemanticModels()) {
+                out.write(model.getType() + " space:," + model.getPath() + "\n");
+            
+            }
+            
             out.write("Text");
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
                 out.write("," + rs.getName());
@@ -423,24 +426,6 @@ public class Metacognition extends Document {
         ComplexityIndices.computeComplexityFactors(this);
         determineCohesion();
         LOGGER.info("Finished processing self-explanations ...");
-    }
-
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        // save serialized object - only path for LSA / LDA
-        stream.defaultWriteObject();
-        stream.writeObject(this.getLSA().getPath());
-        stream.writeObject(this.getLDA().getPath());
-    }
-
-    private void readObject(ObjectInputStream stream) throws IOException,
-            ClassNotFoundException {
-        // load serialized object - and rebuild LSA / LDA
-        stream.defaultReadObject();
-        LSA lsa = LSA.loadLSA((String) stream.readObject(), this.getLanguage());
-        LDA lda = LDA.loadLDA((String) stream.readObject(), this.getLanguage());
-        // rebuild LSA / LDA
-        rebuildSemanticSpaces(lsa, lda);
-        referredDoc.rebuildSemanticSpaces(lsa, lda);
     }
 
     //global count of reading strategies given as input argument

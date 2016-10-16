@@ -40,7 +40,10 @@ import javax.swing.border.EmptyBorder;
 import org.apache.log4j.Logger;
 
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
 import services.complexity.DataGathering;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
@@ -89,8 +92,10 @@ public class EssayProcessingView extends JFrame {
                 try {
                     LSA lsa = LSA.loadLSA(pathToLSA, lang);
                     LDA lda = LDA.loadLDA(pathToLDA, lang);
-
-                    DataGathering.processTexts(path, -1, true, lsa, lda, lang, usePOSTagging, computeDialogism);
+                    List<ISemanticModel> models = new ArrayList<>();
+                    models.add(lsa);
+                    models.add(lda);
+                    DataGathering.processTexts(path, -1, true, models, lang, usePOSTagging, computeDialogism);
                 } catch (Exception e) {
                     System.err.println("Error: " + e.getMessage());
                     e.printStackTrace();

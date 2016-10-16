@@ -49,9 +49,9 @@ public class DialogismComputations {
 		// merge chains based on LSA / LDA in order to generate semantic
 		// chains
 		logger.info("Starting to assess voices by first building semantic chains");
-		List<SemanticChain> semanticChains = new LinkedList<SemanticChain>();
+		List<SemanticChain> semanticChains = new LinkedList<>();
 		for (LexicalChain chain : d.getLexicalChains()) {
-			SemanticChain newChain = new SemanticChain(chain, d.getLSA(), d.getLDA());
+			SemanticChain newChain = new SemanticChain(chain, d.getSemanticModels());
 			newChain.updateSemanticRepresentation();
 			semanticChains.add(newChain);
 		}

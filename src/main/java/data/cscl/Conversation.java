@@ -44,6 +44,7 @@ import data.Block;
 import data.discourse.SemanticChain;
 import data.Lang;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
@@ -56,8 +57,10 @@ import services.discourse.dialogism.DialogismComputations;
 import services.discourse.dialogism.DialogismMeasures;
 import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 
 /**
  * @author Mihai Dascalu
@@ -84,12 +87,11 @@ public class Conversation extends AbstractDocument {
 
     /**
      * @param path
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      */
-    public Conversation(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public Conversation(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
         participants = new TreeSet<>();
         intenseCollabZonesSocialKB = new ArrayList<>();
         intenseCollabZonesVoice = new ArrayList<>();
@@ -99,13 +101,12 @@ public class Conversation extends AbstractDocument {
     /**
      * @param path
      * @param contents
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      * @param usePOSTagging
      */
-    public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
-        this(path, lsa, lda, lang);
+    public Conversation(String path, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        this(path, models, lang);
         this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
@@ -120,24 +121,21 @@ public class Conversation extends AbstractDocument {
      * @param usePOSTagging
      * @return
      */
-    public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging);
+    public static Conversation load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging) {
+        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 
     /**
      * Load a conversation
      *
      * @param docFile
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      * @param usePOSTagging
      * @return
      */
-    public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
+    public static Conversation load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Conversation c = null;
@@ -212,7 +210,7 @@ public class Conversation extends AbstractDocument {
             }
 
             contents.setBlocks(blocks);
-            c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging);
+            c = new Conversation(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             // set title as a concatenation of topics
             String title = "";
             nl1 = doc.getElementsByTagName("Topic");
@@ -221,11 +219,11 @@ public class Conversation extends AbstractDocument {
                     el = (Element) nl1.item(i);
                     title += el.getFirstChild().getNodeValue() + " ";
                 }
-                c.setDocumentTitle(title, lsa, lda, lang, usePOSTagging);
+                c.setDocumentTitle(title, models, lang, usePOSTagging);
             }
 
             if (title.length() == 0) {
-                c.setDocumentTitle(docFile.getName(), lsa, lda, lang, usePOSTagging);
+                c.setDocumentTitle(docFile.getName(), models, lang, usePOSTagging);
             }
 
             // obtain annotator grades
@@ -305,8 +303,8 @@ public class Conversation extends AbstractDocument {
     private void determineParticipantInterventions() {
         if (getParticipants().size() > 0) {
             for (Participant p : getParticipants()) {
-                p.setInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
-                p.setSignificantInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
+                p.setInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
+                p.setSignificantInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
             }
             for (Block b : getBlocks()) {
                 if (b != null && ((Utterance) b).getParticipant() != null) {
@@ -357,7 +355,7 @@ public class Conversation extends AbstractDocument {
         super.computeAll(computeDialogism);
 
         this.getParticipants().stream().forEach((p) -> {
-            KeywordModeling.determineTopics(p.getInterventions());
+            KeywordModeling.determineKeywords(p.getInterventions());
         });
 
         Collaboration.evaluateSocialKB(this);
@@ -396,59 +394,6 @@ public class Conversation extends AbstractDocument {
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             Exceptions.printStackTrace(ex);
-        }
-    }
-
-    /**
-     * @param stream
-     * @throws IOException
-     */
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        // save serialized object - only path for LSA / LDA
-        stream.defaultWriteObject();
-        if (getLSA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLSA().getPath());
-        }
-        if (getLDA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLDA().getPath());
-        }
-    }
-
-    /**
-     * @param stream
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        // load serialized object - and rebuild LSA / LDA
-        stream.defaultReadObject();
-        String lsaPath = (String) stream.readObject();
-        String ldaPath = (String) stream.readObject();
-        LSA lsa = null;
-        LDA lda = null;
-        if (lsaPath != null && lsaPath.length() > 0) {
-            lsa = LSA.loadLSA(lsaPath, this.getLanguage());
-        }
-        if (ldaPath != null && ldaPath.length() > 0) {
-            lda = LDA.loadLDA(ldaPath, this.getLanguage());
-        }
-        // rebuild LSA / LDA
-        rebuildSemanticSpaces(lsa, lda);
-
-        // rebuild interventions document for each participant
-        determineParticipantInterventions();
-        // determine topics for each participant
-        for (Participant p : participants) {
-            KeywordModeling.determineTopics(p.getInterventions());
-        }
-
-        for (Participant p : getParticipants()) {
-            p.getInterventions().rebuildSemanticSpaces(getLSA(), getLDA());
-            p.getSignificantInterventions().rebuildSemanticSpaces(getLSA(), getLDA());
         }
     }
 

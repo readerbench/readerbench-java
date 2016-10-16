@@ -23,6 +23,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import data.cscl.Conversation;
+import java.util.ArrayList;
+import java.util.List;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -31,11 +34,15 @@ public class CorpusAssessmentWorker extends Worker {
     static Logger logger = Logger.getLogger(CorpusAssessmentWorker.class);
     private LSA lsa;
     private LDA lda;
+    private List<ISemanticModel> models;
 
     public CorpusAssessmentWorker() {
         // load also LSA vector space and LDA model
         lsa = LSA.loadLSA(CorpusAssessmentMaster.PATH_TO_LSA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
         lda = LDA.loadLDA(CorpusAssessmentMaster.PATH_TO_LDA, CorpusAssessmentMaster.PROCESSING_LANGUAGE);
+        models = new ArrayList<>();
+        models.add(lsa);
+        models.add(lda);
     }
 
     public void performTask(Serializable task) throws Exception {
@@ -51,7 +58,7 @@ public class CorpusAssessmentWorker extends Worker {
             send(new StatusMsg(workerID, StatusMsg.STARTING_MESSAGE, new String[]{taskMsg.getArgs()[0].toString()},
                     null));
 
-            Conversation d = Conversation.load(new File(taskMsg.getArgs()[0].toString()), lsa, lda, CorpusAssessmentMaster.PROCESSING_LANGUAGE, CorpusAssessmentMaster.USE_POS_TAGGING
+            Conversation d = Conversation.load(new File(taskMsg.getArgs()[0].toString()), models, CorpusAssessmentMaster.PROCESSING_LANGUAGE, CorpusAssessmentMaster.USE_POS_TAGGING
             );
             if (CorpusAssessmentMaster.PROCESS_INPUT) {
                 d.computeAll(CorpusAssessmentMaster.COMPUTE_DIALOGISM);

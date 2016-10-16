@@ -23,6 +23,7 @@ import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import cc.mallet.util.Maths;
 import services.commons.VectorAlgebra;
+import services.semanticModels.SemanticModel;
 
 public class SemanticSearch {
 
@@ -33,9 +34,11 @@ public class SemanticSearch {
 			// difference between documents
 			double lsaSim = 0;
 			double ldaSim = 0;
-			if (query.getLSA() != null && d.getLSA() != null)
+			if (query.getSemanticModel(SemanticModel.LSA) != null && 
+                    d.getSemanticModel(SemanticModel.LSA) != null)
 				lsaSim = VectorAlgebra.cosineSimilarity(query.getLSAVector(), d.getLSAVector());
-			if (query.getLDA() != null && d.getLDA() != null)
+			if (query.getSemanticModel(SemanticModel.LDA) != null && 
+                    d.getSemanticModel(SemanticModel.LDA) != null)
 				ldaSim = 1 - Maths.jensenShannonDivergence(query.getLDAProbDistribution(), d.getLDAProbDistribution());
 			double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
 

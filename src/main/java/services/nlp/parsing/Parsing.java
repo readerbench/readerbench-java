@@ -50,10 +50,14 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.openide.util.Exceptions;
 import services.commons.TextPreprocessing;
 import services.nlp.lemmatizer.StaticLemmatizerPOS;
 import services.nlp.stemmer.Stemmer;
+import services.semanticModels.LDA.LDA;
+import services.semanticModels.SemanticModel;
 
 /**
  * General NLP parsing class relying on the Stanford Core NLP
@@ -157,12 +161,13 @@ public abstract class Parsing {
     }
 
     public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
-        Map<BlockTemplate, Annotation> annotations = new HashMap<>();
+        Map<BlockTemplate, Annotation> annotations;
         try {
             if (!adt.getBlocks().isEmpty()) {
-                adt.getBlocks().stream().forEach((blockTmp) -> {
-                    annotations.put(blockTmp, new Annotation(TextPreprocessing.basicTextCleaning(blockTmp.getContent(), lang)));
-                });
+                annotations = adt.getBlocks().stream()
+                        .collect(Collectors.toMap(
+                                Function.identity(),
+                                (blockTmp) -> new Annotation(TextPreprocessing.basicTextCleaning(blockTmp.getContent(), lang))));
                 if (usePOSTagging) {
                     getPipeline().annotate(annotations.values());
                 }
@@ -227,8 +232,10 @@ public abstract class Parsing {
             // determine overall word occurrences
             d.determineWordOccurences(d.getBlocks());
 
-            if (d.getLDA() != null) {
-                d.setLDAProbDistribution(d.getLDA().getProbDistribution(d));
+            if (d.getSemanticModel(SemanticModel.LDA) != null) {
+                d.getModelVectors().put(
+                        SemanticModel.LDA, 
+                        ((LDA)d.getSemanticModel(SemanticModel.LDA)).getProbDistribution(d));
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -238,7 +245,7 @@ public abstract class Parsing {
 
     public Block processBlock(AbstractDocument d, int blockIndex, String content, List<CoreMap> sentences) {
         // uses Stanford Core NLP
-        Block b = new Block(d, blockIndex, content, d.getLSA(), d.getLDA(), d.getLanguage());
+        Block b = new Block(d, blockIndex, content, d.getSemanticModels(), d.getLanguage());
 
         // set Stanford sentences
         b.setStanfordSentences(sentences);
@@ -259,16 +266,16 @@ public abstract class Parsing {
 
     public Sentence processSentence(Block b, int utteranceIndex, CoreMap sentence) {
         // uses Stanford Core NLP
-        Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getLSA(), b.getLDA(), lang);
+        Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModels(), lang);
 
         sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
             String word = token.get(OriginalTextAnnotation.class);
             String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
             String ne = token.get(NamedEntityTagAnnotation.class);
             if (TextPreprocessing.isWord(word, lang)) {
-                Word w = new Word(b.getIndex(), s.getIndex(), word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang),
+                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang),
                         Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne,
-                        s.getLSA(), s.getLDA(), lang);
+                        s.getSemanticModels(), lang);
                 s.getAllWords().add(w);
                 if (w.isContentWord()) {
                     s.getWords().add(w);

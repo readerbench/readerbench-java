@@ -61,6 +61,7 @@ import data.Block;
 import data.document.Document;
 import data.document.Metacognition;
 import data.document.ReadingStrategyType;
+import java.util.ArrayList;
 
 public class AnnotateVerbalizationView extends JFrame {
 
@@ -128,7 +129,7 @@ public class AnnotateVerbalizationView extends JFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                loadedDocument = Document.load(file, null, null, null, false);
+                loadedDocument = Document.load(file, new ArrayList<>(), null, false);
                 if (loadedDocument != null) {
                     mntmOpenDocument.setEnabled(false);
                     mntmOpenVerbalization.setEnabled(true);
@@ -208,10 +209,8 @@ public class AnnotateVerbalizationView extends JFrame {
 
         JMenuItem mntmQuit = new JMenuItem(LocalizationUtils.getTranslation("Quit"), KeyEvent.VK_Q);
         mntmQuit.setAccelerator(KeyStroke.getKeyStroke("control Q"));
-        mntmQuit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                AnnotateVerbalizationView.this.dispose();
-            }
+        mntmQuit.addActionListener((ActionEvent e) -> {
+            AnnotateVerbalizationView.this.dispose();
         });
         mnFile.add(mntmQuit);
 
@@ -546,12 +545,9 @@ public class AnnotateVerbalizationView extends JFrame {
 
         adjustToSystemGraphics();
 
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                AnnotateVerbalizationView view = new AnnotateVerbalizationView();
-                view.setVisible(true);
-            }
+        EventQueue.invokeLater(() -> {
+            AnnotateVerbalizationView view = new AnnotateVerbalizationView();
+            view.setVisible(true);
         });
     }
 
@@ -561,13 +557,10 @@ public class AnnotateVerbalizationView extends JFrame {
             if ("Nimbus".equals(info.getName())) {
                 try {
                     UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedLookAndFeelException e) {
+                } catch (ClassNotFoundException |
+                        InstantiationException |
+                        IllegalAccessException |
+                        UnsupportedLookAndFeelException e) {
                     e.printStackTrace();
                 }
             }

@@ -53,6 +53,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import java.io.FileNotFoundException;
+import java.util.StringJoiner;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -69,8 +70,10 @@ import services.discourse.keywordMining.Scoring;
 import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
 import services.nlp.parsing.SimpleParsing;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 
 /**
  *
@@ -126,29 +129,24 @@ public abstract class AbstractDocument extends AnalysisElement {
         this.lexicalChains = new LinkedList<>();
     }
 
-    public AbstractDocument(String path, LSA lsa, LDA lda, Lang lang) {
+    public AbstractDocument(String path, List<ISemanticModel> models, Lang lang) {
         this();
         this.path = path;
         setLanguage(lang);
         this.disambiguationGraph = new DisambiguationGraph(lang);
-        setLSA(lsa);
-        setLDA(lda);
+        setSemanticModels(models);
     }
 
-    public void rebuildSemanticSpaces(LSA lsa, LDA lda) {
-        this.setLSA(lsa);
-        this.setLDA(lda);
+    public void rebuildSemanticSpaces(List<ISemanticModel> models) {
+        setSemanticModels(models);
         for (Block b : getBlocks()) {
             if (b != null) {
-                b.setLSA(lsa);
-                b.setLDA(lda);
+                b.setSemanticModels(models);
                 if (b.getSentences() != null) {
                     for (Sentence s : b.getSentences()) {
-                        s.setLSA(lsa);
-                        s.setLDA(lda);
+                        s.setSemanticModels(models);
                         for (Word w : s.getAllWords()) {
-                            w.setLSA(lsa);
-                            w.setLDA(lda);
+                            w.setSemanticModels(models);
                         }
                     }
                 }
@@ -156,8 +154,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
         if (voices != null) {
             for (SemanticChain chain : voices) {
-                chain.setLSA(lsa);
-                chain.setLDA(lda);
+                chain.setSemanticModels(models);
             }
         }
     }
@@ -216,7 +213,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         CohesionGraph.buildCohesionGraph(this);
 
         // determine topics
-        KeywordModeling.determineTopics(this);
+        KeywordModeling.determineKeywords(this);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
@@ -226,7 +223,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         LOGGER.info("Finished all discourse analysis processes ...");
     }
 
-    public void setDocumentTitle(String title, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
+    public void setDocumentTitle(String title, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this.titleText = title;
         Annotation document;
         String processedText = title.replaceAll("\\s+", " ");
@@ -240,26 +237,19 @@ public abstract class AbstractDocument extends AnalysisElement {
                 CoreMap sentence = document.get(SentencesAnnotation.class).get(0);
 
                 // add corresponding block
-                setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", lsa, lda, lang), 0, sentence));
+                setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", models, lang), 0, sentence));
             } else {
-                setTitle(SimpleParsing.processSentence(new Block(null, 0, "", lsa, lda, lang), 0, processedText));
+                setTitle(SimpleParsing.processSentence(new Block(null, 0, "", models, lang), 0, processedText));
             }
         }
     }
 
-    public static AbstractDocument loadGenericDocument(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
+    public static AbstractDocument loadGenericDocument(String pathToDoc, 
+            Map<SemanticModel, String> modelPaths, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
             int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
-        // load also LSA vector space and LDA model
-        LSA lsa = null;
-        LDA lda = null;
-        if (pathToLSA != null && pathToLSA.length() > 0 && new File(pathToLSA).isDirectory()) {
-            lsa = LSA.loadLSA(pathToLSA, lang);
-        }
-        if (pathToLDA != null && pathToLDA.length() > 0 && new File(pathToLDA).isDirectory()) {
-            lda = LDA.loadLDA(pathToLDA, lang);
-        }
-        return loadGenericDocument(new File(pathToDoc), lsa, lda, lang, usePOSTagging, computeDialogism,
+        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
@@ -288,9 +278,10 @@ public abstract class AbstractDocument extends AnalysisElement {
         return false;
     }
 
-    public static AbstractDocument loadGenericDocument(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors, boolean cleanInput,
-            SaveType saveOutput) {
+    public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models, 
+            Lang lang, boolean usePOSTagging, boolean computeDialogism, 
+            String pathToComplexityModel, int[] selectedComplexityFactors, 
+            boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
         LOGGER.info("Loading " + docFile.getPath() + " file for processing");
         boolean isDocument = checkTagsDocument(docFile, "p");
@@ -305,13 +296,13 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
 
         if (isDocument) {
-            Document d = Document.load(docFile, lsa, lda, lang, usePOSTagging);
+            Document d = Document.load(docFile, models, lang, usePOSTagging);
             d.computeAll(computeDialogism);
             d.save(saveOutput);
             return d;
         }
         if (isChat) {
-            Conversation c = Conversation.load(docFile, lsa, lda, lang, usePOSTagging);
+            Conversation c = Conversation.load(docFile, models, lang, usePOSTagging);
             c.computeAll(computeDialogism);
             c.save(saveOutput);
             return c;
@@ -351,7 +342,8 @@ public abstract class AbstractDocument extends AnalysisElement {
     public static AbstractDocument loadSerializedDocument(String path) {
         LOGGER.info("Loading serialized document " + path + " ...");
         AbstractDocument d = null;
-        try (FileInputStream fIn = new FileInputStream(new File(path)); ObjectInputStream oIn = new ObjectInputStream(fIn)) {
+        try (FileInputStream fIn = new FileInputStream(new File(path)); 
+             ObjectInputStream oIn = new ObjectInputStream(fIn)) {
             d = (AbstractDocument) oIn.readObject();
         } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
@@ -385,13 +377,10 @@ public abstract class AbstractDocument extends AnalysisElement {
             if (titleText != null) {
                 out.write(titleText.replaceAll(",", "").replaceAll("\\s+", " ") + "\n");
             }
-            if (getLSA() != null) {
-                out.write("LSA space:," + getLSA().getPath() + "\n");
+            for (ISemanticModel model : getSemanticModels()) {
+                out.write(model.getType() + " space:," + model.getPath() + "\n");
             }
-            if (getLDA() != null) {
-                out.write("LDA model:," + getLDA().getPath() + "\n");
-            }
-
+            
             out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Personal Knowledge Building,Social Knowledge Building,Initial Text,Processed Text\n");
             for (Block b : blocks) {
                 if (b != null) {
@@ -431,7 +420,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
             out.write("\n");
 
-            if (this.getLDA() != null) {
+            if (semanticModels.containsKey(SemanticModel.LDA)) {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
@@ -741,8 +730,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public String getDescription() {
         String s = this.getTitleText();
-        if (this.getLSA() != null && this.getLDA() != null) {
-            s += " [" + this.getLSA().getPath() + ", " + this.getLDA().getPath() + "]";
+        
+        if (!getSemanticModels().isEmpty()) {
+            StringJoiner sj = new StringJoiner(", ", " [", "]");
+            for (ISemanticModel model : getSemanticModels()) {
+                sj.add(model.getPath());
+            }
+            s += sj;
         }
         return s;
     }

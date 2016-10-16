@@ -100,7 +100,7 @@ public class PreProcessing {
             }
         }
         // perform processing
-        AbstractDocument d = new Document(null, docTmp, null, null, lang, usePOSTagging);
+        AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), lang, usePOSTagging);
         return parseDocumentProcessing(d, noMinWordPerDoc);
     }
 

@@ -38,12 +38,13 @@ import data.document.Document;
 import data.Lang;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SemanticModel;
 
 public class ResearchArticle extends Document {
 
@@ -52,23 +53,22 @@ public class ResearchArticle extends Document {
     private List<String> citationURIList = new ArrayList<>();
     private List<ArticleAuthor> articleAuthorList = new ArrayList<>();
 
-    public ResearchArticle(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public ResearchArticle(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
     }
 
-    public ResearchArticle(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
-        super(path, docTmp, lsa, lda, lang, usePOSTagging);
+    public ResearchArticle(String path, AbstractDocumentTemplate docTmp, 
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        super(path, docTmp, models, lang, usePOSTagging);
     }
 
-    public static ResearchArticle load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+    public static ResearchArticle load(String pathToDoc, Map<SemanticModel, String> modelPaths, 
+            Lang lang, boolean usePOSTagging, boolean cleanInput) {
+        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging, cleanInput);
     }
 
-    public static ResearchArticle load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+    public static ResearchArticle load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean cleanInput) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -112,12 +112,12 @@ public class ResearchArticle extends Document {
                     }
                 }
             }
-            ResearchArticle d = new ResearchArticle(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging);
+            ResearchArticle d = new ResearchArticle(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             d.setNoVerbalizationBreakPoints(noBreakPoints);
             // determine title
             nl = doc.getElementsByTagName("title");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), lsa, lda, lang, usePOSTagging);
+                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
             }
 
             // determine meta

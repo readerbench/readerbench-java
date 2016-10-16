@@ -61,9 +61,11 @@ import data.Word;
 import data.Lang;
 import data.lexicalChains.DisambiguationGraph;
 import java.util.ArrayList;
+import java.util.Map;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import services.semanticModels.ISemanticModel;
+import services.semanticModels.SemanticModel;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 
@@ -78,33 +80,24 @@ public class Document extends AbstractDocument implements Comparable<Document> {
     private List<Word> initialTopics;
     private double keywordAbstractOverlap;
 
-    public Document(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public Document(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
         this.authors = new ArrayList<>();
         this.initialTopics = new ArrayList<>();
     }
 
-    public Document(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
-        this(path, lsa, lda, lang);
+    public Document(String path, AbstractDocumentTemplate docTmp, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        this(path, models, lang);
         this.setText(docTmp.getText());
         setDocTmp(docTmp);
         Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }
 
     public Document(AbstractDocumentTemplate docTmp, ISemanticModel semModel, boolean usePOSTagging) {
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            LOGGER.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-        }
-
         setLanguage(semModel.getLanguage());
-        setLSA(lsa);
-        setLDA(lda);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
+        setSemanticModels(models);
         setDisambiguationGraph(new DisambiguationGraph(semModel.getLanguage()));
         setText(docTmp.getText());
 
@@ -112,14 +105,12 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public static Document load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging);
+    public static Document load(String pathToDoc, Map<SemanticModel, String> modelPaths, Lang lang, boolean usePOSTagging) {
+        List<ISemanticModel> models = SemanticModel.loadModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 
-    public static Document load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
+    public static Document load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             InputSource input = new InputSource(new FileInputStream(docFile));
@@ -128,7 +119,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            return load(docFile.getAbsolutePath(), doc, lsa, lda, lang, usePOSTagging);
+            return load(docFile.getAbsolutePath(), doc, models, lang, usePOSTagging);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
@@ -136,7 +127,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         return null;
     }
 
-    public static Document load(String inputPath, Element root, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
+    public static Document load(String inputPath, Element root, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         Element el;
         NodeList nl;
@@ -171,13 +162,13 @@ public class Document extends AbstractDocument implements Comparable<Document> {
                 }
             }
         }
-        Document d = new Document(inputPath, contents, lsa, lda, lang, usePOSTagging);
+        Document d = new Document(inputPath, contents, models, lang, usePOSTagging);
         d.setNoVerbalizationBreakPoints(noBreakPoints);
 
         // determine title
         nl = root.getElementsByTagName("title");
         if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), lsa, lda, lang,
+            d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang,
                     usePOSTagging);
         }
 
@@ -255,38 +246,6 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             }
         }
         return d;
-    }
-
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        // save serialized object - only path for LSA / LDA
-        stream.defaultWriteObject();
-        if (getLSA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLSA().getPath());
-        }
-        if (getLDA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLDA().getPath());
-        }
-    }
-
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        // load serialized object
-        stream.defaultReadObject();
-        String lsaPath = (String) stream.readObject();
-        String ldaPath = (String) stream.readObject();
-        LSA lsa = null;
-        LDA lda = null;
-        if (lsaPath != null && lsaPath.length() > 0) {
-            lsa = LSA.loadLSA(lsaPath, this.getLanguage());
-        }
-        if (ldaPath != null && ldaPath.length() > 0) {
-            lda = LDA.loadLDA(ldaPath, this.getLanguage());
-        }
-        // rebuild LSA / LDA
-        rebuildSemanticSpaces(lsa, lda);
     }
 
     public void addToXML(org.w3c.dom.Document doc, Element parent) {
@@ -484,26 +443,23 @@ public class Document extends AbstractDocument implements Comparable<Document> {
     }
 
     public String getFullDescription() {
-        String descr = "";
+        StringBuilder descr = new StringBuilder();
         if (this.getPath() != null) {
-            descr += this.getPath() + "_";
+            descr.append(this.getPath()).append("_");
         }
         if (this.getTitleText() != null) {
-            descr += this.getTitleText() + "_";
+            descr.append(this.getTitleText()).append("_");
         }
-        if (this.getLSA() != null) {
-            descr += this.getLSA().getPath() + "_";
-        }
-        if (this.getLDA() != null) {
-            descr += this.getLDA().getPath() + "_";
+        for (ISemanticModel model : getSemanticModels()) {
+            descr.append(model.getPath()).append("_");
         }
         if (this.getAuthors() != null) {
-            descr = this.getAuthors().stream().map((author) -> author + "_").reduce(descr, String::concat);
+            descr.append(this.getAuthors().stream().map((author) -> author + "_").reduce("", String::concat));
         }
         if (this.getText() != null) {
-            descr += this.getText() + "_";
+            descr.append(this.getText()).append("_");
         }
-        return descr;
+        return descr.toString();
     }
 
     @Override
@@ -530,14 +486,6 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         if (this.getTitleText() != null && d.getTitleText() != null) {
             compare1 += this.getTitleText() + "_";
             compare2 += d.getTitleText() + "_";
-        }
-        if (this.getLSA() != null && d.getLSA() != null) {
-            compare1 += this.getLSA().getPath() + "_";
-            compare2 += d.getLSA().getPath() + "_";
-        }
-        if (this.getLDA() != null && d.getLDA() != null) {
-            compare1 += this.getLDA().getPath() + "_";
-            compare2 += d.getLDA().getPath() + "_";
         }
         if (this.getAuthors() != null && d.getAuthors() != null) {
             compare1 = this.getAuthors().stream().map((author) -> author + "_").reduce(compare1, String::concat);

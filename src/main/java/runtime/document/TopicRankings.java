@@ -38,6 +38,7 @@ import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -135,7 +136,10 @@ public class TopicRankings {
             File[] files = dir.listFiles((File pathname) -> {
                 return pathname.getName().toLowerCase().endsWith(".xml");
             });
-
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(lsa);
+            models.add(lda);
+        
             for (File file : files) {
                 LOGGER.info("Processing " + file.getName() + " file");
                 // Create file
@@ -143,9 +147,9 @@ public class TopicRankings {
                 Document d;
                 try {
                     if (meta) {
-                        d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
+                        d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                     } else {
-                        d = Document.load(file, lsa, lda, lang, usePOSTagging);
+                        d = Document.load(file, models, lang, usePOSTagging);
                     }
                     d.computeAll(computeDialogism);
                     d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);

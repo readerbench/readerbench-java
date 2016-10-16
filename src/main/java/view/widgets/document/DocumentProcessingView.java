@@ -60,7 +60,10 @@ import data.cscl.Conversation;
 import data.document.Document;
 import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.util.EnumMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
+import services.semanticModels.SemanticModel;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -116,7 +119,10 @@ public class DocumentProcessingView extends JInternalFrame {
             if (isSerialized) {
                 d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
-                d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
+                Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+                modelPaths.put(SemanticModel.LSA, pathToLSA);
+                modelPaths.put(SemanticModel.LDA, pathToLDA);
+                d = AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
                         ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
                         SaveType.SERIALIZED_AND_CSV_EXPORT);
             }

@@ -31,9 +31,11 @@ import data.document.Metacognition;
 import data.Lang;
 import data.document.ReadingStrategyType;
 import java.util.EnumMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.semanticModels.SemanticModel;
 import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {
@@ -42,7 +44,10 @@ public class TestMatildaAvaleurSE {
 
     public static List<Metacognition> compute(String filename, String folder) {
         List<Metacognition> verbalizations = new ArrayList<>();
-        Document doc = Document.load(filename, "resources/config/FR/LSA/Le Monde", "resources/config/FR/LDA/Le Monde", Lang.fr, true);
+        Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+        modelPaths.put(SemanticModel.LSA, "resources/config/FR/LSA/Le Monde");
+        modelPaths.put(SemanticModel.LDA, "resources/config/FR/LDA/Le Monde");
+        Document doc = Document.load(filename, modelPaths, Lang.fr, true);
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
             Metacognition v = Metacognition.loadVerbalization(f.getAbsolutePath(), doc, true);

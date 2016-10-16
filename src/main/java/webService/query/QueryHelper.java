@@ -21,8 +21,11 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
 import data.document.Document;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import services.complexity.ComplexityIndices;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -35,11 +38,13 @@ public class QueryHelper {
         logger.info("Processign query ...");
         Lang lang = Lang.getLang(hm.get("lang"));
         AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(hm.get("text"));
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(LSA.loadLSA(hm.get("lsa"), lang));
+        models.add(LDA.loadLDA(hm.get("lda"), lang));
         AbstractDocument document = new Document(
                 null,
                 template,
-                LSA.loadLSA(hm.get("lsa"), lang),
-                LDA.loadLDA(hm.get("lda"), lang),
+                models,
                 lang,
                 Boolean.parseBoolean(hm.get("postagging"))
         );

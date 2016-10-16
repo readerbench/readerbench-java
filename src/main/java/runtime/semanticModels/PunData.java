@@ -42,24 +42,17 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 
 public class PunData {
 
     static Logger logger = Logger.getLogger(PunData.class);
 
     private static String compareDocs(String s1, String s2, ISemanticModel semModel, double minThreshold) {
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        }
-        if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        }
-        Document d1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1), lsa, lda, semModel.getLanguage(), true);
-        Document d2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s2), lsa, lda, semModel.getLanguage(), true);
-        Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), lsa, lda, semModel.getLanguage(), true);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
+        Document d1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1), models, semModel.getLanguage(), true);
+        Document d2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s2), models, semModel.getLanguage(), true);
+        Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), models, semModel.getLanguage(), true);
         String out = s1 + "-" + s2 + "," + Formatting.formatNumber(semModel.getSimilarity(d1, d2));
 
         List<Keyword> inferredConcepts = new ArrayList<>();

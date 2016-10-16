@@ -24,25 +24,26 @@ import java.util.TreeMap;
 import data.Word;
 import data.lexicalChains.LexicalChain;
 import data.sentiment.SentimentEntity;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
     private static final double SIMILARITY_THRESHOLD = 0.8;
 
-    private transient LSA lsa;
-    private transient LDA lda;
+    private transient Map<SemanticModel, ISemanticModel> semanticModels;
     private List<Word> words;
     private Map<String, Double> termOccurrences;
-    private double[] lsaVector;
-    private double[] ldaProbDistribution;
+    private Map<SemanticModel, double[]> modelVectors;
     private double[] sentenceDistribution;
     private double[] blockDistribution;
     private double[] blockMovingAverage;
@@ -50,10 +51,9 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private transient SentimentEntity chainSentiment;
 
-    public SemanticChain(LexicalChain chain, LSA lsa, LDA lda) {
+    public SemanticChain(LexicalChain chain, List<ISemanticModel> models) {
         words = new LinkedList<>();
-        this.lsa = lsa;
-        this.lda = lda;
+        setSemanticModels(models);
         chain.getLinks().stream().forEach((link) -> {
             words.add(link.getWord());
         });
@@ -97,20 +97,26 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     }
 
     public void updateSemanticRepresentation() {
+        if (modelVectors == null) {
+            modelVectors = new EnumMap<>(SemanticModel.class);
+        }
+        LSA lsa = (LSA)semanticModels.get(SemanticModel.LSA);
         if (lsa != null) {
-            lsaVector = new double[LSA.K];
+            double[] lsaVector = new double[LSA.K];
             words.stream().forEach((word) -> {
                 for (int i = 0; i < LSA.K; i++) {
                     lsaVector[i] += word.getLSAVector()[i];
                 }
             });
+            modelVectors.put(SemanticModel.LSA, lsaVector);
         }
 
         // determine LDA distribution
+        LDA lda = (LDA)semanticModels.get(SemanticModel.LDA);
         if (lda != null) {
             String text = "";
             text = words.stream().map((word) -> word.getLemma() + " ").reduce(text, String::concat);
-            this.ldaProbDistribution = lda.getProbDistribution(text.trim());
+            modelVectors.put(SemanticModel.LDA, lda.getProbDistribution(text.trim()));
         }
 
         Map<String, Double> unsortedOccurences = new TreeMap<>();
@@ -135,35 +141,11 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     }
 
     public double[] getLSAVector() {
-        return lsaVector;
-    }
-
-    public void setLSAVector(double[] lsaVector) {
-        this.lsaVector = lsaVector;
+        return modelVectors.get(SemanticModel.LSA);
     }
 
     public double[] getLDAProbDistribution() {
-        return ldaProbDistribution;
-    }
-
-    public void setLDAProbDistribution(double[] ldaProbDistribution) {
-        this.ldaProbDistribution = ldaProbDistribution;
-    }
-
-    public LSA getLSA() {
-        return lsa;
-    }
-
-    public void setLSA(LSA lsa) {
-        this.lsa = lsa;
-    }
-
-    public LDA getLDA() {
-        return lda;
-    }
-
-    public void setLDA(LDA lda) {
-        this.lda = lda;
+        return modelVectors.get(SemanticModel.LDA);
     }
 
     public int getNoWords() {
@@ -325,5 +307,12 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     @Override
     public int compareTo(SemanticChain o) {
         return (int) (Math.signum(o.getNoWords() - this.getNoWords()));
+    }
+    
+    public void setSemanticModels(List<ISemanticModel> models) {
+        semanticModels = new EnumMap<>(SemanticModel.class);
+        for (ISemanticModel model : models) {
+            semanticModels.put(model.getType(), model);
+        }
     }
 }

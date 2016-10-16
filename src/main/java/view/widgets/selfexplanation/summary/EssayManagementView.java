@@ -56,7 +56,9 @@ import org.apache.log4j.Logger;
 
 import data.Block;
 import data.document.EssayCreator;
+import java.util.ArrayList;
 import org.openide.util.Exceptions;
+import services.semanticModels.ISemanticModel;
 
 public class EssayManagementView extends JFrame {
 
@@ -92,45 +94,43 @@ public class EssayManagementView extends JFrame {
 
         JMenuItem mntmOpen = new JMenuItem("Select files to convert",
                 KeyEvent.VK_O);
-        mntmOpen.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
-                    fc.setMultiSelectionEnabled(true);
-                } else {
-                    fc = new JFileChooser(lastDirectory);
-                    fc.setMultiSelectionEnabled(true);
+        mntmOpen.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+                fc.setMultiSelectionEnabled(true);
+            } else {
+                fc = new JFileChooser(lastDirectory);
+                fc.setMultiSelectionEnabled(true);
+            }
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".txt");
                 }
-                fc.setFileFilter(new FileFilter() {
-                    public boolean accept(File f) {
-                        if (f.isDirectory()) {
-                            return true;
-                        }
-                        return f.getName().endsWith(".txt");
-                    }
-
-                    public String getDescription() {
-                        return " simple text files (*.txt) in UTF-8 format";
-                    }
-                });
-                int returnVal = fc.showOpenDialog(EssayManagementView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File[] files = fc.getSelectedFiles();
-                    lastDirectory = files[0].getParentFile();
-
-                    if (loadedDocument == null) {
-                        loadedDocument = new EssayCreator(null, null, null,
-                                null);
-                    }
-                    for (File f : files) {
-                        String p = f.getPath().replace(".txt", ".xml");
-                        loadedDocument.exportXMLasEssay(p,
-                                loadedDocument.readFromTxt(f.getPath()));
-                    }
-
+                
+                public String getDescription() {
+                    return " simple text files (*.txt) in UTF-8 format";
                 }
+            });
+            int returnVal = fc.showOpenDialog(EssayManagementView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File[] files = fc.getSelectedFiles();
+                lastDirectory = files[0].getParentFile();
+                
+                if (loadedDocument == null) {
+                    loadedDocument = new EssayCreator(null, new ArrayList<>(),
+                            null);
+                }
+                for (File f : files) {
+                    String p = f.getPath().replace(".txt", ".xml");
+                    loadedDocument.exportXMLasEssay(p,
+                            loadedDocument.readFromTxt(f.getPath()));
+                }
+                
             }
         });
         mntmOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
@@ -170,50 +170,48 @@ public class EssayManagementView extends JFrame {
         lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JButton fileChooserBtn = new JButton("Choose txt file to import");
-        fileChooserBtn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
+        fileChooserBtn.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".txt");
                 }
-                fc.setFileFilter(new FileFilter() {
-                    public boolean accept(File f) {
-                        if (f.isDirectory()) {
-                            return true;
-                        }
-                        return f.getName().endsWith(".txt");
-                    }
-
-                    public String getDescription() {
-                        return "Simple text files (*.txt) in UTF-8 format";
-                    }
-                });
-                int returnVal = fc.showOpenDialog(EssayManagementView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    if (file.getName().endsWith(".xml")) {
-                        loadedDocument = EssayCreator.load(file, null, null, null, false);
-                        loadDocument();
-                    } else if (file.getName().endsWith(".txt")) {
-                        textFieldTitle.setText(file.getName().replace(".txt", ""));
-
-                        // read txt content
-                        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
-                            String line;
-                            String content = "";
-                            while ((line = in.readLine()) != null) {
-                                if (line.trim().length() > 0) {
-                                    content += line.trim() + "\n\n";
-                                }
+                
+                public String getDescription() {
+                    return "Simple text files (*.txt) in UTF-8 format";
+                }
+            });
+            int returnVal = fc.showOpenDialog(EssayManagementView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                if (file.getName().endsWith(".xml")) {
+                    loadedDocument = EssayCreator.load(file, new ArrayList<>(), null, false);
+                    loadDocument();
+                } else if (file.getName().endsWith(".txt")) {
+                    textFieldTitle.setText(file.getName().replace(".txt", ""));
+                    
+                    // read txt content
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+                        String line;
+                        String content = "";
+                        while ((line = in.readLine()) != null) {
+                            if (line.trim().length() > 0) {
+                                content += line.trim() + "\n\n";
                             }
-                            textAreaContent.setText(content.trim());
-                        } catch (IOException ex) {
-                            Exceptions.printStackTrace(ex);
                         }
+                        textAreaContent.setText(content.trim());
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
                     }
                 }
             }
@@ -221,12 +219,10 @@ public class EssayManagementView extends JFrame {
 
         JButton saveToXML = new JButton("Save essay as xml");
         saveToXML.setSize(40, 20);
-        saveToXML.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateDocument();
-                saveDocumentDialogue();
-                loadDocument();
-            }
+        saveToXML.addActionListener((ActionEvent e) -> {
+            updateDocument();
+            saveDocumentDialogue();
+            loadDocument();
         });
 
         JSeparator separator = new JSeparator();
@@ -328,7 +324,7 @@ public class EssayManagementView extends JFrame {
 
     public void updateDocument() {
         if (loadedDocument == null) {
-            loadedDocument = new EssayCreator(null, null, null, null);
+            loadedDocument = new EssayCreator(null, new ArrayList<>(), null);
         }
         loadedDocument.setTitleText(textFieldTitle.getText());
         this.setTitle("ReaderBench (" + loadedDocument.getPath() + ")");
@@ -342,14 +338,14 @@ public class EssayManagementView extends JFrame {
         loadedDocument.setDate(new Date());
 
         int index = 0;
-        loadedDocument.setBlocks(new Vector<Block>());
+        loadedDocument.setBlocks(new Vector<>());
         for (String blocks : textAreaContent.getText().trim()
                 .split(VERBALIZATION_TAG)) {
             Block b = null;
             for (String block : blocks.split("(\n)+")) {
                 if (block.trim().length() > 0) {
                     b = new Block(loadedDocument, index++, block.trim(),
-                            loadedDocument.getLSA(), loadedDocument.getLDA(),
+                            loadedDocument.getSemanticModels(),
                             loadedDocument.getLanguage());
                     loadedDocument.getBlocks().add(b);
                 }

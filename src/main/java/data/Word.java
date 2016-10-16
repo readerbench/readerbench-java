@@ -30,36 +30,30 @@ import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SemanticModel;
 import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
  * @author Mihai Dascalu
  */
-public class Word implements Comparable<Word>, Serializable {
+public class Word extends AnalysisElement implements Comparable<Word>, Serializable {
 
     static Logger logger = Logger.getLogger(CohesionGraph.class);
 
     private static final long serialVersionUID = -3809934014813200184L;
 
-    private int blockIndex;// the number of the block the word is part of
-    private int utteranceIndex; // the number of the utterance the word is part
     // of (inside of the block)
-    private transient LSA lsa;
-    private transient LDA lda;
-    private transient Word2VecModel w2vModel;
-    private Lang language;
-    private String text;
     private String POS;
     private String stem;
     private String NE;
-    private String lemma;
-    private double[] lsaVector;
-    private double[] ldaProbDistribution;
-    private double[] w2v;
     private double idf;
     private LexicalChainLink lexicalChainLink; // the lexical chain link associated with the word after disambiguation
     private SemanticChain semanticChain;
@@ -68,17 +62,17 @@ public class Word implements Comparable<Word>, Serializable {
     private transient SentimentEntity sentiment;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
-        this.text = text;
-        this.lemma = lemma;
+        setText(text);
+        setProcessedText(lemma);
         this.stem = stem;
         this.POS = POS;
         this.NE = NE;
-        this.language = lang;
+        setLanguage(lang);
         this.usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
     }
 
     private void loadSentimentEntity() {
-        data.pojo.Word word = WordDAO.getInstance().findByLabel(lemma, language);
+        data.pojo.Word word = WordDAO.getInstance().findByLabel(getLemma(), getLanguage());
         if (word == null) {
             return; // empty sentiment entity - no info on the current word
         }
@@ -92,35 +86,36 @@ public class Word implements Comparable<Word>, Serializable {
         });
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda, Lang lang) {
+    public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
-        this.lsa = lsa;
-        this.lda = lda;
+        setSemanticModels(models);
+        LSA lsa = (LSA)semanticModels.get(SemanticModel.LSA);
+        modelVectors = new EnumMap<>(SemanticModel.class);
         if (lsa != null) {
             this.idf = lsa.getWordIDf(this);
-            this.lsaVector = lsa.getWordVector(this);
+            modelVectors.put(SemanticModel.LSA, lsa.getWordVector(this));
         }
+        LDA lda = (LDA)semanticModels.get(SemanticModel.LDA);
         if (lda != null) {
-            this.ldaProbDistribution = lda.getWordProbDistribution(this);
+            modelVectors.put(SemanticModel.LDA, lda.getWordProbDistribution(this));
         }
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, LSA lsa, LDA lda,
-            SentimentEntity sentiment, Lang lang) {
-        this(text, lemma, stem, POS, NE, lsa, lda, lang);
+    public Word(String text, String lemma, String stem, String POS, String NE, 
+            List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+        this(text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }
 
-    public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
-            LSA lsa, LDA lda, Lang lang) {
-        this(text, lemma, stem, POS, NE, lsa, lda, lang);
-        this.blockIndex = blockIndex;
-        this.utteranceIndex = utteranceIndex;
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE,
+            List<ISemanticModel> models, Lang lang) {
+        this(text, lemma, stem, POS, NE, models, lang);
+        this.container = container;
     }
 
-    public Word(int blockIndex, int utteranceIndex, String text, String lemma, String stem, String POS, String NE,
-            LSA lsa, LDA lda, SentimentEntity sentiment, Lang lang) {
-        this(blockIndex, utteranceIndex, text, lemma, stem, POS, NE, lsa, lda, lang);
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE,
+            List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+        this(container, text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }
 
@@ -164,19 +159,14 @@ public class Word implements Comparable<Word>, Serializable {
     }
 
     public int getBlockIndex() {
-        return blockIndex;
-    }
-
-    public void setBlockIndex(int blockIndex) {
-        this.blockIndex = blockIndex;
+        if (container == null) return 0;
+        if (container.container == null) return 0;
+        return container.container.getIndex();
     }
 
     public int getUtteranceIndex() {
-        return utteranceIndex;
-    }
-
-    public void setUtteranceIndex(int utteranceIndex) {
-        this.utteranceIndex = utteranceIndex;
+        if (container == null) return 0;
+        return container.getIndex();
     }
 
     public String getPOS() {
@@ -195,14 +185,6 @@ public class Word implements Comparable<Word>, Serializable {
         this.stem = stem;
     }
 
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public double getIdf() {
         return idf;
     }
@@ -211,60 +193,12 @@ public class Word implements Comparable<Word>, Serializable {
         this.idf = idf;
     }
 
-    public double[] getLSAVector() {
-        return lsaVector;
-    }
-
-    public void setLSAVector(double[] lsaVector) {
-        this.lsaVector = lsaVector;
-    }
-
-    public double[] getLDAProbDistribution() {
-        return ldaProbDistribution;
-    }
-
-    public void setLDAProbDistribution(double[] ldaProbDistribution) {
-        this.ldaProbDistribution = ldaProbDistribution;
-    }
-
-    public double[] getWord2Vec() {
-        return w2v;
-    }
-
-    public void setWord2Vec(double[] w2v) {
-        this.w2v = w2v;
-    }
-
     public String getLemma() {
-        return lemma;
+        return getProcessedText();
     }
 
     public void setLemma(String lemma) {
-        this.lemma = lemma;
-    }
-
-    public LSA getLSA() {
-        return lsa;
-    }
-
-    public void setLSA(LSA lsa) {
-        this.lsa = lsa;
-    }
-
-    public LDA getLDA() {
-        return lda;
-    }
-
-    public void setLDA(LDA lda) {
-        this.lda = lda;
-    }
-
-    public Lang getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(Lang language) {
-        this.language = language;
+        setProcessedText(lemma);
     }
 
     public String getNE() {
@@ -313,7 +247,7 @@ public class Word implements Comparable<Word>, Serializable {
 
     @Override
     public String toString() {
-        return this.text + "(" + this.lemma + ", " + this.stem + ", " + this.POS + ")";
+        return getText() + "(" + getLemma() + ", " + this.stem + ", " + this.POS + ")";
     }
 
     public String getExtendedLemma() {
@@ -325,10 +259,10 @@ public class Word implements Comparable<Word>, Serializable {
 
     public boolean isContentWord() {
         if (this.getText().length() > 1
-                && !StopWords.isStopWord(this.getText(), this.language)
-                && !StopWords.isStopWord(this.getLemma(), this.language)
-                && (Dictionary.isDictionaryWord(this.getText(), this.language)
-                || Dictionary.isDictionaryWord(this.getLemma(), this.language))) {
+                && !StopWords.isStopWord(this.getText(), getLanguage())
+                && !StopWords.isStopWord(this.getLemma(), getLanguage())
+                && (Dictionary.isDictionaryWord(this.getText(), getLanguage())
+                || Dictionary.isDictionaryWord(this.getLemma(), getLanguage()))) {
             if (this.getPOS() != null) {
                 return this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ") || this.getPOS().equals("RB");
             }

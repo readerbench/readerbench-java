@@ -35,6 +35,7 @@ import services.commons.VectorAlgebra;
 import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
 
 public class KeywordModeling {
@@ -56,7 +57,7 @@ public class KeywordModeling {
         return filteredTopics;
     }
 
-    public static void determineTopics(AnalysisElement e) {
+    public static void determineKeywords(AnalysisElement e) {
         logger.info("Determining keywords using Tf-IDf, LSA and LDA ...");
         // determine topics by using Tf-IDF and (LSA & LDA)
         for (Word w : e.getWordOccurences().keySet()) {
@@ -159,7 +160,7 @@ public class KeywordModeling {
         double[] topicsLDAProbDistribution = null;
 
         // determine corresponding LSA vector for all selected topics
-        if (e.getLSA() != null) {
+        if (e.getSemanticModel(SemanticModel.LSA) != null) {
             topicsLSAVector = new double[LSA.K];
             for (Keyword t : topics) {
                 if (t.getRelevance() > 0) {
@@ -171,8 +172,8 @@ public class KeywordModeling {
             }
         }
         topicString = topicString.trim();
-        if (e.getLDA() != null) {
-            topicsLDAProbDistribution = e.getLDA().getProbDistribution(topicString);
+        if (e.getSemanticModel(SemanticModel.LDA) != null) {
+            topicsLDAProbDistribution = ((LDA)e.getSemanticModel(SemanticModel.LDA)).getProbDistribution(topicString);
         }
 
         TreeMap<Word, Double> inferredConceptsCandidates = new TreeMap<>();
@@ -180,21 +181,21 @@ public class KeywordModeling {
         // create possible matches by exploring 3 alternatives
         // 1 LSA
         logger.info("Determining similar concepts using LSA ...");
-        if (e.getLSA() != null) {
+        if (e.getSemanticModel(SemanticModel.LSA) != null) {
             TreeMap<Word, Double> listLSA;
 
             for (Keyword t : topics) {
-                listLSA = e.getLSA().getSimilarConcepts(t.getWord(), minThreshold);
+                listLSA = e.getSemanticModel(SemanticModel.LSA).getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLSA, LSA_WEIGHT);
             }
         }
 
         // 2 LDA
         logger.info("Determining similar concepts using LDA ...");
-        if (e.getLDA() != null) {
+        if (e.getSemanticModel(SemanticModel.LDA) != null) {
             TreeMap<Word, Double> listLDA;
             for (Keyword t : topics) {
-                listLDA = e.getLDA().getSimilarConcepts(t.getWord(), minThreshold);
+                listLDA = e.getSemanticModel(SemanticModel.LDA).getSimilarConcepts(t.getWord(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLDA, LDA_WEIGHT);
             }
         }
@@ -219,12 +220,13 @@ public class KeywordModeling {
                 double sumRelevance = 0;
                 for (Keyword t : topics) {
                     if (t.getRelevance() > 0) {
-                        if (e.getLSA() != null) {
-                            lsaSim += VectorAlgebra.cosineSimilarity(e.getLSA().getWordVector(w),
+                        if (e.getSemanticModel(SemanticModel.LSA) != null) {
+                            lsaSim += VectorAlgebra.cosineSimilarity(
+                                    ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w),
                                     t.getWord().getLSAVector()) * t.getRelevance();
                         }
                         sumRelevance += t.getRelevance();
-                        if (e.getLDA() != null) {
+                        if (e.getSemanticModel(SemanticModel.LDA) != null) {
                             ldaSim = LDA.getSimilarity(w.getLDAProbDistribution(),
                                     t.getWord().getLDAProbDistribution());
                         }
@@ -236,18 +238,22 @@ public class KeywordModeling {
                 }
 
                 // sim to topic vector
-                if (e.getLSA() != null) {
-                    lsaSim += VectorAlgebra.cosineSimilarity(e.getLSA().getWordVector(w), topicsLSAVector);
+                if (e.getSemanticModel(SemanticModel.LSA) != null) {
+                    lsaSim += VectorAlgebra.cosineSimilarity(
+                            ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w), 
+                            topicsLSAVector);
                 }
-                if (e.getLDA() != null) {
+                if (e.getSemanticModel(SemanticModel.LDA) != null) {
                     ldaSim += LDA.getSimilarity(w.getLDAProbDistribution(), topicsLDAProbDistribution);
                 }
 
                 // sim to analysis element
-                if (e.getLSA() != null) {
-                    lsaSim += VectorAlgebra.cosineSimilarity(e.getLSA().getWordVector(w), e.getLSAVector());
+                if (e.getSemanticModel(SemanticModel.LSA) != null) {
+                    lsaSim += VectorAlgebra.cosineSimilarity(
+                            ((LSA)e.getSemanticModel(SemanticModel.LSA)).getWordVector(w), 
+                            e.getLSAVector());
                 }
-                if (e.getLDA() != null) {
+                if (e.getSemanticModel(SemanticModel.LDA) != null) {
                     ldaSim += LDA.getSimilarity(w.getLDAProbDistribution(), e.getLDAProbDistribution());
                 }
 

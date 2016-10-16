@@ -40,6 +40,7 @@ import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
 import services.semanticModels.ISemanticModel;
+import services.semanticModels.SemanticModel;
 
 /**
  *
@@ -340,5 +341,10 @@ public class LSA implements ISemanticModel {
 
     public static Set<Lang> getAvailableLanguages() {
         return AVAILABLE_FOR;
+    }
+
+    @Override
+    public SemanticModel getType() {
+        return SemanticModel.LSA;
     }
 }

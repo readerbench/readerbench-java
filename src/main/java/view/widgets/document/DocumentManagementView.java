@@ -61,8 +61,10 @@ import org.apache.log4j.Logger;
 
 import data.Block;
 import data.document.Document;
+import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.converters.Txt2XmlConverter;
+import services.semanticModels.ISemanticModel;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
@@ -106,71 +108,67 @@ public class DocumentManagementView extends JFrame {
         menuBar.add(mnFile);
 
         JMenuItem mntmNew = new JMenuItem(LocalizationUtils.getTranslation("New"), KeyEvent.VK_N);
-        mntmNew.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        DocumentManagementView view = new DocumentManagementView();
-                        view.setLocation(DocumentManagementView.this.getLocation().x + 50,
-                                DocumentManagementView.this.getLocation().y + 50);
-                        view.setVisible(true);
-                    }
-                });
-            }
+        mntmNew.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    DocumentManagementView view = new DocumentManagementView();
+                    view.setLocation(DocumentManagementView.this.getLocation().x + 50,
+                            DocumentManagementView.this.getLocation().y + 50);
+                    view.setVisible(true);
+                }
+            });
         });
         mntmNew.setAccelerator(KeyStroke.getKeyStroke("control N"));
         mnFile.add(mntmNew);
 
         JMenuItem mntmOpen = new JMenuItem(LocalizationUtils.getTranslation("Open XML or txt"), KeyEvent.VK_O);
-        mntmOpen.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
+        mntmOpen.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
                 }
-                fc.setFileFilter(new FileFilter() {
-                    public boolean accept(File f) {
-                        if (f.isDirectory()) {
-                            return true;
-                        }
-                        return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
-                    }
-
-                    public String getDescription() {
-                        return "XML files (*.xml) or simple text files (*.txt) in UTF-8 format";
-                    }
-                });
-                int returnVal = fc.showOpenDialog(DocumentManagementView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    if (file.getName().endsWith(".xml")) {
-                        loadedDocument = Document.load(file, null, null, null, false);
-                        loadDocument();
-                    } else if (file.getName().endsWith(".txt")) {
-                        textFieldTitle.setText(file.getName().replace(".txt", ""));
-
-                        // read txt content
-                        try {
-                            FileInputStream inputFile = new FileInputStream(file);
-                            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-                            BufferedReader in = new BufferedReader(ir);
-                            String line;
-                            String content = "";
-                            while ((line = in.readLine()) != null) {
-                                if (line.trim().length() > 0) {
-                                    content += line.trim() + "\n\n";
-                                }
+                
+                public String getDescription() {
+                    return "XML files (*.xml) or simple text files (*.txt) in UTF-8 format";
+                }
+            });
+            int returnVal = fc.showOpenDialog(DocumentManagementView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                if (file.getName().endsWith(".xml")) {
+                    loadedDocument = Document.load(file, new ArrayList<>(), null, false);
+                    loadDocument();
+                } else if (file.getName().endsWith(".txt")) {
+                    textFieldTitle.setText(file.getName().replace(".txt", ""));
+                    
+                    // read txt content
+                    try {
+                        FileInputStream inputFile = new FileInputStream(file);
+                        InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
+                        BufferedReader in = new BufferedReader(ir);
+                        String line;
+                        String content = "";
+                        while ((line = in.readLine()) != null) {
+                            if (line.trim().length() > 0) {
+                                content += line.trim() + "\n\n";
                             }
-                            textAreaContent.setText(content.trim());
-                            in.close();
-                        } catch (IOException ex) {
-                            Exceptions.printStackTrace(ex);
                         }
+                        textAreaContent.setText(content.trim());
+                        in.close();
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
                     }
                 }
             }
@@ -386,7 +384,7 @@ public class DocumentManagementView extends JFrame {
 
     public void updateDocument() {
         if (loadedDocument == null) {
-            loadedDocument = new Document(null, null, null, null);
+            loadedDocument = new Document(null, new ArrayList<>(), null);
         }
         loadedDocument.setTitleText(textFieldTitle.getText());
         this.setTitle("ReaderBench (" + loadedDocument.getPath() + ")");
@@ -411,8 +409,8 @@ public class DocumentManagementView extends JFrame {
             Block b = null;
             for (String block : blocks.split("(\n)+")) {
                 if (block.trim().length() > 0) {
-                    b = new Block(loadedDocument, index++, block.trim(), loadedDocument.getLSA(),
-                            loadedDocument.getLDA(), loadedDocument.getLanguage());
+                    b = new Block(loadedDocument, index++, block.trim(), 
+                            loadedDocument.getSemanticModels(), loadedDocument.getLanguage());
                     loadedDocument.getBlocks().add(b);
                 }
             }

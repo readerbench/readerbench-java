@@ -54,16 +54,8 @@ public class WordAssociationTest {
 
     public void initialLoad(String pathToFile, ISemanticModel semModel, int countMax) {
         wordAssociations = new TreeMap<>();
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
         try {
             FileInputStream inputFile = new FileInputStream(pathToFile);
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
@@ -74,8 +66,8 @@ public class WordAssociationTest {
                     if (line.length() > 0) {
                         StringTokenizer st = new StringTokenizer(line, ",");
                         try {
-                            Document doc1 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
-                            Document doc2 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
+                            Document doc1 = VocabularyTest.processDoc(st.nextToken(), models, semModel.getLanguage());
+                            Document doc2 = VocabularyTest.processDoc(st.nextToken(), models, semModel.getLanguage());
 
                             Double no = Double.valueOf(st.nextToken());
                             if (!wordAssociations.containsKey(doc1)) {

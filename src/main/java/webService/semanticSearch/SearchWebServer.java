@@ -104,20 +104,15 @@ public class SearchWebServer {
         QueryResult() {
             success = true;
             errorMsg = "";
-            data = new ArrayList<SearchResult>();
+            data = new ArrayList<>();
         }
     }
 
     public void setDocuments(String path) {
-        documents = new ArrayList<AbstractDocument>();
+        documents = new ArrayList<>();
 
         File dir = new File(path);
-        File[] files = dir.listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".ser");
-            }
-        });
+        File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
 
         for (File file : files) {
             Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
@@ -165,7 +160,7 @@ public class SearchWebServer {
                 block.setContent(query);
                 contents.getBlocks().add(block);
 
-                AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(), documents.get(0).getLanguage(), true);
+                AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getSemanticModels(), documents.get(0).getLanguage(), true);
                 queryDoc.computeAll(true);
 
                 List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD,

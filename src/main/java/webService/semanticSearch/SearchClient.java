@@ -60,12 +60,12 @@ public class SearchClient {
         block.setContent(query);
         contents.getBlocks().add(block);
 
-        AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getLSA(), documents.get(0).getLDA(), documents.get(0).getLanguage(), false);
+        AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getSemanticModels(), documents.get(0).getLanguage(), false);
         queryDoc.computeAll(true);
         queryDoc.setTitleText(query);
 
         List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);
-        List<ResultSearch> searchResults = new ArrayList<ResultSearch>();
+        List<ResultSearch> searchResults = new ArrayList<>();
         for (SemanticSearchResult r : results) {
             String content = r.getDoc().getText();
             if (content.length() > maxContentSize) {

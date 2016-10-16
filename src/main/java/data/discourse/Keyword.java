@@ -46,7 +46,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
-        if (e.getLDA() == null && e.getLSA() == null) {
+        if (e.getSemanticModels().isEmpty()) {
             this.relevance = termFrequency;
             return;
         }
@@ -54,7 +54,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         // determine importance within analysis element
         lsaSim = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
         ldaSim = LDA.getSimilarity(word.getLDAProbDistribution(), e.getLDAProbDistribution());
-        this.relevance = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+        this.relevance += termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
     }
 
     public double getTermFrequency() {

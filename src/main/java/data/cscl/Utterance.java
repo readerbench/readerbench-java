@@ -19,6 +19,7 @@ import java.util.Date;
 
 import data.Block;
 import data.Sentence;
+import java.util.EnumMap;
 
 public class Utterance extends Block {
 
@@ -33,7 +34,7 @@ public class Utterance extends Block {
     private double personalKB;
 
     public Utterance(Block b, Participant p, Date time) {
-        super(b.getContainer(), b.getIndex(), b.getText(), b.getLSA(), b.getLDA(), b.getLanguage());
+        super(b.getContainer(), b.getIndex(), b.getText(), b.getSemanticModels(), b.getLanguage());
         // inherit all attributes
         super.setSentences(b.getSentences());
         super.setRefBlock(b.getRefBlock());
@@ -41,8 +42,7 @@ public class Utterance extends Block {
         super.setCorefs(b.getCorefs());
         super.setStanfordSentences(b.getStanfordSentences());
         super.setWordOccurences(b.getWordOccurences());
-        super.setLSAVector(b.getLSAVector());
-        super.setLDAProbDistribution(b.getLDAProbDistribution());
+        super.setModelVectors(new EnumMap<>(b.getModelVectors()));
         super.setProcessedText(b.getProcessedText());
         this.participant = p;
         this.time = time;

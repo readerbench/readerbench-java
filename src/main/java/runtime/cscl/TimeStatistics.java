@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
+import services.semanticModels.SemanticModel;
 
 public class TimeStatistics {
 
@@ -51,8 +53,11 @@ public class TimeStatistics {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
                     logger.info("Processing file " + filePath.getFileName().toString() + " ...");
-
-                    Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en", "resources/config/LDA/tasa_en", Lang.en, false);
+                    Map<SemanticModel, String> modelPaths = new EnumMap<>(SemanticModel.class);
+                    modelPaths.put(SemanticModel.LSA, "resources/config/LSA/tasa_en");
+                    modelPaths.put(SemanticModel.LDA, "resources/config/LDA/tasa_en");
+                    
+                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
                     c.computeAll(true);
                     c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 

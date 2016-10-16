@@ -47,29 +47,24 @@ import javax.xml.transform.TransformerException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
+import services.semanticModels.ISemanticModel;
 
 public class EssayCreator extends Document {
 
     private static final long serialVersionUID = 9219491499980439568L;
     private List<String> authors = new LinkedList<>();
 
-    public EssayCreator(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public EssayCreator(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
         authors = new LinkedList<>();
     }
 
-    public EssayCreator(String path, AbstractDocumentTemplate docTmp, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
-        super(path, docTmp, lsa, lda, lang, usePOSTagging);
+    public EssayCreator(String path, AbstractDocumentTemplate docTmp, 
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        super(path, docTmp, models, lang, usePOSTagging);
     }
 
-    public static EssayCreator load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging);
-    }
-
-    public static EssayCreator load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging) {
+    public static EssayCreator load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -103,13 +98,13 @@ public class EssayCreator extends Document {
                 }
 
             }
-            EssayCreator d = new EssayCreator(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging);
+            EssayCreator d = new EssayCreator(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             d.setNoVerbalizationBreakPoints(noBreakPoints);
 
             // determine title
             nl = doc.getElementsByTagName("title");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), lsa, lda, lang,
+                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang,
                         usePOSTagging);
             }
 

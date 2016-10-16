@@ -19,9 +19,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DateFormat;
@@ -114,99 +112,97 @@ public class CreateVerbalizationView extends JFrame {
         menuBar.add(mnFile);
 
         mntmOpenDocument = new JMenuItem(LocalizationUtils.getTranslation("Open Document Template"));
-        mntmOpenDocument.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
+        mntmOpenDocument.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml");
                 }
-                fc.setFileFilter(new FileFilter() {
-                    public boolean accept(File f) {
-                        if (f.isDirectory()) {
-                            return true;
-                        }
-                        return f.getName().endsWith(".xml");
+                
+                public String getDescription() {
+                    return "XML files (*.xml)";
+                }
+            });
+            int returnVal = fc.showOpenDialog(CreateVerbalizationView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                loadedDocument = Document.load(file, new ArrayList<>(), null, false);
+                if (loadedDocument != null) {
+                    mntmOpenDocument.setEnabled(false);
+                    mntmOpenVerbalization.setEnabled(true);
+                    mntmNewVerbalization.setEnabled(true);
+                    mntmSaveVerbalization.setEnabled(true);
+                    noVerbalizations = loadedDocument
+                            .getNoVerbalizationBreakPoints();
+                    
+                    splitPane = new JSplitPane[noVerbalizations];
+                    scrollPaneDocument = new JScrollPane[noVerbalizations];
+                    txtrDocument = new JTextArea[noVerbalizations];
+                    scrollPaneVerbalization = new JScrollPane[noVerbalizations];
+                    txtrVerbalization = new JTextArea[noVerbalizations];
+                    
+                    if (noVerbalizations > 0) {
+                        buttonNext.setEnabled(true);
                     }
-
-                    public String getDescription() {
-                        return "XML files (*.xml)";
+                    
+                    updateContent2();
+                    
+                    for (int i = 0; i < noVerbalizations; i++) {
+                        splitPane[i] = new JSplitPane();
+                        splitPane[i]
+                                .setOrientation(JSplitPane.VERTICAL_SPLIT);
+                        splitPane[i].setDividerLocation(200);
+                        splitPane[i].setDividerSize(5);
+                        tabbedPane.addTab((i + 1) + "", null, splitPane[i],
+                                null);
+                        
+                        scrollPaneDocument[i] = new JScrollPane();
+                        splitPane[i]
+                                .setLeftComponent(scrollPaneDocument[i]);
+                        
+                        scrollPaneDocument[i]
+                                .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        txtrDocument[i] = new JTextArea();
+                        txtrDocument[i].setBackground(Color.LIGHT_GRAY);
+                        txtrDocument[i].setEditable(false);
+                        txtrDocument[i].setWrapStyleWord(true);
+                        txtrDocument[i].setLineWrap(true);
+                        scrollPaneDocument[i]
+                                .setViewportView(txtrDocument[i]);
+                        
+                        scrollPaneVerbalization[i] = new JScrollPane();
+                        splitPane[i]
+                                .setRightComponent(scrollPaneVerbalization[i]);
+                        
+                        scrollPaneVerbalization[i]
+                                .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        txtrVerbalization[i] = new JTextArea();
+                        txtrVerbalization[i].setWrapStyleWord(true);
+                        txtrVerbalization[i].setLineWrap(true);
+                        scrollPaneVerbalization[i]
+                                .setViewportView(txtrVerbalization[i]);
                     }
-                });
-                int returnVal = fc.showOpenDialog(CreateVerbalizationView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    loadedDocument = Document.load(file, null, null, null, false);
-                    if (loadedDocument != null) {
-                        mntmOpenDocument.setEnabled(false);
-                        mntmOpenVerbalization.setEnabled(true);
-                        mntmNewVerbalization.setEnabled(true);
-                        mntmSaveVerbalization.setEnabled(true);
-                        noVerbalizations = loadedDocument
-                                .getNoVerbalizationBreakPoints();
-
-                        splitPane = new JSplitPane[noVerbalizations];
-                        scrollPaneDocument = new JScrollPane[noVerbalizations];
-                        txtrDocument = new JTextArea[noVerbalizations];
-                        scrollPaneVerbalization = new JScrollPane[noVerbalizations];
-                        txtrVerbalization = new JTextArea[noVerbalizations];
-
-                        if (noVerbalizations > 0) {
-                            buttonNext.setEnabled(true);
-                        }
-
-                        updateContent2();
-
-                        for (int i = 0; i < noVerbalizations; i++) {
-                            splitPane[i] = new JSplitPane();
-                            splitPane[i]
-                                    .setOrientation(JSplitPane.VERTICAL_SPLIT);
-                            splitPane[i].setDividerLocation(200);
-                            splitPane[i].setDividerSize(5);
-                            tabbedPane.addTab((i + 1) + "", null, splitPane[i],
-                                    null);
-
-                            scrollPaneDocument[i] = new JScrollPane();
-                            splitPane[i]
-                                    .setLeftComponent(scrollPaneDocument[i]);
-
-                            scrollPaneDocument[i]
-                                    .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-                            txtrDocument[i] = new JTextArea();
-                            txtrDocument[i].setBackground(Color.LIGHT_GRAY);
-                            txtrDocument[i].setEditable(false);
-                            txtrDocument[i].setWrapStyleWord(true);
-                            txtrDocument[i].setLineWrap(true);
-                            scrollPaneDocument[i]
-                                    .setViewportView(txtrDocument[i]);
-
-                            scrollPaneVerbalization[i] = new JScrollPane();
-                            splitPane[i]
-                                    .setRightComponent(scrollPaneVerbalization[i]);
-
-                            scrollPaneVerbalization[i]
-                                    .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-                            txtrVerbalization[i] = new JTextArea();
-                            txtrVerbalization[i].setWrapStyleWord(true);
-                            txtrVerbalization[i].setLineWrap(true);
-                            scrollPaneVerbalization[i]
-                                    .setViewportView(txtrVerbalization[i]);
-                        }
-
-                        // update text
-                        String text = "";
-                        int i = 0;
-                        for (Block b : loadedDocument.getBlocks()) {
-                            if (b != null) {
-                                text += b.getText() + " ";
-                                if (b.isFollowedByVerbalization()) {
-                                    txtrDocument[i].setText(text);
-                                    i++;
-                                    text = "";
-                                }
+                    
+                    // update text
+                    String text = "";
+                    int i = 0;
+                    for (Block b : loadedDocument.getBlocks()) {
+                        if (b != null) {
+                            text += b.getText() + " ";
+                            if (b.isFollowedByVerbalization()) {
+                                txtrDocument[i].setText(text);
+                                i++;
+                                text = "";
                             }
                         }
                     }
@@ -298,7 +294,7 @@ public class CreateVerbalizationView extends JFrame {
             int noVerbalizations = txtrVerbalization.length;
             List<Block> verbalizationBlocks = new ArrayList<>(noVerbalizations);
             for (int i = 0; i < noVerbalizations; i++) {
-                Block block = new Block(null, 0, null, null, null, null);
+                Block block = new Block(null, 0, null, new ArrayList<>(), null);
                 block.setText(txtrVerbalization[i].getText());
                 verbalizationBlocks.add(block);
             }
@@ -377,26 +373,22 @@ public class CreateVerbalizationView extends JFrame {
         buttonPrevious = new JButton("<");
         buttonNext = new JButton(">");
 
-        buttonNext.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (tabbedPane.getSelectedIndex() < noVerbalizations - 1) {
-                    tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex() + 1);
-                    buttonPrevious.setEnabled(true);
-                    if (tabbedPane.getSelectedIndex() == noVerbalizations - 1) {
-                        buttonNext.setEnabled(false);
-                    }
+        buttonNext.addActionListener((ActionEvent e) -> {
+            if (tabbedPane.getSelectedIndex() < noVerbalizations - 1) {
+                tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex() + 1);
+                buttonPrevious.setEnabled(true);
+                if (tabbedPane.getSelectedIndex() == noVerbalizations - 1) {
+                    buttonNext.setEnabled(false);
                 }
             }
         });
 
-        buttonPrevious.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (tabbedPane.getSelectedIndex() > 0) {
-                    tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex() - 1);
-                    buttonNext.setEnabled(true);
-                    if (tabbedPane.getSelectedIndex() == 0) {
-                        buttonPrevious.setEnabled(false);
-                    }
+        buttonPrevious.addActionListener((ActionEvent e) -> {
+            if (tabbedPane.getSelectedIndex() > 0) {
+                tabbedPane.setSelectedIndex(tabbedPane.getSelectedIndex() - 1);
+                buttonNext.setEnabled(true);
+                if (tabbedPane.getSelectedIndex() == 0) {
+                    buttonPrevious.setEnabled(false);
                 }
             }
         });
@@ -404,27 +396,23 @@ public class CreateVerbalizationView extends JFrame {
         buttonPrevious.setEnabled(false);
 
         chckbxIsSummary = new JCheckBox(LocalizationUtils.getTranslation("Is Summary"));
-        chckbxIsSummary.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-
-                if (loadedDocument != null) {
-                    tabbedPane.setEnabled(!chckbxIsSummary.isSelected());
-                    buttonNext.setEnabled(!chckbxIsSummary.isSelected());
-                    buttonPrevious.setEnabled(!chckbxIsSummary.isSelected());
-                    if (!chckbxIsSummary.isSelected()) {
-                        if (tabbedPane.getSelectedIndex() == 0) {
-                            buttonPrevious.setEnabled(false);
-                        }
-                        if (tabbedPane.getSelectedIndex() == noVerbalizations - 1) {
-                            buttonNext.setEnabled(false);
-                        }
-                        txtrDocument[tabbedPane.getSelectedIndex()].setText(previouslyBlockText);
-                    } else {
-                        previouslyBlockText = txtrDocument[tabbedPane.getSelectedIndex()].getText();
-                        txtrDocument[tabbedPane.getSelectedIndex()].setText(loadedDocument.getText());
+        chckbxIsSummary.addItemListener((ItemEvent e) -> {
+            if (loadedDocument != null) {
+                tabbedPane.setEnabled(!chckbxIsSummary.isSelected());
+                buttonNext.setEnabled(!chckbxIsSummary.isSelected());
+                buttonPrevious.setEnabled(!chckbxIsSummary.isSelected());
+                if (!chckbxIsSummary.isSelected()) {
+                    if (tabbedPane.getSelectedIndex() == 0) {
+                        buttonPrevious.setEnabled(false);
                     }
+                    if (tabbedPane.getSelectedIndex() == noVerbalizations - 1) {
+                        buttonNext.setEnabled(false);
+                    }
+                    txtrDocument[tabbedPane.getSelectedIndex()].setText(previouslyBlockText);
+                } else {
+                    previouslyBlockText = txtrDocument[tabbedPane.getSelectedIndex()].getText();
+                    txtrDocument[tabbedPane.getSelectedIndex()].setText(loadedDocument.getText());
                 }
-
             }
         });
 
@@ -581,13 +569,10 @@ public class CreateVerbalizationView extends JFrame {
             if ("Nimbus".equals(info.getName())) {
                 try {
                     UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedLookAndFeelException e) {
+                } catch (ClassNotFoundException | 
+                        InstantiationException | 
+                        IllegalAccessException | 
+                        UnsupportedLookAndFeelException e) {
                     e.printStackTrace();
                 }
             }

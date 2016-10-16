@@ -45,10 +45,10 @@ public class CohesionGraph {
         for (int i = 0; i < d.getBlocks().size(); i++) {
             if (d.getBlocks().get(i) != null) {
                 // set semantic cohesion between the block and the document
-                d.getBlockDocDistances()[i] = new SemanticCohesion(d.getBlocks().get(i), d);
+                    d.getBlockDocDistances()[i] = new SemanticCohesion(d.getBlocks().get(i), d);
             }
         }
-
+        
         // auxiliary variables used to compute mean and standard deviation of semantic cohesion
         double s0 = 0, s1 = 0, s2 = 0, mean = 0, stdev = 0;
 

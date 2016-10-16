@@ -36,11 +36,11 @@ import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
-import java.util.function.Consumer;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;
 import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -117,23 +117,20 @@ public class PdfToTextFrenchCVs {
         });
 
         // determine similarities
-        visibleConcepts.keySet().stream().forEach(new Consumer<Word>() {
-            @Override
-            public void accept(Word w1) {
-                for (Word w2 : visibleConcepts.keySet()) {
-                    double lsaSim = 0;
-                    double ldaSim = 0;
-                    if (queryDoc.getLSA() != null) {
-                        lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
-                    }
-                    if (queryDoc.getLDA() != null) {
-                        ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
-                    }
-                    double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
-                    if (!w1.equals(w2) && sim >= threshold) {
-                        visibleConcepts.put(w1, true);
-                        visibleConcepts.put(w2, true);
-                    }
+        visibleConcepts.keySet().stream().forEach((Word w1) -> {
+            for (Word w2 : visibleConcepts.keySet()) {
+                double lsaSim = 0;
+                double ldaSim = 0;
+                if (queryDoc.getLSA() != null) {
+                    lsaSim = queryDoc.getLSA().getSimilarity(w1, w2);
+                }
+                if (queryDoc.getLDA() != null) {
+                    ldaSim = queryDoc.getLDA().getSimilarity(w1, w2);
+                }
+                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                if (!w1.equals(w2) && sim >= threshold) {
+                    visibleConcepts.put(w1, true);
+                    visibleConcepts.put(w2, true);
                 }
             }
         });
@@ -162,7 +159,11 @@ public class PdfToTextFrenchCVs {
 
         // Lang lang = Lang.eng;
         Lang lang = Lang.getLang(language);
-        AbstractDocument queryDoc = new Document(null, contents, LSA.loadLSA(pathToLSA, lang), LDA.loadLDA(pathToLDA, lang), lang, posTagging);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(LSA.loadLSA(pathToLSA, lang));
+        models.add(LDA.loadLDA(pathToLDA, lang));
+        
+        AbstractDocument queryDoc = new Document(null, contents, models, lang, posTagging);
         logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
         queryDoc.computeAll(computeDialogism);
         ComplexityIndices.computeComplexityFactors(queryDoc);

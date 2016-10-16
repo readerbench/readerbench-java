@@ -42,7 +42,10 @@ import org.apache.log4j.Logger;
 
 import data.Lang;
 import edu.stanford.nlp.util.Timing;
+import java.util.ArrayList;
+import java.util.List;
 import services.complexity.DataGathering;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
@@ -88,7 +91,10 @@ public class RunMeasurementsView extends JFrame {
                 try {
                     LSA lsa = LSA.loadLSA(pathToLSA, lang);
                     LDA lda = LDA.loadLDA(pathToLDA, lang);
-
+                    List<ISemanticModel> models = new ArrayList<>();
+                    models.add(lsa);
+                    models.add(lda);
+                    
                     // determine number of classes
                     int noGrades = (new File(path)).listFiles(new FileFilter() {
                         public boolean accept(File pathname) {
@@ -107,7 +113,7 @@ public class RunMeasurementsView extends JFrame {
 
                     for (int gradeLevel = 1; gradeLevel <= noGrades; gradeLevel++) {
                         DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, path, gradeLevel,
-                                false, lsa, lda, lang, usePOSTagging, usePOSTagging);
+                                false, models, lang, usePOSTagging, usePOSTagging);
                     }
 
                     logger.info("Finished processing all documents");

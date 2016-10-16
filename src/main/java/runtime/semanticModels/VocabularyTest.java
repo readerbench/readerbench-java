@@ -27,6 +27,8 @@ import data.AbstractDocumentTemplate;
 import data.document.Document;
 import data.Lang;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 import services.ageOfExposure.TopicMatchGraph;
 import services.commons.Formatting;
@@ -45,16 +47,8 @@ public class VocabularyTest {
     public void process(String path, ISemanticModel semModel) {
         logger.info("Starting vocabulary tests processing...");
 
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
 
         try {
             if (!new File(path).isDirectory()) {
@@ -82,23 +76,23 @@ public class VocabularyTest {
                                     logger.error("Manual indexing corrupted at question " + questionId + "/" + id);
                                 }
                             } else if (line.startsWith("1.")) {
-                                rhs[0] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[0] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("2.")) {
-                                rhs[1] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[1] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("3.")) {
-                                rhs[2] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[2] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("4.")) {
-                                rhs[3] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[3] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("5.")) {
-                                rhs[4] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[4] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("6.")) {
-                                rhs[5] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                rhs[5] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("a.")) {
-                                lhs[0] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                lhs[0] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("b.")) {
-                                lhs[1] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                lhs[1] = processDoc(line.substring(2), models, semModel.getLanguage());
                             } else if (line.startsWith("c.")) {
-                                lhs[2] = processDoc(line.substring(2), lsa, lda, semModel.getLanguage());
+                                lhs[2] = processDoc(line.substring(2), models, semModel.getLanguage());
 
                                 // process current question
                                 TopicMatchGraph graph = new TopicMatchGraph(9);
@@ -138,9 +132,9 @@ public class VocabularyTest {
         }
     }
 
-    public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
+    public static Document processDoc(String line, List<ISemanticModel> models, Lang lang) {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-        Document doc = new Document(null, contents, lsa, lda, lang, true);
+        Document doc = new Document(null, contents, models, lang, true);
         return doc;
     }
 

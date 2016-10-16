@@ -36,6 +36,8 @@ import data.Sentence;
 import data.Word;
 import data.document.Document;
 import data.Lang;
+import java.util.ArrayList;
+import services.semanticModels.ISemanticModel;
 
 public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 
@@ -157,9 +159,9 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
             for (Sentence s : b.getSentences()) {
                 for (Word w : s.getWords()) {
                     if (w.getPOS() != null && annotateWithPOS) {
-                        sb.append(w.getLemma() + "_" + w.getPOS() + " ");
+                        sb.append(w.getLemma()).append("_").append(w.getPOS()).append(" ");
                     } else {
-                        sb.append(w.getLemma() + " ");
+                        sb.append(w.getLemma()).append(" ");
                     }
                 }
                 if (s.getWords().size() > 0) {
@@ -198,9 +200,9 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
             block.setContent(st.nextToken().trim());
             docTmp.getBlocks().add(block);
         }
-        Document d = new Document(null, docTmp, null, null, Lang.en, usePOStagging);
+        Document d = new Document(null, docTmp, new ArrayList<>(), Lang.en, usePOStagging);
         d.setTitleText("TASA");
-        List<String> authors = new LinkedList<String>();
+        List<String> authors = new LinkedList<>();
         authors.add(ID.replaceAll("[^a-z,A-Z]", ""));
         d.setGenre(genre);
         d.setAuthors(authors);

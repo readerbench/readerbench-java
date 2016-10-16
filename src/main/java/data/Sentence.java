@@ -23,6 +23,7 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.ArrayList;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
@@ -38,8 +39,8 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 	private transient SemanticGraph dependencies;
 	private Map<Word, Word> pronimialReplacementMap;
 
-	public Sentence(Block b, int index, String text, LSA lsa, LDA lda, Lang lang) {
-		super(b, index, text.replaceAll("\\s", " ").trim(), lsa, lda, lang);
+	public Sentence(Block b, int index, String text, List<ISemanticModel> models, Lang lang) {
+		super(b, index, text.replaceAll("\\s", " ").trim(), models, lang);
 		this.words = new ArrayList<>();
 		this.allWords = new ArrayList<>();
 		this.pronimialReplacementMap = new TreeMap<>();
