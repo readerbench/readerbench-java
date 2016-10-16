@@ -32,9 +32,12 @@ public class LexicalChainsMaxSpan extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getLexicalChains().parallelStream()
+        int max = d.getLexicalChains().parallelStream()
                 .mapToInt(c -> c.getLinks().size())
-                .average().orElse(ComplexityIndices.IDENTITY);
-	}
-    
+                .max().orElse(ComplexityIndices.IDENTITY);
+        if (max > 0) {
+            return max;
+        }
+        return ComplexityIndices.IDENTITY;
+    }
 }

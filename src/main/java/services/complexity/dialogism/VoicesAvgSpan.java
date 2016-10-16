@@ -32,15 +32,17 @@ public class VoicesAvgSpan extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        if (d.getSignificantVoices() == null)
-			return ComplexityIndices.IDENTITY;
-		int noVoices = d.getSignificantVoices().size();
-        int noWords = d.getSignificantVoices().parallelStream()
+        if (d.getVoices() == null) {
+            return ComplexityIndices.IDENTITY;
+        }
+        int noVoices = d.getVoices().size();
+        int noWords = d.getVoices().parallelStream()
                 .mapToInt(c -> c.getWords().size())
                 .sum();
-		if (noVoices != 0 && d.getMinWordCoverage() != 0)
-			return (((double) noWords) / noVoices) / d.getMinWordCoverage();
-		return ComplexityIndices.IDENTITY;
+        if (noVoices != 0) {
+            return ((double) noWords) / noVoices;
+        }
+        return ComplexityIndices.IDENTITY;
     }
-    
+
 }

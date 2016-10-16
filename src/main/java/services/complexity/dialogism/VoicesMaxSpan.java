@@ -32,15 +32,12 @@ public class VoicesMaxSpan extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        if (d.getSignificantVoices() == null)
-			return ComplexityIndices.IDENTITY;
-		int max = d.getSignificantVoices().parallelStream()
+        if (d.getVoices() == null) {
+            return ComplexityIndices.IDENTITY;
+        }
+        int max = d.getVoices().parallelStream()
                 .mapToInt(c -> c.getWords().size())
                 .max().orElse(ComplexityIndices.IDENTITY);
-		if (d.getMinWordCoverage() != 0)
-			return ((double) max) / d.getMinWordCoverage();
-		return ComplexityIndices.IDENTITY;
+        return max;
     }
-    
 }
-

@@ -19,6 +19,7 @@ import data.AbstractDocument;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.discourse.dialogism.DialogismComputations;
 
 /**
  *
@@ -33,13 +34,13 @@ public class AvgLexicalChainsPerBlock extends ComplexityIndex {
     @Override
     public double compute(AbstractDocument d) {
         long noChains = d.getLexicalChains().parallelStream()
-                .filter(c -> c.getLinks().size() >= d.getMinWordCoverage())
+                .filter(c -> c.getLinks().size() >= DialogismComputations.SEMANTIC_CHAIN_MIN_NO_WORDS)
                 .count();
         int noBlocks = d.getNoBlocks();
-        if (noBlocks != 0)
-			return ((double) noChains) / noBlocks;
-		return ComplexityIndices.IDENTITY;
-	}
-    
-}
+        if (noBlocks != 0) {
+            return ((double) noChains) / noBlocks;
+        }
+        return ComplexityIndices.IDENTITY;
+    }
 
+}

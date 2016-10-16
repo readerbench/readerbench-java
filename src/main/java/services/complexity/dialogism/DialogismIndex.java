@@ -27,21 +27,22 @@ import services.complexity.ComplexityIndices;
  * @author Stefan Ruseti
  */
 public class DialogismIndex extends ComplexityIndex {
-    
+
     private transient final Function<SemanticChain, Double> mapper;
-    
+
     public DialogismIndex(ComplexityIndecesEnum index, Function<SemanticChain, Double> mapper) {
         super(index);
         this.mapper = mapper;
     }
-    
+
     @Override
     public double compute(AbstractDocument d) {
-        if (d.getSignificantVoices() == null)
-			return ComplexityIndices.IDENTITY;
-		return d.getSignificantVoices().parallelStream()
+        if (d.getVoices() == null) {
+            return ComplexityIndices.IDENTITY;
+        }
+        return d.getVoices().parallelStream()
                 .mapToDouble(mapper::apply)
                 .average().orElse(ComplexityIndices.IDENTITY);
-	}
-    
+    }
+
 }

@@ -32,13 +32,15 @@ public class AvgNoVoices extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        if (d.getSignificantVoices() == null)
-			return ComplexityIndices.IDENTITY;
-		int noVoices = d.getSignificantVoices().size();
+        if (d.getVoices() == null) {
+            return ComplexityIndices.IDENTITY;
+        }
+        int noVoices = d.getVoices().size();
         int noBlocks = d.getNoBlocks();
-		if (noBlocks != 0)
-			return ((double) noVoices) / noBlocks;
-		return ComplexityIndices.IDENTITY;
+        if (noBlocks != 0) {
+            return ((double) noVoices) / noBlocks;
+        }
+        return ComplexityIndices.IDENTITY;
     }
-    
+
 }

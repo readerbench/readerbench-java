@@ -81,7 +81,6 @@ import services.semanticModels.SimilarityType;
 public abstract class AbstractDocument extends AnalysisElement {
 
     private static final long serialVersionUID = -6173684658096015060L;
-    public static final int MIN_PERCENTAGE_CONTENT_WORDS = 2;
 
     public static enum DocumentType {
         DOCUMENT, CONVERSATION, ESSAY_CREATOR, METACOGNITION, SUMMARY
@@ -747,24 +746,6 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public static long getSerialversionuid() {
         return serialVersionUID;
-    }
-
-    public int getMinWordCoverage() {
-        int noWords = 0;
-        noWords = getWordOccurences().entrySet().stream().map((entry) -> entry.getValue()).reduce(noWords, Integer::sum);
-        return Math.round(MIN_PERCENTAGE_CONTENT_WORDS / 100f * noWords + 0.5f);
-    }
-
-    // get voices with more words than getMinWordCoverage()
-    public List<SemanticChain> getSignificantVoices() {
-        if (this.getVoices() == null || this.getVoices().isEmpty()) {
-            return null;
-        }
-        List<SemanticChain> importantVoices = new ArrayList<>();
-        this.getVoices().stream().filter((chain) -> (chain.getWords().size() >= this.getMinWordCoverage())).forEach((chain) -> {
-            importantVoices.add(chain);
-        });
-        return importantVoices;
     }
 
     public int getNoBlocks() {

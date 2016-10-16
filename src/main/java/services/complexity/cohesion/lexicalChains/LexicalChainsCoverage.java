@@ -16,10 +16,10 @@
 package services.complexity.cohesion.lexicalChains;
 
 import data.AbstractDocument;
-import data.lexicalChains.LexicalChain;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.discourse.dialogism.DialogismComputations;
 
 /**
  *
@@ -34,14 +34,15 @@ public class LexicalChainsCoverage extends ComplexityIndex {
     @Override
     public double compute(AbstractDocument d) {
         long noCoveredWords = d.getLexicalChains().parallelStream()
-                .filter(c -> c.getLinks().size() >= d.getMinWordCoverage())
+                .filter(c -> c.getLinks().size() >= DialogismComputations.SEMANTIC_CHAIN_MIN_NO_WORDS)
                 .count();
         int noWords = d.getLexicalChains().parallelStream()
                 .mapToInt(c -> c.getLinks().size())
                 .sum();
-        if (noWords != 0)
-			return ((double) noCoveredWords) / noWords;
-		return ComplexityIndices.IDENTITY;
+        if (noWords != 0) {
+            return ((double) noCoveredWords) / noWords;
+        }
+        return ComplexityIndices.IDENTITY;
     }
-    
+
 }

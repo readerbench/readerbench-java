@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.commons.DoubleStatistics;
 
 /**
  *
@@ -52,7 +51,7 @@ public class DialogismSynergyIndex extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        List<SemanticChain> voices = d.getSignificantVoices();
+        List<SemanticChain> voices = d.getVoices();
         if (voices == null || voices.isEmpty()) {
             return ComplexityIndices.IDENTITY;
         }
