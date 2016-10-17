@@ -18,7 +18,7 @@ public class DocumentFlow {
 
     public DocumentFlow(AbstractDocument doc, SimilarityType simType, DocFlowCriteria crit) {
 
-        if (doc.getModelVectors().keySet().contains(simType) && doc.getBlocks().size() >= 3 && doc.getBlockDistances() != null) {
+        if (doc.getModelVectors().containsKey(simType) && doc.getBlocks().size() >= 3 && doc.getBlockDistances() != null) {
             this.graph = new double[doc.getBlocks().size()][doc.getBlocks().size()];
             switch (crit) {
                 case MAX_VALUE:

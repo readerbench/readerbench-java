@@ -33,6 +33,7 @@ import data.sentiment.SentimentValence;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import services.semanticModels.ISemanticModel;
@@ -87,16 +88,6 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
         setSemanticModels(models);
-        LSA lsa = (LSA)semanticModels.get(SimilarityType.LSA);
-        modelVectors = new EnumMap<>(SimilarityType.class);
-        if (lsa != null) {
-            this.idf = lsa.getWordIDf(this);
-            modelVectors.put(SimilarityType.LSA, lsa.getWordVector(this));
-        }
-        LDA lda = (LDA)semanticModels.get(SimilarityType.LDA);
-        if (lda != null) {
-            modelVectors.put(SimilarityType.LDA, lda.getWordProbDistribution(this));
-        }
     }
 
     public Word(String text, String lemma, String stem, String POS, String NE, 
@@ -244,6 +235,13 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     }
 
     @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 37 * hash + Objects.hashCode(getLemma());
+        return hash;
+    }
+
+    @Override
     public String toString() {
         return getText() + "(" + getLemma() + ", " + this.stem + ", " + this.POS + ")";
     }
@@ -287,4 +285,14 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     public void setSentiment(SentimentEntity sentimentEntity) {
         this.sentiment = sentimentEntity;
     }
+
+    @Override
+    public double[] getModelRepresentation(SimilarityType type) {
+        if (!modelVectors.containsKey(type)) {
+            modelVectors.put(type, semanticModels.get(type).getWordRepresentation(this));
+        }
+        return modelVectors.get(type);
+    }
+    
+    
 }

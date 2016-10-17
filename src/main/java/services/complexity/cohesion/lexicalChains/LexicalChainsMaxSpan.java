@@ -35,9 +35,6 @@ public class LexicalChainsMaxSpan extends ComplexityIndex {
         int max = d.getLexicalChains().parallelStream()
                 .mapToInt(c -> c.getLinks().size())
                 .max().orElse(ComplexityIndices.IDENTITY);
-        if (max > 0) {
-            return max;
-        }
-        return ComplexityIndices.IDENTITY;
+        return max;
     }
 }

@@ -53,6 +53,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import java.io.FileNotFoundException;
+import java.util.EnumMap;
 import java.util.StringJoiner;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
@@ -119,6 +120,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     private List<SemanticChain> voices;
     private transient List<SemanticChain> selectedVoices;
+    
+    protected Map<SimilarityType, String> modelPaths;
 
     public AbstractDocument() {
         super();
@@ -311,6 +314,10 @@ public abstract class AbstractDocument extends AnalysisElement {
     public void saveSerializedDocument() {
         LOGGER.info("Saving serialized document ...");
         try {
+            modelPaths = new EnumMap<>(SimilarityType.class);
+            for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+                modelPaths.put(e.getKey(), e.getValue().getPath());
+            }
             FileOutputStream fos;
             fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
             try (ObjectOutputStream out = new ObjectOutputStream(fos)) {
@@ -342,6 +349,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         try (FileInputStream fIn = new FileInputStream(new File(path));
                 ObjectInputStream oIn = new ObjectInputStream(fIn)) {
             d = (AbstractDocument) oIn.readObject();
+            d.rebuildSemanticSpaces(SimilarityType.loadVectorModels(d.modelPaths, d.getLanguage()));
         } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
         }

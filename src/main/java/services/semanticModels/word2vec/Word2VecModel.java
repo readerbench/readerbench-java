@@ -65,8 +65,7 @@ public class Word2VecModel implements ISemanticModel {
     private Word2VecModel(String path, Lang language, Word2Vec word2vec) {
         this.language = language;
         this.path = path;
-        this.wordVectors = new TreeMap<>();
-        word2vec.vocab().words().stream()
+        this.wordVectors = word2vec.vocab().words().stream()
                 .map(w -> new Word(w, w, Stemmer.stemWord(w, language), null, null, language))
                 .distinct()
                 .collect(Collectors.toMap(

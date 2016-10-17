@@ -523,6 +523,6 @@ public class LDA implements ISemanticModel, Serializable {
 
     @Override
     public BiFunction<double[], double[], Double> getSimilarityFuction() {
-        return Maths::jensenShannonDivergence;
+        return (v1, v2) -> 1 - Maths.jensenShannonDivergence(v1, v2);
     }
 }

@@ -38,7 +38,7 @@ public class DocumentFlowView extends JFrame {
     private final JPanel contentPane;
     private final DefaultTableModel modelContent;
     private final JTable tableContent;
-    private JComboBox<String> comboBoxSemDistance;
+    private JComboBox<SimilarityType> comboBoxSemDistance;
     private JComboBox<DocFlowCriteria> comboBoxCriteria;
     private final JTextArea textAreaStats;
 
@@ -61,7 +61,7 @@ public class DocumentFlowView extends JFrame {
 
         comboBoxSemDistance = new JComboBox<>();
         for (SimilarityType st : doc.getModelVectors().keySet()) {
-            comboBoxSemDistance.addItem(st.getName());
+            comboBoxSemDistance.addItem(st);
         }
 
         JLabel lblCriteria = new JLabel("Criteria:");
@@ -71,12 +71,12 @@ public class DocumentFlowView extends JFrame {
         }
 
         comboBoxSemDistance.addActionListener((ActionEvent e) -> {
-            updateContents(comboBoxSemDistance.getSelectedIndex(),
+            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
         comboBoxCriteria.addActionListener((ActionEvent e) -> {
-            updateContents(comboBoxSemDistance.getSelectedIndex(),
+            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
@@ -143,15 +143,14 @@ public class DocumentFlowView extends JFrame {
         scrollPaneContent.setViewportView(tableContent);
         contentPane.setLayout(gl_contentPane);
 
-        updateContents(comboBoxSemDistance.getSelectedIndex(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
+        updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
     }
 
-    private void updateContents(int semanticDistIndex, DocFlowCriteria crit) {
+    private void updateContents(SimilarityType simType, DocFlowCriteria crit) {
         // clean table
         while (modelContent.getRowCount() > 0) {
             modelContent.removeRow(0);
         }
-        SimilarityType simType = SimilarityType.values()[semanticDistIndex];
         df = new DocumentFlow(doc, simType, crit);
         if (df.getOrderedParagraphs() != null && df.getGraph() != null) {
 
