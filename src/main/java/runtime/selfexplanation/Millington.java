@@ -47,9 +47,10 @@ import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.readingStrategies.ReadingStrategies;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class Millington {
@@ -61,6 +62,8 @@ public class Millington {
     private final LSA lsa;
     private final LDA lda;
     private final Lang lang;
+    private List<ISemanticModel> models = new ArrayList<>();
+        
 
     public Millington(String path) {
         this.path = path;
@@ -68,6 +71,9 @@ public class Millington {
         this.lang = Lang.en;
         this.lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", lang);
         this.lda = LDA.loadLDA("resources/config/EN/LDA/TASA", lang);
+        models.add(lsa);
+        models.add(lda);
+    
     }
 
     private String getTextFromFile(String path) {
@@ -192,28 +198,23 @@ public class Millington {
 
             String seRefText = content.substring(0, content.indexOf(targetText) + targetText.length());
 
-            Document refDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(seRefText), lsa, lda, lang,
-                    true, true);
-            Summary se = new Summary(studentSE, refDoc, true, true);
-            se.computeAll(true, false);
+            Document refDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(seRefText), models, lang, true);
+            Summary se = new Summary(studentSE, refDoc, true);
+            se.computeAll(true);
             List<SemanticCohesion> cohesionScores = new ArrayList<>();
 
             String prevText = content.substring(0, content.indexOf(targetText));
-            Document prevDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(prevText), lsa, lda, lang,
-                    true, true);
+            Document prevDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(prevText), models, lang, true);
             cohesionScores.add(new SemanticCohesion(se, prevDoc));
 
-            Document targetDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(targetText), lsa, lda,
-                    lang, true, true);
+            Document targetDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(targetText), models, lang, true);
             cohesionScores.add(new SemanticCohesion(se, targetDoc));
 
             String nextText = content.substring(content.indexOf(targetText) + targetText.length());
-            Document nextDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(nextText), lsa, lda, lang,
-                    true, true);
+            Document nextDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(nextText), models, lang, true);
             cohesionScores.add(new SemanticCohesion(se, nextDoc));
 
-            Document entireDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(content), lsa, lda, lang,
-                    true, true);
+            Document entireDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(content), models, lang, true);
             cohesionScores.add(new SemanticCohesion(se, entireDoc));
 
             out = new BufferedWriter(new FileWriter(path + "/output.csv", true));
@@ -236,7 +237,7 @@ public class Millington {
             out.close();
 
             if (rowNo % 10 == 0) {
-                LOGGER.info("Finished processing " + rowNo + " rows...");
+                LOGGER.info("Finished processing " + rowNo + " rows ...");
             }
             rowNo++;
         }

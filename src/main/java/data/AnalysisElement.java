@@ -16,19 +16,18 @@
 package data;
 
 import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
 import java.util.ArrayList;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
-import services.semanticModels.word2vec.Word2VecModel;
+import java.util.EnumMap;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  * This abstract class is the base for all type of elements. It is extended
@@ -43,27 +42,23 @@ public abstract class AnalysisElement implements Serializable {
     protected static final Logger LOGGER = Logger.getLogger(AnalysisElement.class);
 
     private int index;
-    private transient LSA lsa;
-    private transient LDA lda;
-    private transient Word2VecModel w2vModel;
+    protected transient Map<SimilarityType, ISemanticModel> semanticModels;
+    protected Map<SimilarityType, double[]> modelVectors;
+
     private Lang language;
     // the upper level element in the analysis hierarchy: document > block / utterance > sentence
-    private AnalysisElement container;
+    protected AnalysisElement container;
     private String text;
     private String processedText; // lemmas without stop-words and punctuation
     private String alternateText; // text used for display in different colors
     private Map<Word, Integer> wordOccurences;
-    private double[] lsaVector;
-    private double[] ldaProbDistribution;
-    private double[] w2v;
     private double individualScore;
     private double overallScore;
     private double[] voiceDistribution;
     // specificity score computed for a specific class of topics
-    private transient double specificity;
 
-    private List<Topic> topics;
-    private List<Topic> inferredConcepts;
+    private List<Keyword> topics;
+    private List<Keyword> inferredConcepts;
 
     private transient SentimentEntity sentimentEntity;
 
@@ -73,46 +68,45 @@ public abstract class AnalysisElement implements Serializable {
     public AnalysisElement() {
         this.processedText = "";
         this.alternateText = "";
-        this.lsaVector = new double[LSA.K];
         this.wordOccurences = new TreeMap<>();
         this.topics = new ArrayList<>();
         this.inferredConcepts = new ArrayList<>();
         this.sentimentEntity = new SentimentEntity();
+        this.semanticModels = new EnumMap<>(SimilarityType.class);
+        this.modelVectors = new EnumMap<>(SimilarityType.class);
     }
 
     /**
-     * @param lsa
-     * @param lda
+     * @param models
      * @param language
      */
-    public AnalysisElement(LSA lsa, LDA lda, Lang language) {
+    public AnalysisElement(List<ISemanticModel> models, Lang language) {
         this();
-        this.lsa = lsa;
-        this.lda = lda;
+        for (ISemanticModel model : models) {
+            semanticModels.put(model.getType(), model);
+        }
         this.language = language;
     }
 
     /**
      * @param elem
      * @param index
-     * @param lsa
-     * @param lda
+     * @param models
      * @param language
      */
-    public AnalysisElement(AnalysisElement elem, int index, LSA lsa, LDA lda, Lang language) {
-        this(lsa, lda, language);
+    public AnalysisElement(AnalysisElement elem, int index, List<ISemanticModel> models, Lang language) {
+        this(models, language);
         this.index = index;
         this.container = elem;
     }
 
     /**
      * @param text
-     * @param lsa
-     * @param lda
+     * @param models
      * @param language
      */
-    public AnalysisElement(String text, LSA lsa, LDA lda, Lang language) {
-        this(lsa, lda, language);
+    public AnalysisElement(String text, List<ISemanticModel> models, Lang language) {
+        this(models, language);
         this.text = text;
         this.alternateText = text;
     }
@@ -121,36 +115,30 @@ public abstract class AnalysisElement implements Serializable {
      * @param elem
      * @param index
      * @param text
-     * @param lsa
-     * @param lda
+     * @param models
      * @param language
      */
-    public AnalysisElement(AnalysisElement elem, int index, String text, LSA lsa, LDA lda, Lang language) {
-        this(elem, index, lsa, lda, language);
+    public AnalysisElement(AnalysisElement elem, int index, String text, List<ISemanticModel> models, Lang language) {
+        this(elem, index, models, language);
         this.text = text;
         this.alternateText = text;
     }
 
     /**
-     * Determines the LSA vector for the corresponding analysis element by using
-     * local tf-idf * LSA Determines the LDA probability distribution. TODO:
-     * explain better
+     * Determine vector representations for all semantic models by relying on Tf
+     * * individual word representation
      */
     public void determineSemanticDimensions() {
-        // determine the vector for the corresponding analysis element by using
-        // local TfIdf * LSA
-        if (lsa != null) {
+        for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+            double[] vec = new double[e.getValue().getNoDimensions()];
             for (Word word : wordOccurences.keySet()) {
-                double factor = (1 + Math.log(wordOccurences.get(word)) * word.getIdf());
-                for (int i = 0; i < LSA.K; i++) {
-                    lsaVector[i] += word.getLSAVector()[i] * factor;
+                if (word.getModelRepresentation(e.getKey()) != null) {
+                    for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                        vec[i] += (1 + Math.log(wordOccurences.get(word))) * word.getModelRepresentation(e.getKey())[i];
+                    }
                 }
             }
-        }
-
-        // determine LDA distribution
-        if (lda != null) {
-            this.ldaProbDistribution = lda.getProbDistribution(this);
+            modelVectors.put(e.getKey(), vec);
         }
     }
 
@@ -193,48 +181,6 @@ public abstract class AnalysisElement implements Serializable {
     }
 
     /**
-     * @return Latent Semantic Analysis object
-     */
-    public LSA getLSA() {
-        return lsa;
-    }
-
-    /**
-     * @param lsa Latent Semantic Analysis object to be set
-     */
-    public final void setLSA(LSA lsa) {
-        this.lsa = lsa;
-    }
-
-    /**
-     * @return Latent Dirichlet Allocation object
-     */
-    public LDA getLDA() {
-        return lda;
-    }
-
-    /**
-     * @param lda Latent Dirichlet Allocation object to be set
-     */
-    public final void setLDA(LDA lda) {
-        this.lda = lda;
-    }
-
-    /**
-     * @return word2Vec object
-     */
-    public Word2VecModel getW2vModel() {
-        return w2vModel;
-    }
-
-    /**
-     * @param w2vModel word2Vec object to be set
-     */
-    public void setW2vModel(Word2VecModel w2vModel) {
-        this.w2vModel = w2vModel;
-    }
-
-    /**
      * @return the language the text is written in
      */
     public Lang getLanguage() {
@@ -246,49 +192,6 @@ public abstract class AnalysisElement implements Serializable {
      */
     public final void setLanguage(Lang language) {
         this.language = language;
-    }
-
-    /**
-     * @return Latent Semantic Analysis vector
-     */
-    public double[] getLSAVector() {
-        return lsaVector;
-    }
-
-    /**
-     * @param vector Latent Semantic Analysis vector to be set
-     */
-    public void setLSAVector(double[] vector) {
-        this.lsaVector = vector;
-    }
-
-    /**
-     * @return Latent Dirichlet Allocation Probability Distribution vector
-     */
-    public double[] getLDAProbDistribution() {
-        return ldaProbDistribution;
-    }
-
-    /**
-     * @param ldaProbDistribution Latent Dirichlet Allocation Probability
-     * Distribution vector to be set
-     */
-    public void setLDAProbDistribution(double[] ldaProbDistribution) {
-        this.ldaProbDistribution = ldaProbDistribution;
-    }
-
-    /**
-     * @return word2vec vector
-     */
-    public double[] getWord2Vec() {
-        return w2v;
-    }
-
-    /**
-     * @param w2v word2vec vector to be set
-     */
-    public void setWord2Vec(double[] w2v) {
-        this.w2v = w2v;
     }
 
     /**
@@ -393,50 +296,29 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @return
      */
-    public List<Topic> getTopics() {
+    public List<Keyword> getTopics() {
         return topics;
     }
 
     /**
      * @param topics
      */
-    public void setTopics(List<Topic> topics) {
+    public void setTopics(List<Keyword> topics) {
         this.topics = topics;
     }
 
     /**
      * @return
      */
-    public List<Topic> getInferredConcepts() {
+    public List<Keyword> getInferredConcepts() {
         return inferredConcepts;
     }
 
     /**
      * @param inferredConcepts
      */
-    public void setInferredConcepts(List<Topic> inferredConcepts) {
+    public void setInferredConcepts(List<Keyword> inferredConcepts) {
         this.inferredConcepts = inferredConcepts;
-    }
-
-    /**
-     * @return
-     */
-    public double getSpecificity() {
-        return specificity;
-    }
-
-    /**
-     * @param specificity
-     */
-    public void setSpecificity(double specificity) {
-        this.specificity = specificity;
-    }
-
-    /**
-     * @return
-     */
-    public double getCombinedScore() {
-        return specificity * overallScore;
     }
 
     /**
@@ -467,4 +349,30 @@ public abstract class AnalysisElement implements Serializable {
         this.sentimentEntity = sentimentEntity;
     }
 
+    public List<ISemanticModel> getSemanticModels() {
+        return new ArrayList<>(semanticModels.values());
+    }
+
+    public final void setSemanticModels(List<ISemanticModel> models) {
+        semanticModels = new EnumMap<>(SimilarityType.class);
+        for (ISemanticModel model : models) {
+            semanticModels.put(model.getType(), model);
+        }
+    }
+
+    public Map<SimilarityType, double[]> getModelVectors() {
+        return modelVectors;
+    }
+
+    public void setModelVectors(Map<SimilarityType, double[]> modelVectors) {
+        this.modelVectors = modelVectors;
+    }
+
+    public double[] getModelRepresentation(SimilarityType type) {
+        return modelVectors.get(type);
+    }
+
+    public ISemanticModel getSemanticModel(SimilarityType type) {
+        return semanticModels.get(type);
+    }
 }

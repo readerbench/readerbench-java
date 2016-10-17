@@ -19,59 +19,50 @@ import java.io.Serializable;
 
 import data.AnalysisElement;
 import data.Word;
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
+import services.semanticModels.ISemanticModel;
 
 /**
  *
  * @author Mihai Dascalu
  */
-public class Topic implements Comparable<Topic>, Serializable {
+public class Keyword implements Comparable<Keyword>, Serializable {
 
     private static final long serialVersionUID = -2955989168004509623L;
 
     private Word word;
     private double relevance;
     private double termFrequency;
-    private double lsaSim;
-    private double ldaSim;
+    private double semanticSimilarity;
 
-    public Topic(Word word, AnalysisElement e) {
+    public Keyword(Word word, AnalysisElement e) {
         this.word = word;
         this.updateRelevance(e);
+    }
+
+    public Keyword(Word word, double relevance) {
+        super();
+        this.word = word;
+        this.relevance = relevance;
     }
 
     public final void updateRelevance(AnalysisElement e) {
         termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
-        if (e.getLDA() == null && e.getLSA() == null) {
-            this.relevance = termFrequency;
+        if (e.getSemanticModels().isEmpty()) {
+            this.relevance += termFrequency;
             return;
         }
 
-        // determine importance within analysis element
-        lsaSim = VectorAlgebra.cosineSimilarity(word.getLSAVector(), e.getLSAVector());
-        ldaSim = LDA.getSimilarity(word.getLDAProbDistribution(), e.getLDAProbDistribution());
-        this.relevance = termFrequency * SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+        this.relevance += termFrequency * SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
     }
 
     public double getTermFrequency() {
         return termFrequency;
     }
 
-    public double getLSASim() {
-        return lsaSim;
-    }
-
-    public double getLDASim() {
-        return ldaSim;
-    }
-
-    public Topic(Word word, double relevance) {
-        super();
-        this.word = word;
-        this.relevance = relevance;
+    public double getSemanticSimilarity() {
+        return semanticSimilarity;
     }
 
     public Word getWord() {
@@ -92,15 +83,20 @@ public class Topic implements Comparable<Topic>, Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Topic)) {
+        if (!(obj instanceof Keyword)) {
             return false;
         }
-        Topic t = (Topic) obj;
-        return this.getWord().getStem().equals(t.getWord().getStem());
+        Keyword t = (Keyword) obj;
+        return this.getWord().getLemma().equals(t.getWord().getLemma());
     }
 
     @Override
-    public int compareTo(Topic o) {
+    public int hashCode() {
+        return word.getLemma().hashCode();
+    }
+
+    @Override
+    public int compareTo(Keyword o) {
         return (int) Math.signum(o.getRelevance() - this.getRelevance());
     }
 

@@ -35,9 +35,9 @@ import data.document.MetaDocument;
 import java.util.HashMap;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
 import webService.query.QueryHelper;
+import webService.queryResult.QueryResultTopic;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
 import webService.services.ConceptMap;
@@ -63,19 +63,26 @@ public class DataGathering {
         }
     }
 
-    public static void processTexts(String path, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(path, path, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism);
+    public static void processTexts(String path, int gradeLevel, boolean writeHeader, 
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging, 
+            boolean computeDialogism) throws IOException {
+        processTexts(path, path, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, saveLocation, gradeLevel, writeHeader, lsa, lda, lang, usePOSTagging, computeDialogism, false);
+    public static void processTexts(String processingPath, String saveLocation, 
+            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, 
+            Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+        processTexts(processingPath, saveLocation, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism, false);
     }
 
-    public static void processMetaDocuments(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, processingPath, 0, true, lsa, lda, lang, usePOSTagging, computeDialogism, true);
+    public static void processMetaDocuments(String processingPath, List<ISemanticModel> models, 
+            Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
+        processTexts(processingPath, processingPath, 0, true, models, lang, usePOSTagging, computeDialogism, true);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, int gradeLevel, boolean writeHeader, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
+    public static void processTexts(String processingPath, String saveLocation, 
+            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, Lang lang, 
+            boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -98,11 +105,11 @@ public class DataGathering {
             Document d = null;
             try {
                 if (meta) {
-                    d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
+                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                 } else {
-                    d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
+                    d = Document.load(file, models, lang, usePOSTagging);
                 }
-                d.computeAll(computeDialogism, null, null);
+                d.computeAll(computeDialogism);
             } catch (Exception e) {
                 logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
                 Exceptions.printStackTrace(e);
@@ -145,13 +152,24 @@ public class DataGathering {
                             null);
                     StringBuilder concat = new StringBuilder();
                     for (ResultNode node : resultTopic.getNodes()) {
-                        concat.append(node.getName());
-                        concat.append(',');
-                        concat.append(node.getValue());
-                        concat.append(',');
+                        concat.append(node.getName()).append(',').append(node.getValue()).append(',');
                     }
                     outConcept.write(concat.toString());
                     outConcept.close();
+
+                    QueryResultTopic queryResult = new QueryResultTopic();
+                    queryResult.setData(
+                            ConceptMap.getTopics(
+                                    QueryHelper.processQuery(hm),
+                                    Double.parseDouble(hm.get("threshold")),
+                                    null));
+                    
+                    try (BufferedWriter outResult = new BufferedWriter(new FileWriter(d.getPath() + "_response.json"))) {
+                        outResult.write(queryResult.convertToJson());
+                        outResult.close();
+                    }
+                    catch (IOException ex) {
+                    }
                 } catch (IOException ex) {
                     logger.error("Runtime error while initializing " + d.getPath() + " concept map file");
                     Exceptions.printStackTrace(ex);

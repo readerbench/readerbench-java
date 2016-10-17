@@ -18,4 +18,11 @@ public class TwoModeGraphNode {
     public String getUri() {
         return this.uri;
     }
+    public TwoModeGraphNodeType getType() {
+        return this.type;
+    }
+    @Override
+    public String toString() {
+        return "{" + this.uri  + "}";
+    }
 }

@@ -21,7 +21,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -37,35 +36,39 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Word;
 import data.document.Document;
 import data.Lang;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import javax.xml.parsers.ParserConfigurationException;
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class ResearchArticle extends Document {
 
     private static final long serialVersionUID = 9219491499980439567L;
 
-    private List<String> citationURIList = new LinkedList<String>();
-    private List<ArticleAuthor> articleAuthorList = new LinkedList<ArticleAuthor>();
+    private List<String> citationURIList = new ArrayList<>();
+    private List<ArticleAuthor> articleAuthorList = new ArrayList<>();
 
-    public ResearchArticle(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public ResearchArticle(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
     }
 
     public ResearchArticle(String path, AbstractDocumentTemplate docTmp,
-            LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
-        super(path, docTmp, lsa, lda, lang, usePOSTagging, cleanInput);
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        super(path, docTmp, models, lang, usePOSTagging);
     }
 
-    public static ResearchArticle load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+    public static ResearchArticle load(String pathToDoc, Map<SimilarityType, String> modelPaths,
+            Lang lang, boolean usePOSTagging, boolean cleanInput) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging, cleanInput);
     }
 
-    public static ResearchArticle load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean cleanInput) {
+    public static ResearchArticle load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean cleanInput) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -109,22 +112,18 @@ public class ResearchArticle extends Document {
                     }
                 }
             }
-            ResearchArticle d = new ResearchArticle(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
+            ResearchArticle d = new ResearchArticle(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             d.setNoVerbalizationBreakPoints(noBreakPoints);
             // determine title
             nl = doc.getElementsByTagName("title");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), lsa, lda, lang,
-                        usePOSTagging);
+                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
             }
 
             // determine meta
             nl = doc.getElementsByTagName("meta");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue()); // to
-                // check
-                // with
-                // XML
+                d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
             }
 
             // get source
@@ -226,11 +225,10 @@ public class ResearchArticle extends Document {
                     }
                 }
             }
-
             return d;
-        } catch (Exception e) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
-            e.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException ex) {
+            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + ex.getMessage());
+            Exceptions.printStackTrace(ex);
         }
         return null;
     }
@@ -258,7 +256,7 @@ public class ResearchArticle extends Document {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == null || obj == null) {
+        if (this == null || obj == null || !(obj instanceof ResearchArticle)) {
             return false;
         }
         ResearchArticle a = (ResearchArticle) obj;

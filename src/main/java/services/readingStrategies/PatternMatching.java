@@ -72,7 +72,7 @@ public class PatternMatching {
 
     // returns the number of occurrences
     public static int containsStrategy(List<Sentence> sentences, AnalysisElement el, ReadingStrategyType strategy, boolean alreadyExistentCheck) {
-        String text = " " + el.getAlternateText() + " ";
+        String text = " " + el.getAlternateText().toLowerCase() + " ";
         int no_occurences = 0;
         ListOfWords usedList = null;
         String usedColor = null;

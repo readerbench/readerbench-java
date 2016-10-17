@@ -15,6 +15,7 @@
  */
 package view.widgets.article;
 
+import com.itextpdf.text.log.SysoLogger;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -26,11 +27,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,18 +52,13 @@ import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
 import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
-import org.gephi.filters.api.FilterController;
-import org.gephi.filters.api.Query;
-import org.gephi.filters.plugin.graph.EgoBuilder.EgoFilter;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
-import org.gephi.graph.api.GraphView;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 import org.gephi.io.exporter.api.ExportController;
-import org.gephi.layout.plugin.forceAtlas2.ForceAtlas2;
 import org.gephi.preview.api.G2DTarget;
 import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
@@ -77,10 +70,7 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import data.AbstractDocument;
-import data.Word;
 import data.article.ResearchArticle;
-import data.discourse.Topic;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import view.models.PreviewSketch;
@@ -93,7 +83,6 @@ import view.widgets.article.utils.SingleAuthorContainer;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
 import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
-import view.widgets.document.corpora.PaperConceptView;
 
 public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
@@ -355,20 +344,12 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			}
 		}
 		paramLogger.logGraphMeasures(graphMeasures);
-
-//		// run ForceAtlas 2 layout
-//		ForceAtlas2 layout = new ForceAtlas2(null);
-//		layout.setGraphModel(graphModel);
-//		layout.resetPropertiesValues();
-//
-//		layout.setOutboundAttractionDistribution(false);
-//		layout.setEdgeWeightInfluence(1.5d);
-//		layout.setGravity(10d);
-//		layout.setJitterTolerance(.02);
-//		layout.setScalingRatio(15.0);
-//		layout.initAlgo();
+                Collections.sort(graphMeasures);
+                GraphMeasure.saveSerializedObject(graphMeasures);
                 
-		// Rank size by centrality
+                System.out.println(graphMeasures);
+                
+                // Rank size by centrality
 		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
 		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
 				RankingNodeSizeTransformer.class);
@@ -464,10 +445,10 @@ public class ArticleAuthorSimilarityView extends JFrame {
 				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
 				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
 
-				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
+//				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
 //				String centerUri = "http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker";
 //				String centerUri = "http://data.linkededucation.org/resource/lak/conference/edm2009/paper/202";
-//				String centerUri = null;
+				String centerUri = null;
 				
 				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger, centerUri);
 				view.setVisible(true);

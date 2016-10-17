@@ -20,13 +20,11 @@ import data.discourse.SemanticChain;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.commons.DoubleStatistics;
 
 /**
  *
@@ -36,7 +34,7 @@ public class DialogismMutualInformationIndex extends ComplexityIndex {
 
     private transient final Function<Stream<? extends Number>, Double> combine;
     private transient final Function<SemanticChain, double[]> listFunction;
-    
+
     public DialogismMutualInformationIndex(ComplexityIndecesEnum index,
             Function<SemanticChain, double[]> listFunction,
             Function<Stream<? extends Number>, Double> combine) {
@@ -47,31 +45,30 @@ public class DialogismMutualInformationIndex extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        List<SemanticChain> voices = d.getSignificantVoices();
+        List<SemanticChain> voices = d.getVoices();
         if (voices == null || voices.isEmpty()) {
             return ComplexityIndices.IDENTITY;
         }
-                                
+
         int no = 0;
-		double[] evolution = new double[listFunction.apply(voices.get(0)).length];
+        double[] evolution = new double[listFunction.apply(voices.get(0)).length];
         for (int i = 1; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				double[] mi = VectorAlgebra.discreteMutualInformation(
-                        listFunction.apply(voices.get(i)), 
+            for (int j = 0; j < i; j++) {
+                double[] mi = VectorAlgebra.discreteMutualInformation(
+                        listFunction.apply(voices.get(i)),
                         listFunction.apply(voices.get(j)));
-				for (int k = 0; k < evolution.length; k++) {
-					evolution[k] += mi[k];
-				}
-				no++;
-			}
-		}
+                for (int k = 0; k < evolution.length; k++) {
+                    evolution[k] += mi[k];
+                }
+                no++;
+            }
+        }
         if (no > 0) {
             final int factor = no;
             return combine.apply(Arrays.stream(evolution)
                     .mapToObj(x -> x / factor));
-		}
-		return ComplexityIndices.IDENTITY;
+        }
+        return ComplexityIndices.IDENTITY;
     }
 
 }
-

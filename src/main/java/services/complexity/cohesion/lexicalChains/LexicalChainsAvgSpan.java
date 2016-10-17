@@ -32,12 +32,9 @@ public class LexicalChainsAvgSpan extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        int max = d.getLexicalChains().parallelStream()
+        return d.getLexicalChains().parallelStream()
                 .mapToInt(c -> c.getLinks().size())
-                .max().orElse(ComplexityIndices.IDENTITY);
-        if (max > 0 && d.getMinWordCoverage() > 0)
-			return ((double) max) / d.getMinWordCoverage();
-		return ComplexityIndices.IDENTITY;
-	}
-    
+                .average().orElse(ComplexityIndices.IDENTITY);
+    }
+
 }

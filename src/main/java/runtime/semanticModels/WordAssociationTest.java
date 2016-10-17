@@ -15,6 +15,7 @@
  */
 package runtime.semanticModels;
 
+import data.Lang;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
@@ -33,14 +34,14 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
-import data.Lang;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 public class WordAssociationTest {
@@ -53,16 +54,8 @@ public class WordAssociationTest {
 
     public void initialLoad(String pathToFile, ISemanticModel semModel, int countMax) {
         wordAssociations = new TreeMap<>();
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
         try {
             FileInputStream inputFile = new FileInputStream(pathToFile);
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
@@ -73,8 +66,8 @@ public class WordAssociationTest {
                     if (line.length() > 0) {
                         StringTokenizer st = new StringTokenizer(line, ",");
                         try {
-                            Document doc1 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
-                            Document doc2 = VocabularyTest.processDoc(st.nextToken(), lsa, lda, semModel.getLanguage());
+                            Document doc1 = VocabularyTest.processDoc(st.nextToken(), models, semModel.getLanguage());
+                            Document doc2 = VocabularyTest.processDoc(st.nextToken(), models, semModel.getLanguage());
 
                             Double no = Double.valueOf(st.nextToken());
                             if (!wordAssociations.containsKey(doc1)) {
@@ -160,13 +153,13 @@ public class WordAssociationTest {
                             : ","));
                     if (printSimilarConcepts) {
                         // determine most similar concepts;
-                        List<Topic> similarConcepts = new ArrayList<>();
+                        List<Keyword> similarConcepts = new ArrayList<>();
                         TreeMap<Word, Double> listLSA = semModel.getSimilarConcepts(doc, minThreshold);
                         for (Entry<Word, Double> entry : listLSA.entrySet()) {
                             for (Word word : doc.getWordOccurences().keySet()) {
                                 if (!entry.getKey().getLemma().equals(word.getLemma())
                                         && !entry.getKey().getStem().equals(word.getStem())) {
-                                    similarConcepts.add(new Topic(entry.getKey(), entry.getValue()));
+                                    similarConcepts.add(new Keyword(entry.getKey(), entry.getValue()));
                                 }
                             }
                         }
@@ -198,14 +191,21 @@ public class WordAssociationTest {
 
         WordAssociationTest comp = new WordAssociationTest();
 
-        // LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
-        // LSA lsa = LSA.loadLSA("resources/config/ES/LSA/Jose Antonio", Lang.es);
-        // comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", lsa, 3, true, 20, 0.3);
-        // comp.compare("resources/config/ES/word lists/Normas Palabras C4819_es.csv", lsa, 3, true, 20, 0.3);
-        // LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.eng);
-        LDA lda = LDA.loadLDA("resources/config/ES/LDA/Jose Antonio", Lang.es);
-        comp.compare("resources/config/ES/word lists/Normas Palabras C4819_es.csv", lda, 3, true, 20, 0.3);
-        // comp.compare("resources/config/ES/word lists/Nelson norms_en.csv", lda, 3, false, 20, 0.3);
-        // comp.compare("resources/config/EN/LSA/TASA LAK", "resources/config/EN/word lists/Nelson norms_en.csv", Lang.en, 0.3);
+//        LSA lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+//        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", lsa1, 3, true, 20, 0.3);
+//        lsa1 = LSA.loadLSA("resources/config/ES/LSA/Jose Antonio", Lang.es);
+//        comp.compare("resources/config/ES/word lists/Normas Palabras C4819_es.csv", lsa1, 3, true, 20, 0.3);
+//        LDA lda1 = LDA.loadLDA("resources/config/ES/LDA/Jose Antonio", Lang.es);
+//        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", lda1, 3, false, 20, 0.3);
+//        lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        comp.compare("resources/config/ES/word lists/Normas Palabras C4819_es.csv", lda1, 3, true, 20, 0.3);
+        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
+        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
+        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
+        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
+        w2v1 = Word2VecModel.loadGoogleNewsModel();
+        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
     }
 }

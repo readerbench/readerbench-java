@@ -57,7 +57,7 @@ public class SentimentAnalysis {
             Double sentimentValue = pair.getValue();
             localResults.add(new ResultValence(
                     sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                    Formatting.formatNumber(sentimentValue)
+                    Formatting.formatNumber(sentimentValue, 2)
             ));
         }
         Collections.sort(localResults);
@@ -71,7 +71,7 @@ public class SentimentAnalysis {
                 Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
                 SentimentValence sentimentValence = (SentimentValence) pair.getKey();
                 localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                        Formatting.formatNumber(pair.getValue())));
+                        Formatting.formatNumber(pair.getValue(), 2)));
             }
             Collections.sort(localResults);
 
@@ -84,7 +84,7 @@ public class SentimentAnalysis {
                     Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
                     SentimentValence sentimentValence = (SentimentValence) pair.getKey();
                     localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                            Formatting.formatNumber(pair.getValue())));
+                            Formatting.formatNumber(pair.getValue(), 2)));
                 }
                 Collections.sort(localResults);
 
@@ -99,7 +99,7 @@ public class SentimentAnalysis {
                         Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
                         SentimentValence sentimentValence = (SentimentValence) pair.getKey();
                         localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                                Formatting.formatNumber(pair.getValue())));
+                                Formatting.formatNumber(pair.getValue(), 2)));
                     }
                     if (!localResults.isEmpty()) {
                         Collections.sort(localResults);

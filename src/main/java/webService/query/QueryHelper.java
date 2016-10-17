@@ -21,9 +21,11 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
 import data.document.Document;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import services.complexity.ComplexityIndices;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -31,23 +33,24 @@ import webService.ReaderBenchServer;
 public class QueryHelper {
 
     private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
-    
+
     public static AbstractDocument processQuery(Map<String, String> hm) {
         logger.info("Processign query ...");
         Lang lang = Lang.getLang(hm.get("lang"));
         AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(hm.get("text"));
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(LSA.loadLSA(hm.get("lsa"), lang));
+        models.add(LDA.loadLDA(hm.get("lda"), lang));
         AbstractDocument document = new Document(
                 null,
                 template,
-                LSA.loadLSA(hm.get("lsa"), lang),
-                LDA.loadLDA(hm.get("lda"), lang),
+                models,
                 lang,
-                Boolean.parseBoolean(hm.get("postagging")),
-                true);
+                Boolean.parseBoolean(hm.get("postagging"))
+        );
         logger.info("Built document has " + document.getBlocks().size() + " blocks.");
-        document.computeAll(Boolean.parseBoolean(hm.get("dialogism")), null, null);
+        document.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
         ComplexityIndices.computeComplexityFactors(document);
         return document;
     }
-
 }

@@ -20,13 +20,13 @@ import data.discourse.SemanticCohesion;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan
  */
-public class AvgBlockDocCohesion extends ComplexityIndex{
+public class AvgBlockDocCohesion extends ComplexityIndex {
 
     public AvgBlockDocCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_BLOCK_DOC_COHESION, simType);
@@ -34,20 +34,25 @@ public class AvgBlockDocCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         int no = 0;
-		double sum = 0;
-		if (d != null && d.getBlockDocDistances() != null) {
-			for (SemanticCohesion coh : d.getBlockDocDistances()) {
-				if (coh != null && coh.getCohesion() > 0) {
-					sum += coh.getSemanticSimilarities().get(simType);
-					no++;
-				}
-			}
-		}
-		if (no == 1)
-			return ComplexityIndices.IDENTITY;
-		if (no != 0)
-			return sum / no;
-		return ComplexityIndices.IDENTITY;
+        double sum = 0;
+        if (d != null && d.getBlockDocDistances() != null) {
+            for (SemanticCohesion coh : d.getBlockDocDistances()) {
+                if (coh != null && coh.getCohesion() > 0) {
+                    sum += coh.getSemanticSimilarities().get(simType);
+                    no++;
+                }
+            }
+        }
+        if (no == 1) {
+            return ComplexityIndices.IDENTITY;
+        }
+        if (no != 0) {
+            return sum / no;
+        }
+        return ComplexityIndices.IDENTITY;
     }
 }

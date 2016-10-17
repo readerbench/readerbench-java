@@ -22,9 +22,11 @@ import org.apache.log4j.BasicConfigurator;
 
 import data.document.Document;
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
-import services.converters.Txt2XmlConverter;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -44,7 +46,7 @@ public class DataGatheringTest {
 
         for (File file : files) {
             try {
-                Document d = Document.load(file, null, null, Lang.en, false, true);
+                Document d = Document.load(file, new ArrayList<>(), Lang.en, false);
                 d.saveTxtDocument();
             } catch (Exception e) {
                 Exceptions.printStackTrace(e);
@@ -69,6 +71,9 @@ public class DataGatheringTest {
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(lsa);
+        models.add(lda);
 
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
         try {
@@ -83,7 +88,7 @@ public class DataGatheringTest {
 //            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.en, true, true);
 
             //DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", -1, true, lsa, lda, Lang.en, true, true);
-            DataGathering.processTexts("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", -1, true, lsa, lda, Lang.en, true, true);
+            DataGathering.processTexts("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", -1, true, models, Lang.en, true, true);
 
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);

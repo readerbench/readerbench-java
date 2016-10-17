@@ -18,7 +18,7 @@ package runtime.document;
 import data.AbstractDocument;
 import data.Lang;
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import data.document.MetaDocument;
 import java.io.BufferedWriter;
@@ -37,7 +37,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
@@ -74,8 +75,8 @@ public class TopicRankings {
         Set<Word> words = new TreeSet<>();
 
         for (Document d : documents) {
-            List<Topic> topics = TopicModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
-            for (Topic t : topics) {
+            List<Keyword> topics = KeywordModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
+            for (Keyword t : topics) {
                 words.add(t.getWord());
             }
         }
@@ -85,11 +86,11 @@ public class TopicRankings {
     public Map<Word, Double> getRelevance(Document d, Set<Word> keywords) {
         Map<Word, Double> keywordOccurrences = new TreeMap<>();
 
-        List<Topic> topics = d.getTopics();
+        List<Keyword> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
             for (Word keyword : keywords) {
                 //determine identical stem
-                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                if (keyword.getLemma().equals(topics.get(i).getWord().getLemma())) {
                     keywordOccurrences.put(topics.get(i).getWord(), topics.get(i).getRelevance());
                 }
             }
@@ -100,11 +101,11 @@ public class TopicRankings {
     public Map<Word, Integer> getIndex(Document d, Set<Word> keywords) {
         Map<Word, Integer> keywordOccurrences = new TreeMap<>();
 
-        List<Topic> topics = d.getTopics();
+        List<Keyword> topics = d.getTopics();
         for (int i = 0; i < topics.size(); i++) {
             for (Word keyword : keywords) {
                 //determine identical stem
-                if (keyword.getStem().equals(topics.get(i).getWord().getStem())) {
+                if (keyword.getLemma().equals(topics.get(i).getWord().getLemma())) {
                     keywordOccurrences.put(topics.get(i).getWord(), i);
                 }
             }
@@ -135,7 +136,10 @@ public class TopicRankings {
             File[] files = dir.listFiles((File pathname) -> {
                 return pathname.getName().toLowerCase().endsWith(".xml");
             });
-
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(lsa);
+            models.add(lda);
+        
             for (File file : files) {
                 LOGGER.info("Processing " + file.getName() + " file");
                 // Create file
@@ -143,14 +147,13 @@ public class TopicRankings {
                 Document d;
                 try {
                     if (meta) {
-                        d = MetaDocument.load(file, lsa, lda, lang, usePOSTagging, true, MetaDocument.DocumentLevel.Subsection, 5);
+                        d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
                     } else {
-                        d = Document.load(file, lsa, lda, lang, usePOSTagging, true);
+                        d = Document.load(file, models, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism, null, null);
+                    d.computeAll(computeDialogism);
+                    d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
-                    d.saveSerializedDocument();
-                    d.exportDocument();
                 } catch (Exception e) {
                     LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
                     Exceptions.printStackTrace(e);

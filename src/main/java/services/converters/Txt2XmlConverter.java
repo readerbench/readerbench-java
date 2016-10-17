@@ -38,6 +38,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -58,6 +59,7 @@ import org.openide.util.Exceptions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
+import services.semanticModels.ISemanticModel;
 
 public class Txt2XmlConverter {
 
@@ -85,7 +87,7 @@ public class Txt2XmlConverter {
             block.setContent(st.nextToken().trim());
             docTmp.getBlocks().add(block);
         }
-        Document d = new Document(null, docTmp, null, null, lang, false, false);
+        Document d = new Document(null, docTmp, new ArrayList<>(), lang, false);
         d.setTitleText(title);
         d.setDate(new Date());
         d.exportXML(path);
@@ -128,7 +130,7 @@ public class Txt2XmlConverter {
     }
 
     private void addTextToElement(AbstractDocumentTemplate docTmp, Lang lang, Element parent) {
-        Document d = new Document(null, docTmp, null, null, lang, false, false);
+        Document d = new Document(null, docTmp, new ArrayList<>(), lang, false);
         d.addToXML(doc, parent);
     }
 

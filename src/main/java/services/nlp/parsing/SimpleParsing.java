@@ -31,7 +31,7 @@ import services.nlp.stemmer.Stemmer;
 public class SimpleParsing {
 
     public static Block processBlock(AbstractDocument d, int blockIndex, String paragraph) {
-        Block b = new Block(d, blockIndex, paragraph, d.getLSA(), d.getLDA(), d.getLanguage());
+        Block b = new Block(d, blockIndex, paragraph, d.getSemanticModels(), d.getLanguage());
         // parse the text using a simple String Tokenizer
         StringTokenizer st = new StringTokenizer(b.getText(), ".!?");
         int utteranceCounter = 0;
@@ -53,7 +53,7 @@ public class SimpleParsing {
     public static Sentence processSentence(Block b, int utteranceIndex, String sentence) {
         // basic parsing
         Lang lang = b.getLanguage();
-        Sentence s = new Sentence(b, utteranceIndex, sentence, b.getLSA(), b.getLDA(), lang);
+        Sentence s = new Sentence(b, utteranceIndex, sentence, b.getSemanticModels(), lang);
 
         Word w;
         StringTokenizer st = new StringTokenizer(s.getText(), " ,:;'-");
@@ -61,7 +61,7 @@ public class SimpleParsing {
             String wordText = st.nextToken().toLowerCase();
             String stem = Stemmer.stemWord(wordText, lang);
             String lemma = StaticLemmatizer.lemmaStatic(wordText, lang);
-            w = new Word(b.getIndex(), s.getIndex(), wordText, lemma, stem, null, null, s.getLSA(), s.getLDA(),
+            w = new Word(s, wordText, lemma, stem, null, null, s.getSemanticModels(),
                     lang);
             s.getAllWords().add(w);
 
@@ -84,7 +84,7 @@ public class SimpleParsing {
             s.setSentimentEntity(se);
         }
 
-        s.finalProcessing(b, null);
+        s.finalProcessing();
         return s;
     }
 }

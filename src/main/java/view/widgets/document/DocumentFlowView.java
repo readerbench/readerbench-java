@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndecesEnum;
 import services.complexity.cohesion.flow.DocFlowCriteria;
 import services.complexity.cohesion.flow.DocFlowIndex;
 import services.complexity.cohesion.flow.DocumentFlow;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import view.models.document.DocumentFlowTable;
 import view.models.document.DocumentTableModel;
 
@@ -38,7 +38,7 @@ public class DocumentFlowView extends JFrame {
     private final JPanel contentPane;
     private final DefaultTableModel modelContent;
     private final JTable tableContent;
-    private JComboBox<String> comboBoxSemDistance;
+    private JComboBox<SimilarityType> comboBoxSemDistance;
     private JComboBox<DocFlowCriteria> comboBoxCriteria;
     private final JTextArea textAreaStats;
 
@@ -60,8 +60,8 @@ public class DocumentFlowView extends JFrame {
         JLabel lblSemanticDistance = new JLabel("Semantic distance:");
 
         comboBoxSemDistance = new JComboBox<>();
-        for (SimilarityType st : SimilarityType.values()) {
-            comboBoxSemDistance.addItem(st.getName());
+        for (SimilarityType st : doc.getModelVectors().keySet()) {
+            comboBoxSemDistance.addItem(st);
         }
 
         JLabel lblCriteria = new JLabel("Criteria:");
@@ -71,12 +71,12 @@ public class DocumentFlowView extends JFrame {
         }
 
         comboBoxSemDistance.addActionListener((ActionEvent e) -> {
-            updateContents(comboBoxSemDistance.getSelectedIndex(),
+            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
         comboBoxCriteria.addActionListener((ActionEvent e) -> {
-            updateContents(comboBoxSemDistance.getSelectedIndex(),
+            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
@@ -143,51 +143,52 @@ public class DocumentFlowView extends JFrame {
         scrollPaneContent.setViewportView(tableContent);
         contentPane.setLayout(gl_contentPane);
 
-        updateContents(comboBoxSemDistance.getSelectedIndex(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
+        updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
     }
 
-    private void updateContents(int semanticDistIndex, DocFlowCriteria crit) {
+    private void updateContents(SimilarityType simType, DocFlowCriteria crit) {
         // clean table
         while (modelContent.getRowCount() > 0) {
             modelContent.removeRow(0);
         }
-        SimilarityType simType = SimilarityType.values()[semanticDistIndex];
         df = new DocumentFlow(doc, simType, crit);
+        if (df.getOrderedParagraphs() != null && df.getGraph() != null) {
 
-        for (Integer index : df.getOrderedParagraphs()) {
-            Block refBlock = doc.getBlocks().get(index);
-            Object[] row = {index,
-                refBlock.getText() + "[" + Formatting.formatNumber(refBlock.getOverallScore()) + "]"};
-            modelContent.addRow(row);
-        }
+            for (Integer index : df.getOrderedParagraphs()) {
+                Block refBlock = doc.getBlocks().get(index);
+                Object[] row = {index,
+                    refBlock.getText() + "[" + Formatting.formatNumber(refBlock.getOverallScore()) + "]"};
+                modelContent.addRow(row);
+            }
 
-        textAreaStats.setText("Edges in the cohesion graph:\n");
-        for (int i = 0; i < df.getGraph().length - 1; i++) {
-            for (int j = i + 1; j < df.getGraph().length; j++) {
-                if (df.getGraph()[i][j] > 0) {
-                    textAreaStats
-                            .append("\t" + i + ">>" + j + ":\t" + Formatting.formatNumber(df.getGraph()[i][j]) + "\n");
+            textAreaStats.setText("Edges in the cohesion graph:\n");
+            for (int i = 0; i < df.getGraph().length - 1; i++) {
+                for (int j = i + 1; j < df.getGraph().length; j++) {
+                    if (df.getGraph()[i][j] > 0) {
+                        textAreaStats
+                                .append("\t" + i + ">>" + j + ":\t" + Formatting.formatNumber(df.getGraph()[i][j]) + "\n");
+                    }
                 }
             }
+            textAreaStats.append("\nCohesion flow specific indices:\n");
+            textAreaStats.append(Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, crit, simType, null).getDescription()
+                    + "\n");
+            textAreaStats.append(Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY, crit, simType, null).getDescription()
+                    + "\n");
+            textAreaStats.append(Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY, crit, simType, null).getDescription()
+                    + "\n");
+            textAreaStats.append(Formatting.formatNumber(df.getSpearmanCorrelation()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION, crit, simType, null).getDescription()
+                    + "\n");
+            textAreaStats.append(Formatting.formatNumber(df.getMaxOrderedSequence()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE, crit, simType, null).getDescription()
+                    + "\n");
+            textAreaStats.append(Formatting.formatNumber(df.getAverageFlowCohesion()) + "\t"
+                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION, crit, simType, null).getDescription()
+                    + "\n");
         }
-        textAreaStats.append("\nCohesion flow specific indices:\n");
-        textAreaStats.append(Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, crit, simType, null).getDescription()
-                + "\n");
-        textAreaStats.append(Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY, crit, simType, null).getDescription()
-                + "\n");
-        textAreaStats.append(Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY, crit, simType, null).getDescription()
-                + "\n");
-        textAreaStats.append(Formatting.formatNumber(df.getSpearmanCorrelation()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION, crit, simType, null).getDescription()
-                + "\n");
-        textAreaStats.append(Formatting.formatNumber(df.getMaxOrderedSequence()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE, crit, simType, null).getDescription()
-                + "\n");
-        textAreaStats.append(Formatting.formatNumber(df.getAverageFlowCohesion()) + "\t"
-                + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION, crit, simType, null).getDescription()
-                + "\n");
     }
 }

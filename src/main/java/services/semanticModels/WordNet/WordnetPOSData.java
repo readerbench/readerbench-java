@@ -15,6 +15,7 @@
  */
 package services.semanticModels.WordNet;
 
+import services.semanticModels.SimilarityType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;

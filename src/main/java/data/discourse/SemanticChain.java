@@ -24,25 +24,26 @@ import java.util.TreeMap;
 import data.Word;
 import data.lexicalChains.LexicalChain;
 import data.sentiment.SentimentEntity;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
     private static final double SIMILARITY_THRESHOLD = 0.8;
 
-    private transient LSA lsa;
-    private transient LDA lda;
+    private transient Map<SimilarityType, ISemanticModel> semanticModels;
     private List<Word> words;
     private Map<String, Double> termOccurrences;
-    private double[] lsaVector;
-    private double[] ldaProbDistribution;
+    private Map<SimilarityType, double[]> modelVectors;
     private double[] sentenceDistribution;
     private double[] blockDistribution;
     private double[] blockMovingAverage;
@@ -50,10 +51,9 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private transient SentimentEntity chainSentiment;
 
-    public SemanticChain(LexicalChain chain, LSA lsa, LDA lda) {
+    public SemanticChain(LexicalChain chain, List<ISemanticModel> models) {
         words = new LinkedList<>();
-        this.lsa = lsa;
-        this.lda = lda;
+        this.setSemanticModels(models);
         chain.getLinks().stream().forEach((link) -> {
             words.add(link.getWord());
         });
@@ -66,7 +66,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
             return -1;
         }
 
-        double dist = -1;
         // if words have same lemma
         for (Word w1 : chain1.getWords()) {
             for (Word w2 : chain2.getWords()) {
@@ -76,14 +75,18 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
             }
         }
 
-        double distLSA = VectorAlgebra.cosineSimilarity(chain1.getLSAVector(), chain2.getLSAVector());
-        double distLDA = LDA.getSimilarity(chain1.getLDAProbDistribution(), chain2.getLDAProbDistribution());
-
-        if (SemanticCohesion.getAggregatedSemanticMeasure(distLSA, distLDA) >= SIMILARITY_THRESHOLD) {
-            dist = Math.max(dist, distLDA);
+        EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+        for (SimilarityType st : chain1.getSemanticModels().keySet()) {
+            ISemanticModel model = chain1.getSemanticModels().get(st);
+            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st), chain2.getModelVectors().get(st)));
         }
 
-        return dist;
+        double dist = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
+        if (dist >= SIMILARITY_THRESHOLD) {
+            return dist;
+        }
+
+        return -1;
     }
 
     public static SemanticChain merge(SemanticChain chain1, SemanticChain chain2) {
@@ -97,20 +100,21 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     }
 
     public void updateSemanticRepresentation() {
-        if (lsa != null) {
-            lsaVector = new double[LSA.K];
-            words.stream().forEach((word) -> {
-                for (int i = 0; i < LSA.K; i++) {
-                    lsaVector[i] += word.getLSAVector()[i];
-                }
-            });
+        if (modelVectors == null) {
+            modelVectors = new EnumMap<>(SimilarityType.class);
         }
 
-        // determine LDA distribution
-        if (lda != null) {
-            String text = "";
-            text = words.stream().map((word) -> word.getLemma() + " ").reduce(text, String::concat);
-            this.ldaProbDistribution = lda.getProbDistribution(text.trim());
+        for (Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+            double[] vec = new double[e.getValue().getNoDimensions()];
+            words.stream()
+                .map(word -> word.getModelRepresentation(e.getKey()))
+                .filter(Objects::nonNull)
+                .forEach(v -> {
+                for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                    vec[i] += v[i];
+                }
+            });
+            modelVectors.put(e.getKey(), vec);
         }
 
         Map<String, Double> unsortedOccurences = new TreeMap<>();
@@ -132,38 +136,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     public void setWords(List<Word> words) {
         this.words = words;
-    }
-
-    public double[] getLSAVector() {
-        return lsaVector;
-    }
-
-    public void setLSAVector(double[] lsaVector) {
-        this.lsaVector = lsaVector;
-    }
-
-    public double[] getLDAProbDistribution() {
-        return ldaProbDistribution;
-    }
-
-    public void setLDAProbDistribution(double[] ldaProbDistribution) {
-        this.ldaProbDistribution = ldaProbDistribution;
-    }
-
-    public LSA getLSA() {
-        return lsa;
-    }
-
-    public void setLSA(LSA lsa) {
-        this.lsa = lsa;
-    }
-
-    public LDA getLDA() {
-        return lda;
-    }
-
-    public void setLDA(LDA lda) {
-        this.lda = lda;
     }
 
     public int getNoWords() {
@@ -325,5 +297,20 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     @Override
     public int compareTo(SemanticChain o) {
         return (int) (Math.signum(o.getNoWords() - this.getNoWords()));
+    }
+
+    public final void setSemanticModels(List<ISemanticModel> models) {
+        semanticModels = new EnumMap<>(SimilarityType.class);
+        for (ISemanticModel model : models) {
+            semanticModels.put(model.getType(), model);
+        }
+    }
+
+    public Map<SimilarityType, ISemanticModel> getSemanticModels() {
+        return semanticModels;
+    }
+
+    public Map<SimilarityType, double[]> getModelVectors() {
+        return modelVectors;
     }
 }

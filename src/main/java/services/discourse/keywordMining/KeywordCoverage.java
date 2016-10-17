@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.discourse.topicMining;
+package services.discourse.keywordMining;
 
 import org.apache.log4j.Logger;
 
@@ -22,7 +22,7 @@ import data.Word;
 import services.nlp.listOfWords.MapOfWordWeights;
 import services.readingStrategies.PatternMatching;
 
-public class TopicCoverage {
+public class KeywordCoverage {
 
     static Logger logger = Logger.getLogger(PatternMatching.class);
 

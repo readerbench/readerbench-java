@@ -49,7 +49,7 @@ import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import services.commons.Formatting;
 
 public class ParticipantEvaluation {
@@ -174,7 +174,7 @@ public class ParticipantEvaluation {
 	public static void evaluateUsedConcepts(Conversation c) {
 		// determine cumulative effect of top 10 topics (nouns and verbs only)
 		int noSelectedTopics = 0;
-		for (Topic topic : c.getTopics()) {
+		for (Keyword topic : c.getTopics()) {
 			if (topic.getWord().getPOS() == null
 					|| (topic.getWord().getPOS().startsWith("N") || topic.getWord().getPOS().startsWith("V"))) {
 				noSelectedTopics++;

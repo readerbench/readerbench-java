@@ -44,10 +44,10 @@ import org.apache.log4j.Logger;
 
 import data.Block;
 import data.Sentence;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import view.events.LinkMouseListener;
 import view.models.document.DocumentTable;
 import view.models.document.DocumentTableModel;
@@ -367,7 +367,7 @@ public class DocumentView extends JFrame {
 					@Override
 					public void run() {
 						ConceptView view = new ConceptView(null, document,
-								TopicModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+								KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
 										chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
 						view.setVisible(true);
 					}
@@ -448,9 +448,9 @@ public class DocumentView extends JFrame {
 		}
 
 		// add new topics
-		List<Topic> topTopics = TopicModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+		List<Keyword> topTopics = KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
 				chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
-		for (Topic topic : topTopics) {
+		for (Keyword topic : topTopics) {
 			Object[] row = { topic.getWord().getLemma(),
 					Double.valueOf(Formatting.formatNumber(topic.getRelevance())) };
 			modelTopics.addRow(row);

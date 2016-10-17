@@ -16,7 +16,6 @@
 package data.discourse;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -45,11 +44,11 @@ public class WordOverlap {
 
 	public WordOverlap(List<Document> documents) {
 		this.documents = documents;
-		this.documentScores = new HashMap<String, Double>();
-		this.semanticCohesionScores = new HashMap<String, Double>();
-		this.documentOverlapScores = new HashMap<AbstractDocument, Double>();
-		this.documentSemanticScores = new HashMap<AbstractDocument, Double>();
-		this.documentAggregatedScores = new HashMap<AbstractDocument, Double>();
+		this.documentScores = new HashMap<>();
+		this.semanticCohesionScores = new HashMap<>();
+		this.documentOverlapScores = new HashMap<>();
+		this.documentSemanticScores = new HashMap<>();
+		this.documentAggregatedScores = new HashMap<>();
 
 	}
 
@@ -63,10 +62,10 @@ public class WordOverlap {
 
 			// STEP 1 : word overlap distance
 			// for each keyword create a number of occurrence equal to 0
-			HashMap<String, Integer> topicOccurency = new HashMap<String, Integer>();
+			HashMap<String, Integer> topicOccurency = new HashMap<>();
 			List<Word> wordList = ((Document) doc).getInitialTopics();
 			for (Word topic : wordList) {
-				topicOccurency.put(topic.getText(), new Integer(0));
+				topicOccurency.put(topic.getText(), 0);
 			}
 
 			// compute the number of occurrences for each word
@@ -79,7 +78,7 @@ public class WordOverlap {
 						if (!topicOccurency.containsKey(word.getText().toLowerCase()))
 							continue;
 						Integer count = topicOccurency.get(word.getText().toLowerCase());
-						count = new Integer(count + 1);
+						count = count + 1;
 						topicOccurency.put(word.getText().toLowerCase(), count);
 					}
 				}
@@ -134,7 +133,7 @@ public class WordOverlap {
 			CoreMap keywordSentence = keywordDocument.get(SentencesAnnotation.class).get(0);
 
 			Sentence docKeywords = Parsing_EN.getInstance()
-					.processSentence(new Block(null, 0, "", doc.getLSA(), doc.getLDA(), Lang.en), 0, keywordSentence);
+					.processSentence(new Block(null, 0, "", doc.getSemanticModels(), Lang.en), 0, keywordSentence);
 
 			SemanticCohesion semanticCohesion = new SemanticCohesion(docAbstract, docKeywords);
 			double cohesionVal = (float) semanticCohesion.getCohesion();
@@ -156,13 +155,11 @@ public class WordOverlap {
 		}
 
 		// sort the documents based on their score
-		Collections.sort(documents, new Comparator<AbstractDocument>() {
-			public int compare(AbstractDocument d1, AbstractDocument d2) {
-				double score1 = documentScores.get(((Document) d1).getFullDescription());
-				double score2 = documentScores.get(((Document) d2).getFullDescription());
-				return -Double.compare(score1, score2);
-			}
-		});
+		Collections.sort(documents, (AbstractDocument d1, AbstractDocument d2) -> {
+            double score1 = documentScores.get(((Document) d1).getFullDescription());
+            double score2 = documentScores.get(((Document) d2).getFullDescription());
+            return -Double.compare(score1, score2);
+        });
 		// System.out.print(">> ");
 		for (AbstractDocument doc : documents) {
 			Document d = (Document) doc;

@@ -19,29 +19,38 @@ import data.Lang;
 import services.nlp.lemmatizer.StaticLemmatizer;
 
 public class Stemmer {
-	public static String stemWord(String word, Lang lang) {
-		if (lang == null)
-			return word;
-		switch (lang) {
-		case fr:
-			return Stemmer_FR.stemWord(word);
-		case ro:
-			return Stemmer_RO.stemWord(word);
-		case it:
-			return Stemmer_IT.stemWord(word);
-		case es:
-			return Stemmer_ES.stemWord(word);
-		case nl:
-			return Stemmer_NL.stemWord(word);
-		// TODO implement latin stemmer, for now rely on lemmas
-		case la:
-			return StaticLemmatizer.lemmaStatic(word, Lang.la);
-		default:
-			return Stemmer_EN.stemWord(word);
-		}
-	}
 
-	public static void main(String[] args) {
-		System.out.println(stemWord("information", Lang.en));
-	}
+    /**
+     *
+     * @param word
+     * @param lang
+     * @return
+     */
+    public static String stemWord(String word, Lang lang) {
+        String w = word.toLowerCase();
+        if (lang == null) {
+            return w;
+        }
+        switch (lang) {
+            case fr:
+                return Stemmer_FR.stemWord(w);
+            case ro:
+                return Stemmer_RO.stemWord(w);
+            case it:
+                return Stemmer_IT.stemWord(w);
+            case es:
+                return Stemmer_ES.stemWord(w);
+            case nl:
+                return Stemmer_NL.stemWord(w);
+            // TODO implement latin stemmer, for now rely on lemmas
+            case la:
+                return StaticLemmatizer.lemmaStatic(w, Lang.la);
+            default:
+                return Stemmer_EN.stemWord(w);
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(stemWord("information", Lang.en));
+    }
 }

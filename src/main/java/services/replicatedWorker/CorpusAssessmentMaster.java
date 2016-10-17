@@ -45,14 +45,13 @@ import data.Lang;
 
 public class CorpusAssessmentMaster extends Master {
 
-    static final Logger logger = Logger.getLogger(CorpusAssessmentMaster.class);
+    static final Logger LOGGER = Logger.getLogger(CorpusAssessmentMaster.class);
 
     public static final String PATH_TO_LSA = "resources/config/EN/LSA/TASA";
     public static final String PATH_TO_LDA = "resources/config/EN/LDA/TASA";
     public static final Lang PROCESSING_LANGUAGE = Lang.en;
     public static final boolean USE_POS_TAGGING = true;
     public static final boolean COMPUTE_DIALOGISM = true;
-    public static final boolean CLEAN_INPUT = true;
     public static final boolean PROCESS_INPUT = true;
     public static final String PATH_TO_COMPLEXITY_MODEL = null;// "in/corpus_complexity_tasa_en";
     public static final int[] SELECTED_COMPLEXITY_FACTORS = null;
@@ -68,7 +67,7 @@ public class CorpusAssessmentMaster extends Master {
         // load also LSA vector space and LDA model
         // lsa = LSA.loadLSA(PATH_TO_LSA, PROCESSING_LANGUAGE);
         // lda = LDA.loadLDA(PATH_TO_LDA, PROCESSING_LANGUAGE);
-        logger.info("Master analysing all files in " + rootPath);
+        LOGGER.info("Master analysing all files in " + rootPath);
         files = new LinkedList<File>();
 
         FileFilter filter = new FileFilter() {
@@ -126,7 +125,7 @@ public class CorpusAssessmentMaster extends Master {
             synchronized (files) {
                 File f = files.remove(0);
                 TaskMsg tMsg = new TaskMsg(new Object[]{f.getAbsolutePath()}, false);
-                logger.info("Master assigning " + tMsg);
+                LOGGER.info("Master assigning " + tMsg);
                 ObjectMessage msg = sessionTask.get(addr).createObjectMessage(tMsg);
 
                 master.get(addr).send(msg);
@@ -136,7 +135,7 @@ public class CorpusAssessmentMaster extends Master {
             }
         } else {
             TaskMsg tMsg = new TaskMsg(null, true);
-            logger.info("Master ending communication with " + addr);
+            LOGGER.info("Master ending communication with " + addr);
             ObjectMessage msg = sessionTask.get(addr).createObjectMessage(tMsg);
 
             master.get(addr).send(msg);

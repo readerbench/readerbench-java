@@ -9,7 +9,7 @@ import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
 import data.AbstractDocument;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 public class DocumentFlow {
 
@@ -18,7 +18,7 @@ public class DocumentFlow {
 
     public DocumentFlow(AbstractDocument doc, SimilarityType simType, DocFlowCriteria crit) {
 
-        if (doc.getBlocks().size() >= 3 && doc.getBlockDistances() != null) {
+        if (doc.getModelVectors().containsKey(simType) && doc.getBlocks().size() >= 3 && doc.getBlockDistances() != null) {
             this.graph = new double[doc.getBlocks().size()][doc.getBlocks().size()];
             switch (crit) {
                 case MAX_VALUE:

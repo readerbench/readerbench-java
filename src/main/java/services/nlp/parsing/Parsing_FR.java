@@ -25,6 +25,7 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Lang;
 import data.document.Document;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import java.util.ArrayList;
 
 public class Parsing_FR extends Parsing {
 
@@ -46,7 +47,7 @@ public class Parsing_FR extends Parsing {
     public static void main(String[] args) {
         BasicConfigurator.configure();
         AbstractDocumentTemplate docTmp = getDocumentModel();
-        AbstractDocument d = new Document(null, docTmp, null, null, Lang.fr, true, false);
+        AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), Lang.fr, true);
         System.out.println(d);
     }
 

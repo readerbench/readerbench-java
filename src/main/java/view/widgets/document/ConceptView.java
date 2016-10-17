@@ -66,8 +66,11 @@ import data.AbstractDocument;
 import data.Word;
 import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
-import data.discourse.Topic;
-import services.discourse.topicMining.TopicModeling;
+import data.discourse.Keyword;
+import java.util.EnumMap;
+import services.discourse.keywordMining.KeywordModeling;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import view.models.PreviewSketch;
 
 public class ConceptView extends JFrame {
@@ -81,7 +84,7 @@ public class ConceptView extends JFrame {
     private static final int MAX_SIZE_INFERRED_CONCEPT = 20;
 
     private AbstractDocument doc;
-    private List<Topic> topics;
+    private List<Keyword> topics;
     private JSlider sliderThreshold;
     private JSlider sliderInferredConcepts;
     private JPanel panelGraph;
@@ -91,7 +94,7 @@ public class ConceptView extends JFrame {
     private JTextField txtInferredConcepts;
     private JTextField txtTopics;
 
-    public ConceptView(Participant p, AbstractDocument d, List<Topic> topics) {
+    public ConceptView(Participant p, AbstractDocument d, List<Keyword> topics) {
         if (p != null && p.getName().length() > 0) {
             super.setTitle("ReaderBench - Visualization of " + p.getName() + "'s network of concepts");
         } else {
@@ -107,7 +110,7 @@ public class ConceptView extends JFrame {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         super.setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
 
-        TopicModeling.determineInferredConcepts(doc, topics, 0.7);
+        KeywordModeling.determineInferredConcepts(doc, topics, 0.7);
 
         generateLayout();
         generateGraph();
@@ -133,10 +136,8 @@ public class ConceptView extends JFrame {
 
         checkBoxNoun = new JCheckBox("Nouns");
         checkBoxNoun.setBackground(Color.WHITE);
-        checkBoxNoun.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                generateGraph();
-            }
+        checkBoxNoun.addActionListener((ActionEvent e) -> {
+            generateGraph();
         });
         checkBoxNoun.setSelected(true);
 
@@ -280,28 +281,20 @@ public class ConceptView extends JFrame {
         // build nodes
         Map<Word, Node> nodes = new TreeMap<Word, Node>();
 
-        List<Topic> subListInferredConcepts = TopicModeling.getSublist(doc.getInferredConcepts(),
+        List<Keyword> subListInferredConcepts = KeywordModeling.getSublist(doc.getInferredConcepts(),
                 sliderInferredConcepts.getValue() * 10, checkBoxNoun.isSelected(), checkBoxVerb.isSelected());
 
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             visibleConcepts.put(t.getWord(), false);
         }
-        for (Topic t : subListInferredConcepts) {
+        for (Keyword t : subListInferredConcepts) {
             visibleConcepts.put(t.getWord(), false);
         }
 
         // determine similarities
         for (Word w1 : visibleConcepts.keySet()) {
             for (Word w2 : visibleConcepts.keySet()) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-                if (d.getLSA() != null) {
-                    lsaSim = d.getLSA().getSimilarity(w1, w2);
-                }
-                if (d.getLDA() != null) {
-                    ldaSim = d.getLDA().getSimilarity(w1, w2);
-                }
-                double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                 if (!w1.equals(w2) && sim >= threshold) {
                     visibleConcepts.put(w1, true);
                     visibleConcepts.put(w2, true);
@@ -311,14 +304,14 @@ public class ConceptView extends JFrame {
 
         // determine optimal sizes
         double min = Double.MAX_VALUE, max = Double.MIN_VALUE;
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             if (visibleConcepts.get(t.getWord()) && t.getRelevance() >= 0) {
                 min = Math.min(min, Math.log(1 + t.getRelevance()));
                 max = Math.max(max, Math.log(1 + t.getRelevance()));
             }
         }
 
-        for (Topic t : topics) {
+        for (Keyword t : topics) {
             if (visibleConcepts.get(t.getWord())) {
                 Node n = graphModel.factory().newNode(t.getWord().getLemma());
                 n.setLabel(t.getWord().getLemma());
@@ -340,14 +333,14 @@ public class ConceptView extends JFrame {
         min = Double.MAX_VALUE;
         max = Double.MIN_VALUE;
 
-        for (Topic t : subListInferredConcepts) {
+        for (Keyword t : subListInferredConcepts) {
             if (visibleConcepts.get(t.getWord()) && t.getRelevance() >= 0) {
                 min = Math.min(min, Math.log(1 + t.getRelevance()));
                 max = Math.max(max, Math.log(1 + t.getRelevance()));
             }
         }
 
-        for (Topic t : subListInferredConcepts) {
+        for (Keyword t : subListInferredConcepts) {
             if (visibleConcepts.get(t.getWord()) && !nodes.containsKey(t.getWord())) {
                 Node n = graphModel.factory().newNode(t.getWord().getLemma());
                 n.setLabel(t.getWord().getLemma());
@@ -370,15 +363,7 @@ public class ConceptView extends JFrame {
         for (Word w1 : visibleConcepts.keySet()) {
             for (Word w2 : visibleConcepts.keySet()) {
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
-                    double lsaSim = 0;
-                    double ldaSim = 0;
-                    if (d.getLSA() != null) {
-                        lsaSim = d.getLSA().getSimilarity(w1, w2);
-                    }
-                    if (d.getLDA() != null) {
-                        ldaSim = d.getLDA().getSimilarity(w1, w2);
-                    }
-                    double sim = SemanticCohesion.getAggregatedSemanticMeasure(lsaSim, ldaSim);
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
                         Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 1 - sim, false);
                         e.setLabel(sim + "");
@@ -390,7 +375,7 @@ public class ConceptView extends JFrame {
 
         textAreaInferredConcepts.setText("");
 
-        for (Topic t : subListInferredConcepts) {
+        for (Keyword t : subListInferredConcepts) {
             if (visibleConcepts.get(t.getWord())) {
                 textAreaInferredConcepts.append(t.getWord().getLemma() + " ");
             }

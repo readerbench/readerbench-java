@@ -22,21 +22,31 @@ import data.AnalysisElement;
 import data.Word;
 import data.Lang;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 public interface ISemanticModel {
-	public double getSimilarity(Word w1, Word w2);
 
-	public double getSimilarity(AnalysisElement e1, AnalysisElement e2);
+    public double getSimilarity(AnalysisElement e1, AnalysisElement e2);
 
-	public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold);
+    public double getSimilarity(double[] v1, double[] v2);
 
-	public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold);
+    public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold);
 
-	public Set<Word> getWordSet();
-    
-    public Map<Word, double[]> getWordRepresentation();
+    public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold);
 
-	public String getPath();
+    public Set<Word> getWordSet();
 
-	public Lang getLanguage();
+    public Map<Word, double[]> getWordRepresentations();
+
+    public double[] getWordRepresentation(Word w);
+
+    public String getPath();
+
+    public Lang getLanguage();
+
+    public SimilarityType getType();
+
+    public BiFunction<double[], double[], Double> getSimilarityFuction();
+
+    public int getNoDimensions();
 }

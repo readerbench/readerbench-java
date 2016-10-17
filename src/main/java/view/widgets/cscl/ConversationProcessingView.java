@@ -16,9 +16,7 @@
 package view.widgets.cscl;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
@@ -28,13 +26,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -46,13 +42,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.Painter;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
@@ -60,36 +52,36 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.Lang;
 import data.AbstractDocument.SaveType;
-import java.awt.event.ActionListener;
+import java.util.EnumMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
+import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
-import view.widgets.complexity.ComplexityIndicesView;
 
 public class ConversationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
     static Logger logger = Logger.getLogger(ConversationProcessingView.class);
 
-    private JLabel lblLanguage;
-    private JComboBox<String> comboBoxLanguage;
-    private JButton btnRemoveDocument = null;
-    private JButton btnAddDocument = null;
-    private JButton btnViewDocument = null;
-    private JButton btnAddSerializedDocument = null;
-    private JTable docTable;
-    private ConversationManagementTableModel docTableModel = null;
+    private final JLabel lblLanguage;
+    private final JComboBox<String> comboBoxLanguage;
+    private final JButton btnRemoveDocument;
+    private final JButton btnAddDocument;
+    private final JButton btnViewDocument;
+    private final JButton btnAddSerializedDocument;
+    private final JTable docTable;
+    private final ConversationManagementTableModel docTableModel;
     private final TableRowSorter<ConversationManagementTableModel> docSorter;
     private final JScrollPane scrollPane;
-    private JDesktopPane desktopPane;
+    private final JDesktopPane desktopPane;
     private static File lastDirectory = null;
 
     private static final List<Conversation> LOADED_CONVERSATIONS = new ArrayList<>();
@@ -119,18 +111,19 @@ public class ConversationProcessingView extends JInternalFrame {
             if (isSerialized) {
                 d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
-                d = Conversation.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
+                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
+                d = Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
                         ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, null, null, true,
                         SaveType.SERIALIZED_AND_CSV_EXPORT);
             }
             if (d == null) {
-                JOptionPane.showMessageDialog(desktopPane, "Please load an appropriate conversation input file!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
             } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
                 addConversation((Conversation) d);
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         }
 
@@ -273,15 +266,17 @@ public class ConversationProcessingView extends JInternalFrame {
      * Create the frame.
      */
     public ConversationProcessingView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setResizable(true);
-        setClosable(true);
-        setMaximizable(true);
-        setIconifiable(true);
-        setBounds(20, 20, 950, 350);
-        queryArticleName = "";
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setResizable(true);
+        super.setClosable(true);
+        super.setMaximizable(true);
+        super.setIconifiable(true);
+        super.setBounds(20, 20, 950, 350);
+        desktopPane = new JDesktopPane();
+        desktopPane.setBackground(Color.WHITE);
 
+        queryArticleName = "";
         lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
         lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
         lblLanguage.setForeground(Color.BLACK);
@@ -300,13 +295,9 @@ public class ConversationProcessingView extends JInternalFrame {
                         ConversationProcessingView.this);
                 frame.setVisible(true);
                 desktopPane.add(frame);
-                try {
-                    frame.setSelected(true);
-                } catch (java.beans.PropertyVetoException exception) {
-                    exception.printStackTrace();
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
+                frame.setSelected(true);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
 
@@ -338,8 +329,7 @@ public class ConversationProcessingView extends JInternalFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(
-                        file.getPath(), null, null, false, true);
+                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, true);
                 task.execute();
             }
         });
@@ -371,25 +361,6 @@ public class ConversationProcessingView extends JInternalFrame {
         scrollPane = new JScrollPane();
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setViewportView(docTable);
-
-        desktopPane = new JDesktopPane() {
-            private static final long serialVersionUID = 8453433109734630086L;
-
-            @Override
-            public void updateUI() {
-                if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
-                    UIDefaults map = new UIDefaults();
-                    Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
-                        g.setColor(Color.WHITE);
-                        g.fillRect(0, 0, w, h);
-                    };
-                    map.put("DesktopPane[Enabled].backgroundPainter", painter);
-                    putClientProperty("Nimbus.Overrides", map);
-                }
-                super.updateUI();
-            }
-        };
-        desktopPane.setBackground(Color.WHITE);
 
         JPanel panelSingleDoc = new JPanel();
         panelSingleDoc.setBackground(Color.WHITE);
@@ -493,13 +464,15 @@ public class ConversationProcessingView extends JInternalFrame {
         panelSingleDoc.setLayout(gl_panelSingleDoc);
         btnRemoveDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
-                int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-                Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
-                LOADED_CONVERSATIONS.remove(toRemove);
-                docTableModel.removeRow(modelRow);
+                int[] rows = docTable.getSelectedRows();
+                for (int i = 0; i < rows.length; i++) {
+                    int modelRow = docTable.convertRowIndexToModel(rows[i] - i);
+                    Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
+                    LOADED_CONVERSATIONS.remove(toRemove);
+                    docTableModel.removeRow(modelRow);
+                }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "Please load at least an appropriate conversation!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         desktopPane.setLayout(gl_desktopPane);
@@ -515,23 +488,33 @@ public class ConversationProcessingView extends JInternalFrame {
     public void addConversation(Conversation c) {
         if (docTableModel != null) {
             synchronized (LOADED_CONVERSATIONS) {
+                //remove already existent copy
+                for (int i = 0; i < LOADED_CONVERSATIONS.size(); i++) {
+                    int modelRow = docTable.convertRowIndexToModel(i);
+                    Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
+                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())) {
+                        LOADED_CONVERSATIONS.remove(toRemove);
+                        docTableModel.removeRow(modelRow);
+                    }
+                }
+
                 // add rows as loaded documents
-                Vector<Object> dataRow = new Vector<>();
+                List<Object> dataRow = new ArrayList<>();
 
                 dataRow.add(c.getTitleText());
 
-                if (c.getLSA() != null) {
-                    dataRow.add(c.getLSA().getPath());
+                if (c.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
                 } else {
                     dataRow.add("");
                 }
-                if (c.getLDA() != null) {
-                    dataRow.add(c.getLDA().getPath());
+                if (c.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
                 } else {
                     dataRow.add("");
                 }
 
-                docTableModel.addRow(dataRow);
+                docTableModel.addRow(dataRow.toArray());
                 LOADED_CONVERSATIONS.add(c);
             }
 
@@ -558,19 +541,19 @@ public class ConversationProcessingView extends JInternalFrame {
                 synchronized (LOADED_CONVERSATIONS) {
                     for (Conversation c : LOADED_CONVERSATIONS) {
                         // add rows as loaded documents
-                        Vector<Object> dataRow = new Vector<>();
+                        List<Object> dataRow = new ArrayList<>();
                         dataRow.add(c.getTitleText());
-                        if (c.getLSA() != null) {
-                            dataRow.add(c.getLSA().getPath());
+                        if (c.getSemanticModel(SimilarityType.LSA) != null) {
+                            dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
                         } else {
                             dataRow.add("");
                         }
-                        if (c.getLDA() != null) {
-                            dataRow.add(c.getLDA().getPath());
+                        if (c.getSemanticModel(SimilarityType.LDA) != null) {
+                            dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
                         } else {
                             dataRow.add("");
                         }
-                        docTableModel.addRow(dataRow);
+                        docTableModel.addRow(dataRow.toArray());
                     }
 
                     if (LOADED_CONVERSATIONS.size() > 0) {

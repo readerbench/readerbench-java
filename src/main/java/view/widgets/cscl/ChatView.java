@@ -50,9 +50,9 @@ import data.Block;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 import services.commons.Formatting;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import view.models.document.ChatTable;
 import view.models.document.DocumentTableModel;
 import view.models.document.TopicsTableModel;
@@ -79,7 +79,7 @@ public class ChatView extends JFrame {
     private DefaultTableModel modelContent;
     private JTable tableContent;
     private JComboBox<String> comboBoxCategory;
-    private List<Topic> topTopics;
+    private List<Keyword> topTopics;
 
     public ChatView(Conversation documentToDisplay) {
         super();
@@ -349,11 +349,11 @@ public class ChatView extends JFrame {
                 ConceptView view = null;
                 if (index == 0) {
                     view = new ConceptView(null, chat,
-                            TopicModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
+                            KeywordModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
                                     chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
                 } else {
                     view = new ConceptView(ls.get(index - 1), chat,
-                            TopicModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
+                            KeywordModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
                                     chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
                 }
                 view.setVisible(true);
@@ -458,16 +458,16 @@ public class ChatView extends JFrame {
         // add new topics
         // discussion topics
         if (index == 0) {
-            topTopics = TopicModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
+            topTopics = KeywordModeling.getSublist(chat.getTopics(), sliderTopics.getValue() * 5,
                     chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
-            for (Topic topic : topTopics) {
+            for (Keyword topic : topTopics) {
                 Object[] row = {topic.getWord().getLemma(), Formatting.formatNumber(topic.getRelevance())};
                 modelTopics.addRow(row);
             }
         } else {
-            topTopics = TopicModeling.getSublist(ls.get(index - 1).getInterventions().getTopics(),
+            topTopics = KeywordModeling.getSublist(ls.get(index - 1).getInterventions().getTopics(),
                     sliderTopics.getValue() * 5, chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
-            for (Topic topic : topTopics) {
+            for (Keyword topic : topTopics) {
                 Object[] row = {topic.getWord().getLemma(), (int) Math.round(topic.getRelevance())};
                 modelTopics.addRow(row);
             }

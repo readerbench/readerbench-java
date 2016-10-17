@@ -49,13 +49,13 @@ import javax.xml.transform.TransformerException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
-import services.commons.TextPreprocessing;
 import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  * A generalization of Document in which the block list for meta-cognitions
@@ -79,18 +79,16 @@ public class Metacognition extends Document {
     private int comprehensionClass;
     private List<String> tutors = new LinkedList<>();
 
-    public Metacognition(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+    public Metacognition(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging) {
         // build the corresponding structure of verbalizations
-        super(path, docTmp, initialReadingMaterial.getLSA(),
-                initialReadingMaterial.getLDA(), initialReadingMaterial
-                .getLanguage(), usePOSTagging, cleanInput);
+        super(path, docTmp, initialReadingMaterial.getSemanticModels(), initialReadingMaterial.getLanguage(), usePOSTagging);
         this.referredDoc = initialReadingMaterial;
         automatedReadingStrategies = new ArrayList<>();
         annotatedReadingStrategies = new ArrayList<>();
         avgCohesion = new ArrayList<>();
     }
 
-    public static Metacognition loadVerbalization(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging, boolean cleanInput) {
+    public static Metacognition loadVerbalization(String pathToDoc, Document initialReadingMaterial, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -108,8 +106,7 @@ public class Metacognition extends Document {
             AbstractDocumentTemplate tmp = extractDocumentContent(doc, "verbalization");
 
             LOGGER.info("Building internal representation ...");
-            Metacognition meta = new Metacognition(pathToDoc, tmp,
-                    initialReadingMaterial, usePOSTagging, cleanInput);
+            Metacognition meta = new Metacognition(pathToDoc, tmp, initialReadingMaterial, usePOSTagging);
             extractDocumentDescriptors(doc, meta);
 
             // add corresponding links from verbalizations to initial document
@@ -117,15 +114,9 @@ public class Metacognition extends Document {
             if (nl != null && nl.getLength() > 0) {
                 for (int i = 0; i < nl.getLength(); i++) {
                     meta.getAnnotatedRS().add(new EnumMap<>(ReadingStrategyType.class));
-                    Integer after = Integer.valueOf(nl.item(i).getAttributes()
-                            .getNamedItem("after_p").getNodeValue());
-                    Integer id = Integer.valueOf(nl.item(i).getAttributes()
-                            .getNamedItem("id").getNodeValue());
-                    meta.getBlocks()
-                            .get(id)
-                            .setRefBlock(
-                                    initialReadingMaterial.getBlocks().get(
-                                            after));
+                    Integer after = Integer.valueOf(nl.item(i).getAttributes().getNamedItem("after_p").getNodeValue());
+                    Integer id = Integer.valueOf(nl.item(i).getAttributes().getNamedItem("id").getNodeValue());
+                    meta.getBlocks().get(id).setRefBlock(initialReadingMaterial.getBlocks().get(after));
                     // add annotated scores
                     try {
                         meta.getAnnotatedRS().get(id).put(ReadingStrategyType.META_COGNITION, Integer.valueOf(nl.item(i).getAttributes().getNamedItem("no_control").getNodeValue()));
@@ -153,9 +144,7 @@ public class Metacognition extends Document {
     public void exportXML(String path) {
         try {
             org.w3c.dom.Document dom = generateDOMforXMLexport(path);
-
             Element docEl = writeDocumentDescriptors(dom);
-
             Element bodyEl = dom.createElement("self_explanations_body");
             docEl.appendChild(bodyEl);
 
@@ -374,9 +363,11 @@ public class Metacognition extends Document {
                 out.write("," + author);
             }
             out.write("\n");
-            out.write("LSA space:," + getLSA().getPath() + "\n");
-            out.write("LDA model:," + getLDA().getPath() + "\n");
-
+            for (ISemanticModel model : getSemanticModels()) {
+                out.write(model.getType() + " space:," + model.getPath() + "\n");
+            
+            }
+            
             out.write("Text");
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
                 out.write("," + rs.getName());
@@ -426,36 +417,15 @@ public class Metacognition extends Document {
         }
     }
 
-    public void computeAll(boolean computeDialogism, boolean saveOutput) {
+    @Override
+    public void computeAll(boolean computeDialogism) {
         VerbalizationAssessment.detRefBlockSimilarities(this);
         ReadingStrategies.detReadingStrategies(this);
 
         computeDiscourseAnalysis(computeDialogism);
         ComplexityIndices.computeComplexityFactors(this);
         determineCohesion();
-
-        if (saveOutput) {
-            saveSerializedDocument();
-        }
         LOGGER.info("Finished processing self-explanations ...");
-    }
-
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        // save serialized object - only path for LSA / LDA
-        stream.defaultWriteObject();
-        stream.writeObject(this.getLSA().getPath());
-        stream.writeObject(this.getLDA().getPath());
-    }
-
-    private void readObject(ObjectInputStream stream) throws IOException,
-            ClassNotFoundException {
-        // load serialized object - and rebuild LSA / LDA
-        stream.defaultReadObject();
-        LSA lsa = LSA.loadLSA((String) stream.readObject(), this.getLanguage());
-        LDA lda = LDA.loadLDA((String) stream.readObject(), this.getLanguage());
-        // rebuild LSA / LDA
-        rebuildSemanticSpaces(lsa, lda);
-        referredDoc.rebuildSemanticSpaces(lsa, lda);
     }
 
     //global count of reading strategies given as input argument

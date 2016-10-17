@@ -30,9 +30,10 @@ import org.apache.log4j.BasicConfigurator;
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class ChapouRougeTest {
@@ -53,8 +54,8 @@ public class ChapouRougeTest {
         File folder = new File(path);
         for (File f : folder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
             LOGGER.info("Processing file " + f.getAbsolutePath() + " ...");
-            Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true, true);
-            summary.computeAll(true, false);
+            Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true);
+            summary.computeAll(true);
             loadedSummaries.add(summary);
         }
 
@@ -97,8 +98,11 @@ public class ChapouRougeTest {
         String pathToOriginalFile = "resources/in/Philippe/chaprou/chaprou-original.xml";
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", lang);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", lang);
-
-        Document chaprouge = Document.load(new File(pathToOriginalFile), lsa, lda, lang, true, true);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(lsa);
+        models.add(lda);
+        
+        Document chaprouge = Document.load(new File(pathToOriginalFile), models, lang, true);
         ChapouRougeTest crt = new ChapouRougeTest("resources/in/Philippe/chaprou/pretest", chaprouge);
         crt.process();
 

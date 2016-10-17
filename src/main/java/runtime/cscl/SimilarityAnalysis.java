@@ -15,7 +15,6 @@
  */
 package runtime.cscl;
 
-import data.AbstractDocument.SaveType;
 import data.Lang;
 import data.Word;
 import data.cscl.Conversation;
@@ -27,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +40,7 @@ import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
 public class SimilarityAnalysis {
@@ -348,8 +348,12 @@ public class SimilarityAnalysis {
                     }
 
                     logger.info("Processing chat " + filePath.getFileName());
-                    Conversation c = Conversation.load(filePathString, pathToLSA, pathToLDA, lang, usePOSTagging, true);
-                    c.computeAll(computeDialogism, null, null, SaveType.NONE);
+                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                    modelPaths.put(SimilarityType.LSA, pathToLSA);
+                    modelPaths.put(SimilarityType.LDA, pathToLDA);
+                    
+                    Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
+                    c.computeAll(computeDialogism);
 
                     Utterance firstUtt = null, secondUtt = null;
                     for (int i = 1; i < c.getBlocks().size(); i++) {

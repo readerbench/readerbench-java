@@ -29,59 +29,57 @@ import webService.result.ResultTopic;
 
 public class ParticipantInteraction {
 
-	public static ResultTopic buildParticipantGraph(Conversation c) {
-		List<Participant> participants = new ArrayList<Participant>();
-		participants.addAll(c.getParticipants());
-		c.computeAll(true, null, null, SaveType.NONE);
-		double[][] participantContributions = c.getParticipantContributions();
+    public static ResultTopic buildParticipantGraph(Conversation c) {
+        List<Participant> participants = new ArrayList<>();
+        participants.addAll(c.getParticipants());
+        c.computeAll(true);
+        double[][] participantContributions = c.getParticipantContributions();
 
-		DecimalFormat formatter = new DecimalFormat("#.##");
+        DecimalFormat formatter = new DecimalFormat("#.##");
 
-		List<ResultNode> nodes = new ArrayList<ResultNode>();
-		List<ResultEdge> links = new ArrayList<ResultEdge>();
+        List<ResultNode> nodes = new ArrayList<>();
+        List<ResultEdge> links = new ArrayList<>();
 
-		// Node[] participantNodes = new Node[participants.size()];
+        // Node[] participantNodes = new Node[participants.size()];
+        // Set<String> namesToIgnore = new TreeSet<String>(Arrays.asList(new
+        // String[] { "2093911", "1516180", "90343" }));
+        // build all nodes
+        for (int i = 0; i < participants.size(); i++) {
+            // if (!namesToIgnore.contains(participants.get(i).getName())) {
+            // build block element
+            int in = 0;
+            for (int j = 0; j < participants.size(); j++) {
+                if (participantContributions[j][i] != 0.0) {
+                    in += participantContributions[j][i];
+                }
+            }
+            nodes.add(new ResultNode(i, participants.get(i).getName(), Formatting.formatNumber(in), 1));
+        }
 
-		// Set<String> namesToIgnore = new TreeSet<String>(Arrays.asList(new
-		// String[] { "2093911", "1516180", "90343" }));
+        // determine max value
+        double maxVal = Double.MIN_VALUE;
+        for (int i = 0; i < participants.size(); i++) {
+            for (int j = 0; j < participants.size(); j++) {
+                // if (!namesToIgnore.contains(participants.get(i).getName())
+                // && !namesToIgnore.contains(participants.get(j).getName())) {
+                maxVal = Math.max(maxVal, participantContributions[i][j]);
+                // }
+            }
+        }
 
-		// build all nodes
-		for (int i = 0; i < participants.size(); i++) {
-			// if (!namesToIgnore.contains(participants.get(i).getName())) {
-			// build block element
-			int in = 0;
-			for (int j = 0; j < participants.size(); j++) {
-				if (participantContributions[j][i] != 0.0)
-					in += participantContributions[j][i];
-			}
-			nodes.add(new ResultNode(i, participants.get(i).getName(), Formatting.formatNumber(in), 1));
-		}
+        for (int i = 0; i < participants.size(); i++) {
+            for (int j = 0; j < participants.size(); j++) {
+                if (participantContributions[i][j] > 0 // && !namesToIgnore.contains(participants.get(i).getName())
+                        // && !namesToIgnore.contains(participants.get(j).getName())
+                        ) {
+                    links.add(new ResultEdge(formatter.format(participantContributions[i][j]), i, j,
+                            (float) 10 * (participantContributions[i][j] / maxVal)));
+                }
+            }
+        }
 
-		// determine max value
-		double maxVal = Double.MIN_VALUE;
-		for (int i = 0; i < participants.size(); i++) {
-			for (int j = 0; j < participants.size(); j++) {
-				// if (!namesToIgnore.contains(participants.get(i).getName())
-				// && !namesToIgnore.contains(participants.get(j).getName())) {
-				maxVal = Math.max(maxVal, participantContributions[i][j]);
-				// }
-			}
-		}
+        return new ResultTopic(nodes, links);
 
-		for (int i = 0; i < participants.size(); i++) {
-			for (int j = 0; j < participants.size(); j++) {
-				if (participantContributions[i][j] > 0
-				// && !namesToIgnore.contains(participants.get(i).getName())
-				// && !namesToIgnore.contains(participants.get(j).getName())
-				) {
-					links.add(new ResultEdge(formatter.format(participantContributions[i][j]), i, j,
-							(float) 10 * (participantContributions[i][j] / maxVal)));
-				}
-			}
-		}
-
-		return new ResultTopic(nodes, links);
-
-	}
+    }
 
 }

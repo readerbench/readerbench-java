@@ -16,7 +16,6 @@
 package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
-import data.Block;
 import data.Sentence;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;

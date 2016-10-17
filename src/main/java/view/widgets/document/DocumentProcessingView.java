@@ -16,12 +16,9 @@
 package view.widgets.document;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
@@ -29,13 +26,11 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -48,13 +43,9 @@ import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.Painter;
 import javax.swing.RowFilter;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
@@ -62,7 +53,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import data.AbstractDocument;
@@ -70,7 +60,10 @@ import data.cscl.Conversation;
 import data.document.Document;
 import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.util.EnumMap;
+import java.util.Map;
 import org.openide.util.Exceptions;
+import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
@@ -83,32 +76,32 @@ public class DocumentProcessingView extends JInternalFrame {
 
     private final JLabel lblLanguage;
     private final JComboBox<String> comboBoxLanguage;
-    private JButton btnRemoveDocument = null;
-    private JButton btnAddDocument = null;
-    private JButton btnViewDocument = null;
-    private JButton btnAddSerializedDocument = null;
-    private JTable docTable;
-    private DocumentManagementTableModel docTableModel = null;
-    private TableRowSorter<DocumentManagementTableModel> docSorter;
-    private JScrollPane scrollPane;
-    private JDesktopPane desktopPane;
+    private final JButton btnRemoveDocument;
+    private final JButton btnAddDocument;
+    private final JButton btnViewDocument;
+    private final JButton btnAddSerializedDocument;
+    private final JTable docTable;
+    private final DocumentManagementTableModel docTableModel;
+    private final TableRowSorter<DocumentManagementTableModel> docSorter;
+    private final JScrollPane scrollPane;
+    private final JDesktopPane desktopPane;
     private static File lastDirectory = null;
 
     private static final List<Document> LOADED_DOCUMENTS = new ArrayList<>();
     private CustomTextField articleTextField;
     private CustomTextField authorsTextField;
-    private JButton btnViewSimilarDocs;
+    private final JButton btnViewSimilarDocs;
     private String queryArticleName;
     private String queryAuthorName;
 
     public class DocumentProcessingTask extends SwingWorker<Void, Void> {
 
-        private String pathToDoc;
-        private String pathToLSA;
-        private String pathToLDA;
-        private boolean computeDialogism;
-        private boolean usePOSTagging;
-        private boolean isSerialized;
+        private final String pathToDoc;
+        private final String pathToLSA;
+        private final String pathToLDA;
+        private final boolean computeDialogism;
+        private final boolean usePOSTagging;
+        private final boolean isSerialized;
 
         public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
                 boolean computeDialogism, boolean isSerialized) {
@@ -126,18 +119,19 @@ public class DocumentProcessingView extends JInternalFrame {
             if (isSerialized) {
                 d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
-                d = AbstractDocument.loadGenericDocument(pathToIndividualFile, pathToLSA, pathToLDA,
+                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
+                d = AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
                         ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
                         SaveType.SERIALIZED_AND_CSV_EXPORT);
             }
             if (d == null) {
-                JOptionPane.showMessageDialog(desktopPane, "Please load a document input file!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate document XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
             } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
                 addDocument((Document) d);
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded document!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         }
 
@@ -280,13 +274,16 @@ public class DocumentProcessingView extends JInternalFrame {
      * Create the frame.
      */
     public DocumentProcessingView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Document Processing"));
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setResizable(true);
-        setClosable(true);
-        setMaximizable(true);
-        setIconifiable(true);
-        setBounds(20, 20, 840, 450);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Document Processing"));
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setResizable(true);
+        super.setClosable(true);
+        super.setMaximizable(true);
+        super.setIconifiable(true);
+        super.setBounds(20, 20, 840, 450);
+        desktopPane = new JDesktopPane();
+        desktopPane.setBackground(Color.WHITE);
+
         queryAuthorName = "";
         queryArticleName = "";
 
@@ -304,17 +301,12 @@ public class DocumentProcessingView extends JInternalFrame {
         btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add document(s)"));
         btnAddDocument.addActionListener((ActionEvent e) -> {
             try {
-                JInternalFrame frame = new AddDocumentView(ReaderBenchView.RUNTIME_LANGUAGE,
-                        DocumentProcessingView.this);
+                JInternalFrame frame = new AddDocumentView(ReaderBenchView.RUNTIME_LANGUAGE, DocumentProcessingView.this);
                 frame.setVisible(true);
                 desktopPane.add(frame);
-                try {
-                    frame.setSelected(true);
-                } catch (java.beans.PropertyVetoException exception) {
-                    exception.printStackTrace();
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
+                frame.setSelected(true);
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
 
@@ -346,8 +338,7 @@ public class DocumentProcessingView extends JInternalFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(
-                        file.getPath(), null, null, false, false, true);
+                DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, false, true);
                 task.execute();
             }
         });
@@ -379,28 +370,6 @@ public class DocumentProcessingView extends JInternalFrame {
         scrollPane = new JScrollPane();
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setViewportView(docTable);
-
-        desktopPane = new JDesktopPane() {
-            private static final long serialVersionUID = 8453433109734630086L;
-
-            @Override
-            public void updateUI() {
-                if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
-                    UIDefaults map = new UIDefaults();
-                    Painter<JComponent> painter = new Painter<JComponent>() {
-                        @Override
-                        public void paint(Graphics2D g, JComponent c, int w, int h) {
-                            g.setColor(Color.WHITE);
-                            g.fillRect(0, 0, w, h);
-                        }
-                    };
-                    map.put("DesktopPane[Enabled].backgroundPainter", painter);
-                    putClientProperty("Nimbus.Overrides", map);
-                }
-                super.updateUI();
-            }
-        };
-        desktopPane.setBackground(Color.WHITE);
 
         JPanel panelSingleDoc = new JPanel();
         panelSingleDoc.setBackground(Color.WHITE);
@@ -530,23 +499,11 @@ public class DocumentProcessingView extends JInternalFrame {
         });
 
         btnViewSimilarDocs = new JButton(LocalizationUtils.getTranslation("View similar docs"));
-        btnViewSimilarDocs.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (docTable.getSelectedRow() != -1) {
-                    AbstractDocument d = LOADED_DOCUMENTS.get(docTable.getSelectedRow());
-                    if (d instanceof Document) {
-                        PaperSimilarityView view = new PaperSimilarityView(LOADED_DOCUMENTS, (Document) d);
-                        view.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(desktopPane,
-                                "Please select a document (not a conversation) from the list!", "Information",
-                                JOptionPane.INFORMATION_MESSAGE);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(desktopPane,
-                            "Please select a document (not a conversation) from the list!", "Information",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+        btnViewSimilarDocs.addActionListener((ActionEvent e) -> {
+            if (docTable.getSelectedRow() != -1) {
+                Document d = LOADED_DOCUMENTS.get(docTable.getSelectedRow());
+                PaperSimilarityView view = new PaperSimilarityView(LOADED_DOCUMENTS, (Document) d);
+                view.setVisible(true);
             }
         });
         btnViewSimilarDocs.setEnabled(false);
@@ -570,13 +527,15 @@ public class DocumentProcessingView extends JInternalFrame {
         panelSingleDoc.setLayout(gl_panelSingleDoc);
         btnRemoveDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
-                int modelRow = docTable.convertRowIndexToModel(docTable.getSelectedRow());
-                Document toRemove = LOADED_DOCUMENTS.get(modelRow);
-                LOADED_DOCUMENTS.remove(toRemove);
-                docTableModel.removeRow(modelRow);
+                int[] rows = docTable.getSelectedRows();
+                for (int i = 0; i < rows.length; i++) {
+                    int modelRow = docTable.convertRowIndexToModel(rows[i] - i);
+                    Document toRemove = LOADED_DOCUMENTS.get(modelRow);
+                    LOADED_DOCUMENTS.remove(toRemove);
+                    docTableModel.removeRow(modelRow);
+                }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Please load appropriate documents!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, "Please load at least an appropriate document!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         desktopPane.setLayout(gl_desktopPane);
@@ -598,26 +557,36 @@ public class DocumentProcessingView extends JInternalFrame {
         return out;
     }
 
-    public void addDocument(Document d) {
+    private void addDocument(Document d) {
         if (docTableModel != null) {
             synchronized (LOADED_DOCUMENTS) {
-                // add rows as loaded documents
-                Vector<Object> dataRow = new Vector<Object>();
+                //remove already existent copy
+                for (int i = 0; i < LOADED_DOCUMENTS.size(); i++) {
+                    int modelRow = docTable.convertRowIndexToModel(i);
+                    Document toRemove = LOADED_DOCUMENTS.get(modelRow);
+                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())) {
+                        LOADED_DOCUMENTS.remove(toRemove);
+                        docTableModel.removeRow(modelRow);
+                    }
+                }
+
+                // add row with loaded document
+                List<Object> dataRow = new ArrayList<>();
 
                 dataRow.add(d.getTitleText());
                 dataRow.add(getStringFromList(((Document) d).getAuthors()));
-                if (d.getLSA() != null) {
-                    dataRow.add(d.getLSA().getPath());
+                if (d.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
                 } else {
                     dataRow.add("");
                 }
-                if (d.getLDA() != null) {
-                    dataRow.add(d.getLDA().getPath());
+                if (d.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
                 } else {
                     dataRow.add("");
                 }
 
-                docTableModel.addRow(dataRow);
+                docTableModel.addRow(dataRow.toArray());
                 LOADED_DOCUMENTS.add(d);
             }
 
@@ -647,13 +616,13 @@ public class DocumentProcessingView extends JInternalFrame {
                 synchronized (LOADED_DOCUMENTS) {
                     for (AbstractDocument d : LOADED_DOCUMENTS) {
                         // add rows as loaded documents
-                        Vector<Object> dataRow = new Vector<Object>();
+                        List<Object> dataRow = new ArrayList<>();
 
                         if (d instanceof Document) {
-                            String title = d.getTitleText();
+                            String docTitle = d.getTitleText();
                             String authors = getStringFromList(((Document) d).getAuthors());
 
-                            if (!title.toLowerCase().contains(queryArticleName.toLowerCase())) {
+                            if (!docTitle.toLowerCase().contains(queryArticleName.toLowerCase())) {
                                 continue;
                             }
                             if (!authors.toLowerCase().contains(queryAuthorName.toLowerCase())) {
@@ -669,13 +638,13 @@ public class DocumentProcessingView extends JInternalFrame {
                         } else {
                             dataRow.add("");
                         }
-                        if (d.getLSA() != null) {
-                            dataRow.add(d.getLSA().getPath());
+                        if (d.getSemanticModel(SimilarityType.LSA) != null) {
+                            dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
                         } else {
                             dataRow.add("");
                         }
-                        if (d.getLDA() != null) {
-                            dataRow.add(d.getLDA().getPath());
+                        if (d.getSemanticModel(SimilarityType.LDA) != null) {
+                            dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
                         } else {
                             dataRow.add("");
                         }
@@ -684,7 +653,7 @@ public class DocumentProcessingView extends JInternalFrame {
                         } else {
                             dataRow.add(false);
                         }
-                        docTableModel.addRow(dataRow);
+                        docTableModel.addRow(dataRow.toArray());
                     }
 
                     if (LOADED_DOCUMENTS.size() > 0) {
@@ -705,7 +674,7 @@ public class DocumentProcessingView extends JInternalFrame {
 
     private void newFilter() {
         List<RowFilter<DocumentManagementTableModel, Object>> rfs = new ArrayList<>(2);
-        RowFilter<DocumentManagementTableModel, Object> rf = null;
+        RowFilter<DocumentManagementTableModel, Object> rf;
         // If current expression doesn't parse, don't update.
         try {
             rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);

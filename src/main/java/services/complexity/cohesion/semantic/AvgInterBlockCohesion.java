@@ -20,13 +20,13 @@ import data.Block;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgInterBlockCohesion extends ComplexityIndex{
+public class AvgInterBlockCohesion extends ComplexityIndex {
 
     public AvgInterBlockCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_INTER_BLOCK_COHESION, simType);
@@ -34,23 +34,26 @@ public class AvgInterBlockCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         int no = 0;
-		double sum = 0;
+        double sum = 0;
         for (int i = 0; i < d.getBlocks().size(); i++) {
-			Block b = d.getBlocks().get(i);
-			if (b != null) {
-				for (int j = 0; j < d.getBlocks().size(); j++) {
-					if (i != j && d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][j] != null
-							&& d.getPrunnedBlockDistances()[i][j].getCohesion() > 0) {
-						sum += d.getPrunnedBlockDistances()[i][j].getSemanticSimilarities().get(simType);
-						no++;
-					}
-				}
-			}
-		}
-		if (no != 0)
-			return sum / no;
-		return ComplexityIndices.IDENTITY;
+            Block b = d.getBlocks().get(i);
+            if (b != null) {
+                for (int j = 0; j < d.getBlocks().size(); j++) {
+                    if (i != j && d.getPrunnedBlockDistances() != null && d.getPrunnedBlockDistances()[i][j] != null
+                            && d.getPrunnedBlockDistances()[i][j].getCohesion() > 0) {
+                        sum += d.getPrunnedBlockDistances()[i][j].getSemanticSimilarities().get(simType);
+                        no++;
+                    }
+                }
+            }
+        }
+        if (no != 0) {
+            return sum / no;
+        }
+        return ComplexityIndices.IDENTITY;
     }
 }
-

@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,19 +42,21 @@ import data.Block;
 import data.discourse.SemanticChain;
 import data.Lang;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 import services.commons.VectorAlgebra;
 import services.complexity.ComputeBalancedMeasure;
 import services.discourse.CSCL.Collaboration;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.dialogism.DialogismComputations;
 import services.discourse.dialogism.DialogismMeasures;
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 
 /**
  * @author Mihai Dascalu
@@ -83,12 +83,11 @@ public class Conversation extends AbstractDocument {
 
     /**
      * @param path
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      */
-    public Conversation(String path, LSA lsa, LDA lda, Lang lang) {
-        super(path, lsa, lda, lang);
+    public Conversation(String path, List<ISemanticModel> models, Lang lang) {
+        super(path, models, lang);
         participants = new TreeSet<>();
         intenseCollabZonesSocialKB = new ArrayList<>();
         intenseCollabZonesVoice = new ArrayList<>();
@@ -98,51 +97,40 @@ public class Conversation extends AbstractDocument {
     /**
      * @param path
      * @param contents
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      */
-    public Conversation(String path, AbstractDocumentTemplate contents, LSA lsa, LDA lda, Lang lang,
-            boolean usePOSTagging, boolean cleanInput) {
-        this(path, lsa, lda, lang);
+    public Conversation(String path, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        this(path, models, lang);
         this.setText(contents.getText());
         setDocTmp(contents);
-        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging, cleanInput);
+        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
         this.determineParticipantInterventions();
     }
 
     /**
      * @param pathToDoc
-     * @param pathToLSA
-     * @param pathToLDA
+     * @param modelPaths
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      * @return
      */
-    public static Conversation load(String pathToDoc, String pathToLSA, String pathToLDA, Lang lang,
-            boolean usePOSTagging, boolean cleanInput) {
-        // load also LSA vector space and LDA model
-        LSA lsa = LSA.loadLSA(pathToLSA, lang);
-        LDA lda = LDA.loadLDA(pathToLDA, lang);
-        return load(new File(pathToDoc), lsa, lda, lang, usePOSTagging, cleanInput);
+    public static Conversation load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
+        return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 
     /**
      * Load a conversation
      *
      * @param docFile
-     * @param lsa
-     * @param lda
+     * @param models
      * @param lang
      * @param usePOSTagging
-     * @param cleanInput
      * @return
      */
-    public static Conversation load(File docFile, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging,
-            boolean cleanInput) {
+    public static Conversation load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         Conversation c = null;
@@ -156,16 +144,11 @@ public class Conversation extends AbstractDocument {
             input.setEncoding("UTF-8");
 
             DocumentBuilder db = dbf.newDocumentBuilder();
-            org.w3c.dom.Document dom = null;
-            try {
-                dom = db.parse(input);
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            Element el = null;
-            NodeList nl1 = null, nl2 = null;
+            Element el;
+            NodeList nl1, nl2;
 
             // reformat input accordingly to evaluation model
             nl1 = doc.getElementsByTagName("Turn");
@@ -217,7 +200,7 @@ public class Conversation extends AbstractDocument {
             }
 
             contents.setBlocks(blocks);
-            c = new Conversation(docFile.getAbsolutePath(), contents, lsa, lda, lang, usePOSTagging, cleanInput);
+            c = new Conversation(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             // set title as a concatenation of topics
             String title = "";
             nl1 = doc.getElementsByTagName("Topic");
@@ -226,11 +209,11 @@ public class Conversation extends AbstractDocument {
                     el = (Element) nl1.item(i);
                     title += el.getFirstChild().getNodeValue() + " ";
                 }
-                c.setDocumentTitle(title, lsa, lda, lang, usePOSTagging);
+                c.setDocumentTitle(title, models, lang, usePOSTagging);
             }
 
             if (title.length() == 0) {
-                c.setDocumentTitle(docFile.getName(), lsa, lda, lang, usePOSTagging);
+                c.setDocumentTitle(docFile.getName(), models, lang, usePOSTagging);
             }
 
             // obtain annotator grades
@@ -243,7 +226,7 @@ public class Conversation extends AbstractDocument {
                         for (int j = 0; j < nl1.getLength(); j++) {
                             el = (Element) nl1.item(j);
                             if (!el.getAttribute("nickname").equals("")) {
-                                double nr = 0;
+                                double nr;
                                 try {
                                     nr = Double.valueOf(el.getAttribute("value"));
                                 } catch (Exception e) {
@@ -300,6 +283,10 @@ public class Conversation extends AbstractDocument {
         } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
             System.err.print("Error evaluating input file " + docFile.getPath() + "!");
             Exceptions.printStackTrace(ex);
+        } catch (SAXException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
         return c;
     }
@@ -310,8 +297,8 @@ public class Conversation extends AbstractDocument {
     private void determineParticipantInterventions() {
         if (getParticipants().size() > 0) {
             for (Participant p : getParticipants()) {
-                p.setInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
-                p.setSignificantInterventions(new Conversation(null, getLSA(), getLDA(), getLanguage()));
+                p.setInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
+                p.setSignificantInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
             }
             for (Block b : getBlocks()) {
                 if (b != null && ((Utterance) b).getParticipant() != null) {
@@ -350,22 +337,18 @@ public class Conversation extends AbstractDocument {
     public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getParticipantBlockDistribution(voice, p);
 
-        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(),
-                DialogismComputations.MAXIMUM_INTERVAL);
+        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
     }
 
     /**
      * @param computeDialogism
-     * @param pathToComplexityModel
-     * @param selectedComplexityFactors
-     * @param saveOutput
      */
-    public void computeAll(boolean computeDialogism, String pathToComplexityModel, int[] selectedComplexityFactors,
-            SaveType saveOutput) {
-        super.computeAll(computeDialogism, pathToComplexityModel, selectedComplexityFactors);
+    @Override
+    public void computeAll(boolean computeDialogism) {
+        super.computeAll(computeDialogism);
 
         this.getParticipants().stream().forEach((p) -> {
-            TopicModeling.determineTopics(p.getInterventions());
+            KeywordModeling.determineKeywords(p.getInterventions());
         });
 
         Collaboration.evaluateSocialKB(this);
@@ -379,34 +362,14 @@ public class Conversation extends AbstractDocument {
         ParticipantEvaluation.evaluateInvolvement(this);
         ParticipantEvaluation.performSNA(this);
         ParticipantEvaluation.evaluateUsedConcepts(this);
+    }
 
-        // compute all textual complexity factors
+    public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
         if (pathToComplexityModel != null && selectedComplexityFactors != null) {
             ComputeBalancedMeasure.evaluateTextualComplexityParticipants(this, pathToComplexityModel, selectedComplexityFactors);
         }
-
-        // writing exports
-        switch (saveOutput) {
-            case SERIALIZED:
-                saveSerializedDocument();
-                break;
-            case SERIALIZED_AND_CSV_EXPORT:
-                saveSerializedDocument();
-                exportDocument();
-                break;
-            case FULL:
-                exportDocument();
-                exportDocumentAdvanced();
-                saveSerializedDocument();
-                break;
-            default:
-                break;
-        }
     }
 
-    /**
-     *
-     */
     public void exportIM() {
         LOGGER.info("Writing document export in IM format");
         File output = new File(getPath().replace(".xml", "_IM.txt"));
@@ -424,59 +387,6 @@ public class Conversation extends AbstractDocument {
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
             Exceptions.printStackTrace(ex);
-        }
-    }
-
-    /**
-     * @param stream
-     * @throws IOException
-     */
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        // save serialized object - only path for LSA / LDA
-        stream.defaultWriteObject();
-        if (getLSA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLSA().getPath());
-        }
-        if (getLDA() == null) {
-            stream.writeObject("");
-        } else {
-            stream.writeObject(getLDA().getPath());
-        }
-    }
-
-    /**
-     * @param stream
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        // load serialized object - and rebuild LSA / LDA
-        stream.defaultReadObject();
-        String lsaPath = (String) stream.readObject();
-        String ldaPath = (String) stream.readObject();
-        LSA lsa = null;
-        LDA lda = null;
-        if (lsaPath != null && lsaPath.length() > 0) {
-            lsa = LSA.loadLSA(lsaPath, this.getLanguage());
-        }
-        if (ldaPath != null && ldaPath.length() > 0) {
-            lda = LDA.loadLDA(ldaPath, this.getLanguage());
-        }
-        // rebuild LSA / LDA
-        rebuildSemanticSpaces(lsa, lda);
-
-        // rebuild interventions document for each participant
-        determineParticipantInterventions();
-        // determine topics for each participant
-        for (Participant p : participants) {
-            TopicModeling.determineTopics(p.getInterventions());
-        }
-
-        for (Participant p : getParticipants()) {
-            p.getInterventions().rebuildSemanticSpaces(getLSA(), getLDA());
-            p.getSignificantInterventions().rebuildSemanticSpaces(getLSA(), getLDA());
         }
     }
 

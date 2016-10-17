@@ -89,7 +89,7 @@ public class SimilarLDATopics {
     public void reorder(int top, int noWordsPerTopic) {
         Map<Integer, Double> sims = new HashMap<>();
 
-        for (int i = 0; i < lda.getNoTopics(); i++) {
+        for (int i = 0; i < lda.getNoDimensions(); i++) {
             double sim = simTopic(i, noWordsPerTopic);
             LOGGER.info("Processed " + i + " >> " + sim);
             sims.put(i, sim);

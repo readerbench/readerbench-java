@@ -21,13 +21,13 @@ import data.discourse.SemanticCohesion;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgTransitionCohesion extends ComplexityIndex{
+public class AvgTransitionCohesion extends ComplexityIndex {
 
     public AvgTransitionCohesion(SimilarityType simType) {
         super(ComplexityIndecesEnum.AVERAGE_TRANSITION_COHESION, simType);
@@ -35,28 +35,31 @@ public class AvgTransitionCohesion extends ComplexityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (!d.getModelVectors().keySet().contains(simType)) {
+            return ComplexityIndices.IDENTITY;
+        }
         int no = 0;
-		double sum = 0;
-		Block previous = null;
-		Block current;
-		for (Block b : d.getBlocks()) {
-			if (b != null) {
-				current = b;
-				if (previous != null) {
-					if (!current.getSentences().isEmpty() && !previous.getSentences().isEmpty()) {
-						SemanticCohesion coh = new SemanticCohesion(current.getSentences().get(0),
-								previous.getSentences().get(previous.getSentences().size() - 1));
-						sum += coh.getSemanticSimilarities().get(simType);
-						no++;
-					}
-				}
-				previous = b;
-			}
-		}
-		if (no != 0)
-			return sum / no;
-		return ComplexityIndices.IDENTITY;
+        double sum = 0;
+        Block previous = null;
+        Block current;
+        for (Block b : d.getBlocks()) {
+            if (b != null) {
+                current = b;
+                if (previous != null) {
+                    if (!current.getSentences().isEmpty() && !previous.getSentences().isEmpty()) {
+                        SemanticCohesion coh = new SemanticCohesion(current.getSentences().get(0),
+                                previous.getSentences().get(previous.getSentences().size() - 1));
+                        sum += coh.getSemanticSimilarities().get(simType);
+                        no++;
+                    }
+                }
+                previous = b;
+            }
+        }
+        if (no != 0) {
+            return sum / no;
+        }
+        return ComplexityIndices.IDENTITY;
     }
-    
-    
+
 }

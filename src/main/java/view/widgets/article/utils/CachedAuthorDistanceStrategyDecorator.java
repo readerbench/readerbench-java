@@ -23,10 +23,10 @@ import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class CachedAuthorDistanceStrategyDecorator implements IAuthorDistanceStrategy {
-	private IAuthorDistanceStrategy distanceStrategy;
-	private Map<String, Double> singleAuthorContainerDistanceCache;
-	private Map<String, Double> researchArticleDistanceCache;
-	private Map<String, Double> authorToArticleDistanceCache;
+	private final IAuthorDistanceStrategy distanceStrategy;
+	private final Map<String, Double> singleAuthorContainerDistanceCache;
+	private final Map<String, Double> researchArticleDistanceCache;
+	private final Map<String, Double> authorToArticleDistanceCache;
 	
 	public CachedAuthorDistanceStrategyDecorator(ArticleContainer authorContainer, IAuthorDistanceStrategy distanceStrategy) {
 		this.distanceStrategy = distanceStrategy;

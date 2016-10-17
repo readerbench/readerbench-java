@@ -26,10 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +36,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import services.commons.Formatting;
+import services.semanticModels.SimilarityType;
 
 /**
  *
@@ -52,12 +52,7 @@ public class DistanceStatistics {
     public static void main(String[] args) {
 
         Map<Integer, DistanceStats> blockDistances = new TreeMap<>(
-                new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o1.compareTo(o2);
-            }
-        });
+                (Integer o1, Integer o2) -> o1.compareTo(o2));
         Map<String, ChatStats> chatStats = new HashMap<>();
 
         try {
@@ -65,10 +60,12 @@ public class DistanceStatistics {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml")) {
                     logger.info("Processing file " + filePath.getFileName().toString());
-
-                    Conversation c = Conversation.load(filePathString, "resources/config/LSA/tasa_en",
-                            "resources/config/LDA/tasa_en", Lang.en, false, true);
-                    c.computeAll(true, null, null, SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+                    modelPaths.put(SimilarityType.LSA, "resources/config/LSA/tasa_en");
+                    modelPaths.put(SimilarityType.LDA, "resources/config/LDA/tasa_en");
+                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
+                    c.computeAll(true);
+                    c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     Utterance firstUtt = null;
                     for (int i = 1; i < c.getBlocks().size(); i++) {
@@ -230,9 +227,7 @@ public class DistanceStatistics {
 
                     logger.info("Printing contribution distances for chat " + c.getPath());
                     logger.info("Max distance for chat: " + blockDistances.size());
-                    Iterator it = blockDistances.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry pair = (Map.Entry) it.next();
+                    for (Map.Entry pair : blockDistances.entrySet()) {
                         logger.info(pair.getKey() + " = " + pair.getValue());
                     }
                 }
@@ -244,9 +239,7 @@ public class DistanceStatistics {
 
         logger.info("Printing final contribution distances for conversations.");
         logger.info("Max distance for all conersations: " + blockDistances.size());
-        Iterator it = blockDistances.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
+        for (Map.Entry pair : blockDistances.entrySet()) {
             logger.info(pair.getKey() + " = " + pair.getValue());
         }
 
@@ -263,9 +256,7 @@ public class DistanceStatistics {
             sb.append(
                     "sep=,\nchat id,contrubtions,participants,duration,explicit links,coverage,same speaker first,different speaker first,same block,different block,d1,d2,d3,d4,d5\n");
 
-            Iterator it = chatStats.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
+            for (Map.Entry pair : chatStats.entrySet()) {
                 ChatStats cs = (ChatStats) pair.getValue();
                 sb.append(pair.getKey());
                 sb.append(",");
@@ -289,9 +280,7 @@ public class DistanceStatistics {
                 sb.append(",");
 
                 logger.info("References for " + pair.getKey() + " file: " + cs.getReferences().size());
-                Iterator itReferences = cs.getReferences().entrySet().iterator();
-                while (itReferences.hasNext()) {
-                    Map.Entry pairReference = (Map.Entry) itReferences.next();
+                for (Map.Entry pairReference : cs.getReferences().entrySet()) {
                     sb.append(pairReference.getValue());
                     sb.append(",");
                 }
@@ -325,9 +314,7 @@ public class DistanceStatistics {
             sb.append(
                     "sep=,\ndistance,total,same speaker,different speaker,%,same speaker first,different speaker first\n");
 
-            Iterator it = blockDistances.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry) it.next();
+            for (Map.Entry pair : blockDistances.entrySet()) {
                 DistanceStats ds = (DistanceStats) pair.getValue();
                 sb.append(pair.getKey());
                 sb.append(",");

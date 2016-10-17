@@ -51,7 +51,7 @@ import javax.swing.table.TableRowSorter;
 
 import org.apache.log4j.Logger;
 
-import services.discourse.topicMining.TopicModeling;
+import services.discourse.keywordMining.KeywordModeling;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.document.corpora.PaperConceptView;
@@ -287,7 +287,7 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 					return;
 				}
 				PaperConceptView conceptView = new PaperConceptView(
-						TopicModeling.getCollectionTopics(DocumentProcessingView.getLoadedDocuments()),
+						KeywordModeling.getCollectionTopics(DocumentProcessingView.getLoadedDocuments()),
 						"out/concepts_" + new Timestamp(new Date().getTime()) + ".pdf");
 				conceptView.setVisible(true);
 			}

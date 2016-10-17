@@ -17,7 +17,6 @@ package data.discourse;
 
 import java.io.Serializable;
 
-import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import java.util.EnumMap;
@@ -26,8 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 /**
  * @author Mihai Dascalu
@@ -38,41 +38,29 @@ public class SemanticCohesion implements Serializable {
     private static final long serialVersionUID = 7561413289472294392L;
 
     public static final int WINDOW_SIZE = 20;
-    public static final double WEIGH_WN = 1.0;
-    public static final double WEIGH_LSA = 1.0;
-    public static final double WEIGH_LDA = 1.0;
+    private static final EnumMap<SimilarityType, Double> WEIGHTS = new EnumMap<>(SimilarityType.class);
+
+    static {
+        WEIGHTS.put(SimilarityType.WU_PALMER, 1.0);
+        WEIGHTS.put(SimilarityType.LSA, 1.0);
+        WEIGHTS.put(SimilarityType.LDA, 1.0);
+        WEIGHTS.put(SimilarityType.WORD2VEC, 1.0);
+    }
 
     protected final AnalysisElement source;
     protected final AnalysisElement destination;
     protected final EnumMap<SimilarityType, Double> similarities;
 
-    public static double getAggregatedSemanticMeasure(double lsaSim, double ldaSim) {
-        double cohesion = 0;
-        double divisor = 0;
-        if (lsaSim > 0) {
-            divisor += WEIGH_LSA;
-        } else {
-            lsaSim = 0;
+    public static double getAggregatedSemanticMeasure(Map<SimilarityType, Double> similarities) {
+        double sum = 0, div = 0;
+        for (Map.Entry<SimilarityType, Double> e : similarities.entrySet()) {
+            if (WEIGHTS.containsKey(e.getKey())) {
+                sum += WEIGHTS.get(e.getKey()) * e.getValue();
+                div += WEIGHTS.get(e.getKey());
+            }
         }
-        if (ldaSim > 0) {
-            divisor += WEIGH_LDA;
-        } else {
-            ldaSim = 0;
-        }
-        if (divisor > 0) {
-            cohesion = (WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim) / divisor;
-        }
-        if (cohesion > 0) {
-            return cohesion;
-        }
-        return 0;
-    }
-
-    public static double getCohesionMeasure(double WNSim, double lsaSim, double ldaSim) {
-        double cohesion = (WEIGH_WN * WNSim + WEIGH_LSA * lsaSim + WEIGH_LDA * ldaSim)
-                / (WEIGH_WN + WEIGH_LSA + WEIGH_LDA);
-        if (cohesion > 0) {
-            return cohesion;
+        if (sum > 0 && div > 0) {
+            return sum / div;
         }
         return 0;
     }
@@ -85,19 +73,13 @@ public class SemanticCohesion implements Serializable {
         this.source = source;
         this.destination = destination;
         this.similarities = new EnumMap<>(SimilarityType.class);
-        this.similarities.put(SimilarityType.LSA, VectorAlgebra.cosineSimilarity(source.getLSAVector(), destination.getLSAVector()));
-        if (source.getLDAProbDistribution() == null || destination.getLDAProbDistribution() == null) {
-            this.similarities.put(SimilarityType.LDA, 0d);
-        } else {
-            this.similarities.put(SimilarityType.LDA, 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(source.getLDAProbDistribution()), VectorAlgebra.normalize(destination.getLDAProbDistribution())));
-        }
-        //TODO - add support for Word2Vec
-        similarities.put(SimilarityType.WORD2VEC, 0d);
 
+        source.getSemanticModels().stream().forEach((semModel) -> {
+            this.similarities.put(semModel.getType(), semModel.getSimilarity(source, destination));
+        });
         similarities.put(SimilarityType.LEACOCK_CHODOROW, getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
         similarities.put(SimilarityType.WU_PALMER, getOntologySim(source, destination, SimilarityType.WU_PALMER));
         similarities.put(SimilarityType.PATH_SIM, getOntologySim(source, destination, SimilarityType.PATH_SIM));
-        
     }
 
     public SemanticCohesion(EnumMap<SimilarityType, Double> similarities) {
@@ -154,7 +136,15 @@ public class SemanticCohesion implements Serializable {
     }
 
     public double getCohesion() {
-        return getCohesionMeasure(similarities.get(SimilarityType.WU_PALMER), similarities.get(SimilarityType.LSA), similarities.get(SimilarityType.LDA));
+        return getAggregatedSemanticMeasure(this.similarities);
+    }
+
+    public static double getAverageSemanticModelSimilarity(AnalysisElement u1, AnalysisElement u2) {
+        Map<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+        for (ISemanticModel model : u1.getSemanticModels()) {
+            similarities.put(model.getType(), model.getSimilarity(u1.getModelVectors().get(model.getType()), u2.getModelVectors().get(model.getType())));
+        }
+        return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
     }
 
     public EnumMap<SimilarityType, Double> getSemanticSimilarities() {
@@ -165,7 +155,9 @@ public class SemanticCohesion implements Serializable {
     public String toString() {
         StringBuilder s = new StringBuilder();
         for (SimilarityType st : SimilarityType.values()) {
-            s.append(st.getName()).append("=").append(Formatting.formatNumber(similarities.get(st))).append(";");
+            if (similarities.containsKey(st)) {
+                s.append(st.getName()).append("=").append(Formatting.formatNumber(similarities.get(st))).append(";");
+            }
         }
         return s.toString();
     }
@@ -173,7 +165,9 @@ public class SemanticCohesion implements Serializable {
     public String print() {
         StringBuilder s = new StringBuilder();
         for (SimilarityType st : SimilarityType.values()) {
-            s.append(Formatting.formatNumber(similarities.get(st))).append(",");
+            if (similarities.containsKey(st)) {
+                s.append(Formatting.formatNumber(similarities.get(st))).append(",");
+            }
         }
         return s.toString();
     }

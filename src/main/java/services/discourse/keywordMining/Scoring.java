@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.discourse.topicMining;
+package services.discourse.keywordMining;
 
 import org.apache.log4j.Logger;
 
@@ -21,7 +21,7 @@ import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.Word;
-import data.discourse.Topic;
+import data.discourse.Keyword;
 
 /**
  * 
@@ -35,10 +35,10 @@ public class Scoring {
 			// determine cumulative word importance in terms of topics coverage
 			double importance = 0;
 			for (Word w : s.getWordOccurences().keySet()) {
-				Topic t = new Topic(w, 0);
+				Keyword t = new Keyword(w, 0);
 				int index = d.getTopics().indexOf(t);
 				if (index >= 0) {
-					Topic coveredTopic = d.getTopics().get(index);
+					Keyword coveredTopic = d.getTopics().get(index);
 					double tf = s.getWordOccurences().get(w);
 					importance += (1 + Math.log(tf)) * coveredTopic.getRelevance();
 				}

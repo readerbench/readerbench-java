@@ -83,6 +83,55 @@ public class TextPreprocessing {
         new Pair<>(Pattern.compile("\\!"), " \\! "), new Pair<>(Pattern.compile("\\?"), " \\? "),
         new Pair<>(Pattern.compile("\\-"), " \\- "), new Pair<>(Pattern.compile(" +"), " ")};
 
+    public static boolean isWord(String text, Lang lang) {
+        String pattern;
+        switch (lang) {
+            case fr:
+                pattern = "[a-zàâäæçéêèëîïôœùûü]+";
+                break;
+            case ro:
+                pattern = "[a-zăâîşţ]+";
+                break;
+            case es:
+                pattern = "[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]";
+                break;
+            case nl:
+                pattern = "[^a-zäëÿüïöáéýúíóàèùìòãñõâêûîôç]+";
+                break;
+            default:
+                pattern = "[a-z]+";
+                break;
+        }
+        return text.toLowerCase().matches(pattern);
+    }
+
+    private static final Pair[] REPLACEMENTS_RO = new Pair[]{new Pair<>(Pattern.compile("ş"), "ş"), new Pair<>(Pattern.compile("ț"), "ţ")};
+    private static final Pair[] REPLACEMENTS_LA = new Pair[]{new Pair<>(Pattern.compile("[áàâä]"), "a"), new Pair<>(Pattern.compile("[èéêë]"), "e"),
+        new Pair<>(Pattern.compile("[íìîï]"), "i"), new Pair<>(Pattern.compile("[óòôö]"), "o"), new Pair<>(Pattern.compile("[úùûü]"), "u")};
+
+    public static String basicTextCleaning(String text, Lang lang) {
+        String result = Pattern.compile("\\s+").matcher(text).replaceAll(" ");
+        result = Pattern.compile("’").matcher(result).replaceAll("'");
+        Pair[] patterns;
+        switch (lang) {
+            case ro:
+                patterns = REPLACEMENTS_RO;
+                break;
+            case la:
+                patterns = REPLACEMENTS_LA;
+                break;
+            default:
+                patterns = null;
+        }
+        if (patterns == null) {
+            return result;
+        }
+        for (Pair<Pattern, String> p : patterns) {
+            result = p.first.matcher(result).replaceAll(p.second);
+        }
+        return result;
+    }
+
     public static String cleanText(String text, Lang lang) {
         // clean initial text
 
@@ -223,8 +272,6 @@ public class TextPreprocessing {
                             for (int i = 0; i < nl.getLength(); i++) {
                                 el = (Element) nl.item(i);
                                 contents = el.getFirstChild().getNodeValue().trim();
-                                System.out.println(contents + "\n---------------\n"
-                                        + cleanText(doubleCleanVerbalization(contents), Lang.fr) + "\n");
                             }
                         }
                     } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {

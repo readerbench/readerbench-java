@@ -24,13 +24,14 @@ import data.AnalysisElement;
 import data.Block;
 import data.Sentence;
 import data.Word;
+import data.discourse.SemanticCohesion;
 import data.document.ReadingStrategyType;
+import java.util.EnumMap;
+import java.util.Map;
 import services.commons.Formatting;
-import services.commons.VectorAlgebra;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.WordNet.OntologySupport;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 public class InferredKnowledgeStrategy {
 
@@ -59,19 +60,19 @@ public class InferredKnowledgeStrategy {
 
         int noOccur = 0;
 
-        // determine vectors for collections of sentences
-        double[] vectorSentences = new double[LSA.K];
-        double[] probDistribSentences = new double[v.getLDA().getNoTopics()];
+        List<ISemanticModel> semanticModels = sentences.get(0).getSemanticModels();
 
-        for (Sentence s : sentences) {
-            for (int i = 0; i < LSA.K; i++) {
-                vectorSentences[i] += s.getLSAVector()[i];
+        Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
+
+        for (ISemanticModel model : semanticModels) {
+            double[] vec = new double[model.getNoDimensions()];
+            for (Sentence s : sentences) {
+                for (int i = 0; i < model.getNoDimensions(); i++) {
+                    vec[i] += s.getModelRepresentation(model.getType())[i];
+                }
             }
-            for (int i = 0; i < v.getLDA().getNoTopics(); i++) {
-                probDistribSentences[i] += s.getLDAProbDistribution()[i];
-            }
+            modelVectors.put(model.getType(), vec);
         }
-        probDistribSentences = VectorAlgebra.normalize(probDistribSentences);
 
         for (Word w1 : v.getWordOccurences().keySet()) {
             // only for words that have not been previously marked as paraphrases and not previously identified as inferred concepts
@@ -92,34 +93,30 @@ public class InferredKnowledgeStrategy {
                 // use only potential inferred concepts
                 if (!hasAssociations) {
                     // determine maximum likelihood
-                    double maxSim = 0;
-                    double[] probDistrib1 = w1.getLDAProbDistribution();
-                    double[] vector1 = v.getLSA().getWordVector(w1);
+                    double maxSimWord = 0;
                     Word closestWord = null;
 
-                    // add similarity to sentences as a measure of importance of the word
-                    double simLSASentences = VectorAlgebra.cosineSimilarity(vector1, vectorSentences);
-                    double simLDASentences = LDA.getSimilarity(probDistrib1, probDistribSentences);
-                    double simMaxSentence = Math.max(simLSASentences, simLDASentences);
+                    Map<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
+                    for (ISemanticModel model : semanticModels) {
+                        similarities.put(model.getType(), model.getSimilarity(w1.getModelRepresentation(model.getType()), modelVectors.get(model.getType())));
+                    }
+                    double simSentence = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
 
                     for (Sentence s : sentences) {
                         for (Word w2 : s.getWordOccurences().keySet()) {
                             // determine semantic proximity
-                            double simLSAWord = VectorAlgebra.cosineSimilarity(vector1, v.getLSA().getWordVector(w2));
-                            double simLDAWord = LDA.getSimilarity(probDistrib1, w2.getLDAProbDistribution());
-                            double simWNWord = OntologySupport.semanticSimilarity(w1, w2, SimilarityType.WU_PALMER);
-                            double simMaxWord = Math.max(simWNWord, Math.max(simLSAWord, simLDAWord));
+                            double simWord = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
 
-                            if (maxSim < simMaxWord) {
-                                maxSim = simMaxWord;
+                            if (maxSimWord < simWord) {
+                                maxSimWord = simWord;
                                 closestWord = w2;
                             }
                         }
                     }
 
-                    if (Math.max(maxSim, simMaxSentence) >= SIMILARITY_THRESHOLD_KI) {
-                        noOccur += addAssociations(w1, v, usedColor, Formatting.formatNumber(simMaxSentence) + "; "
-                                + closestWord.getLemma() + "-" + Formatting.formatNumber(maxSim));
+                    if (Math.max(simSentence, maxSimWord) >= SIMILARITY_THRESHOLD_KI) {
+                        noOccur += addAssociations(w1, v, usedColor, Formatting.formatNumber(simSentence) + "; "
+                                + closestWord.getLemma() + "-" + Formatting.formatNumber(maxSimWord));
                     }
                 }
             }

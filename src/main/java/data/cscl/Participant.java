@@ -38,8 +38,8 @@ public class Participant implements Comparable<Participant>, Serializable {
     public Participant(String name, AbstractDocument d) {
         super();
         this.name = name;
-        this.interventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
-        this.significantInterventions = new Conversation(null, d.getLSA(), d.getLDA(), d.getLanguage());
+        this.interventions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.significantInterventions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
         this.resetIndices();

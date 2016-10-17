@@ -33,7 +33,7 @@ import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.discourse.SemanticCohesion;
-import services.semanticModels.WordNet.SimilarityType;
+import services.semanticModels.SimilarityType;
 
 public class SentenceView extends JFrame {
 

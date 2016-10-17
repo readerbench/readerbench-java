@@ -26,11 +26,14 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.document.Document;
 import data.Lang;
+import java.util.ArrayList;
+import java.util.List;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 public class MSRSentenceCompletionTest {
@@ -42,16 +45,8 @@ public class MSRSentenceCompletionTest {
     public void process(String path, ISemanticModel semModel) {
         logger.info("Starting sentence completion test...");
 
-        LSA lsa = null;
-        LDA lda = null;
-        if (semModel instanceof LSA) {
-            lsa = (LSA) semModel;
-        } else if (semModel instanceof LDA) {
-            lda = (LDA) semModel;
-        } else {
-            logger.error("Inappropriate semantic model used for assessment: " + semModel.getPath());
-            return;
-        }
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semModel);
 
         try {
             String line;
@@ -91,7 +86,7 @@ public class MSRSentenceCompletionTest {
                         if ((line = questions.readLine()) == null) {
                             break outer;
                         }
-                        concepts[i] = processDoc(line, lsa, lda, semModel.getLanguage());
+                        concepts[i] = processDoc(line, models, semModel.getLanguage());
                     }
 
                     // read blank lines
@@ -130,9 +125,9 @@ public class MSRSentenceCompletionTest {
         }
     }
 
-    public static Document processDoc(String line, LSA lsa, LDA lda, Lang lang) {
+    public static Document processDoc(String line, List<ISemanticModel> models, Lang lang) {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(line.trim());
-        Document doc = new Document(null, contents, lsa, lda, lang, true, true);
+        Document doc = new Document(null, contents, models, lang, true);
         return doc;
     }
 
@@ -141,13 +136,21 @@ public class MSRSentenceCompletionTest {
 
         MSRSentenceCompletionTest test = new MSRSentenceCompletionTest();
 
-        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        test.process("resources/in/MSR sentence completion", lsa1);
-        ISemanticModel lsa2 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
-        test.process("resources/in/MSR sentence completion", lsa2);
-        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-        test.process("resources/in/MSR sentence completion", lda1);
-        ISemanticModel lda2 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
-        test.process("resources/in/MSR sentence completion", lda2);
+//        ISemanticModel lsa1 = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+//        test.process("resources/in/MSR sentence completion", lsa1);
+//        lsa1 = LSA.loadLSA("resources/config/EN/LSA/COCA newspaper", Lang.en);
+//        test.process("resources/in/MSR sentence completion", lsa1);
+//        ISemanticModel lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        test.process("resources/in/MSR sentence completion", lda1);
+//        lda1 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
+//        test.process("resources/in/MSR sentence completion", lda1);
+        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
+        test.process("resources/in/MSR sentence completion/", w2v1);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
+        test.process("resources/in/MSR sentence completion/", w2v1);
+        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
+        test.process("resources/in/MSR sentence completion/", w2v1);
+        w2v1 = Word2VecModel.loadGoogleNewsModel();
+        test.process("resources/in/MSR sentence completion", w2v1);
     }
 }
