@@ -21,6 +21,9 @@ import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import java.util.EnumMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.semanticModels.WordNet.OntologySupport;
@@ -122,11 +125,14 @@ public class SemanticCohesion implements Serializable {
         double sum = 0;
         // determine asymmetric measure of similarity as sum of all max
         // distances
-        for (Word w1 : u1.getWordOccurences().keySet()) {
-            double factor = 1 + Math.log(u1.getWordOccurences().get(w1));
-            sum += factor;
-            distance += factor * getMaxSemOntologySim(w1, u2, typeOfSimilarity);
-        }
+        Map<Word, Double> factors = u1.getWordOccurences().entrySet().parallelStream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> 1 + Math.log(e.getValue())));
+        distance = factors.entrySet().parallelStream()
+                .mapToDouble(e -> e.getValue() * getMaxSemOntologySim(e.getKey(), u2, typeOfSimilarity))
+                .sum();
+        sum = factors.values().parallelStream().mapToDouble(x -> x).sum();
         // apply normalization with regards to the number of words
         if (sum > 0) {
             return distance / sum;

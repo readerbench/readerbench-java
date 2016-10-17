@@ -108,7 +108,7 @@ public class OntologySupport {
         if (!w1.getLanguage().equals(w2.getLanguage())) {
             return 0;
         }
-        if (w1 == null || w2 == null || w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
+        if (w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
             return 0;
         }
         double sim = dictionaries.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);

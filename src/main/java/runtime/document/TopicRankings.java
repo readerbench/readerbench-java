@@ -205,6 +205,6 @@ public class TopicRankings {
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
         TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", 30, lsa, lda, Lang.fr, true, true, false);
-        tr.processTexts(true);
+        tr.processTexts(false);
     }
 }
