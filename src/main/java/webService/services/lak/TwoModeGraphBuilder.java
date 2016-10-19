@@ -20,29 +20,28 @@ import webService.services.lak.result.TwoModeGraphNodeType;
 public class TwoModeGraphBuilder {
 
     private static final Map<String, TwoModeGraphBuilder> LOADED_GRAPH_BUILDERS = new HashMap<>();
-    private static final IAuthorDistanceStrategy[] distanceStrategyList = new IAuthorDistanceStrategy[3];
-
+    
+    private final IAuthorDistanceStrategy[] distanceStrategyList = new IAuthorDistanceStrategy[3];
     private final ArticleContainer authorContainer;
-
     private TwoModeGraph graph;
 
     public TwoModeGraphBuilder(String inputDirectory) {
         this.authorContainer = ArticleContainer.buildAuthorContainerFromDirectory(inputDirectory);
         AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(authorContainer);
 
-        if (TwoModeGraphBuilder.distanceStrategyList[0] == null) {
-            TwoModeGraphBuilder.distanceStrategyList[0] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+        if (this.distanceStrategyList[0] == null) {
+            this.distanceStrategyList[0] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
                     distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance));
 
-            TwoModeGraphBuilder.distanceStrategyList[1] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+            this.distanceStrategyList[1] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
                     distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance));
 
-            TwoModeGraphBuilder.distanceStrategyList[2] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
+            this.distanceStrategyList[2] = new CachedAuthorDistanceStrategyDecorator(this.authorContainer,
                     distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance));
         }
     }
 
-    public TwoModeGraph getGraph(String centerUri, String searchText) {
+    public synchronized TwoModeGraph getGraph(String centerUri, String searchText) {
         this.graph = new TwoModeGraph();
         try {
             List<GraphNodeItem> allGraphNodeItemList = this.loadAllNodes();
@@ -70,7 +69,7 @@ public class TwoModeGraphBuilder {
     }
 
     private void loadAllEdges(List<GraphNodeItem> nodeItemList) {
-        for (IAuthorDistanceStrategy distanceStrategy : TwoModeGraphBuilder.distanceStrategyList) {
+        for (IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
             double threshold = distanceStrategy.getThreshold();
             for (int i = 0; i < nodeItemList.size() - 1; i++) {
                 for (int j = i + 1; j < nodeItemList.size(); j++) {
@@ -120,10 +119,13 @@ public class TwoModeGraphBuilder {
         graph.nodeList = nodeList;
     }
 
-    public List<TwoModeGraphNode> getAuthorNodes() {
+    public List<TwoModeGraphNode> getNodes() {
         List<TwoModeGraphNode> nodeList = new ArrayList<>();
         this.authorContainer.getAuthorContainers().stream().forEach((author) -> {
             nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Author, author.getAuthor().getAuthorUri(), author.getAuthor().getAuthorName()));
+        });
+        this.authorContainer.getArticles().stream().forEach((article) -> {
+            nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Article, article.getURI(), article.getTitleText()));
         });
         return nodeList;
     }

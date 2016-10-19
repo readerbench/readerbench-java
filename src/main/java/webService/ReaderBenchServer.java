@@ -765,10 +765,10 @@ public class ReaderBenchServer {
             return result;
         });
 
-        Spark.get("/lak/authors", (request, response) -> {
+        Spark.get("/lak/nodes", (request, response) -> {
             response.type("application/json");
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            List<TwoModeGraphNode> authorNodes = graphBuilder.getAuthorNodes();
+            List<TwoModeGraphNode> authorNodes = graphBuilder.getNodes();
             QueryResultTwoModeGraphNodes qResult = new QueryResultTwoModeGraphNodes(authorNodes);
             return qResult.convertToJson();
         });
