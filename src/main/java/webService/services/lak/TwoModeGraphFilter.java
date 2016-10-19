@@ -33,13 +33,14 @@ public class TwoModeGraphFilter {
     public TwoModeGraphFilter() {
     }
 
-    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri, int noAuthors, int noArticles) {
+    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri, int noAuthors, int noArticles,
+            boolean showAuthors, boolean showArticles) {
         if (graphMeasures == null || graphMeasures.size() == 0) {
             LOGGER.info("TwoModeGraphFilter did not manage to load the OrderedAuthorsArticlesByBetweenness !!!");
             return graph;
         }
         Set<String> uriSet = this.getUriSet(graph);
-        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet, noAuthors, noArticles);
+        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet, noAuthors, noArticles, showAuthors, showArticles);
         if (centerUri != null && centerUri.length() > 0) {
             restrictedUriSet.add(centerUri);
         }
@@ -74,9 +75,16 @@ public class TwoModeGraphFilter {
         return uriSet;
     }
 
-    private Set<String> getRestrictedSet(Set<String> fullSet, int noAuthors, int noArticles) {
+    private Set<String> getRestrictedSet(Set<String> fullSet, int noAuthors, int noArticles, 
+            boolean showAuthors, boolean showArticles) {
         Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, noArticles);
+        if(!showArticles) {
+            articlesUriSet = new HashSet<>();
+        }
         Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, noAuthors);
+        if(!showAuthors) {
+            authorsUriSet = new HashSet<>();
+        }
         articlesUriSet.addAll(authorsUriSet);
         return articlesUriSet;
     }

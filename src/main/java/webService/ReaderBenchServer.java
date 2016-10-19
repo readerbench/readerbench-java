@@ -780,16 +780,20 @@ public class ReaderBenchServer {
             String searchText = (String) json.get("searchText");
             int noAuthors = TwoModeGraphFilter.MaxNoAuthors;
             int noArticles = TwoModeGraphFilter.MaxNoArticles;
+            boolean showAuthors = true, showArticles = true;
             try {
                 noAuthors = ((Long) json.get("noAuthors")).intValue();
                 noArticles = ((Long) json.get("noArticles")).intValue();
-            } catch(Exception e) {}
-            
+                showAuthors = (boolean) json.get("showAuthors");
+                showArticles = (boolean) json.get("showArticles");
+            } catch (Exception e) {
+            }
+
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
             TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
-            graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles);
+            graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
