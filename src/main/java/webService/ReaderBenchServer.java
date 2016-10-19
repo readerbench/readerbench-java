@@ -501,7 +501,7 @@ public class ReaderBenchServer {
             List<ISemanticModel> models = new ArrayList<>();
             models.add(LSA.loadLSA(hm.get("lsa"), lang));
             models.add(LDA.loadLDA(hm.get("lda"), lang));
-        
+
             Conversation conversation = Conversation.load(
                     new File("tmp/" + json.get("csclFile")),
                     models,
@@ -778,11 +778,18 @@ public class ReaderBenchServer {
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
             String searchText = (String) json.get("searchText");
+            int noAuthors = TwoModeGraphFilter.MaxNoAuthors;
+            int noArticles = TwoModeGraphFilter.MaxNoArticles;
+            try {
+                noAuthors = ((Long) json.get("noAuthors")).intValue();
+                noArticles = ((Long) json.get("noArticles")).intValue();
+            } catch(Exception e) {}
+            
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
             TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
-            graph = graphFilter.filterGraph(graph, centerUri);
+            graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();

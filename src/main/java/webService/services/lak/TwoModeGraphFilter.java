@@ -5,7 +5,6 @@
  */
 package webService.services.lak;
 
-import com.itextpdf.text.log.SysoLogger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,13 +33,13 @@ public class TwoModeGraphFilter {
     public TwoModeGraphFilter() {
     }
 
-    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri) {
+    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri, int noAuthors, int noArticles) {
         if (graphMeasures == null || graphMeasures.size() == 0) {
             LOGGER.info("TwoModeGraphFilter did not manage to load the OrderedAuthorsArticlesByBetweenness !!!");
             return graph;
         }
         Set<String> uriSet = this.getUriSet(graph);
-        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet);
+        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet, noAuthors, noArticles);
         if (centerUri != null && centerUri.length() > 0) {
             restrictedUriSet.add(centerUri);
         }
@@ -75,9 +74,9 @@ public class TwoModeGraphFilter {
         return uriSet;
     }
 
-    private Set<String> getRestrictedSet(Set<String> fullSet) {
-        Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, MaxNoArticles);
-        Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, MaxNoAuthors);
+    private Set<String> getRestrictedSet(Set<String> fullSet, int noAuthors, int noArticles) {
+        Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, noArticles);
+        Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, noAuthors);
         articlesUriSet.addAll(authorsUriSet);
         return articlesUriSet;
     }
