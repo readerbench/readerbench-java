@@ -31,8 +31,6 @@ import java.util.List;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
@@ -150,7 +148,7 @@ public class MSRSentenceCompletionTest {
         test.process("resources/in/MSR sentence completion/", w2v1);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         test.process("resources/in/MSR sentence completion/", w2v1);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        test.process("resources/in/MSR sentence completion", w2v1);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        test.process("resources/in/MSR sentence completion", w2v1);
     }
 }

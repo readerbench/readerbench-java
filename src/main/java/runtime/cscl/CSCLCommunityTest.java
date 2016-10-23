@@ -34,7 +34,7 @@ public class CSCLCommunityTest {
         ReaderBenchServer.initializeDB();
 
         ReaderBenchView.adjustToSystemGraphics();
-        // Community.processAllFolders("resources/in/blogs_Nic/diana/new", "", false, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.eng, true, true, null, null, 0, 7);
+        // Community.processAllFolders("resources/in/blogs_Nic/diana/new", "", false, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, null, null, 0, 7);
 
         String path = "resources/in/MOOC/forum_posts&comments";
         SerialCorpusAssessment.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);

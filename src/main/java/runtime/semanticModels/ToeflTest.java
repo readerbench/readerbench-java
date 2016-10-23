@@ -125,7 +125,7 @@ public class ToeflTest {
         test.process("resources/in/toefl_test/", w2v1);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         test.process("resources/in/toefl_test/", w2v1);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        test.process("resources/in/toefl_test", w2v1);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        test.process("resources/in/toefl_test", w2v1);
     }
 }

@@ -24,9 +24,7 @@ import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -66,7 +64,7 @@ public class Conversation extends AbstractDocument {
 
     private static final long serialVersionUID = 2096182930189552475L;
 
-    private Set<Participant> participants;
+    private List<Participant> participants;
     private double[][] participantContributions;
     private List<CollaborationZone> intenseCollabZonesSocialKB;
     private List<CollaborationZone> intenseCollabZonesVoice;
@@ -88,7 +86,7 @@ public class Conversation extends AbstractDocument {
      */
     public Conversation(String path, List<ISemanticModel> models, Lang lang) {
         super(path, models, lang);
-        participants = new TreeSet<>();
+        participants = new ArrayList<>();
         intenseCollabZonesSocialKB = new ArrayList<>();
         intenseCollabZonesVoice = new ArrayList<>();
         annotatedCollabZones = new ArrayList<>();
@@ -283,9 +281,7 @@ public class Conversation extends AbstractDocument {
         } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
             System.err.print("Error evaluating input file " + docFile.getPath() + "!");
             Exceptions.printStackTrace(ex);
-        } catch (SAXException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
+        } catch (SAXException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }
         return c;
@@ -393,14 +389,14 @@ public class Conversation extends AbstractDocument {
     /**
      * @return
      */
-    public Set<Participant> getParticipants() {
+    public List<Participant> getParticipants() {
         return participants;
     }
 
     /**
      * @param participants
      */
-    public void setParticipants(TreeSet<Participant> participants) {
+    public void setParticipants(ArrayList<Participant> participants) {
         this.participants = participants;
     }
 

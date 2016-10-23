@@ -205,7 +205,7 @@ public class WordAssociationTest {
         comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
     }
 }

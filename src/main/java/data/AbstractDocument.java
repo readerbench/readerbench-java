@@ -120,7 +120,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     private List<SemanticChain> voices;
     private transient List<SemanticChain> selectedVoices;
-    
+
     protected Map<SimilarityType, String> modelPaths;
 
     public AbstractDocument() {
@@ -209,7 +209,6 @@ public abstract class AbstractDocument extends AnalysisElement {
             DialogismComputations.determineVoiceDistributions(this);
         }
 
-        
         long t1 = System.currentTimeMillis();
         // build coherence graph
         CohesionGraph.buildCohesionGraph(this);
@@ -221,8 +220,6 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        CohesionGraph.buildCohesionGraphOld(this);
 //        t2 = System.currentTimeMillis();
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
-
-        
         // determine topics
         KeywordModeling.determineKeywords(this);
         // TopicModel.determineTopicsLDA(this);
@@ -407,8 +404,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                     out.write(",");
                     if (b instanceof Utterance) {
                         if (((Utterance) b).getParticipant() != null) {
-                            out.write(((Utterance) b).getParticipant().getName().replaceAll(",", "").replaceAll("\\s+",
-                                    " "));
+                            out.write(((Utterance) b).getParticipant().getName().replaceAll(",", "").replaceAll("\\s+", " "));
                         }
                         out.write(",");
                         if (((Utterance) b).getTime() != null) {

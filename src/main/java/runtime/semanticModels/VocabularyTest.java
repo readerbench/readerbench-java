@@ -101,7 +101,7 @@ public class VocabularyTest {
                                     }
                                 }
 
-                                Integer[] assoc = graph.computeAssociations(6);
+                                Integer[] assoc = graph.computeAssociations(3);
 
                                 sb.append(questionId).append(",");
                                 questionId += 1;
@@ -155,7 +155,7 @@ public class VocabularyTest {
         test.process("resources/in/vocabulary_test/", w2v1);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         test.process("resources/in/vocabulary_test/", w2v1);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        test.process("resources/in/vocabulary_test/", w2v1);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        test.process("resources/in/vocabulary_test/", w2v1);
     }
 }

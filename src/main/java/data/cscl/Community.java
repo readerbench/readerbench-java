@@ -89,7 +89,7 @@ public class Community extends AnalysisElement {
             // update the community correspondingly
             for (Participant p : c.getParticipants()) {
                 int index = participants.indexOf(p);
-                Participant participantToUpdate = null;
+                Participant participantToUpdate;
                 if (index >= 0) {
                     participantToUpdate = participants.get(index);
                 } else {
@@ -217,7 +217,7 @@ public class Community extends AnalysisElement {
     }
 
     protected Set<Participant> extractArrayListfromSet(List<Participant> community) {
-        Set<Participant> ls = new TreeSet<Participant>();
+        Set<Participant> ls = new TreeSet<>();
         for (Participant p : community) {
             ls.add(p);
         }
@@ -327,7 +327,7 @@ public class Community extends AnalysisElement {
                     }
                     for (CSCLCriteria crit : CSCLCriteria.values()) {
                         p.getLongitudinalIndices().put(
-                                new AbstractMap.SimpleEntry<CSCLIndices, CSCLCriteria>(index, crit),
+                                new AbstractMap.SimpleEntry<>(index, crit),
                                 CSCLCriteria.getValue(crit, values));
                     }
                 }
@@ -350,11 +350,7 @@ public class Community extends AnalysisElement {
             Date endDate, int monthIncrement, int dayIncrement) {
         LOGGER.info("Loading all files in " + path);
 
-        FileFilter filter = new FileFilter() {
-            public boolean accept(File f) {
-                return f.getName().endsWith(".ser");
-            }
-        };
+        FileFilter filter = (File f) -> f.getName().endsWith(".ser");
         Community community = new Community(path, needsAnonymization, startDate, endDate);
         File dir = new File(path);
         if (!dir.isDirectory()) {
@@ -399,33 +395,24 @@ public class Community extends AnalysisElement {
     }
 
     public void generateParticipantView(String path) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
-                        participantContributions, true, needsAnonymization);
-                view.setVisible(true);
-            }
+        EventQueue.invokeLater(() -> {
+            ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
+                    participantContributions, true, needsAnonymization);
+            view.setVisible(true);
         });
     }
 
     public void generateConceptView(String path) {
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
-                conceptView.setVisible(true);
-            }
+        EventQueue.invokeLater(() -> {
+            PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
+            conceptView.setVisible(true);
         });
     }
 
     public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
-        try {
-            LOGGER.info("Writing document collection export");
-            File output = new File(pathToFile);
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
-                    32768);
-
+        LOGGER.info("Writing document collection export");
+        // print participant statistics
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
             // print participant statistics
             if (participants.size() > 0) {
                 out.write("Participant involvement and interaction\n");
@@ -529,8 +516,6 @@ public class Community extends AnalysisElement {
                     out.write("\n");
                 }
             }
-
-            out.close();
             LOGGER.info("Successfully finished writing document collection export");
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -574,7 +559,7 @@ public class Community extends AnalysisElement {
                 }
             }
         }
-        System.out.println("Finished processsing all files...");
+        LOGGER.info("Finished processsing all files...");
     }
 
     public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {
