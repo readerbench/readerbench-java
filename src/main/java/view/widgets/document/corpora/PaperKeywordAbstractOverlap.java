@@ -223,34 +223,4 @@ public class PaperKeywordAbstractOverlap extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				List<Document> docs = new LinkedList<Document>();
-
-				File dir = new File("in/EducMap/AbstractAnalyzer2");
-				File[] files = dir.listFiles(new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return name.endsWith(".ser");
-					}
-				});
-
-				for (File file : files) {
-					Document d = (Document) AbstractDocument
-							.loadSerializedDocument(file.getPath());
-					docs.add(d);
-				}
-
-				PaperKeywordAbstractOverlap view = new PaperKeywordAbstractOverlap(
-						docs);
-				view.setVisible(true);
-			}
-		});
-	}
 }

@@ -210,11 +210,4 @@ public class ComprehensionModelManagementView extends JFrame {
         });
     }
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-        EventQueue.invokeLater(() -> {
-            ComprehensionModelManagementView view = new ComprehensionModelManagementView();
-            view.setVisible(true);
-        });
-    }
 }

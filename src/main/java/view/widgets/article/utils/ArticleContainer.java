@@ -86,10 +86,4 @@ public class ArticleContainer {
 		return new ArticleContainer(articles);
 	}
 	
-	
-	public static void main(String[] args) {
-		String inDir = "in/LAK_corpus/parsed-documents2";
-		ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
-		System.out.println(container.authorContainers);
-	}
 }

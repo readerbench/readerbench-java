@@ -549,20 +549,6 @@ public class CreateVerbalizationView extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                CreateVerbalizationView view = new CreateVerbalizationView();
-                view.setVisible(true);
-            }
-        });
-    }
-
     private static void adjustToSystemGraphics() {
         for (UIManager.LookAndFeelInfo info : UIManager
                 .getInstalledLookAndFeels()) {

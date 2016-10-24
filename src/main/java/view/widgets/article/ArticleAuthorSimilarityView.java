@@ -418,45 +418,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		adjustToSystemGraphics();
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				String inDir = "resources/in/LAK_corpus/parsed-documents";
-
-				ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
-				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
-
-				IAuthorDistanceStrategy semanticDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance);
-				CachedAuthorDistanceStrategyDecorator cachedSemanticDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistStrategy);
-
-				IAuthorDistanceStrategy coAuthDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoAuthDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coAuthDistStrategy);
-
-				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
-				
-				IAuthorDistanceStrategy semanticDistPrunnedByCoCitOrCuAuthStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticPrunnedByCoCitOrCoAuth);
-				CachedAuthorDistanceStrategyDecorator cachedSemanticDistPrunnedByCoCitOrCuAuthStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistPrunnedByCoCitOrCuAuthStrategy);
-
-				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
-				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
-
-//				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
-//				String centerUri = "http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker";
-//				String centerUri = "http://data.linkededucation.org/resource/lak/conference/edm2009/paper/202";
-				String centerUri = null;
-				
-				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger, centerUri);
-				view.setVisible(true);
-				
-				// displayMetrics(container);
-			}
-		});
-	}
+        
 	private static void computeMetrics(ArticleContainer container) {
 		List<SingleAuthorContainer> list = container.getAuthorContainers();
 		List<String> authorPaperList = new ArrayList<String>();

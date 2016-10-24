@@ -433,22 +433,4 @@ public class SemSpaceView extends JFrame {
         return panel;
     }
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        ReaderBenchView.adjustToSystemGraphics();
-
-        JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.en));
-//		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.setVisible(true);
-
-        // frame = new
-        // SemSpaceView(LSA.loadLSA("resources/config/LA/LSA/Letters",
-        // Lang.la));
-        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }
-
 }

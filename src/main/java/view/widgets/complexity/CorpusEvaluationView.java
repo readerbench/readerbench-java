@@ -670,21 +670,6 @@ public class CorpusEvaluationView extends JFrame {
         contentPane.setLayout(gl_contentPane);
     }
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(() -> {
-            try {
-                CorpusEvaluationView frame = new CorpusEvaluationView();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     private static void adjustToSystemGraphics() {
         for (UIManager.LookAndFeelInfo info : UIManager
                 .getInstalledLookAndFeels()) {

@@ -299,20 +299,6 @@ public class VCoPView extends JFrame {
 		}
 	}
 
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-
-		adjustToSystemGraphics();
-
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				VCoPView view = new VCoPView();
-				view.setVisible(true);
-			}
-		});
-	}
-
 	private static void adjustToSystemGraphics() {
 		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 			if ("Nimbus".equals(info.getName())) {

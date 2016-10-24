@@ -56,7 +56,6 @@ public class VCoPEvaluationView extends JFrame {
 
     private JPanel contentPane;
     private JTextField textFieldPath;
-    private JComboBox<String> comboBoxLanguage;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
     private JCheckBox chckbxUsePosTagging;
@@ -136,23 +135,8 @@ public class VCoPEvaluationView extends JFrame {
                         GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(114, Short.MAX_VALUE)));
 
-        JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-
-        comboBoxLanguage = new JComboBox<String>();
-        comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
-        for (Lang l : Lang.values()) {
-            comboBoxLanguage.addItem(l.getDescription());
-        }
-
-        comboBoxLanguage.addActionListener((ActionEvent e) -> {
-            if (comboBoxLanguage.getSelectedIndex() > 0) {
-                // set language
-                lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
-
-                ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
-            }
-        });
-
+        lang = ReaderBenchView.RUNTIME_LANGUAGE;
+ 
         JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
         comboBoxLSA = new JComboBox<>();
         comboBoxLSA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
@@ -168,7 +152,6 @@ public class VCoPEvaluationView extends JFrame {
         btnEvaluateCorpus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!textFieldPath.getText().equals("")) {
-                    if (comboBoxLanguage.getSelectedIndex() > 0) {
                         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
                         SerialCorpusAssessment.processCorpus(textFieldPath.getText(),
@@ -178,11 +161,6 @@ public class VCoPEvaluationView extends JFrame {
                         Toolkit.getDefaultToolkit().beep();
                         logger.info("Finished processing all files");
                         setCursor(null); // turn off the wait cursor
-                    } else {
-                        JOptionPane.showMessageDialog(VCoPEvaluationView.this,
-                                "Please select an appropriate language for processing!", "Error",
-                                JOptionPane.WARNING_MESSAGE);
-                    }
                 } else {
                     JOptionPane.showMessageDialog(VCoPEvaluationView.this,
                             "Please select an appropriate input folder to be evaluated!", "Error",
@@ -197,15 +175,13 @@ public class VCoPEvaluationView extends JFrame {
                         gl_panelEvaluate
                         .createSequentialGroup()
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
-                                .addComponent(lblLsaVectorSpace).addComponent(lblLanguage)
+                                .addComponent(lblLsaVectorSpace)
                                 .addComponent(lblLdaModel))
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
                                 .addGroup(gl_panelEvaluate.createSequentialGroup()
                                         .addGroup(gl_panelEvaluate
                                                 .createParallelGroup(Alignment.LEADING)
-                                                .addComponent(comboBoxLanguage, 0,
-                                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                                 .addComponent(comboBoxLSA, 0, 495, Short.MAX_VALUE))
                                         .addGap(7))
                                 .addGroup(gl_panelEvaluate.createSequentialGroup()
@@ -216,9 +192,7 @@ public class VCoPEvaluationView extends JFrame {
                                 .addComponent(btnEvaluateCorpus).addContainerGap()))));
         gl_panelEvaluate.setVerticalGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_panelEvaluate.createSequentialGroup().addContainerGap()
-                        .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage)
-                                .addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25,
-                                        GroupLayout.PREFERRED_SIZE))
+                        .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE))
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(lblLsaVectorSpace).addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE,
@@ -234,20 +208,6 @@ public class VCoPEvaluationView extends JFrame {
         panelEvaluate.setLayout(gl_panelEvaluate);
 
         contentPane.setLayout(gl_contentPane);
-    }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                VCoPEvaluationView view = new VCoPEvaluationView();
-                view.setVisible(true);
-            }
-        });
     }
 
     private static void adjustToSystemGraphics() {

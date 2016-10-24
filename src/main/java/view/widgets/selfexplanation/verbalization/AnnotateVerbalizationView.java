@@ -540,17 +540,6 @@ public class AnnotateVerbalizationView extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(() -> {
-            AnnotateVerbalizationView view = new AnnotateVerbalizationView();
-            view.setVisible(true);
-        });
-    }
-
     private static void adjustToSystemGraphics() {
         for (UIManager.LookAndFeelInfo info : UIManager
                 .getInstalledLookAndFeels()) {

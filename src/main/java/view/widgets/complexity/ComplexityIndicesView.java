@@ -223,21 +223,6 @@ public class ComplexityIndicesView extends JFrame {
     
     
 
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(() -> {
-            try {
-                JFrame frame = new ComplexityIndicesView();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     private static void adjustToSystemGraphics() {
         for (UIManager.LookAndFeelInfo info : UIManager
                 .getInstalledLookAndFeels()) {
