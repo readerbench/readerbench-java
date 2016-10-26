@@ -29,9 +29,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -48,7 +46,6 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 
@@ -89,7 +86,7 @@ public class PaperCorpusSimilarityView extends JFrame {
     static Logger logger = Logger.getLogger(PaperCorpusSimilarityView.class);
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
-    private List<Document> docs;
+    private final List<Document> docs;
     private JSlider sliderThreshold;
     private JPanel panelGraph;
 
@@ -201,14 +198,12 @@ public class PaperCorpusSimilarityView extends JFrame {
         sliderThreshold.setMinorTickSpacing(10);
         sliderThreshold.setMajorTickSpacing(50);
         java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
-        labelTableThreshold.put(new Integer(100), new JLabel("100%"));
-        labelTableThreshold.put(new Integer(50), new JLabel("50%"));
-        labelTableThreshold.put(new Integer(0), new JLabel("0"));
+        labelTableThreshold.put(100, new JLabel("100%"));
+        labelTableThreshold.put(50, new JLabel("50%"));
+        labelTableThreshold.put(0, new JLabel("0"));
         sliderThreshold.setLabelTable(labelTableThreshold);
-        sliderThreshold.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                generateGraph();
-            }
+        sliderThreshold.addChangeListener((ChangeEvent e) -> {
+            generateGraph();
         });
 
         panelGraph = new JPanel();
@@ -359,13 +354,13 @@ public class PaperCorpusSimilarityView extends JFrame {
 
     public HashMap<Node, AbstractDocument> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel,
             double threshold) {
-        HashMap<Node, AbstractDocument> outMap = new HashMap<Node, AbstractDocument>();
+        HashMap<Node, AbstractDocument> outMap = new HashMap<>();
         logger.info("Starting to build the document graph");
         // build connected graph
-        Map<AbstractDocument, Boolean> visibleDocs = new TreeMap<AbstractDocument, Boolean>();
+        Map<AbstractDocument, Boolean> visibleDocs = new TreeMap<>();
         // build nodes
-        Map<AbstractDocument, Node> nodes = new TreeMap<AbstractDocument, Node>();
-        List<CompareDocsSim> similarities = new LinkedList<CompareDocsSim>();
+        Map<AbstractDocument, Node> nodes = new TreeMap<>();
+        List<CompareDocsSim> similarities = new ArrayList<>();
 
         for (AbstractDocument d : docs) {
             visibleDocs.put(d, false);

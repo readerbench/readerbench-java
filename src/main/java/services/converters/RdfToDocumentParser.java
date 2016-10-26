@@ -289,10 +289,9 @@ public class RdfToDocumentParser {
 
     private static void addSingleDocument(String filePath) {
         Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-        modelPaths.put(SimilarityType.LSA, ReaderBenchView.TRAINED_LSA_SPACES_EN[0]);
-        modelPaths.put(SimilarityType.LDA, ReaderBenchView.TRAINED_LDA_MODELS_EN[0]);
-        ResearchArticle d = ResearchArticle.load(filePath, modelPaths,
-                Lang.en, false, true);
+        modelPaths.put(SimilarityType.LSA, ReaderBenchView.LSA_SPACES.get("en")[0]);
+        modelPaths.put(SimilarityType.LDA, ReaderBenchView.LDA_SPACES.get("en")[0]);
+        ResearchArticle d = ResearchArticle.load(filePath, modelPaths, Lang.en, false, true);
         d.computeAll(false);
         d.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
     }
