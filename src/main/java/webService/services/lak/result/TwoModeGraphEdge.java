@@ -8,10 +8,10 @@ import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
  */
 public class TwoModeGraphEdge {
 
-    AuthorDistanceStrategyType edgeType;
-    double score;
-    String sourceUri;
-    String targetUri;
+    private final AuthorDistanceStrategyType edgeType;
+    private final double score;
+    private final String sourceUri;
+    private final String targetUri;
 
     public TwoModeGraphEdge(AuthorDistanceStrategyType edgeType, double score, String sourceUri, String targetUri) {
         this.edgeType = edgeType;
@@ -26,6 +26,14 @@ public class TwoModeGraphEdge {
 
     public String getTargetUri() {
         return this.targetUri;
+    }
+    
+    public double getScore() {
+        return this.score;
+    }
+    
+    public AuthorDistanceStrategyType getEdgeType() {
+        return this.edgeType;
     }
 
     @Override

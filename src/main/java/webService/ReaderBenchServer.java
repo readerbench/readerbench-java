@@ -791,7 +791,7 @@ public class ReaderBenchServer {
 
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
-            TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
+            TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
