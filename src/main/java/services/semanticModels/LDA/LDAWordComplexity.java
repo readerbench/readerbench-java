@@ -21,18 +21,19 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import services.commons.ValueComparator;
 import services.commons.VectorAlgebra;
 import services.semanticModels.LDA.LDA;
 import data.Word;
 import data.Lang;
+import java.util.logging.Logger;
 
 public class LDAWordComplexity {
 
-    static Logger logger = Logger.getLogger(LDAWordComplexity.class);
+    static Logger logger = Logger.getLogger("");
 
     public static void wordComplexityAvgWeight(LDA lda) throws IOException {
         try (BufferedWriter out = new BufferedWriter(
@@ -94,7 +95,7 @@ public class LDAWordComplexity {
     }
 
     public static void main(String[] args) throws IOException {
-        BasicConfigurator.configure();
+        
 
         String path = "resources/config/FR/LDA/Le Monde";
         Lang lang = Lang.fr;

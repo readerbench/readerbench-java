@@ -48,7 +48,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -70,13 +70,14 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
 public class PaperSimilarityView extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(PaperSimilarityView.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
     private final List<Document> docs;

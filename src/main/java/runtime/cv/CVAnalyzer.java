@@ -28,9 +28,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.junit.Test;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
@@ -48,7 +49,7 @@ import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
-    public Logger logger = Logger.getLogger(CVAnalyzer.class);
+    public Logger logger = Logger.getLogger("");
 
     private static final String CV_PATH_SAMPLE = "resources/in/cv/cv_sample/";
     private static final String CV_PATH = "resources/in/cv_new/cv_analyse/";
@@ -429,7 +430,7 @@ public class CVAnalyzer {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         Map<String, String> hm = loadDefaultParameters();
@@ -442,7 +443,7 @@ public class CVAnalyzer {
 
     @Test
     public static void cvSampleTest() {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         Map<String, String> hm = loadDefaultParameters();

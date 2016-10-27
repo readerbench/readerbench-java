@@ -20,12 +20,13 @@ import java.io.File;
 import java.io.FileReader;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.word2vec.Word2VecModel;
@@ -33,7 +34,7 @@ import webService.ReaderBenchServer;
 
 public class ToeflTest {
 
-    static Logger logger = Logger.getLogger(ToeflTest.class);
+    static Logger logger = Logger.getLogger("");
 
     int questionId;
 

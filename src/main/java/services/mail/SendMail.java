@@ -19,18 +19,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 
 public class SendMail {
 	
-	private static Logger logger = Logger.getLogger(SendMail.class);
+	private static Logger logger = Logger.getLogger("");
 	
 	private static String apiKey = "key-5e4bf79654ee1197436b79057c6f43d9";
 	private static String domainName = "readerbench.com";

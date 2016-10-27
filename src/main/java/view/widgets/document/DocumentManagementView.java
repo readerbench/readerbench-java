@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -57,7 +58,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.Logger;
+
 
 import data.Block;
 import data.document.Document;
@@ -71,7 +72,7 @@ import view.widgets.ReaderBenchView;
 public class DocumentManagementView extends JFrame {
 
     private static final long serialVersionUID = -2864356905020607155L;
-    static Logger logger = Logger.getLogger(DocumentManagementView.class);
+    static Logger logger = Logger.getLogger("");
     public static final String VERBALIZATION_TAG = "//verbalization_breakpoint//";
 
     private Document loadedDocument = null;

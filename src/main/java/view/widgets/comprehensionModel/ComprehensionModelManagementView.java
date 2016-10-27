@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
@@ -34,8 +35,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import services.comprehensionModel.ComprehensionModel;
 import services.semanticModels.LDA.LDA;
@@ -44,7 +45,7 @@ import utils.localization.LocalizationUtils;
 public class ComprehensionModelManagementView extends JFrame {
 
     private static final long serialVersionUID = -2864356905020607155L;
-    static Logger logger = Logger.getLogger(ComprehensionModelManagementView.class);
+    static Logger logger = Logger.getLogger("");
 
     private final JPanel contentPane;
     private final JTextField txtFieldHdpGrade;

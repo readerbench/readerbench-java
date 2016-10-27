@@ -40,7 +40,7 @@ import services.replicatedWorker.SerialCorpusAssessment;
  */
 public class CreativityTest {
 
-    private static final Logger LOGGER = Logger.getLogger(CreativityTest.class.getName());
+    private static final Logger logger = Logger.getLogger("");
 
     public static void processAllFolders(String folder, String prefix, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
         File dir = new File(folder);
@@ -62,11 +62,11 @@ public class CreativityTest {
                 }
             }
         }
-        LOGGER.info("Finished processsing all files ...");
+        logger.info("Finished processsing all files ...");
     }
 
     public static void processConversations(String path) {
-        LOGGER.log(Level.INFO, "Loading all files in {0}", path);
+        logger.log(Level.INFO, "Loading all files in {0}", path);
 
         FileFilter filter = (File f) -> f.getName().endsWith(".ser");
         File[] filesTODO = (new File(path)).listFiles(filter);
@@ -77,7 +77,7 @@ public class CreativityTest {
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
-                    LOGGER.log(Level.WARNING, "Incorrect number of participants for {0}", f.getPath());
+                    logger.log(Level.WARNING, "Incorrect number of participants for {0}", f.getPath());
                 } else {
                     Participant p1 = c.getParticipants().get(0);
                     Participant p2 = c.getParticipants().get(1);
@@ -94,7 +94,7 @@ public class CreativityTest {
                 }
             }
         } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

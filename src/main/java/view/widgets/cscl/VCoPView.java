@@ -28,6 +28,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -48,15 +49,15 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.cscl.Community;
 import utils.localization.LocalizationUtils;
 
 public class VCoPView extends JFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
-	static Logger logger = Logger.getLogger(VCoPView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private JPanel contentPane;
 	private JTextField textFieldPath;

@@ -20,17 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
 
 import data.Word;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 
 public class GenerateSpace {
-	static Logger logger = Logger.getLogger(GenerateSpace.class);
+	static Logger logger = Logger.getLogger("");
 	private ISemanticModel semSpace;
 
 	public GenerateSpace(ISemanticModel semSpace) {

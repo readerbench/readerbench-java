@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -53,8 +54,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import services.commons.Formatting;
 import services.complexity.ComputeBalancedMeasure;
@@ -67,7 +68,7 @@ import services.complexity.ComplexityIndexType;
 public class CorpusEvaluationView extends JFrame {
 
     private static final long serialVersionUID = -4518616508590444786L;
-    static Logger logger = Logger.getLogger(CorpusEvaluationView.class);
+    static Logger logger = Logger.getLogger("");
 
     private JPanel contentPane;
     private JTextField textFieldDirectory;

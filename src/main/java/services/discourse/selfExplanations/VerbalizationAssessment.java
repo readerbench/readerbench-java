@@ -15,15 +15,16 @@
  */
 package services.discourse.selfExplanations;
 
-import org.apache.log4j.Logger;
+
 
 import services.semanticModels.LSA.LSA;
 import data.Block;
 import data.discourse.SemanticCohesion;
 import data.document.Metacognition;
+import java.util.logging.Logger;
 
 public class VerbalizationAssessment {
-	static Logger logger = Logger.getLogger(LSA.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static void detRefBlockSimilarities(Metacognition metacognition) {
 		logger.info("Building metacognition block similarities");

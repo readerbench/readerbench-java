@@ -36,18 +36,19 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Block;
 import data.Word;
 import data.discourse.WordOverlap;
 import data.document.Document;
+import java.util.logging.Logger;
 
 public class PaperKeywordAbstractOverlap extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(PaperKeywordAbstractOverlap.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
     private final List<Document> docs;

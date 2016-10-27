@@ -46,8 +46,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -71,6 +71,7 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.article.ResearchArticle;
+import java.util.logging.Logger;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import view.models.PreviewSketch;
@@ -87,7 +88,7 @@ import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
 	private static final long serialVersionUID = -8582615231233815258L;
-	static Logger logger = Logger.getLogger(ArticleAuthorSimilarityView.class);
+	static Logger logger = Logger.getLogger("");
 	public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
 	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
 	public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);

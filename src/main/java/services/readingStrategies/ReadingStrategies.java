@@ -17,8 +17,7 @@ package services.readingStrategies;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import data.Block;
 import data.Sentence;
@@ -30,10 +29,10 @@ import java.util.EnumMap;
 
 public class ReadingStrategies {
 
-    static final Logger LOGGER = Logger.getLogger(ReadingStrategies.class);
+    static final Logger logger = Logger.getLogger("");
 
     public static void detReadingStrategies(Metacognition metacognition) {
-        LOGGER.info("Identifying reading strategies from verbalization...");
+        logger.info("Identifying reading strategies from verbalization...");
 
         // clear references of words in initial document
         for (Block b : metacognition.getBlocks()) {
@@ -125,7 +124,7 @@ public class ReadingStrategies {
     }
 
     public static void detReadingStrategies(Summary essay) {
-        LOGGER.info("Identifying reading strategies from summary ...");
+        logger.info("Identifying reading strategies from summary ...");
 
         // clear references of words in initial document
         for (Block b : essay.getBlocks()) {

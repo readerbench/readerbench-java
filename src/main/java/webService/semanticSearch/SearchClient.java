@@ -20,13 +20,14 @@ import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -40,7 +41,7 @@ import webService.result.ResultSearch;
 
 public class SearchClient {
 
-    private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+    private static Logger logger = Logger.getLogger("");
 
     public static final double MIN_THRESHOLD = 0.2d;
     public static final int NO_RESULTS = 20;
@@ -101,7 +102,7 @@ public class SearchClient {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         performQuery("money", 5656);
         performQuery("financial", 5858);
     }

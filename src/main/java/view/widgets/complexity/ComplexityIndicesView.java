@@ -39,9 +39,10 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
-import org.apache.log4j.BasicConfigurator;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
+
 
 import services.complexity.ComplexityIndices;
 import utils.localization.LocalizationUtils;
@@ -56,7 +57,7 @@ public class ComplexityIndicesView extends JFrame {
 
     private static final long serialVersionUID = -3120119620693209906L;
 
-    static Logger logger = Logger.getLogger(ComplexityIndicesView.class);
+    static Logger logger = Logger.getLogger("");
 
     private JPanel contentPane;
 

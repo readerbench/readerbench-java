@@ -19,13 +19,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import data.Block;
 import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
 import data.cscl.Utterance;
 import data.discourse.SemanticCohesion;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 
 /**
@@ -34,7 +35,7 @@ import services.commons.Formatting;
  */
 // class responsible for evaluating collaboration
 public class Collaboration {
-	static Logger logger = Logger.getLogger(Collaboration.class);
+	static Logger logger = Logger.getLogger("");
 	public static final double COLLABORATION_ZONE_SLACK = 0.025;
 	public static final int COLLABORATION_ZONE_MIN_SPREAD = 5;
 	public static double BETA_FSCORE = 1;

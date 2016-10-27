@@ -19,8 +19,9 @@ import java.awt.Color;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import data.AnalysisElement;
 import data.Sentence;
@@ -33,7 +34,7 @@ import services.nlp.listOfWords.ListOfWords;
  */
 public class PatternMatching {
 
-    static Logger logger = Logger.getLogger(PatternMatching.class);
+    static Logger logger = Logger.getLogger("");
 
     private static ListOfWords patterns_causality_fr;
     private static ListOfWords patterns_metacognition_fr;

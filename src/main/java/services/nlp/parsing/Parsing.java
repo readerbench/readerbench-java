@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -50,6 +50,7 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.openide.util.Exceptions;
 import services.commons.TextPreprocessing;
@@ -63,7 +64,7 @@ import services.nlp.stemmer.Stemmer;
  */
 public abstract class Parsing {
 
-    static Logger logger = Logger.getLogger(Parsing.class);
+    static Logger logger = Logger.getLogger("");
 
     protected Lang lang;
 
@@ -143,7 +144,7 @@ public abstract class Parsing {
                                         Long longTime = Long.parseLong(blockTmp.getTime());
                                         time = new Date(longTime * 1000);
                                     } catch (NumberFormatException e7) {
-                                        logger.error("Unparsable date: " + blockTmp.getTime());
+                                        logger.severe("Unparsable date: " + blockTmp.getTime());
                                     }
                                 }
                             }
@@ -230,7 +231,7 @@ public abstract class Parsing {
             d.determineWordOccurences(d.getBlocks());
             d.determineSemanticDimensions();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

@@ -20,13 +20,14 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
@@ -51,7 +52,7 @@ import view.models.PreviewSketch;
 public class ParticipantInteractionView extends JFrame {
 	private static final long serialVersionUID = 2571577554857108582L;
 
-	static Logger logger = Logger.getLogger(ParticipantInteractionView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private List<Participant> participants;
 	private double[][] participantContributions;

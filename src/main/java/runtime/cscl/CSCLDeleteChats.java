@@ -20,12 +20,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 public class CSCLDeleteChats {
 	
-	public static Logger logger = Logger.getLogger(CSCLDeleteChats.class);
+	public static Logger logger = Logger.getLogger("");
 
 	private static String conversationsPath = "resources/in/corpus_v2/";	
 	
@@ -111,7 +112,7 @@ public class CSCLDeleteChats {
 			    	try {
 						Files.delete(filePath);
 					} catch (Exception e) {
-						logger.error("File " + filePath.getFileName().toString() + " could not be deleted.");
+						logger.severe("File " + filePath.getFileName().toString() + " could not be deleted.");
 						e.printStackTrace();
 					}
 					deletedFiles++;
@@ -124,7 +125,7 @@ public class CSCLDeleteChats {
 						try {
 							Files.delete(filePath);
 						} catch (Exception e) {
-							logger.error("File " + filePath.getFileName().toString() + " could not be deleted.");
+							logger.severe("File " + filePath.getFileName().toString() + " could not be deleted.");
 							e.printStackTrace();
 						}
 						deletedFiles++;

@@ -23,6 +23,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -42,10 +43,11 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.Lang;
+import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
@@ -59,7 +61,7 @@ import webService.ReaderBenchServer;
 public class SemanticModelsTraining extends JFrame {
 
     private static final long serialVersionUID = 4920477447183036103L;
-    static Logger logger = Logger.getLogger(SemanticModelsTraining.class);
+    static Logger logger = Logger.getLogger("");
 
     private static final String TERM_DOC_MATRIX_NAME = "matrix.svd";
     private static final String SVD_FOLDER_NAME = "svd_out";
@@ -122,7 +124,7 @@ public class SemanticModelsTraining extends JFrame {
                         preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
                 }
             } catch (Exception exc) {
-                logger.error("Error processing input file " + exc.getMessage(), exc);
+                logger.log(Level.SEVERE,"Error processing input file " + exc.getMessage(), exc);
             }
             return null;
         }
@@ -179,7 +181,7 @@ public class SemanticModelsTraining extends JFrame {
                 processing.performPostProcessing(input.getParent(), lang, chckbxLSAUseHalfSigma.isSelected());
                 logger.info("Finished building the LSA model");
             } catch (Exception exc) {
-                logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
                 exc.printStackTrace();
             }
             return null;
@@ -221,7 +223,7 @@ public class SemanticModelsTraining extends JFrame {
                 lda.processCorpus(input, noTopics, noThreads, noIterations);
                 lda.printTopics(textFieldLDADirectory.getText(), 100);
             } catch (Exception exc) {
-                logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
                 exc.printStackTrace();
             }
             return null;

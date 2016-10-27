@@ -15,18 +15,19 @@
  */
 package services.discourse.relatedness;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Block;
 import data.discourse.SemanticRelatedness;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author Gabriel Gutu
  */
 public class RelatednessGraph {
-	static Logger logger = Logger.getLogger(RelatednessGraph.class);
+	static Logger logger = Logger.getLogger("");
 
 	/**
 	 * Build the relatedness graph of a document.

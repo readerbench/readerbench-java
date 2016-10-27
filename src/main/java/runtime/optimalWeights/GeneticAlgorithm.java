@@ -24,8 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -33,7 +34,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import runtime.timeSeries.KeyStrokeLoginTimeSeries;
 
 public class GeneticAlgorithm implements Runnable {
-	static Logger logger = Logger.getLogger(KeyStrokeLoginTimeSeries.class);
+	static Logger logger = Logger.getLogger("");
 
 	private static List<double[]> x;
 
@@ -148,7 +149,7 @@ public class GeneticAlgorithm implements Runnable {
 				line++;
 			}
 		} catch (Exception e) {
-			logger.error("Error: " + e.getMessage());
+			logger.severe("Error: " + e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -362,7 +363,7 @@ public class GeneticAlgorithm implements Runnable {
 			logger.info("Population " + id + ": Best overall individual:\n" + best);
 		} catch (Exception e) {
 			e.printStackTrace();
-			logger.error(e.getMessage());
+			logger.severe(e.getMessage());
 		}
 	}
 

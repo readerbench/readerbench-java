@@ -227,7 +227,7 @@ public class ResearchArticle extends Document {
             }
             return d;
         } catch (ParserConfigurationException | SAXException | IOException | DOMException ex) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + ex.getMessage());
+            logger.severe("Error evaluating input file " + docFile.getPath() + " - " + ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
         return null;

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AnalysisElement;
@@ -32,6 +32,7 @@ import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import java.util.EnumMap;
+import java.util.logging.Logger;
 import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -39,7 +40,7 @@ import services.semanticModels.WordNet.OntologySupport;
 
 public class KeywordModeling {
 
-    static Logger logger = Logger.getLogger(KeywordModeling.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final double LSA_WEIGHT = 1.0;
     public static final double LDA_WEIGHT = 1.0;

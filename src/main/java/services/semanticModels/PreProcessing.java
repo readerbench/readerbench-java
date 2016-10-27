@@ -33,7 +33,7 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -43,13 +43,14 @@ import data.Lang;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
+import java.util.logging.Logger;
 import services.commons.TextPreprocessing;
 import services.nlp.listOfWords.Dictionary;
 import services.semanticModels.LSA.LSA;
 
 public class PreProcessing {
 
-    static Logger logger = Logger.getLogger(PreProcessing.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final int MIN_NO_OCCURRENCES = 5;
 

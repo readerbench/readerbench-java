@@ -37,11 +37,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -55,7 +56,7 @@ public class EssayProcessingView extends JFrame {
 
     public static final String C_BASE_FOLDER_NAME = "grade";
 
-    static Logger logger = Logger.getLogger(RunMeasurementsView.class);
+    static Logger logger = Logger.getLogger("");
 
     private JPanel contentPane;
     private JTextField textFieldPath;

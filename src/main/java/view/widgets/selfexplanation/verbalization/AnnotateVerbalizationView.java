@@ -25,6 +25,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -50,8 +51,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import services.readingStrategies.ReadingStrategies;
 import utils.localization.LocalizationUtils;
@@ -66,7 +67,7 @@ import java.util.ArrayList;
 public class AnnotateVerbalizationView extends JFrame {
 
     private static final long serialVersionUID = -2864356905020607155L;
-    static Logger logger = Logger.getLogger(AnnotateVerbalizationView.class);
+    static Logger logger = Logger.getLogger("");
 
     private Metacognition loadedVerbalization = null;
     private Document loadedDocument = null;

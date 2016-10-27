@@ -17,10 +17,11 @@ package data.sentiment;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import dao.ValenceDAO;
 import dao.WeightDAO;
+import java.util.logging.Logger;
 import webService.ReaderBenchServer;
 
 /**
@@ -34,7 +35,7 @@ import webService.ReaderBenchServer;
  */
 public class SentimentWeights {
 
-	static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+	static Logger logger = Logger.getLogger("");
 
 	/**
 	 * The sentiment grid contains the associations of (primary sentiment, RAGE

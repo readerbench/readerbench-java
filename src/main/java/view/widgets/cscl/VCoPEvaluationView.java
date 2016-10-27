@@ -22,6 +22,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -41,8 +42,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import services.replicatedWorker.SerialCorpusAssessment;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
@@ -52,7 +53,7 @@ import data.AbstractDocument.SaveType;
 public class VCoPEvaluationView extends JFrame {
 
     private static final long serialVersionUID = 8894652868238113117L;
-    static Logger logger = Logger.getLogger(VCoPView.class);
+    static Logger logger = Logger.getLogger("");
 
     private JPanel contentPane;
     private JTextField textFieldPath;

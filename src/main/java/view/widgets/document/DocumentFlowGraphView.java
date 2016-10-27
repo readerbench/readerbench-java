@@ -19,13 +19,14 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -56,7 +57,7 @@ import services.complexity.cohesion.flow.DocumentFlow;
 import view.models.PreviewSketch;
 
 public class DocumentFlowGraphView extends JFrame {
-	static Logger logger = Logger.getLogger(ConceptView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private static final long serialVersionUID = -5991280949453890249L;
 

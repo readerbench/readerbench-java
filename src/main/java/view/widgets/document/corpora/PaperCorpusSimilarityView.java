@@ -49,7 +49,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -76,6 +76,7 @@ import org.openide.util.Lookup;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
@@ -83,7 +84,7 @@ public class PaperCorpusSimilarityView extends JFrame {
 
     static PaperCorpusSimilarityView corpusView;
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(PaperCorpusSimilarityView.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
     private final List<Document> docs;

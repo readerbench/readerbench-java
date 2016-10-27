@@ -32,10 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -45,7 +46,7 @@ import webService.ReaderBenchServer;
 
 public class SimilarityAnalysis {
 
-    public Logger logger = Logger.getLogger(SimilarityAnalysis.class);
+    public Logger logger = Logger.getLogger("");
     private String path;
 
     private String pathToLSA;
@@ -1461,7 +1462,7 @@ public class SimilarityAnalysis {
     }
 
     public static void main(String args[]) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/LSA/tasa_lak_en", Lang.en);

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,7 +41,8 @@ import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
-import org.apache.log4j.BasicConfigurator;
+import java.util.logging.Logger;
+
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
@@ -55,7 +56,7 @@ import webService.ReaderBenchServer;
 
 public class Millington {
 
-    static final Logger LOGGER = Logger.getLogger(Millington.class);
+    static final Logger logger = Logger.getLogger("");
 
     private final String path;
     private final Map<String, String> loadedDocuments;
@@ -192,7 +193,7 @@ public class Millington {
             }
 
             if (content == null || !content.contains(targetText)) {
-                LOGGER.error("Error processing row " + rowNo);
+                logger.severe("Error processing row " + rowNo);
                 continue;
             }
 
@@ -237,16 +238,16 @@ public class Millington {
             out.close();
 
             if (rowNo % 10 == 0) {
-                LOGGER.info("Finished processing " + rowNo + " rows ...");
+                logger.info("Finished processing " + rowNo + " rows ...");
             }
             rowNo++;
         }
-        LOGGER.info("Finished processing all rows...");
+        logger.info("Finished processing all rows...");
     }
 
     public static void main(String[] args) {
         try {
-            BasicConfigurator.configure();
+            
             ReaderBenchServer.initializeDB();
 
             Millington m = new Millington("resources/in/Millington");

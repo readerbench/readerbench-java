@@ -35,7 +35,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+
 
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.CharSequenceLowercase;
@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -66,7 +67,7 @@ import services.semanticModels.SimilarityType;
 public class LDA implements ISemanticModel, Serializable {
 
     private static final long serialVersionUID = 5981303412937874248L;
-    static Logger logger = Logger.getLogger(LDA.class);
+    static Logger logger = Logger.getLogger("");
     private static int MIN_NO_WORDS_PER_DOCUMENT = 5;
 
     private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();

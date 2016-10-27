@@ -3,7 +3,7 @@ package webService.services.lak;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 import webService.services.lak.result.TwoModeGraph;
 import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
@@ -13,7 +13,7 @@ import webService.services.lak.result.TwoModeGraphNodeType;
  * @author ionutparaschiv
  */
 public class TwoModeGraphFilter {
-    private static final Logger LOGGER = Logger.getLogger(TwoModeGraphFilter.class);
+    private static final Logger LOGGER = Logger.getLogger("");
 
     public static int MaxNoAuthors = 20;
     public static int MaxNoArticles = 20;

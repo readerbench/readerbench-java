@@ -18,9 +18,10 @@ package runtime.semanticModels;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -36,7 +37,7 @@ import webService.ReaderBenchServer;
 
 public class MSRSentenceCompletionTest {
 
-    static Logger logger = Logger.getLogger(MSRSentenceCompletionTest.class);
+    static Logger logger = Logger.getLogger("");
 
     int questionId;
 

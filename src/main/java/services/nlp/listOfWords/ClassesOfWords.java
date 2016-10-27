@@ -30,11 +30,12 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Lang;
 import java.io.Serializable;
+import java.util.logging.Logger;
 import services.commons.TextPreprocessing;
 
 /**
@@ -43,12 +44,12 @@ import services.commons.TextPreprocessing;
  */
 public class ClassesOfWords implements Serializable {
     
-    static final Logger LOGGER = Logger.getLogger(ClassesOfWords.class);
+    static final Logger logger = Logger.getLogger("");
     
     private Map<String, Set<String>> classes;
     
     public ClassesOfWords(String path) {
-        LOGGER.info("Loading file " + path + " ...");
+        logger.info("Loading file " + path + " ...");
         classes = new TreeMap<>();
         try {
             FileInputStream inputFile = new FileInputStream(path);
@@ -69,7 +70,7 @@ public class ClassesOfWords implements Serializable {
                 }
             }
         } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         }
     }
     
@@ -88,7 +89,7 @@ public class ClassesOfWords implements Serializable {
                 }
             }
         } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         }
     }
     

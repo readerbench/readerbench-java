@@ -19,8 +19,8 @@ import services.semanticModels.SimilarityType;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
@@ -55,7 +55,7 @@ import vu.wntools.wordnet.WordnetData;
 
 public class OntologySupport {
 
-    static Logger logger = Logger.getLogger(OntologySupport.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final double SYNONYM_WEIGHT = 1.0;
     public static final double HYPERNYM_WEIGHT = 1.0;

@@ -34,8 +34,9 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
@@ -45,7 +46,7 @@ import services.semanticModels.SimilarityType;
  */
 public class Word extends AnalysisElement implements Comparable<Word>, Serializable {
 
-    static Logger logger = Logger.getLogger(CohesionGraph.class);
+    static Logger logger = Logger.getLogger("");
 
     private static final long serialVersionUID = -3809934014813200184L;
 

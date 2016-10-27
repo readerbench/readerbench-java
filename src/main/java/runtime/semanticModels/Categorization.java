@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import dao.CategoryDAO;
 import data.AbstractDocument;
@@ -28,6 +28,7 @@ import data.pojo.Category;
 import data.pojo.CategoryPhrase;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import webService.query.QueryHelper;
@@ -35,7 +36,7 @@ import webService.result.ResultCategory;
 
 public class Categorization {
 
-    private static final Logger logger = Logger.getLogger(Categorization.class);
+    private static final Logger logger = Logger.getLogger("");
 
     public static void performCategorization(String description) {
         Map<String, String> hm = new HashMap<>();

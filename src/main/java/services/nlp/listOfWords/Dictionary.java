@@ -17,7 +17,7 @@ package services.nlp.listOfWords;
 
 import java.util.Set;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.Lang;
 
@@ -104,7 +104,7 @@ public class Dictionary {
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
+		
 		System.out.println(Dictionary.isDictionaryWord("abalobé", Lang.fr));
 		System.out.println(Dictionary.isDictionaryWord("cosi", Lang.it));
 		System.out.println(Dictionary.isDictionaryWord("atarugaear", Lang.es));

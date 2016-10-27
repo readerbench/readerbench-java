@@ -23,9 +23,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -35,7 +36,7 @@ import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 
 public class KeyStrokeLoginTimeSeries {
-	static Logger logger = Logger.getLogger(KeyStrokeLoginTimeSeries.class);
+	static Logger logger = Logger.getLogger("");
 
 	private static final CSCLCriteria[] CRITERIA_MA = { CSCLCriteria.STDEV, CSCLCriteria.SLOPE, CSCLCriteria.ENTROPY,
 			CSCLCriteria.UNIFORMITY, CSCLCriteria.LOCAL_EXTREME };
@@ -142,7 +143,7 @@ public class KeyStrokeLoginTimeSeries {
 				}
 				int slot = tts / (timeframe * 1000);
 				if (slot < 0 || slot >= timeSeriesLength) {
-					logger.error("Improper timestamp for " + studID + ": " + timestamp + " error of "
+					logger.severe("Improper timestamp for " + studID + ": " + timestamp + " error of "
 							+ (tts - writingTime * 1000) / 1000 + " seconds");
 					if (tts > (writingTime + 30) * 1000)
 						studs.add(studID);
@@ -156,14 +157,14 @@ public class KeyStrokeLoginTimeSeries {
 				rowNo++;
 			}
 			printStud(studID, timeSeriesLength, timeSeries, out);
-			logger.error("Students with problems");
+			logger.severe("Students with problems");
 			for (String stud : studs) {
-				logger.error(stud);
+				logger.severe(stud);
 			}
 			myWorkBook.close();
 			out.close();
 		} catch (Exception e) {
-			logger.error("Error: " + e.getMessage());
+			logger.severe("Error: " + e.getMessage());
 			e.printStackTrace();
 		}
 
@@ -247,7 +248,7 @@ public class KeyStrokeLoginTimeSeries {
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
+		
 		KeyStrokeLoginTimeSeries ksl = new KeyStrokeLoginTimeSeries("resources/in/KL", 300, 25 * 60);
 		ksl.parseDataFile();
 	}

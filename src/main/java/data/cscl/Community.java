@@ -227,7 +227,7 @@ public class Community extends AnalysisElement {
     public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
         if (startDate != null && endDate != null && participants != null && participants.size() > 0) {
-            LOGGER.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
+            logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
                     + dateFormat.format(endDate) + " having " + participants.size() + " participants.");
         }
 
@@ -307,10 +307,10 @@ public class Community extends AnalysisElement {
     }
 
     public void modelEvolution() {
-        LOGGER.info("Modeling time evolution for " + participants.size() + " participants");
+        logger.info("Modeling time evolution for " + participants.size() + " participants");
         for (CSCLIndices index : CSCLIndices.values()) {
             if (index.isUsedForTimeModeling()) {
-                LOGGER.info("Modeling based on " + index.getDescription());
+                logger.info("Modeling based on " + index.getDescription());
                 int no = 0;
                 for (Participant p : participants) {
                     // model time evolution of each participant
@@ -323,7 +323,7 @@ public class Community extends AnalysisElement {
                         }
                     }
                     if (++no % 100 == 0) {
-                        LOGGER.info("Finished evaluating the time evolution of " + no + " participants");
+                        logger.info("Finished evaluating the time evolution of " + no + " participants");
                     }
                     for (CSCLCriteria crit : CSCLCriteria.values()) {
                         p.getLongitudinalIndices().put(
@@ -348,7 +348,7 @@ public class Community extends AnalysisElement {
 
     public static Community loadMultipleConversations(String path, boolean needsAnonymization, Date startDate,
             Date endDate, int monthIncrement, int dayIncrement) {
-        LOGGER.info("Loading all files in " + path);
+        logger.info("Loading all files in " + path);
 
         FileFilter filter = (File f) -> f.getName().endsWith(".ser");
         Community community = new Community(path, needsAnonymization, startDate, endDate);
@@ -387,7 +387,7 @@ public class Community extends AnalysisElement {
         community.getTimeframeSubCommunities()
                 .add(getSubCommunity(community, startSubCommunities, community.getLastContributionDate()));
 
-        LOGGER.info("Finished creating " + community.getTimeframeSubCommunities().size()
+        logger.info("Finished creating " + community.getTimeframeSubCommunities().size()
                 + " timeframe sub-communities spanning from " + community.getFistContributionDate() + " to "
                 + community.getLastContributionDate());
 
@@ -410,7 +410,7 @@ public class Community extends AnalysisElement {
     }
 
     public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
-        LOGGER.info("Writing document collection export");
+        logger.info("Writing document collection export");
         // print participant statistics
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
             // print participant statistics
@@ -516,9 +516,9 @@ public class Community extends AnalysisElement {
                     out.write("\n");
                 }
             }
-            LOGGER.info("Successfully finished writing document collection export");
+            logger.info("Successfully finished writing document collection export");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -559,7 +559,7 @@ public class Community extends AnalysisElement {
                 }
             }
         }
-        LOGGER.info("Finished processsing all files...");
+        logger.info("Finished processsing all files...");
     }
 
     public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {

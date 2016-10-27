@@ -41,7 +41,7 @@ public class RunSVD {
 	 * Matrix v2 = s.getV().viewPart(0, 20, 0, 3).assign(Functions.ABS); }
      */
     public static void main(String[] args) throws IOException {
-//        BasicConfigurator.configure();
+//        
 //        runSSVDOnSparseVectors("in/lastFm/lastFM", "in/lastFm/out", 300, 200,
 //                30000, 3, 2, true);
         double[][] m = {{1., 1., 1.}, {1., 1., 1.}, {1., 1., 1.}};

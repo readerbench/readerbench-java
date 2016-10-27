@@ -18,15 +18,16 @@ package services.complexity;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import data.AbstractDocument;
 
 public class Clustering {
-	static Logger logger = Logger.getLogger(Clustering.class);
+	static Logger logger = Logger.getLogger("");
 	public static final int MAXIMUM_NUMBER_OF_ITERATIONS = 1000;
 
 	public static void performKMeansClustering(List<AbstractDocument> docs,

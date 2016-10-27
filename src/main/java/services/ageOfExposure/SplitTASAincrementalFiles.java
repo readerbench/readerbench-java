@@ -22,15 +22,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import services.converters.GenericTasaDocument;
 import services.converters.SplitTASA;
 
 public class SplitTASAincrementalFiles {
-	static Logger logger = Logger.getLogger(SplitTASAincrementalFiles.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static void parseTasaFromSingleFile(String input, String path, boolean usePOStagging,
 			boolean annotateWithPOS) throws FileNotFoundException, IOException {
@@ -80,7 +78,6 @@ public class SplitTASAincrementalFiles {
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
 
 		try {
 			SplitTASAincrementalFiles.parseTasaFromSingleFile("tasa.txt", "resources/in/AoE", false, false);

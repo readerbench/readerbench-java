@@ -24,16 +24,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import org.apache.log4j.BasicConfigurator;
+
 
 public class Parsing_IT extends Parsing {
 
-    static final Logger logger = Logger.getLogger(Parsing_IT.class);
+    static final Logger logger = Logger.getLogger("");
 
     private static Parsing_IT instance = null;
 
@@ -107,7 +108,7 @@ public class Parsing_IT extends Parsing {
             }
             out.close();
         } catch (IOException ex) {
-            logger.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         }
     }
 
@@ -119,7 +120,7 @@ public class Parsing_IT extends Parsing {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         parseTrainingCorpus("resources/corpora/IT/train_it.txt", "resources/corpora/IT/train_PENN_it.txt");
     }
 }

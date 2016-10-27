@@ -150,7 +150,7 @@ public class EssayCreator extends Document {
                     try {
                         date = df2.parse(el.getFirstChild().getNodeValue());
                     } catch (ParseException e2) {
-                        LOGGER.error("Incorrect date format: " + el.getFirstChild().getNodeValue());
+                        logger.severe("Incorrect date format: " + el.getFirstChild().getNodeValue());
                     }
                 }
                 d.setDate(date);
@@ -169,7 +169,7 @@ public class EssayCreator extends Document {
             }
             return d;
         } catch (ParserConfigurationException | SAXException | IOException | NumberFormatException | DOMException ex) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + ex.getMessage());
+            logger.severe("Error evaluating input file " + docFile.getPath() + " - " + ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
         return null;
@@ -254,7 +254,7 @@ public class EssayCreator extends Document {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException ex) {
-            LOGGER.error(ex.getMessage());
+            logger.severe(ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
     }
