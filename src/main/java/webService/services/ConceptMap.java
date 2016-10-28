@@ -15,22 +15,18 @@
  */
 package webService.services;
 
+import data.AbstractDocument;
+import data.Word;
+import data.discourse.Keyword;
+import data.discourse.SemanticCohesion;
+import data.sentiment.SentimentGrid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import data.AbstractDocument;
-import data.Word;
-import data.discourse.SemanticCohesion;
-import data.discourse.Keyword;
-import data.sentiment.SentimentGrid;
-import java.util.EnumMap;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
-import services.semanticModels.ISemanticModel;
-import services.semanticModels.SimilarityType;
 import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
@@ -50,18 +46,20 @@ public class ConceptMap {
      * @param queryDoc
      * @param threshold
      * @param ignoredWords
+     * @param noTopics
      * @return List of keywords and corresponding relevance scores for results
      */
-    public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold, Set<String> ignoredWords) {
+    public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold, Set<String> ignoredWords, int noTopics) {
 
         List<ResultNode> nodes = new ArrayList<>();
         List<ResultEdge> links = new ArrayList<>();
 
-        // List<Topic> topics = queryDoc.getTopics();
-        List<Keyword> topics = KeywordModeling.getSublist(queryDoc.getTopics(), 50, true, true);
+        List<Keyword> topics = queryDoc.getTopics();
         if (ignoredWords != null) {
             topics = KeywordModeling.filterTopics(queryDoc, ignoredWords);
         }
+        // TODO: remove this and add at line #84 visible concepts sublist extraction
+        topics = KeywordModeling.getSublist(topics, noTopics, true, true);
 
         // build connected graph
         Map<Word, Boolean> visibleConcepts = new TreeMap<>();

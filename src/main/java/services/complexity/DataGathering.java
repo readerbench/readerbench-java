@@ -149,7 +149,8 @@ public class DataGathering {
                     ResultTopic resultTopic = ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null);
+                            null,
+                            50);
                     StringBuilder concat = new StringBuilder();
                     for (ResultNode node : resultTopic.getNodes()) {
                         concat.append(node.getName()).append(',').append(node.getValue()).append(',');
@@ -162,7 +163,8 @@ public class DataGathering {
                             ConceptMap.getTopics(
                                     QueryHelper.processQuery(hm),
                                     Double.parseDouble(hm.get("threshold")),
-                                    null));
+                                    null,
+                                    50));
                     
                     try (BufferedWriter outResult = new BufferedWriter(new FileWriter(d.getPath() + "_response.json"))) {
                         outResult.write(queryResult.convertToJson());

@@ -65,6 +65,7 @@ public class CVAnalyzer {
     private String ignoreWords;
 
     public CVAnalyzer(Map<String, String> hm) {
+        this.hm = hm;
         this.path = null;
         this.keywords = null;
         this.ignoreWords = null;
@@ -122,7 +123,11 @@ public class CVAnalyzer {
         }
 
         // textual complexity factors
+        logger.info("Limba: ");
+        logger.info(hm.get("lang"));
         Lang lang = Lang.getLang(hm.get("lang"));
+        logger.info("Lang: ");
+        logger.info(lang);
         TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
         for (ComplexityIndexType cat : textualComplexity.getList()) {
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
@@ -144,6 +149,12 @@ public class CVAnalyzer {
         sb.append("\n");
 
         return sb.toString();
+    }
+    
+    private void cvError() {
+        
+        
+        
     }
 
     private String csvBuildRow(String fileName, ResultCv result) {
@@ -375,7 +386,7 @@ public class CVAnalyzer {
 
         hm.put("text", cvContent);
         ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, FAN_DELTA);
+                hm, FAN_DELTA, CVConstants.NO_CONCEPTS);
 
         return result;
     }
@@ -419,12 +430,12 @@ public class CVAnalyzer {
 
     private static Map<String, String> loadDefaultParameters() {
         Map<String, String> hm = new HashMap<>();
-        hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
-        hm.put("lda", "resources/config/FR/LDA/Le_Monde");
-        hm.put("lang", "French");
-        hm.put("postagging", "true");
-        hm.put("dialogism", "true");
-        hm.put("threshold", "0.3");
+        hm.put("lsa",           CVConstants.LSA_PATH_FR);
+        hm.put("lda",           CVConstants.LDA_PATH_FR);
+        hm.put("lang",          CVConstants.LANG_FR);
+        hm.put("postagging",    CVConstants.POS_TAGGING);
+        hm.put("dialogism",     CVConstants.DIALOGISM);
+        hm.put("threshold",     CVConstants.THRESHOLD);
         return hm;
     }
 

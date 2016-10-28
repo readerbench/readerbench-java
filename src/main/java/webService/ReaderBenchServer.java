@@ -60,6 +60,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
 import runtime.cv.CVAnalyzer;
+import runtime.cv.CVConstants;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import services.mail.SendMail;
@@ -158,7 +159,7 @@ public class ReaderBenchServer {
             Map<String, String> hm) {
 
         // concepts
-        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null);
+        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null, 50);
         List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, hm);
         List<ResultCategory> resultCategories = getCategories(document.getText(), hm);
 
@@ -312,7 +313,8 @@ public class ReaderBenchServer {
                     ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null)
+                            null,
+                            50)
             );
 
             response.type("application/json");
@@ -396,7 +398,8 @@ public class ReaderBenchServer {
                     ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null)
+                            null,
+                            50)
             );
 
             response.type("application/json");
@@ -537,7 +540,7 @@ public class ReaderBenchServer {
             }
 
             hm.put("text", documentContent);
-            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null);
+            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null, 50);
             List<ResultCategory> resultCategories = getCategories(documentContent, hm);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
@@ -568,7 +571,7 @@ public class ReaderBenchServer {
             QueryResultCvCover queryResult = new QueryResultCvCover();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null, 50));
             resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(cvDocument));
             result.setCv(resultCv);
 
@@ -577,7 +580,7 @@ public class ReaderBenchServer {
             AbstractDocument coverDocument = QueryHelper.processQuery(hm);
 
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null, 50));
             resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(coverDocument));
             result.setCover(resultCover);
 
@@ -624,7 +627,8 @@ public class ReaderBenchServer {
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    hm, CVAnalyzer.FAN_DELTA);
+                    hm, CVAnalyzer.FAN_DELTA, CVConstants.NO_CONCEPTS);
+            result.setText(cvDocument.getText());
 
             queryResult.setData(result);
 

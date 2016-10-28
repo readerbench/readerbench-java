@@ -15,24 +15,24 @@
  */
 package webService.keywords;
 
+import data.AbstractDocument;
+import data.discourse.SemanticCohesion;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import data.AbstractDocument;
-import data.Lang;
-import data.discourse.SemanticCohesion;
-import java.util.HashMap;
-import java.util.Map;
 import services.commons.Formatting;
 import services.nlp.listOfWords.ListOfWords;
 import webService.query.QueryHelper;
 import webService.result.ResultKeyword;
 
 public class KeywordsHelper {
+
+    private static Logger logger = Logger.getLogger("");
 
     public static List<ResultKeyword> getKeywords(
             AbstractDocument document,
@@ -45,6 +45,7 @@ public class KeywordsHelper {
         ListOfWords usedList = new ListOfWords();
         usedList.setWords(keywords);
 
+        double threshold = Double.parseDouble(hm.get("threshold"));
         usedList.getWords().stream().forEach((pattern) -> {
             hm.put("text", pattern);
             AbstractDocument patterDocument = QueryHelper.processQuery(hm);
@@ -52,10 +53,13 @@ public class KeywordsHelper {
             Pattern javaPattern = Pattern.compile(" " + pattern + " ");
             Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");
             SemanticCohesion sc = new SemanticCohesion(patterDocument, document);
+            double cohesion = sc.getCohesion();
             while (matcher.find()) {
                 occ++;
             }
-            resultKeywords.add(new ResultKeyword(pattern, occ, Formatting.formatNumber(sc.getCohesion())));
+            if (occ > 0 && cohesion >= threshold) {
+                resultKeywords.add(new ResultKeyword(pattern, occ, Formatting.formatNumber(cohesion)));
+            }
         });
 
         Collections.sort(resultKeywords, ResultKeyword.ResultKeywordRelevanceComparator);

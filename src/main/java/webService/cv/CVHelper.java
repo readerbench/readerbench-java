@@ -15,18 +15,18 @@
  */
 package webService.cv;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import data.AbstractDocument;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import runtime.cv.CVValidation;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import webService.keywords.KeywordsHelper;
@@ -43,13 +43,14 @@ public class CVHelper {
             Set<String> keywords,
             Set<String> ignore,
             Map<String, String> hm,
-            double deltaFAN
+            double deltaFAN,
+            int noTopics
     ) {
 
         ResultCv result = new ResultCv();
 
         // topic extraction
-        result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignore));
+        result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignore, noTopics));
 
         // word occurrences
         Map<String, Integer> wordOccurences = new HashMap<>();
@@ -129,6 +130,7 @@ public class CVHelper {
 
         // number of pages
         result.setPages(pdfConverter.getPages());
+        result.addFeedback(CVValidation.validatePages(result.getPages()));
 
         // number of paragraphs
         result.setParagraphs(document.getNoBlocks());
