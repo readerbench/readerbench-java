@@ -15,7 +15,7 @@
  */
 package webService.query;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -24,6 +24,7 @@ import data.document.Document;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -32,7 +33,7 @@ import webService.ReaderBenchServer;
 
 public class QueryHelper {
 
-    private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+    private static Logger logger = Logger.getLogger("");
 
     public static AbstractDocument processQuery(Map<String, String> hm) {
         logger.info("Processign query ...");

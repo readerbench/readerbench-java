@@ -25,8 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
 import data.complexity.Measurement;
@@ -44,7 +45,7 @@ import webService.services.ConceptMap;
 
 public class DataGathering {
 
-    static Logger logger = Logger.getLogger(DataGathering.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final int MAX_PROCESSED_FILES = 10000;
 
@@ -58,7 +59,7 @@ public class DataGathering {
             });
             out.write(concat.toString());
         } catch (Exception e) {
-            logger.error("Runtime error while initializing measurements.csv file");
+            logger.severe("Runtime error while initializing measurements.csv file");
             Exceptions.printStackTrace(e);
         }
     }
@@ -111,7 +112,7 @@ public class DataGathering {
                 }
                 d.computeAll(computeDialogism);
             } catch (Exception e) {
-                logger.error("Runtime error while processing " + file.getName() + ": " + e.getMessage());
+                logger.severe("Runtime error while processing " + file.getName() + ": " + e.getMessage());
                 Exceptions.printStackTrace(e);
             }
 
@@ -131,7 +132,7 @@ public class DataGathering {
                     }
                     out.write(concat.toString());
                 } catch (IOException ex) {
-                    logger.error("Runtime error while initializing measurements.csv file");
+                    logger.severe("Runtime error while initializing measurements.csv file");
                     Exceptions.printStackTrace(ex);
                     throw ex;
                 }
@@ -173,7 +174,7 @@ public class DataGathering {
                     catch (IOException ex) {
                     }
                 } catch (IOException ex) {
-                    logger.error("Runtime error while initializing " + d.getPath() + " concept map file");
+                    logger.severe("Runtime error while initializing " + d.getPath() + " concept map file");
                     Exceptions.printStackTrace(ex);
                     throw ex;
                 }

@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -52,7 +53,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.cscl.Conversation;
@@ -69,10 +70,8 @@ import view.widgets.ReaderBenchView;
 public class ConversationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger(ConversationProcessingView.class);
+    static Logger logger = Logger.getLogger("");
 
-    private final JLabel lblLanguage;
-    private final JComboBox<String> comboBoxLanguage;
     private final JButton btnRemoveDocument;
     private final JButton btnAddDocument;
     private final JButton btnViewDocument;
@@ -147,7 +146,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 try {
                     addSingleDocument(f.getPath());
                 } catch (Exception ex) {
-                    logger.error(f.getName() + ": " + ex.getMessage());
+                    logger.severe(f.getName() + ": " + ex.getMessage());
                     Exceptions.printStackTrace(ex);
                 }
             }
@@ -277,16 +276,6 @@ public class ConversationProcessingView extends JInternalFrame {
         desktopPane.setBackground(Color.WHITE);
 
         queryArticleName = "";
-        lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-        lblLanguage.setFont(new Font("SansSerif", Font.BOLD, 12));
-        lblLanguage.setForeground(Color.BLACK);
-
-        comboBoxLanguage = new JComboBox<>();
-        for (Lang l : Lang.values()) {
-            comboBoxLanguage.addItem(l.getDescription());
-        }
-        comboBoxLanguage.setEnabled(false);
-        comboBoxLanguage.setSelectedItem(ReaderBenchView.RUNTIME_LANGUAGE.getDescription());
 
         btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
         btnAddDocument.addActionListener((ActionEvent e) -> {
@@ -380,16 +369,13 @@ public class ConversationProcessingView extends JInternalFrame {
                         .addComponent(scrollPane, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
                         .addComponent(panelSearch, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 865, Short.MAX_VALUE)
                         .addGroup(Alignment.LEADING,
-                                gl_desktopPane.createSequentialGroup().addComponent(lblLanguage).addGap(2)
-                                .addComponent(comboBoxLanguage, 0, 804, Short.MAX_VALUE))
+                                gl_desktopPane.createSequentialGroup())
                         .addComponent(panelSingleDoc, Alignment.LEADING, GroupLayout.DEFAULT_SIZE,
                                 GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap()));
         gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
                 .createSequentialGroup().addContainerGap()
-                .addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false)
-                        .addComponent(lblLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                        .addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
+                .addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false))
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .addComponent(panelSearch, GroupLayout.PREFERRED_SIZE, 62, GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(ComponentPlacement.RELATED)

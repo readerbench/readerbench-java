@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
@@ -47,7 +47,7 @@ import org.openide.util.Exceptions;
 
 public class TASAAnalyzer {
 
-    private static final Logger LOGGER = Logger.getLogger("TASAAnalyzer");
+    private static final Logger logger = Logger.getLogger("TASAAnalyzer");
     private final double MIN_SEM_SIMILARITY = 0.3;
     private final double MIN_THRESHOLD = 0.4;
     private final double MAX_THRESHOLD = 0.7;
@@ -73,14 +73,14 @@ public class TASAAnalyzer {
         models = new TreeMap<>();
         for (int i = 0; i < noGrades; i++) {
             String classPath = path + "/grade" + i;
-            LOGGER.log(Level.INFO, "Loading model {0}...", classPath);
+            logger.log(Level.INFO, "Loading model {0}...", classPath);
             models.put(i, LDA.loadLDA(classPath, Lang.en));
-            LOGGER.log(Level.INFO, "Loaded model with {0} topics.", models.get(i).getNoDimensions());
+            logger.log(Level.INFO, "Loaded model with {0} topics.", models.get(i).getNoDimensions());
         }
     }
 
     public Integer[] computeMatchTask(LDA modelA, LDA modelB) {
-        LOGGER.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
+        logger.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
 
         /* Find best topic matches */
         TopicMatchGraph graph = new TopicMatchGraph(modelA.getNoDimensions() + modelB.getNoDimensions());
@@ -135,7 +135,7 @@ public class TASAAnalyzer {
         }
 
         for (int cLevel = 0; cLevel < noGrades - 1; cLevel++) {
-            LOGGER.log(Level.INFO, "Building word distributions for grade level {0}...", cLevel);
+            logger.log(Level.INFO, "Building word distributions for grade level {0}...", cLevel);
             intermediateModel = models.get(cLevel);
             matches = asyncResults.remove(0).get();
 
@@ -155,7 +155,7 @@ public class TASAAnalyzer {
 			 * Iterate all words from mature space and extract topic
 			 * distribution
              */
-            LOGGER.log(Level.INFO, "Matching all words for grade level {0} ...", cLevel);
+            logger.log(Level.INFO, "Matching all words for grade level {0} ...", cLevel);
             for (Word analyzedWord : matureModel.getWordRepresentations().keySet()) {
                 double intermediateTopicDistr[] = new double[intermediateModel.getNoDimensions()];
                 double matureTopicDistr[] = new double[intermediateModel.getNoDimensions()];
@@ -201,7 +201,7 @@ public class TASAAnalyzer {
 
     public static Map<String, Double> getWordAcquisitionAge(String normFile) {
         Map<String, Double> aoaWords = new HashMap<>();
-        LOGGER.log(Level.INFO, "Loading file {0}...", normFile);
+        logger.log(Level.INFO, "Loading file {0}...", normFile);
 
         /* Compute the AgeOfAcquisition Dictionary */
         String tokens[];
@@ -325,7 +325,7 @@ public class TASAAnalyzer {
     }
 
     public static void main(String args[]) throws Exception {
-        BasicConfigurator.configure();
+        
 
         TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE HDP", 6);
         // TASAAnalyzer ta = new TASAAnalyzer("resources/in/AoE 100", 6);

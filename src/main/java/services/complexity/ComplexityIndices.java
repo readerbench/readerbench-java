@@ -15,13 +15,14 @@
  */
 package services.complexity;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Lang;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class ComplexityIndices {
 
-    static Logger logger = Logger.getLogger(ComplexityIndices.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final int IDENTITY = -1;
 

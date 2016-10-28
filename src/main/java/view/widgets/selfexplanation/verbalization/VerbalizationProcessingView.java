@@ -24,6 +24,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -41,7 +42,7 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 
 import data.document.Document;
 import data.document.Metacognition;
@@ -56,7 +57,7 @@ import view.widgets.document.DocumentProcessingView;
 public class VerbalizationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger(VerbalizationProcessingView.class);
+    static Logger logger = Logger.getLogger("");
 
     private final JDesktopPane desktopPane;
     private final JTable verbalizationsTable;

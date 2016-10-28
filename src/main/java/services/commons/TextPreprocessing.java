@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -32,6 +30,7 @@ import org.xml.sax.InputSource;
 import data.Lang;
 import edu.stanford.nlp.util.Pair;
 import java.io.IOException;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
@@ -40,7 +39,7 @@ import services.readingStrategies.PatternMatching;
 
 public class TextPreprocessing {
 
-    static Logger logger = Logger.getLogger(TextPreprocessing.class);
+    static Logger logger = Logger.getLogger("");
 
     // lowercase + eliminate numbers
     private static final Pair[] INITIAL = {new Pair<>(Pattern.compile("\\s+"), " "),
@@ -275,7 +274,7 @@ public class TextPreprocessing {
                             }
                         }
                     } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {
-                        logger.error("Error processing " + f.getName() + ": " + e.getMessage());
+                        logger.severe("Error processing " + f.getName() + ": " + e.getMessage());
                     }
                 }
             }
@@ -286,7 +285,6 @@ public class TextPreprocessing {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
         System.out.println(cleanVerbalisation(
                 "alors parce que i mangent i zarrete (a a ) devant (a) alors e alors la pace qu pusqu' télé et iii .. i et  ii  puis???"));
         // displayCleaningResults("in/Matilda/MATILDA_CE2/parts");

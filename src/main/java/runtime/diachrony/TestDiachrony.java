@@ -17,7 +17,7 @@ package runtime.diachrony;
 
 import java.io.IOException;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.Lang;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import webService.ReaderBenchServer;
 public class TestDiachrony {
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
 
         ReaderBenchServer.initializeDB();
 

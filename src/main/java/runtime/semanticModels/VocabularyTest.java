@@ -18,9 +18,10 @@ package runtime.semanticModels;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -38,7 +39,7 @@ import webService.ReaderBenchServer;
 
 public class VocabularyTest {
 
-    static Logger logger = Logger.getLogger(VocabularyTest.class);
+    static Logger logger = Logger.getLogger("");
 
     int questionId;
 
@@ -71,7 +72,7 @@ public class VocabularyTest {
                             } else if (line.startsWith("----")) {
                                 int id = Integer.valueOf(line.replaceAll("-", ""));
                                 if (questionId != id) {
-                                    logger.error("Manual indexing corrupted at question " + questionId + "/" + id);
+                                    logger.severe("Manual indexing corrupted at question " + questionId + "/" + id);
                                 }
                             } else if (line.startsWith("1.")) {
                                 rhs[0] = processDoc(line.substring(2), models, semModel.getLanguage());
@@ -101,7 +102,7 @@ public class VocabularyTest {
                                     }
                                 }
 
-                                Integer[] assoc = graph.computeAssociations(6);
+                                Integer[] assoc = graph.computeAssociations(3);
 
                                 sb.append(questionId).append(",");
                                 questionId += 1;
@@ -155,7 +156,7 @@ public class VocabularyTest {
         test.process("resources/in/vocabulary_test/", w2v1);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         test.process("resources/in/vocabulary_test/", w2v1);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        test.process("resources/in/vocabulary_test/", w2v1);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        test.process("resources/in/vocabulary_test/", w2v1);
     }
 }

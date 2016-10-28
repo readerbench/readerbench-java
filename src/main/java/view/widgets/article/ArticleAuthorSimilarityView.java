@@ -46,8 +46,8 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -71,6 +71,7 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.article.ResearchArticle;
+import java.util.logging.Logger;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import view.models.PreviewSketch;
@@ -87,7 +88,7 @@ import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 public class ArticleAuthorSimilarityView extends JFrame {
 	static ArticleAuthorSimilarityView corpusView;
 	private static final long serialVersionUID = -8582615231233815258L;
-	static Logger logger = Logger.getLogger(ArticleAuthorSimilarityView.class);
+	static Logger logger = Logger.getLogger("");
 	public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
 	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
 	public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);
@@ -418,45 +419,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-		BasicConfigurator.configure();
-		adjustToSystemGraphics();
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				String inDir = "resources/in/LAK_corpus/parsed-documents";
-
-				ArticleContainer container = ArticleContainer.buildAuthorContainerFromDirectory(inDir);
-				AuthorDistanceStrategyFactory distStrategyFactory = new AuthorDistanceStrategyFactory(container);
-
-				IAuthorDistanceStrategy semanticDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticDistance);
-				CachedAuthorDistanceStrategyDecorator cachedSemanticDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistStrategy);
-
-				IAuthorDistanceStrategy coAuthDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoAuthorshipDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoAuthDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coAuthDistStrategy);
-
-				IAuthorDistanceStrategy coCitationsDistStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.CoCitationsDistance);
-				CachedAuthorDistanceStrategyDecorator cachedCoCitationsDistStrategy = new CachedAuthorDistanceStrategyDecorator(container, coCitationsDistStrategy);
-				
-				IAuthorDistanceStrategy semanticDistPrunnedByCoCitOrCuAuthStrategy = distStrategyFactory.getDistanceStrategy(AuthorDistanceStrategyType.SemanticPrunnedByCoCitOrCoAuth);
-				CachedAuthorDistanceStrategyDecorator cachedSemanticDistPrunnedByCoCitOrCuAuthStrategy = new CachedAuthorDistanceStrategyDecorator(container, semanticDistPrunnedByCoCitOrCuAuthStrategy);
-
-				IAuthorDistanceStrategy[] allStrategies = new IAuthorDistanceStrategy[] { cachedSemanticDistStrategy, cachedCoAuthDistStrategy, cachedCoCitationsDistStrategy };
-				ArticleAuthorParameterLogger paramLogger = new ArticleAuthorParameterLogger(container);
-
-//				String centerUri = "http://data.linkededucation.org/resource/lak/person/danielle-s-mcnamara";
-//				String centerUri = "http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker";
-//				String centerUri = "http://data.linkededucation.org/resource/lak/conference/edm2009/paper/202";
-				String centerUri = null;
-				
-				ArticleAuthorSimilarityView view = new ArticleAuthorSimilarityView(container, allStrategies, paramLogger, centerUri);
-				view.setVisible(true);
-				
-				// displayMetrics(container);
-			}
-		});
-	}
+        
 	private static void computeMetrics(ArticleContainer container) {
 		List<SingleAuthorContainer> list = container.getAuthorContainers();
 		List<String> authorPaperList = new ArrayList<String>();

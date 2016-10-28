@@ -30,15 +30,16 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 
 public class TimeStatistics {
 
-    public static Logger logger = Logger.getLogger(TimeStatistics.class);
+    public static Logger logger = Logger.getLogger("");
 
     private static final String CORPORA_PATH = "resources/in/corpus_v2/";
 

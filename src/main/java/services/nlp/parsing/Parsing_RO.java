@@ -18,7 +18,8 @@ package services.nlp.parsing;
 import data.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import java.util.Properties;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -26,7 +27,7 @@ import org.apache.log4j.Logger;
  */
 public class Parsing_RO extends Parsing {
 
-    static final Logger LOGGER = Logger.getLogger(Parsing_RO.class);
+    static final Logger logger = Logger.getLogger("");
 
     private static Parsing_RO instance = null;
     private final StanfordCoreNLP pipeline = new StanfordCoreNLP(new ParsingParams_RO());

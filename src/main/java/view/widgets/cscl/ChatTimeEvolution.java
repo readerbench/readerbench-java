@@ -52,15 +52,7 @@ public class ChatTimeEvolution extends JFrame {
 	private static final int AVERAGE_TYPING_SPEED = 19; // words per minute for
 														// composition
 
-	protected ArrayList<Participant> extractArrayListfromSet(
-			Set<Participant> set) {
-		ArrayList<Participant> ls = new ArrayList<Participant>();
-		for (Participant p : set) {
-			ls.add(p);
-		}
-		return ls;
-	}
-
+	
 	public ChatTimeEvolution(Conversation c) {
 		super("ReaderBench - Chat Time Evolution");
 
@@ -147,21 +139,21 @@ public class ChatTimeEvolution extends JFrame {
 
 		// add dependencies
 		CustomLineAnnotation annotation;
-		ArrayList<Participant> ls = extractArrayListfromSet(c.getParticipants());
+		c.getParticipants();
 		for (int i = 0; i < c.getBlocks().size() - 1; i++) {
 			for (int j = i + 1; j < c.getBlocks().size(); j++) {
 				if (c.getPrunnedBlockDistances()[i][j] != null) {
 					Block b1 = c.getBlocks().get(i);
 					Participant participant1 = ((Utterance) b1)
 							.getParticipant();
-					int idParticipant1 = ls.indexOf(participant1);
+					int idParticipant1 = c.getParticipants().indexOf(participant1);
 					Number end1 = collection.getEndValue(0, idParticipant1,
 							subTasks.get(participant1).indexOf(b1));
 
 					Block b2 = c.getBlocks().get(j);
 					Participant participant2 = ((Utterance) b2)
 							.getParticipant();
-					int idParticipant2 = ls.indexOf(participant2);
+					int idParticipant2 = c.getParticipants().indexOf(participant2);
 					Number start2 = collection.getStartValue(0, idParticipant2,
 							subTasks.get(participant2).indexOf(b2));
 
@@ -343,9 +335,4 @@ public class ChatTimeEvolution extends JFrame {
 		return null;
 	}
 
-	public static void main(String[] args) {
-		ChatTimeEvolution demo = new ChatTimeEvolution("Gantt Chart Demo 2");
-		demo.pack();
-		demo.setVisible(true);
-	}
 }

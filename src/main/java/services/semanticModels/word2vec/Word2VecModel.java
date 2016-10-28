@@ -20,8 +20,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
@@ -53,7 +54,7 @@ import services.semanticModels.SimilarityType;
  */
 public class Word2VecModel implements ISemanticModel {
 
-    static final Logger LOGGER = Logger.getLogger(Word2VecModel.class);
+    static final Logger logger = Logger.getLogger("");
     private static final List<Word2VecModel> LOADED_WORD2VEC_MODELS = new ArrayList<>();
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en);
 
@@ -75,12 +76,12 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     private static Word2Vec loadWord2Vec(String path) {
-        LOGGER.info("Loading word2vec model " + path + " ...");
+        logger.info("Loading word2vec model " + path + " ...");
         Word2Vec word2Vec = null;
         try {
             word2Vec = WordVectorSerializer.loadFullModel(path + "/word2vec.model");
         } catch (IOException e) {
-            LOGGER.error(e);
+            logger.severe(e.getMessage());
         }
         return word2Vec;
     }
@@ -175,7 +176,7 @@ public class Word2VecModel implements ISemanticModel {
         // Split on white spaces in the line to get words
         TokenizerFactory t = new DefaultTokenizerFactory();
         t.setTokenPreProcessor(new CommonPreprocessor());
-        LOGGER.info("Building word2vec model ...");
+        logger.info("Building word2vec model ...");
         Word2Vec word2Vec = new Word2Vec.Builder()
                 .minWordFrequency(5)
                 .iterations(5)
@@ -188,7 +189,7 @@ public class Word2VecModel implements ISemanticModel {
                 .build();
         word2Vec.fit();
 
-        LOGGER.info("Writing word vectors to text file ...");
+        logger.info("Writing word vectors to text file ...");
         String outputPath = new File(inputFile).getParentFile().getAbsolutePath() + "/word2vec.model";
         WordVectorSerializer.writeFullModel(word2Vec, outputPath);
     }

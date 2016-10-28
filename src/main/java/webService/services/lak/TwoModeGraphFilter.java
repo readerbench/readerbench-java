@@ -1,18 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package webService.services.lak;
 
-import com.itextpdf.text.log.SysoLogger;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.log4j.Logger;
-import view.widgets.article.utils.GraphMeasure;
-import view.widgets.article.utils.GraphNodeItemType;
+import java.util.logging.Logger;
 import webService.services.lak.result.TwoModeGraph;
 import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.lak.result.TwoModeGraphNodeType;
@@ -22,25 +13,21 @@ import webService.services.lak.result.TwoModeGraphNodeType;
  * @author ionutparaschiv
  */
 public class TwoModeGraphFilter {
+    private static final Logger LOGGER = Logger.getLogger("");
 
     public static int MaxNoAuthors = 20;
     public static int MaxNoArticles = 20;
 
-    private static final Logger LOGGER = Logger.getLogger(TwoModeGraphFilter.class);
-    private static List<GraphMeasure> graphMeasures;
-    private static List<String> articleUriList = new ArrayList<>();
-    private static List<String> authorUriList = new ArrayList<>();
+    private TwoModeGraphDegreeCalculator graphDegreeCalculator;
 
     public TwoModeGraphFilter() {
     }
 
-    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri) {
-        if (graphMeasures == null || graphMeasures.size() == 0) {
-            LOGGER.info("TwoModeGraphFilter did not manage to load the OrderedAuthorsArticlesByBetweenness !!!");
-            return graph;
-        }
+    public TwoModeGraph filterGraph(TwoModeGraph graph, String centerUri, int noAuthors, int noArticles,
+            boolean showAuthors, boolean showArticles) {
+        this.graphDegreeCalculator = new TwoModeGraphDegreeCalculator(graph);
         Set<String> uriSet = this.getUriSet(graph);
-        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet);
+        Set<String> restrictedUriSet = this.getRestrictedSet(uriSet, noAuthors, noArticles, showAuthors, showArticles);
         if (centerUri != null && centerUri.length() > 0) {
             restrictedUriSet.add(centerUri);
         }
@@ -75,9 +62,18 @@ public class TwoModeGraphFilter {
         return uriSet;
     }
 
-    private Set<String> getRestrictedSet(Set<String> fullSet) {
-        Set<String> articlesUriSet = this.restrictSetFromList(articleUriList, fullSet, MaxNoArticles);
-        Set<String> authorsUriSet = this.restrictSetFromList(authorUriList, fullSet, MaxNoAuthors);
+    private Set<String> getRestrictedSet(Set<String> fullSet, int noAuthors, int noArticles,
+            boolean showAuthors, boolean showArticles) {
+        Set<String> articlesUriSet = this.restrictSetFromList(this.graphDegreeCalculator.getSortedArticleUrisByDegree(),
+                fullSet, noArticles);
+        if (!showArticles) {
+            articlesUriSet = new HashSet<>();
+        }
+        Set<String> authorsUriSet = this.restrictSetFromList(this.graphDegreeCalculator.getSortedAuthorUrisByDegree(),
+                fullSet, noAuthors);
+        if (!showAuthors) {
+            authorsUriSet = new HashSet<>();
+        }
         articlesUriSet.addAll(authorsUriSet);
         return articlesUriSet;
     }
@@ -95,19 +91,5 @@ public class TwoModeGraphFilter {
             }
         }
         return uriSet;
-    }
-
-    public static TwoModeGraphFilter getTwoModeGraphFilter() {
-        if (graphMeasures == null) {
-            graphMeasures = GraphMeasure.readGraphMeasures();
-            graphMeasures.stream().forEach(measure -> {
-                if (measure.getNodeType() == GraphNodeItemType.Article) {
-                    articleUriList.add(measure.getUri());
-                } else if (measure.getNodeType() == GraphNodeItemType.Author) {
-                    authorUriList.add(measure.getUri());
-                }
-            });
-        }
-        return new TwoModeGraphFilter();
     }
 }

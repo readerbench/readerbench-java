@@ -20,13 +20,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
-import org.apache.log4j.BasicConfigurator;
+
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
@@ -38,7 +39,7 @@ import webService.ReaderBenchServer;
 
 public class ChapouRougeTest {
 
-    static final Logger LOGGER = Logger.getLogger(ChapouRougeTest.class);
+    static final Logger logger = Logger.getLogger("");
 
     private final String path;
     private final Document refDoc;
@@ -53,7 +54,7 @@ public class ChapouRougeTest {
     public void process() {
         File folder = new File(path);
         for (File f : folder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
-            LOGGER.info("Processing file " + f.getAbsolutePath() + " ...");
+            logger.info("Processing file " + f.getAbsolutePath() + " ...");
             Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true);
             summary.computeAll(true);
             loadedSummaries.add(summary);
@@ -84,14 +85,14 @@ public class ChapouRougeTest {
                     out.write("," + summary.getComplexityIndices().get(index));
                 }
             }
-            LOGGER.info("Finished all files for processing ...");
+            logger.info("Finished all files for processing ...");
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         Lang lang = Lang.fr;

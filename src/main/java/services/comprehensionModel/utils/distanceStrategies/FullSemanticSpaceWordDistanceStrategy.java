@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 import data.Word;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
+
 import services.comprehensionModel.utils.CMUtils;
 import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
 import services.semanticModels.ISemanticModel;
@@ -32,7 +33,7 @@ import services.semanticModels.utils.WordSimilarityContainer;
 public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrategy, java.io.Serializable {
 
     private static final long serialVersionUID = -5922757870061109713L;
-    static Logger logger = Logger.getLogger(FullSemanticSpaceWordDistanceStrategy.class);
+    static Logger logger = Logger.getLogger("");
 
     private WordSimilarityContainer wordDistanceContainer;
     private List<Word> uniqueWordList;

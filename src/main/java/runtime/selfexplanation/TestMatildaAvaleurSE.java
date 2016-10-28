@@ -21,10 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import data.document.Document;
 import data.document.Metacognition;
@@ -40,7 +37,7 @@ import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {
 
-    static Logger logger = Logger.getLogger(TestMatildaAvaleurSE.class);
+    static Logger logger = Logger.getLogger("");
 
     public static List<Metacognition> compute(String filename, String folder) {
         List<Metacognition> verbalizations = new ArrayList<>();
@@ -72,8 +69,7 @@ public class TestMatildaAvaleurSE {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
+        logger.setLevel(java.util.logging.Level.INFO);
         ReaderBenchServer.initializeDB();
 
         try {

@@ -33,19 +33,20 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import data.AbstractDocument.SaveType;
 import data.Lang;
+import java.util.logging.Logger;
 
 public class CorpusAssessmentMaster extends Master {
 
-    static final Logger LOGGER = Logger.getLogger(CorpusAssessmentMaster.class);
+    static final Logger logger = Logger.getLogger("");
 
     public static final String PATH_TO_LSA = "resources/config/EN/LSA/TASA";
     public static final String PATH_TO_LDA = "resources/config/EN/LDA/TASA";
@@ -67,7 +68,7 @@ public class CorpusAssessmentMaster extends Master {
         // load also LSA vector space and LDA model
         // lsa = LSA.loadLSA(PATH_TO_LSA, PROCESSING_LANGUAGE);
         // lda = LDA.loadLDA(PATH_TO_LDA, PROCESSING_LANGUAGE);
-        LOGGER.info("Master analysing all files in " + rootPath);
+        logger.info("Master analysing all files in " + rootPath);
         files = new LinkedList<File>();
 
         FileFilter filter = new FileFilter() {
@@ -125,7 +126,7 @@ public class CorpusAssessmentMaster extends Master {
             synchronized (files) {
                 File f = files.remove(0);
                 TaskMsg tMsg = new TaskMsg(new Object[]{f.getAbsolutePath()}, false);
-                LOGGER.info("Master assigning " + tMsg);
+                logger.info("Master assigning " + tMsg);
                 ObjectMessage msg = sessionTask.get(addr).createObjectMessage(tMsg);
 
                 master.get(addr).send(msg);
@@ -135,7 +136,7 @@ public class CorpusAssessmentMaster extends Master {
             }
         } else {
             TaskMsg tMsg = new TaskMsg(null, true);
-            LOGGER.info("Master ending communication with " + addr);
+            logger.info("Master ending communication with " + addr);
             ObjectMessage msg = sessionTask.get(addr).createObjectMessage(tMsg);
 
             master.get(addr).send(msg);
@@ -222,8 +223,8 @@ public class CorpusAssessmentMaster extends Master {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
+        
+        Logger.getLogger("").setLevel(Level.INFO);
 
         Master MasterTool = new CorpusAssessmentMaster("in/forum_Nic");
         MasterTool.run();

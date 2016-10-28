@@ -37,11 +37,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -55,13 +56,12 @@ public class EssayProcessingView extends JFrame {
 
     public static final String C_BASE_FOLDER_NAME = "grade";
 
-    static Logger logger = Logger.getLogger(RunMeasurementsView.class);
+    static Logger logger = Logger.getLogger("");
 
     private JPanel contentPane;
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
-    private JComboBox<String> comboBoxLanguage;
     private JButton btnRun;
     private JCheckBox chckbxUsePosTagging;
     private Lang lang = null;
@@ -180,23 +180,7 @@ public class EssayProcessingView extends JFrame {
         chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
         chckbxUsePosTagging.setSelected(true);
 
-        JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-
-        comboBoxLanguage = new JComboBox<>();
-        comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
-        for (Lang l : Lang.values()) {
-            comboBoxLanguage.addItem(l.getDescription());
-        }
-
-        comboBoxLanguage.addActionListener((ActionEvent e) -> {
-            if (comboBoxLanguage.getSelectedIndex() > 0) {
-                // set final analysis language
-                lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
-
-                ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
-                btnRun.setEnabled(true);
-            }
-        });
+        lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
@@ -216,21 +200,18 @@ public class EssayProcessingView extends JFrame {
                                                         .addPreferredGap(ComponentPlacement.RELATED)
                                                         .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                                 GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE).addComponent(
-                                                comboBoxLanguage, Alignment.LEADING, 0, 420, Short.MAX_VALUE))
+                                                .addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE))
                                         .addGap(6))
                                 .addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
                                         .addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
                                         .addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 242,
                                                 GroupLayout.PREFERRED_SIZE)
                                         .addContainerGap())
-                                .addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage)
+                                .addGroup(gl_contentPane.createSequentialGroup()
                                         .addContainerGap(482, Short.MAX_VALUE)))));
         gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
                 .createSequentialGroup().addContainerGap()
-                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
-                        comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE))
+                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE))
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
                         .addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,

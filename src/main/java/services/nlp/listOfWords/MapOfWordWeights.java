@@ -23,16 +23,17 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author Mihai Dascalu
  */
 public class MapOfWordWeights {
-	static Logger logger = Logger.getLogger(MapOfWordWeights.class);
+	static Logger logger = Logger.getLogger("");
 
 	private Map<String, Double> words;
 
@@ -63,12 +64,12 @@ public class MapOfWordWeights {
 							+ " was not found within the dictionary words");
 			}
 		} catch (IOException ex) {
-			logger.error(ex.getMessage());
+			logger.severe(ex.getMessage());
 		} finally {
 			try {
 				in.close();
 			} catch (IOException ex) {
-				logger.error(ex.getMessage());
+				logger.severe(ex.getMessage());
 			}
 		}
 	}

@@ -18,13 +18,14 @@ package services.discourse.cohesion;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,7 +33,7 @@ import data.sentiment.SentimentValence;
  */
 public class SentimentAnalysis {
 
-    static Logger logger = Logger.getLogger(SentimentAnalysis.class);
+    static Logger logger = Logger.getLogger("");
 
     public static void weightSemanticValences(Sentence s) {
         if (s.getAllWords().isEmpty()) {

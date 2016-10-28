@@ -15,20 +15,21 @@
  */
 package services.discourse.keywordMining;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.Word;
 import data.discourse.Keyword;
+import java.util.logging.Logger;
 
 /**
  * 
  * @author Mihai Dascalu
  */
 public class Scoring {
-	static Logger logger = Logger.getLogger(Scoring.class);
+	static Logger logger = Logger.getLogger("");
 
 	private static double determineIndividualScore(Sentence s, AbstractDocument d) {
 		if (s != null && !s.getWords().isEmpty()) {

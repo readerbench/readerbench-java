@@ -43,8 +43,9 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import data.Block;
 import data.cscl.Conversation;
@@ -65,7 +66,7 @@ import view.widgets.document.VoiceSelectionView;
  */
 public class ChatView extends JFrame {
 
-    static Logger logger = Logger.getLogger(ChatView.class);
+    static Logger logger = Logger.getLogger("");
     private static final long serialVersionUID = -4709511294166379162L;
     private static final int MAX_LENGTH_TITLE = 100;
 

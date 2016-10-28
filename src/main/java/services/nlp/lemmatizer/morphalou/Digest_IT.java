@@ -25,13 +25,14 @@ import java.io.OutputStreamWriter;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 public class Digest_IT {
 
-    private static final Logger logger = Logger.getLogger(Digest_IT.class);
+    private static final Logger logger = Logger.getLogger("");
 
     public static final String PATH_TO_TEXT_LEMMAS_IT = "resources/config/IT/word lists/lemmas_pos_it.txt";
     public static final String PATH_TO_MORPH_IT = "resources/corpora/IT/morph-it_048.txt";
@@ -90,12 +91,12 @@ public class Digest_IT {
 
             writeLemmas();
         } catch (IOException ex) {
-            logger.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         } finally {
             try {
                 in.close();
             } catch (IOException ex) {
-                logger.error(ex.getMessage());
+                logger.severe(ex.getMessage());
             }
         }
     }
@@ -111,18 +112,18 @@ public class Digest_IT {
                 out.write(lemma + "|" + lemmas.get(lemma) + "\n");
             }
         } catch (IOException ex) {
-            logger.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         } finally {
             try {
                 out.close();
             } catch (IOException ex) {
-                logger.error(ex.getMessage());
+                logger.severe(ex.getMessage());
             }
         }
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         parseMorphIt();
     }
 }

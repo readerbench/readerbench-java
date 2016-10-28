@@ -31,8 +31,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.cpu.nativecpu.CpuNDArrayFactory;
@@ -41,12 +41,13 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 
 import data.Word;
 import java.util.Set;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 import services.semanticModels.word2vec.Word2VecModel;
 
 public class TASAWord2VecAnalyzer {
 
-    private static final Logger LOGGER = Logger.getLogger(TASAWord2VecAnalyzer.class);
+    private static final Logger logger = Logger.getLogger("");
     private final double MIN_THRESHOLD = 0.2;
     private final double MAX_THRESHOLD = 0.7;
     private final double THRESHOLD_INCREMENT = 0.1;
@@ -76,7 +77,7 @@ public class TASAWord2VecAnalyzer {
         models = new TreeMap<>();
         for (int i = 0; i < noClasses; i++) {
             String classPath = path + "/grade" + i;
-            LOGGER.info("Loading model " + classPath + " ...");
+            logger.info("Loading model " + classPath + " ...");
             models.put(i, Word2VecModel.loadWord2Vec(classPath, lang));
         }
     }
@@ -237,7 +238,7 @@ public class TASAWord2VecAnalyzer {
     }
 
     public static void main(String args[]) throws Exception {
-        BasicConfigurator.configure();
+        
 
         TASAWord2VecAnalyzer analyzer = new TASAWord2VecAnalyzer("resources/in/AoE 100", Lang.en);
         analyzer.loadModels();

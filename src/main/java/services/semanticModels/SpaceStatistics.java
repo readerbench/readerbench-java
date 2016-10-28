@@ -33,8 +33,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
@@ -52,6 +52,7 @@ import org.openide.util.Lookup;
 import data.Word;
 import data.document.Document;
 import data.Lang;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import runtime.semanticModels.WordAssociationTest;
 import services.commons.Formatting;
@@ -63,7 +64,7 @@ public class SpaceStatistics {
 
     private static final double MINIMUM_IMPOSED_THRESHOLD = 0.3d;
 
-    static Logger logger = Logger.getLogger(SpaceStatistics.class);
+    static Logger logger = Logger.getLogger("");
 
     private final ISemanticModel semModel;
     private final int noWords;
@@ -160,7 +161,7 @@ public class SpaceStatistics {
             }
             logger.info("Written serialized relevant similarities to " + this.indexPath);
         } catch (Exception ex) {
-            logger.error("Error serializing relevant similarities to " + this.indexPath + " - " + ex.getMessage());
+            logger.severe("Error serializing relevant similarities to " + this.indexPath + " - " + ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
     }
@@ -175,7 +176,7 @@ public class SpaceStatistics {
             }
             return true;
         } catch (IOException | ClassNotFoundException ex) {
-            logger.error("Failed to load the serialized relevant similarities from " + this.indexPath + " - " + ex.getMessage());
+            logger.severe("Failed to load the serialized relevant similarities from " + this.indexPath + " - " + ex.getMessage());
             return false;
         }
     }
@@ -477,7 +478,7 @@ public class SpaceStatistics {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
 
         // SpaceStatistics ss = new SpaceStatistics(LDA.loadLDA("in/HDP/grade4",
         // Lang.eng));

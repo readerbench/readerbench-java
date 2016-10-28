@@ -18,7 +18,7 @@ package runtime.essays;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.document.Document;
 import data.Lang;
@@ -55,7 +55,7 @@ public class DataGatheringTest {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
 //        LSA lsa = LSA.loadLSA("resources/config/LA/LSA/Letters", Lang.la);

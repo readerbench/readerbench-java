@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.Lang;
 import data.Word;
@@ -45,7 +45,7 @@ import services.semanticModels.LDA.LDA;
 //test matching with all-to-all matchings
 public class TASAAnalyzerFull {
 
-    private static Logger LOGGER = Logger.getLogger("TASAAnalyzerFull");
+    private static Logger logger = Logger.getLogger("");
     private final double MIN_THRESHOLD = 0.2;
     private final double MAX_THRESHOLD = 0.7;
     private final double THRESHOLD_INCREMENT = 0.1;
@@ -75,13 +75,13 @@ public class TASAAnalyzerFull {
         models = new TreeMap<>();
         for (int i = 0; i < noClasses; i++) {
             String classPath = path + "/grade" + i;
-            LOGGER.log(Level.INFO, "Loading model {0} ...", classPath);
+            logger.log(Level.INFO, "Loading model {0} ...", classPath);
             models.put(i, LDA.loadLDA(classPath, Lang.en));
         }
     }
 
     public Double[][] computeMatchTask(LDA modelA, LDA modelB) {
-        LOGGER.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
+        logger.log(Level.INFO, "Matching {0} to {1}...", new Object[]{modelA.getPath(), modelB.getPath()});
         /* Compute Matches */
         Double[][] matches = new Double[modelA.getNoDimensions()][modelB.getNoDimensions()];
         double s0 = 0, s1 = 0, s2 = 0, mean = 0, stdev = 0;
@@ -155,7 +155,7 @@ public class TASAAnalyzerFull {
         }
 
         for (int cLevel = 0; cLevel < noClasses - 1; cLevel++) {
-            LOGGER.log(Level.INFO, "Building word distributions for grade level {0} ...", cLevel);
+            logger.log(Level.INFO, "Building word distributions for grade level {0} ...", cLevel);
             intermediateModel = models.get(cLevel);
             matches = asyncResults.remove(0).get();
 
@@ -169,7 +169,7 @@ public class TASAAnalyzerFull {
 
             // Iterate all words from mature space and extract topic
             // distribution
-            LOGGER.log(Level.INFO, "Matching all words for level {0} ...", cLevel);
+            logger.log(Level.INFO, "Matching all words for level {0} ...", cLevel);
             for (Word analyzedWord : matureModel.getWordRepresentations().keySet()) {
                 double intermediateTopicDistr[] = new double[intermediateModel.getNoDimensions()];
                 double matureTopicDistr[] = new double[intermediateModel.getNoDimensions()];
@@ -310,7 +310,7 @@ public class TASAAnalyzerFull {
     }
 
     public static void main(String args[]) throws Exception {
-        BasicConfigurator.configure();
+        
 
         TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE 100", 6);
         // TASAAnalyzerFull ta = new TASAAnalyzerFull("resources/in/AoE HDP",

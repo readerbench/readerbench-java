@@ -23,8 +23,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -33,7 +34,7 @@ import org.apache.poi.ss.usermodel.Cell;
 
 public class CsvToXlsConverter {
 
-    static Logger logger = Logger.getLogger(CsvToXlsConverter.class);
+    static Logger logger = Logger.getLogger("");
 
     public static void convertCsvToXls(String path) throws IOException {
         List<List<String>> arrayLines = new ArrayList<List<String>>();

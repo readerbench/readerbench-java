@@ -24,6 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -36,8 +37,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -74,7 +75,7 @@ public class SemSpaceView extends JFrame {
     private static final long serialVersionUID = 1L;
     public static final Color COLOR_ORIGINAL_CONCEPT = new Color(176, 46, 46);
 
-    static Logger logger = Logger.getLogger(SemSpaceView.class);
+    static Logger logger = Logger.getLogger("");
 
     public static final int MIN_NODE_SIZE = 10;
     public static final int MAX_NODE_SIZE = 20;
@@ -431,24 +432,6 @@ public class SemSpaceView extends JFrame {
             panel.add(getWordTextField());
         }
         return panel;
-    }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        ReaderBenchView.adjustToSystemGraphics();
-
-        JFrame frame = new SemSpaceView(LDA.loadLDA("resources/in/HDP/grade12", Lang.en));
-//		JFrame frame = new SemSpaceView(LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la));
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.setVisible(true);
-
-        // frame = new
-        // SemSpaceView(LSA.loadLSA("resources/config/LA/LSA/Letters",
-        // Lang.la));
-        // frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
     }
 
 }

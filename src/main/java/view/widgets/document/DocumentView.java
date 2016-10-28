@@ -21,6 +21,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -40,7 +41,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 
 import data.Block;
 import data.Sentence;
@@ -58,7 +59,7 @@ import view.models.document.TopicsTableModel;
  * @author Mihai Dascalu
  */
 public class DocumentView extends JFrame {
-	static Logger logger = Logger.getLogger(DocumentView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private static final long serialVersionUID = -4709511294166379162L;
 	private static final int MIN_ROW_HEIGHT = 20;

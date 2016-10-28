@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+
 import org.junit.Test;
 
 import data.AbstractDocument;
@@ -37,6 +37,7 @@ import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
 import java.util.EnumMap;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.converters.PdfToTextConverter;
@@ -48,7 +49,7 @@ import services.semanticModels.SimilarityType;
 
 public class PdfToTextFrenchCVs {
 
-    static Logger logger = Logger.getLogger(PdfToTextFrenchCVs.class);
+    static Logger logger = Logger.getLogger("");
 
     @Test
     public void process() {

@@ -30,12 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 public class SplitTASA {
-	static Logger logger = Logger.getLogger(SplitTASA.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static final String[] TASA_GENRES = { "SocialStudies", "LanguageArts", "Science", "Health", "HomeEconomics",
 			"IndustrialArts", "Business", "Miscellaneous", "Unmarked" };
@@ -418,10 +419,10 @@ public class SplitTASA {
 			GenericTasaDocument existingDoc = null;
 			for (GenericTasaDocument doc : docs) {
 				if (doc.getID().equals(tmpDoc.getID())) {
-					logger.warn("Duplicate identifier " + doc.getID());
+					logger.warning("Duplicate identifier " + doc.getID());
 				}
 				if (doc.getContent().contains(tmpDoc.getContent()) || tmpDoc.getContent().contains(doc.getContent())) {
-					logger.warn("Duplicate content " + doc.getID() + " and " + tmpDoc.getID());
+					logger.warning("Duplicate content " + doc.getID() + " and " + tmpDoc.getID());
 					existingDoc = doc;
 					break;
 				}
@@ -502,7 +503,7 @@ public class SplitTASA {
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
+		
 
 		// SplitTASA.parseTasa("/Users/mihaidascalu/SeparateTasa");
 

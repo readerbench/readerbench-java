@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
@@ -50,10 +50,11 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.Keyword;
+import java.util.logging.Logger;
 import services.commons.Formatting;
 
 public class ParticipantEvaluation {
-	static Logger logger = Logger.getLogger(ParticipantEvaluation.class);
+	static Logger logger = Logger.getLogger("");
 	private static final String GENERIC_NAME = "Member";
 
 	public static void buildParticipantGraph(DirectedGraph graph, GraphModel graphModel, List<Participant> participants,

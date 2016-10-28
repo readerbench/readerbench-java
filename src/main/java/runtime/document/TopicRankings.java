@@ -32,9 +32,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
@@ -49,7 +50,7 @@ import webService.ReaderBenchServer;
  */
 public class TopicRankings {
 
-    static final Logger LOGGER = Logger.getLogger(TopicRankings.class);
+    static final Logger logger = Logger.getLogger("");
 
     private final String processingPath;
     private final int noTopKeyWords;
@@ -141,7 +142,7 @@ public class TopicRankings {
             models.add(lda);
         
             for (File file : files) {
-                LOGGER.info("Processing " + file.getName() + " file");
+                logger.info("Processing " + file.getName() + " file");
                 // Create file
 
                 Document d;
@@ -155,7 +156,7 @@ public class TopicRankings {
                     d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
-                    LOGGER.error("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
+                    logger.severe("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
                     Exceptions.printStackTrace(e);
                 }
             }
@@ -196,13 +197,13 @@ public class TopicRankings {
             }
 
         } catch (IOException ex) {
-            LOGGER.error("Runtime error while analyzing selected folder ...");
+            logger.severe("Runtime error while analyzing selected folder ...");
             Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);

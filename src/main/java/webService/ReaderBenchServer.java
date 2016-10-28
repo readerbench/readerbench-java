@@ -35,6 +35,7 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -50,12 +51,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
@@ -116,7 +118,7 @@ import webService.services.vCoP.CommunityInteraction;
 
 public class ReaderBenchServer {
 
-    private static final Logger LOGGER = Logger.getLogger(ReaderBenchServer.class);
+    private static final Logger LOGGER = Logger.getLogger("");
     public static final int PORT = 8080;
 
     public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
@@ -336,7 +338,7 @@ public class ReaderBenchServer {
                         )
                 );
             } catch (Exception e) {
-                LOGGER.error("Exception: " + e.getMessage());
+                LOGGER.severe("Exception: " + e.getMessage());
             }
 
             response.type("application/json");
@@ -504,7 +506,7 @@ public class ReaderBenchServer {
             List<ISemanticModel> models = new ArrayList<>();
             models.add(LSA.loadLSA(hm.get("lsa"), lang));
             models.add(LDA.loadLDA(hm.get("lda"), lang));
-        
+
             Conversation conversation = Conversation.load(
                     new File("tmp/" + json.get("csclFile")),
                     models,
@@ -782,11 +784,22 @@ public class ReaderBenchServer {
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
             String searchText = (String) json.get("searchText");
+            int noAuthors = TwoModeGraphFilter.MaxNoAuthors;
+            int noArticles = TwoModeGraphFilter.MaxNoArticles;
+            boolean showAuthors = true, showArticles = true;
+            try {
+                noAuthors = ((Long) json.get("noAuthors")).intValue();
+                noArticles = ((Long) json.get("noArticles")).intValue();
+                showAuthors = (boolean) json.get("showAuthors");
+                showArticles = (boolean) json.get("showArticles");
+            } catch (Exception e) {
+            }
+
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
-            TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
+            TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
-            graph = graphFilter.filterGraph(graph, centerUri);
+            graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
@@ -833,11 +846,18 @@ public class ReaderBenchServer {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO); // changing log level
-
-        ReaderBenchServer.initializeDB();
-        ReaderBenchServer server = new ReaderBenchServer();
-        server.start();
+        try {
+            LOGGER.setLevel(Level.INFO); // changing log level
+            FileHandler fh = new FileHandler("ReaderBenchServer.log");
+                    LOGGER.addHandler(fh);
+                    
+                    ReaderBenchServer.initializeDB();
+                    ReaderBenchServer server = new ReaderBenchServer();
+                    server.start();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }

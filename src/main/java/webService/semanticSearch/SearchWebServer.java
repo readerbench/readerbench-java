@@ -20,8 +20,8 @@ import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
@@ -76,7 +76,7 @@ class SearchResult implements Comparable<SearchResult> {
 
 public class SearchWebServer {
 
-    private static Logger logger = Logger.getLogger(SearchWebServer.class);
+    private static Logger logger = Logger.getLogger("");
     public static final double MIN_THRESHOLD = 0.2d;
     public static final int NO_RESULTS = 20;
 

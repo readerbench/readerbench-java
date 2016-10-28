@@ -29,14 +29,15 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
+import java.util.logging.Level;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.loaders.FileEntry.Folder;
@@ -56,7 +57,7 @@ import org.apache.commons.io.FileUtils;
 
 public class FileProcessor {
 	
-	private static Logger logger = Logger.getLogger(FileProcessor.class);
+	private static Logger logger = Logger.getLogger("");
 	
 	private static FileProcessor instance = null;
 	protected FileProcessor() {
@@ -74,7 +75,7 @@ public class FileProcessor {
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {
-			logger.error("Can't save uploaded file!");
+			logger.severe("Can't save uploaded file!");
 		}
 		return targetFile.getName();
 	}
@@ -84,7 +85,7 @@ public class FileProcessor {
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {
-			logger.error("Can't save uploaded files!");
+			logger.severe("Can't save uploaded files!");
 		}
 		return targetFile.getName();
 	}

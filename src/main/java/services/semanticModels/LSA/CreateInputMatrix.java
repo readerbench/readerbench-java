@@ -32,7 +32,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
-import org.apache.log4j.Logger;
+
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
@@ -42,11 +42,12 @@ import org.apache.mahout.math.Vector.Element;
 
 import data.Lang;
 import data.Word;
+import java.util.logging.Logger;
 import services.semanticModels.PreProcessing;
 
 public class CreateInputMatrix extends LSA {
 
-	private static Logger logger = Logger.getLogger(CreateInputMatrix.class);
+	private static Logger logger = Logger.getLogger("");
 	private int noWords;
 	private int noDocuments;
 

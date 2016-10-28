@@ -16,6 +16,7 @@
 package services.replicatedWorker;
 
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
@@ -30,14 +31,14 @@ import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.log4j.Logger;
+
 
 /**
  * 
  * @author Mihai Dascalu
  */
 public abstract class Worker implements MessageListener, ExceptionListener {
-	static Logger logger = Logger.getLogger(Worker.class);
+	static Logger logger = Logger.getLogger("");
 
 	private boolean running;
 
@@ -64,7 +65,7 @@ public abstract class Worker implements MessageListener, ExceptionListener {
 					send(new StatusMsg(workerID, StatusMsg.KEEPALIVE_MESSAGE,
 							null, null));
 				} catch (Exception e) {
-					logger.error(workerID
+					logger.severe(workerID
 							+ " exception while sending keepalive message; now exiting.");
 					e.printStackTrace();
 					System.exit(-1);
@@ -119,7 +120,7 @@ public abstract class Worker implements MessageListener, ExceptionListener {
 
 			consumer.setMessageListener(this);
 		} catch (Exception e) {
-			logger.error("Caught: " + e);
+			logger.severe("Caught: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -139,7 +140,7 @@ public abstract class Worker implements MessageListener, ExceptionListener {
 			}
 
 		} catch (JMSException e) {
-			logger.error("Caught: " + e);
+			logger.severe("Caught: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -157,7 +158,7 @@ public abstract class Worker implements MessageListener, ExceptionListener {
 	public abstract void performTask(Serializable task) throws Exception;
 
 	public synchronized void onException(JMSException ex) {
-		logger.error("JMS Exception occured. Shutting down client.");
+		logger.severe("JMS Exception occured. Shutting down client.");
 		running = false;
 	}
 

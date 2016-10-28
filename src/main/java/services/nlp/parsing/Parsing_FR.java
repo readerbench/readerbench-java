@@ -17,7 +17,7 @@ package services.nlp.parsing;
 
 import java.util.Properties;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -45,7 +45,7 @@ public class Parsing_FR extends Parsing {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         AbstractDocumentTemplate docTmp = getDocumentModel();
         AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), Lang.fr, true);
         System.out.println(d);

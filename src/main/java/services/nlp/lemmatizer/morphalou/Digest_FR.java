@@ -24,15 +24,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.apache.commons.digester3.Digester;
-import org.apache.log4j.Logger;
+
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 public class Digest_FR {
 
-    static Logger logger = Logger.getLogger(Digest_FR.class);
+    static Logger logger = Logger.getLogger("");
     public static final String PATH_TO_TEXT_LEMMAS_FR = "resources/config/FR/word lists/lemmas_pos_fr.txt";
     public static final String PATH_TO_MORPHALOU_FR = "resources/corpora/FR/Morphalou-2.0.xml";
 
@@ -135,7 +136,7 @@ public class Digest_FR {
     }
 
     public static void main(String[] args) {
-        // BasicConfigurator.configure();
+        // 
         try {
             parseMorpholau();
         } catch (Exception exc) {

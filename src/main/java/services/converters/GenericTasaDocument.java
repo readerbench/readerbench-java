@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
+
 
 import view.widgets.complexity.RunMeasurementsView;
 import data.AbstractDocumentTemplate;
@@ -37,11 +37,12 @@ import data.Word;
 import data.document.Document;
 import data.Lang;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import services.semanticModels.ISemanticModel;
 
 public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 
-    static Logger logger = Logger.getLogger(GenericTasaDocument.class);
+    static Logger logger = Logger.getLogger("");
 
     private String ID;
     private double DRPscore;
@@ -178,7 +179,7 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
      */
     public Document getDocument(boolean usePOStagging) {
         if (content.length() < SplitTASA.LOWER_BOUND) {
-            logger.warn(ID
+            logger.warning(ID
                     + " has too few characters to be taken into consideration");
             return null;
         }
@@ -186,7 +187,7 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
         // perform processing and save the new document
         StringTokenizer st = new StringTokenizer(content, "\n");
         if (st.countTokens() != noParagraphs) {
-            logger.warn("Incorrect number of paragraphs for " + ID);
+            logger.warning("Incorrect number of paragraphs for " + ID);
         }
 
         int crtBlock = 0;

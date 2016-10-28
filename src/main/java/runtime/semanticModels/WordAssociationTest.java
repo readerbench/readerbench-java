@@ -30,13 +30,14 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.Word;
 import data.discourse.Keyword;
 import data.document.Document;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -46,7 +47,7 @@ import webService.ReaderBenchServer;
 
 public class WordAssociationTest {
 
-    static Logger logger = Logger.getLogger(WordAssociationTest.class);
+    static Logger logger = Logger.getLogger("");
     private Map<Document, Map<Document, Double>> wordAssociations;
     private Map<Document, Double> simTop;
     private Map<Document, Double> simMax;
@@ -185,7 +186,7 @@ public class WordAssociationTest {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
 
         ReaderBenchServer.initializeDB();
 
@@ -205,7 +206,7 @@ public class WordAssociationTest {
         comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
         w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
         comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
-        w2v1 = Word2VecModel.loadGoogleNewsModel();
-        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
+//        w2v1 = Word2VecModel.loadGoogleNewsModel();
+//        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
     }
 }

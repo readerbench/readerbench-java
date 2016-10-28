@@ -21,13 +21,14 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -59,7 +60,7 @@ import view.models.PreviewSketch;
 
 public class CohesionGraphView extends JFrame {
 	private static final long serialVersionUID = -5991280949453890249L;
-	static Logger logger = Logger.getLogger(ConceptView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private AbstractDocument doc;
 	private JPanel panelGraph;

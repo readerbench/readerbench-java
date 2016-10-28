@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -46,7 +47,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -76,7 +77,7 @@ import view.models.PreviewSketch;
 public class ConceptView extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(ConceptView.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
     public static final Color COLOR_INFERRED_CONCEPT = new Color(102, 102, 255); // orchid
     private static final int MIN_SIZE = 10;

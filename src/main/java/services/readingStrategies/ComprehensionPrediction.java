@@ -20,8 +20,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 import services.complexity.ComputeBalancedMeasure;
 import data.complexity.Measurement;
@@ -29,7 +30,7 @@ import data.document.Metacognition;
 import services.complexity.ComplexityIndices;
 
 public class ComprehensionPrediction extends ComputeBalancedMeasure {
-	static Logger logger = Logger.getLogger(ComprehensionPrediction.class);
+	static Logger logger = Logger.getLogger("");
 	public static final int NO_COMPREHENSION_CLASSES = 3;
 	private final List<? extends Metacognition> selfExplanations;
 	private Map<Double, List<Measurement>> measurements;

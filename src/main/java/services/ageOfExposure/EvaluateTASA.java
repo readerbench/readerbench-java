@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import services.converters.GenericTasaDocument;
 import services.converters.SplitTASA;
@@ -39,7 +39,7 @@ import data.document.Document;
 import data.Lang;
 
 public class EvaluateTASA {
-	private static Logger logger = Logger.getLogger("EvaluateTASA");
+	private static Logger logger = Logger.getLogger("");
 
 	private int noIndexes;
 	private Map<Word, double[]> wordWCIndexesValues;
@@ -162,7 +162,7 @@ public class EvaluateTASA {
 	}
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
+		
 		try {
 			EvaluateTASA eval = new EvaluateTASA("in/word complexity/words.csv");
 			eval.processWordComplexity("tasa.txt", "in/word complexity", false);

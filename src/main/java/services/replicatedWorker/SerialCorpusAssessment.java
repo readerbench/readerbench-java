@@ -32,7 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -41,12 +41,13 @@ import data.AbstractDocument.SaveType;
 import data.Lang;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 
 public class SerialCorpusAssessment {
 
-    static final Logger LOGGER = Logger.getLogger(SerialCorpusAssessment.class);
+    static final Logger logger = Logger.getLogger("");
 
     private static void checkpoint(File checkpoint, File newFile, long processingTime) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -87,7 +88,7 @@ public class SerialCorpusAssessment {
 
     public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, boolean cleanInput, SaveType saveOutput) {
-        LOGGER.info("Analysing all files in \"" + rootPath + "\"");
+        logger.info("Analysing all files in \"" + rootPath + "\"");
         List<File> files = new LinkedList<>();
 
         FileFilter filter = (File f) -> f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
@@ -141,7 +142,7 @@ public class SerialCorpusAssessment {
         // process all remaining files
         for (File f : files) {
             try {
-                LOGGER.info("Processing file " + f.getName());
+                logger.info("Processing file " + f.getName());
                 Long start = System.currentTimeMillis();
                 AbstractDocument.loadGenericDocument(f.getAbsolutePath(), modelPaths, lang, usePOSTagging,
                         computeDialogism, null, null, cleanInput, saveOutput);
@@ -149,7 +150,7 @@ public class SerialCorpusAssessment {
 
                 // update checkpoint
                 checkpoint(checkpoint, f, end - start);
-                LOGGER.info("Successfully finished processing file " + f.getName());
+                logger.info("Successfully finished processing file " + f.getName());
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }

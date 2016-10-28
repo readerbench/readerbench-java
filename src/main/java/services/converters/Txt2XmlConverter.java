@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -41,6 +41,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -63,7 +64,7 @@ import services.semanticModels.ISemanticModel;
 
 public class Txt2XmlConverter {
 
-    static final Logger LOGGER = Logger.getLogger(Txt2XmlConverter.class);
+    static final Logger logger = Logger.getLogger("");
     private final static DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
 
     private int currentBlock = 0;
@@ -323,7 +324,7 @@ public class Txt2XmlConverter {
             int total_docs_to_process = new File(path).listFiles((File pathname)
                     -> pathname.getName().endsWith(".txt")
             ).length;
-            LOGGER.info("Processing " + total_docs_to_process + " documents in total");
+            logger.info("Processing " + total_docs_to_process + " documents in total");
 
             int current_doc_to_process = 0;
 
@@ -343,7 +344,7 @@ public class Txt2XmlConverter {
                         }
                     }
                     if ((++current_doc_to_process) % 1000 == 0) {
-                        LOGGER.info("Finished processing " + (current_doc_to_process) + " documents of "
+                        logger.info("Finished processing " + (current_doc_to_process) + " documents of "
                                 + total_docs_to_process);
                     }
                     if (meta) {
@@ -363,7 +364,7 @@ public class Txt2XmlConverter {
                     Exceptions.printStackTrace(ex);
                 }
             }
-            LOGGER.info("Finished processing all files.");
+            logger.info("Finished processing all files.");
         } catch (ParserConfigurationException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -378,7 +379,7 @@ public class Txt2XmlConverter {
             int total_docs_to_process = new File(path).listFiles((File pathname)
                     -> pathname.getName().endsWith(".docx")
             ).length;
-            LOGGER.info("Processing " + total_docs_to_process + " documents in total");
+            logger.info("Processing " + total_docs_to_process + " documents in total");
 
             int current_doc_to_process = 0;
 
@@ -388,13 +389,13 @@ public class Txt2XmlConverter {
             Txt2XmlConverter converter = new Txt2XmlConverter(lang);
             for (File f : listFiles) {
                 if ((++current_doc_to_process) % 1000 == 0) {
-                    LOGGER.info("Finished processing " + (current_doc_to_process) + " documents of "
+                    logger.info("Finished processing " + (current_doc_to_process) + " documents of "
                             + total_docs_to_process);
                 }
 
                 converter.processMetaDocFile(f, f.getPath().replace(".docx", ".xml"));
             }
-            LOGGER.info("Finished processing all files.");
+            logger.info("Finished processing all files.");
         } catch (FileNotFoundException e) {
             Exceptions.printStackTrace(e);
         } catch (UnsupportedEncodingException e) {
@@ -417,7 +418,7 @@ public class Txt2XmlConverter {
                 (File pathname) -> pathname.getName().endsWith(".txt"));
 
         for (File f : listFiles) {
-            LOGGER.info("Processing " + f.getPath());
+            logger.info("Processing " + f.getPath());
             // see if there are folders with genre names
             File dir = new File(path + "/" + f.getName().replaceAll("\\.txt", ""));
             if (dir.exists()) {
@@ -459,7 +460,7 @@ public class Txt2XmlConverter {
                 Exceptions.printStackTrace(e);
             }
         }
-        LOGGER.info("Finished processing all files.");
+        logger.info("Finished processing all files.");
     }
 
     public static class Paragraph {

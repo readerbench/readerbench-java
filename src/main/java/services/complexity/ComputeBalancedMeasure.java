@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+
 
 import services.libsvm.svm;
 import services.libsvm.svm_model;
@@ -32,9 +32,10 @@ import data.AbstractDocument;
 import data.complexity.Measurement;
 import data.cscl.Conversation;
 import data.cscl.Participant;
+import java.util.logging.Logger;
 
 public class ComputeBalancedMeasure {
-	static Logger logger = Logger.getLogger(ComputeBalancedMeasure.class);
+	static Logger logger = Logger.getLogger("");
 
 	public svm_parameter getTrainingParameter(int noFactors) {
 		svm_parameter param = new svm_parameter();

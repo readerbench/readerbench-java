@@ -15,16 +15,17 @@
  */
 package services.discourse.keywordMining;
 
-import org.apache.log4j.Logger;
+
 
 import data.AnalysisElement;
 import data.Word;
+import java.util.logging.Logger;
 import services.nlp.listOfWords.MapOfWordWeights;
 import services.readingStrategies.PatternMatching;
 
 public class KeywordCoverage {
 
-    static Logger logger = Logger.getLogger(PatternMatching.class);
+    static Logger logger = Logger.getLogger("");
 
     // returns the coverage with the predefined topic class
     public static double coverage(MapOfWordWeights usedMap, AnalysisElement el) {

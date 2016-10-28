@@ -24,6 +24,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -51,8 +52,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import utils.localization.LocalizationUtils;
 import data.Block;
@@ -66,7 +67,7 @@ import javax.swing.JCheckBox;
 public class CreateVerbalizationView extends JFrame {
 
     private static final long serialVersionUID = -2864356905020607155L;
-    static Logger logger = Logger.getLogger(CreateVerbalizationView.class);
+    static Logger logger = Logger.getLogger("");
 
     private Document loadedDocument = null;
     private Metacognition loadedVerbalization = null;
@@ -547,20 +548,6 @@ public class CreateVerbalizationView extends JFrame {
             textFieldURI.setText(loadedVerbalization.getURI());
             textFieldSource.setText(loadedVerbalization.getSource());
         }
-    }
-
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                CreateVerbalizationView view = new CreateVerbalizationView();
-                view.setVisible(true);
-            }
-        });
     }
 
     private static void adjustToSystemGraphics() {

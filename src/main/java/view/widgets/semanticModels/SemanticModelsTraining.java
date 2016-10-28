@@ -23,6 +23,7 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -42,10 +43,11 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.Lang;
+import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
@@ -59,7 +61,7 @@ import webService.ReaderBenchServer;
 public class SemanticModelsTraining extends JFrame {
 
     private static final long serialVersionUID = 4920477447183036103L;
-    static Logger logger = Logger.getLogger(SemanticModelsTraining.class);
+    static Logger logger = Logger.getLogger("");
 
     private static final String TERM_DOC_MATRIX_NAME = "matrix.svd";
     private static final String SVD_FOLDER_NAME = "svd_out";
@@ -74,9 +76,6 @@ public class SemanticModelsTraining extends JFrame {
     private JTextField textFieldMinWords;
     private JCheckBox chckbxLSAUseHalfSigma;
     private JComboBox<String> comboBoxFormat;
-    private JComboBox<String> comboBoxLanguage;
-    private JComboBox<String> comboBoxLDALanguage;
-    private JComboBox<String> comboBoxLSALanguage;
     private JCheckBox chckbxUsePosTagging;
     private JTextField textFieldLSAFile;
     private JTextField textFieldLSARank;
@@ -125,7 +124,7 @@ public class SemanticModelsTraining extends JFrame {
                         preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
                 }
             } catch (Exception exc) {
-                logger.error("Error processing input file " + exc.getMessage(), exc);
+                logger.log(Level.SEVERE,"Error processing input file " + exc.getMessage(), exc);
             }
             return null;
         }
@@ -182,7 +181,7 @@ public class SemanticModelsTraining extends JFrame {
                 processing.performPostProcessing(input.getParent(), lang, chckbxLSAUseHalfSigma.isSelected());
                 logger.info("Finished building the LSA model");
             } catch (Exception exc) {
-                logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
                 exc.printStackTrace();
             }
             return null;
@@ -224,7 +223,7 @@ public class SemanticModelsTraining extends JFrame {
                 lda.processCorpus(input, noTopics, noThreads, noIterations);
                 lda.printTopics(textFieldLDADirectory.getText(), 100);
             } catch (Exception exc) {
-                logger.error("Error procesing " + input + " directory: " + exc.getMessage());
+                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
                 exc.printStackTrace();
             }
             return null;
@@ -289,13 +288,6 @@ public class SemanticModelsTraining extends JFrame {
 
         chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
 
-        JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-
-        comboBoxLanguage = new JComboBox<>();
-        for (Lang l : Lang.values()) {
-            comboBoxLanguage.addItem(l.getDescription());
-        }
-
         JLabel lblOutputFileName = new JLabel(LocalizationUtils.getTranslation("Output file name") + ":");
 
         textFieldOutput = new JTextField();
@@ -319,7 +311,7 @@ public class SemanticModelsTraining extends JFrame {
                         "Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            Lang lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLanguage.getSelectedItem()));
+            Lang lang = ReaderBenchView.RUNTIME_LANGUAGE;
             int minNoWords = 20;
             try {
                 minNoWords = Integer.parseInt(textFieldMinWords.getText());
@@ -348,7 +340,7 @@ public class SemanticModelsTraining extends JFrame {
                                         .addComponent(lblSelectInput)
                                         .addComponent(
                                                 lblOutputFileName)
-                                        .addComponent(lblFormat).addComponent(lblLanguage).addComponent(lblMinWords))
+                                        .addComponent(lblFormat).addComponent(lblMinWords))
                                 .addGap(18)
                                 .addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
                                         .addGroup(gl_panelPreProcessing.createSequentialGroup()
@@ -356,7 +348,6 @@ public class SemanticModelsTraining extends JFrame {
                                                         Short.MAX_VALUE)
                                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnBrowse))
                                         .addComponent(comboBoxFormat, 0, 336, Short.MAX_VALUE)
-                                        .addComponent(comboBoxLanguage, 0, 336, Short.MAX_VALUE)
                                         .addComponent(textFieldOutput, 336, 336, 336)
                                         .addGroup(gl_panelPreProcessing.createSequentialGroup()
                                                 .addComponent(textFieldMinWords, GroupLayout.PREFERRED_SIZE, 97,
@@ -381,10 +372,7 @@ public class SemanticModelsTraining extends JFrame {
                                 GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                 GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(ComponentPlacement.RELATED)
-                        .addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addComponent(lblLanguage))
+                        .addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE))
                         .addPreferredGap(ComponentPlacement.RELATED)
                         .addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE)
                                 .addComponent(comboBoxFormat, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -438,8 +426,6 @@ public class SemanticModelsTraining extends JFrame {
             }
         });
 
-        JLabel lblLSALanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-
         JLabel lblLSARank = new JLabel(LocalizationUtils.getTranslation("LSA rank") + ":");
 
         JLabel lblLSAReduceTasks = new JLabel(LocalizationUtils.getTranslation("No reduce tasks") + ":");
@@ -460,11 +446,6 @@ public class SemanticModelsTraining extends JFrame {
         textFieldLSAPowerIterations.setText("1");
         textFieldLSAPowerIterations.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSAPowerIterations.setColumns(10);
-
-        comboBoxLSALanguage = new JComboBox<>();
-        for (Lang l : Lang.values()) {
-            comboBoxLSALanguage.addItem(l.getDescription());
-        }
 
         chckbxLSAUseHalfSigma = new JCheckBox(LocalizationUtils.getTranslation("Use half sigma for final comutations"));
         chckbxLSAUseHalfSigma.setSelected(true);
@@ -498,7 +479,7 @@ public class SemanticModelsTraining extends JFrame {
             } catch (Exception exc) {
                 k = 300;
             }
-            lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLSALanguage.getSelectedItem()));
+            lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
             LSATrainingTask task = new LSATrainingTask(input, lang, k, noReduceTasks, noPowerIterations);
             task.execute();
@@ -531,7 +512,6 @@ public class SemanticModelsTraining extends JFrame {
                                                 .createSequentialGroup()
                                                 .addGroup(gl_panelLSATraining
                                                         .createParallelGroup(Alignment.LEADING)
-                                                        .addComponent(lblLSALanguage)
                                                         .addComponent(
                                                                 lblLSARank)
                                                         .addComponent(lblLSAReduceTasks))
@@ -567,9 +547,7 @@ public class SemanticModelsTraining extends JFrame {
                                                                                         GroupLayout.PREFERRED_SIZE,
                                                                                         91,
                                                                                         GroupLayout.PREFERRED_SIZE))
-                                                                        .addComponent(btnLSATrain)))
-                                                        .addComponent(comboBoxLSALanguage, 0, 297,
-                                                                Short.MAX_VALUE)))
+                                                                        .addComponent(btnLSATrain)))))
                                         .addComponent(chckbxLSAUseHalfSigma))
                                 .addContainerGap()));
         gl_panelLSATraining
@@ -582,10 +560,7 @@ public class SemanticModelsTraining extends JFrame {
                                                 GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTxtOnly)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblLSALanguage).addComponent(comboBoxLSALanguage,
-                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.PREFERRED_SIZE))
+                                .addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE))
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(gl_panelLSATraining.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(lblLSARank).addComponent(
@@ -636,12 +611,6 @@ public class SemanticModelsTraining extends JFrame {
                 .getTranslation("All TXT files within the provided directory will be taken into consideration"));
         lblAllTxt.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
-        JLabel lblLDALanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
-
-        comboBoxLDALanguage = new JComboBox<>();
-        for (Lang l : Lang.values()) {
-            comboBoxLDALanguage.addItem(l.getDescription());
-        }
 
         JLabel lblLDANoTopics = new JLabel(LocalizationUtils.getTranslation("No topics") + ":");
 
@@ -690,7 +659,7 @@ public class SemanticModelsTraining extends JFrame {
             } catch (Exception exc) {
                 noThreads = 2;
             }
-            Lang lang = Lang.getLang((String) (SemanticModelsTraining.this.comboBoxLanguage.getSelectedItem()));
+            Lang lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
             LDATrainingTask task = new LDATrainingTask(textFieldLDADirectory.getText(), lang, noTopics, noThreads,
                     noIterations);
@@ -714,7 +683,7 @@ public class SemanticModelsTraining extends JFrame {
                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnLDADirectory))
                         .addGroup(gl_panelLDATraining.createSequentialGroup()
                                 .addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
-                                        .addComponent(lblLDALanguage).addComponent(lblLDANoTopics)
+                                        .addComponent(lblLDANoTopics)
                                         .addComponent(lblLDANoThreads))
                                 .addGap(29)
                                 .addGroup(gl_panelLDATraining.createParallelGroup(Alignment.LEADING)
@@ -733,8 +702,7 @@ public class SemanticModelsTraining extends JFrame {
                                                                 .addComponent(textFieldLDANoIterations,
                                                                         GroupLayout.PREFERRED_SIZE, 91,
                                                                         GroupLayout.PREFERRED_SIZE))
-                                                        .addComponent(btnLDATrain)))
-                                        .addComponent(comboBoxLDALanguage, 0, 327, Short.MAX_VALUE))))
+                                                        .addComponent(btnLDATrain))))))
                 .addContainerGap()));
         gl_panelLDATraining
                 .setVerticalGroup(
@@ -746,10 +714,7 @@ public class SemanticModelsTraining extends JFrame {
                                                 GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblAllTxt)
                                 .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblLDALanguage).addComponent(comboBoxLDALanguage,
-                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.PREFERRED_SIZE))
+                                .addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE))
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(gl_panelLDATraining.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(lblLDANoTopics).addComponent(
@@ -770,20 +735,5 @@ public class SemanticModelsTraining extends JFrame {
     /**
      * Launch the application.
      */
-    public static void main(String[] args) {
-        BasicConfigurator.configure();
 
-        ReaderBenchServer.initializeDB();
-
-        ReaderBenchView.adjustToSystemGraphics();
-
-        EventQueue.invokeLater(() -> {
-            try {
-                SemanticModelsTraining frame = new SemanticModelsTraining();
-                frame.setVisible(true);
-            } catch (Exception e) {
-                Exceptions.printStackTrace(e);
-            }
-        });
-    }
 }

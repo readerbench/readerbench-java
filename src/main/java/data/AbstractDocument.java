@@ -120,7 +120,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     private List<SemanticChain> voices;
     private transient List<SemanticChain> selectedVoices;
-    
+
     protected Map<SimilarityType, String> modelPaths;
 
     public AbstractDocument() {
@@ -209,7 +209,6 @@ public abstract class AbstractDocument extends AnalysisElement {
             DialogismComputations.determineVoiceDistributions(this);
         }
 
-        
         long t1 = System.currentTimeMillis();
         // build coherence graph
         CohesionGraph.buildCohesionGraph(this);
@@ -221,8 +220,6 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        CohesionGraph.buildCohesionGraphOld(this);
 //        t2 = System.currentTimeMillis();
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
-
-        
         // determine topics
         KeywordModeling.determineKeywords(this);
         // TopicModel.determineTopicsLDA(this);
@@ -231,7 +228,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         // assign sentiment values
         SentimentAnalysis.weightSemanticValences(this);
 
-        LOGGER.info("Finished all discourse analysis processes ...");
+        logger.info("Finished all discourse analysis processes ...");
     }
 
     public void setDocumentTitle(String title, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
@@ -294,7 +291,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             String pathToComplexityModel, int[] selectedComplexityFactors,
             boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
-        LOGGER.info("Loading " + docFile.getPath() + " file for processing");
+        logger.info("Loading " + docFile.getPath() + " file for processing");
         boolean isDocument = checkTagsDocument(docFile, "p");
 
         boolean isChat = checkTagsDocument(docFile, "Utterance");
@@ -323,7 +320,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveSerializedDocument() {
-        LOGGER.info("Saving serialized document ...");
+        logger.info("Saving serialized document ...");
         try {
             modelPaths = new EnumMap<>(SimilarityType.class);
             for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
@@ -340,7 +337,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveTxtDocument() {
-        LOGGER.info("Saving plain text document ...");
+        logger.info("Saving plain text document ...");
         File output = new File(path.replace(".xml", ".txt"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -355,7 +352,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadSerializedDocument(String path) {
-        LOGGER.info("Loading serialized document " + path + " ...");
+        logger.info("Loading serialized document " + path + " ...");
         AbstractDocument d = null;
         try (FileInputStream fIn = new FileInputStream(new File(path));
                 ObjectInputStream oIn = new ObjectInputStream(fIn)) {
@@ -387,7 +384,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void exportDocument() {
-        LOGGER.info("Writing document export");
+        logger.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             if (titleText != null) {
@@ -407,8 +404,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                     out.write(",");
                     if (b instanceof Utterance) {
                         if (((Utterance) b).getParticipant() != null) {
-                            out.write(((Utterance) b).getParticipant().getName().replaceAll(",", "").replaceAll("\\s+",
-                                    " "));
+                            out.write(((Utterance) b).getParticipant().getName().replaceAll(",", "").replaceAll("\\s+", " "));
                         }
                         out.write(",");
                         if (((Utterance) b).getTime() != null) {
@@ -578,13 +574,13 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
             out.write("\n");
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
 
     public void exportDocumentAdvanced() {
-        LOGGER.info("Writing advanced document export");
+        logger.info("Writing advanced document export");
         File output = new File(path.replace(".xml", "_adv.csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -609,7 +605,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
