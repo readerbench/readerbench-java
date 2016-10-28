@@ -124,11 +124,7 @@ public class CVAnalyzer {
         }
 
         // textual complexity factors
-        logger.info("Limba: ");
-        logger.info(hm.get("lang"));
         Lang lang = Lang.getLang(hm.get("lang"));
-        logger.info("Lang: ");
-        logger.info(lang);
         TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
         for (ComplexityIndexType cat : textualComplexity.getList()) {
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
