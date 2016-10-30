@@ -15,13 +15,18 @@
  */
 package services.ageOfExposure;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 import services.converters.GenericTasaDocument;
@@ -76,11 +81,92 @@ public class SplitTASAincrementalFiles {
 			dir.mkdir();
 		}
 	}
+	
+	public static void createFilesMixed(String path, String output) throws IOException {
+		createFoldersMixed(output);
+		
+		int[] tokens = {
+			429000, 779000, 1088000, 1447000,
+			2038000, 2668000, 2867000, 3063000,
+			3270000, 3661000, 4024000, 4194000,
+			5431000
+		};
+		
+		ArrayList<ArrayList<String>> allDocs = new ArrayList<ArrayList<String>>();
+		ArrayList<String> docs;
+		
+		// read all docs
+		for (int i = 0; i < SplitTASA.NO_GRADE_LEVELS; i++) {
+			FileInputStream inputFile = new FileInputStream(path + "/grade" + i + "/alltexts[1-" + (i + 1) + "].txt");
+			InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
+			BufferedReader in = new BufferedReader(ir);
+			String line = "";
+			
+			docs = new ArrayList<String>();
+			
+			while ((line = in.readLine()) != null) {
+				docs.add(line);
+			}
+			
+			in.close();
+			allDocs.add(docs);
+		}
+		
+		// pick random docs
+		ArrayList<String> mixedFile = new ArrayList<String>();
+		ArrayList<String> auxList;
+		String auxString;
+		int totalTokens = 0, idx = 0;
+		
+		for (int i = 0; i < SplitTASA.NO_GRADE_LEVELS; i++) {
+			FileOutputStream outputFile = new FileOutputStream(output + "/mixed" + i + "/alltextsmixed" + (i + 1) + ".txt");
+			OutputStreamWriter ow = new OutputStreamWriter(outputFile, "UTF-8");
+			BufferedWriter out = new BufferedWriter(ow);
+			
+			while (totalTokens <= tokens[i]) {
+				auxList = allDocs.get(idx % SplitTASA.NO_GRADE_LEVELS);
+				auxString = auxList.get(ThreadLocalRandom.current().nextInt(0, auxList.size()));
+				
+				totalTokens += auxString.split("[ \\.\n]+").length;
+				mixedFile.add(auxString);
+				idx++;
+			}
+			
+			for (int j = 0; j < mixedFile.size(); j++) {
+				out.write(mixedFile.get(j));
+				out.newLine();
+			}
+			out.close();
+		}
+	}
+	
+	private static void createFoldersMixed(String path) {
+		// delete all potential class folders as well
+		for (int i = 0; i < SplitTASA.NO_GRADE_LEVELS; i++) {
+			File dir = new File(path + "/mixed" + i);
+			if (dir.exists()) {
+				for (File f : dir.listFiles())
+					f.delete();
+				dir.delete();
+			}
+			dir.mkdir();
+		}
+	}
 
 	public static void main(String[] args) {
 
+		/*
 		try {
 			SplitTASAincrementalFiles.parseTasaFromSingleFile("tasa.txt", "resources/in/AoE", false, false);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		*/
+		
+		try {
+			SplitTASAincrementalFiles.createFilesMixed("resources/in/AoE HDP full", "resources/in/AoE Mixed");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
