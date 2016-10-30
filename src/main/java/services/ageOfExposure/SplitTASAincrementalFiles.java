@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
@@ -118,6 +119,8 @@ public class SplitTASAincrementalFiles {
 		String auxString;
 		int totalTokens = 0, idx = 0;
 		
+		HashSet<String> docSet = new HashSet<String>();
+		
 		for (int i = 0; i < SplitTASA.NO_GRADE_LEVELS; i++) {
 			FileOutputStream outputFile = new FileOutputStream(output + "/mixed" + i + "/alltextsmixed" + (i + 1) + ".txt");
 			OutputStreamWriter ow = new OutputStreamWriter(outputFile, "UTF-8");
@@ -125,7 +128,11 @@ public class SplitTASAincrementalFiles {
 			
 			while (totalTokens <= tokens[i]) {
 				auxList = allDocs.get(idx % SplitTASA.NO_GRADE_LEVELS);
-				auxString = auxList.get(ThreadLocalRandom.current().nextInt(0, auxList.size()));
+				
+				while (true) {
+					auxString = auxList.get(ThreadLocalRandom.current().nextInt(0, auxList.size()));
+					if (!docSet.contains(auxString)) break;
+				}
 				
 				totalTokens += auxString.split("[ \\.\n]+").length;
 				mixedFile.add(auxString);
