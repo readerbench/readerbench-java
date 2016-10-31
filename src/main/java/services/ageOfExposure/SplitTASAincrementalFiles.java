@@ -131,7 +131,11 @@ public class SplitTASAincrementalFiles {
 				
 				while (true) {
 					auxString = auxList.get(ThreadLocalRandom.current().nextInt(0, auxList.size()));
-					if (!docSet.contains(auxString)) break;
+					
+					if (!docSet.contains(auxString)) {
+						docSet.add(auxString);
+						break;
+					}
 				}
 				
 				totalTokens += auxString.split("[ \\.\n]+").length;
