@@ -43,29 +43,28 @@ public class LifeConverter {
             int count_fl = 0;
             int count_id = 2;
             
-            
             Dialog temp = new Dialog(new LinkedList<Person>(), new ArrayList<String>(), new ArrayList<Turn>(), d.id);
             
             for(int i = 0; i < sz_b; i++) {
-                if(d.getBody().get(i).getId() == 4134) {
+                if(d.getBody().get(i).getId() == "4134") {
                     
                     if(d.getBody().get(i).getUtter().getMesg().contains("with respect to")) {
                         jaxbMarshaller.marshal(temp, new File("Question" + count_fl + ".xml"));
                         count_fl++;
                         temp = new Dialog(new LinkedList<Person>(), new ArrayList<String>(), new ArrayList<Turn>(), d.getId());
-                        temp.getBody().add(new Turn(4134, new Utterance(1, 0, "", d.getBody().get(i - 1).getUtter().getMesg())));
+                        temp.getBody().add(new Turn("4134", new Utterance(1, 0, "", d.getBody().get(i - 1).getUtter().getMesg())));
                         temp.getBody().get(0).getUtter().setMesg(temp.getBody().get(0).getUtter().getMesg().concat(" " + d.getBody().get(i).getUtter().getMesg()));
                     }
                     else {
                         
-                        if( i < sz_b && d.getBody().get(i + 1).getId() == 4134) {
+                        if( i < sz_b && d.getBody().get(i + 1).getId() == "4134") {
                            continue;
                         }
                         else {
                             jaxbMarshaller.marshal(temp, new File("Question" + count_fl + ".xml"));
                             count_fl++;
                             temp = new Dialog(new LinkedList<Person>(), new ArrayList<String>(), new ArrayList<Turn>(), d.id);
-                            temp.getBody().add(new Turn(4134, new Utterance(1, 0, "", d.getBody().get(i).getUtter().getMesg())));
+                            temp.getBody().add(new Turn("4134", new Utterance(1, 0, "", d.getBody().get(i).getUtter().getMesg())));
                        }
                     }
                     count_id = 2;
