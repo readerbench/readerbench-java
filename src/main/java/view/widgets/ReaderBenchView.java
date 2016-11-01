@@ -89,16 +89,16 @@ public class ReaderBenchView extends JFrame {
         LDA_SPACES = new HashMap();
         LSA_SPACES = new HashMap();
         
-        LDA_SPACES.put("en", new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""});
-        LDA_SPACES.put("fr", new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
-        LDA_SPACES.put("it", new String[]{""});
-        LDA_SPACES.put("es", new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
-        LDA_SPACES.put("la", new String[]{"resources/config/LA/LSA/Letters", ""});
-        LSA_SPACES.put("en", new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
-        LSA_SPACES.put("fr", new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
-        LSA_SPACES.put("it", new String[]{"resources/config/IT/LDA/Paisa", ""});
-        LSA_SPACES.put("es", new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
-        LSA_SPACES.put("la", new String[]{"resources/config/LA/LDA/Letters", ""});
+        LSA_SPACES.put("en", new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""});
+        LSA_SPACES.put("fr", new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
+        LSA_SPACES.put("it", new String[]{""});
+        LSA_SPACES.put("es", new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
+        LSA_SPACES.put("la", new String[]{"resources/config/LA/LSA/Letters", ""});
+        LDA_SPACES.put("en", new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
+        LDA_SPACES.put("fr", new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
+        LDA_SPACES.put("it", new String[]{"resources/config/IT/LDA/Paisa", ""});
+        LDA_SPACES.put("es", new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
+        LDA_SPACES.put("la", new String[]{"resources/config/LA/LDA/Letters", ""});
     }
 
     public static Lang RUNTIME_LANGUAGE;
