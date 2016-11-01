@@ -240,6 +240,25 @@ public class LSA implements ISemanticModel {
         return similarConcepts;
     }
     
+    public Word getMostSimilarConcept(Word w) {
+    	return getMostSimilarConcept(getWordVector(w));
+    }
+    
+    public Word getMostSimilarConcept(double[] vector) {
+    	Word res = null;
+    	double sim, max = 0;
+    
+    	for (Word c : words.keySet()) {
+    		sim = VectorAlgebra.cosineSimilarity(vector, getWordVector(c));
+    		if (sim >= max) {
+    			res = c;
+    			max = sim;
+    		}
+    	}
+    	
+    	return res;
+    }
+    
     @Override
     public Lang getLanguage() {
         return language;

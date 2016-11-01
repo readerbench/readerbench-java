@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,17 +36,13 @@ import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 
 import org.apache.pdfbox.cos.COSDocument;
-import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
-
-import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-
-import services.commons.Formatting;
 import webService.ReaderBenchServer;
 
 public class PdfToTextConverter {
@@ -114,7 +109,7 @@ public class PdfToTextConverter {
 
     // number of colors
     private Integer colors;
-    
+
     private Integer fontTypes; // contains font types with text styles
     private Integer fontTypesSimple; // contains font types withouth text styles
     private Integer fontSizes;
@@ -136,11 +131,11 @@ public class PdfToTextConverter {
     public Integer getFontTypesSimple() {
         return fontTypesSimple;
     }
-    
+
     public void setFontTypesSimple(Integer fontTypesSimple) {
         this.fontTypesSimple = fontTypesSimple;
     }
-    
+
     public Integer getFontSizes() {
         return fontSizes;
     }
@@ -163,8 +158,8 @@ public class PdfToTextConverter {
 
     public void setMaxFontSize(Float maxFontSize) {
         this.maxFontSize = maxFontSize;
-    }   
-    
+    }
+
     public Integer getTotalCharacters() {
         return totalCharacters;
     }
@@ -188,11 +183,11 @@ public class PdfToTextConverter {
     public void setItalicCharacters(Integer italicCharacters) {
         this.italicCharacters = italicCharacters;
     }
-    
+
     public Integer getBoldItalicCharacters() {
         return boldItalicCharacters;
     }
-    
+
     public void setBoldItalicCharacters(Integer boldItalicCharacters) {
         this.boldItalicCharacters = boldItalicCharacters;
     }
@@ -204,7 +199,7 @@ public class PdfToTextConverter {
     public void setColors(Integer colors) {
         this.colors = colors;
     }
-    
+
     final StringBuffer extractedText = new StringBuffer();
 
     // Extract text from PDF Document
@@ -217,11 +212,11 @@ public class PdfToTextConverter {
         File file;
         try {
             if (!isFile) {
-                
+
                 URL url;
-                URLDecoder.decode(fileName, "UTF-8"); 
+                URLDecoder.decode(fileName, "UTF-8");
                 url = new URL(fileName);
-                
+
                 StringBuilder sb = new StringBuilder();
                 sb.append("tmp/");
                 sb.append(System.currentTimeMillis());
@@ -233,7 +228,7 @@ public class PdfToTextConverter {
                 file = new File(fileName);
                 FileUtils.copyURLToFile(url, file);
 
-                parser = new PDFParser(new RandomAccessBufferedFileInputStream(new FileInputStream(file)));                
+                parser = new PDFParser(new RandomAccessBufferedFileInputStream(new FileInputStream(file)));
 
             } else {
                 file = new File(fileName);
@@ -246,8 +241,8 @@ public class PdfToTextConverter {
             }
 
             PrintWriter out = new PrintWriter(fileName.replace(".pdf", ".txt"), "UTF-8");
-            
-             // structures used for extraction
+
+            // structures used for extraction
             Map<Float, Integer> fontSizes = new HashMap<>();
             Map<String, Integer> fontStats = new HashMap<>();
 
@@ -295,7 +290,7 @@ public class PdfToTextConverter {
                 //out.write(page.getContents().getByteArray());
                 PDResources pdResources = page.getResources();
                 // get number of images on this page and save them for later normalization				
-                int images = (int)StreamSupport.stream(pdResources.getXObjectNames().spliterator(), true)
+                int images = (int) StreamSupport.stream(pdResources.getXObjectNames().spliterator(), true)
                         .filter(x -> pdResources.isImageXObject(x))
                         .count();
                 this.imagesPerPage.put(k, images);
@@ -319,7 +314,6 @@ public class PdfToTextConverter {
 					}
 				}*/
                 // get number of colors on this page and save them for later normalization	
-
                 // extract text on this page
                 // use the following to extract text on page if the above technique does not work
                 /*pdfStripper.setStartPage(k);
@@ -327,7 +321,7 @@ public class PdfToTextConverter {
 				String textOnPage = pdfStripper.getText(pdDoc);*/
                 k++;
             }
-            
+
             String text = stripper.getText(pdDoc);
             //logger.info("Culori textuale: " + text);
             logger.info("Numar culori document: " + stripper.getCharsPerColor().size());
@@ -338,16 +332,15 @@ public class PdfToTextConverter {
             out.write(parsedText);
             out.close();
 
-            
             Iterator<String> it = fontStats.keySet().iterator();
             Map<String, Integer> simpleFonts = new HashMap<>();
-           
+
             int totalCharacters = 0, bold = 0, italic = 0, boldItalic = 0;
-            
+
             while (it.hasNext()) {
                 String fontKey = it.next();
                 String fontType;
- 
+
                 // Parsing fontNames which contain Bold, Italic in name and
                 // adding the number of chars to the actual total
                 if (fontKey.contains("+")) {
@@ -391,7 +384,7 @@ public class PdfToTextConverter {
                         // System.out.println("fontType6: " + fontKey);
                     }
                 }
- 
+
                 // System.out.println("Remastered " + fontKey.toLowerCase());
                 if (simpleFonts.containsKey(fontType)) {
                     // System.out.println("The Value: " +
@@ -403,7 +396,7 @@ public class PdfToTextConverter {
                 } else {
                     simpleFonts.put(fontType, fontStats.get(fontKey));
                 }
- 
+
                 if (fontKey.toLowerCase().contains("bolditalic")) {
                     // System.out.println("BOLDITALIC Style: " + fontKey + ".
                     // And number of chars: " + fontStats.get(fontKey));
@@ -419,14 +412,14 @@ public class PdfToTextConverter {
                 }
                 totalCharacters += fontStats.get(fontKey);
             }
-            
+
             Iterator<String> fit = simpleFonts.keySet().iterator();
             while (fit.hasNext()) {
                 String ffontKey = fit.next();
                 System.out.println("font: " + ffontKey + ", and number of chars: " + simpleFonts.get(ffontKey));
- 
+
             }
-            
+
             this.setFontTypes(fontStats.size());
             this.setFontSizes(fontSizes.size());
             logger.info("*****Styles*****");
@@ -440,30 +433,27 @@ public class PdfToTextConverter {
             this.setBoldItalicCharacters(boldItalic);
             logger.info("How many fonts did I find: " + simpleFonts.size());
             this.setFontTypesSimple(simpleFonts.size());
-            
+
             // Sort FontSizes
             logger.info("\n*****FontSizes*****");
-            
+
             if (fontSizes.size() > 0) {
                 Collections.max(fontSizes.keySet());
                 logger.info("MaxFont: " + Collections.max(fontSizes.keySet()));
                 this.setMaxFontSize(Collections.max(fontSizes.keySet()));
                 logger.info("MinFont: " + Collections.min(fontSizes.keySet()));
                 this.setMinFontSize(Collections.min(fontSizes.keySet()));
-            }
-            else {
+            } else {
                 logger.info("MaxFont: " + "N/A");
                 this.setMaxFontSize(new Float(0.0));
                 logger.info("MinFont: " + "N/A");
                 this.setMinFontSize(new Float(0.0));
-            }          
-            
-            
+            }
+
             // replace all single \n's with space; multiple \ns means new paragraph
             // OLD method - should be replaced
             //parsedText = parsedText.replaceAll("([^\n]+)([\n])([^\n ]+)", "$1 $3");
             // OLD method ends here
-            
             // NEW method
             // append current line to previous line if previous line does not end with a "." character
             /*String lines[] = parsedText.split("\\r?\\n");
@@ -504,7 +494,6 @@ public class PdfToTextConverter {
 				}
 			}*/
             // debug purposes
-            
             pdDoc.close();
 
         } catch (IOException e) {
