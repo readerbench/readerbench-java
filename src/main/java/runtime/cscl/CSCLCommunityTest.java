@@ -17,7 +17,7 @@ package runtime.cscl;
 
 import java.util.Date;
 
-import org.apache.log4j.BasicConfigurator;
+
 
 import data.AbstractDocument.SaveType;
 import data.Lang;
@@ -29,7 +29,7 @@ import webService.ReaderBenchServer;
 public class CSCLCommunityTest {
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
 
         ReaderBenchServer.initializeDB();
 

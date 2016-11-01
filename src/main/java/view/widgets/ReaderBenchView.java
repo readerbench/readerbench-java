@@ -40,7 +40,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.Painter;
 import javax.swing.UIDefaults;
@@ -49,13 +48,14 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import data.AbstractDocument;
 import data.Lang;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
 import utils.settings.SettingsUtils;
@@ -80,15 +80,12 @@ import webService.ReaderBenchServer;
 public class ReaderBenchView extends JFrame {
 
     private static final long serialVersionUID = 4565038532352428650L;
-    public static Logger logger = Logger.getLogger(ReaderBenchView.class);
+    public static Logger logger = Logger.getLogger("");
 
-    public static HashMap<String, String[]> LSA_SPACES;
-    public static HashMap<String, String[]> LDA_SPACES; 
-    static
-    {
-        LDA_SPACES = new HashMap();
-        LSA_SPACES = new HashMap();
-        
+    public static final Map<String, String[]> LSA_SPACES = new HashMap();
+    public static final Map<String, String[]> LDA_SPACES = new HashMap();
+
+    static {
         LSA_SPACES.put("en", new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""});
         LSA_SPACES.put("fr", new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
         LSA_SPACES.put("it", new String[]{""});
@@ -105,7 +102,6 @@ public class ReaderBenchView extends JFrame {
     public static Locale LOADED_LOCALE;
 
     // File menu item
-
     // tabbed panel
     private final JTabbedPane tabbedPane;
     // data input panel
@@ -147,7 +143,7 @@ public class ReaderBenchView extends JFrame {
         super.setTitle("ReaderBench " + SettingsUtils.getReaderBenchVersion());
         super.setIconImage(Toolkit.getDefaultToolkit().getImage("resources/config/Logos/reader_bench_icon.png"));
         Locale.setDefault(LOADED_LOCALE);
-        
+
         // adjust view to desktop size
         super.setBounds(50, 50, 1180, 750);
 
@@ -487,8 +483,6 @@ public class ReaderBenchView extends JFrame {
         panelCSCL.setLayout(gl_panelSettingsSpecific);
         desktopPane.setLayout(gl_desktopPane);
 
-
-        
     }
 
     public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, Lang lang) {
@@ -543,22 +537,34 @@ public class ReaderBenchView extends JFrame {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO); // changing log level
-
-        ReaderBenchView.setRuntimeLang(args[0]);
-        ReaderBenchView.setLoadedLocale();
-        
-        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
-
-        ReaderBenchServer.initializeDB();
-
-        adjustToSystemGraphics();
-
-        EventQueue.invokeLater(() -> {
-            ReaderBenchView view = new ReaderBenchView();
-            view.setVisible(true);
-        });
+        try {
+            Logger.getLogger("").setLevel(Level.INFO); // changing log level
+            
+            if (args.length > 0) {
+                ReaderBenchView.setRuntimeLang(args[0]);
+            } else {
+                RUNTIME_LANGUAGE = Lang.en;
+            }
+            ReaderBenchView.setLoadedLocale();
+            
+            FileHandler fh = new FileHandler("ReaderBenchServer.log");
+            logger.addHandler(fh);
+            
+            Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
+            
+            ReaderBenchServer.initializeDB();
+            
+            adjustToSystemGraphics();
+            
+            EventQueue.invokeLater(() -> {
+                ReaderBenchView view = new ReaderBenchView();
+                view.setVisible(true);
+            });
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public static void adjustToSystemGraphics() {
@@ -572,17 +578,13 @@ public class ReaderBenchView extends JFrame {
             }
         }
     }
-    
+
     public static void setRuntimeLang(String text) {
-        if (text == null || text.length() == 0) {
-            RUNTIME_LANGUAGE = Lang.en;
-            return;
-        }
         RUNTIME_LANGUAGE = Lang.getLang(text);
     }
-    
+
     public static void setLoadedLocale() {
-        LOADED_LOCALE= RUNTIME_LANGUAGE.getLocale();
+        LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
     }
-    
+
 }

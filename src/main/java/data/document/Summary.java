@@ -70,13 +70,13 @@ public class Summary extends Metacognition {
                 return null;
             }
 
-            LOGGER.info("Building summary internal representation ...");
+            logger.info("Building summary internal representation ...");
             Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging);
 
             extractDocumentDescriptors(doc, meta);
             return meta;
         } catch (ParserConfigurationException | SAXException | IOException | ParseException e) {
-            LOGGER.error("Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "!");
+            logger.severe("Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "!");
             Exceptions.printStackTrace(e);
             return null;
         }
@@ -103,7 +103,7 @@ public class Summary extends Metacognition {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -117,6 +117,6 @@ public class Summary extends Metacognition {
         computeDiscourseAnalysis(computeDialogism);
         ReadingStrategies.detReadingStrategies(this);
         ComplexityIndices.computeComplexityFactors(this);
-        LOGGER.info("Finished processing summary ...");
+        logger.info("Finished processing summary ...");
     }
 }

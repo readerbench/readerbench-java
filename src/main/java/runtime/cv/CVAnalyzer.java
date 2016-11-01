@@ -28,9 +28,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.junit.Test;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
@@ -48,7 +49,7 @@ import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
-    public Logger logger = Logger.getLogger(CVAnalyzer.class);
+    public Logger logger = Logger.getLogger("");
 
     private static final String CV_PATH_SAMPLE = "resources/in/cv/cv_sample/";
     private static final String CV_PATH = "resources/in/cv_new/cv_analyse/";
@@ -65,6 +66,7 @@ public class CVAnalyzer {
     private String ignoreWords;
 
     public CVAnalyzer(Map<String, String> hm) {
+        this.hm = hm;
         this.path = null;
         this.keywords = null;
         this.ignoreWords = null;
@@ -144,6 +146,12 @@ public class CVAnalyzer {
         sb.append("\n");
 
         return sb.toString();
+    }
+    
+    private void cvError() {
+        
+        
+        
     }
 
     private String csvBuildRow(String fileName, ResultCv result) {
@@ -375,7 +383,7 @@ public class CVAnalyzer {
 
         hm.put("text", cvContent);
         ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, FAN_DELTA);
+                hm, FAN_DELTA, CVConstants.NO_CONCEPTS);
 
         return result;
     }
@@ -419,17 +427,17 @@ public class CVAnalyzer {
 
     private static Map<String, String> loadDefaultParameters() {
         Map<String, String> hm = new HashMap<>();
-        hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
-        hm.put("lda", "resources/config/FR/LDA/Le_Monde");
-        hm.put("lang", "French");
-        hm.put("postagging", "true");
-        hm.put("dialogism", "true");
-        hm.put("threshold", "0.3");
+        hm.put("lsa",           CVConstants.LSA_PATH_FR);
+        hm.put("lda",           CVConstants.LDA_PATH_FR);
+        hm.put("lang",          CVConstants.LANG_FR);
+        hm.put("postagging",    CVConstants.POS_TAGGING);
+        hm.put("dialogism",     CVConstants.DIALOGISM);
+        hm.put("threshold",     CVConstants.THRESHOLD);
         return hm;
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         Map<String, String> hm = loadDefaultParameters();
@@ -442,7 +450,7 @@ public class CVAnalyzer {
 
     @Test
     public static void cvSampleTest() {
-        BasicConfigurator.configure();
+        
         ReaderBenchServer.initializeDB();
 
         Map<String, String> hm = loadDefaultParameters();

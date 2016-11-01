@@ -23,14 +23,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Reader;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -42,7 +43,7 @@ import org.openide.util.Exceptions;
 
 public class ProcessSVDOutput extends LSA {
 
-    private static Logger logger = Logger.getLogger(ProcessSVDOutput.class);
+    private static Logger logger = Logger.getLogger("");
 
     private double[][] readMatrix(String path) {
         // determine all files in input folder
@@ -92,7 +93,7 @@ public class ProcessSVDOutput extends LSA {
 
         for (int i = 0; i < idMax; i++) {
             if (!vectors.keySet().contains(i)) {
-                logger.error("Missing information for element " + i + "!");
+                logger.severe("Missing information for element " + i + "!");
             }
         }
 
@@ -124,7 +125,7 @@ public class ProcessSVDOutput extends LSA {
 
             while (reader.next(key, vec)) {
                 if (no > 1) {
-                    logger.error("Input matrix contains too many rows!");
+                    logger.severe("Input matrix contains too many rows!");
                 }
                 DenseVector vect = (DenseVector) vec.get();
                 vector = new double[vect.size()];
@@ -185,14 +186,14 @@ public class ProcessSVDOutput extends LSA {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         try {
             // post-process
             ProcessSVDOutput processing = new ProcessSVDOutput();
             processing.performPostProcessing("resources/config/ES/LSA/Jose Antonio", Lang.es, true);
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
-            logger.error("Error during learning process");
+            logger.severe("Error during learning process");
         }
     }
 }

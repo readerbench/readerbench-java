@@ -21,6 +21,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -33,7 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 
-import org.apache.log4j.Logger;
+
 
 import data.Block;
 import data.document.Summary;
@@ -46,7 +47,7 @@ import view.widgets.document.DocumentView;
 public class SummaryView extends JFrame {
 	private static final long serialVersionUID = -4709511294166379162L;
 
-	static Logger logger = Logger.getLogger(SummaryView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private Summary summary;
 

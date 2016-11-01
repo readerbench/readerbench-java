@@ -21,6 +21,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -34,7 +35,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 
 import services.commons.Formatting;
 import view.models.verbalization.VerbalizationTable;
@@ -57,7 +58,7 @@ public class VerbalizationView extends JFrame {
 
     private static final long serialVersionUID = -4709511294166379162L;
 
-    static Logger logger = Logger.getLogger(VerbalizationView.class);
+    static Logger logger = Logger.getLogger("");
 
     private Metacognition verbalization;
     private final DefaultTableModel modelContents;

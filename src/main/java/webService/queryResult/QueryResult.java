@@ -28,36 +28,37 @@ import com.google.gson.GsonBuilder;
 @Root(name = "response")
 public class QueryResult {
 
-	@Element
-	private boolean success;
+    private static Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 
-	@Element(name = "errormsg")
-	private String errorMsg; // custom error message (optional)
+    @Element
+    private boolean success;
 
-	protected QueryResult() {
+    @Element(name = "errormsg")
+    private String errorMsg; // custom error message (optional)
+
+    protected QueryResult() {
         this(true, "");
-	}
-    
+    }
+
     public QueryResult(boolean success, String errorMsg) {
-		this.success = success;
-		this.errorMsg = errorMsg;
-	}
-	
-	public String convertToJson() {
-		Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-		String json = gson.toJson(this);
-		return json;
-	}
-	
-	private String convertToXml() {
-		Serializer serializer = new Persister();
-		StringWriter result = new StringWriter();
-		try {
-			serializer.write(this, result);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-		return result.toString();
-	}
-	
+        this.success = success;
+        this.errorMsg = errorMsg;
+    }
+
+    public String convertToJson() {
+        String json = gson.toJson(this);
+        return json;
+    }
+
+    private String convertToXml() {
+        Serializer serializer = new Persister();
+        StringWriter result = new StringWriter();
+        try {
+            serializer.write(this, result);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result.toString();
+    }
+
 }

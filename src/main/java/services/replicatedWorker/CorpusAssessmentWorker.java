@@ -18,20 +18,18 @@ package services.replicatedWorker;
 import java.io.File;
 import java.io.Serializable;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import data.cscl.Conversation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 
 public class CorpusAssessmentWorker extends Worker {
 
-    static Logger logger = Logger.getLogger(CorpusAssessmentWorker.class);
+    static Logger logger = Logger.getLogger("");
     private LSA lsa;
     private LDA lda;
     private List<ISemanticModel> models;
@@ -77,8 +75,8 @@ public class CorpusAssessmentWorker extends Worker {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
+        
+        Logger.getLogger("").setLevel(Level.INFO);
 
         Worker consumerTool = new CorpusAssessmentWorker();
         consumerTool.run();

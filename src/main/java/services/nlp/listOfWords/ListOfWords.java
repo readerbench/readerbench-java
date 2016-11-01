@@ -24,8 +24,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 
 /**
  *
@@ -33,7 +34,7 @@ import org.apache.log4j.Logger;
  */
 public class ListOfWords {
 
-    private static Logger logger = Logger.getLogger(ListOfWords.class);
+    private static Logger logger = Logger.getLogger("");
 
     private Set<String> words;
 
@@ -57,7 +58,7 @@ public class ListOfWords {
                 }
             }
         } catch (IOException ex) {
-            logger.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         }
     }
 
@@ -73,7 +74,7 @@ public class ListOfWords {
                 }
             }
         } catch (IOException ex) {
-            logger.error(ex.getMessage());
+            logger.severe(ex.getMessage());
         }
     }
 

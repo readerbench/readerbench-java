@@ -30,14 +30,15 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.AbstractDocumentTemplate;
 import data.Word;
 import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
@@ -45,7 +46,7 @@ import services.semanticModels.LDA.LDA;
 
 public class PunData {
 
-    static Logger logger = Logger.getLogger(PunData.class);
+    static Logger logger = Logger.getLogger("");
 
     private static String compareDocs(String s1, String s2, ISemanticModel semModel, double minThreshold) {
         List<ISemanticModel> models = new ArrayList<>();
@@ -105,7 +106,7 @@ public class PunData {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         PunData comp = new PunData();
 
         LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);

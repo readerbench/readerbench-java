@@ -143,7 +143,9 @@ public enum ComplexityIndecesEnum {
     DOC_FLOW_ADJACENCY_ACCURACY(ComplexityIndexType.COHESION), 
     DOC_FLOW_SPEARMAN_CORRELATION(ComplexityIndexType.COHESION), 
     DOC_FLOW_MAX_ORDERED_SEQUENCE(ComplexityIndexType.COHESION), 
-    DOC_FLOW_AVERAGE_COHESION(ComplexityIndexType.COHESION);
+    DOC_FLOW_AVERAGE_COHESION(ComplexityIndexType.COHESION),
+    
+    DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES);
     
     private final ComplexityIndexType type;
 

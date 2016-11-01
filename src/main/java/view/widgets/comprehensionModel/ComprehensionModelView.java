@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -36,7 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -74,7 +75,7 @@ public class ComprehensionModelView extends JFrame {
 
     private static final long serialVersionUID = 1L;
 
-    static Logger logger = Logger.getLogger(ComprehensionModelView.class);
+    static Logger logger = Logger.getLogger("");
     private final ComprehensionModel cm;
     private int sentenceIndex;
     public static final Color COLOR_SEMANTIC = new Color(255, 10, 0);

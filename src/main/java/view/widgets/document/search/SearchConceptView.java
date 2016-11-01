@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -47,7 +48,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -84,7 +85,7 @@ public class SearchConceptView extends JFrame {
 
     public static SearchConceptView paperSimilarityView;
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(SearchConceptView.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
 
     public static final double MAX_COHESION = 0.96;

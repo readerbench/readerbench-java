@@ -22,17 +22,18 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
+
 
 import data.Lang;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.nlp.lemmatizer.morphalou.Digest_FR;
 import services.nlp.lemmatizer.morphalou.Digest_IT;
 
 public class StaticLemmatizerPOS {
 
-    static Logger logger = Logger.getLogger(StaticLemmatizerPOS.class);
+    static Logger logger = Logger.getLogger("");
 
     private static Map<String, String> lemmas_fr = null;
     private static Map<String, String> lemmas_it = null;
@@ -116,7 +117,7 @@ public class StaticLemmatizerPOS {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
+        
         System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null, Lang.fr));
         System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB", Lang.it));
     }

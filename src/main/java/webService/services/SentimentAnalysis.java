@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import data.AbstractDocument;
 import data.Block;
@@ -35,7 +34,7 @@ import webService.result.ResultValence;
 
 public class SentimentAnalysis {
 
-    private static Logger logger = Logger.getLogger(SentimentAnalysis.class);
+    private static Logger logger = Logger.getLogger("");
 
     /**
      * Get sentiment values for the entire document and for each paragraph

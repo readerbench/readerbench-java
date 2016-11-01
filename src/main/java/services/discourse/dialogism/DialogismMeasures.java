@@ -19,16 +19,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.discourse.SemanticChain;
+import java.util.logging.Logger;
 
 public class DialogismMeasures {
-	static Logger logger = Logger.getLogger(DialogismMeasures.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static double[][] getSentenceCorrelationMatrix(
 			List<SemanticChain> voices) {

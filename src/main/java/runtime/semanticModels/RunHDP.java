@@ -15,17 +15,16 @@
  */
 package runtime.semanticModels;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
+import java.util.logging.Logger;
 import services.semanticModels.LDA.LDA;
 
 public class RunHDP {
-	static Logger logger = Logger.getLogger(RunHDP.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static void main(String[] args) {
-		BasicConfigurator.configure();
 
 		try {
 			LDA lda = new LDA(Lang.en);
@@ -40,7 +39,7 @@ public class RunHDP {
 			// lda.findDeepLearningRules(w1, w2, 0.5);
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			logger.error("Error during learning process");
+			logger.severe("Error during learning process");
 		}
 	}
 }

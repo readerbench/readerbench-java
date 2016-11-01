@@ -27,14 +27,15 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 
 import data.Lang;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
 public class StaticLemmatizer {
 
-    static Logger logger = Logger.getLogger(StaticLemmatizer.class);
+    static Logger logger = Logger.getLogger("");
 
     private static Map<String, String> lemmas_en;
     private static Map<String, String> lemmas_ro;
@@ -63,7 +64,7 @@ public class StaticLemmatizer {
                     lemmas.put(inflected, lemma);
                 }
                 if (existing != null) {
-                    logger.error("Duplicate entry: " + inflected);
+                    logger.severe("Duplicate entry: " + inflected);
                 }
             }
             in.close();

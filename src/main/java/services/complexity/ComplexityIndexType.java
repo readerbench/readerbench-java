@@ -19,6 +19,7 @@ import services.complexity.CAF.CAFFactory;
 import services.complexity.cohesion.CohesionFactory;
 import services.complexity.connectives.ConnectivesFactory;
 import services.complexity.coreference.CoreferenceFactory;
+import services.complexity.dependencies.SemanticDependenciesFactory;
 import services.complexity.dialogism.DialogismFactory;
 import services.complexity.entityDensity.EntityDensityFactory;
 import services.complexity.readability.ReadabilityFactory;
@@ -41,7 +42,8 @@ public enum ComplexityIndexType {
     CONNECTIVES(new ConnectivesFactory()),
     COHESION(new CohesionFactory()),
     DIALOGISM(new DialogismFactory()),
-    RHYTHM(null);
+    RHYTHM(null),
+    SEMANTIC_DEPENDENCIES(new SemanticDependenciesFactory());
 
     private final ComplexityIndecesFactory factory;
 

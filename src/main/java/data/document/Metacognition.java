@@ -33,7 +33,7 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.Logger;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,6 +44,7 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.discourse.SemanticCohesion;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.openide.util.Exceptions;
@@ -67,7 +68,7 @@ public class Metacognition extends Document {
 
     private static final long serialVersionUID = 3740041983851246989L;
 
-    static final Logger LOGGER = Logger.getLogger(Metacognition.class);
+    static final Logger logger = Logger.getLogger("");
 
     private Document referredDoc; // the initial referred document
     private SemanticCohesion[] blockSimilarities; // similarities with referred document blocks
@@ -93,7 +94,7 @@ public class Metacognition extends Document {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             File toProcess = new File(pathToDoc);
-            LOGGER.info("Processing self-explanation " + toProcess.getName() + " ...");
+            logger.info("Processing self-explanation " + toProcess.getName() + " ...");
             InputSource input = new InputSource(new FileInputStream(toProcess));
             input.setEncoding("UTF-8");
 
@@ -105,7 +106,7 @@ public class Metacognition extends Document {
             // determine contents
             AbstractDocumentTemplate tmp = extractDocumentContent(doc, "verbalization");
 
-            LOGGER.info("Building internal representation ...");
+            logger.info("Building internal representation ...");
             Metacognition meta = new Metacognition(pathToDoc, tmp, initialReadingMaterial, usePOSTagging);
             extractDocumentDescriptors(doc, meta);
 
@@ -126,7 +127,7 @@ public class Metacognition extends Document {
                         meta.getAnnotatedRS().get(id).put(ReadingStrategyType.BRIDGING, Integer.valueOf(nl.item(i).getAttributes().getNamedItem("no_bridging").getNodeValue()));
                         meta.getAnnotatedRS().get(id).put(ReadingStrategyType.TEXT_BASED_INFERENCES, meta.getAnnotatedRS().get(id).get(ReadingStrategyType.BRIDGING) + meta.getAnnotatedRS().get(id).get(ReadingStrategyType.CAUSALITY));
                     } catch (DOMException | NumberFormatException e) {
-                        LOGGER.info("Verbalization " + id + " has no annotated reading strategies!");
+                        logger.info("Verbalization " + id + " has no annotated reading strategies!");
                         Exceptions.printStackTrace(e);
                     }
                 }
@@ -134,7 +135,7 @@ public class Metacognition extends Document {
 
             return meta;
         } catch (ParserConfigurationException | SAXException | IOException | ParseException | DOMException | NumberFormatException e) {
-            LOGGER.error("Error evaluating input file " + pathToDoc + "!");
+            logger.severe("Error evaluating input file " + pathToDoc + "!");
             Exceptions.printStackTrace(e);
         }
         return null;
@@ -166,7 +167,7 @@ public class Metacognition extends Document {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -325,7 +326,7 @@ public class Metacognition extends Document {
     }
 
     public void determineCohesion() {
-        LOGGER.info("Identyfing average cohesion to previous paragraphs ...");
+        logger.info("Identyfing average cohesion to previous paragraphs ...");
         // add average cohesion between verbalization and text paragraphs
         int startIndex = 0, endIndex, noBlocks;
 
@@ -354,7 +355,7 @@ public class Metacognition extends Document {
     }
 
     public void exportMetacognition() {
-        LOGGER.info("Writing advanced document export");
+        logger.info("Writing advanced document export");
         File output = new File(getPath().replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             out.write("Referred document:," + getReferredDoc().getTitleText() + "\n");
@@ -410,9 +411,9 @@ public class Metacognition extends Document {
                 out.write(allAutomatedRS.get(rs) + ",");
             }
             out.write("\n");
-            LOGGER.info("Successfully finished writing file " + output.getName());
+            logger.info("Successfully finished writing file " + output.getName());
         } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -425,7 +426,7 @@ public class Metacognition extends Document {
         computeDiscourseAnalysis(computeDialogism);
         ComplexityIndices.computeComplexityFactors(this);
         determineCohesion();
-        LOGGER.info("Finished processing self-explanations ...");
+        logger.info("Finished processing self-explanations ...");
     }
 
     //global count of reading strategies given as input argument

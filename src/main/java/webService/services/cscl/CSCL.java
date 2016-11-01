@@ -37,6 +37,10 @@ import services.commons.Formatting;
 import webService.result.ResultCscl;
 import webService.services.ConceptMap;
 
+/**
+ *
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
 public class CSCL {
 
     public static org.w3c.dom.Document loadXMLFromString(String xml) throws Exception {
@@ -123,7 +127,7 @@ public class CSCL {
     public static ResultCscl getAll(AbstractDocument conversationDocument, Conversation c, double threshold) {
 
         return new ResultCscl(
-                ConceptMap.getTopics(conversationDocument, threshold, null),
+                ConceptMap.getTopics(conversationDocument, threshold, null, 50),
                 ParticipantInteraction.buildParticipantGraph(c),
                 ParticipantEvolution.buildParticipantEvolutionData(c),
                 Collaboration.buildSocialKBGraph(c),
@@ -136,7 +140,7 @@ public class CSCL {
 
     public static HashMap<String, HashMap<String, Double>> getCsclIndices(Conversation c) {
 
-        HashMap<String, HashMap<String, Double>> indices = new HashMap<String, HashMap<String, Double>>();
+        HashMap<String, HashMap<String, Double>> indices = new HashMap<>();
 
         // print participant statistics
         if (c.getParticipants().size() > 0) {
@@ -145,7 +149,7 @@ public class CSCL {
             //for (CSCLIndices CSCLindex : CSCLIndices.values())
             //out.write(CSCLindex.getDescription());
             for (Participant p : c.getParticipants()) {
-                HashMap<String, Double> hm = new HashMap<String, Double>();
+                HashMap<String, Double> hm = new HashMap<>();
                 //out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
                 for (CSCLIndices index : CSCLIndices.values()) {
                     //out.write("," + p.getIndices().get(index));
@@ -177,7 +181,7 @@ public class CSCL {
 
     public static HashMap<String, String> getCsclIndicesDescription(Conversation c) {
 
-        HashMap<String, String> hm = new HashMap<String, String>();
+        HashMap<String, String> hm = new HashMap<>();
 
         for (CSCLIndices index : CSCLIndices.values()) {
             hm.put(index.toString(), index.getDescription());

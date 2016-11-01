@@ -25,8 +25,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
+
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColor;
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColorN;
 import org.apache.pdfbox.contentstream.operator.color.SetNonStrokingColorSpace;
@@ -49,7 +50,7 @@ import webService.ReaderBenchServer;
 
 public class ColorTextStripper extends PDFTextStripper {
 
-    private static Logger logger = Logger.getLogger(ReaderBenchServer.class);
+    private static Logger logger = Logger.getLogger("");
     private PrintWriter out;
 
     public ColorTextStripper(PrintWriter out) throws IOException {

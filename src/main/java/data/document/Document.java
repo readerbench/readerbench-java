@@ -15,6 +15,7 @@
  */
 package data.document;
 
+import com.esotericsoftware.minlog.Log;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -117,7 +118,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Element doc = dom.getDocumentElement();
             return load(docFile.getAbsolutePath(), doc, models, lang, usePOSTagging);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+            logger.severe("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
         }
         return null;
@@ -325,7 +326,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            LOGGER.error(e.getMessage());
+            logger.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

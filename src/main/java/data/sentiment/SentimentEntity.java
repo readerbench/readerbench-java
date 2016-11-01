@@ -19,9 +19,10 @@ import edu.stanford.nlp.math.SloppyMath;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+
 
 import services.discourse.cohesion.CohesionGraph;
 
@@ -34,7 +35,7 @@ import services.discourse.cohesion.CohesionGraph;
  */
 public class SentimentEntity {
 
-    static Logger logger = Logger.getLogger(CohesionGraph.class);
+    static Logger logger = Logger.getLogger("");
 
     /**
      * Map that stores the valences and their quantifier for sentiments

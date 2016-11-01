@@ -18,8 +18,8 @@ package services.discourse.cohesion;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
-import org.apache.log4j.Logger;
 
 import services.semanticModels.WordNet.OntologySupport;
 import data.AbstractDocument;
@@ -33,7 +33,7 @@ import java.util.Objects;
 public class DisambiguisationGraphAndLexicalChains {
 
     static Logger logger = Logger
-            .getLogger(DisambiguisationGraphAndLexicalChains.class);
+            .getLogger(DisambiguisationGraphAndLexicalChains.class.getName());
 
     public static void buildDisambiguationGraph(AbstractDocument d) {
         logger.info("Building disambiguation graph");

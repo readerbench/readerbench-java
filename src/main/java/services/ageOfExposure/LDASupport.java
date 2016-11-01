@@ -50,10 +50,8 @@ public class LDASupport {
 	 */
 	public static double topicDistance(LDA lda1, int topic1Id, LDA lda2, int topic2Id) {
 
-		ParallelTopicModel model1 = lda1.getModel();
-		ParallelTopicModel model2 = lda2.getModel();
-
-		/* Get the bigger Alphabet */
+		
+                /* Get the bigger Alphabet */
 		Alphabet a1 = model1.getAlphabet(), a2 = model2.getAlphabet(), bigA = (a1.size() > a2.size() ? a1 : a2);
 
 		/* Create model local word id to reference(bigger) model id mapping */

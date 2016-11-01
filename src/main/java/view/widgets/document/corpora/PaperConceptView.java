@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -52,7 +53,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -79,7 +80,7 @@ public class PaperConceptView extends JFrame {
 
     private static PaperConceptView paperConceptView;
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger(PaperConceptView.class);
+    static Logger logger = Logger.getLogger("");
     public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
     private static final int MIN_SIZE = 5;
     private static final int MAX_SIZE_TOPIC = 20;

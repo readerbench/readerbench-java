@@ -29,13 +29,14 @@ import java.util.TreeMap;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
-import org.apache.log4j.Logger;
+
 
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
 import java.util.EnumSet;
 import java.util.function.BiFunction;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -48,7 +49,7 @@ import services.semanticModels.SimilarityType;
  */
 public class LSA implements ISemanticModel {
     
-    static Logger logger = Logger.getLogger(LSA.class);
+    static Logger logger = Logger.getLogger("");
     
     private static final List<LSA> LOADED_LSA_SPACES = new LinkedList<>();
     public static final int LOWER_BOUND = 50;
@@ -237,6 +238,25 @@ public class LSA implements ISemanticModel {
             }
         }
         return similarConcepts;
+    }
+    
+    public Word getMostSimilarConcept(Word w) {
+    	return getMostSimilarConcept(getWordVector(w));
+    }
+    
+    public Word getMostSimilarConcept(double[] vector) {
+    	Word res = null;
+    	double sim, max = 0;
+    
+    	for (Word c : words.keySet()) {
+    		sim = VectorAlgebra.cosineSimilarity(vector, getWordVector(c));
+    		if (sim >= max) {
+    			res = c;
+    			max = sim;
+    		}
+    	}
+    	
+    	return res;
     }
     
     @Override

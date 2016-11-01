@@ -29,7 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
+
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 
@@ -39,7 +40,7 @@ import services.semanticModels.LDA.LDA;
  */
 public class SimilarLDATopics {
 
-    static final Logger LOGGER = Logger.getLogger(SimilarLDATopics.class);
+    static final Logger logger = Logger.getLogger("");
 
     private final LDA lda;
     private final List<Word> simWords;
@@ -87,7 +88,7 @@ public class SimilarLDATopics {
 
         for (int i = 0; i < lda.getNoDimensions(); i++) {
             double sim = simTopic(i, noWordsPerTopic);
-            LOGGER.info("Processed " + i + " >> " + sim);
+            logger.info("Processed " + i + " >> " + sim);
             sims.put(i, sim);
         }
 

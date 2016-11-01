@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -49,7 +50,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.Logger;
+
 
 import services.discourse.keywordMining.KeywordModeling;
 import utils.localization.LocalizationUtils;
@@ -61,7 +62,7 @@ import view.widgets.document.search.SearchSimilarityView;
 
 public class DocumentSemanticSearchView extends JInternalFrame {
 	private static final long serialVersionUID = -8772215709851320157L;
-	static Logger logger = Logger.getLogger(DocumentProcessingView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private TableRowSorter<DocumentManagementTableModel> docSorter;
 	private JDesktopPane desktopPane;

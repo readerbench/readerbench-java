@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+
 
 import services.commons.VectorAlgebra;
 import data.AbstractDocument;
@@ -38,10 +38,11 @@ import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticChain;
 import data.lexicalChains.LexicalChain;
+import java.util.logging.Logger;
 
 public class DialogismComputations {
 
-    static final Logger LOGGER = Logger.getLogger(DialogismComputations.class);
+    static final Logger logger = Logger.getLogger("");
 
     public static final int WINDOW_SIZE = 5; // no sentences
     public static final int MAXIMUM_INTERVAL = 60; // seconds
@@ -50,7 +51,7 @@ public class DialogismComputations {
     public static void determineVoices(AbstractDocument d) {
         // merge chains based on LSA / LDA in order to generate semantic
         // chains
-        LOGGER.info("Starting to assess voices by first building semantic chains");
+        logger.info("Starting to assess voices by first building semantic chains");
         List<SemanticChain> semanticChains = new LinkedList<>();
         for (LexicalChain chain : d.getLexicalChains()) {
             SemanticChain newChain = new SemanticChain(chain, d.getSemanticModels());
@@ -128,7 +129,7 @@ public class DialogismComputations {
     }
 
     public static void determineVoiceDistributions(AbstractDocument d) {
-        LOGGER.info("Identifying voice distributions");
+        logger.info("Identifying voice distributions");
         // determine distribution of each lexical chain
         int noSentences = 0;
         int[][] traceability = new int[d.getBlocks().size()][];
@@ -271,7 +272,7 @@ public class DialogismComputations {
 
     public static void implicitLinksCohesion(AbstractDocument d) {
         // build voice distribution vectors for each block
-        LOGGER.info("Comparing implicit links");
+        logger.info("Comparing implicit links");
         for (Block b : d.getBlocks()) {
             if (b != null && b.getRefBlock() != null) {
                 System.out.println(b.getIndex() + "->" + b.getRefBlock().getIndex() + "\t"

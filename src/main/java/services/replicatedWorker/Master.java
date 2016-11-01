@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
@@ -34,14 +35,14 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.log4j.Logger;
+
 
 /**
  * 
  * @author Mihai Dascalu
  */
 public abstract class Master implements MessageListener, ExceptionListener {
-	static Logger logger = Logger.getLogger(Master.class);
+	static Logger logger = Logger.getLogger("");
 
 	public static final String USER = ActiveMQConnection.DEFAULT_USER;
 	public static final String PASSWORD = ActiveMQConnection.DEFAULT_PASSWORD;
@@ -149,7 +150,7 @@ public abstract class Master implements MessageListener, ExceptionListener {
 				}
 				// perform cleanup
 				for (String addr : diedWorkers) {
-					logger.error(addr + " died!");
+					logger.severe(addr + " died!");
 					// reassign task
 					logger.info("Master reassigning " + assignedTasks.get(addr));
 					reassignTask(assignedTasks.get(addr));
@@ -287,7 +288,7 @@ public abstract class Master implements MessageListener, ExceptionListener {
 						try {
 							sendTask(addr);
 						} catch (Exception e) {
-							logger.error("Error assigning task!");
+							logger.severe("Error assigning task!");
 							e.printStackTrace();
 						}
 					}
@@ -322,7 +323,7 @@ public abstract class Master implements MessageListener, ExceptionListener {
 					try {
 						sendTask(addr);
 					} catch (Exception e) {
-						logger.error("Error assigning task!");
+						logger.severe("Error assigning task!");
 						e.printStackTrace();
 					}
 					break;
@@ -339,7 +340,7 @@ public abstract class Master implements MessageListener, ExceptionListener {
 	}
 
 	public synchronized void onException(JMSException ex) {
-		logger.error("JMS Exception occured. Shutting down master.");
+		logger.severe("JMS Exception occured. Shutting down master.");
 		running = false;
 	}
 

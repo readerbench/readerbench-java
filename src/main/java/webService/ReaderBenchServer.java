@@ -35,6 +35,7 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -50,16 +51,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
 import runtime.cv.CVAnalyzer;
+import runtime.cv.CVConstants;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import services.mail.SendMail;
@@ -115,7 +118,7 @@ import webService.services.vCoP.CommunityInteraction;
 
 public class ReaderBenchServer {
 
-    private static final Logger LOGGER = Logger.getLogger(ReaderBenchServer.class);
+    private static final Logger LOGGER = Logger.getLogger("");
     public static final int PORT = 8080;
 
     public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
@@ -158,7 +161,7 @@ public class ReaderBenchServer {
             Map<String, String> hm) {
 
         // concepts
-        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null);
+        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null, 50);
         List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, hm);
         List<ResultCategory> resultCategories = getCategories(document.getText(), hm);
 
@@ -312,7 +315,8 @@ public class ReaderBenchServer {
                     ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null)
+                            null,
+                            50)
             );
 
             response.type("application/json");
@@ -334,7 +338,7 @@ public class ReaderBenchServer {
                         )
                 );
             } catch (Exception e) {
-                LOGGER.error("Exception: " + e.getMessage());
+                LOGGER.severe("Exception: " + e.getMessage());
             }
 
             response.type("application/json");
@@ -396,7 +400,8 @@ public class ReaderBenchServer {
                     ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null)
+                            null,
+                            50)
             );
 
             response.type("application/json");
@@ -537,7 +542,7 @@ public class ReaderBenchServer {
             }
 
             hm.put("text", documentContent);
-            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null);
+            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null, 50);
             List<ResultCategory> resultCategories = getCategories(documentContent, hm);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
@@ -568,7 +573,7 @@ public class ReaderBenchServer {
             QueryResultCvCover queryResult = new QueryResultCvCover();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null, 50));
             resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(cvDocument));
             result.setCv(resultCv);
 
@@ -577,7 +582,7 @@ public class ReaderBenchServer {
             AbstractDocument coverDocument = QueryHelper.processQuery(hm);
 
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null));
+            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null, 50));
             resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(coverDocument));
             result.setCover(resultCover);
 
@@ -624,7 +629,8 @@ public class ReaderBenchServer {
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    hm, CVAnalyzer.FAN_DELTA);
+                    hm, CVAnalyzer.FAN_DELTA, CVConstants.NO_CONCEPTS);
+            result.setText(cvDocument.getText());
 
             queryResult.setData(result);
 
@@ -791,7 +797,7 @@ public class ReaderBenchServer {
 
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
-            TwoModeGraphFilter graphFilter = TwoModeGraphFilter.getTwoModeGraphFilter();
+            TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
             LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
             graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
             LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
@@ -840,11 +846,18 @@ public class ReaderBenchServer {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO); // changing log level
-
-        ReaderBenchServer.initializeDB();
-        ReaderBenchServer server = new ReaderBenchServer();
-        server.start();
+        try {
+            LOGGER.setLevel(Level.INFO); // changing log level
+            FileHandler fh = new FileHandler("ReaderBenchServer.log");
+                    LOGGER.addHandler(fh);
+                    
+                    ReaderBenchServer.initializeDB();
+                    ReaderBenchServer server = new ReaderBenchServer();
+                    server.start();
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }

@@ -18,6 +18,7 @@ package view.widgets.cscl;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -31,7 +32,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EtchedBorder;
 
-import org.apache.log4j.Logger;
+
 
 import services.commons.Formatting;
 import data.cscl.CollaborationZone;
@@ -41,7 +42,7 @@ import data.cscl.Utterance;
 public class CollaborationKBView extends JFrame {
 	private static final long serialVersionUID = -461457535432534468L;
 
-	static Logger logger = Logger.getLogger(CollaborationKBView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private Conversation chat;
 	private JPanel panelPersonalKB;

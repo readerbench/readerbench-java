@@ -34,7 +34,8 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.time.DateUtils;
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
+
 import services.commons.Formatting;
 import services.semanticModels.SimilarityType;
 
@@ -44,7 +45,7 @@ import services.semanticModels.SimilarityType;
  */
 public class DistanceStatistics {
 
-    public static Logger logger = Logger.getLogger(DistanceStatistics.class);
+    public static Logger logger = Logger.getLogger("");
 
     private static final String CORPORA_PATH = "resources/in/corpus_v2/";
     private static int no_references = 0;

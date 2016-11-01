@@ -26,6 +26,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -52,7 +53,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.log4j.Logger;
+
 
 import data.AbstractDocument;
 import data.cscl.Conversation;
@@ -69,7 +70,7 @@ import view.widgets.ReaderBenchView;
 public class ConversationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger(ConversationProcessingView.class);
+    static Logger logger = Logger.getLogger("");
 
     private final JButton btnRemoveDocument;
     private final JButton btnAddDocument;
@@ -145,7 +146,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 try {
                     addSingleDocument(f.getPath());
                 } catch (Exception ex) {
-                    logger.error(f.getName() + ": " + ex.getMessage());
+                    logger.severe(f.getName() + ": " + ex.getMessage());
                     Exceptions.printStackTrace(ex);
                 }
             }

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -46,7 +47,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.log4j.Logger;
+
 
 import services.complexity.Clustering;
 import services.complexity.ComputeBalancedMeasure;
@@ -59,7 +60,7 @@ import services.semanticModels.SimilarityType;
 public class DocumentEvaluationView extends JFrame {
 
     private static final long serialVersionUID = -4518616508590444786L;
-    static Logger logger = Logger.getLogger(DocumentEvaluationView.class);
+    static Logger logger = Logger.getLogger("");
     private List<AbstractDocument> documents;
 
     private JPanel contentPane;

@@ -19,6 +19,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Logger;
+
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -36,7 +38,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.log4j.Logger;
+
 
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
@@ -44,7 +46,7 @@ import data.Lang;
 
 public class AddConversationView extends JInternalFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
-	static Logger logger = Logger.getLogger(AddConversationView.class);
+	static Logger logger = Logger.getLogger("");
 
 	private JPanel contentPane;
 	private ConversationProcessingView view;
