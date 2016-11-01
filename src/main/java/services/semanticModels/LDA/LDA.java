@@ -53,11 +53,16 @@ import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
+import data.document.Document;
+import edu.stanford.nlp.util.Pair;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
+import java.util.SortedSet;
 import java.util.function.BiFunction;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -75,10 +80,13 @@ public class LDA implements ISemanticModel, Serializable {
 
     private Lang language;
     private String path;
-    private ParallelTopicModel model;
+    //private ParallelTopicModel model;
     private Pipe pipe;
     private InstanceList instances;
     private Map<Word, double[]> wordProbDistributions;
+    private TopicInferencer inferencer;
+    private int numTopics;
+    private List<Pair<Word, Double>>[] sortedWords;
 
     public LDA(Lang language) {
         this.language = language;
@@ -90,8 +98,19 @@ public class LDA implements ISemanticModel, Serializable {
         this.path = path;
         logger.info("Loading LDA model " + path + " ...");
         try {
-            model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
-            buildWordVectors();
+            Object[] objects = (Object[]) ObjectManipulation.loadObject(path + "/LDA-small.model");
+            inferencer = (TopicInferencer) objects[0];
+            wordProbDistributions = (Map<Word, double[]>) objects[1];
+            numTopics = wordProbDistributions.entrySet().stream()
+                .map(e -> e.getValue().length)
+                .findFirst().orElse(0);
+            sortedWords = IntStream.range(0, numTopics).parallel()
+                .mapToObj(topic -> wordProbDistributions.entrySet().stream()
+                .map(e -> new Pair<>(e.getKey(), e.getValue()[topic]))
+                .sorted((p1, p2) -> p2.second.compareTo(p1.second))
+                .collect(Collectors.toList()))
+                .toArray(size -> new List[size]);
+            //buildWordVectors();
         } catch (ClassNotFoundException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -193,7 +212,7 @@ public class LDA implements ISemanticModel, Serializable {
      */
     public int createHDPModel(String path, int initialTopics, int numIterations) {
         logger.info("Running HDP on " + path + " with " + initialTopics + " initial topics and " + numIterations
-                + " iterations");
+            + " iterations");
         readDirectory(new File(path));
 
         HDP hdp = new HDP(path, 1.0, 0.01, 1D, initialTopics);
@@ -235,11 +254,11 @@ public class LDA implements ISemanticModel, Serializable {
         return hdp.getNoTopics();
     }
 
-    public void processCorpus(String path, int noTopics, int noThreads, int noIterations) throws IOException {
+    public ParallelTopicModel processCorpus(String path, int noTopics, int noThreads, int noIterations) throws IOException {
 
         readDirectory(new File(path));
 
-        model = new ParallelTopicModel(noTopics, 1.0, 0.01);
+        ParallelTopicModel model = new ParallelTopicModel(noTopics, 1.0, 0.01);
 
         model.addInstances(instances);
 
@@ -250,27 +269,30 @@ public class LDA implements ISemanticModel, Serializable {
         model.estimate();
 
         // save the trained model
-        ObjectManipulation.saveObject(model, path + "/LDA.model");
+        //ObjectManipulation.saveObject(model, path + "/LDA.model");
+        ObjectManipulation.saveObject(new Object[]{model.getInferencer(), buildWordVectors(model, language)}, path + "/LDA-small.model");
+        return model;
     }
 
-    private void buildWordVectors() {
+    private static Map<Word, double[]> buildWordVectors(ParallelTopicModel model, Lang language) {
         ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-        wordProbDistributions = new TreeMap<>();
+        Map<Word, double[]> result = new TreeMap<>();
 
         for (int topic = 0; topic < model.getNumTopics(); topic++) {
             for (IDSorter idCountPair : topicSortedWords.get(topic)) {
                 Word concept = Word.getWordFromConcept(model.getAlphabet().lookupObject(idCountPair.getID()).toString(),
-                        language);
-                if (!wordProbDistributions.containsKey(concept)) {
-                    wordProbDistributions.put(concept, new double[model.getNumTopics()]);
+                    language);
+                if (!result.containsKey(concept)) {
+                    result.put(concept, new double[model.getNumTopics()]);
                 }
-                wordProbDistributions.get(concept)[topic] = idCountPair.getWeight();
+                result.get(concept)[topic] = idCountPair.getWeight();
             }
         }
+        return result;
     }
 
     public double[] getWordProbDistribution(Word word) {
-        double[] probDistribution = new double[model.getNumTopics()];
+        double[] probDistribution = new double[numTopics];
         if (wordProbDistributions.containsKey(word)) {
             // words exist in learning space
             return wordProbDistributions.get(word);
@@ -281,14 +303,14 @@ public class LDA implements ISemanticModel, Serializable {
             for (Word w : wordProbDistributions.keySet()) {
                 if (w.getStem().equals(word.getStem())) {
                     double[] vector = wordProbDistributions.get(w);
-                    for (int i = 0; i < model.getNumTopics(); i++) {
+                    for (int i = 0; i < numTopics; i++) {
                         probDistribution[i] += vector[i];
                     }
                     no++;
                 }
             }
             if (no != 0) {
-                for (int i = 0; i < model.getNumTopics(); i++) {
+                for (int i = 0; i < numTopics; i++) {
                     probDistribution[i] /= no;
                 }
             }
@@ -302,25 +324,26 @@ public class LDA implements ISemanticModel, Serializable {
 
         processing.addThruPipe(new Instance(s, null, "analysis", null));
 
-        TopicInferencer inferencer = model.getInferencer();
         return inferencer.getSampledDistribution(processing.get(0), 1000, 1, 5);
     }
 
     public double[] getProbDistribution(AnalysisElement e) {
-        if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
-            double[] distrib = new double[model.getNumTopics()];
-            for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
-                distrib = VectorAlgebra.sum(distrib, VectorAlgebra
-                        .scalarProduct(entry.getKey().getModelRepresentation(SimilarityType.LDA), (1 + Math.log(entry.getValue()))));
-            }
-            return VectorAlgebra.normalize(distrib);
+//        if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
+        double[] distrib = new double[numTopics];
+        for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
+            double[] v = entry.getKey().getModelRepresentation(SimilarityType.LDA);
+            if (v == null) continue;
+            distrib = VectorAlgebra.sum(distrib, VectorAlgebra
+                .scalarProduct(v, (1 + Math.log(entry.getValue()))));
         }
-        return getProbDistribution(e.getProcessedText());
+        return VectorAlgebra.normalize(distrib);
+//        }
+//        return getProbDistribution(e.getProcessedText());
     }
 
     @Override
     public int getNoDimensions() {
-        return model.getNumTopics();
+        return numTopics;
     }
 
     @Override
@@ -378,20 +401,14 @@ public class LDA implements ISemanticModel, Serializable {
         logger.info("Starting to write topics for trained model");
         // Get an array of sorted sets of word ID/count pairs
         try (BufferedWriter out = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
-            // Get an array of sorted sets of word ID/count pairs
-            ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
+            new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
 
             // Show top <<noTopics>> concepts
-            for (int topic = 0; topic < model.getNumTopics(); topic++) {
-                Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
+            for (int topic = 0; topic < numTopics; topic++) {
 
                 out.write(topic + "\t");
-                int rank = 0;
-                while (iterator.hasNext() && rank < noWordsPerTopic) {
-                    IDSorter idCountPair = iterator.next();
-                    out.write(model.getAlphabet().lookupObject(idCountPair.getID()) + "(" + idCountPair.getWeight() + ") ");
-                    rank++;
+                for (Pair<Word, Double> e : sortedWords[topic].subList(0, noWordsPerTopic)) {
+                    out.write(e.first.getLemma() + "(" + e.second + ") ");
                 }
                 out.write("\n\n");
             }
@@ -402,18 +419,12 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     public String printTopic(int topic, int noWordsPerTopic) {
-        String result = topic + ":";
+        StringBuilder result = new StringBuilder(topic + ":");
         // Get an array of sorted sets of word ID/count pairs
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-        Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
-
-        int rank = 0;
-        while (iterator.hasNext() && rank < noWordsPerTopic) {
-            IDSorter idCountPair = iterator.next();
-            result += model.getAlphabet().lookupObject(idCountPair.getID()) + "(" + idCountPair.getWeight() + ") ";
-            rank++;
+        for (Pair<Word, Double> e : sortedWords[topic].subList(0, noWordsPerTopic)) {
+            result.append(e.first.getLemma()).append("(").append(e.second).append(") ");
         }
-        return result;
+        return result.toString();
     }
 
     public static int findMaxResemblance(double[] v1, double[] v2) {
@@ -445,7 +456,7 @@ public class LDA implements ISemanticModel, Serializable {
             for (Entry<Word, Double> sim : similarSum.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "+" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
-                            + sim.getValue() + ")");
+                        + sim.getValue() + ")");
                 }
             }
         }
@@ -454,7 +465,7 @@ public class LDA implements ISemanticModel, Serializable {
             for (Entry<Word, Double> sim : similarDiff.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "-" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
-                            + sim.getValue() + ")");
+                        + sim.getValue() + ")");
                 }
             }
         }
@@ -478,12 +489,8 @@ public class LDA implements ISemanticModel, Serializable {
         this.path = path;
     }
 
-    public ParallelTopicModel getModel() {
-        return model;
-    }
-
-    public void setModel(ParallelTopicModel model) {
-        this.model = model;
+    public TopicInferencer getInferencer() {
+        return inferencer;
     }
 
     public Pipe getPipe() {
@@ -502,6 +509,10 @@ public class LDA implements ISemanticModel, Serializable {
     @Override
     public double[] getWordRepresentation(Word w) {
         return wordProbDistributions.get(w);
+    }
+
+    public List<Pair<Word, Double>>[] getSortedWords() {
+        return sortedWords;
     }
 
     @Override
@@ -525,5 +536,43 @@ public class LDA implements ISemanticModel, Serializable {
     @Override
     public BiFunction<double[], double[], Double> getSimilarityFuction() {
         return (v1, v2) -> 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(v1), VectorAlgebra.normalize(v2));
+    }
+
+    public static void convertModels() {
+        File root = new File("resources/config");
+        for (File lang : root.listFiles(file -> !file.getName().startsWith("."))) {
+            try {
+                File ldaFolder = lang.listFiles(file -> file.getName().equals("LDA"))[0];
+                for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith("."))) {
+                    LDA lda = loadLDA(folder.getPath(), Lang.valueOf(lang.getName().toLowerCase()));
+                    ObjectManipulation.saveObject(new Object[]{lda.getInferencer(), lda.wordProbDistributions}, lda.path + "/LDA-small.model");
+                }
+            } catch (Exception ex) {
+            }
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        List<ISemanticModel> models = new ArrayList<>();
+        LDA lda = loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        models.add(lda);
+        try (PrintWriter out = new PrintWriter("lda-comp.csv")) {
+            out.println("Folder,File,JS,Cosine");
+            for (File folder : new File("tasa").listFiles(file -> file.getName().startsWith("class"))) {
+                for (File file : folder.listFiles(file -> file.getName().endsWith(".xml"))) {
+                    try {
+                        Document d = Document.load(file, models, Lang.en, true);
+                        double[] v1 = lda.getProbDistribution(d);
+                        double[] v2 = lda.getProbDistribution(d.getProcessedText());
+                        double sim1 = lda.getSimilarity(v1, v2);
+                        double sim2 = VectorAlgebra.cosineSimilarity(v1, v2);
+                        out.println(folder.getName() + "," + file.getName() + "," + sim1 + ", " + sim2);
+                    }
+                    catch (Exception ex) {
+                        
+                    }
+                }
+            }
+        }
     }
 }

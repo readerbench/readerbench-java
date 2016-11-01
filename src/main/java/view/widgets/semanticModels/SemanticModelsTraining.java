@@ -15,6 +15,7 @@
  */
 package view.widgets.semanticModels;
 
+import cc.mallet.topics.ParallelTopicModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -213,6 +214,7 @@ public class SemanticModelsTraining extends JFrame {
             this.noIterations = noIterations;
         }
 
+        @Override
         public Void doInBackground() {
             btnPreProcess.setEnabled(false);
             btnLSATrain.setEnabled(false);

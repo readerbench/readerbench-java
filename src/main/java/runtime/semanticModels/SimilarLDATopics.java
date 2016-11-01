@@ -18,6 +18,7 @@ package runtime.semanticModels;
 import cc.mallet.types.IDSorter;
 import data.Lang;
 import data.Word;
+import edu.stanford.nlp.util.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,20 +58,15 @@ public class SimilarLDATopics {
         double result = 0;
         double sumWeight = 0;
         // Get an array of sorted sets of word ID/count pairs
-        ArrayList<TreeSet<IDSorter>> topicSortedWords = lda.getModel().getSortedWords();
-        Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
-
-        int rank = 0;
-        while (iterator.hasNext() && rank < noWordsPerTopic) {
-            IDSorter idCountPair = iterator.next();
+        
+        for (Pair<Word, Double> e : lda.getSortedWords()[topic].subList(0, noWordsPerTopic)) {
             double sim = 0;
-            Word w = Word.getWordFromConcept(lda.getModel().getAlphabet().lookupObject(idCountPair.getID()).toString(), lda.getLanguage());
+            Word w = e.first;
             for (Word simW : simWords) {
                 sim += lda.getSimilarity(w, simW);
             }
-            result += sim / simWords.size() * idCountPair.getWeight();
-            sumWeight += idCountPair.getWeight();
-            rank++;
+            result += sim / simWords.size() * e.second;
+            sumWeight += e.second;
         }
         return result / sumWeight;
     }
