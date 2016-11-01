@@ -16,8 +16,6 @@
 package services.converters.lifeConverter;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,10 +28,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "Dialog")
 public class Dialog {
-    List<Person> participants;
-    List<String> topics;
-    int id;
-    List<Turn> body;
+
+    private List<Person> participants;
+    private List<String> topics;
+    private List<Turn> body;
+    private int id;
 
     public Dialog(List<Person> participants, List<String> topics, List<Turn> body, int id) {
         this.participants = participants;
@@ -43,13 +42,10 @@ public class Dialog {
     }
 
     public Dialog() {
-        participants = new LinkedList<Person>();
-        topics = new ArrayList<String>();
+        participants = new ArrayList<>();
+        topics = new ArrayList<>();
         id = -1;
-        
     }
-    
-    
 
     public List<Person> getParticipants() {
         return participants;
@@ -66,7 +62,7 @@ public class Dialog {
     public int getId() {
         return id;
     }
-    
+
     @XmlElementWrapper(name = "Participants")
     @XmlElement(name = "Person")
     public void setParticipants(List<Person> participants) {
@@ -89,5 +85,5 @@ public class Dialog {
     public void setId(int id) {
         this.id = id;
     }
-    
+
 }

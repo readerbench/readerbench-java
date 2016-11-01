@@ -17,50 +17,40 @@ package services.converters;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
-
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.openide.util.Exceptions;
 
 public class CsvToXlsConverter {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static void convertCsvToXls(String path) throws IOException {
-        List<List<String>> arrayLines = new ArrayList<List<String>>();
-        List<String> arrayValues = new ArrayList<String>();
+        List<List<String>> arrayLines = new ArrayList<>();
+        List<String> arrayValues;
 
         String thisLine;
         String outputPath = path.replaceAll("\\.csv", "\\.xls");
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // DataInputStream myInput = new DataInputStream(fis);
-        BufferedReader myInput = new BufferedReader(new InputStreamReader(fis));
-        // arList = new ArrayList();
-        while ((thisLine = myInput.readLine()) != null) {
-            arrayValues = new ArrayList<String>();
-            String strar[] = thisLine.split(",");
-            for (int j = 0; j < strar.length; j++) {
-                arrayValues.add(strar[j]);
+
+        try (BufferedReader myInput = new BufferedReader(new InputStreamReader(new FileInputStream(path))); HSSFWorkbook hwb = new HSSFWorkbook(); FileOutputStream fileOut = new FileOutputStream(outputPath)) {
+            while ((thisLine = myInput.readLine()) != null) {
+                arrayValues = new ArrayList<>();
+                String strar[] = thisLine.split(",");
+                arrayValues.addAll(Arrays.asList(strar));
+                arrayLines.add(arrayValues);
             }
-            arrayLines.add(arrayValues);
-        }
-        try {
-            HSSFWorkbook hwb = new HSSFWorkbook();
+
             HSSFSheet sheet = hwb.createSheet("new sheet");
             for (int k = 0; k < arrayLines.size(); k++) {
                 List<String> ardata = arrayLines.get(k);
@@ -83,14 +73,11 @@ public class CsvToXlsConverter {
                         cell.setCellValue(data);
                     }
                 }
+                hwb.write(fileOut);
             }
-            FileOutputStream fileOut = new FileOutputStream(outputPath);
-            hwb.write(fileOut);
-            fileOut.close();
-            //hwb.close();
-            logger.info("Your xls file has been generated!");
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
         }
+        LOGGER.info("Your xls file has been generated!");
     }
 }

@@ -24,14 +24,32 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jsoup.Jsoup;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.dialogism.AvgNoVoices;
 import services.complexity.dialogism.VoicesAvgSpan;
 import services.complexity.dialogism.VoicesMaxSpan;
+import services.converters.lifeConverter.Dialog;
+import services.converters.lifeConverter.Person;
+import services.converters.lifeConverter.Turn;
+import services.converters.lifeConverter.Utterance;
 import services.replicatedWorker.SerialCorpusAssessment;
 
 /**
@@ -40,15 +58,64 @@ import services.replicatedWorker.SerialCorpusAssessment;
  */
 public class CreativityTest {
 
-    private static final Logger logger = Logger.getLogger("");
+    private static final Logger LOGGER = Logger.getLogger("");
 
-    public static void processAllFolders(String folder, String prefix, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
+    public static void parse(File file, int nameColID, int timeColID, int msgColID) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Dialog.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            Dialog temp = new Dialog(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), 0);
+
+            XSSFWorkbook myWorkBook = new XSSFWorkbook(file);
+            ArrayList<String> people = new ArrayList<>();
+            XSSFSheet mySheet = myWorkBook.getSheetAt(0);
+            int genid = 1;
+            DataFormatter formatter = new DataFormatter();
+            try {
+                Iterator<Row> iter = mySheet.rowIterator();
+                iter.next();
+                while (iter.hasNext()) {
+                    Row r = iter.next();
+                    String name = formatter.formatCellValue(r.getCell(nameColID)).trim();
+                    if (!people.contains(name)) {
+                        temp.getParticipants().add(new Person(name));
+                        people.add(name);
+                    }
+                    String time = formatter.formatCellValue(r.getCell(timeColID));
+
+                    //clean input
+                    String message = Jsoup.parse(formatter.formatCellValue(r.getCell(msgColID))).text();
+
+                    if (name.length() > 0 && name.length() > 0 && time.length() > 0) {
+                        temp.getBody().add(new Turn(name, new Utterance(genid, 0, time, message)));
+                        genid++;
+                    }
+                }
+            } catch (NullPointerException ex) {
+                LOGGER.log(Level.INFO, "File {0} requires cleaning ...", file.getName());
+                Exceptions.printStackTrace(ex);
+            } finally {
+                jaxbMarshaller.marshal(temp, new File(file.getAbsolutePath().replace(".xlsx", ".xml")));
+            }
+        } catch (JAXBException | IOException | InvalidFormatException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    public static void processAllFolders(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
             File[] communityFolder = dir.listFiles();
             for (File f : communityFolder) {
-                if (f.isDirectory() && f.getName().startsWith(prefix)) {
+                if (f.isDirectory()) {
+                    //regenerate all corresponding xml files
+                    File[] excelFiles = f.listFiles((File pathname) -> pathname.getName().endsWith(".xlsx"));
+                    for (File excelFile : excelFiles) {
+                        CreativityTest.parse(excelFile, 1, 0, 2);
+                    }
                     if (restartProcessing) {
                         // remove checkpoint file
                         File checkpoint = new File(f.getPath() + "/checkpoint.xml");
@@ -62,22 +129,23 @@ public class CreativityTest {
                 }
             }
         }
-        logger.info("Finished processsing all files ...");
+
+        LOGGER.info("Finished processsing all files ...");
     }
 
     public static void processConversations(String path) {
-        logger.log(Level.INFO, "Loading all files in {0}", path);
+        LOGGER.log(Level.INFO, "Loading all files in {0}", path);
 
         FileFilter filter = (File f) -> f.getName().endsWith(".ser");
         File[] filesTODO = (new File(path)).listFiles(filter);
 
-        File output = new File(path + "/measurements.xml");
+        File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), ABS(Dialogism),Voices, Avg voices, Avg voice span, Max voice span");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
-                    logger.log(Level.WARNING, "Incorrect number of participants for {0}", f.getPath());
+                    LOGGER.log(Level.WARNING, "Incorrect number of participants for {0}", f.getPath());
                 } else {
                     Participant p1 = c.getParticipants().get(0);
                     Participant p2 = c.getParticipants().get(1);
@@ -94,12 +162,12 @@ public class CreativityTest {
                 }
             }
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
 
     public static void main(String[] args) {
-        CreativityTest.processAllFolders("resources/in/creativity", "", false, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true);
+        CreativityTest.processAllFolders("resources/in/creativity", false, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true);
     }
 }

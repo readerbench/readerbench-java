@@ -24,7 +24,8 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "Person")
 public class Person {
-    String id;
+
+    private String id;
 
     public Person(String id) {
         this.id = id;
@@ -37,10 +38,10 @@ public class Person {
     public String getId() {
         return id;
     }
-    
-    @XmlAttribute( name = "nickname")
+
+    @XmlAttribute(name = "nickname")
     public void setId(String id) {
         this.id = id;
     }
-    
+
 }
