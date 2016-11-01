@@ -24,22 +24,22 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "Person")
 public class Person {
-    int id;
+    String id;
 
-    public Person(int id) {
+    public Person(String id) {
         this.id = id;
     }
 
     public Person() {
-        id = -1;
+        id = "";
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
     
     @XmlAttribute( name = "nickname")
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     

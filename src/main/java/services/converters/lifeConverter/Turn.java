@@ -25,10 +25,10 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "Turn")
 public class Turn {
-    int id;
+    String id;
     Utterance utter;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
@@ -37,7 +37,7 @@ public class Turn {
     }
 
     @XmlAttribute (name = "nickname")
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     
@@ -46,13 +46,13 @@ public class Turn {
         this.utter = utter;
     }
 
-    public Turn(int id, Utterance utter) {
+    public Turn(String id, Utterance utter) {
         this.id = id;
         this.utter = utter;
     }
 
     public Turn() {
-        id = -1;
+        id = "";
         utter = null;
     }
     
