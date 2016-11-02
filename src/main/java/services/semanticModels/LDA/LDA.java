@@ -59,9 +59,11 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -83,7 +85,6 @@ public class LDA implements ISemanticModel, Serializable {
     private Pipe pipe;
     private InstanceList instances;
     private Map<Word, double[]> wordProbDistributions;
-    private TopicInferencer inferencer;
     private int numTopics;
     private List<Pair<Word, Double>>[] sortedWords;
 
@@ -92,14 +93,24 @@ public class LDA implements ISemanticModel, Serializable {
         pipe = buildPipe();
     }
 
+//    private LDA(String path, Lang language) {
+//        this(language);
+//        this.path = path;
+//        logger.log(Level.INFO, "Loading LDA model {0} ...", path);
+//        try {
+//            ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
+//            wordProbDistributions = buildWordVectors(model, language);
+//        } catch (ClassNotFoundException | IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//    }
+    
     private LDA(String path, Lang language) {
         this(language);
         this.path = path;
-        logger.info("Loading LDA model " + path + " ...");
+        logger.log(Level.INFO, "Loading LDA model {0} ...", path);
         try {
-            Object[] objects = (Object[]) ObjectManipulation.loadObject(path + "/LDA-small.model");
-            inferencer = (TopicInferencer) objects[0];
-            wordProbDistributions = (Map<Word, double[]>) objects[1];
+            wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/LDA-small.model");
             numTopics = wordProbDistributions.entrySet().stream()
                 .map(e -> e.getValue().length)
                 .findFirst().orElse(0);
@@ -317,15 +328,6 @@ public class LDA implements ISemanticModel, Serializable {
         return probDistribution;
     }
 
-    public double[] getProbDistribution(String s) {
-        // Create new instances with empty target and source fields.
-        InstanceList processing = new InstanceList(pipe);
-
-        processing.addThruPipe(new Instance(s, null, "analysis", null));
-
-        return inferencer.getSampledDistribution(processing.get(0), 1000, 1, 5);
-    }
-
     public double[] getProbDistribution(AnalysisElement e) {
 //        if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
         double[] distrib = new double[numTopics];
@@ -488,10 +490,6 @@ public class LDA implements ISemanticModel, Serializable {
         this.path = path;
     }
 
-    public TopicInferencer getInferencer() {
-        return inferencer;
-    }
-
     public Pipe getPipe() {
         return pipe;
     }
@@ -542,36 +540,43 @@ public class LDA implements ISemanticModel, Serializable {
         for (File lang : root.listFiles(file -> !file.getName().startsWith("."))) {
             try {
                 File ldaFolder = lang.listFiles(file -> file.getName().equals("LDA"))[0];
-                for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith("."))) {
+                for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith(".") && !file.getName().equals("INL"))) {
                     LDA lda = loadLDA(folder.getPath(), Lang.valueOf(lang.getName().toLowerCase()));
-                    ObjectManipulation.saveObject(new Object[]{lda.getInferencer(), lda.wordProbDistributions}, lda.path + "/LDA-small.model");
+                    ObjectManipulation.saveObject(lda.wordProbDistributions, lda.path + "/LDA-small.model");
                 }
             } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-        List<ISemanticModel> models = new ArrayList<>();
-        LDA lda = loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-        models.add(lda);
-        try (PrintWriter out = new PrintWriter("lda-comp.csv")) {
-            out.println("Folder,File,JS,Cosine");
-            for (File folder : new File("tasa").listFiles(file -> file.getName().startsWith("class"))) {
-                for (File file : folder.listFiles(file -> file.getName().endsWith(".xml"))) {
-                    try {
-                        Document d = Document.load(file, models, Lang.en, true);
-                        double[] v1 = lda.getProbDistribution(d);
-                        double[] v2 = lda.getProbDistribution(d.getProcessedText());
-                        double sim1 = lda.getSimilarity(v1, v2);
-                        double sim2 = VectorAlgebra.cosineSimilarity(v1, v2);
-                        out.println(folder.getName() + "," + file.getName() + "," + sim1 + ", " + sim2);
-                    }
-                    catch (Exception ex) {
-                        
-                    }
-                }
-            }
-        }
+        convertModels();
+//        List<ISemanticModel> models = new ArrayList<>();
+//        LDA lda = loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        models.add(lda);
+//        try (PrintWriter out = new PrintWriter("lda-comp.csv")) {
+//            out.println("Folder,File,JS,Cosine");
+//            for (File folder : new File("tasa").listFiles(file -> file.getName().startsWith("class"))) {
+//                for (File file : folder.listFiles(file -> file.getName().endsWith(".xml"))) {
+//                    try {
+//                        Document d = Document.load(file, models, Lang.en, true);
+//                        double[] v1 = lda.getProbDistribution(d);
+//                        double[] v2 = lda.getProbDistribution(d.getProcessedText());
+//                        double sim1 = lda.getSimilarity(v1, v2);
+//                        double sim2 = VectorAlgebra.cosineSimilarity(v1, v2);
+//                        out.println(folder.getName() + "," + file.getName() + "," + sim1 + ", " + sim2);
+//                        out.println(StringUtils.join(v1, ','));
+//                        out.println(StringUtils.join(v2, ','));
+//                        
+//                        return;
+//                    }
+//                    catch (Exception ex) {
+//                        
+//                    }
+//                }
+//            }
+//        }
+    
     }
 }

@@ -43,7 +43,7 @@ public enum ComplexityIndexType {
     COHESION(new CohesionFactory()),
     DIALOGISM(new DialogismFactory()),
     RHYTHM(null),
-    SEMANTIC_DEPENDENCIES(new SemanticDependenciesFactory());
+    SEMANTIC_DEPENDENCIES(null);
 
     private final ComplexityIndecesFactory factory;
 
