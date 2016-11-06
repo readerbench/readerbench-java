@@ -19,7 +19,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
 import data.AbstractDocument;
-import data.AbstractDocument.SaveType;
 import data.AbstractDocumentTemplate;
 import data.Block;
 import data.Lang;
@@ -798,9 +797,9 @@ public class ReaderBenchServer {
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
             TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
-            LOGGER.info("[Before filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
+            LOGGER.log(Level.INFO, "[Before filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
             graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
-            LOGGER.info("[After filter] nodes = " + graph.nodeList.size() + " edges = " + graph.edgeList.size());
+            LOGGER.log(Level.INFO, "[After filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
             QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
             String result = queryResult.convertToJson();
             return result;
@@ -829,7 +828,7 @@ public class ReaderBenchServer {
                 Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
                 loadedDocs.add(d);
             }
-        } catch (Exception e) {
+        } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
         }
 
@@ -837,27 +836,26 @@ public class ReaderBenchServer {
     }
 
     public static void initializeDB() {
+        LOGGER.setLevel(Level.INFO); // changing log level
+        FileHandler fh;
+        try {
+            fh = new FileHandler("ReaderBenchServer.log");
+            LOGGER.addHandler(fh);
+        } catch (IOException | SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
         LOGGER.info("Initialize words...");
         WordDAO.getInstance().loadAll();
         LOGGER.info("Words initialization finished");
 
         SentimentWeights.initialize();
-        LOGGER.info("Valence map has " + data.sentiment.SentimentValence.getValenceMap().size() + " sentiments after initialization.");
+        LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
     }
 
     public static void main(String[] args) {
-        try {
-            LOGGER.setLevel(Level.INFO); // changing log level
-            FileHandler fh = new FileHandler("ReaderBenchServer.log");
-                    LOGGER.addHandler(fh);
-                    
-                    ReaderBenchServer.initializeDB();
-                    ReaderBenchServer server = new ReaderBenchServer();
-                    server.start();
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (SecurityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        ReaderBenchServer.initializeDB();
+        ReaderBenchServer server = new ReaderBenchServer();
+        server.start();
     }
 }

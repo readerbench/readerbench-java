@@ -50,11 +50,8 @@ import javax.swing.border.TitledBorder;
 
 import data.AbstractDocument;
 import data.Lang;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
@@ -86,12 +83,12 @@ public class ReaderBenchView extends JFrame {
     public static final Map<Lang, String[]> LDA_SPACES = new HashMap();
 
     static {
-        LSA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""});
+        LSA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/COCA_newspaper", ""});
         LSA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
         LSA_SPACES.put(Lang.it, new String[]{""});
         LSA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
         LSA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LSA/Letters", ""});
-        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
+        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
         LDA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
         LDA_SPACES.put(Lang.it, new String[]{"resources/config/IT/LDA/Paisa", ""});
         LDA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
@@ -500,33 +497,12 @@ public class ReaderBenchView extends JFrame {
         comboBoxLDA.setEnabled(true);
     }
 
-    public static void main(String[] args) {
-        try {
-            Logger.getLogger("").setLevel(Level.INFO); // changing log level
+    public static void setRuntimeLang(String text) {
+        RUNTIME_LANGUAGE = Lang.getLang(text);
+    }
 
-            if (args.length > 0) {
-                ReaderBenchView.setRuntimeLang(args[0]);
-            } else {
-                RUNTIME_LANGUAGE = Lang.en;
-            }
-            ReaderBenchView.setLoadedLocale();
-
-            FileHandler fh = new FileHandler("ReaderBenchServer.log");
-            LOGGER.addHandler(fh);
-
-            Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
-
-            ReaderBenchServer.initializeDB();
-
-            adjustToSystemGraphics();
-
-            EventQueue.invokeLater(() -> {
-                ReaderBenchView view = new ReaderBenchView();
-                view.setVisible(true);
-            });
-        } catch (IOException | SecurityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+    public static void setLoadedLocale() {
+        LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
     }
 
     public static void adjustToSystemGraphics() {
@@ -541,12 +517,23 @@ public class ReaderBenchView extends JFrame {
         }
     }
 
-    public static void setRuntimeLang(String text) {
-        RUNTIME_LANGUAGE = Lang.getLang(text);
-    }
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            ReaderBenchView.setRuntimeLang(args[0]);
+        } else {
+            RUNTIME_LANGUAGE = Lang.en;
+        }
+        ReaderBenchView.setLoadedLocale();
 
-    public static void setLoadedLocale() {
-        LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
-    }
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
 
+        ReaderBenchServer.initializeDB();
+
+        adjustToSystemGraphics();
+
+        EventQueue.invokeLater(() -> {
+            ReaderBenchView view = new ReaderBenchView();
+            view.setVisible(true);
+        });
+    }
 }
