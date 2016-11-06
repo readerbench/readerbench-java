@@ -27,15 +27,14 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-
-
 import data.Lang;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
 public class StaticLemmatizer {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static Map<String, String> lemmas_en;
     private static Map<String, String> lemmas_ro;
@@ -44,16 +43,16 @@ public class StaticLemmatizer {
     private static Map<String, String> lemmas_la;
 
     private static Map<String, String> initialize(String path, Lang lang) {
-        logger.info("Initializing lemmas from " + path);
+        LOGGER.log(Level.INFO, "Initializing lemmas from {0} ...", path);
         Map<String, String> lemmas = new TreeMap<>();
         BufferedReader in;
+        String str_line = null;
         try {
             FileInputStream inputFile = new FileInputStream(path);
             // InputStreamReader ir = new InputStreamReader(inputFile,
             // "ISO-8859-1");
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
             in = new BufferedReader(ir);
-            String str_line;
             StringTokenizer strk;
             while ((str_line = in.readLine()) != null) {
                 strk = new StringTokenizer(str_line, "\t");
@@ -64,11 +63,12 @@ public class StaticLemmatizer {
                     lemmas.put(inflected, lemma);
                 }
                 if (existing != null) {
-                    logger.severe("Duplicate entry: " + inflected);
+                    LOGGER.log(Level.SEVERE, "Duplicate entry: {0}", inflected);
                 }
             }
             in.close();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error processing line: {0}", str_line);
             Exceptions.printStackTrace(e);
         }
         return lemmas;
