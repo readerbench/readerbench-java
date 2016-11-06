@@ -31,12 +31,10 @@ import java.util.logging.Logger;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -54,15 +52,14 @@ import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
-
-
 import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.document.Document;
-import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
@@ -73,7 +70,7 @@ import view.widgets.document.corpora.PaperSimilarityView;
 public class DocumentProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final JButton btnRemoveDocument;
     private final JButton btnAddDocument;
@@ -100,11 +97,11 @@ public class DocumentProcessingView extends JInternalFrame {
         private final String pathToLDA;
         private final boolean computeDialogism;
         private final boolean usePOSTagging;
-        private boolean isSerialized;
-        private final boolean chckSer;
+        private final boolean isSerialized;
+        private final boolean checkSer;
 
         public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-                boolean computeDialogism, boolean isSerialized, boolean chckSer) {
+                boolean computeDialogism, boolean isSerialized, boolean checkSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
@@ -112,20 +109,48 @@ public class DocumentProcessingView extends JInternalFrame {
             this.usePOSTagging = usePOSTagging;
             this.computeDialogism = computeDialogism;
             this.isSerialized = isSerialized;
-            this.chckSer = chckSer;
+            this.checkSer = checkSer;
+        }
+
+        public DocumentProcessingTask(String pathToDoc) {
+            this(pathToDoc, null, null, false, false, true, false);
+        }
+
+        public AbstractDocument processDocument(String pathToIndividualFile) {
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            modelPaths.put(SimilarityType.LSA, pathToLSA);
+            modelPaths.put(SimilarityType.LDA, pathToLDA);
+            return AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
+                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
+                    SaveType.SERIALIZED_AND_CSV_EXPORT);
         }
 
         public void addSingleDocument(String pathToIndividualFile) {
             AbstractDocument d = null;
             if (isSerialized) {
-                d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
+                try {
+                    d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.", "Error", JOptionPane.ERROR);
+                    Exceptions.printStackTrace(ex);
+                }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
-                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                modelPaths.put(SimilarityType.LSA, pathToLSA);
-                modelPaths.put(SimilarityType.LDA, pathToLDA);
-                d = AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
-                        ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
-                        SaveType.SERIALIZED_AND_CSV_EXPORT);
+                //check if file was already preprocessed
+                if (checkSer) {
+                    File ser = new File(pathToIndividualFile.replace(".xml", ".ser"));
+                    if (ser.exists()) {
+                        try {
+                            d = AbstractDocument.loadSerializedDocument(ser.getAbsolutePath());
+                        } catch (IOException | ClassNotFoundException ex) {
+                            LOGGER.log(Level.INFO, "Obsolete ser file for {0}. Reprocessing file ...", pathToIndividualFile);
+                            d = processDocument(pathToIndividualFile);
+                        }
+                    } else {
+                        d = processDocument(pathToIndividualFile);
+                    }
+                } else {
+                    d = processDocument(pathToIndividualFile);
+                }
             }
             if (d == null) {
                 JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate document XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -135,7 +160,7 @@ public class DocumentProcessingView extends JInternalFrame {
                 JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         }
-       
+
         @Override
         public Void doInBackground() {
             btnAddDocument.setEnabled(false);
@@ -148,54 +173,15 @@ public class DocumentProcessingView extends JInternalFrame {
                     // process each individual ser file
                     files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                 }
-            } 
-            else if (chckSer) {
-                if (file.isDirectory()) {
-                    boolean found = false;
-                    int size = 0;
-                    files = new File[file.listFiles().length];
-                    File[] XMLfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
-                    File[] SERfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
-                    for(File i : XMLfiles) {
-                        for(File j : SERfiles) {
-//                            System.out.println("I'm here " + XMLfiles.length + " " + SERfiles.length);
-//                            System.out.println(i.getName().replace(".xml", ".ser"));
-//                            System.out.println("Ceva");
-                            if(i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
-                                System.out.println("Found one");
-                                files[size] = j;
-                                size++;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(found == false) {
-                            files[size] = i;
-                            size++;
-                        }
-                    }
-                } else {
-                    File[] parent = file.getParentFile().listFiles();
-                    for(File i : parent) {
-                        if(i.getName().equals(file.getName().replace(".xml", ".ser"))) {
-                            System.out.println("Found a .ser " + i.getName());
-                            files[0] = i;
-                        }
-                    }
-                }
             } else if (file.isDirectory()) {
                 // process each individual xml file
                 files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
             }
             for (File f : files) {
                 try {
-                    if(f.getName().contains(".ser"))
-                        isSerialized = true;
-                    else
-                        isSerialized = false;
                     addSingleDocument(f.getPath());
                 } catch (Exception ex) {
-                    logger.severe(f.getName() + ": " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "{0}: {1}", new Object[]{f.getName(), ex.getMessage()});
                     Exceptions.printStackTrace(ex);
                 }
             }
@@ -367,7 +353,7 @@ public class DocumentProcessingView extends JInternalFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, false, true, false);
+                DocumentProcessingView.DocumentProcessingTask task = DocumentProcessingView.this.new DocumentProcessingTask(file.getPath());
                 task.execute();
             }
         });

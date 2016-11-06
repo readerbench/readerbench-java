@@ -55,6 +55,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.StringJoiner;
+import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -351,16 +352,13 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public static AbstractDocument loadSerializedDocument(String path) {
-        logger.info("Loading serialized document " + path + " ...");
-        AbstractDocument d = null;
-        try (FileInputStream fIn = new FileInputStream(new File(path));
-                ObjectInputStream oIn = new ObjectInputStream(fIn)) {
-            d = (AbstractDocument) oIn.readObject();
-            d.rebuildSemanticSpaces(SimilarityType.loadVectorModels(d.modelPaths, d.getLanguage()));
-        } catch (IOException | ClassNotFoundException e) {
-            Exceptions.printStackTrace(e);
-        }
+    public static AbstractDocument loadSerializedDocument(String path) throws FileNotFoundException, IOException, ClassNotFoundException {
+        logger.log(Level.INFO, "Loading serialized document {0} ...", path);
+        AbstractDocument d;
+        FileInputStream fIn = new FileInputStream(new File(path));
+        ObjectInputStream oIn = new ObjectInputStream(fIn);
+        d = (AbstractDocument) oIn.readObject();
+        d.rebuildSemanticSpaces(SimilarityType.loadVectorModels(d.modelPaths, d.getLanguage()));
         return d;
     }
 

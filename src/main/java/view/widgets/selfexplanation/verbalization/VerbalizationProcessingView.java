@@ -42,10 +42,9 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import data.document.Document;
 import data.document.Metacognition;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
@@ -57,7 +56,7 @@ import view.widgets.document.DocumentProcessingView;
 public class VerbalizationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final JDesktopPane desktopPane;
     private final JTable verbalizationsTable;
@@ -89,9 +88,13 @@ public class VerbalizationProcessingView extends JInternalFrame {
         }
 
         public void addSingleVerbalisation(String pathToIndividualFile) {
-            Metacognition v;
+            Metacognition v = null;
             if (isSerialized) {
-                v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
+                try {
+                    v = (Metacognition) Metacognition.loadSerializedDocument(pathToIndividualFile);
+                } catch (IOException | ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             } else {
                 v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging);
                 v.computeAll(true);
@@ -120,20 +123,19 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     // process each individual ser file
                     files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                 }
-            } 
-            else if (chckSer) {
+            } else if (chckSer) {
                 if (file.isDirectory()) {
                     boolean found = false;
                     int size = 0;
                     files = new File[file.listFiles().length];
                     File[] XMLfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
                     File[] SERfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
-                    for(File i : XMLfiles) {
-                        for(File j : SERfiles) {
+                    for (File i : XMLfiles) {
+                        for (File j : SERfiles) {
 //                            System.out.println("I'm here " + XMLfiles.length + " " + SERfiles.length);
 //                            System.out.println(i.getName().replace(".xml", ".ser"));
 //                            System.out.println("Ceva");
-                            if(i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
+                            if (i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
                                 System.out.println("Found one");
                                 files[size] = j;
                                 size++;
@@ -141,15 +143,15 @@ public class VerbalizationProcessingView extends JInternalFrame {
                                 break;
                             }
                         }
-                        if(found == false) {
+                        if (found == false) {
                             files[size] = i;
                             size++;
                         }
                     }
                 } else {
                     File[] parent = file.getParentFile().listFiles();
-                    for(File i : parent) {
-                        if(i.getName().equals(file.getName().replace(".xml", ".ser"))) {
+                    for (File i : parent) {
+                        if (i.getName().equals(file.getName().replace(".xml", ".ser"))) {
                             System.out.println("Found a .ser " + i.getName());
                             files[0] = i;
                         }
@@ -161,13 +163,14 @@ public class VerbalizationProcessingView extends JInternalFrame {
             }
             for (File f : files) {
                 try {
-                    if(f.getName().contains(".ser"))
+                    if (f.getName().contains(".ser")) {
                         isSerialized = true;
-                    else
+                    } else {
                         isSerialized = false;
+                    }
                     addSingleVerbalisation(f.getPath());
                 } catch (Exception ex) {
-                    logger.severe(f.getName() + ": " + ex.getMessage());
+                    LOGGER.severe(f.getName() + ": " + ex.getMessage());
                     Exceptions.printStackTrace(ex);
                 }
             }
