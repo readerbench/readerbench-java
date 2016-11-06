@@ -54,6 +54,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
             return;
         }
 
+        this.semanticSimilarity = SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
         this.relevance += termFrequency * SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
     }
 

@@ -27,6 +27,7 @@ import data.document.Document;
 import data.document.Metacognition;
 import data.Lang;
 import data.document.ReadingStrategyType;
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
 import org.openide.util.Exceptions;
@@ -37,7 +38,7 @@ import webService.ReaderBenchServer;
 
 public class TestMatildaAvaleurSE {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static List<Metacognition> compute(String filename, String folder) {
         List<Metacognition> verbalizations = new ArrayList<>();
@@ -61,15 +62,20 @@ public class TestMatildaAvaleurSE {
         List<Metacognition> verbalizations = new ArrayList<>();
         File verbFolder = new File(folder);
         for (File f : verbFolder.listFiles((File dir, String name) -> name.endsWith(".ser"))) {
-            Metacognition v = (Metacognition) Metacognition.loadSerializedDocument(f.getAbsolutePath());
-            v.computeAll(true);
-            verbalizations.add(v);
+            Metacognition v;
+            try {
+                v = (Metacognition) Metacognition.loadSerializedDocument(f.getAbsolutePath());
+                v.computeAll(true);
+                verbalizations.add(v);
+            } catch (IOException | ClassNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return verbalizations;
     }
 
     public static void main(String[] args) {
-        logger.setLevel(java.util.logging.Level.INFO);
+        LOGGER.setLevel(java.util.logging.Level.INFO);
         ReaderBenchServer.initializeDB();
 
         try {
@@ -108,7 +114,7 @@ public class TestMatildaAvaleurSE {
                     }
                 }
             }
-            logger.info("Finished all files for processing!");
+            LOGGER.info("Finished all files for processing!");
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }

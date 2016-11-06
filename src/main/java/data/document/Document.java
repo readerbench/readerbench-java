@@ -118,7 +118,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
             Element doc = dom.getDocumentElement();
             return load(docFile.getAbsolutePath(), doc, models, lang, usePOSTagging);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            logger.severe("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+            LOGGER.severe("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
         }
         return null;
@@ -165,17 +165,13 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         // determine title
         nl = root.getElementsByTagName("title");
         if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang,
-                    usePOSTagging);
+            d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
         }
 
         // determine meta
         nl = root.getElementsByTagName("meta");
         if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue()); // to
-            // check
-            // with
-            // XML
+            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
         }
 
         // get source
@@ -326,7 +322,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

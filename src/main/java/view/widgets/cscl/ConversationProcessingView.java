@@ -110,8 +110,12 @@ public class ConversationProcessingView extends JInternalFrame {
 
         public AbstractDocument processDocument(String pathToIndividualFile) {
             Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-            modelPaths.put(SimilarityType.LSA, pathToLSA);
-            modelPaths.put(SimilarityType.LDA, pathToLDA);
+            if (pathToLSA != null & pathToLSA.length() > 0) {
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+            }
+            if (pathToLDA != null & pathToLDA.length() > 0) {
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
+            }
             return Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
                     ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);

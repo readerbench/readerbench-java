@@ -88,7 +88,7 @@ public class ReaderBenchView extends JFrame {
         LSA_SPACES.put(Lang.it, new String[]{""});
         LSA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
         LSA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LSA/Letters", ""});
-        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
+        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/COCA_newspaper", ""});
         LDA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
         LDA_SPACES.put(Lang.it, new String[]{"resources/config/IT/LDA/Paisa", ""});
         LDA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});

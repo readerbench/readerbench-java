@@ -97,7 +97,7 @@ public class MetaDocument extends Document {
             }
         });
         if (leaves.isEmpty()) {
-            logger.severe("Error while processing document - empty leaf documents!");
+            LOGGER.severe("Error while processing document - empty leaf documents!");
         }
         setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
                 .collect(Collectors.toMap(
@@ -121,7 +121,7 @@ public class MetaDocument extends Document {
             Element root = (Element) doc.getElementsByTagName("section").item(0);
             return load(file.getPath(), root, models, lang, usePOSTagging, maxLevel, maxDepth);
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            logger.severe("Error evaluating input file " + file.getPath() + " - " + e.getMessage());
+            LOGGER.severe("Error evaluating input file " + file.getPath() + " - " + e.getMessage());
             Exceptions.printStackTrace(e);
         }
         return null;

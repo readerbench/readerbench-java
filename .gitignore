@@ -46,4 +46,4 @@ Thumbs.db
 /tmp/
 /nbactions.xml
 /nb-configuration.xml
-/ReaderBenchServer.log
+/ReaderBenchServer.log*

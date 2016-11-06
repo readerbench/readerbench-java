@@ -229,7 +229,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         // assign sentiment values
         SentimentAnalysis.weightSemanticValences(this);
 
-        logger.info("Finished all discourse analysis processes ...");
+        LOGGER.info("Finished all discourse analysis processes ...");
     }
 
     public void setDocumentTitle(String title, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
@@ -292,7 +292,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             String pathToComplexityModel, int[] selectedComplexityFactors,
             boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
-        logger.info("Loading " + docFile.getPath() + " file for processing");
+        LOGGER.log(Level.INFO, "Loading {0} file for processing", docFile.getPath());
         boolean isDocument = checkTagsDocument(docFile, "p");
 
         boolean isChat = checkTagsDocument(docFile, "Utterance");
@@ -321,7 +321,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveSerializedDocument() {
-        logger.info("Saving serialized document ...");
+        LOGGER.info("Saving serialized document ...");
         try {
             modelPaths = new EnumMap<>(SimilarityType.class);
             for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
@@ -338,7 +338,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void saveTxtDocument() {
-        logger.info("Saving plain text document ...");
+        LOGGER.info("Saving plain text document ...");
         File output = new File(path.replace(".xml", ".txt"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -353,7 +353,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadSerializedDocument(String path) throws FileNotFoundException, IOException, ClassNotFoundException {
-        logger.log(Level.INFO, "Loading serialized document {0} ...", path);
+        LOGGER.log(Level.INFO, "Loading serialized document {0} ...", path);
         AbstractDocument d;
         FileInputStream fIn = new FileInputStream(new File(path));
         ObjectInputStream oIn = new ObjectInputStream(fIn);
@@ -382,7 +382,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void exportDocument() {
-        logger.info("Writing document export");
+        LOGGER.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             if (titleText != null) {
@@ -572,13 +572,13 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
             out.write("\n");
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
 
     public void exportDocumentAdvanced() {
-        logger.info("Writing advanced document export");
+        LOGGER.info("Writing advanced document export");
         File output = new File(path.replace(".xml", "_adv.csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
                 32768)) {
@@ -603,7 +603,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 }
             }
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }

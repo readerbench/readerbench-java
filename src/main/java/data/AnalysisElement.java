@@ -22,12 +22,9 @@ import java.util.TreeMap;
 
 import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
@@ -41,7 +38,7 @@ import services.semanticModels.SimilarityType;
 public abstract class AnalysisElement implements Serializable {
 
     private static final long serialVersionUID = -8110285459013257550L;
-    protected static final Logger logger = Logger.getLogger("");
+    protected static final Logger LOGGER = Logger.getLogger("");
 
     private int index;
     protected transient Map<SimilarityType, ISemanticModel> semanticModels;
