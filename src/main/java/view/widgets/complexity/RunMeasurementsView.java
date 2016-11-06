@@ -44,6 +44,7 @@ import data.Lang;
 import edu.stanford.nlp.util.Timing;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
@@ -143,7 +144,8 @@ public class RunMeasurementsView extends JFrame {
      */
     public RunMeasurementsView() {
         setTitle("ReaderBench - "
-                + LocalizationUtils.getTranslation("Corpus Assessment in terms of Textual Complexity"));
+                + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.panelRunMeasurements.title"));
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 560, 220);
@@ -154,9 +156,11 @@ public class RunMeasurementsView extends JFrame {
 
         JLabel lblPath = new JLabel("Path:");
 
-        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
+        JLabel lblLsaVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.lblLSAspace.text") + ":");
 
-        JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation("LDA model") + ":");
+        JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.lblLDAvector.text") + ":");
 
         comboBoxLSA = new JComboBox<String>();
         comboBoxLSA.setEnabled(false);
@@ -195,20 +199,23 @@ public class RunMeasurementsView extends JFrame {
                 } else {
                     JOptionPane
                             .showMessageDialog(RunMeasurementsView.this,
-                                    LocalizationUtils.getTranslation(
-                                            "Please select an appropriate directory to be analysed") + "!",
+                                    ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.msgSelectAnotherDirectory.text") + "!",
                                     "Error", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
+        chckbxUsePosTagging = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.boxUsePOSTagging.text"));
         chckbxUsePosTagging.setSelected(true);
 
-        JLabel lblLanguage = new JLabel(LocalizationUtils.getTranslation("Language") + ":");
+        JLabel lblLanguage = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.lblLanguage.text") + ":");
 
         comboBoxLanguage = new JComboBox<>();
-        comboBoxLanguage.addItem("<< " + LocalizationUtils.getTranslation("Please select analysis language") + " >>");
+        comboBoxLanguage.addItem("<< " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.cmbboxPleaseSelectLanguage") + " >>");
         for (Lang l : Lang.values()) {
             comboBoxLanguage.addItem(l.getDescription());
         }

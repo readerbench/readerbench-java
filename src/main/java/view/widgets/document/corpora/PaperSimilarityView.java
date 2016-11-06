@@ -166,7 +166,7 @@ public class PaperSimilarityView extends JFrame {
         lblThreshold = new JLabel("Threshold among documents");
         lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        sliderThreshold = new JSlider(40, 80, 50);
+        sliderThreshold = new JSlider(0, 80, 50);
         sliderThreshold.setBackground(Color.WHITE);
         sliderThreshold.setPaintTicks(true);
         sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -177,6 +177,8 @@ public class PaperSimilarityView extends JFrame {
         labelTableThreshold.put(80, new JLabel("80%"));
         labelTableThreshold.put(60, new JLabel("60%"));
         labelTableThreshold.put(40, new JLabel("40%"));
+        labelTableThreshold.put(20, new JLabel("20%"));
+        labelTableThreshold.put(0, new JLabel("0%"));
         sliderThreshold.setLabelTable(labelTableThreshold);
         sliderThreshold.addChangeListener((ChangeEvent e) -> {
             generateGraph();

@@ -15,6 +15,7 @@
  */
 package view.models.verbalization;
 
+import java.util.ResourceBundle;
 import javax.swing.table.DefaultTableModel;
 
 import utils.localization.LocalizationUtils;
@@ -30,10 +31,14 @@ public class VerbalisationManagementTableModel extends DefaultTableModel {
 	};
 
 	public VerbalisationManagementTableModel() {
-		super(new Object[][] {}, new String[] { LocalizationUtils.getTranslation("Author"), 
-				LocalizationUtils.getTranslation("Document name"),
-				LocalizationUtils.getTranslation("LSA vector space"), 
-				LocalizationUtils.getTranslation("LDA model") });
+		super(new Object[][] {}, new String[] { ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.Author.text"), 
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.DocName.text"),
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LSAspace.text"), 
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LDAvector.text") });
 	}
 
 	@Override

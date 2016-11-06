@@ -93,16 +93,18 @@ public class ConversationProcessingView extends JInternalFrame {
         private final String pathToLSA;
         private final String pathToLDA;
         private final boolean usePOSTagging;
-        private final boolean isSerialized;
+        private boolean isSerialized;
+        private final boolean chckSer;
 
         public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-                boolean isSerialized) {
+                boolean isSerialized, boolean chckSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
             this.usePOSTagging = usePOSTagging;
             this.isSerialized = isSerialized;
+            this.chckSer = chckSer;
         }
 
         public void addSingleDocument(String pathToIndividualFile) {
@@ -138,12 +140,51 @@ public class ConversationProcessingView extends JInternalFrame {
                     // process each individual ser file
                     files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                 }
+            } 
+            else if (chckSer) {
+                if (file.isDirectory()) {
+                    boolean found = false;
+                    int size = 0;
+                    files = new File[file.listFiles().length];
+                    File[] XMLfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
+                    File[] SERfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
+                    for(File i : XMLfiles) {
+                        for(File j : SERfiles) {
+//                            System.out.println("I'm here " + XMLfiles.length + " " + SERfiles.length);
+//                            System.out.println(i.getName().replace(".xml", ".ser"));
+//                            System.out.println("Ceva");
+                            if(i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
+                                System.out.println("Found one");
+                                files[size] = j;
+                                size++;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(found == false) {
+                            files[size] = i;
+                            size++;
+                        }
+                    }
+                } else {
+                    File[] parent = file.getParentFile().listFiles();
+                    for(File i : parent) {
+                        if(i.getName().equals(file.getName().replace(".xml", ".ser"))) {
+                            System.out.println("Found a .ser " + i.getName());
+                            files[0] = i;
+                        }
+                    }
+                }
             } else if (file.isDirectory()) {
                 // process each individual xml file
                 files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
             }
             for (File f : files) {
                 try {
+                    if(f.getName().contains(".ser"))
+                        isSerialized = true;
+                    else
+                        isSerialized = false;
                     addSingleDocument(f.getPath());
                 } catch (Exception ex) {
                     logger.severe(f.getName() + ": " + ex.getMessage());
@@ -318,7 +359,7 @@ public class ConversationProcessingView extends JInternalFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, true);
+                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, true, false);
                 task.execute();
             }
         });

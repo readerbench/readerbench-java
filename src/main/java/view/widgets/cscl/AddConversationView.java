@@ -43,6 +43,7 @@ import javax.swing.filechooser.FileFilter;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 import data.Lang;
+import java.util.ResourceBundle;
 
 public class AddConversationView extends JInternalFrame {
 	private static final long serialVersionUID = 8894652868238113117L;
@@ -54,13 +55,15 @@ public class AddConversationView extends JInternalFrame {
 	private JComboBox<String> comboBoxLSA;
 	private JComboBox<String> comboBoxLDA;
 	private JCheckBox chckbxUsePosTagging;
+        private JCheckBox chckbxCheckSer;
 	private static File lastDirectory = null;
-
+        
 	/**
 	 * Create the frame.
-	 */
+	*/
 	public AddConversationView(Lang lang, ConversationProcessingView view) {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Add a new conversation"));
+		setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComprehensionModelManagementView.lblText.text"));
 		this.view = view;
 		setResizable(false);
 		this.setClosable(true);
@@ -124,24 +127,30 @@ public class AddConversationView extends JInternalFrame {
 			}
 		});
 
-		JButton btnOk = new JButton("Ok");
+				JButton btnOk = new JButton("Ok");
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (!textFieldPath.getText().equals("")) {
-					ConversationProcessingView.DocumentProcessingTask task = AddConversationView.this.view.new DocumentProcessingTask(
-							textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(), false);
-					task.execute();
-					AddConversationView.this.dispose();
-				} else
-					JOptionPane.showMessageDialog(AddConversationView.this,
-							"Please select an appropriate input file to be analysed!", "Error",
-							JOptionPane.WARNING_MESSAGE);
+                            if (!textFieldPath.getText().equals("")) {
+
+                                ConversationProcessingView.DocumentProcessingTask task = AddConversationView.this.view.new DocumentProcessingTask(
+                                                    textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+                                                    (String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(), false, chckbxCheckSer.isSelected());
+
+                                task.execute();
+
+                                AddConversationView.this.dispose();
+                            } else
+                                JOptionPane.showMessageDialog(AddConversationView.this,
+                                                "Please select an appropriate input file to be analysed!", "Error",
+                                                JOptionPane.WARNING_MESSAGE);
 			}
 		});
 
 		chckbxUsePosTagging = new JCheckBox("Use POS tagging");
 		chckbxUsePosTagging.setSelected(true);
+                
+                chckbxCheckSer = new JCheckBox("Check for already processed file");
+                chckbxCheckSer.setSelected(false);
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
@@ -166,6 +175,8 @@ public class AddConversationView extends JInternalFrame {
 										.addGap(6))
 								.addGroup(
 										gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+                                                                                                .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
+                                                                                                .addComponent(chckbxCheckSer)
 												.addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
 												.addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
 														GroupLayout.PREFERRED_SIZE)
@@ -188,7 +199,7 @@ public class AddConversationView extends JInternalFrame {
 								.addComponent(lblLdaModel))
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(btnOk)
-								.addComponent(btnCancel).addComponent(chckbxUsePosTagging))
+								.addComponent(btnCancel).addComponent(chckbxUsePosTagging).addComponent(chckbxCheckSer))
 						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}

@@ -62,6 +62,7 @@ import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import utils.localization.LocalizationUtils;
 import data.complexity.Measurement;
+import java.util.ResourceBundle;
 import java.util.stream.IntStream;
 import services.complexity.ComplexityIndexType;
 
@@ -349,7 +350,8 @@ public class CorpusEvaluationView extends JFrame {
     }
 
     public CorpusEvaluationView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Corpus Complexity Evaluation"));
+        setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.panelCorpusEvaluation.title"));
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(50, 50, 1000, 600);
@@ -358,7 +360,8 @@ public class CorpusEvaluationView extends JFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
+        JLabel lblPath = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblPath.text") + ":");
         lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldDirectory = new JTextField();
@@ -378,11 +381,13 @@ public class CorpusEvaluationView extends JFrame {
         });
 
         chckbxAll = new JCheckBox(
-                LocalizationUtils.getTranslation("Perform measurements for all factors combined"));
+                ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.boxPerformMeasurementsAllFactors.text"));
         chckbxAll.setSelected(true);
 
         chckbxClass = new JCheckBox(
-                LocalizationUtils.getTranslation("Perform measurements for each class of textual complexity factors"));
+                ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.boxPerformMeasurementsEachClass.text"));
         chckbxClass.setSelected(true);
 
         JLabel lblBaselines = new JLabel("Baselines");
@@ -390,23 +395,28 @@ public class CorpusEvaluationView extends JFrame {
 
         JSeparator separator = new JSeparator();
 
-        lblSelectiveMeasurements = new JLabel(LocalizationUtils.getTranslation("Selective measurements"));
+        lblSelectiveMeasurements = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblSelecitveMeasuremets.text"));
         lblSelectiveMeasurements.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         separator_1 = new JSeparator();
 
         chckbxIndividual = new JCheckBox(
-                LocalizationUtils.getTranslation("Perform measurements for each individually selected factor"));
+                ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.boxPerformMeasurementsIndividualFactor.text"));
         chckbxIndividual.setSelected(true);
 
         chckbxAllSelected = new JCheckBox(
-                LocalizationUtils.getTranslation("Perform measurements for all selected factors combined"));
+                ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.boxPerformMeasurementsAllSelectedFactors.text"));
         chckbxAllSelected.setSelected(true);
 
-        lblResults = new JLabel(LocalizationUtils.getTranslation("Results"));
+        lblResults = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblResults.text"));
         lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        lblKCrossValidation = new JLabel(LocalizationUtils.getTranslation("k cross-validation folds") + ":");
+        lblKCrossValidation = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblKCrossValidationFolds.text") + ":");
         lblKCrossValidation.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldCrossValidation = new JTextField();
@@ -414,7 +424,8 @@ public class CorpusEvaluationView extends JFrame {
         textFieldCrossValidation.setText("3");
         textFieldCrossValidation.setColumns(10);
 
-        btnSelectComplexityIndices = new JButton(LocalizationUtils.getTranslation("Select complexity indices"));
+        btnSelectComplexityIndices = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblKCrossValidationFolds.text"));
         btnSelectComplexityIndices.addActionListener((ActionEvent e) -> {
             ComplexityIndicesView view = new ComplexityIndicesView();
             view.setVisible(true);
@@ -422,7 +433,8 @@ public class CorpusEvaluationView extends JFrame {
 
         separator_2 = new JSeparator();
 
-        btnPerformMeasurements = new JButton(LocalizationUtils.getTranslation("Perform measurements"));
+        btnPerformMeasurements = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.btnPerformMeasurements.text"));
         btnPerformMeasurements.addActionListener((ActionEvent e) -> {
             String path = textFieldDirectory.getText();
             if (!new File(path).isDirectory()) {
@@ -471,8 +483,10 @@ public class CorpusEvaluationView extends JFrame {
         scrollPane.setViewportView(table);
 
         lblComments = new JLabel(
-                "* EA - " + LocalizationUtils.getTranslation("Exact Agreement")
-                + " ; AA - " + LocalizationUtils.getTranslation("Adjacent Agreement"));
+                "* EA - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblExactAgreement.text")
+                + " ; AA - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("CorpusEvaluationView.lblAdjacentAgreement.text"));
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
                 .setHorizontalGroup(gl_contentPane

@@ -76,14 +76,16 @@ public class VerbalizationProcessingView extends JInternalFrame {
         private final String pathToDoc;
         private final Document referredDoc;
         private final boolean usePOSTagging;
-        private final boolean isSerialized;
+        private boolean isSerialized;
+        private final boolean chckSer;
 
-        public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized) {
+        public VerbalizationProcessingTask(String pathToDoc, Document d, boolean usePOSTagging, boolean isSerialized, boolean chckSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.referredDoc = d;
             this.usePOSTagging = usePOSTagging;
             this.isSerialized = isSerialized;
+            this.chckSer = chckSer;
         }
 
         public void addSingleVerbalisation(String pathToIndividualFile) {
@@ -118,14 +120,54 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     // process each individual ser file
                     files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                 }
+            } 
+            else if (chckSer) {
+                if (file.isDirectory()) {
+                    boolean found = false;
+                    int size = 0;
+                    files = new File[file.listFiles().length];
+                    File[] XMLfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
+                    File[] SERfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
+                    for(File i : XMLfiles) {
+                        for(File j : SERfiles) {
+//                            System.out.println("I'm here " + XMLfiles.length + " " + SERfiles.length);
+//                            System.out.println(i.getName().replace(".xml", ".ser"));
+//                            System.out.println("Ceva");
+                            if(i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
+                                System.out.println("Found one");
+                                files[size] = j;
+                                size++;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(found == false) {
+                            files[size] = i;
+                            size++;
+                        }
+                    }
+                } else {
+                    File[] parent = file.getParentFile().listFiles();
+                    for(File i : parent) {
+                        if(i.getName().equals(file.getName().replace(".xml", ".ser"))) {
+                            System.out.println("Found a .ser " + i.getName());
+                            files[0] = i;
+                        }
+                    }
+                }
             } else if (file.isDirectory()) {
                 // process each individual xml file
                 files = file.listFiles((File dir, String name1) -> name1.endsWith(".xml"));
             }
             for (File f : files) {
                 try {
+                    if(f.getName().contains(".ser"))
+                        isSerialized = true;
+                    else
+                        isSerialized = false;
                     addSingleVerbalisation(f.getPath());
                 } catch (Exception ex) {
+                    logger.severe(f.getName() + ": " + ex.getMessage());
                     Exceptions.printStackTrace(ex);
                 }
             }
@@ -258,7 +300,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
                 VerbalizationProcessingTask task = VerbalizationProcessingView.this.new VerbalizationProcessingTask(
-                        file.getPath(), null, false, true);
+                        file.getPath(), null, false, true, false);
                 task.execute();
             }
         });

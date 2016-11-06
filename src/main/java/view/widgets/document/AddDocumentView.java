@@ -52,11 +52,35 @@ public class AddDocumentView extends JInternalFrame {
 	private JComboBox<String> comboBoxLSA;
 	private JComboBox<String> comboBoxLDA;
 	private JCheckBox chckbxUsePosTagging;
+        private JCheckBox chckbxCheckSer;
 	private static File lastDirectory = null;
 
 	/**
 	 * Create the frame.
 	 */
+
+        public boolean checkSerDocsByName(String pathToFile) {
+            File f = new File(pathToFile);
+            File[] files = f.getParentFile().listFiles();
+            for(File i : files) {
+                if(i.getName().equals(pathToFile.replace(".xml", ".ser"))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public boolean checkSerDocsInFolder(String pathToFile) {
+            File f = new File(pathToFile);
+            File[] files = f.getParentFile().listFiles();
+            for(File i : files) {
+                if(i.getName().endsWith(".ser")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
 	public AddDocumentView(Lang lang, DocumentProcessingView view) {
 		setTitle("ReaderBench - Add a new document");
 		this.view = view;
@@ -126,12 +150,14 @@ public class AddDocumentView extends JInternalFrame {
 		btnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (!textFieldPath.getText().equals("")) {
-					DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
-							textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
-							chckbxUsePosTagging.isSelected(), false);
-					task.execute();
-					AddDocumentView.this.dispose();
+                                    DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
+                                    textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+                                    (String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
+                                    chckbxUsePosTagging.isSelected(), false, chckbxCheckSer.isSelected());
+
+                                    task.execute();
+                                        
+                                    AddDocumentView.this.dispose();
 				} else
 					JOptionPane.showMessageDialog(AddDocumentView.this,
 							"Please select an appropriate input file to be analysed!", "Error",
@@ -141,6 +167,9 @@ public class AddDocumentView extends JInternalFrame {
 
 		chckbxUsePosTagging = new JCheckBox("Use POS tagging");
 		chckbxUsePosTagging.setSelected(true);
+                
+                chckbxCheckSer = new JCheckBox("Check for already processed file");
+                chckbxCheckSer.setSelected(false);
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
 		gl_contentPane
@@ -164,7 +193,7 @@ public class AddDocumentView extends JInternalFrame {
 												.addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE))
 										.addGap(6))
 								.addGroup(
-										gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
+										gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging).addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE).addComponent(chckbxCheckSer)
 												.addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
 												.addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
 														GroupLayout.PREFERRED_SIZE)
@@ -187,7 +216,7 @@ public class AddDocumentView extends JInternalFrame {
 								.addComponent(lblLdaModel))
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(btnOk)
-								.addComponent(btnCancel).addComponent(chckbxUsePosTagging))
+								.addComponent(btnCancel).addComponent(chckbxUsePosTagging).addComponent(chckbxCheckSer))
 						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 		contentPane.setLayout(gl_contentPane);
 	}
