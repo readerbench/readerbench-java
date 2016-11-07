@@ -18,46 +18,46 @@ package view.widgets.cscl;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.RowFilter;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
 
 import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.AbstractDocument.SaveType;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.logging.Level;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.RowFilter;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
@@ -127,7 +127,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 try {
                     d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
                 } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.", "Error", JOptionPane.ERROR);
+                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.");
                     Exceptions.printStackTrace(ex);
                 }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
@@ -147,13 +147,15 @@ public class ConversationProcessingView extends JInternalFrame {
                 } else {
                     d = processDocument(pathToIndividualFile);
                 }
-            }
-            if (d == null) {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-                addConversation((Conversation) d);
             } else {
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+            if (d != null && d.getLanguage() != ReaderBenchView.RUNTIME_LANGUAGE) {
                 JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                d = null;
+            }
+            if (d != null) {
+                addConversation((Conversation) d);
             }
         }
 

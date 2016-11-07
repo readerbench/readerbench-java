@@ -155,13 +155,15 @@ public class DocumentProcessingView extends JInternalFrame {
                 } else {
                     d = processDocument(pathToIndividualFile);
                 }
-            }
-            if (d == null) {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate document XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-                addDocument((Document) d);
             } else {
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate document XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+            if (d != null && d.getLanguage() != ReaderBenchView.RUNTIME_LANGUAGE) {
                 JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                d = null;
+            }
+            if (d != null) {
+                addDocument((Document) d);
             }
         }
 
