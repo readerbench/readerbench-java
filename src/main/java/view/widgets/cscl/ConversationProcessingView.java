@@ -18,49 +18,46 @@ package view.widgets.cscl;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.RowFilter;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingWorker;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableRowSorter;
-
-
 
 import data.AbstractDocument;
 import data.cscl.Conversation;
-import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Level;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.RowFilter;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
@@ -70,7 +67,7 @@ import view.widgets.ReaderBenchView;
 public class ConversationProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final JButton btnRemoveDocument;
     private final JButton btnAddDocument;
@@ -93,36 +90,72 @@ public class ConversationProcessingView extends JInternalFrame {
         private final String pathToLSA;
         private final String pathToLDA;
         private final boolean usePOSTagging;
-        private final boolean isSerialized;
+        private boolean isSerialized;
+        private final boolean chckSer;
 
         public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-                boolean isSerialized) {
+                boolean isSerialized, boolean chckSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
             this.usePOSTagging = usePOSTagging;
             this.isSerialized = isSerialized;
+            this.chckSer = chckSer;
+        }
+
+        public DocumentProcessingTask(String pathToDoc) {
+            this(pathToDoc, null, null, false, true, false);
+        }
+
+        public AbstractDocument processDocument(String pathToIndividualFile) {
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            if (pathToLSA != null & pathToLSA.length() > 0) {
+                modelPaths.put(SimilarityType.LSA, pathToLSA);
+            }
+            if (pathToLDA != null & pathToLDA.length() > 0) {
+                modelPaths.put(SimilarityType.LDA, pathToLDA);
+            }
+            return Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
+                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, null, null, true,
+                    SaveType.SERIALIZED_AND_CSV_EXPORT);
         }
 
         public void addSingleDocument(String pathToIndividualFile) {
             AbstractDocument d = null;
             if (isSerialized) {
-                d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
+                try {
+                    d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
+                } catch (IOException | ClassNotFoundException ex) {
+                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.");
+                    Exceptions.printStackTrace(ex);
+                }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
-                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                modelPaths.put(SimilarityType.LSA, pathToLSA);
-                modelPaths.put(SimilarityType.LDA, pathToLDA);
-                d = Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
-                        ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, usePOSTagging, null, null, true,
-                        SaveType.SERIALIZED_AND_CSV_EXPORT);
-            }
-            if (d == null) {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
-            } else if (d.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-                addConversation((Conversation) d);
+                //check if file was already preprocessed
+                if (chckSer) {
+                    File ser = new File(pathToIndividualFile.replace(".xml", ".ser"));
+                    if (ser.exists()) {
+                        try {
+                            d = AbstractDocument.loadSerializedDocument(ser.getAbsolutePath());
+                        } catch (IOException | ClassNotFoundException ex) {
+                            LOGGER.log(Level.INFO, "Obsolete ser file for {0}. Reprocessing file ...", pathToIndividualFile);
+                            d = processDocument(pathToIndividualFile);
+                        }
+                    } else {
+                        d = processDocument(pathToIndividualFile);
+                    }
+                } else {
+                    d = processDocument(pathToIndividualFile);
+                }
             } else {
+                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
+            }
+            if (d != null && d.getLanguage() != ReaderBenchView.RUNTIME_LANGUAGE) {
                 JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                d = null;
+            }
+            if (d != null) {
+                addConversation((Conversation) d);
             }
         }
 
@@ -146,7 +179,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 try {
                     addSingleDocument(f.getPath());
                 } catch (Exception ex) {
-                    logger.severe(f.getName() + ": " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "{0}: {1}", new Object[]{f.getName(), ex.getMessage()});
                     Exceptions.printStackTrace(ex);
                 }
             }
@@ -318,7 +351,7 @@ public class ConversationProcessingView extends JInternalFrame {
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(file.getPath(), null, null, false, true);
+                ConversationProcessingView.DocumentProcessingTask task = ConversationProcessingView.this.new DocumentProcessingTask(file.getPath());
                 task.execute();
             }
         });

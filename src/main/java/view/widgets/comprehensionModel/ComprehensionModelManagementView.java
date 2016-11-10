@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
@@ -83,7 +84,8 @@ public class ComprehensionModelManagementView extends JFrame {
         textFieldSemanticThreshold.setColumns(10);
         textFieldSemanticThreshold.setText("0.5");
 
-        JLabel lblText = new JLabel(LocalizationUtils.getTranslation("Text"));
+        JLabel lblText = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComprehensionModelManagementView.lblText.text"));
         lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textAreaContent = new JTextArea();

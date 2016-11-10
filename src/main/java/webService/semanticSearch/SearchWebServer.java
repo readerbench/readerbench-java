@@ -16,7 +16,6 @@
 package webService.semanticSearch;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +35,8 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.document.Document;
+import java.io.IOException;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticSearch.SemanticSearch;
 import services.semanticSearch.SemanticSearchResult;
@@ -115,8 +116,13 @@ public class SearchWebServer {
         File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
 
         for (File file : files) {
-            Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-            documents.add(d);
+            Document d;
+            try {
+                d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                documents.add(d);
+            } catch (IOException | ClassNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 

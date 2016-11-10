@@ -50,11 +50,8 @@ import javax.swing.border.TitledBorder;
 
 import data.AbstractDocument;
 import data.Lang;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
@@ -80,22 +77,22 @@ import webService.ReaderBenchServer;
 public class ReaderBenchView extends JFrame {
 
     private static final long serialVersionUID = 4565038532352428650L;
-    public static Logger logger = Logger.getLogger("");
+    public static final Logger LOGGER = Logger.getLogger("");
 
-    public static final Map<String, String[]> LSA_SPACES = new HashMap();
-    public static final Map<String, String[]> LDA_SPACES = new HashMap();
+    public static final Map<Lang, String[]> LSA_SPACES = new HashMap();
+    public static final Map<Lang, String[]> LDA_SPACES = new HashMap();
 
     static {
-        LSA_SPACES.put("en", new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LSA/COCA_newspaper", ""});
-        LSA_SPACES.put("fr", new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
-        LSA_SPACES.put("it", new String[]{""});
-        LSA_SPACES.put("es", new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
-        LSA_SPACES.put("la", new String[]{"resources/config/LA/LSA/Letters", ""});
-        LDA_SPACES.put("en", new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/LDA/TASA_smart_cities", "resources/config/EN/LDA/COCA_newspaper", ""});
-        LDA_SPACES.put("fr", new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
-        LDA_SPACES.put("it", new String[]{"resources/config/IT/LDA/Paisa", ""});
-        LDA_SPACES.put("es", new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
-        LDA_SPACES.put("la", new String[]{"resources/config/LA/LDA/Letters", ""});
+        LSA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/COCA_newspaper", ""});
+        LSA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
+        LSA_SPACES.put(Lang.it, new String[]{""});
+        LSA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
+        LSA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LSA/Letters", ""});
+        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/COCA_newspaper", ""});
+        LDA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
+        LDA_SPACES.put(Lang.it, new String[]{"resources/config/IT/LDA/Paisa", ""});
+        LDA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
+        LDA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LDA/Letters", ""});
     }
 
     public static Lang RUNTIME_LANGUAGE;
@@ -489,82 +486,23 @@ public class ReaderBenchView extends JFrame {
         comboBoxLSA.removeAllItems();
         comboBoxLDA.removeAllItems();
 
-        switch (lang) {
-            case fr:
-                for (String url : ReaderBenchView.LSA_SPACES.get("fr")) {
-                    comboBoxLSA.addItem(url);
-                }
-                for (String url : ReaderBenchView.LDA_SPACES.get("fr")) {
-                    comboBoxLDA.addItem(url);
-                }
-                break;
-            case it:
-                for (String url : ReaderBenchView.LSA_SPACES.get("it")) {
-                    comboBoxLSA.addItem(url);
-                }
-                for (String url : ReaderBenchView.LDA_SPACES.get("it")) {
-                    comboBoxLDA.addItem(url);
-                }
-                break;
-            case es:
-                for (String url : ReaderBenchView.LSA_SPACES.get("es")) {
-                    comboBoxLSA.addItem(url);
-                }
-                for (String url : ReaderBenchView.LDA_SPACES.get("es")) {
-                    comboBoxLDA.addItem(url);
-                }
-                break;
-            case la:
-                for (String url : ReaderBenchView.LSA_SPACES.get("la")) {
-                    comboBoxLSA.addItem(url);
-                }
-                for (String url : ReaderBenchView.LDA_SPACES.get("la")) {
-                    comboBoxLDA.addItem(url);
-                }
-                break;
-            default:
-                for (String url : ReaderBenchView.LSA_SPACES.get("en")) {
-                    comboBoxLSA.addItem(url);
-                }
-                for (String url : ReaderBenchView.LDA_SPACES.get("en")) {
-                    comboBoxLDA.addItem(url);
-                }
-                break;
+        for (String url : ReaderBenchView.LSA_SPACES.get(lang)) {
+            comboBoxLSA.addItem(url);
+        }
+        for (String url : ReaderBenchView.LDA_SPACES.get(lang)) {
+            comboBoxLDA.addItem(url);
         }
 
         comboBoxLSA.setEnabled(true);
         comboBoxLDA.setEnabled(true);
     }
 
-    public static void main(String[] args) {
-        try {
-            Logger.getLogger("").setLevel(Level.INFO); // changing log level
-            
-            if (args.length > 0) {
-                ReaderBenchView.setRuntimeLang(args[0]);
-            } else {
-                RUNTIME_LANGUAGE = Lang.en;
-            }
-            ReaderBenchView.setLoadedLocale();
-            
-            FileHandler fh = new FileHandler("ReaderBenchServer.log");
-            logger.addHandler(fh);
-            
-            Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
-            
-            ReaderBenchServer.initializeDB();
-            
-            adjustToSystemGraphics();
-            
-            EventQueue.invokeLater(() -> {
-                ReaderBenchView view = new ReaderBenchView();
-                view.setVisible(true);
-            });
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (SecurityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+    public static void setRuntimeLang(String text) {
+        RUNTIME_LANGUAGE = Lang.getLang(text);
+    }
+
+    public static void setLoadedLocale() {
+        LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
     }
 
     public static void adjustToSystemGraphics() {
@@ -579,12 +517,23 @@ public class ReaderBenchView extends JFrame {
         }
     }
 
-    public static void setRuntimeLang(String text) {
-        RUNTIME_LANGUAGE = Lang.getLang(text);
-    }
+    public static void main(String[] args) {
+        if (args.length > 0) {
+            ReaderBenchView.setRuntimeLang(args[0]);
+        } else {
+            RUNTIME_LANGUAGE = Lang.en;
+        }
+        ReaderBenchView.setLoadedLocale();
 
-    public static void setLoadedLocale() {
-        LOADED_LOCALE = RUNTIME_LANGUAGE.getLocale();
-    }
+        Toolkit.getDefaultToolkit().getSystemEventQueue().push(new TCPopupEventQueue());
 
+        ReaderBenchServer.initializeDB();
+
+        adjustToSystemGraphics();
+
+        EventQueue.invokeLater(() -> {
+            ReaderBenchView view = new ReaderBenchView();
+            view.setVisible(true);
+        });
+    }
 }

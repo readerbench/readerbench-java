@@ -15,6 +15,7 @@
  */
 package view.models.document;
 
+import java.util.ResourceBundle;
 import javax.swing.table.DefaultTableModel;
 import utils.localization.LocalizationUtils;
 
@@ -29,9 +30,12 @@ public class ConversationManagementTableModel extends DefaultTableModel {
 
 	public ConversationManagementTableModel() {
 		super(new Object[][] {}, new String[] { 
-				LocalizationUtils.getTranslation("Title"),
-				LocalizationUtils.getTranslation("LSA vector space"), 
-				LocalizationUtils.getTranslation("LDA model") });
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.Title.title"),
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LSAspace.text"), 
+				ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LDAvector.text") });
 	}
 
 	@Override

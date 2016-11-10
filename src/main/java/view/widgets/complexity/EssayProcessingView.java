@@ -42,6 +42,7 @@ import javax.swing.border.EmptyBorder;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
@@ -118,7 +119,8 @@ public class EssayProcessingView extends JFrame {
      * Create the frame.
      */
     public EssayProcessingView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Essay Processing"));
+        setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.panelEssayProcessing.title"));
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 570, 240);
@@ -129,9 +131,11 @@ public class EssayProcessingView extends JFrame {
 
         JLabel lblPath = new JLabel("Path:");
 
-        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
+        JLabel lblLsaVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.lblLSAspace.text") + ":");
 
-        JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation("LDA model") + ":");
+        JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.lblLDAvector.text") + ":");
 
         comboBoxLSA = new JComboBox<String>();
         comboBoxLSA.setEnabled(false);
@@ -156,7 +160,8 @@ public class EssayProcessingView extends JFrame {
             }
         });
 
-        btnRun = new JButton(LocalizationUtils.getTranslation("Generate Measurements File"));
+        btnRun = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.btnGenerateMeasurementsFile.text"));
         btnRun.setEnabled(false);
         btnRun.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -170,14 +175,15 @@ public class EssayProcessingView extends JFrame {
                 } else {
                     JOptionPane
                             .showMessageDialog(EssayProcessingView.this,
-                                    LocalizationUtils.getTranslation(
-                                            "Please select an appropriate directory to be analysed") + "!",
+                                    ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.msgSelectAnotherDirectory.text") + "!",
                                     "Error", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
+        chckbxUsePosTagging = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.boxUsePOSTagging.text"));
         chckbxUsePosTagging.setSelected(true);
 
         lang = ReaderBenchView.RUNTIME_LANGUAGE;

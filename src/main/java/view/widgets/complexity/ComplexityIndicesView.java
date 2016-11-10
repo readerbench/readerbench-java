@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.IntStream;
 
 import javax.swing.GroupLayout;
@@ -74,7 +75,8 @@ public class ComplexityIndicesView extends JFrame {
         selectedIndices = new boolean[indices.length];
 	}
     public ComplexityIndicesView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Textual Complexity Indices"));
+        setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComplexityIndicesView.TxtComplexityIndices.title"));
         setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 800, 400);
@@ -87,9 +89,12 @@ public class ComplexityIndicesView extends JFrame {
 
         if (complexityIndicesTableModel == null) {
             complexityIndicesTableModel = new DefaultTableModel(
-                    new Object[][]{}, new Object[]{"ID", LocalizationUtils.getTranslation("Class name"),
-                        LocalizationUtils.getTranslation("Index description"),
-                        LocalizationUtils.getTranslation("Index acronym"), Status.INDETERMINATE}) {
+                    new Object[][]{}, new Object[]{"ID", ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComplexityIndicesView.tblClassName.text"),
+                       ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComplexityIndicesView.tblIndexDescription.text"),
+                         ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ComplexityIndicesView.tblIndexAcronym.text"), Status.INDETERMINATE}) {
                 private static final long serialVersionUID = 6850181164110466483L;
 
                 private final Class<?>[] columnTypes = new Class[]{Integer.class, // identifier

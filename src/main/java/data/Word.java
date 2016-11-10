@@ -17,12 +17,9 @@ package data;
 
 import java.io.Serializable;
 
-import services.discourse.cohesion.CohesionGraph;
 import services.nlp.listOfWords.Dictionary;
 import services.nlp.listOfWords.StopWords;
 import services.nlp.stemmer.Stemmer;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import dao.WordDAO;
 import data.discourse.SemanticChain;
 import data.document.ReadingStrategyType;
@@ -30,12 +27,10 @@ import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
-
 
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -46,7 +41,7 @@ import services.semanticModels.SimilarityType;
  */
 public class Word extends AnalysisElement implements Comparable<Word>, Serializable {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static final long serialVersionUID = -3809934014813200184L;
 
@@ -62,8 +57,8 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     private transient SentimentEntity sentiment;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
-        setText(text);
-        setProcessedText(lemma);
+        super.setText(text);
+        super.setProcessedText(lemma);
         this.stem = stem;
         this.POS = POS;
         this.NE = NE;
@@ -88,23 +83,20 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
 
     public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
-        setSemanticModels(models);
+        super.setSemanticModels(models);
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, 
-            List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+    public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
         this(text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }
 
-    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE,
-            List<ISemanticModel> models, Lang lang) {
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, models, lang);
         this.container = container;
     }
 
-    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE,
-            List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
         this(container, text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }
@@ -149,13 +141,19 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     }
 
     public int getBlockIndex() {
-        if (container == null) return 0;
-        if (container.container == null) return 0;
+        if (container == null) {
+            return 0;
+        }
+        if (container.container == null) {
+            return 0;
+        }
         return container.container.getIndex();
     }
 
     public int getUtteranceIndex() {
-        if (container == null) return 0;
+        if (container == null) {
+            return 0;
+        }
         return container.getIndex();
     }
 
@@ -294,6 +292,5 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         }
         return modelVectors.get(type);
     }
-    
-    
+
 }

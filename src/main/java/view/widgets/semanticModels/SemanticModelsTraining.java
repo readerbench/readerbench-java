@@ -15,14 +15,11 @@
  */
 package view.widgets.semanticModels;
 
-import cc.mallet.topics.ParallelTopicModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -49,7 +46,6 @@ import javax.swing.filechooser.FileFilter;
 
 import data.Lang;
 import java.util.logging.Level;
-import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
@@ -57,7 +53,6 @@ import services.semanticModels.LSA.ProcessSVDOutput;
 import services.semanticModels.LSA.RunSVD;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
-import webService.ReaderBenchServer;
 
 public class SemanticModelsTraining extends JFrame {
 

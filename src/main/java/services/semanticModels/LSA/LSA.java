@@ -30,12 +30,12 @@ import java.util.TreeMap;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
 
-
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
 import java.util.EnumSet;
 import java.util.function.BiFunction;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
@@ -48,17 +48,17 @@ import services.semanticModels.SimilarityType;
  * @author Mihai Dascalu
  */
 public class LSA implements ISemanticModel {
-    
-    static Logger logger = Logger.getLogger("");
-    
+
+    static final Logger LOGGER = Logger.getLogger("");
+
     private static final List<LSA> LOADED_LSA_SPACES = new LinkedList<>();
     public static final int LOWER_BOUND = 50;
     public static final double LSA_THRESHOLD = 0.25;
     public int K = 300;
     public static final int NO_KNN_NEIGHBOURS = 100;
-    
+
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en, Lang.es, Lang.fr, Lang.la, Lang.ro);
-    
+
     private Lang language;
     private String path;
     private double[][] Uk;
@@ -68,7 +68,7 @@ public class LSA implements ISemanticModel {
     private Map<Word, Double> mapIdf;
     private double[] vectorSpaceMean;
     private Map<Word, double[]> wordVectors;
-    
+
     public static LSA loadLSA(String path, Lang language) {
         try {
             for (LSA lsa : LOADED_LSA_SPACES) {
@@ -76,8 +76,8 @@ public class LSA implements ISemanticModel {
                     return lsa;
                 }
             }
-            
-            logger.info("Loading LSA semantic space " + path + " ...");
+
+            LOGGER.log(Level.INFO, "Loading LSA semantic space {0} ...", path);
             LSA lsaLoad = new LSA();
             lsaLoad.setLanguage(language);
             lsaLoad.setPath(path);
@@ -92,11 +92,11 @@ public class LSA implements ISemanticModel {
             return lsaLoad;
         } catch (IOException | ClassNotFoundException ex) {
             Exceptions.printStackTrace(ex);
-            logger.info("Error during vector space loading!");
+            LOGGER.info("Error during vector space loading!");
             return null;
         }
     }
-    
+
     protected void loadIdf(String path) throws FileNotFoundException, IOException {
         // loads IDf matrix from file
         FileInputStream inputFile = new FileInputStream(path + "/idf.txt");
@@ -111,7 +111,7 @@ public class LSA implements ISemanticModel {
             }
         }
     }
-    
+
     protected void loadWordList(String path) throws FileNotFoundException, IOException {
         // loads IDf matrix from file
         FileInputStream inputFile = new FileInputStream(path + "/wordlist.txt");
@@ -120,14 +120,14 @@ public class LSA implements ISemanticModel {
             words = new DualTreeBidiMap<>();
             String str_linie;
             StringTokenizer strk;
-            
+
             while ((str_linie = in.readLine()) != null) {
                 strk = new StringTokenizer(str_linie, " ");
                 words.put(Word.getWordFromConcept(strk.nextToken(), language), Integer.parseInt(strk.nextToken()));
             }
         }
     }
-    
+
     public double getWordIDf(Word word) {
         double idf = 0;
         if (words.containsKey(word)) {
@@ -149,7 +149,7 @@ public class LSA implements ISemanticModel {
         }
         return idf;
     }
-    
+
     public double[] getWordVector(Word word) {
         double[] vector = new double[K];
         if (words.containsKey(word)) {
@@ -177,7 +177,7 @@ public class LSA implements ISemanticModel {
         }
         return vector;
     }
-    
+
     private void determineSpaceMean() {
         // determine space median
         vectorSpaceMean = new double[K];
@@ -192,7 +192,7 @@ public class LSA implements ISemanticModel {
             vectorSpaceMean[i] /= words.size();
         }
     }
-    
+
     private void determineWordRepresentations() {
         // determine space median
         wordVectors = new TreeMap<>();
@@ -205,27 +205,27 @@ public class LSA implements ISemanticModel {
             wordVectors.put(w, vector);
         });
     }
-    
+
     @Override
     public double getSimilarity(double[] v1, double[] v2) {
         return VectorAlgebra.cosineSimilarity(v1, v2);
     }
-    
+
     @Override
     public double getSimilarity(AnalysisElement e1, AnalysisElement e2) {
         return this.getSimilarity(e1.getModelRepresentation(SimilarityType.LSA), e2.getModelRepresentation(SimilarityType.LSA));
     }
-    
+
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(Word w, double minThreshold) {
         return getSimilarConcepts(getWordVector(w), minThreshold);
     }
-    
+
     @Override
     public TreeMap<Word, Double> getSimilarConcepts(AnalysisElement e, double minThreshold) {
         return getSimilarConcepts(e.getModelRepresentation(SimilarityType.LSA), minThreshold);
     }
-    
+
     private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
         TreeMap<Word, Double> similarConcepts = new TreeMap<>();
         double[] vector2;
@@ -239,121 +239,121 @@ public class LSA implements ISemanticModel {
         }
         return similarConcepts;
     }
-    
+
     public Word getMostSimilarConcept(Word w) {
-    	return getMostSimilarConcept(getWordVector(w));
+        return getMostSimilarConcept(getWordVector(w));
     }
-    
+
     public Word getMostSimilarConcept(double[] vector) {
-    	Word res = null;
-    	double sim, max = 0;
-    
-    	for (Word c : words.keySet()) {
-    		sim = VectorAlgebra.cosineSimilarity(vector, getWordVector(c));
-    		if (sim >= max) {
-    			res = c;
-    			max = sim;
-    		}
-    	}
-    	
-    	return res;
+        Word res = null;
+        double sim, max = 0;
+
+        for (Word c : words.keySet()) {
+            sim = VectorAlgebra.cosineSimilarity(vector, getWordVector(c));
+            if (sim >= max) {
+                res = c;
+                max = sim;
+            }
+        }
+
+        return res;
     }
-    
+
     @Override
     public Lang getLanguage() {
         return language;
     }
-    
+
     public void setLanguage(Lang language) {
         this.language = language;
     }
-    
+
     @Override
     public String getPath() {
         return path;
     }
-    
+
     public void setPath(String path) {
         this.path = path;
     }
-    
+
     public double[][] getUk() {
         return Uk;
     }
-    
+
     public void setUk(double[][] uk) {
         Uk = uk;
     }
-    
+
     public double[] getSk() {
         return Sk;
     }
-    
+
     public void setSk(double[] sk) {
         Sk = sk;
     }
-    
+
     public double[][] getVtk() {
         return Vtk;
     }
-    
+
     public void setVtk(double[][] vtk) {
         Vtk = vtk;
     }
-    
+
     public BidiMap<Word, Integer> getWords() {
         return words;
     }
-    
+
     @Override
     public Set<Word> getWordSet() {
         return words.keySet();
     }
-    
+
     @Override
     public Map<Word, double[]> getWordRepresentations() {
         return wordVectors;
     }
-    
+
     @Override
     public double[] getWordRepresentation(Word w) {
         return wordVectors.get(w);
     }
-    
+
     public void setWords(BidiMap<Word, Integer> words) {
         this.words = words;
     }
-    
+
     public Map<Word, Double> getMapIdf() {
         return mapIdf;
     }
-    
+
     public void setMapIdf(Map<Word, Double> mapIdf) {
         this.mapIdf = mapIdf;
     }
-    
+
     public double[] getVectorSpaceMean() {
         return vectorSpaceMean;
     }
-    
+
     public void setVectorSpaceMean(double[] vectorSpaceMean) {
         this.vectorSpaceMean = vectorSpaceMean;
     }
-    
+
     public static Set<Lang> getAvailableLanguages() {
         return AVAILABLE_FOR;
     }
-    
+
     @Override
     public SimilarityType getType() {
         return SimilarityType.LSA;
     }
-    
+
     @Override
     public BiFunction<double[], double[], Double> getSimilarityFuction() {
         return VectorAlgebra::cosineSimilarity;
     }
-    
+
     @Override
     public int getNoDimensions() {
         return this.K;

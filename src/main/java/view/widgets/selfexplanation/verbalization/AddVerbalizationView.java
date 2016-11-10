@@ -52,7 +52,30 @@ public class AddVerbalizationView extends JInternalFrame {
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxDocument;
     private JCheckBox chckbxUsePosTagging;
+    private JCheckBox chckbxCheckSer;
     private static File lastDirectory = null;
+    
+        public boolean checkSerDocsByName(String pathToFile) {
+            File f = new File(pathToFile);
+            File[] files = f.getParentFile().listFiles();
+            for(File i : files) {
+                if(i.getName().equals(pathToFile.replace(".xml", ".ser"))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public boolean checkSerDocsInFolder(String pathToFile) {
+            File f = new File(pathToFile);
+            File[] files = f.getParentFile().listFiles();
+            for(File i : files) {
+                if(i.getName().endsWith(".ser")) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
     /**
      * Create the verbalization view frame.
@@ -127,13 +150,13 @@ public class AddVerbalizationView extends JInternalFrame {
         JButton btnOk = new JButton("Ok");
         btnOk.addActionListener((ActionEvent e) -> {
             if (!textFieldPath.getText().equals("")) {
-                VerbalizationProcessingView.VerbalizationProcessingTask task = AddVerbalizationView.this.view.new VerbalizationProcessingTask(
-                        textFieldPath.getText(), DocumentProcessingView
-                        .getLoadedDocuments()
-                        .get(comboBoxDocument.getSelectedIndex()),
-                        chckbxUsePosTagging.isSelected(), false);
-                task.execute();
-                AddVerbalizationView.this.dispose();
+                    VerbalizationProcessingView.VerbalizationProcessingTask task = AddVerbalizationView
+                            .this.view.new VerbalizationProcessingTask(
+                            textFieldPath.getText(), DocumentProcessingView
+                        .   getLoadedDocuments().get(comboBoxDocument.getSelectedIndex()),
+                                    chckbxUsePosTagging.isSelected(), false, chckbxCheckSer.isSelected());
+                    task.execute();
+                    AddVerbalizationView.this.dispose();
             } else {
                 JOptionPane
                         .showMessageDialog(
@@ -145,6 +168,9 @@ public class AddVerbalizationView extends JInternalFrame {
 
         chckbxUsePosTagging = new JCheckBox("Use POS tagging");
         chckbxUsePosTagging.setSelected(true);
+        
+        chckbxCheckSer = new JCheckBox("Check for already processed file");
+        chckbxCheckSer.setSelected(false);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
@@ -204,6 +230,11 @@ public class AddVerbalizationView extends JInternalFrame {
                                                         ComponentPlacement.RELATED,
                                                         256,
                                                         Short.MAX_VALUE)
+                                                .addComponent(chckbxCheckSer)
+                                                .addPreferredGap(
+                                                        ComponentPlacement.RELATED,
+                                                        256,
+                                                        Short.MAX_VALUE)
                                                 .addComponent(
                                                         btnOk,
                                                         GroupLayout.PREFERRED_SIZE,
@@ -253,7 +284,8 @@ public class AddVerbalizationView extends JInternalFrame {
                                         .addComponent(btnOk)
                                         .addComponent(btnCancel)
                                         .addComponent(
-                                                chckbxUsePosTagging))
+                                                chckbxUsePosTagging)
+                                        .addComponent(chckbxCheckSer))
                                 .addContainerGap(19, Short.MAX_VALUE)));
         contentPane.setLayout(gl_contentPane);
     }

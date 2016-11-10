@@ -42,8 +42,11 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
@@ -227,7 +230,7 @@ public class Community extends AnalysisElement {
     public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
         if (startDate != null && endDate != null && participants != null && participants.size() > 0) {
-            logger.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
+            LOGGER.info("Processing timeframe between " + dateFormat.format(startDate) + " and "
                     + dateFormat.format(endDate) + " having " + participants.size() + " participants.");
         }
 
@@ -307,10 +310,10 @@ public class Community extends AnalysisElement {
     }
 
     public void modelEvolution() {
-        logger.info("Modeling time evolution for " + participants.size() + " participants");
+        LOGGER.info("Modeling time evolution for " + participants.size() + " participants");
         for (CSCLIndices index : CSCLIndices.values()) {
             if (index.isUsedForTimeModeling()) {
-                logger.info("Modeling based on " + index.getDescription());
+                LOGGER.info("Modeling based on " + index.getDescription());
                 int no = 0;
                 for (Participant p : participants) {
                     // model time evolution of each participant
@@ -323,7 +326,7 @@ public class Community extends AnalysisElement {
                         }
                     }
                     if (++no % 100 == 0) {
-                        logger.info("Finished evaluating the time evolution of " + no + " participants");
+                        LOGGER.info("Finished evaluating the time evolution of " + no + " participants");
                     }
                     for (CSCLCriteria crit : CSCLCriteria.values()) {
                         p.getLongitudinalIndices().put(
@@ -348,7 +351,7 @@ public class Community extends AnalysisElement {
 
     public static Community loadMultipleConversations(String path, boolean needsAnonymization, Date startDate,
             Date endDate, int monthIncrement, int dayIncrement) {
-        logger.info("Loading all files in " + path);
+        LOGGER.log(Level.INFO, "Loading all files in {0}", path);
 
         FileFilter filter = (File f) -> f.getName().endsWith(".ser");
         Community community = new Community(path, needsAnonymization, startDate, endDate);
@@ -358,9 +361,12 @@ public class Community extends AnalysisElement {
         }
         File[] filesTODO = dir.listFiles(filter);
         for (File f : filesTODO) {
-            Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
-            if (c != null) {
+            Conversation c;
+            try {
+                c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 community.getDocuments().add(c);
+            } catch (IOException | ClassNotFoundException ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
 
@@ -387,7 +393,7 @@ public class Community extends AnalysisElement {
         community.getTimeframeSubCommunities()
                 .add(getSubCommunity(community, startSubCommunities, community.getLastContributionDate()));
 
-        logger.info("Finished creating " + community.getTimeframeSubCommunities().size()
+        LOGGER.info("Finished creating " + community.getTimeframeSubCommunities().size()
                 + " timeframe sub-communities spanning from " + community.getFistContributionDate() + " to "
                 + community.getLastContributionDate());
 
@@ -410,7 +416,7 @@ public class Community extends AnalysisElement {
     }
 
     public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
-        logger.info("Writing document collection export");
+        LOGGER.info("Writing document collection export");
         // print participant statistics
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
             // print participant statistics
@@ -516,9 +522,9 @@ public class Community extends AnalysisElement {
                     out.write("\n");
                 }
             }
-            logger.info("Successfully finished writing document collection export");
+            LOGGER.info("Successfully finished writing document collection export");
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -559,7 +565,7 @@ public class Community extends AnalysisElement {
                 }
             }
         }
-        logger.info("Finished processsing all files...");
+        LOGGER.info("Finished processsing all files...");
     }
 
     public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {

@@ -17,7 +17,6 @@ package view.widgets.document;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -37,158 +36,184 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-
-
 import data.Lang;
 import view.widgets.ReaderBenchView;
 
 public class AddDocumentView extends JInternalFrame {
-	private static final long serialVersionUID = 8894652868238113117L;
-	static Logger logger = Logger.getLogger("");
 
-	private JPanel contentPane;
-	private DocumentProcessingView view;
-	private JTextField textFieldPath;
-	private JComboBox<String> comboBoxLSA;
-	private JComboBox<String> comboBoxLDA;
-	private JCheckBox chckbxUsePosTagging;
-	private static File lastDirectory = null;
+    private static final long serialVersionUID = 8894652868238113117L;
+    static final Logger LOGGER = Logger.getLogger("");
 
-	/**
-	 * Create the frame.
-	 */
-	public AddDocumentView(Lang lang, DocumentProcessingView view) {
-		setTitle("ReaderBench - Add a new document");
-		this.view = view;
-		setResizable(false);
-		this.setClosable(true);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 549, 166);
-		contentPane = new JPanel();
-		contentPane.setBackground(Color.WHITE);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
+    private final JPanel contentPane;
+    private DocumentProcessingView view;
+    private JTextField textFieldPath;
+    private JComboBox<String> comboBoxLSA;
+    private JComboBox<String> comboBoxLDA;
+    private JCheckBox chckbxUsePosTagging;
+    private JCheckBox chckbxSer;
+    private static File lastDirectory = null;
 
-		JLabel lblPath = new JLabel("Path:");
+    /**
+     * Create the frame.
+     *
+     * @param pathToFile
+     * @return
+     */
+    public boolean checkSerDocsByName(String pathToFile) {
+        File f = new File(pathToFile);
+        File[] files = f.getParentFile().listFiles();
+        for (File i : files) {
+            if (i.getName().equals(pathToFile.replace(".xml", ".ser"))) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-		JLabel lblLsaVectorSpace = new JLabel("LSA vector space:");
+    public boolean checkSerDocsInFolder(String pathToFile) {
+        File f = new File(pathToFile);
+        File[] files = f.getParentFile().listFiles();
+        for (File i : files) {
+            if (i.getName().endsWith(".ser")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-		JLabel lblLdaModel = new JLabel("LDA model:");
+    public AddDocumentView(Lang lang, DocumentProcessingView view) {
+        super.setTitle("ReaderBench - Add a new document");
+        this.view = view;
+        super.setResizable(false);
+        super.setClosable(true);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(100, 100, 549, 166);
+        contentPane = new JPanel();
+        contentPane.setBackground(Color.WHITE);
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        super.setContentPane(contentPane);
 
-		comboBoxLSA = new JComboBox<String>();
-		comboBoxLDA = new JComboBox<String>();
+        JLabel lblPath = new JLabel("Path:");
 
-		ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
+        JLabel lblLsaVectorSpace = new JLabel("LSA vector space:");
 
-		textFieldPath = new JTextField();
-		textFieldPath.setText("");
-		textFieldPath.setColumns(10);
+        JLabel lblLdaModel = new JLabel("LDA model:");
+        comboBoxLSA = new JComboBox<>();
+        comboBoxLDA = new JComboBox<>();
 
-		JButton btnSearch = new JButton("...");
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = null;
-				if (lastDirectory == null)
-					fc = new JFileChooser(new File("resources/in"));
-				else
-					fc = new JFileChooser(lastDirectory);
-				fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-				fc.setFileFilter(new FileFilter() {
-					public boolean accept(File f) {
-						if (f.isDirectory()) {
-							return true;
-						}
-						return f.getName().endsWith(".xml");
-					}
+        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
 
-					public String getDescription() {
-						return "XML file (*.xml) or directory";
-					}
-				});
-				int returnVal = fc.showOpenDialog(AddDocumentView.this);
+        textFieldPath = new JTextField();
+        textFieldPath.setText("");
+        textFieldPath.setColumns(10);
 
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					lastDirectory = file.getParentFile();
-					textFieldPath.setText(file.getPath());
-				}
-			}
-		});
+        JButton btnSearch = new JButton("...");
+        btnSearch.addActionListener((ActionEvent e) -> {
+            JFileChooser fc;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("resources/in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml");
+                }
 
-		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AddDocumentView.this.dispose();
-			}
-		});
+                @Override
+                public String getDescription() {
+                    return "XML file (*.xml) or directory";
+                }
+            });
+            int returnVal = fc.showOpenDialog(AddDocumentView.this);
 
-		JButton btnOk = new JButton("Ok");
-		btnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (!textFieldPath.getText().equals("")) {
-					DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
-							textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-							(String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
-							chckbxUsePosTagging.isSelected(), false);
-					task.execute();
-					AddDocumentView.this.dispose();
-				} else
-					JOptionPane.showMessageDialog(AddDocumentView.this,
-							"Please select an appropriate input file to be analysed!", "Error",
-							JOptionPane.WARNING_MESSAGE);
-			}
-		});
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                textFieldPath.setText(file.getPath());
+            }
+        });
 
-		chckbxUsePosTagging = new JCheckBox("Use POS tagging");
-		chckbxUsePosTagging.setSelected(true);
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener((ActionEvent e) -> {
+            AddDocumentView.this.dispose();
+        });
 
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane
-				.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
-								.createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
-										.createSequentialGroup().addGroup(
-												gl_contentPane.createParallelGroup(Alignment.LEADING)
-														.addComponent(lblPath).addComponent(
-																lblLsaVectorSpace)
-														.addComponent(lblLdaModel))
-										.addGap(13)
-										.addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-												.addComponent(comboBoxLDA, 0, 401, Short.MAX_VALUE)
-												.addGroup(gl_contentPane.createSequentialGroup()
-														.addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 354,
-																Short.MAX_VALUE)
-														.addPreferredGap(ComponentPlacement.RELATED)
-														.addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
-																GroupLayout.PREFERRED_SIZE))
-												.addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE))
-										.addGap(6))
-								.addGroup(
-										gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
-												.addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
-												.addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
-														GroupLayout.PREFERRED_SIZE)
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCancel)
-												.addContainerGap()))));
-		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_contentPane.createSequentialGroup()
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblPath).addComponent(btnSearch))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
-								.addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-								.addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblLdaModel))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(btnOk)
-								.addComponent(btnCancel).addComponent(chckbxUsePosTagging))
-						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		contentPane.setLayout(gl_contentPane);
-	}
+        JButton btnOk = new JButton("Ok");
+        btnOk.addActionListener((ActionEvent e) -> {
+            if (!textFieldPath.getText().equals("")) {
+                DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
+                        textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+                        (String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
+                        chckbxUsePosTagging.isSelected(), false, chckbxSer.isSelected());
+
+                task.execute();
+
+                AddDocumentView.this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(AddDocumentView.this,
+                        "Please select an appropriate input file to be analysed!", "Error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        chckbxUsePosTagging = new JCheckBox("Use POS tagging");
+        chckbxUsePosTagging.setSelected(true);
+
+        chckbxSer = new JCheckBox("Consider already pre-processed files");
+        chckbxSer.setSelected(true);
+
+        GroupLayout gl_contentPane = new GroupLayout(contentPane);
+        gl_contentPane
+                .setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
+                                .createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
+                                .createSequentialGroup().addGroup(
+                                        gl_contentPane.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(lblPath).addComponent(
+                                        lblLsaVectorSpace)
+                                        .addComponent(lblLdaModel))
+                                .addGap(13)
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(comboBoxLDA, 0, 401, Short.MAX_VALUE)
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addComponent(textFieldPath, GroupLayout.DEFAULT_SIZE, 354,
+                                                        Short.MAX_VALUE)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
+                                                        GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE))
+                                .addGap(6))
+                                .addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging).addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE).addComponent(chckbxSer)
+                                        .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
+                                        .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCancel)
+                                        .addContainerGap()))));
+        gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_contentPane.createSequentialGroup()
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblPath).addComponent(btnSearch))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLsaVectorSpace)
+                                .addComponent(comboBoxLSA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblLdaModel))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(btnOk)
+                                .addComponent(btnCancel).addComponent(chckbxUsePosTagging).addComponent(chckbxSer))
+                        .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        contentPane.setLayout(gl_contentPane);
+    }
 }

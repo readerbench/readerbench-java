@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
-
 
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
@@ -50,7 +50,7 @@ import webService.ReaderBenchServer;
  */
 public class TopicRankings {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final String processingPath;
     private final int noTopKeyWords;
@@ -129,9 +129,14 @@ public class TopicRankings {
             });
 
             for (File file : files) {
-                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-                documents.add(d);
-                d.exportDocument();
+                Document d = null;
+                try {
+                    d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                    documents.add(d);
+                    d.exportDocument();
+                } catch (IOException | ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         } else {
             File[] files = dir.listFiles((File pathname) -> {
@@ -140,9 +145,9 @@ public class TopicRankings {
             List<ISemanticModel> models = new ArrayList<>();
             models.add(lsa);
             models.add(lda);
-        
+
             for (File file : files) {
-                logger.info("Processing " + file.getName() + " file");
+                LOGGER.log(Level.INFO, "Processing {0} file", file.getName());
                 // Create file
 
                 Document d;
@@ -156,7 +161,7 @@ public class TopicRankings {
                     d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
-                    logger.severe("Runtime error while processing " + file.getName() + ": " + e.getMessage() + " ...");
+                    LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
                     Exceptions.printStackTrace(e);
                 }
             }
@@ -197,13 +202,13 @@ public class TopicRankings {
             }
 
         } catch (IOException ex) {
-            logger.severe("Runtime error while analyzing selected folder ...");
+            LOGGER.severe("Runtime error while analyzing selected folder ...");
             Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
-        
+
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);

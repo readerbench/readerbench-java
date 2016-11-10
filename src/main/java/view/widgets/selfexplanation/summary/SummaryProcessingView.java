@@ -42,14 +42,13 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import utils.localization.LocalizationUtils;
 import view.models.verbalization.VerbalisationManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.document.DocumentProcessingView;
 import data.document.Document;
 import data.document.Summary;
+import java.io.IOException;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
@@ -57,7 +56,7 @@ import services.semanticModels.SimilarityType;
 public class SummaryProcessingView extends JInternalFrame {
 
     private static final long serialVersionUID = -8772215709851320157L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final JDesktopPane desktopPane;
     private final JTable summariesTable;
@@ -86,9 +85,13 @@ public class SummaryProcessingView extends JInternalFrame {
         }
 
         public void addSingleEssay(String pathToIndividualFile) {
-            Summary e;
+            Summary e = null;
             if (isSerialized) {
-                e = (Summary) Summary.loadSerializedDocument(pathToIndividualFile);
+                try {
+                    e = (Summary) Summary.loadSerializedDocument(pathToIndividualFile);
+                } catch (IOException | ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             } else {
                 e = Summary.loadSummary(pathToIndividualFile, referredDoc, usePOSTagging);
                 if (e != null) {
