@@ -32,12 +32,14 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.time.DateUtils;
+import org.openide.util.Exceptions;
 import static runtime.cscl.TimeStatistics.getDateDiff;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
@@ -65,7 +67,9 @@ public class SimilarityAnalysis {
     private final LDA lda;
 
     private final Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Integer>>>> totalSimDetected;
+    private final Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Double>>>> percentageSimDetected;
     private final Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Integer>>>> totalSimInBlock;
+    private final Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Double>>>> percentageSimInBlock;
     private Map<String, Integer> chatContributions;
     private Map<String, Integer> chatExplicitLinks;
 
@@ -98,7 +102,9 @@ public class SimilarityAnalysis {
         this.lda = lda;
 
         totalSimDetected = new HashMap<>();
+        percentageSimDetected = new HashMap<>();
         totalSimInBlock = new HashMap<>();
+        percentageSimInBlock = new HashMap<>();
         chatContributions = new HashMap<>();
         chatExplicitLinks = new HashMap<>();
     }
@@ -206,13 +212,19 @@ public class SimilarityAnalysis {
 
         for (Integer analysisType : analysisTypes) {
             totalSimDetected.put(analysisType, new HashMap<>());
+            percentageSimDetected.put(analysisType, new HashMap<>());
             totalSimInBlock.put(analysisType, new HashMap<>());
+            percentageSimInBlock.put(analysisType, new HashMap<>());
             for (SimilarityFormula formula : formulas) {
                 totalSimDetected.get(analysisType).put(formula, new HashMap<>());
+                percentageSimDetected.get(analysisType).put(formula, new HashMap<>());
                 totalSimInBlock.get(analysisType).put(formula, new HashMap<>());
+                percentageSimInBlock.get(analysisType).put(formula, new HashMap<>());
                 for (SimilarityType method : methods) {
                     totalSimDetected.get(analysisType).get(formula).put(method, new HashMap<>());
+                    percentageSimDetected.get(analysisType).get(formula).put(method, new HashMap<>());
                     totalSimInBlock.get(analysisType).get(formula).put(method, new HashMap<>());
+                    percentageSimInBlock.get(analysisType).get(formula).put(method, new HashMap<>());
                 }
             }
         }
@@ -220,11 +232,15 @@ public class SimilarityAnalysis {
             for (SimilarityType method : methods) {
                 for (Integer windowSize : windowSizes) {
                     totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, 0);
+                    percentageSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, 0.0);
                     totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, 0);
+                    percentageSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, 0.0);
                 }
                 for (Integer timeFrame : timeFrames) {
                     totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, 0);
+                    percentageSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, 0.0);
                     totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, 0);
+                    percentageSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, 0.0);
                 }
             }
         }
@@ -241,7 +257,7 @@ public class SimilarityAnalysis {
                     e.printStackTrace();
                 }
             }
-            
+
             Map<SimilarityType, File> filesGeneral = new HashMap<>();
             for (SimilarityType method : methods) {
                 filesGeneral.put(method, new File(path + "/similarity_stats_" + method.getAcronym() + ".csv"));
@@ -257,7 +273,13 @@ public class SimilarityAnalysis {
                 Integer explicitLinks = 0;
                 String filePathString = filePath.toString();
                 String fileExtension = FilenameUtils.getExtension(filePathString);
+                chatExplicitLinks.put(filePath.getFileName().toString(), 0);
                 if (fileExtension.compareTo("xml") == 0) {
+                    Map<SimilarityType, StringBuilder> hmRowBuilderGeneral = new HashMap<>();
+                    for (SimilarityType method : methods) {
+                        hmRowBuilderGeneral.put(method, new StringBuilder());
+                    }
+
                     Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Integer>>>> simDetected = new HashMap<>();
                     Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Map<Integer, Integer>>>> simInBlock = new HashMap<>();
                     for (Integer analysisType : analysisTypes) {
@@ -309,11 +331,7 @@ public class SimilarityAnalysis {
                                         .append(firstUtt.getIndex()).append(CSCLConstants.CSV_DELIM)
                                         .append(firstUtt.getParticipant().getName()).append(CSCLConstants.CSV_DELIM);
                             }
-                            
-                            Map<SimilarityType, StringBuilder> hmRowBuilderGeneral = new HashMap<>();
-                            for (SimilarityType method : methods) {
-                                hmRowBuilderGeneral.put(method, new StringBuilder());
-                            }
+
                             int kDistance = 0;
                             int kTime = 0;
 
@@ -602,7 +620,9 @@ public class SimilarityAnalysis {
                                             hmRowBuilder.get(method).append(simDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
                                             hmRowBuilder.get(method).append(simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
                                             totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) + simDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize));
+                                            percentageSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, (explicitLinks > 0) ? (totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) * 1.0 / explicitLinks) : 0);
                                             totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) + simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize));
+                                            percentageSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, (explicitLinks > 0) ? (totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) * 1.0 / explicitLinks) : 0);
                                         }
                                     }
                                     for (Integer timeFrame : timeFrames) {
@@ -613,54 +633,61 @@ public class SimilarityAnalysis {
                                             hmRowBuilder.get(method).append(simDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
                                             hmRowBuilder.get(method).append(simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
                                             totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) + simDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame));
+                                            percentageSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, (explicitLinks > 0) ? (totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) * 1.0 / explicitLinks) : 0);
                                             totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) + simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame));
+                                            percentageSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, (explicitLinks > 0) ? (totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) * 1.0 / explicitLinks) : 0);
                                         }
                                     }
                                     hmRowBuilder.get(method).append("\n");
                                 }
                             }
-                            
-                            for (SimilarityType method : methods) {
-                                hmRowBuilderGeneral.get(method).append(filePath.getFileName()).append(CSCLConstants.CSV_DELIM);
-                                hmRowBuilderGeneral.get(method).append(c.getBlocks().size()).append(CSCLConstants.CSV_DELIM);
-                                chatContributions.put(filePath.getFileName().toString(), c.getBlocks().size());
-                                hmRowBuilderGeneral.get(method).append(explicitLinks).append(CSCLConstants.CSV_DELIM);
-                                chatContributions.put(filePath.getFileName().toString(), explicitLinks);
-                                for (Integer windowSize : windowSizes) {
-                                    for (SimilarityFormula formula : formulas) {
-                                        hmRowBuilderGeneral.get(method).append(totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
-                                        hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
-                                    }
-                                }
-                                for (Integer windowSize : windowSizes) {
-                                    for (SimilarityFormula formula : formulas) {
-                                        hmRowBuilderGeneral.get(method).append(totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
-                                        hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
-                                    }
-                                }
-                                for (Integer timeFrame : timeFrames) {
-                                    for (SimilarityFormula formula : formulas) {
-                                        hmRowBuilderGeneral.get(method).append(totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
-                                        hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
-                                    }
-                                }
-                                for (Integer timeFrame : timeFrames) {
-                                    for (SimilarityFormula formula : formulas) {
-                                        hmRowBuilderGeneral.get(method).append(totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
-                                        hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
-                                    }
-                                }
-                                hmRowBuilderGeneral.get(method).append("\n");
-                            }
+
                             try {
                                 for (SimilarityType method : methods) {
                                     FileUtils.writeStringToFile(files.get(method), hmRowBuilder.get(method).toString(), "UTF-8", true);
-                                    FileUtils.writeStringToFile(filesGeneral.get(method), hmRowBuilderGeneral.get(method).toString(), "UTF-8", true);
                                 }
                             } catch (IOException e) {
                                 LOGGER.log(Level.INFO, "Exception: {0}", e.getMessage());
                                 e.printStackTrace();
                             }
+                        }
+                    }
+
+                    chatContributions.put(filePath.getFileName().toString(), c.getNoBlocks());
+                    chatExplicitLinks.put(filePath.getFileName().toString(), explicitLinks);
+                    for (SimilarityType method : methods) {
+                        hmRowBuilderGeneral.get(method).append(filePath.getFileName()).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(c.getNoBlocks()).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(explicitLinks).append(CSCLConstants.CSV_DELIM);
+                        for (Integer windowSize : windowSizes) {
+                            for (SimilarityFormula formula : formulas) {
+                                hmRowBuilderGeneral.get(method).append(simDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
+                                hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? simDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) * 1.0 / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
+                            }
+                        }
+                        for (Integer windowSize : windowSizes) {
+                            for (SimilarityFormula formula : formulas) {
+                                hmRowBuilderGeneral.get(method).append(simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
+                                hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) * 1.0 / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
+                            }
+                        }
+                        for (Integer timeFrame : timeFrames) {
+                            for (SimilarityFormula formula : formulas) {
+                                hmRowBuilderGeneral.get(method).append(simDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
+                                hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? simDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) * 1.0 / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
+                            }
+                        }
+                        for (Integer timeFrame : timeFrames) {
+                            for (SimilarityFormula formula : formulas) {
+                                hmRowBuilderGeneral.get(method).append(simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
+                                hmRowBuilderGeneral.get(method).append(explicitLinks > 0 ? simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) * 1.0 / explicitLinks : 0).append(CSCLConstants.CSV_DELIM);
+                            }
+                        }
+                        hmRowBuilderGeneral.get(method).append("\n");
+                        try {
+                            FileUtils.writeStringToFile(filesGeneral.get(method), hmRowBuilderGeneral.get(method).toString(), "UTF-8", true);
+                        } catch (IOException ex) {
+                            Exceptions.printStackTrace(ex);
                         }
                     }
                 }
@@ -706,14 +733,14 @@ public class SimilarityAnalysis {
                 hmRowBuilder.get(method).append('\n');
                 FileUtils.writeStringToFile(files.get(method), hmRowBuilder.get(method).toString(), "UTF-8", true);
             }
-            
+
             Map<SimilarityType, StringBuilder> hmRowBuilderGeneral = new HashMap<>();
-            
+
             List<Integer> totalContributions = new ArrayList<>(chatContributions.values());
             int totalContribs = totalContributions.stream().mapToInt(Integer::intValue).sum();
-            List<Integer> totalEplicitLinks = new ArrayList<>(chatExplicitLinks.values());            
+            List<Integer> totalEplicitLinks = new ArrayList<>(chatExplicitLinks.values());
             int totalExplicit = totalEplicitLinks.stream().mapToInt(Integer::intValue).sum();
-            
+
             for (SimilarityType method : methods) {
                 hmRowBuilderGeneral.put(method, new StringBuilder());
                 hmRowBuilderGeneral.get(method).append("Total").append(CSCLConstants.CSV_DELIM);
@@ -722,25 +749,25 @@ public class SimilarityAnalysis {
                 for (Integer windowSize : windowSizes) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(totalExplicit > 0 ? totalSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) / totalExplicit : 0).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(percentageSimDetected.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer windowSize : windowSizes) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(totalExplicit > 0 ? totalSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) / totalExplicit : 0).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(percentageSimInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize)).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(totalExplicit > 0 ? totalSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) / totalExplicit : 0).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(percentageSimDetected.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(totalExplicit > 0 ? totalSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) / totalExplicit : 0).append(CSCLConstants.CSV_DELIM);
+                        hmRowBuilderGeneral.get(method).append(percentageSimInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame)).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 hmRowBuilderGeneral.get(method).append('\n');
@@ -750,77 +777,61 @@ public class SimilarityAnalysis {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 hmRowBuilderGeneral.get(method).append('\n');
-                
+
                 hmRowBuilderGeneral.get(method).append("stdev").append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM);
                 for (Integer windowSize : windowSizes) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 hmRowBuilderGeneral.get(method).append('\n');
-                
+
                 hmRowBuilderGeneral.get(method).append("max").append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM);
                 for (Integer windowSize : windowSizes) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 hmRowBuilderGeneral.get(method).append('\n');
-                
+
                 hmRowBuilderGeneral.get(method).append("min").append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM).append(CSCLConstants.CSV_DELIM);
                 for (Integer windowSize : windowSizes) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 for (Integer timeFrame : timeFrames) {
                     for (SimilarityFormula formula : formulas) {
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                         hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
-                        hmRowBuilderGeneral.get(method).append(CSCLConstants.CSV_DELIM);
                     }
                 }
                 hmRowBuilderGeneral.get(method).append('\n');
-                FileUtils.writeStringToFile(files.get(method), hmRowBuilderGeneral.get(method).toString(), "UTF-8", true);
+                FileUtils.writeStringToFile(filesGeneral.get(method), hmRowBuilderGeneral.get(method).toString(), "UTF-8", true);
             }
         } catch (IOException e) {
             LOGGER.log(Level.INFO, "Exception: {0}", e.getMessage());
