@@ -14,12 +14,24 @@ public class TimeStats {
     private int explicitLinks;
     private int sameSpeaker;
     private int differentSpeaker;
+    private int explicitLinksPercentage;
+    private int sameSpeakerPercentage;
+    private int differentSpeakerPercentage;
 
-    public TimeStats(int explicitLinks, int sameSpeaker, int differentSpeaker) {
+    public TimeStats(int explicitLinks, int sameSpeaker, int differentSpeaker,
+            int explicitLinksPercentage, int sameSpeakerPercentage, 
+            int differentSpeakerPercentage) {
         super();
         this.explicitLinks = explicitLinks;
         this.sameSpeaker = sameSpeaker;
         this.differentSpeaker = differentSpeaker;
+        this.explicitLinksPercentage = explicitLinksPercentage;
+        this.sameSpeakerPercentage = sameSpeakerPercentage;
+        this.differentSpeakerPercentage = differentSpeakerPercentage;
+    }
+    
+    public TimeStats() {
+        this(0, 0, 0, 0, 0, 0);
     }
 
     public int getExplicitLinks() {
@@ -46,4 +58,28 @@ public class TimeStats {
         this.differentSpeaker = differentSpeaker;
     }
 
+    public int getExplicitLinksPercentage() {
+        return explicitLinksPercentage;
+    }
+
+    public void setExplicitLinksPercentage(int explicitLinksPercentage) {
+        this.explicitLinksPercentage = explicitLinksPercentage;
+    }
+
+    public int getSameSpeakerPercentage() {
+        return sameSpeakerPercentage;
+    }
+
+    public void setSameSpeakerPercentage(int sameSpeakerPercentage) {
+        this.sameSpeakerPercentage = sameSpeakerPercentage;
+    }
+
+    public int getDifferentSpeakerPercentage() {
+        return differentSpeakerPercentage;
+    }
+
+    public void setDifferentSpeakerPercentage(int differentSpeakerPercentage) {
+        this.differentSpeakerPercentage = differentSpeakerPercentage;
+    }
+    
 }
