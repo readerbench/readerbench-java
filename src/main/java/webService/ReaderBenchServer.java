@@ -743,9 +743,13 @@ public class ReaderBenchServer {
 
             HashMap<Object, Object> hm = new HashMap<>();
             HashMap<String, String> hmFrom = new HashMap<>();
-            hmFrom.put("name", name);
-            hmFrom.put("email", email);
+            //hmFrom.put("name", name);
+            hmFrom.put("email", "contact@readerbench.com");
             hm.put("from", hmFrom);
+            HashMap<String, String> hmReplyTo = new HashMap<>();
+            hmReplyTo.put("name", name);
+            hmReplyTo.put("email", email);
+            hm.put("reply-to", hmReplyTo);
 
             HashMap<String, String> hmSimpleReceiver = new HashMap<>();
             hmSimpleReceiver.put("email", "contact@readerbench.com");
@@ -766,7 +770,7 @@ public class ReaderBenchServer {
             queryResult.setMailgunResponse(jsonObject);
 
             String result = queryResult.convertToJson();
-            LOGGER.info("queryResult" + result);
+            LOGGER.log(Level.INFO, "queryResult{0}", result);
 
             return result;
         });

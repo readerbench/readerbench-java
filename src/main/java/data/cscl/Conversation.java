@@ -227,7 +227,7 @@ public class Conversation extends AbstractDocument {
                                 double nr;
                                 try {
                                     nr = Double.valueOf(el.getAttribute("value"));
-                                } catch (Exception e) {
+                                } catch (NumberFormatException e) {
                                     nr = 0;
                                 }
                                 for (Participant p : c.getParticipants()) {
@@ -268,7 +268,7 @@ public class Conversation extends AbstractDocument {
                                             collabEv[k]++;
                                         }
                                     }
-                                } catch (Exception e) {
+                                } catch (NumberFormatException e) {
                                     logger.info("Incorrect annotated collaboration zone format");
                                 }
                             }
