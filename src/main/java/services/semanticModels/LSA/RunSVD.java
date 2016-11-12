@@ -15,37 +15,49 @@
  */
 package services.semanticModels.LSA;
 
+import data.Lang;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import org.apache.mahout.math.DiagonalMatrix;
 
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.apache.mahout.math.decompositions.SSVD;
 
 import scala.Tuple3;
+import services.commons.ObjectManipulation;
 
 public class RunSVD {
 
     public static void runSSVDOnSparseVectors(String inputPath, String outputPath, int rank, int oversampling, int powerIterations)
             throws IOException {
-        new File(outputPath).mkdirs();
         Matrix m = MatrixWritable.readMatrix(new DataInputStream(new FileInputStream(inputPath)));
 
+        //perform SVD
         Tuple3<Matrix, Matrix, Vector> result = SSVD.ssvd(m, rank, oversampling, powerIterations);
-        MatrixWritable.writeMatrix(
-                new DataOutputStream(new FileOutputStream(outputPath + "/U.ser")),
-                result._1());
-        MatrixWritable.writeMatrix(
-                new DataOutputStream(new FileOutputStream(outputPath + "/Vt.ser")),
-                result._2());
-        VectorWritable.writeVector(
-                new DataOutputStream(new FileOutputStream(outputPath + "/S.ser")),
-                result._3());
+        Vector halfsigma = result._3();
+
+        for (int i = 0; i < halfsigma.size(); i++) {
+            halfsigma.set(i, Math.sqrt(halfsigma.get(i)));
+        }
+
+        //compute U * S^1/2
+        Matrix U = result._1().times(new DiagonalMatrix(result._3()));
+
+        double[][] u = new double[U.numRows()][rank];
+        for (int i = 0; i < U.numRows(); i++) {
+            for (int j = 0; j < Math.min(U.numCols(), rank); j++) {
+                u[i][j] = U.get(i, j);
+            }
+        }
+
+        //save U
+        ObjectManipulation.saveObject(u, outputPath + "/U.ser");
+
+        //remove input matrix
+        new File(inputPath).delete();
     }
 }

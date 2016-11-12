@@ -66,7 +66,6 @@ public class SemanticModelsTraining extends JFrame {
     private JTextField textFieldLDANoIterations;
     private JTextField textFieldLDANoThreads;
     private JTextField textFieldMinWords;
-    private JCheckBox chckbxLSAUseHalfSigma;
     private JComboBox<String> comboBoxFormat;
     private JCheckBox chckbxUsePosTagging;
     private JTextField textFieldLSAFile;
@@ -152,16 +151,16 @@ public class SemanticModelsTraining extends JFrame {
 
             try {
                 // create initial matrix
-                LOGGER.info("Starting to create term-doc matrix");
+                LOGGER.info("Starting to create term-doc matrix ...");
                 CreateInputMatrix lsaTraining = new CreateInputMatrix();
                 lsaTraining.parseCorpus(input.getParent(), input.getName(), TERM_DOC_MATRIX_NAME, lang);
 
-                LOGGER.info("Finished building term-doc matrix");
+                LOGGER.info("Finished building term-doc matrix ...");
                 // perform SVD
                 RunSVD.runSSVDOnSparseVectors(input.getParent() + "/" + TERM_DOC_MATRIX_NAME,
-                        input.getParent(), k, Math.min((int) k / 2, 150), noPowerIterations);
+                        input.getParent(), k, k, noPowerIterations);
 
-                LOGGER.info("Finished performing SVD decomposition");
+                LOGGER.info("Finished performing SVD decomposition ...");
             } catch (Exception exc) {
                 LOGGER.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
             }
@@ -256,7 +255,7 @@ public class SemanticModelsTraining extends JFrame {
 
         JButton btnBrowse = new JButton("...");
         btnBrowse.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = null;
+            JFileChooser fc;
             fc = new JFileChooser("resources/config");
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(SemanticModelsTraining.this);
@@ -423,9 +422,6 @@ public class SemanticModelsTraining extends JFrame {
         textFieldLSAPowerIterations.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSAPowerIterations.setColumns(10);
 
-        chckbxLSAUseHalfSigma = new JCheckBox(LocalizationUtils.getTranslation("Use half sigma for final comutations"));
-        chckbxLSAUseHalfSigma.setSelected(true);
-
         btnLSATrain = new JButton("Train LSA model");
         btnLSATrain.addActionListener((ActionEvent e) -> {
             int k;
@@ -511,8 +507,7 @@ public class SemanticModelsTraining extends JFrame {
                                                                                         GroupLayout.PREFERRED_SIZE,
                                                                                         91,
                                                                                         GroupLayout.PREFERRED_SIZE))
-                                                                        .addComponent(btnLSATrain)))))
-                                        .addComponent(chckbxLSAUseHalfSigma))
+                                                                        .addComponent(btnLSATrain))))))
                                 .addContainerGap()));
         gl_panelLSATraining
                 .setVerticalGroup(
@@ -538,8 +533,7 @@ public class SemanticModelsTraining extends JFrame {
                                 .addGroup(gl_panelLSATraining.createParallelGroup(Alignment.TRAILING).addGroup(
                                         gl_panelLSATraining.createSequentialGroup().addGroup(gl_panelLSATraining
                                                 .createParallelGroup(Alignment.BASELINE))
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(chckbxLSAUseHalfSigma))
+                                        .addPreferredGap(ComponentPlacement.RELATED))
                                         .addComponent(btnLSATrain))
                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         panelLSATraining.setLayout(gl_panelLSATraining);

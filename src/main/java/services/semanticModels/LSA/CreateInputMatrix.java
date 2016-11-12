@@ -42,6 +42,7 @@ import org.apache.mahout.math.Vector.Element;
 
 import data.Lang;
 import data.Word;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import services.semanticModels.PreProcessing;
 
@@ -63,7 +64,7 @@ public class CreateInputMatrix extends LSA {
         FileInputStream inputFile = new FileInputStream(path + "/" + inputFileName);
         InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
         BufferedReader in = new BufferedReader(ir);
-        String line = "";
+        String line;
 
         Map<Word, Double> tempWords = new TreeMap<>();
 
@@ -116,7 +117,7 @@ public class CreateInputMatrix extends LSA {
         int crtDoc = 0;
 
         // double[][] termDoc = new double[noWords][];
-        Map<Integer, Vector> termDocVectors = new TreeMap<Integer, Vector>();
+        Map<Integer, Vector> termDocVectors = new TreeMap<>();
         // prepare individual word vectors
         for (int i = 0; i < noWords; i++) {
             // termDoc[i] = new double[noDocuments];
@@ -128,7 +129,7 @@ public class CreateInputMatrix extends LSA {
             if (line.length() > LOWER_BOUND) {
                 StringTokenizer st = new StringTokenizer(line, " .");
 
-                Map<Word, Integer> wordOccurrences = new TreeMap<Word, Integer>();
+                Map<Word, Integer> wordOccurrences = new TreeMap<>();
                 while (st.hasMoreTokens()) {
                     Word w = Word.getWordFromConcept(st.nextToken(), lang);
                     // only for relevant words and associations
@@ -176,12 +177,12 @@ public class CreateInputMatrix extends LSA {
         Matrix m = new SparseMatrix(noWords, noDocuments, termDocVectors);
         MatrixWritable.writeMatrix(new DataOutputStream(new FileOutputStream(path + "/" + outputFileName)), m);
 
-        LOGGER.info("Vector space dimensions:\n" + noWords + " words with " + noDocuments + " documents");
+        LOGGER.log(Level.INFO, "Vector space dimensions:\n{0} words with {1} documents", new Object[]{noWords, noDocuments});
 
         saveIdf(path);
         saveWordList(path);
 
-        LOGGER.info("Finished all computations");
+        LOGGER.info("Finished all computations ...");
     }
 
     private void saveWordList(String path) throws FileNotFoundException, IOException {
