@@ -47,7 +47,6 @@ import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
-import services.semanticModels.LSA.ProcessSVDOutput;
 import services.semanticModels.LSA.RunSVD;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
@@ -55,10 +54,9 @@ import view.widgets.ReaderBenchView;
 public class SemanticModelsTraining extends JFrame {
 
     private static final long serialVersionUID = 4920477447183036103L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static final String TERM_DOC_MATRIX_NAME = "matrix.svd";
-    private static final String SVD_FOLDER_NAME = "svd_out";
 
     private JPanel contentPane;
     private JTextField textFieldInput;
@@ -73,7 +71,6 @@ public class SemanticModelsTraining extends JFrame {
     private JCheckBox chckbxUsePosTagging;
     private JTextField textFieldLSAFile;
     private JTextField textFieldLSARank;
-    private JTextField textFieldLSAReduceTasks;
     private JTextField textFieldLSAPowerIterations;
     private JButton btnPreProcess;
     private JButton btnLSATrain;
@@ -81,12 +78,12 @@ public class SemanticModelsTraining extends JFrame {
 
     private class PreProcessingTask extends SwingWorker<Void, Void> {
 
-        private String input;
-        private String output;
-        private Lang lang;
-        private int minNoWords;
-        private boolean usePosTagging;
-        private int selectedCase;
+        private final String input;
+        private final String output;
+        private final Lang lang;
+        private final int minNoWords;
+        private final boolean usePosTagging;
+        private final int selectedCase;
 
         public PreProcessingTask(String input, String output, Lang lang, int minNoWords, boolean usePosTagging,
                 int selectedCase) {
@@ -118,7 +115,7 @@ public class SemanticModelsTraining extends JFrame {
                         preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
                 }
             } catch (Exception exc) {
-                logger.log(Level.SEVERE, "Error processing input file " + exc.getMessage(), exc);
+                LOGGER.log(Level.SEVERE, "Error processing input file " + exc.getMessage(), exc);
             }
             return null;
         }
@@ -134,21 +131,20 @@ public class SemanticModelsTraining extends JFrame {
 
     private class LSATrainingTask extends SwingWorker<Void, Void> {
 
-        private File input;
-        private Lang lang;
-        private int k;
-        private int noReduceTasks;
-        private int noPowerIterations;
+        private final File input;
+        private final Lang lang;
+        private final int k;
+        private final int noPowerIterations;
 
-        public LSATrainingTask(File input, Lang lang, int k, int noReduceTasks, int noPowerIterations) {
+        public LSATrainingTask(File input, Lang lang, int k, int noPowerIterations) {
             super();
             this.input = input;
             this.lang = lang;
             this.k = k;
-            this.noReduceTasks = noReduceTasks;
             this.noPowerIterations = noPowerIterations;
         }
 
+        @Override
         public Void doInBackground() {
             btnPreProcess.setEnabled(false);
             btnLSATrain.setEnabled(false);
@@ -156,27 +152,18 @@ public class SemanticModelsTraining extends JFrame {
 
             try {
                 // create initial matrix
-                logger.info("Starting to create term-doc matrix");
+                LOGGER.info("Starting to create term-doc matrix");
                 CreateInputMatrix lsaTraining = new CreateInputMatrix();
                 lsaTraining.parseCorpus(input.getParent(), input.getName(), TERM_DOC_MATRIX_NAME, lang);
 
-                logger.info("Finished building term-doc matrix");
+                LOGGER.info("Finished building term-doc matrix");
                 // perform SVD
                 RunSVD.runSSVDOnSparseVectors(input.getParent() + "/" + TERM_DOC_MATRIX_NAME,
-                        input.getParent() + "/" + SVD_FOLDER_NAME, k, Math.min((int) k / 2, 150),
-                        Math.min(200000,
-                                (int) (3 * k * 0.01
-                                * Math.max(lsaTraining.getNoDocuments(), lsaTraining.getNoWords()))),
-                        noReduceTasks, noPowerIterations, chckbxLSAUseHalfSigma.isSelected());
+                        input.getParent(), k, Math.min((int) k / 2, 150), noPowerIterations);
 
-                logger.info("Finished performing SVD decomposition");
-                // post-process
-                ProcessSVDOutput processing = new ProcessSVDOutput();
-                processing.performPostProcessing(input.getParent(), lang, chckbxLSAUseHalfSigma.isSelected());
-                logger.info("Finished building the LSA model");
+                LOGGER.info("Finished performing SVD decomposition");
             } catch (Exception exc) {
-                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
-                exc.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
             }
             return null;
         }
@@ -192,11 +179,11 @@ public class SemanticModelsTraining extends JFrame {
 
     private class LDATrainingTask extends SwingWorker<Void, Void> {
 
-        private String input;
-        private Lang lang;
-        private int noTopics;
-        private int noThreads;
-        private int noIterations;
+        private final String input;
+        private final Lang lang;
+        private final int noTopics;
+        private final int noThreads;
+        private final int noIterations;
 
         public LDATrainingTask(String input, Lang lang, int noTopics, int noThreads, int noIterations) {
             super();
@@ -217,7 +204,7 @@ public class SemanticModelsTraining extends JFrame {
                 LDA lda = new LDA(lang);
                 lda.processCorpus(input, noTopics, noThreads, noIterations);
             } catch (Exception exc) {
-                logger.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
+                LOGGER.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
                 Exceptions.printStackTrace(exc);
             }
             return null;
@@ -424,17 +411,10 @@ public class SemanticModelsTraining extends JFrame {
 
         JLabel lblLSARank = new JLabel(LocalizationUtils.getTranslation("LSA rank") + ":");
 
-        JLabel lblLSAReduceTasks = new JLabel(LocalizationUtils.getTranslation("No reduce tasks") + ":");
-
         textFieldLSARank = new JTextField();
         textFieldLSARank.setText("300");
         textFieldLSARank.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSARank.setColumns(10);
-
-        textFieldLSAReduceTasks = new JTextField();
-        textFieldLSAReduceTasks.setText("1");
-        textFieldLSAReduceTasks.setHorizontalAlignment(SwingConstants.RIGHT);
-        textFieldLSAReduceTasks.setColumns(10);
 
         JLabel lblLSAPowerInterations = new JLabel(LocalizationUtils.getTranslation("No power interations") + ":");
 
@@ -450,7 +430,6 @@ public class SemanticModelsTraining extends JFrame {
         btnLSATrain.addActionListener((ActionEvent e) -> {
             int k;
             int noPowerIterations;
-            int noReduceTasks;
             Lang lang;
             if (textFieldLSAFile.getText().equals("") || !textFieldLSAFile.getText().endsWith(".txt")
                     || !new File(textFieldLSAFile.getText()).exists()) {
@@ -466,18 +445,13 @@ public class SemanticModelsTraining extends JFrame {
                 noPowerIterations = 1;
             }
             try {
-                noReduceTasks = Integer.parseInt(textFieldLSAReduceTasks.getText());
-            } catch (Exception exc) {
-                noReduceTasks = 1;
-            }
-            try {
                 k = Integer.parseInt(textFieldLSARank.getText());
             } catch (Exception exc) {
                 k = 300;
             }
             lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
-            LSATrainingTask task = new LSATrainingTask(input, lang, k, noReduceTasks, noPowerIterations);
+            LSATrainingTask task = new LSATrainingTask(input, lang, k, noPowerIterations);
             task.execute();
         });
 
@@ -508,9 +482,7 @@ public class SemanticModelsTraining extends JFrame {
                                                 .createSequentialGroup()
                                                 .addGroup(gl_panelLSATraining
                                                         .createParallelGroup(Alignment.LEADING)
-                                                        .addComponent(
-                                                                lblLSARank)
-                                                        .addComponent(lblLSAReduceTasks))
+                                                        .addComponent(lblLSARank))
                                                 .addGap(29)
                                                 .addGroup(gl_panelLSATraining
                                                         .createParallelGroup(Alignment.LEADING)
@@ -519,10 +491,6 @@ public class SemanticModelsTraining extends JFrame {
                                                                 .addGroup(gl_panelLSATraining
                                                                         .createParallelGroup(
                                                                                 Alignment.LEADING)
-                                                                        .addComponent(
-                                                                                textFieldLSAReduceTasks,
-                                                                                GroupLayout.DEFAULT_SIZE,
-                                                                                66, Short.MAX_VALUE)
                                                                         .addComponent(textFieldLSARank,
                                                                                 Alignment.TRAILING,
                                                                                 GroupLayout.DEFAULT_SIZE,
@@ -569,11 +537,7 @@ public class SemanticModelsTraining extends JFrame {
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(gl_panelLSATraining.createParallelGroup(Alignment.TRAILING).addGroup(
                                         gl_panelLSATraining.createSequentialGroup().addGroup(gl_panelLSATraining
-                                                .createParallelGroup(Alignment.BASELINE)
-                                                .addComponent(textFieldLSAReduceTasks,
-                                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                                        GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(lblLSAReduceTasks))
+                                                .createParallelGroup(Alignment.BASELINE))
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addComponent(chckbxLSAUseHalfSigma))
                                         .addComponent(btnLSATrain))
@@ -726,8 +690,4 @@ public class SemanticModelsTraining extends JFrame {
                                 .addContainerGap(40, Short.MAX_VALUE)));
         panelLDATraining.setLayout(gl_panelLDATraining);
     }
-
-    /**
-     * Launch the application.
-     */
 }

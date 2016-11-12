@@ -42,18 +42,14 @@ import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.topics.ParallelTopicModel;
-import cc.mallet.topics.TopicInferencer;
 import cc.mallet.types.IDSorter;
-import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
 import data.AnalysisElement;
 import data.Word;
 import data.Lang;
-import data.document.Document;
 import edu.stanford.nlp.util.Pair;
 import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.EnumSet;
 import java.util.function.BiFunction;
@@ -61,7 +57,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.lang3.StringUtils;
 import org.openide.util.Exceptions;
 import services.commons.ObjectManipulation;
 import services.commons.VectorAlgebra;
@@ -71,7 +66,7 @@ import services.semanticModels.SimilarityType;
 public class LDA implements ISemanticModel, Serializable {
 
     private static final long serialVersionUID = 5981303412937874248L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     private static int MIN_NO_WORDS_PER_DOCUMENT = 5;
 
     private static List<LDA> LOADED_LDA_MODELS = new ArrayList<>();
@@ -79,7 +74,6 @@ public class LDA implements ISemanticModel, Serializable {
 
     private Lang language;
     private String path;
-    //private ParallelTopicModel model;
     private Pipe pipe;
     private InstanceList instances;
     private Map<Word, double[]> wordProbDistributions;
@@ -91,21 +85,10 @@ public class LDA implements ISemanticModel, Serializable {
         pipe = buildPipe();
     }
 
-//    private LDA(String path, Lang language) {
-//        this(language);
-//        this.path = path;
-//        logger.log(Level.INFO, "Loading LDA model {0} ...", path);
-//        try {
-//            ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject(path + "/LDA.model");
-//            wordProbDistributions = buildWordVectors(model, language);
-//        } catch (ClassNotFoundException | IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
-//    }
     private LDA(String path, Lang language) {
         this(language);
         this.path = path;
-        logger.log(Level.INFO, "Loading LDA model {0} ...", path);
+        LOGGER.log(Level.INFO, "Loading LDA model {0} ...", path);
         try {
             wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/LDA-small.model");
             numTopics = wordProbDistributions.entrySet().stream()
@@ -117,7 +100,6 @@ public class LDA implements ISemanticModel, Serializable {
                             .sorted((p1, p2) -> p2.second.compareTo(p1.second))
                             .collect(Collectors.toList()))
                     .toArray(size -> new List[size]);
-            //buildWordVectors();
         } catch (ClassNotFoundException | IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -218,7 +200,7 @@ public class LDA implements ISemanticModel, Serializable {
      * @return
      */
     public int createHDPModel(String path, int initialTopics, int numIterations) {
-        logger.log(Level.INFO, "Running HDP on {0} with {1} initial topics and {2} iterations", new Object[]{path, initialTopics, numIterations});
+        LOGGER.log(Level.INFO, "Running HDP on {0} with {1} initial topics and {2} iterations", new Object[]{path, initialTopics, numIterations});
         readDirectory(new File(path));
 
         HDP hdp = new HDP(path, 1.0, 0.01, 1D, initialTopics);
@@ -276,7 +258,7 @@ public class LDA implements ISemanticModel, Serializable {
 
         // save the trained model
         //ObjectManipulation.saveObject(model, path + "/LDA.model");
-        ObjectManipulation.saveObject(new Object[]{buildWordVectors(model, language)}, path + "/LDA-small.model");
+        ObjectManipulation.saveObject(buildWordVectors(model, language), path + "/LDA-small.model");
 
         LDA lda = new LDA(path, language);
         lda.printTopics(100);
@@ -400,7 +382,7 @@ public class LDA implements ISemanticModel, Serializable {
     }
 
     public void printTopics(int noWordsPerTopic) {
-        logger.info("Starting to write topics for trained model");
+        LOGGER.info("Starting to write topics for trained model");
         // Get an array of sorted sets of word ID/count pairs
         try (BufferedWriter out = new BufferedWriter(
                 new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
@@ -417,7 +399,7 @@ public class LDA implements ISemanticModel, Serializable {
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
-        logger.info("Successfully finished writing topics");
+        LOGGER.info("Successfully finished writing topics");
     }
 
     public String printTopic(int topic, int noWordsPerTopic) {
@@ -546,37 +528,12 @@ public class LDA implements ISemanticModel, Serializable {
                     ObjectManipulation.saveObject(lda.wordProbDistributions, lda.path + "/LDA-small.model");
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Exceptions.printStackTrace(ex);
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
         convertModels();
-//        List<ISemanticModel> models = new ArrayList<>();
-//        LDA lda = loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-//        models.add(lda);
-//        try (PrintWriter out = new PrintWriter("lda-comp.csv")) {
-//            out.println("Folder,File,JS,Cosine");
-//            for (File folder : new File("tasa").listFiles(file -> file.getName().startsWith("class"))) {
-//                for (File file : folder.listFiles(file -> file.getName().endsWith(".xml"))) {
-//                    try {
-//                        Document d = Document.load(file, models, Lang.en, true);
-//                        double[] v1 = lda.getProbDistribution(d);
-//                        double[] v2 = lda.getProbDistribution(d.getProcessedText());
-//                        double sim1 = lda.getSimilarity(v1, v2);
-//                        double sim2 = VectorAlgebra.cosineSimilarity(v1, v2);
-//                        out.println(folder.getName() + "," + file.getName() + "," + sim1 + ", " + sim2);
-//                        out.println(StringUtils.join(v1, ','));
-//                        out.println(StringUtils.join(v2, ','));
-//                        
-//                        return;
-//                    }
-//                    catch (Exception ex) {
-//                        
-//                    }
-//                }
-//            }
-//        }
     }
 }
