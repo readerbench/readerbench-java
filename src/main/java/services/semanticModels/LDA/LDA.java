@@ -34,8 +34,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-
-
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.CharSequenceLowercase;
 import cc.mallet.pipe.Pipe;
@@ -104,7 +102,6 @@ public class LDA implements ISemanticModel, Serializable {
 //            Exceptions.printStackTrace(ex);
 //        }
 //    }
-    
     private LDA(String path, Lang language) {
         this(language);
         this.path = path;
@@ -112,14 +109,14 @@ public class LDA implements ISemanticModel, Serializable {
         try {
             wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/LDA-small.model");
             numTopics = wordProbDistributions.entrySet().stream()
-                .map(e -> e.getValue().length)
-                .findFirst().orElse(0);
+                    .map(e -> e.getValue().length)
+                    .findFirst().orElse(0);
             sortedWords = IntStream.range(0, numTopics).parallel()
-                .mapToObj(topic -> wordProbDistributions.entrySet().stream()
-                .map(e -> new Pair<>(e.getKey(), e.getValue()[topic]))
-                .sorted((p1, p2) -> p2.second.compareTo(p1.second))
-                .collect(Collectors.toList()))
-                .toArray(size -> new List[size]);
+                    .mapToObj(topic -> wordProbDistributions.entrySet().stream()
+                            .map(e -> new Pair<>(e.getKey(), e.getValue()[topic]))
+                            .sorted((p1, p2) -> p2.second.compareTo(p1.second))
+                            .collect(Collectors.toList()))
+                    .toArray(size -> new List[size]);
             //buildWordVectors();
         } catch (ClassNotFoundException | IOException ex) {
             Exceptions.printStackTrace(ex);
@@ -221,8 +218,7 @@ public class LDA implements ISemanticModel, Serializable {
      * @return
      */
     public int createHDPModel(String path, int initialTopics, int numIterations) {
-        logger.info("Running HDP on " + path + " with " + initialTopics + " initial topics and " + numIterations
-            + " iterations");
+        logger.log(Level.INFO, "Running HDP on {0} with {1} initial topics and {2} iterations", new Object[]{path, initialTopics, numIterations});
         readDirectory(new File(path));
 
         HDP hdp = new HDP(path, 1.0, 0.01, 1D, initialTopics);
@@ -280,7 +276,10 @@ public class LDA implements ISemanticModel, Serializable {
 
         // save the trained model
         //ObjectManipulation.saveObject(model, path + "/LDA.model");
-        ObjectManipulation.saveObject(new Object[]{model.getInferencer(), buildWordVectors(model, language)}, path + "/LDA-small.model");
+        ObjectManipulation.saveObject(new Object[]{buildWordVectors(model, language)}, path + "/LDA-small.model");
+
+        LDA lda = new LDA(path, language);
+        lda.printTopics(100);
         return model;
     }
 
@@ -291,7 +290,7 @@ public class LDA implements ISemanticModel, Serializable {
         for (int topic = 0; topic < model.getNumTopics(); topic++) {
             for (IDSorter idCountPair : topicSortedWords.get(topic)) {
                 Word concept = Word.getWordFromConcept(model.getAlphabet().lookupObject(idCountPair.getID()).toString(),
-                    language);
+                        language);
                 if (!result.containsKey(concept)) {
                     result.put(concept, new double[model.getNumTopics()]);
                 }
@@ -333,9 +332,11 @@ public class LDA implements ISemanticModel, Serializable {
         double[] distrib = new double[numTopics];
         for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
             double[] v = entry.getKey().getModelRepresentation(SimilarityType.LDA);
-            if (v == null) continue;
+            if (v == null) {
+                continue;
+            }
             distrib = VectorAlgebra.sum(distrib, VectorAlgebra
-                .scalarProduct(v, (1 + Math.log(entry.getValue()))));
+                    .scalarProduct(v, (1 + Math.log(entry.getValue()))));
         }
         return VectorAlgebra.normalize(distrib);
 //        }
@@ -398,11 +399,11 @@ public class LDA implements ISemanticModel, Serializable {
         return similarConcepts;
     }
 
-    public void printTopics(String path, int noWordsPerTopic) {
+    public void printTopics(int noWordsPerTopic) {
         logger.info("Starting to write topics for trained model");
         // Get an array of sorted sets of word ID/count pairs
         try (BufferedWriter out = new BufferedWriter(
-            new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
+                new OutputStreamWriter(new FileOutputStream(path + "/topics.bck"), "UTF-8"))) {
 
             // Show top <<noTopics>> concepts
             for (int topic = 0; topic < numTopics; topic++) {
@@ -457,7 +458,7 @@ public class LDA implements ISemanticModel, Serializable {
             for (Entry<Word, Double> sim : similarSum.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "+" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
-                        + sim.getValue() + ")");
+                            + sim.getValue() + ")");
                 }
             }
         }
@@ -466,7 +467,7 @@ public class LDA implements ISemanticModel, Serializable {
             for (Entry<Word, Double> sim : similarDiff.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "-" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
-                        + sim.getValue() + ")");
+                            + sim.getValue() + ")");
                 }
             }
         }
@@ -577,6 +578,5 @@ public class LDA implements ISemanticModel, Serializable {
 //                }
 //            }
 //        }
-    
     }
 }

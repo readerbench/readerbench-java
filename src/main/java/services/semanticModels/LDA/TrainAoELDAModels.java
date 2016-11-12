@@ -15,7 +15,6 @@
  */
 package services.semanticModels.LDA;
 
-import cc.mallet.topics.ParallelTopicModel;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -26,13 +25,11 @@ public class TrainAoELDAModels {
 
     public static void trainModels(String path, int noThreads, int noIterations) throws IOException {
         // determine number of classes
-        int noGrades = (new File(path)).listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                if (pathname.isDirectory()) {
-                    return true;
-                }
-                return false;
+        int noGrades = (new File(path)).listFiles((File pathname) -> {
+            if (pathname.isDirectory()) {
+                return true;
             }
+            return false;
         }).length;
 
         // proportional method
@@ -49,7 +46,6 @@ public class TrainAoELDAModels {
             String classPath = path + "/grade" + i;
             LDA lda = new LDA(Lang.en);
             lda.processCorpus(classPath, noTopics, noThreads, noIterations);
-            lda.printTopics(classPath, 100);
         }
     }
 

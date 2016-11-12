@@ -41,11 +41,9 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-
-
-
 import data.Lang;
 import java.util.logging.Level;
+import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
@@ -120,7 +118,7 @@ public class SemanticModelsTraining extends JFrame {
                         preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
                 }
             } catch (Exception exc) {
-                logger.log(Level.SEVERE,"Error processing input file " + exc.getMessage(), exc);
+                logger.log(Level.SEVERE, "Error processing input file " + exc.getMessage(), exc);
             }
             return null;
         }
@@ -218,10 +216,9 @@ public class SemanticModelsTraining extends JFrame {
             try {
                 LDA lda = new LDA(lang);
                 lda.processCorpus(input, noTopics, noThreads, noIterations);
-                lda.printTopics(textFieldLDADirectory.getText(), 100);
             } catch (Exception exc) {
-                logger.severe("Error procesing " + input + " directory: " + exc.getMessage());
-                exc.printStackTrace();
+                logger.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
+                Exceptions.printStackTrace(exc);
             }
             return null;
         }
@@ -404,6 +401,7 @@ public class SemanticModelsTraining extends JFrame {
             JFileChooser fc = new JFileChooser("resources/config");
             fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             fc.setFileFilter(new FileFilter() {
+                @Override
                 public boolean accept(File f) {
                     if (f.isDirectory()) {
                         return true;
@@ -411,6 +409,7 @@ public class SemanticModelsTraining extends JFrame {
                     return f.getName().endsWith(".txt");
                 }
 
+                @Override
                 public String getDescription() {
                     return "Text documents (*.txt)";
                 }
@@ -608,7 +607,6 @@ public class SemanticModelsTraining extends JFrame {
                 .getTranslation("All TXT files within the provided directory will be taken into consideration"));
         lblAllTxt.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
-
         JLabel lblLDANoTopics = new JLabel(LocalizationUtils.getTranslation("No topics") + ":");
 
         textFieldLDANoTopics = new JTextField();
@@ -732,5 +730,4 @@ public class SemanticModelsTraining extends JFrame {
     /**
      * Launch the application.
      */
-
 }
