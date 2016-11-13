@@ -273,8 +273,8 @@ public class SimilarityAnalysis {
                 Integer explicitLinks = 0;
                 String filePathString = filePath.toString();
                 String fileExtension = FilenameUtils.getExtension(filePathString);
-                chatExplicitLinks.put(filePath.getFileName().toString(), 0);
-                if (fileExtension.compareTo("xml") == 0) {
+                if (filePathString.contains("in.xml") && fileExtension.compareTo("xml") == 0) {
+                    chatExplicitLinks.put(filePath.getFileName().toString(), 0);
                     Map<SimilarityType, StringBuilder> hmRowBuilderGeneral = new HashMap<>();
                     for (SimilarityType method : methods) {
                         hmRowBuilderGeneral.put(method, new StringBuilder());
