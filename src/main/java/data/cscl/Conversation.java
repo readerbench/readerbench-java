@@ -145,23 +145,23 @@ public class Conversation extends AbstractDocument {
             org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            Element el;
+            Element turn, el;
             NodeList nl1, nl2;
 
             // reformat input accordingly to evaluation model
             nl1 = doc.getElementsByTagName("Turn");
             if (nl1 != null && nl1.getLength() > 0) {
                 for (int i = 0; i < nl1.getLength(); i++) {
-                    el = (Element) nl1.item(i);
-                    BlockTemplate block = contents.new BlockTemplate();
-                    if (el.hasAttribute("nickname") && el.getAttribute("nickname").trim().length() > 0) {
-                        block.setSpeaker(el.getAttribute("nickname").trim());
-                    } else {
-                        block.setSpeaker("unregistered member");
-                    }
-
-                    nl2 = el.getElementsByTagName("Utterance");
+                    turn = (Element) nl1.item(i);
+                    nl2 = turn.getElementsByTagName("Utterance");
                     if (nl2 != null && nl2.getLength() > 0) {
+                        BlockTemplate block = contents.new BlockTemplate();
+                        if (turn.hasAttribute("nickname") && turn.getAttribute("nickname").trim().length() > 0) {
+                            block.setSpeaker(turn.getAttribute("nickname").trim());
+                        } else {
+                            block.setSpeaker("unregistered member");
+                        }
+
                         for (int j = 0; j < nl2.getLength(); j++) {
                             el = (Element) nl2.item(j);
                             if (el.getFirstChild() != null) {
