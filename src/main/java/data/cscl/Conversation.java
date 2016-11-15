@@ -155,14 +155,13 @@ public class Conversation extends AbstractDocument {
                     turn = (Element) nl1.item(i);
                     nl2 = turn.getElementsByTagName("Utterance");
                     if (nl2 != null && nl2.getLength() > 0) {
-                        BlockTemplate block = contents.new BlockTemplate();
-                        if (turn.hasAttribute("nickname") && turn.getAttribute("nickname").trim().length() > 0) {
-                            block.setSpeaker(turn.getAttribute("nickname").trim());
-                        } else {
-                            block.setSpeaker("unregistered member");
-                        }
-
                         for (int j = 0; j < nl2.getLength(); j++) {
+                            BlockTemplate block = contents.new BlockTemplate();
+                            if (turn.hasAttribute("nickname") && turn.getAttribute("nickname").trim().length() > 0) {
+                                block.setSpeaker(turn.getAttribute("nickname").trim());
+                            } else {
+                                block.setSpeaker("unregistered member");
+                            }
                             el = (Element) nl2.item(j);
                             if (el.getFirstChild() != null) {
                                 if (el.hasAttribute("time")) {
