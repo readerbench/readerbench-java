@@ -18,6 +18,7 @@ package data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class AbstractDocumentTemplate implements Serializable {
 
@@ -100,6 +101,35 @@ public class AbstractDocumentTemplate implements Serializable {
         public String toString() {
             return "BlockTemplate [speaker=" + speaker + ", time=" + time + ", id=" + id + ", refId=" + refId
                     + ", verbId=" + verbId + ", content=" + content + "]";
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 23 * hash + Objects.hashCode(this.id);
+            hash = 23 * hash + Objects.hashCode(this.content);
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final BlockTemplate other = (BlockTemplate) obj;
+            if (!Objects.equals(this.content, other.content)) {
+                return false;
+            }
+            if (!Objects.equals(this.id, other.id)) {
+                return false;
+            }
+            return true;
         }
     }
 
