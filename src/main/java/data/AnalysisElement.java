@@ -81,8 +81,10 @@ public abstract class AnalysisElement implements Serializable {
      */
     public AnalysisElement(List<ISemanticModel> models, Lang language) {
         this();
-        for (ISemanticModel model : models) {
-            semanticModels.put(model.getType(), model);
+        if (models != null) {
+            models.stream().filter((model) -> (model != null)).forEach((model) -> {
+                semanticModels.put(model.getType(), model);
+            });
         }
         this.language = language;
     }

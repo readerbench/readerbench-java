@@ -32,7 +32,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -41,13 +40,18 @@ import data.AbstractDocument.SaveType;
 import data.Lang;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.xml.sax.SAXException;
 import services.semanticModels.SimilarityType;
 
 public class SerialCorpusAssessment {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static void checkpoint(File checkpoint, File newFile, long processingTime) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -81,14 +85,14 @@ public class SerialCorpusAssessment {
             out.write(sw.toString());
 
             out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException | IllegalArgumentException | TransformerException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
     public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, boolean cleanInput, SaveType saveOutput) {
-        logger.info("Analysing all files in \"" + rootPath + "\"");
+        LOGGER.log(Level.INFO, "Analysing all files in \"{0}\"", rootPath);
         List<File> files = new LinkedList<>();
 
         FileFilter filter = (File f) -> f.getName().endsWith(".xml") && !f.getName().equals("checkpoint.xml");
@@ -97,17 +101,16 @@ public class SerialCorpusAssessment {
         List<String> alreadyAnalysedFiles = new LinkedList<>();
         File checkpoint = new File(rootPath + "/checkpoint.xml");
         if (!checkpoint.exists()) {
-            try {
+            try (BufferedWriter in = new BufferedWriter(new FileWriter(checkpoint))) {
                 checkpoint.createNewFile();
-                BufferedWriter in = new BufferedWriter(new FileWriter(checkpoint));
                 in.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<completedFiles/>");
                 in.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Exceptions.printStackTrace(e);
             }
         } else {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            org.w3c.dom.Document dom = null;
+            org.w3c.dom.Document dom;
             try {
                 DocumentBuilder db = dbf.newDocumentBuilder();
                 dom = db.parse(checkpoint);
@@ -123,8 +126,8 @@ public class SerialCorpusAssessment {
                         alreadyAnalysedFiles.add(el.getAttribute("name"));
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (ParserConfigurationException | SAXException | IOException e) {
+                Exceptions.printStackTrace(e);
             }
         }
         // determine solely unprocessed files
@@ -142,7 +145,7 @@ public class SerialCorpusAssessment {
         // process all remaining files
         for (File f : files) {
             try {
-                logger.info("Processing file " + f.getName());
+                LOGGER.log(Level.INFO, "Processing file {0}", f.getName());
                 Long start = System.currentTimeMillis();
                 AbstractDocument.loadGenericDocument(f.getAbsolutePath(), modelPaths, lang, usePOSTagging,
                         computeDialogism, null, null, cleanInput, saveOutput);
@@ -150,7 +153,7 @@ public class SerialCorpusAssessment {
 
                 // update checkpoint
                 checkpoint(checkpoint, f, end - start);
-                logger.info("Successfully finished processing file " + f.getName());
+                LOGGER.log(Level.INFO, "Successfully finished processing file {0}", f.getName());
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }

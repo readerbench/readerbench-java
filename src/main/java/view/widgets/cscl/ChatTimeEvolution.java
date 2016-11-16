@@ -63,17 +63,17 @@ public class ChatTimeEvolution extends JFrame {
 
 		for (Participant p : c.getParticipants()) {
 			subTasks.put(p, new LinkedList<Block>());
-			int startIndex = 0, endIndex = p.getInterventions().getBlocks()
+			int startIndex = 0, endIndex = p.getContributions().getBlocks()
 					.size() - 1;
-			while (startIndex < p.getInterventions().getBlocks().size()
-					&& p.getInterventions().getBlocks().get(startIndex) == null)
+			while (startIndex < p.getContributions().getBlocks().size()
+					&& p.getContributions().getBlocks().get(startIndex) == null)
 				startIndex++;
 
 			while (endIndex >= 0
-					&& p.getInterventions().getBlocks().get(endIndex) == null)
+					&& p.getContributions().getBlocks().get(endIndex) == null)
 				endIndex--;
-			Block startUtter = p.getInterventions().getBlocks().get(startIndex);
-			Block endUtter = p.getInterventions().getBlocks().get(endIndex);
+			Block startUtter = p.getContributions().getBlocks().get(startIndex);
+			Block endUtter = p.getContributions().getBlocks().get(endIndex);
 
 			Calendar start, end;
 			start = Calendar.getInstance();
@@ -89,7 +89,7 @@ public class ChatTimeEvolution extends JFrame {
 
 			Calendar lastEndCal = Calendar.getInstance();
 			lastEndCal.set(1900, 0, 0);
-			for (Block b : p.getInterventions().getBlocks()) {
+			for (Block b : p.getContributions().getBlocks()) {
 				if (b != null) {
 					Task subT = null;
 					start = Calendar.getInstance();

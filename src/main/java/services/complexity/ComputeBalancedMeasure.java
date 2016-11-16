@@ -263,7 +263,7 @@ public class ComputeBalancedMeasure {
 		Iterator<Participant> it = chat.getParticipants().iterator();
 		while (it.hasNext()) {
 			Participant part = it.next();
-			participantInterventions.add(part.getSignificantInterventions());
+			participantInterventions.add(part.getSignificantContributions());
 		}
 
 		double[] results = evaluateTextualComplexity(participantInterventions,

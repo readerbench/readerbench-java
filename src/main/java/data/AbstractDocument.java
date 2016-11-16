@@ -298,10 +298,10 @@ public abstract class AbstractDocument extends AnalysisElement {
         boolean isChat = checkTagsDocument(docFile, "Utterance");
 
         if (isChat && isDocument) {
-            throw new RuntimeException("Input file has an innapropriate structure as it contains tags for both documents and chats!");
+            throw new RuntimeException("Input file " + docFile.getPath() + " has an innapropriate structure as it contains tags for both documents and chats!");
         }
         if (!isChat && !isDocument) {
-            throw new RuntimeException("Input file has an innapropriate structure as it not contains any tags for documents or chats!");
+            throw new RuntimeException("Input file " + docFile.getPath() + " has an innapropriate structure as it not contains any tags for documents or chats!");
         }
 
         if (isDocument) {
@@ -454,7 +454,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 if (c.getParticipants().size() > 0) {
                     for (Participant p : c.getParticipants()) {
                         out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ":");
-                        for (Keyword t : p.getInterventions().getTopics()) {
+                        for (Keyword t : p.getContributions().getTopics()) {
                             out.write("," + t.getWord().getLemma() + " (" + t.getWord().getPOS() + ") - "
                                     + Formatting.formatNumber(t.getRelevance()));
                         }

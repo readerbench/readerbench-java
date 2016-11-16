@@ -28,7 +28,6 @@ public enum CSCLIndices {
 	BETWEENNESS(true),
 	CLOSENESS(true),
 	ECCENTRICITY(true),
-	RELEVANCE_TOP10_TOPICS(true),
 	NO_NOUNS(false),
 	NO_VERBS(false),
 	NO_NEW_THREADS(false),
