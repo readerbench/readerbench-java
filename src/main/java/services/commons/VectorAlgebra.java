@@ -30,6 +30,8 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import cc.mallet.util.Maths;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class VectorAlgebra {
 
@@ -141,6 +143,13 @@ public class VectorAlgebra {
         }
         return result;
     }
+    
+    public static double[] normalize2(double[] v) {
+        final double sum = Arrays.stream(v).map(x -> x * x).sum();
+        if (sum == 0) return new double[v.length];
+        return Arrays.stream(v).map(x -> x * x / sum).toArray();
+    }
+
 
     public static double[] and(double[] v1, double[] v2) {
         if (v1.length != v2.length) {
