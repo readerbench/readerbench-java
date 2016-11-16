@@ -15,7 +15,6 @@
  */
 package services.nlp.parsing;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -64,6 +63,16 @@ import services.nlp.stemmer.Stemmer;
 public abstract class Parsing {
 
     static final Logger LOGGER = Logger.getLogger("");
+    public static final SimpleDateFormat[] DATE_FORMATS = {
+        new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"),
+        new SimpleDateFormat("EEE MM/dd/yyyy HH:mm aaa", Locale.ENGLISH),
+        new SimpleDateFormat("kk.mm.ss"),
+        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
+        new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
+        new SimpleDateFormat("HH:mm:ss"),
+        new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
+    };
+    public static final int STANFORD_ID = 10000;
 
     protected Lang lang;
 
@@ -114,41 +123,20 @@ public abstract class Parsing {
         }
         Date time = null;
         // extract date (if applicable)
-        if (null != blockTmp.getTime()) {
-            try {
-                DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-                time = df.parse(blockTmp.getTime());
-            } catch (ParseException e) {
-                DateFormat df2 = new SimpleDateFormat("EEE MM/dd/yyyy HH:mm aaa");
+        if (blockTmp.getTime() != null) {
+            for (SimpleDateFormat format : DATE_FORMATS) {
                 try {
-                    time = df2.parse(blockTmp.getTime());
-                } catch (ParseException e2) {
-                    DateFormat df3 = new SimpleDateFormat("kk.mm.ss");
-                    try {
-                        time = df3.parse(blockTmp.getTime());
-                    } catch (ParseException e3) {
-                        DateFormat df4 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        try {
-                            time = df4.parse(blockTmp.getTime());
-                        } catch (ParseException e4) {
-                            DateFormat df5 = new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE);
-                            try {
-                                time = df5.parse(blockTmp.getTime());
-                            } catch (ParseException e5) {
-                                DateFormat df6 = new SimpleDateFormat("HH:mm:ss");
-                                try {
-                                    time = df6.parse(blockTmp.getTime());
-                                } catch (ParseException e6) {
-                                    try {
-                                        Long longTime = Long.parseLong(blockTmp.getTime());
-                                        time = new Date(longTime * 1000);
-                                    } catch (NumberFormatException e7) {
-                                        LOGGER.log(Level.SEVERE, "Unparsable date: {0}", blockTmp.getTime());
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    time = format.parse(blockTmp.getTime());
+                    break;
+                } catch (ParseException e) {
+                }
+            }
+            if (time == null) {
+                try {
+                    Long longTime = Long.parseLong(blockTmp.getTime());
+                    time = new Date(longTime * 1000);
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.SEVERE, "Unparsable date: {0}", blockTmp.getTime());
                 }
             }
         }
@@ -200,7 +188,9 @@ public abstract class Parsing {
                     if (usePOSTagging) {
                         document = annotations.get(blockTmp);
                         // create an empty Annotation just with the given text
-                        b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
+                        b
+                                = processBlock(d, id, text, document.get(SentencesAnnotation.class
+                                ));
                     } else {
                         b = SimpleParsing.processBlock(d, id, text);
                     }
@@ -215,6 +205,7 @@ public abstract class Parsing {
                             if (refB != null && refB.getIndex() == ref) {
                                 b.setRefBlock(refB);
                                 break;
+
                             }
                         }
                     }
@@ -222,7 +213,8 @@ public abstract class Parsing {
                     if (usePOSTagging && lang.equals(Lang.en)) {
                         // Build the co-reference link graph
                         // Each chain stores a set of mentions that link to each other, along with a method for getting the most representative mention.
-                        b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
+                        b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class
+                        ));
                     }
                 }
             }
@@ -260,34 +252,42 @@ public abstract class Parsing {
         // uses Stanford Core NLP
         Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModels(), lang);
 
-        sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
-            String word = token.get(OriginalTextAnnotation.class);
-            String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
-            String ne = token.get(NamedEntityTagAnnotation.class);
-            if (TextPreprocessing.isWord(word, lang)) {
-                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
-                s.getAllWords().add(w);
-                if (w.isContentWord()) {
-                    s.getWords().add(w);
-                    if (s.getWordOccurences().containsKey(w)) {
-                        s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
-                    } else {
-                        s.getWordOccurences().put(w, 1);
+        sentence
+                .get(TokensAnnotation.class
+                ).stream().forEach((token) -> {
+                    String word = token.get(OriginalTextAnnotation.class
+                    );
+                    String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class
+                    ));
+                    String ne = token.get(NamedEntityTagAnnotation.class
+                    );
+                    if (TextPreprocessing.isWord(word, lang)) {
+                        Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
+                        s.getAllWords().add(w);
+                        if (w.isContentWord()) {
+                            s.getWords().add(w);
+                            if (s.getWordOccurences().containsKey(w)) {
+                                s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
+                            } else {
+                                s.getWordOccurences().put(w, 1);
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
 
         if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
-                s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
+                s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class
+                ));
+
             }
             if (lang.equals(Lang.en)) {
-                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class
+                );
                 SentimentEntity se = new SentimentEntity();
                 // Stanford Valence
                 int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
-                se.add(new data.sentiment.SentimentValence(10000, "Stanford", "STANFORD", false), score);
+                se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
                 s.setSentimentEntity(se);
             }
         }
