@@ -32,7 +32,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -107,39 +106,6 @@ public class SimilarityAnalysis {
         percentageSimInBlock = new HashMap<>();
         chatContributions = new HashMap<>();
         chatExplicitLinks = new HashMap<>();
-    }
-
-    /**
-     *
-     * @param c
-     * @param min
-     * @param max
-     * @return
-     */
-    private boolean isInBlock(Conversation c, int min, int max) {
-        boolean isInBlock = false;
-        if (min != -1) {
-            isInBlock = true;
-            if (min == max) {
-                isInBlock = true;
-            }
-            if (!((Utterance) c.getBlocks().get(min)).getParticipant().getName()
-                    .equals(((Utterance) c.getBlocks().get(max)).getParticipant().getName())) {
-                isInBlock = false;
-            } else {
-                for (int j = min + 1; j <= max - 1; j++) {
-                    Utterance secondUtt = (Utterance) c.getBlocks().get(j);
-                    if (secondUtt != null) {
-                        if (secondUtt.getParticipant() == null || !secondUtt.getParticipant()
-                                .getName().equals(((Utterance) c.getBlocks().get(min)).getParticipant().getName())) {
-                            isInBlock = false;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        return isInBlock;
     }
 
     /**
@@ -543,7 +509,7 @@ public class SimilarityAnalysis {
                                         // ref in block?
                                         Integer minRef = (int) Math.min(refId, refMax.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize));
                                         Integer maxRef = (int) Math.max(refId, refMax.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize));
-                                        boolean isInBlock = isInBlock(c, minRef, maxRef);
+                                        boolean isInBlock = SimilarityHelper.isInBlock(c, minRef, maxRef);
                                         if (isInBlock) {
                                             simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).put(windowSize, simInBlock.get(CSCLConstants.DISTANCE_ANALYSIS).get(formula).get(method).get(windowSize) + 1);
                                         }
@@ -575,7 +541,7 @@ public class SimilarityAnalysis {
                                         // ref in block?
                                         Integer minRef = (int) Math.min(refId, refMax.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame));
                                         Integer maxRef = (int) Math.max(refId, refMax.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame));
-                                        boolean isInBlock = isInBlock(c, minRef, maxRef);
+                                        boolean isInBlock = SimilarityHelper.isInBlock(c, minRef, maxRef);
                                         if (isInBlock) {
                                             simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).put(timeFrame, simInBlock.get(CSCLConstants.TIME_ANALYSIS).get(formula).get(method).get(timeFrame) + 1);
                                         }
