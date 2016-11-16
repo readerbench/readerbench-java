@@ -701,7 +701,7 @@ public class ReaderBenchServer {
             long monthIncrement = (Long) json.get("monthIncrement");
             long dayIncrement = (Long) json.get("dayIncrement");
 
-            Community communityStartEnd = Community.loadMultipleConversations(communityFolder.toString(), true, startDate, endDate,
+            Community communityStartEnd = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDate, endDate,
                     (int) monthIncrement, (int) dayIncrement);
             communityStartEnd.computeMetrics(useTextualComplexity, true, true);
 
@@ -710,7 +710,7 @@ public class ReaderBenchServer {
             Date startDateAllCommunities = format.parse("01/01/1970");
             Date endDateAllCommunities = format.parse("01/01/2099");
 
-            Community allCommunity = Community.loadMultipleConversations(communityFolder.toString(), true, startDateAllCommunities,
+            Community allCommunity = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDateAllCommunities,
                     endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
             allCommunity.computeMetrics(useTextualComplexity, true, true);
 

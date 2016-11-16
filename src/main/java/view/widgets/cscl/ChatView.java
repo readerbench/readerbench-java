@@ -466,7 +466,7 @@ public class ChatView extends JFrame {
                 modelTopics.addRow(row);
             }
         } else {
-            topTopics = KeywordModeling.getSublist(ls.get(index - 1).getInterventions().getTopics(),
+            topTopics = KeywordModeling.getSublist(ls.get(index - 1).getContributions().getTopics(),
                     sliderTopics.getValue() * 5, chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
             for (Keyword topic : topTopics) {
                 Object[] row = {topic.getWord().getLemma(), (int) Math.round(topic.getRelevance())};

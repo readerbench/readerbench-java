@@ -28,8 +28,8 @@ public class Participant implements Comparable<Participant>, Serializable {
     private static final long serialVersionUID = -4515721505776009876L;
 
     private String name;
-    private transient AbstractDocument interventions;
-    private transient AbstractDocument significantInterventions;
+    private AbstractDocument contributions;
+    private AbstractDocument significantContributions;
     private double gradeAnnotator;
     private double textualComplexityLevel;
     private EnumMap<CSCLIndices, Double> indices;
@@ -38,8 +38,8 @@ public class Participant implements Comparable<Participant>, Serializable {
     public Participant(String name, AbstractDocument d) {
         super();
         this.name = name;
-        this.interventions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
-        this.significantInterventions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.contributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.significantContributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
         this.resetIndices();
@@ -53,20 +53,20 @@ public class Participant implements Comparable<Participant>, Serializable {
         this.name = name;
     }
 
-    public AbstractDocument getInterventions() {
-        return interventions;
+    public AbstractDocument getContributions() {
+        return contributions;
     }
 
-    public void setInterventions(AbstractDocument interventions) {
-        this.interventions = interventions;
+    public void setContributions(AbstractDocument interventions) {
+        this.contributions = interventions;
     }
 
-    public AbstractDocument getSignificantInterventions() {
-        return significantInterventions;
+    public AbstractDocument getSignificantContributions() {
+        return significantContributions;
     }
 
-    public void setSignificantInterventions(AbstractDocument significantInterventions) {
-        this.significantInterventions = significantInterventions;
+    public void setSignificantContributions(AbstractDocument significantInterventions) {
+        this.significantContributions = significantInterventions;
     }
 
     public double getGradeAnnotator() {

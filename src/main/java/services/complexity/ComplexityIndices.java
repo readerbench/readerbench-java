@@ -15,8 +15,6 @@
  */
 package services.complexity;
 
-
-
 import data.AbstractDocument;
 import data.Lang;
 import java.util.Arrays;
@@ -33,7 +31,7 @@ import java.util.stream.Collectors;
  */
 public class ComplexityIndices {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static final int IDENTITY = -1;
 
@@ -45,7 +43,7 @@ public class ComplexityIndices {
                 .flatMap(f -> f.build(d.getLanguage()).stream())
                 .collect(Collectors.toMap(Function.identity(), f -> f.compute(d))));
     }
-    
+
     public static List<ComplexityIndex> getIndices(Lang lang) {
         return Arrays.stream(ComplexityIndexType.values())
                 .filter(cat -> cat.getFactory() != null)
@@ -53,7 +51,7 @@ public class ComplexityIndices {
                 .flatMap(f -> f.build(lang).stream())
                 .collect(Collectors.toList());
     }
-    
+
     public static double[] getComplexityIndicesArray(AbstractDocument d) {
         return ComplexityIndices.getIndices(d.getLanguage()).stream()
                 .mapToDouble(index -> d.getComplexityIndices().get(index))

@@ -145,24 +145,23 @@ public class Conversation extends AbstractDocument {
             org.w3c.dom.Document dom = db.parse(input);
 
             Element doc = dom.getDocumentElement();
-            Element el;
+            Element turn, el;
             NodeList nl1, nl2;
 
             // reformat input accordingly to evaluation model
             nl1 = doc.getElementsByTagName("Turn");
             if (nl1 != null && nl1.getLength() > 0) {
                 for (int i = 0; i < nl1.getLength(); i++) {
-                    el = (Element) nl1.item(i);
-                    BlockTemplate block = contents.new BlockTemplate();
-                    if (el.hasAttribute("nickname") && el.getAttribute("nickname").trim().length() > 0) {
-                        block.setSpeaker(el.getAttribute("nickname").trim());
-                    } else {
-                        block.setSpeaker("unregistered member");
-                    }
-
-                    nl2 = el.getElementsByTagName("Utterance");
+                    turn = (Element) nl1.item(i);
+                    nl2 = turn.getElementsByTagName("Utterance");
                     if (nl2 != null && nl2.getLength() > 0) {
                         for (int j = 0; j < nl2.getLength(); j++) {
+                            BlockTemplate block = contents.new BlockTemplate();
+                            if (turn.hasAttribute("nickname") && turn.getAttribute("nickname").trim().length() > 0) {
+                                block.setSpeaker(turn.getAttribute("nickname").trim());
+                            } else {
+                                block.setSpeaker("unregistered member");
+                            }
                             el = (Element) nl2.item(j);
                             if (el.getFirstChild() != null) {
                                 if (el.hasAttribute("time")) {
@@ -293,19 +292,19 @@ public class Conversation extends AbstractDocument {
     private void determineParticipantInterventions() {
         if (getParticipants().size() > 0) {
             for (Participant p : getParticipants()) {
-                p.setInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
-                p.setSignificantInterventions(new Conversation(null, getSemanticModels(), getLanguage()));
+                p.setContributions(new Conversation(null, getSemanticModels(), getLanguage()));
+                p.setSignificantContributions(new Conversation(null, getSemanticModels(), getLanguage()));
             }
             for (Block b : getBlocks()) {
                 if (b != null && ((Utterance) b).getParticipant() != null) {
-                    Block.addBlock(((Utterance) b).getParticipant().getInterventions(), b);
+                    Block.addBlock(((Utterance) b).getParticipant().getContributions(), b);
                     if (b.isSignificant()) {
-                        Block.addBlock(((Utterance) b).getParticipant().getSignificantInterventions(), b);
+                        Block.addBlock(((Utterance) b).getParticipant().getSignificantContributions(), b);
                     }
                 }
             }
             for (Participant p : getParticipants()) {
-                p.getInterventions().determineWordOccurences(p.getInterventions().getBlocks());
+                p.getContributions().determineWordOccurences(p.getContributions().getBlocks());
             }
         }
     }
@@ -344,7 +343,7 @@ public class Conversation extends AbstractDocument {
         super.computeAll(computeDialogism);
 
         this.getParticipants().stream().forEach((p) -> {
-            KeywordModeling.determineKeywords(p.getInterventions());
+            KeywordModeling.determineKeywords(p.getContributions());
         });
 
         Collaboration.evaluateSocialKB(this);
