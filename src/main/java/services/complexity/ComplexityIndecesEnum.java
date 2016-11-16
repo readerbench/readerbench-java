@@ -145,7 +145,8 @@ public enum ComplexityIndecesEnum {
     DOC_FLOW_MAX_ORDERED_SEQUENCE(ComplexityIndexType.COHESION), 
     DOC_FLOW_AVERAGE_COHESION(ComplexityIndexType.COHESION),
     
-    DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES);
+    DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
+    DEPENDENCY_TYPES_PER_SENTENCE(ComplexityIndexType.SEMANTIC_DEPENDENCIES);
     
     private final ComplexityIndexType type;
 
