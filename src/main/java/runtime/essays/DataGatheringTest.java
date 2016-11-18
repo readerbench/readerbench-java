@@ -78,7 +78,7 @@ public class DataGatheringTest {
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
         try {
 //            DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
-//            DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+            DataGathering.processTexts("resources/in/essays/competition_en/texts", -1, true, models, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.en, true, true);
@@ -88,7 +88,7 @@ public class DataGatheringTest {
 //            DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.en, true, true);
 
             //DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", -1, true, lsa, lda, Lang.en, true, true);
-            DataGathering.processTexts("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", -1, true, models, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", -1, true, models, Lang.en, true, true);
 
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);

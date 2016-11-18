@@ -65,7 +65,7 @@ public class KeywordModeling {
             if (index >= 0) {
                 // update frequency for identical lemmas
                 Keyword refTopic = e.getTopics().get(index);
-                refTopic.updateRelevance(e);
+                refTopic.updateRelevance(e, w);
             } else {
                 e.getTopics().add(newTopic);
             }

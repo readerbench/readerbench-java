@@ -134,8 +134,10 @@ public abstract class AnalysisElement implements Serializable {
             double[] vec = new double[e.getValue().getNoDimensions()];
             for (Word word : wordOccurences.keySet()) {
                 if (word.getModelRepresentation(e.getKey()) != null) {
+                    double tf = (1 + Math.log(wordOccurences.get(word)));
+                    double[] v = word.getModelRepresentation(e.getKey());
                     for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
-                        vec[i] += (1 + Math.log(wordOccurences.get(word))) * word.getModelRepresentation(e.getKey())[i];
+                        vec[i] += tf * v[i];
                     }
                 }
             }

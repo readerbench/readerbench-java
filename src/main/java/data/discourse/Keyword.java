@@ -36,7 +36,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
 
     public Keyword(Word word, AnalysisElement e) {
         this.word = word;
-        this.updateRelevance(e);
+        this.updateRelevance(e, word);
     }
 
     public Keyword(Word word, double relevance) {
@@ -45,17 +45,18 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         this.relevance = relevance;
     }
 
-    public final void updateRelevance(AnalysisElement e) {
-        termFrequency = 1 + Math.log(e.getWordOccurences().get(word));
+    public final void updateRelevance(AnalysisElement e, Word newWord) {
+        double tf = 1 + Math.log(e.getWordOccurences().get(newWord));
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
+        this.termFrequency += tf;
         if (e.getSemanticModels().isEmpty()) {
-            this.relevance += termFrequency;
+            this.relevance += tf;
             return;
         }
-
-        this.semanticSimilarity = SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
-        this.relevance += termFrequency * SemanticCohesion.getAverageSemanticModelSimilarity(word, e);
+        double semSim = SemanticCohesion.getAverageSemanticModelSimilarity(newWord, e);
+        this.relevance += tf * semSim;
+        this.semanticSimilarity = Math.max(this.semanticSimilarity, semSim);
     }
 
     public double getTermFrequency() {
