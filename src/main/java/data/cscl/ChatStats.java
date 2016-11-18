@@ -15,6 +15,7 @@ public class ChatStats {
 
     private int contributions;
     private int participants;
+    private int maxRefDistance;
     private int duration; // timestamp
     private int explicitLinks;
     private int sameSpeakerFirst;
@@ -81,6 +82,14 @@ public class ChatStats {
         this.participants = participants;
     }
 
+    public int getMaxRefDistance() {
+        return maxRefDistance;
+    }
+
+    public void setMaxRefDistance(int maxRefDistance) {
+        this.maxRefDistance = maxRefDistance;
+    }
+    
     public int getDuration() {
         return duration;
     }
