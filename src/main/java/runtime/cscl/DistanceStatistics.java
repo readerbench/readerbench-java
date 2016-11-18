@@ -57,8 +57,6 @@ public class DistanceStatistics {
         modelPaths.put(SimilarityType.LSA, CSCLConstants.LSA_PATH);
         modelPaths.put(SimilarityType.LDA, CSCLConstants.LDA_PATH);
 
-        int maxRefDistance = 20;
-
         try {
             Files.walk(Paths.get(CSCLConstants.CSCL_CORPUS)).forEach((Path filePath) -> {
                 String filePathString = filePath.toString();
@@ -100,9 +98,10 @@ public class DistanceStatistics {
                                     0, // different block
                                     null // references
                             ));
+                    chatStats.get(filePath.getFileName().toString()).setMaxRefDistance(getBlockDistance(firstUtt, lastUtt));
 
                     Map<Integer, Integer> references = new HashMap<>();
-                    for (int i = 1; i <= maxRefDistance; i++) {
+                    for (int i = 1; i <= chatStats.get(filePath.getFileName().toString()).getMaxRefDistance(); i++) {
                         references.put(i, 0);
                     }
 
@@ -201,12 +200,10 @@ public class DistanceStatistics {
 
                                     // local information for the conversation
                                     // file stats
-                                    if (distance <= maxRefDistance) {
-                                        if (references.get(distance) != null) {
-                                            references.put(distance, references.get(distance) + 1);
-                                        } else {
-                                            references.put(distance, 1);
-                                        }
+                                    if (references.get(distance) != null) {
+                                        references.put(distance, references.get(distance) + 1);
+                                    } else {
+                                        references.put(distance, 1);
                                     }
                                 }
                             }
@@ -240,17 +237,19 @@ public class DistanceStatistics {
         }
 
         printDistancesToCSVFile(blockDistances, no_references);
-        printConversationStatsToCSVFile(chatStats, maxRefDistance);
+        printConversationStatsToCSVFile(chatStats);
     }
 
-    private static void printConversationStatsToCSVFile(Map<String, ChatStats> chatStats, int maxRefDistance) {
+    private static void printConversationStatsToCSVFile(Map<String, ChatStats> chatStats) {
         try {
             StringBuilder sb = new StringBuilder();
             sb.append(
-                    "sep=,\nchat id,contrubtions,participants,duration,explicit links,coverage,same speaker first,different speaker first,same block,different block,\n");
+                    "sep=,\nchat id,contrubtions,participants,duration,explicit links,coverage,same speaker first,different speaker first,same block,different block,");
+            int maxRefDistance = chatStats.entrySet().stream().max((entry1, entry2) -> entry1.getValue().getMaxRefDistance() > entry2.getValue().getMaxRefDistance() ? 1 : -1).get().getValue().getMaxRefDistance();
             for (int i = 1; i <= maxRefDistance; i++) {
                 sb.append("d").append(i).append(CSCLConstants.CSV_DELIM);
             }
+            sb.append("\n");
             for (Map.Entry pair : chatStats.entrySet()) {
                 ChatStats cs = (ChatStats) pair.getValue();
                 sb.append(pair.getKey()).append(CSCLConstants.CSV_DELIM);
