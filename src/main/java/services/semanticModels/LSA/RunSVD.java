@@ -15,7 +15,6 @@
  */
 package services.semanticModels.LSA;
 
-import data.Lang;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +44,7 @@ public class RunSVD {
         }
 
         //compute U * S^1/2
-        Matrix U = result._1().times(new DiagonalMatrix(result._3()));
+        Matrix U = result._1().times(new DiagonalMatrix(halfsigma));
 
         double[][] u = new double[U.numRows()][rank];
         for (int i = 0; i < U.numRows(); i++) {
