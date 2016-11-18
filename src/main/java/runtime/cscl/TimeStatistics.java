@@ -109,7 +109,7 @@ public class TimeStatistics {
                                         DateUtils.addHours(utterance2.getTime(), 24);
                                         LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; second utt time: {1}", new Object[]{utterance1.getTime(), utterance2.getTime()});
                                     }
-                                    int timp = (int) getDateDiff(utterance2.getTime(), utterance1.getTime(),
+                                    int timp = (int) TimeHelper.getDateDiff(utterance2.getTime(), utterance1.getTime(),
                                             TimeUnit.SECONDS);
                                     LOGGER.log(Level.INFO, "Difference in seconds: {0}", timp);
                                     if (timeStatsGlobal.get(timp) == null) {
@@ -302,22 +302,4 @@ public class TimeStatistics {
             Exceptions.printStackTrace(e);
         }
     }
-
-    /**
-     * Computes the difference between two dates
-     *
-     * @param date1 First datetime
-     * @param date2 Second datetime
-     * @param timeUnit Time unit
-     * @return The difference in time units between dates
-     */
-    public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
-        long diffInMillies = Math.abs(date2.getTime() - date1.getTime());
-        // if the difference between the date is negative, add one day
-        if (diffInMillies < 0) {
-            diffInMillies += 1000 * 60 * 60 * 24;
-        }
-        return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    }
-
 }

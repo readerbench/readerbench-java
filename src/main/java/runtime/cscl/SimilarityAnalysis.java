@@ -39,7 +39,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.openide.util.Exceptions;
-import static runtime.cscl.TimeStatistics.getDateDiff;
 import services.commons.Formatting;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -397,7 +396,7 @@ public class SimilarityAnalysis {
                                         DateUtils.addHours(secondUtt.getTime(), 24);
                                         //LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; second utt time: {1}", new Object[]{firstUtt.getTime(), secondUtt.getTime()});
                                     }
-                                    int diffTimpUttRef = (int) getDateDiff(secondUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
+                                    int diffTimpUttRef = (int) TimeHelper.getDateDiff(secondUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
                                     // ignore if above max time frame
                                     if (diffTimpUttRef > maxTimeFrame) {
                                         continue;
@@ -456,7 +455,7 @@ public class SimilarityAnalysis {
                                         DateUtils.addHours(refUtt.getTime(), 24);
                                         //LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; ref utt time: {1}", new Object[]{firstUtt.getTime(), refUtt.getTime()});
                                     }
-                                    int diffTimpUttRef = (int) getDateDiff(refUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
+                                    int diffTimpUttRef = (int) TimeHelper.getDateDiff(refUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
                                     //LOGGER.log(Level.INFO, "Difference in seconds: {0}", diffTimpUttRef);
                                     for (SimilarityType method : methods) {
                                         // referred utterance id
