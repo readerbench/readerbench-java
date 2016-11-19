@@ -62,8 +62,8 @@ public class DistanceStatistics {
                 String filePathString = filePath.toString();
                 if (filePathString.contains("in.xml") && FilenameUtils.getExtension(filePathString).compareTo("xml") == 0) {
                     LOGGER.log(Level.INFO, "Processing file {0}", filePath.getFileName().toString());
-                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, CSCLConstants.USE_POSTAGGING);
-                    c.computeAll(CSCLConstants.DIALOGISM);
+                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
+                    //c.computeAll(false);
                     //c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     Utterance firstUtt = null;
@@ -180,7 +180,7 @@ public class DistanceStatistics {
                                         boolean sameBlock = true;
                                         for (int k = block2.getIndex() + 1; k < block1.getIndex(); k++) {
                                             Utterance aux = (Utterance) c.getBlocks().get(k);
-                                            if (aux.getParticipant() != utterance1.getParticipant()) {
+                                            if (aux != null && aux.getParticipant() != utterance1.getParticipant()) {
                                                 sameBlock = false;
                                                 chatStats.get(filePath.getFileName().toString()).setDifferentBlock(
                                                         chatStats.get(filePath.getFileName().toString())
