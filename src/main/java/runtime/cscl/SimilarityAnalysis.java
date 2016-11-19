@@ -234,6 +234,10 @@ public class SimilarityAnalysis {
                 }
             }
 
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            modelPaths.put(SimilarityType.LSA, lsa.getPath());
+            modelPaths.put(SimilarityType.LDA, lda.getPath());
+
             Files.walk(Paths.get(path)).forEach((Path filePath) -> {
                 Integer explicitLinks = 0;
                 String filePathString = filePath.toString();
@@ -277,9 +281,6 @@ public class SimilarityAnalysis {
                     }
 
                     LOGGER.log(Level.INFO, "Processing chat {0}", filePath.getFileName());
-                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                    modelPaths.put(SimilarityType.LSA, lsa.getPath());
-                    modelPaths.put(SimilarityType.LDA, lda.getPath());
 
                     Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
                     c.computeAll(computeDialogism);

@@ -17,6 +17,7 @@ package runtime.cscl;
 
 import data.Block;
 import data.Lang;
+import data.cscl.CSCLConstants;
 import data.cscl.Conversation;
 import data.cscl.TimeStats;
 import data.cscl.Utterance;
@@ -76,19 +77,20 @@ public class TimeStatistics {
         Map<String, TimeStats> timeStatsPerChat = new TreeMap<>();
         Map<Integer, TimeStats> timeStatsGlobal = new TreeMap<>();
 
+        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+        modelPaths.put(SimilarityType.LSA, CSCLConstants.LSA_PATH);
+        modelPaths.put(SimilarityType.LDA, CSCLConstants.LDA_PATH);
+
         try {
             Files.walk(Paths.get(TimeStatistics.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 // TODO: replace with mimetype
                 if (filePathString.contains("in.xml")) {
                     LOGGER.log(Level.INFO, "Processing file {0} ...", filePath.getFileName().toString());
-                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                    modelPaths.put(SimilarityType.LSA, "resources/config/EN/LSA/TASA");
-                    modelPaths.put(SimilarityType.LDA, "resources/config/EN/LDA/TASA");
 
                     Lang lang = Lang.getLang("English");
                     LOGGER.log(Level.INFO, "Trying to load {0} file.", filePathString);
-                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.getLang("English"), false);
+                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
                     //c.computeAll(false);
                     //c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
