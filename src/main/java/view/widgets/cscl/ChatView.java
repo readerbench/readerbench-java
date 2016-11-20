@@ -15,7 +15,6 @@
  */
 package view.widgets.cscl;
 
-import data.AbstractDocument;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -52,12 +51,6 @@ import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.Keyword;
 import gma.ProblemSpaceView;
-import java.io.IOException;
-import java.util.LinkedList;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import org.apache.log4j.BasicConfigurator;
-import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
 import view.models.document.ChatTable;
@@ -140,35 +133,6 @@ public class ChatView extends JFrame {
 
         JScrollPane scrollPaneConcept = new JScrollPane();
         scrollPaneConcept.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
-        JButton btnCorrelatedConcepts = new JButton(
-                "    View correlated concepts    ");
-        btnCorrelatedConcepts.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ArrayList<Keyword> selectedTopics = getSelectedTopics();
-                if (selectedTopics.size() > 0) {
-                    JFrame view;
-                    int dialogResult = JOptionPane
-                            .showConfirmDialog(
-                                    null,
-                                    "Would you like "
-                                    + "to use LDA and LSA for searching similar concepts? This could take a while.",
-                                    "Warning", JOptionPane.YES_NO_OPTION);
-                    if (dialogResult == JOptionPane.YES_OPTION) {
-                        view = new ProblemSpaceView(chat, selectedTopics, true);
-                    } else {
-                        view = new ProblemSpaceView(chat, selectedTopics, false);
-                    }
-                    view.setVisible(true);
-                } else {
-                    JOptionPane.showMessageDialog(null,
-                            "You must select at least one topic.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
 
         JButton btnParticipantInvolvement = new JButton("Participant interaction");
         btnParticipantInvolvement.addActionListener((ActionEvent arg0) -> {
@@ -396,6 +360,35 @@ public class ChatView extends JFrame {
             });
         });
 
+        JButton btnCorrelatedConcepts = new JButton(
+                "    View correlated concepts    ");
+        btnCorrelatedConcepts.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Keyword> selectedTopics = getSelectedTopics();
+                if (selectedTopics.size() > 0) {
+                    JFrame view;
+                    int dialogResult = JOptionPane
+                            .showConfirmDialog(
+                                    null,
+                                    "Would you like "
+                                    + "to use LDA and LSA for searching similar concepts? This could take a while.",
+                                    "Warning", JOptionPane.YES_NO_OPTION);
+                    if (dialogResult == JOptionPane.YES_OPTION) {
+                        view = new ProblemSpaceView(chat, selectedTopics, true);
+                    } else {
+                        view = new ProblemSpaceView(chat, selectedTopics, false);
+                    }
+                    view.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "You must select at least one topic.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
         JScrollPane scrollPaneTopics = new JScrollPane();
         scrollPaneTopics.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -432,8 +425,8 @@ public class ChatView extends JFrame {
                                         .addComponent(sliderTopics, GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
                                         .addComponent(comboBoxCategory, GroupLayout.PREFERRED_SIZE, 158,
                                                 GroupLayout.PREFERRED_SIZE)))
-                        .addComponent(lblTopics).addComponent(btnGenerateNetwork))
-                .addComponent(lblTopics).addComponent(btnCorrelatedConcepts)));
+                        .addComponent(lblTopics).addComponent(btnGenerateNetwork)
+                        .addComponent(btnCorrelatedConcepts)).addContainerGap()));
         gl_panelConcepts
                 .setVerticalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
                         .addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap().addComponent(lblTopics)
@@ -461,7 +454,7 @@ public class ChatView extends JFrame {
                                 .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 436, Short.MAX_VALUE)
                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnGenerateNetwork)
-                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCorrelatedConcepts)
+                                .addComponent(btnCorrelatedConcepts)
                                 .addContainerGap()));
         modelTopics = new TopicsTableModel();
 
@@ -582,4 +575,5 @@ public class ChatView extends JFrame {
             }
         }
     }
+
 }
