@@ -16,6 +16,7 @@
 package runtime.optimalWeights;
 
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.List;
 
 import services.commons.Formatting;
@@ -40,7 +41,7 @@ public class Chromosome implements Comparable<Chromosome> {
 
 	public static final double MAX_THRESHOLD = -MIN_THRESHOLD;
 
-	private double[] coefficients = new double[DIMENSION * 3];
+	private final double[] coefficients = new double[DIMENSION * 3];
 
 	private double fitness;
 
@@ -111,6 +112,7 @@ public class Chromosome implements Comparable<Chromosome> {
 		return s;
 	}
 
+    @Override
 	public boolean equals(Object obj) {
 		Chromosome indiv = (Chromosome) obj;
 		if (indiv.getFitness() != this.getFitness())
@@ -121,6 +123,16 @@ public class Chromosome implements Comparable<Chromosome> {
 		return true;
 	}
 
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 89 * hash + Arrays.hashCode(this.coefficients);
+        hash = 89 * hash + (int) (Double.doubleToLongBits(this.fitness) ^ (Double.doubleToLongBits(this.fitness) >>> 32));
+        hash = 89 * hash + (int) (Double.doubleToLongBits(this.adjacentAccuracy) ^ (Double.doubleToLongBits(this.adjacentAccuracy) >>> 32));
+        return hash;
+    }
+
+    @Override
 	public int compareTo(Chromosome o) {
 		return (int) (Math.signum(o.getFitness() - this.getFitness()));
 	}
