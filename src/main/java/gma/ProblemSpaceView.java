@@ -302,6 +302,10 @@ public class ProblemSpaceView extends JFrame {
     }
 
     private void getSimilarTopics() {
+        
+        System.out.println("lsa " + lsa.getPath());
+        System.out.println("lda " + lda.getPath());
+        
         for (Keyword topic : basicTopics) {
 
             // word & similarity

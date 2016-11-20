@@ -362,6 +362,8 @@ public class OntologySupport {
     public static TreeMap<Word, Double> getExtendedSymilarConcepts(Word word){
 		
 		TreeMap<Word, Double> results = getSimilarConcepts(word);
+                
+                System.out.println("first set: " + results);
 		
 		//gets hyponyms
 		int no = 0;
@@ -380,7 +382,7 @@ public class OntologySupport {
 				break;
 		}
 		
-		//System.out.println("Found " + no + " hyponyms");
+		System.out.println("Found " + no + " related");
 		return results;
 	}
 
