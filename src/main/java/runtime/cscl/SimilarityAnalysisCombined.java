@@ -39,7 +39,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.openide.util.Exceptions;
-import static runtime.cscl.TimeStatistics.getDateDiff;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
@@ -207,6 +206,10 @@ public class SimilarityAnalysisCombined {
                 }
             }
 
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            modelPaths.put(SimilarityType.LSA, lsa.getPath());
+            modelPaths.put(SimilarityType.LDA, lda.getPath());
+
             Files.walk(Paths.get(path)).forEach((Path filePath) -> {
                 Integer explicitLinks = 0;
                 String filePathString = filePath.toString();
@@ -238,9 +241,6 @@ public class SimilarityAnalysisCombined {
                     }
 
                     LOGGER.log(Level.INFO, "Processing chat {0}", filePath.getFileName());
-                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                    modelPaths.put(SimilarityType.LSA, lsa.getPath());
-                    modelPaths.put(SimilarityType.LDA, lda.getPath());
 
                     Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
                     c.computeAll(computeDialogism);
@@ -297,7 +297,7 @@ public class SimilarityAnalysisCombined {
                                         DateUtils.addHours(secondUtt.getTime(), 24);
                                         //LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; second utt time: {1}", new Object[]{firstUtt.getTime(), secondUtt.getTime()});
                                     }
-                                    int diffTimpUttRef = (int) getDateDiff(secondUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
+                                    int diffTimpUttRef = (int) TimeHelper.getDateDiff(secondUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
                                     // ignore if above max time frame
                                     if (diffTimpUttRef > maxTimeFrame) {
                                         break;
@@ -359,7 +359,7 @@ public class SimilarityAnalysisCombined {
                                         DateUtils.addHours(refUtt.getTime(), 24);
                                         //LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; ref utt time: {1}", new Object[]{firstUtt.getTime(), refUtt.getTime()});
                                     }
-                                    int diffTimpUttRef = (int) getDateDiff(refUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
+                                    int diffTimpUttRef = (int) TimeHelper.getDateDiff(refUtt.getTime(), firstUtt.getTime(), TimeUnit.SECONDS);
                                     //LOGGER.log(Level.INFO, "Difference in seconds: {0}", diffTimpUttRef);
                                     for (SimilarityType method : methods) {
                                         // referred utterance id

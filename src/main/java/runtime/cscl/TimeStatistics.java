@@ -17,6 +17,7 @@ package runtime.cscl;
 
 import data.Block;
 import data.Lang;
+import data.cscl.CSCLConstants;
 import data.cscl.Conversation;
 import data.cscl.TimeStats;
 import data.cscl.Utterance;
@@ -76,19 +77,20 @@ public class TimeStatistics {
         Map<String, TimeStats> timeStatsPerChat = new TreeMap<>();
         Map<Integer, TimeStats> timeStatsGlobal = new TreeMap<>();
 
+        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+        modelPaths.put(SimilarityType.LSA, CSCLConstants.LSA_PATH);
+        modelPaths.put(SimilarityType.LDA, CSCLConstants.LDA_PATH);
+
         try {
             Files.walk(Paths.get(TimeStatistics.CORPORA_PATH)).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 // TODO: replace with mimetype
                 if (filePathString.contains("in.xml")) {
                     LOGGER.log(Level.INFO, "Processing file {0} ...", filePath.getFileName().toString());
-                    Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-                    modelPaths.put(SimilarityType.LSA, "resources/config/EN/LSA/TASA");
-                    modelPaths.put(SimilarityType.LDA, "resources/config/EN/LDA/TASA");
 
                     Lang lang = Lang.getLang("English");
                     LOGGER.log(Level.INFO, "Trying to load {0} file.", filePathString);
-                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.getLang("English"), false);
+                    Conversation c = Conversation.load(filePathString, modelPaths, Lang.en, false);
                     //c.computeAll(false);
                     //c.save(SaveType.SERIALIZED_AND_CSV_EXPORT);
 
@@ -109,7 +111,7 @@ public class TimeStatistics {
                                         DateUtils.addHours(utterance2.getTime(), 24);
                                         LOGGER.log(Level.INFO, "(Updated) First utt time: {0}; second utt time: {1}", new Object[]{utterance1.getTime(), utterance2.getTime()});
                                     }
-                                    int timp = (int) getDateDiff(utterance2.getTime(), utterance1.getTime(),
+                                    int timp = (int) TimeHelper.getDateDiff(utterance2.getTime(), utterance1.getTime(),
                                             TimeUnit.SECONDS);
                                     LOGGER.log(Level.INFO, "Difference in seconds: {0}", timp);
                                     if (timeStatsGlobal.get(timp) == null) {
@@ -302,22 +304,4 @@ public class TimeStatistics {
             Exceptions.printStackTrace(e);
         }
     }
-
-    /**
-     * Computes the difference between two dates
-     *
-     * @param date1 First datetime
-     * @param date2 Second datetime
-     * @param timeUnit Time unit
-     * @return The difference in time units between dates
-     */
-    public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
-        long diffInMillies = Math.abs(date2.getTime() - date1.getTime());
-        // if the difference between the date is negative, add one day
-        if (diffInMillies < 0) {
-            diffInMillies += 1000 * 60 * 60 * 24;
-        }
-        return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
-    }
-
 }
