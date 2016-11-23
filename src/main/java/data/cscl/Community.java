@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,18 @@
  */
 package data.cscl;
 
-import java.awt.EventQueue;
-import java.io.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.openide.util.Exceptions;
+
+import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -27,6 +37,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import data.AbstractDocument;
 import data.AbstractDocument.SaveType;
@@ -35,13 +47,6 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;

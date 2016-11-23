@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,39 +15,39 @@
  */
 package data.cscl;
 
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.logging.Level;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import javax.xml.parsers.ParserConfigurationException;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.Block;
-import data.discourse.SemanticChain;
 import data.Lang;
-import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
-import org.w3c.dom.DOMException;
-import org.xml.sax.SAXException;
+import data.discourse.SemanticChain;
 import services.commons.VectorAlgebra;
 import services.complexity.ComputeBalancedMeasure;
 import services.discourse.CSCL.Collaboration;
@@ -421,7 +421,7 @@ public class Conversation extends AbstractDocument {
 
                     //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
                     boolean explicitRefCriterion = true;
-                    if (crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
+                    if (crt.getRefId()!= null && crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
                         explicitRefCriterion = false;
                     }
                     if (crt.getSpeaker().equals(prev.getSpeaker()) && diffMinutes <= 1 && explicitRefCriterion) {
