@@ -54,6 +54,9 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     private SemanticChain semanticChain;
     private EnumSet<ReadingStrategyType> usedReadingStrategies;
 
+    public double lsaSimilarityToUnderlyingConcept = -1;
+    public double ldaSimilarityToUnderlyingConcept = -1;
+
     private transient SentimentEntity sentiment;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {

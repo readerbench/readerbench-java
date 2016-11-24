@@ -245,6 +245,19 @@ public class OntologySupport {
                 .flatMap(synset -> wnd.synsetToEntries.getOrDefault(synset, new ArrayList<>()).stream())
                 .collect(Collectors.toSet());
     }
+    
+    public static Set<String> getOtherRelatedWords(Word word) {
+        if (word.getPOS() == null) {
+            return null;
+        }
+        final WordnetData wnd = getDictionary(word.getLanguage(), getPOS(word.getPOS()));
+        return wnd.lemmaToSynsets.getOrDefault(word.getLemma(), new ArrayList<>()).stream()
+                .flatMap(synset -> wnd.otherRelations.getOrDefault(synset, new ArrayList<>()).stream())
+                .flatMap(synset -> wnd.synsetToEntries.getOrDefault(synset, new ArrayList<>()).stream())
+                .collect(Collectors.toSet());
+    }
+    
+     
 
     public static Set<String> getHypernymSenses(String sense, Lang lang) {
         final WordnetData wnd = getDictionary(lang);
@@ -345,6 +358,33 @@ public class OntologySupport {
     public static Set<Lang> getAvailableLanguages() {
         return WORDNET_FILEs.keySet();
     }
+    
+    public static TreeMap<Word, Double> getExtendedSymilarConcepts(Word word){
+		
+		TreeMap<Word, Double> results = getSimilarConcepts(word);
+                
+                System.out.println("first set: " + results);
+		
+		//gets hyponyms
+		int no = 0;
+		Set<String> related = getOtherRelatedWords(word);
+		for (String s : related) {
+			Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(),
+					word.getLanguage()), word.getPOS(), null,
+					word.getLanguage());
+			if (results.containsKey(newWord)
+					&& !StopWords.isStopWord(s, word.getLanguage())
+					&& Dictionary.isDictionaryWord(s, word.getLanguage())) {
+				results.put(newWord, HYPERNYM_WEIGHT);
+				no++;
+			}
+			if (no >= MAX_NO_HYPERNYMS)
+				break;
+		}
+		
+		System.out.println("Found " + no + " related");
+		return results;
+	}
 
     public static void main(String[] args) {
         System.out.println(DICTIONARIES.get(Lang.en).semanticSimilarity("man", "woman", POS.n, SimilarityType.LEACOCK_CHODOROW));
