@@ -44,6 +44,7 @@ import javax.swing.filechooser.FileFilter;
 import data.Lang;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
+import services.nlp.listOfWords.ListOfWords;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
@@ -105,13 +106,14 @@ public class SemanticModelsTraining extends JFrame {
                 PreProcessing preprocess = new PreProcessing();
                 switch (selectedCase) {
                     case 1:
-                        preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords);
+                        preprocess.parseTasa(input, output, lang, usePosTagging, minNoWords, null);
                         break;
                     case 2:
-                        preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords);
+                        preprocess.parseCOCA(input, output, lang, usePosTagging, minNoWords, null);
                         break;
                     default:
-                        preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords);
+                        preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords, null);
+//                        preprocess.parseGeneralCorpus(input, output, lang, usePosTagging, minNoWords, new ListOfWords("resources/corpora/EN/english_names.txt"));
                 }
             } catch (Exception exc) {
                 LOGGER.log(Level.SEVERE, "Error processing input file " + exc.getMessage(), exc);

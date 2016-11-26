@@ -24,9 +24,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
-
 
 /**
  *
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
  */
 public class ListOfWords {
 
-    private static Logger logger = Logger.getLogger("");
+    private static Logger LOGGER = Logger.getLogger("");
 
     private Set<String> words;
 
@@ -42,7 +41,7 @@ public class ListOfWords {
     }
 
     public ListOfWords(String path) {
-        logger.info("Loading file " + path + " ...");
+        LOGGER.log(Level.INFO, "Loading file {0} ...", path);
         words = new TreeSet<>();
         try {
             FileInputStream inputFile = new FileInputStream(path);
@@ -58,7 +57,7 @@ public class ListOfWords {
                 }
             }
         } catch (IOException ex) {
-            logger.severe(ex.getMessage());
+            LOGGER.severe(ex.getMessage());
         }
     }
 
@@ -74,7 +73,7 @@ public class ListOfWords {
                 }
             }
         } catch (IOException ex) {
-            logger.severe(ex.getMessage());
+            LOGGER.severe(ex.getMessage());
         }
     }
 
