@@ -33,8 +33,6 @@ import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-
-
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
@@ -43,20 +41,22 @@ import data.Lang;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import services.commons.TextPreprocessing;
 import services.nlp.listOfWords.Dictionary;
+import services.nlp.listOfWords.ListOfWords;
 import services.semanticModels.LSA.LSA;
 
 public class PreProcessing {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static final int MIN_NO_OCCURRENCES = 5;
 
     private final Map<String, Integer> newConcepts = new TreeMap<>();
 
-    private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc) {
+    private String parseDocumentProcessing(AbstractDocument d, int noMinWordPerDoc, ListOfWords wordsToIgnore) {
         // returns new entries to write
         StringBuilder toWrite = new StringBuilder();
         List<Word> document = new ArrayList<>();
@@ -65,16 +65,18 @@ public class PreProcessing {
             // combine with previous paragraph, if the case
             for (Sentence s : b.getSentences()) {
                 for (Word w : s.getWords()) {
-                    no_words_to_write++;
-                    document.add(w);
+                    if (wordsToIgnore == null || (!wordsToIgnore.getWords().contains(w.getLemma()))) {
+                        no_words_to_write++;
+                        document.add(w);
+                    }
                 }
                 document.add(new Word(".", ".", ".", null, null, d.getLanguage()));
             }
             if (no_words_to_write >= noMinWordPerDoc) {
                 // flush the actual contents of the document
-                for (Word w : document) {
+                document.stream().forEach((w) -> {
                     toWrite.append(w.getLemma()).append(" ");
-                }
+                });
                 toWrite.append("\n");
                 document.clear();
                 no_words_to_write = 0;
@@ -83,7 +85,7 @@ public class PreProcessing {
         return toWrite.toString();
     }
 
-    public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc) {
+    public String processContent(String content, Lang lang, boolean usePOSTagging, int noMinWordPerDoc, ListOfWords wordsToIgnore) {
         String text = TextPreprocessing.cleanText(content, lang);
         AbstractDocumentTemplate docTmp = getDocumentModel(text);
 
@@ -102,7 +104,7 @@ public class PreProcessing {
         }
         // perform processing
         AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), lang, usePOSTagging);
-        return parseDocumentProcessing(d, noMinWordPerDoc);
+        return parseDocumentProcessing(d, noMinWordPerDoc, wordsToIgnore);
     }
 
     /**
@@ -127,7 +129,7 @@ public class PreProcessing {
         }
     }
 
-    public void parseGeneralCorpus(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
+    public void parseGeneralCorpus(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc, ListOfWords wordsToIgnore)
             throws FileNotFoundException, IOException {
         // determine number of documents
 
@@ -142,66 +144,54 @@ public class PreProcessing {
         for (File f : filesToProcess) {
             FileInputStream inputFile = new FileInputStream(f);
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            BufferedReader in = new BufferedReader(ir);
-            String line = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.length() > LSA.LOWER_BOUND) {
-                    total_docs_to_process++;
+            try (BufferedReader in = new BufferedReader(ir)) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.length() > LSA.LOWER_BOUND) {
+                        total_docs_to_process++;
+                    }
                 }
             }
-            in.close();
         }
-        logger.info("Processing " + total_docs_to_process + " documents.");
+        LOGGER.log(Level.INFO, "Processing {0} documents.", total_docs_to_process);
 
         // read corpus
-        BufferedWriter out = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"),
-                32768);
-        for (File f : filesToProcess) {
-            logger.info("Processing file: " + f.getName());
-            BufferedReader in = new BufferedReader(new FileReader(f));
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"), 32768)) {
+            for (File f : filesToProcess) {
+                LOGGER.log(Level.INFO, "Processing file: {0}", f.getName());
+                try (BufferedReader in = new BufferedReader(new FileReader(f))) {
+                    String line, toWrite;
+                    while ((line = in.readLine()) != null) {
+                        if (line.length() > LSA.LOWER_BOUND) {
+                            // toWrite = processContent(
+                            // TextPreprocessing.replaceFrCorpusAdnotations(StringEscapeUtils.escapeXml(line)),
+                            // lang, usePOSTagging, noMinWordPerDoc);
+                            toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
 
-            String line = "";
-            String toWrite = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.length() > LSA.LOWER_BOUND) {
-                    // toWrite = processContent(
-                    // TextPreprocessing.replaceFrCorpusAdnotations(StringEscapeUtils.escapeXml(line)),
-                    // lang, usePOSTagging, noMinWordPerDoc);
-                    toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc);
-
-                    if (toWrite.length() > 0) {
-                        out.write(toWrite + "\n");
-                    }
-                    if ((++current_doc_to_process) % 1000 == 0) {
-                        logger.info("Finished processing " + (current_doc_to_process) + " block documents of "
-                                + total_docs_to_process);
+                            if (toWrite.length() > 0) {
+                                out.write(toWrite + "\n");
+                            }
+                            if ((++current_doc_to_process) % 1000 == 0) {
+                                LOGGER.log(Level.INFO, "Finished processing {0} block documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
+                            }
+                        }
                     }
                 }
+                LOGGER.log(Level.INFO, "Finished pre-processing {0}", f.getName());
             }
-            in.close();
-            logger.info("Finished pre-processing " + f.getName());
+            printNewConcepts();
         }
-        printNewConcepts();
-
-        out.close();
-        logger.info("Finished all pre-processing");
+        LOGGER.info("Finished all pre-processing");
     }
 
-    public void parseTasa(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
+    public void parseTasa(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc, ListOfWords wordsToIgnore)
             throws FileNotFoundException, IOException {
         // determine number of documents
 
         if (!new File(path).isDirectory()) {
             return;
         }
-        File[] filesToProcess = new File(path).listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                return pathname.getName().endsWith(".txt");
-            }
-        });
+        File[] filesToProcess = new File(path).listFiles((File pathname) -> pathname.getName().endsWith(".txt"));
 
         int total_docs_to_process = 0;
         int current_doc_to_process = 0;
@@ -210,81 +200,66 @@ public class PreProcessing {
             // determine number of documents
             FileInputStream inputFile = new FileInputStream(f);
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            BufferedReader in = new BufferedReader(ir);
-            String line = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.startsWith("<ID") || line.startsWith("<text")) {
-                    total_docs_to_process++;
+            try (BufferedReader in = new BufferedReader(ir)) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.startsWith("<ID") || line.startsWith("<text")) {
+                        total_docs_to_process++;
+                    }
                 }
             }
-            in.close();
         }
-        logger.info("Processing " + total_docs_to_process + " documents.");
-
-        // read corpus
-        BufferedWriter out = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"),
-                32768);
-
-        for (File f : filesToProcess) {
-            // read corpus
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-
-            String line = "";
-            String toWrite = "";
-            String content = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.length() == 0 || line.startsWith("<")) {
+        LOGGER.log(Level.INFO, "Processing {0} documents.", total_docs_to_process);
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"), 32768)) {
+            for (File f : filesToProcess) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+                    String line, toWrite, content = "";
+                    while ((line = in.readLine()) != null) {
+                        if (line.length() == 0 || line.startsWith("<")) {
+                            if (content.length() > LSA.LOWER_BOUND) {
+                                toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
+                                if (toWrite.length() > 0) {
+                                    out.write(toWrite + "\n");
+                                }
+                                // flush content
+                                content = "";
+                                if ((++current_doc_to_process) % 1000 == 0) {
+                                    LOGGER.log(Level.INFO, "Finished processing {0} block documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
+                                }
+                            }
+                        } else // process content
+                        {
+                            if (line.length() > 0) {
+                                if (line.startsWith("  ")) {
+                                    content += "\n" + line.trim();
+                                } else {
+                                    content += " " + line.trim();
+                                }
+                            }
+                        }
+                    }
                     if (content.length() > LSA.LOWER_BOUND) {
-                        toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc);
+                        LOGGER.log(Level.INFO, "Processing last block document {0} of {1}", new Object[]{++current_doc_to_process, total_docs_to_process});
+                        toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
                         if (toWrite.length() > 0) {
-                            out.write(toWrite + "\n");
-                        }
-                        // flush content
-                        content = "";
-                        if ((++current_doc_to_process) % 1000 == 0) {
-                            logger.info("Finished processing " + (current_doc_to_process) + " block documents of "
-                                    + total_docs_to_process);
+                            out.write(toWrite);
                         }
                     }
-                } else // process content
-                 if (line.length() > 0) {
-                        if (line.startsWith("  ")) {
-                            content += "\n" + line.trim();
-                        } else {
-                            content += " " + line.trim();
-                        }
-                    }
-            }
-            if (content.length() > LSA.LOWER_BOUND) {
-                logger.info("Processing last block document " + (++current_doc_to_process) + " of "
-                        + total_docs_to_process);
-                toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc);
-                if (toWrite.length() > 0) {
-                    out.write(toWrite);
+                    printNewConcepts();
                 }
             }
-            printNewConcepts();
-            in.close();
         }
-        out.close();
-        logger.info("Finished all pre-processing");
+        LOGGER.info("Finished all pre-processing");
     }
 
-    public void parseCOCA(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc)
+    public void parseCOCA(String path, String output, Lang lang, boolean usePOSTagging, int noMinWordPerDoc, ListOfWords wordsToIgnore)
             throws FileNotFoundException, IOException {
         // determine number of documents
 
         if (!new File(path).isDirectory()) {
             return;
         }
-        File[] filesToProcess = new File(path).listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                return pathname.getName().endsWith(".txt");
-            }
-        });
+        File[] filesToProcess = new File(path).listFiles((File pathname) -> pathname.getName().endsWith(".txt"));
 
         int total_docs_to_process = 0;
         int current_doc_to_process = 0;
@@ -293,53 +268,44 @@ public class PreProcessing {
             // determine number of documents
             FileInputStream inputFile = new FileInputStream(f);
             InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            BufferedReader in = new BufferedReader(ir);
-            String line = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.startsWith("##")) {
-                    total_docs_to_process++;
-                }
-            }
-            in.close();
-        }
-        logger.info("Processing " + total_docs_to_process + " documents.");
-
-        // read corpus
-        BufferedWriter out = new BufferedWriter(
-                new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"),
-                32768);
-
-        for (File f : filesToProcess) {
-            // read corpus
-            BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"));
-
-            String line = "";
-            String toWrite = "";
-
-            while ((line = in.readLine()) != null) {
-                if (line.length() > LSA.LOWER_BOUND) {
-                    line = line.replaceAll("##[0-9]* ]", "");
-                    line = line.replaceAll("<p>", "\n");
-                    line = line.replaceAll(" // ", "\n");
-                    line = line.replaceAll(" # ", "\n");
-                    line = line.replaceAll("@ @ @ @ @ @ @ @ @ @", " ");
-
-                    toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc);
-
-                    if (toWrite.length() > 0) {
-                        out.write(toWrite + "\n");
-                    }
-                    if ((++current_doc_to_process) % 1000 == 0) {
-                        logger.info("Finished processing " + (current_doc_to_process) + " block documents of "
-                                + total_docs_to_process);
+            try (BufferedReader in = new BufferedReader(ir)) {
+                String line;
+                while ((line = in.readLine()) != null) {
+                    if (line.startsWith("##")) {
+                        total_docs_to_process++;
                     }
                 }
             }
-            printNewConcepts();
-            in.close();
         }
-        out.close();
-        logger.info("Finished all pre-processing");
+        LOGGER.log(Level.INFO, "Processing {0} documents.", total_docs_to_process);
+
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path).getParent() + "/" + output), "UTF-8"), 32768)) {
+            for (File f : filesToProcess) {
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), "UTF-8"))) {
+                    String line, toWrite;
+
+                    while ((line = in.readLine()) != null) {
+                        if (line.length() > LSA.LOWER_BOUND) {
+                            line = line.replaceAll("##[0-9]* ]", "");
+                            line = line.replaceAll("<p>", "\n");
+                            line = line.replaceAll(" // ", "\n");
+                            line = line.replaceAll(" # ", "\n");
+                            line = line.replaceAll("@ @ @ @ @ @ @ @ @ @", " ");
+
+                            toWrite = processContent(line, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
+
+                            if (toWrite.length() > 0) {
+                                out.write(toWrite + "\n");
+                            }
+                            if ((++current_doc_to_process) % 1000 == 0) {
+                                LOGGER.log(Level.INFO, "Finished processing {0} block documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
+                            }
+                        }
+                    }
+                    printNewConcepts();
+                }
+            }
+        }
+        LOGGER.info("Finished all pre-processing");
     }
 }
