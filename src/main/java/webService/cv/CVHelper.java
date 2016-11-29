@@ -53,7 +53,6 @@ public class CVHelper {
         result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignore, noTopics));
 
         // word occurrences
-        Map<String, Integer> wordOccurences = new HashMap<>();
         List<String> positiveWords = new ArrayList<>();
         List<String> negativeWords = new ArrayList<>();
         List<String> neutralWords = new ArrayList<>();
@@ -68,10 +67,9 @@ public class CVHelper {
 
         double upperValue = 0;
         double lowerValue = 0;
+        Map<Word, Integer> wordOccurences = document.getWordOccurences();
         for (Map.Entry<Word, Integer> entry : document.getWordOccurences().entrySet()) {
             Word word = entry.getKey();
-            Integer occurrences = entry.getValue();
-            wordOccurences.put(word.getLemma(), occurrences);
             SentimentEntity se = word.getSentiment();
             if (se == null) {
                 continue;
@@ -130,7 +128,6 @@ public class CVHelper {
 
         // number of pages
         result.setPages(pdfConverter.getPages());
-        result.addFeedback(CVValidation.validatePages(result.getPages()));
 
         // number of paragraphs
         result.setParagraphs(document.getNoBlocks());

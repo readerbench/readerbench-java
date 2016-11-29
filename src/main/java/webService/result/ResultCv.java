@@ -58,6 +58,7 @@ public class ResultCv {
     public static Logger logger = Logger.getLogger("");
 
     public ResultCv() {
+        super();
         feedback = new ArrayList<>();
     }
 
@@ -103,7 +104,7 @@ public class ResultCv {
             // (specific keywords, document) relevance
             double keywordsDocumentRelevance
     ) {
-
+        super();
         this.concepts = concepts;
         this.wordOccurences = wordOccurences;
         this.textualComplexity = textualComplexity;

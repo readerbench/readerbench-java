@@ -45,6 +45,22 @@ public class QueryResult {
         this.errorMsg = errorMsg;
     }
 
+    public boolean isSuccess() {
+        return success;
+    }
+    
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
     public String convertToJson() {
         String json = gson.toJson(this);
         return json;

@@ -16,48 +16,15 @@
 package webService.services.utils;
 
 import java.io.File;
-
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.http.Part;
-
-
-import java.awt.Color;
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.logging.Logger;
-
-import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
-
 import org.apache.commons.io.FileUtils;
-
-import java.util.logging.Level;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.openide.loaders.FileEntry.Folder;
-import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
-import org.simpleframework.xml.Path;
-import org.simpleframework.xml.Root;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import webService.ReaderBenchServer;
-
-import org.apache.commons.io.FileUtils;
+import webService.result.ResultFile;
 
 public class FileProcessor {
 	
-	private static Logger logger = Logger.getLogger("");
+	private static final Logger LOGGER = Logger.getLogger("");
 	
 	private static FileProcessor instance = null;
 	protected FileProcessor() {
@@ -70,24 +37,24 @@ public class FileProcessor {
 		return instance;
 	}
 	
-	public String saveFile(Part submitedFile) {
+	public ResultFile saveFile(Part submitedFile) {
 		File targetFile = new File("tmp/" + System.currentTimeMillis() + '_' + submitedFile.getSubmittedFileName());
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {
-			logger.severe("Can't save uploaded file!");
+			LOGGER.severe("Can't save uploaded file!");
 		}
-		return targetFile.getName();
+		return new ResultFile(targetFile.getName(), targetFile.length());
 	}
 	
-	public String saveFile(Part submitedFile, File folderPath) {
+	public ResultFile saveFile(Part submitedFile, File folderPath) {
 		File targetFile = new File(folderPath +"/" + submitedFile.getSubmittedFileName());
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {
-			logger.severe("Can't save uploaded files!");
+			LOGGER.severe("Can't save uploaded files!");
 		}
-		return targetFile.getName();
+		return new ResultFile(targetFile.getName(), targetFile.length());
 	}
 	
 	public File createFolderForVCoPFiles(){
