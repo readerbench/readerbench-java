@@ -150,12 +150,12 @@ public class VocabularyTest {
 //        test.process("resources/in/vocabulary_test/", lda1);
 //        lda1 = LDA.loadLDA("resources/config/EN/LDA/COCA newspaper", Lang.en);
 //        test.process("resources/in/vocabulary_test/", lda1);
-        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3", Lang.en);
+        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
         test.process("resources/in/vocabulary_test/", w2v1);
-        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
-        test.process("resources/in/vocabulary_test/", w2v1);
-        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
-        test.process("resources/in/vocabulary_test/", w2v1);
+//        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
+//        test.process("resources/in/vocabulary_test/", w2v1);
+//        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_iter5", Lang.en);
+//        test.process("resources/in/vocabulary_test/", w2v1);
 //        w2v1 = Word2VecModel.loadGoogleNewsModel();
 //        test.process("resources/in/vocabulary_test/", w2v1);
     }

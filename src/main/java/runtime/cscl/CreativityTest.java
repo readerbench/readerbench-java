@@ -26,7 +26,6 @@ import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -35,7 +34,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -51,6 +49,7 @@ import services.converters.lifeConverter.Person;
 import services.converters.lifeConverter.Turn;
 import services.converters.lifeConverter.Utterance;
 import services.replicatedWorker.SerialCorpusAssessment;
+import webService.ReaderBenchServer;
 
 /**
  *
@@ -104,30 +103,25 @@ public class CreativityTest {
         }
     }
 
-    public static void processAllFolders(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
+    public static void processFolder(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
-            File[] communityFolder = dir.listFiles();
-            for (File f : communityFolder) {
-                if (f.isDirectory()) {
-                    //regenerate all corresponding xml files
-                    File[] excelFiles = f.listFiles((File pathname) -> pathname.getName().endsWith(".xlsx"));
-                    for (File excelFile : excelFiles) {
-                        CreativityTest.parse(excelFile, 1, 0, 2);
-                    }
-                    if (restartProcessing) {
-                        // remove checkpoint file
-                        File checkpoint = new File(f.getPath() + "/checkpoint.xml");
-                        if (checkpoint.exists()) {
-                            checkpoint.delete();
-                        }
-                    }
-                    SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
-                            true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
-                    processConversations(f.getAbsolutePath());
+            //regenerate all corresponding xml files
+            File[] excelFiles = dir.listFiles((File pathname) -> pathname.getName().endsWith(".xlsx"));
+            for (File excelFile : excelFiles) {
+                CreativityTest.parse(excelFile, 1, 0, 2);
+            }
+            if (restartProcessing) {
+                // remove checkpoint file
+                File checkpoint = new File(dir.getPath() + "/checkpoint.xml");
+                if (checkpoint.exists()) {
+                    checkpoint.delete();
                 }
             }
+            SerialCorpusAssessment.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+                    true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+            processConversations(dir.getAbsolutePath());
         }
 
         LOGGER.info("Finished processsing all files ...");
@@ -141,7 +135,7 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), ABS(Dialogism),Voices, Avg voices, Avg voice span, Max voice span");
+            out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), Voices, Avg voices, Avg voice span, Max voice span");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -149,11 +143,10 @@ public class CreativityTest {
                 } else {
                     Participant p1 = c.getParticipants().get(0);
                     Participant p2 = c.getParticipants().get(1);
-                    out.write("\n" + f.getPath()
+                    out.write("\n" + f.getName()
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.SOCIAL_KB) + p2.getIndices().get(CSCLIndices.SOCIAL_KB)) / 2)
                             + "," + Formatting.formatNumber(Math.abs(p1.getIndices().get(CSCLIndices.SOCIAL_KB) - p2.getIndices().get(CSCLIndices.SOCIAL_KB)))
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)) / 2)
-                            + "," + Formatting.formatNumber(Math.abs(p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) - p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)))
                             + "," + c.getVoices().size()
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
@@ -168,6 +161,8 @@ public class CreativityTest {
     }
 
     public static void main(String[] args) {
-        CreativityTest.processAllFolders("resources/in/creativity", false, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true);
+        ReaderBenchServer.initializeDB();
+
+        CreativityTest.processFolder("resources/in/creativity/separated tasks", false, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true);
     }
 }

@@ -15,102 +15,118 @@
  */
 package runtime.semanticModels;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-
-
-
 
 import data.AbstractDocumentTemplate;
-import data.Word;
-import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.util.Iterator;
 import java.util.logging.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
+import webService.ReaderBenchServer;
 
 public class PunData {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
-    private static String compareDocs(String s1, String s2, ISemanticModel semModel, double minThreshold) {
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(semModel);
-        Document d1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1), models, semModel.getLanguage(), true);
-        Document d2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(s2), models, semModel.getLanguage(), true);
-        Document merge = new Document(null, AbstractDocumentTemplate.getDocumentModel(s1 + " " + s2), models, semModel.getLanguage(), true);
-        String out = s1 + "-" + s2 + "," + Formatting.formatNumber(semModel.getSimilarity(d1, d2));
+    public void comparePuns(String pathToFile, ISemanticModel semModel) {
+        try (FileInputStream fis = new FileInputStream(new File(pathToFile));
+                BufferedWriter out = new BufferedWriter(new FileWriter(pathToFile.replace(".xlsx", "_" + semModel.getClass().getSimpleName() + "_" + (new File(semModel.getPath()).getName()) + ".csv"), false))) {
+            // Finds the workbook instance for XLSX file
+            XSSFWorkbook myWorkBook = new XSSFWorkbook(fis);
+            // Return first sheet from the XLSX workbook
+            XSSFSheet mySheet = myWorkBook.getSheetAt(0);
+            // Get iterator to all the rows in current sheet
+            Iterator<Row> rowIterator = mySheet.iterator();
+            // write header
+            out.write("pun word - pun input" + ","
+                    + "nonpun word - nonpun input" + ","
+                    + "pun word - homograph" + ","
+                    + "nonpun word - homograph" + ","
+                    + "pun word - dom" + ","
+                    + "pun word - sub" + ","
+                    + "pun word - unrelated" + ","
+                    + "nonpun word - dom" + ","
+                    + "nonpun word - sub" + ","
+                    + "nonpun word - unrelated" + ","
+                    + "homograph - dom" + ","
+                    + "homograph - sub" + ","
+                    + "homograph - unrelated" + "\n");
 
-        List<Keyword> inferredConcepts = new ArrayList<>();
-
-        TreeMap<Word, Double> simWords = semModel.getSimilarConcepts(merge, minThreshold);
-
-        for (Entry<Word, Double> entry : simWords.entrySet()) {
-            if (!merge.getWordOccurences().keySet().contains(entry.getKey())) {
-                Keyword t = new Keyword(entry.getKey(), entry.getValue());
-
-                if (inferredConcepts.contains(t)) {
-                    Keyword updatedTopic = inferredConcepts.get(inferredConcepts.indexOf(t));
-                    updatedTopic.setRelevance(Math.max(updatedTopic.getRelevance(), entry.getValue()));
-                } else {
-                    inferredConcepts.add(t);
-                }
+            // ignore header line
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
             }
-        }
 
-        Collections.sort(inferredConcepts);
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(semModel);
+            // Traversing over each row of XLSX file
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
 
-        for (Keyword t : inferredConcepts) {
-            out += "," + t.getWord().getLemma() + "," + Formatting.formatNumber(t.getRelevance());
-        }
+                Document punInput = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(0).getStringCellValue()), models, semModel.getLanguage(), true);
+                Document punWord = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(1).getStringCellValue()), models, semModel.getLanguage(), true);
 
-        return out;
-    }
+                Document nonPunInput = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(2).getStringCellValue()), models, semModel.getLanguage(), true);
+                Document nonPunWord = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(3).getStringCellValue()), models, semModel.getLanguage(), true);
 
-    public void comparePuns(String pathToFile, ISemanticModel semModel, double minThreshold) {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile), "UTF-8"));
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(pathToFile.replace(".csv", "_" + semModel.getClass().getSimpleName() + "_" + (new File(semModel.getPath()).getName()) + ".csv")), "UTF-8"))) {
-            // read first line apriori
-            String line = in.readLine();
-            while ((line = in.readLine()) != null) {
-                if (line.length() > 0) {
-                    StringTokenizer st = new StringTokenizer(line, ",");
-                    try {
-                        String s1 = st.nextToken(), s2 = st.nextToken(), s3 = st.nextToken();
-                        out.write(compareDocs(s1, s3, semModel, minThreshold) + "\n");
-                        out.write(compareDocs(s2, s3, semModel, minThreshold) + "\n");
-                    } catch (Exception ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                }
+                Document homograph = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(4).getStringCellValue()), models, semModel.getLanguage(), true);
+                Document dom = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(5).getStringCellValue()), models, semModel.getLanguage(), true);
+                Document sub = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(6).getStringCellValue()), models, semModel.getLanguage(), true);
+                Document unrelated = new Document(null, AbstractDocumentTemplate.getDocumentModel(row.getCell(7).getStringCellValue()), models, semModel.getLanguage(), true);
+
+                out.write(Formatting.formatNumber(semModel.getSimilarity(punWord, punInput)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(nonPunWord, nonPunInput)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(punWord, homograph)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(nonPunWord, homograph)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(punWord, dom)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(punWord, sub)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(punWord, unrelated)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(nonPunWord, dom)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(nonPunWord, sub)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(nonPunWord, unrelated)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(homograph, dom)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(homograph, sub)) + ","
+                        + Formatting.formatNumber(semModel.getSimilarity(homograph, unrelated)) + "\n");
             }
+
             out.close();
-        } catch (IOException e) {
-            Exceptions.printStackTrace(e);
+            LOGGER.info("Finished processing all rows...");
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
+        ReaderBenchServer.initializeDB();
         
         PunData comp = new PunData();
+        String pathToFile = "resources/in/pun data/pun data v2.xlsx";
+        comp.comparePuns(pathToFile, LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en));
+        comp.comparePuns(pathToFile, LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en));
 
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-//		LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.eng);
-        comp.comparePuns("in/pun data/pun data.csv", lda, 0.5);
+        comp.comparePuns(pathToFile, LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en));
+        comp.comparePuns(pathToFile, LDA.loadLDA("resources/config/EN/LDA/COCA_newspaper", Lang.en));
+
+        comp.comparePuns(pathToFile, Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en));
+        comp.comparePuns(pathToFile, Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en));
+        comp.comparePuns(pathToFile, Word2VecModel.loadGoogleNewsModel());
     }
 }
