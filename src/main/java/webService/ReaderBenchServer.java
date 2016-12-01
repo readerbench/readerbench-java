@@ -49,6 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -62,6 +63,8 @@ import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
 import runtime.cv.CVAnalyzer;
 import runtime.cv.CVConstants;
+import runtime.cv.CVFeedback;
+import runtime.cv.CVValidation;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
 import services.mail.SendMail;
@@ -78,6 +81,7 @@ import webService.queryResult.QueryResult;
 import webService.queryResult.QueryResultCscl;
 import webService.queryResult.QueryResultCv;
 import webService.queryResult.QueryResultCvCover;
+import webService.queryResult.QueryResultFile;
 import webService.queryResult.QueryResultMailgun;
 import webService.queryResult.QueryResultSearch;
 import webService.queryResult.QueryResultSelfExplanation;
@@ -91,6 +95,7 @@ import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
+import webService.result.ResultFile;
 import webService.result.ResultKeyword;
 import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
@@ -628,7 +633,7 @@ public class ReaderBenchServer {
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    hm, CVAnalyzer.FAN_DELTA, CVConstants.NO_CONCEPTS);
+                    hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
             result.setText(cvDocument.getText());
 
             queryResult.setData(result);
@@ -642,9 +647,23 @@ public class ReaderBenchServer {
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
-            // input in the upload
-            // form
-            return FileProcessor.getInstance().saveFile(file);
+            // input in the upload form
+            QueryResultFile queryResult = new QueryResultFile();
+            ResultFile result = FileProcessor.getInstance().saveFile(file);
+            List<CVFeedback> cvFeedback = CVValidation.validateFileSize(result.getSize());
+            for (CVFeedback feedback : cvFeedback) {
+                if (feedback.getFatal() == true) {
+                    result.getErrors().add(feedback.getFeedback());
+                    queryResult.setErrorMsg(ResourceBundle.getBundle("utils.localization.cv_errors").getString("error_general"));
+                    queryResult.setSuccess(false);
+                }
+                else {
+                    result.getWarnings().add(feedback.getFeedback());
+                }
+            }
+            queryResult.setData(result);
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
         Spark.options("/fileUpload", (request, response) -> {
             return "";

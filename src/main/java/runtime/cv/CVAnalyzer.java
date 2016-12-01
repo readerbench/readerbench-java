@@ -28,10 +28,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-
-
 import org.junit.Test;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
@@ -49,16 +48,7 @@ import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
-    public Logger logger = Logger.getLogger("");
-
-    private static final String CV_PATH_SAMPLE = "resources/in/cv/cv_sample/";
-    private static final String CV_PATH = "resources/in/cv_new/cv_analyse/";
-    private static final String STATS_FILE = "global_stats.csv";
-
-    public static final double FAN_DELTA = 1;
-
-    private static final String KEYWORDS = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
-    private static final String IGNORE = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
+    public static final Logger LOGGER = Logger.getLogger("");
 
     private Map<String, String> hm;
     private String path;
@@ -71,6 +61,18 @@ public class CVAnalyzer {
         this.keywords = null;
         this.ignoreWords = null;
     }
+    
+    public CVAnalyzer() {
+        this(null);
+    }
+
+    public Map<String, String> getHm() {
+        return hm;
+    }
+
+    public void setHm(Map<String, String> hm) {
+        this.hm = hm;
+    }   
 
     public String getPath() {
         return path;
@@ -101,14 +103,10 @@ public class CVAnalyzer {
 
         sb.append("CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page,")
                 .append("font types,avg font types per page,simple font types,simple font types per page,font sizes,avg font sizes per page,min font size,max font size,bold characters,avg bold characters per page,bold chars by total chars,italic characters,italic characters per pace,italic chars by total chars,bold italic characters,bold italic characters per page,bold italic chars by total chars,")
-                .append("positive words (FAN >= ")
-                .append(FAN_DELTA)
-                .append("),pos words percentage," + "negative words (FAN <= ")
-                .append(-FAN_DELTA)
-                .append("),neg words percentage," + "neutral words (FAN > ")
-                .append(-FAN_DELTA)
-                .append(" & FAN < ")
-                .append(FAN_DELTA)
+                .append("positive words (FAN >= ").append(CVConstants.FAN_DELTA)
+                .append("),pos words percentage," + "negative words (FAN <= ").append(-CVConstants.FAN_DELTA)
+                .append("),neg words percentage," + "neutral words (FAN > ").append(-CVConstants.FAN_DELTA)
+                .append(" & FAN < ").append(CVConstants.FAN_DELTA)
                 .append("),neutral words percentage,")
                 .append("FAN weighted average,");
 
@@ -116,10 +114,8 @@ public class CVAnalyzer {
         List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
         for (SentimentValence svLiwc : sentimentValences) {
             if (svLiwc != null && svLiwc.getName().contains("LIWC")) {
-                sb.append(svLiwc.getName());
-                sb.append(",");
-                sb.append(svLiwc.getName());
-                sb.append(" percentage,");
+                sb.append(svLiwc.getName()).append(CVConstants.CSV_DELIM);
+                sb.append(svLiwc.getName()).append(" percentage").append(CVConstants.CSV_DELIM);
             }
         }
 
@@ -128,8 +124,7 @@ public class CVAnalyzer {
         TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
         for (ComplexityIndexType cat : textualComplexity.getList()) {
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
-                sb.append(index.getAcronym());
-                sb.append(',');
+                sb.append(index.getAcronym()).append(CVConstants.CSV_DELIM);
             }
         }
         sb.append("keywords document relevance,");
@@ -144,182 +139,77 @@ public class CVAnalyzer {
             sb.append("rel" + i + ',');
             }*/
         sb.append("\n");
-
         return sb.toString();
     }
     
-    private void cvError() {
-        
-        
-        
+    private void cvError() {        
     }
 
     private String csvBuildRow(String fileName, ResultCv result) {
         StringBuilder sb = new StringBuilder();
-
-        // file name
-        sb.append(fileName);
-        sb.append(",");
-
-        // pages
-        sb.append(result.getPages());
-        sb.append(',');
-
-        // images
-        sb.append(result.getImages());
-        sb.append(',');
-
-        // average images per page
+        sb.append(fileName).append(CVConstants.CSV_DELIM);
+        sb.append(result.getPages()).append(CVConstants.CSV_DELIM);
+        sb.append(result.getImages()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getImages() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        // colors
-        sb.append(result.getColors());
-        sb.append(',');
-
-        // average colors per page
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getColors()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getColors() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        // paragraphs
-        sb.append(result.getParagraphs());
-        sb.append(',');
-
-        // avg paragraphs per page
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getParagraphs()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getParagraphs() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        // sentences
-        sb.append(result.getSentences());
-        sb.append(',');
-
-        // avg sentences per page
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getSentences()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getSentences() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        // words
-        sb.append(result.getWords());
-        sb.append(',');
-
-        // avg words per page
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getWords()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getWords() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        // content words
-        sb.append(result.getContentWords());
-        sb.append(',');
-
-        // avg content words per page
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getContentWords()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getContentWords() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        sb.append(result.getFontTypes());
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getFontTypes()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getFontTypes() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        sb.append(result.getFontTypesSimple());
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getFontTypesSimple()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getFontTypesSimple() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        sb.append(result.getFontSizes());
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getFontSizes()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getFontSizes() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
-        sb.append(result.getMinFontSize());
-        sb.append(',');
-
-        sb.append(result.getMaxFontSize());
-        sb.append(',');
-
-        sb.append(result.getBoldCharacters());
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getMinFontSize()).append(CVConstants.CSV_DELIM);
+        sb.append(result.getMaxFontSize()).append(CVConstants.CSV_DELIM);
+        sb.append(result.getBoldCharacters()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getBoldCharacters() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getBoldCharacters() * 1.0
-                / result.getTotalCharacters()));
-        sb.append(',');
-
-        sb.append(result.getItalicCharacters());
-        sb.append(',');
-
+                / result.getTotalCharacters())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getItalicCharacters()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getItalicCharacters() * 1.0
-                / result.getPages()));
-        sb.append(',');
-
+                / result.getPages())).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getItalicCharacters() * 1.0
-                / result.getTotalCharacters()));
-        sb.append(',');
-
-        sb.append(result.getBoldItalicCharacters());
-        sb.append(',');
-
+                / result.getTotalCharacters())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getBoldItalicCharacters()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getBoldItalicCharacters()
-                * 1.0 / result.getPages()));
-        sb.append(',');
-
+                * 1.0 / result.getPages())).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getBoldItalicCharacters()
-                * 1.0 / result.getTotalCharacters()));
-        sb.append(',');
-
-        // positive words
-        sb.append(result.getPositiveWords().size());
-        sb.append(',');
-
-        // positive words norm.
+                * 1.0 / result.getTotalCharacters())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getPositiveWords().size()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getPositiveWords().size()
-                * 1.0 / result.getWords()));
-        sb.append(',');
-
-        // negative words
-        sb.append(result.getNegativeWords().size());
-        sb.append(',');
-
-        // negative words norm.
+                * 1.0 / result.getWords())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getNegativeWords().size()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getNegativeWords().size()
-                * 1.0 / result.getWords()));
-        sb.append(',');
-
-        // neutral words
-        sb.append(result.getNeutralWords().size());
-        sb.append(',');
-
-        // neutral words norm.
+                * 1.0 / result.getWords())).append(CVConstants.CSV_DELIM);
+        sb.append(result.getNeutralWords().size()).append(CVConstants.CSV_DELIM);
         sb.append(Formatting.formatNumber(result.getNeutralWords().size()
-                * 1.0 / result.getWords()));
-        sb.append(',');
-
-        // FAN weighted average
-        sb.append(Formatting.formatNumber((result.getFanWeightedAverage())));
-        sb.append(',');
-
+                * 1.0 / result.getWords())).append(CVConstants.CSV_DELIM);
+        sb.append(Formatting.formatNumber((result.getFanWeightedAverage()))).append(CVConstants.CSV_DELIM);
         // LIWC emotions
         for (Map.Entry<String, List<String>> entry
                 : result.getLiwcEmotions().entrySet()) {
-            sb.append(entry.getValue().size());
-            sb.append(',');
+            sb.append(entry.getValue().size()).append(CVConstants.CSV_DELIM);
             sb.append(Formatting.formatNumber(entry.getValue().size() * 1.0
-                    / result.getWords()));
-            sb.append(',');
+                    / result.getWords())).append(CVConstants.CSV_DELIM);
         }
-
         // textual complexity factors
         List<ResultTextualComplexity> complexityFactors
                 = result.getTextualComplexity();
@@ -328,29 +218,21 @@ public class CVAnalyzer {
             for (ResultValence factor : category.getValences()) {
                 // sb.append(factor.getContent() + '(' +
                 // factor.getScore() + ')');
-                sb.append(factor.getScore());
-                sb.append(',');
+                sb.append(factor.getScore()).append(CVConstants.CSV_DELIM);
             }
             // sb.append('|');
         }
-        // sb.append(',');
-
-        // (keywords, document) relevance
-        sb.append(result.getKeywordsDocumentRelevance());
-        sb.append(',');
-
+        // sb.append(CVConstants.CSV_DELIM);
+        sb.append(result.getKeywordsDocumentRelevance()).append(CVConstants.CSV_DELIM);
         // keywords
         for (ResultKeyword keyword : result.getKeywords()) {
             // sb.append(keyword.getName() + '(' +
             // keyword.getRelevance() + ") - " +
             // keyword.getNoOccurences() + " occurences,");
-            sb.append(keyword.getRelevance());
-            sb.append(',');
-            sb.append(keyword.getNoOccurences());
-            sb.append(',');
+            sb.append(keyword.getRelevance()).append(CVConstants.CSV_DELIM);
+            sb.append(keyword.getNoOccurences()).append(CVConstants.CSV_DELIM);
         }
-        // sb.append(',');
-
+        // sb.append(CVConstants.CSV_DELIM);
         // concepts
         /*ResultTopic resultTopic = result.getConcepts();
         List<ResultNode> resultNodes = resultTopic.getNodes();
@@ -359,15 +241,14 @@ public class CVAnalyzer {
         // sb.append(resultNode.getName() + '(' +
         // resultNode.getValue() + ')');
         sb.append(resultNode.getName());
-        sb.append(',');
+        sb.append(CVConstants.CSV_DELIM);
         sb.append(resultNode.getValue());
-        sb.append(',');
+        sb.append(CVConstants.CSV_DELIM);
         i++;
         if (i == 25)
         break;
         }*/
         sb.append("\n");
-
         return sb.toString();
     }
 
@@ -375,15 +256,13 @@ public class CVAnalyzer {
             Set<String> ignoreList, PdfToTextConverter pdfConverter) {
         String cvContent = pdfConverter.pdftoText(filePath, true);
         //logger.info("CV textual content: " + cvContent);
-
         hm.put("text", cvContent);
         AbstractDocument cvDocument = QueryHelper.processQuery(hm);
         hm.put("text", keywords);
         AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
-
         hm.put("text", cvContent);
         ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, FAN_DELTA, CVConstants.NO_CONCEPTS);
+                hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
 
         return result;
     }
@@ -393,18 +272,14 @@ public class CVAnalyzer {
             System.err.println("Path not set. Nothing to process.");
             System.exit(0);
         }
-
         Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
         Set<String> ignoreList = new HashSet<>(Arrays.asList(ignoreWords.split(",[ ]*")));
 
         PdfToTextConverter pdfConverter = new PdfToTextConverter();
-
         StringBuilder sb = new StringBuilder();
         sb.append(csvBuildHeader());
-
-        logger.info("Processing path: " + path);
-        File globalStatsFile = new File(path + STATS_FILE);
-
+        LOGGER.log(Level.INFO, "Processing path: {0}", path);
+        File globalStatsFile = new File(path + CVConstants.STATS_FILE);
         try {
             // iterate through all PDF CV files
             Files.walk(Paths.get(path)).forEach(filePath -> {
@@ -415,12 +290,11 @@ public class CVAnalyzer {
                                     ignoreList, pdfConverter)));
                 }
             });
-
             FileUtils.writeStringToFile(globalStatsFile, sb.toString(), "UTF-8");
             sb.setLength(0);
-            logger.info("Printed global stats to file: " + globalStatsFile.getAbsolutePath());
+            LOGGER.log(Level.INFO, "Printed global stats to file: {0}", globalStatsFile.getAbsolutePath());
         } catch (IOException ex) {
-            logger.info("Exception: " + ex.getMessage());
+            LOGGER.log(Level.INFO, "Exception: {0}", ex.getMessage());
             Exceptions.printStackTrace(ex);
         }
     }
@@ -437,27 +311,23 @@ public class CVAnalyzer {
     }
 
     public static void main(String[] args) {
-        
         ReaderBenchServer.initializeDB();
-
         Map<String, String> hm = loadDefaultParameters();
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(hm);
-        frenchCVAnalyzer.setKeywords(KEYWORDS);
-        frenchCVAnalyzer.setIgnoreWords(IGNORE);
-        frenchCVAnalyzer.setPath(CV_PATH);
+        frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
+        frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
         frenchCVAnalyzer.processPath();
     }
 
     @Test
     public static void cvSampleTest() {
-        
         ReaderBenchServer.initializeDB();
-
         Map<String, String> hm = loadDefaultParameters();
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(hm);
-        frenchCVAnalyzer.setKeywords(KEYWORDS);
-        frenchCVAnalyzer.setIgnoreWords(IGNORE);
-        frenchCVAnalyzer.setPath(CV_PATH_SAMPLE);
+        frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
+        frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
         frenchCVAnalyzer.processPath();
     }
 }

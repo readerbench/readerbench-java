@@ -21,8 +21,8 @@ public class CSCLConstants {
     
     // general
     public static String CSCL_CORPUS = "resources/in/corpus_v2";
-    public static String LSA_PATH = "resources/config/EN/LSA/TASA_CSCL";
-    public static String LDA_PATH = "resources/config/EN/LDA/TASA_CSCL";
+    public static String LSA_PATH = "resources/config/EN/LSA/TASA";
+    public static String LDA_PATH = "resources/config/EN/LDA/TASA";
     public static String CSV_DELIM = ",";
     
 }
