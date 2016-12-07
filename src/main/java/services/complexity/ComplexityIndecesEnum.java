@@ -146,7 +146,10 @@ public enum ComplexityIndecesEnum {
     DOC_FLOW_AVERAGE_COHESION(ComplexityIndexType.COHESION),
     
     DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
-    DEPENDENCY_TYPES_PER_SENTENCE(ComplexityIndexType.SEMANTIC_DEPENDENCIES);
+    DEPENDENCY_TYPES_PER_SENTENCE(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
+    
+    AVG_WORDS_IN_LIST_PER_BLOCK(ComplexityIndexType.WORD_LISTS),
+    AVG_WORDS_IN_LIST_PER_SENTENCE(ComplexityIndexType.WORD_LISTS);
     
     private final ComplexityIndexType type;
 

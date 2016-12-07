@@ -210,11 +210,8 @@ public abstract class AbstractDocument extends AnalysisElement {
             DialogismComputations.determineVoiceDistributions(this);
         }
 
-        long t1 = System.currentTimeMillis();
         // build coherence graph
         CohesionGraph.buildCohesionGraph(this);
-        long t2 = System.currentTimeMillis();
-        System.out.println("new cohesion time: " + ((t2 - t1) / 1000.) + " sec");
 
 //        t1 = System.currentTimeMillis();
 //        // build coherence graph
