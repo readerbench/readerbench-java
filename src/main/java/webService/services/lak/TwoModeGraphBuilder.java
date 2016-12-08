@@ -1,5 +1,6 @@
 package webService.services.lak;
 
+import data.article.ResearchArticle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,6 +129,10 @@ public class TwoModeGraphBuilder {
             nodeList.add(new TwoModeGraphNode(TwoModeGraphNodeType.Article, article.getURI(), article.getTitleText()));
         });
         return nodeList;
+    }
+    
+    public List<ResearchArticle> getArticles() {
+        return this.authorContainer.getArticles();
     }
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {

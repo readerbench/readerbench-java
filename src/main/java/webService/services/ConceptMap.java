@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
 import webService.result.ResultEdge;
@@ -50,14 +51,29 @@ public class ConceptMap {
      * @return List of keywords and corresponding relevance scores for results
      */
     public static ResultTopic getTopics(AbstractDocument queryDoc, double threshold, Set<String> ignoredWords, int noTopics) {
+        List<AbstractDocument> queryDocs = new ArrayList();
+        queryDocs.add(queryDoc);
+        return getTopics(queryDocs, threshold, ignoredWords, noTopics);
+    }
+    public static ResultTopic getTopics(List<? extends AbstractDocument> queryDocs, double threshold, Set<String> ignoredWords, int noTopics) {
 
         List<ResultNode> nodes = new ArrayList<>();
         List<ResultEdge> links = new ArrayList<>();
 
-        List<Keyword> topics = queryDoc.getTopics();
-        if (ignoredWords != null) {
-            topics = KeywordModeling.filterTopics(queryDoc, ignoredWords);
-        }
+        Set<Keyword> topicSet = new TreeSet();
+        queryDocs.stream().map((doc) -> {
+            List<Keyword> docTopics = doc.getTopics();
+            if (ignoredWords != null) {
+                docTopics = KeywordModeling.filterTopics(doc, ignoredWords);
+            }
+            return docTopics;
+        }).forEachOrdered((docTopics) -> {
+            topicSet.addAll(docTopics);
+        });
+        
+        List<Keyword> topics = new ArrayList();
+        topics.addAll(topicSet);
+        
         // TODO: remove this and add at line #84 visible concepts sublist extraction
         topics = KeywordModeling.getSublist(topics, noTopics, true, true);
 
