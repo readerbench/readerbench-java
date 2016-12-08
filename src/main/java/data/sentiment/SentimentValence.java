@@ -30,7 +30,7 @@ import dao.ValenceDAO;
  * @author Gabriel Gutu
  *
  */
-public class SentimentValence {
+public class SentimentValence implements java.io.Serializable {
 
     private static final Map<String, SentimentValence> valenceMap;
     private static final List<SentimentValence> valences = new ArrayList<>();
