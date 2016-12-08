@@ -44,7 +44,13 @@ import org.codehaus.jackson.annotate.JsonIgnore;
     @NamedQuery(name = "SentimentValence.findAll", query = "SELECT s FROM SentimentValence s"),
     @NamedQuery(name = "SentimentValence.findById", query = "SELECT s FROM SentimentValence s WHERE s.id = :id"),
     @NamedQuery(name = "SentimentValence.findByIndexLabel", query = "SELECT s FROM SentimentValence s WHERE s.indexLabel = :index"),
-    @NamedQuery(name = "SentimentValence.findByRage", query = "SELECT s FROM SentimentValence s WHERE s.rage = :rage")})
+    @NamedQuery(name = "SentimentValence.findByRage", query = "SELECT s FROM SentimentValence s WHERE s.rage = :rage"),
+    @NamedQuery(name = "SentimentValence.findByLang", 
+            query = "SELECT distinct exv.fkSentimentValence "
+                    + "FROM Word w, EntityXValence exv "
+                    + "WHERE w.fkLanguage = :lang and "
+                    + "w.fkSentimentEntity = exv.fkSentimentEntity")})
+    
 public class SentimentValence implements Serializable {
 	@Basic(optional = false)
     @Column(name = "label")
