@@ -17,7 +17,7 @@ package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
 import data.Block;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
 public class AvgBlockScore extends ComplexityIndex{
 
     public AvgBlockScore() {
-        super(ComplexityIndecesEnum.AVERAGE_BLOCK_SCORE);
+        super(ComplexityIndicesEnum.AVERAGE_BLOCK_SCORE);
     }
 
     @Override

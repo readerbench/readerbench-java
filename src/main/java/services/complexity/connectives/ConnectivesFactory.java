@@ -19,8 +19,8 @@ import data.AbstractDocument;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.Connectives;
@@ -29,7 +29,7 @@ import services.nlp.listOfWords.Connectives;
  *
  * @author Stefan Ruseti
  */
-public class ConnectivesFactory extends ComplexityIndecesFactory {
+public class ConnectivesFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -41,12 +41,12 @@ public class ConnectivesFactory extends ComplexityIndecesFactory {
         }
         for (String className : connectives.getClasses().keySet()) {
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_BLOCK,
+                    ComplexityIndicesEnum.AVERAGE_CONNECTIVES_BLOCK,
                     lang,
                     AbstractDocument::getNoBlocks,
                     className));
             result.add(new ConnectivesIndex(
-                    ComplexityIndecesEnum.AVERAGE_CONNECTIVES_SENTENCE,
+                    ComplexityIndicesEnum.AVERAGE_CONNECTIVES_SENTENCE,
                     lang,
                     AbstractDocument::getNoSentences,
                     className));

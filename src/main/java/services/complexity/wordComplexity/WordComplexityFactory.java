@@ -18,40 +18,40 @@ package services.complexity.wordComplexity;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class WordComplexityFactory extends ComplexityIndecesFactory {
+public class WordComplexityFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_DIFF_LEMMA_STEM, lang,
+                ComplexityIndicesEnum.WORD_DIFF_LEMMA_STEM, lang,
                 WordComplexity::getDifferenceBetweenLemmaAndStem));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_DIFF_WORD_STEM, lang,
+                ComplexityIndicesEnum.WORD_DIFF_WORD_STEM, lang,
                 WordComplexity::getDifferenceBetweenWordAndStem));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_MAX_DEPTH_HYPERNYM_TREE, lang,
+                ComplexityIndicesEnum.WORD_MAX_DEPTH_HYPERNYM_TREE, lang,
                 WordComplexity::getMaxDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_AVERAGE_DEPTH_HYPERNYM_TREE, lang,
+                ComplexityIndicesEnum.WORD_AVERAGE_DEPTH_HYPERNYM_TREE, lang,
                 WordComplexity::getAverageDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_PATH_COUNT_HYPERNYM_TREE, lang,
+                ComplexityIndicesEnum.WORD_PATH_COUNT_HYPERNYM_TREE, lang,
                 WordComplexity::getPathCountToHypernymTreeRoot));
         result.add(new WordComplexity(
-                ComplexityIndecesEnum.WORD_POLYSEMY_COUNT, lang,
+                ComplexityIndicesEnum.WORD_POLYSEMY_COUNT, lang,
                 WordComplexity::getPolysemyCount));
         if (lang == Lang.en) {
             result.add(new WordComplexity(
-                    ComplexityIndecesEnum.WORD_SYLLABLE_COUNT, lang,
+                    ComplexityIndicesEnum.WORD_SYLLABLE_COUNT, lang,
                     WordComplexity::getSyllables));
         }
         return result;

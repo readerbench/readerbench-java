@@ -18,7 +18,7 @@ package services.complexity.cohesion.lexical;
 import data.AbstractDocument;
 import data.Sentence;
 import java.util.Arrays;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.SimilarityType;
@@ -30,7 +30,7 @@ import services.semanticModels.SimilarityType;
 public class AvgIntraSentenceLexicalCohesion extends LexicalCohesion{
 
     public AvgIntraSentenceLexicalCohesion(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION);
+        super(ComplexityIndicesEnum.AVERAGE_INTRA_SENTENCE_LEXICAL_COHESION);
     }
 
     @Override

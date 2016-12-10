@@ -16,7 +16,7 @@
 package services.complexity.entityDensity;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgNamedEntitiesPerSentence extends ComplexityIndex {
 
     public AvgNamedEntitiesPerSentence() {
-        super(ComplexityIndecesEnum.AVERAGE_NO_NAMED_ENT_PER_SENTENCE);
+        super(ComplexityIndicesEnum.AVERAGE_NO_NAMED_ENT_PER_SENTENCE);
     }
 
     @Override

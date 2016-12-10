@@ -8,15 +8,15 @@ package services.complexity.dependencies;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 
 /**
  *
  * @author stefan
  */
-public class SyntacticDependenciesFactory extends ComplexityIndecesFactory {
+public class SyntacticDependenciesFactory extends ComplexityIndicesFactory {
 
     public static final String[] DEPS = {
         "acl",
@@ -67,8 +67,8 @@ public class SyntacticDependenciesFactory extends ComplexityIndecesFactory {
             return result;
         }
         for (String dep : DEPS) {
-            result.add(new AvgDependenciesPerBlock(ComplexityIndecesEnum.DEPENDENCY_TYPES_PER_BLOCK, dep));
-            result.add(new AvgDependenciesPerSentence(ComplexityIndecesEnum.DEPENDENCY_TYPES_PER_SENTENCE, dep));
+            result.add(new AvgDependenciesPerBlock(ComplexityIndicesEnum.DEPENDENCY_TYPES_PER_BLOCK, dep));
+            result.add(new AvgDependenciesPerSentence(ComplexityIndicesEnum.DEPENDENCY_TYPES_PER_SENTENCE, dep));
         }
         return result;
     }

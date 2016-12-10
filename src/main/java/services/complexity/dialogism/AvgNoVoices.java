@@ -16,7 +16,7 @@
 package services.complexity.dialogism;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgNoVoices extends ComplexityIndex {
 
     public AvgNoVoices() {
-        super(ComplexityIndecesEnum.AVERAGE_NO_VOICES);
+        super(ComplexityIndicesEnum.AVERAGE_NO_VOICES);
     }
 
     @Override

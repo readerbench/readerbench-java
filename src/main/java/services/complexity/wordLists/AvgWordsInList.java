@@ -5,30 +5,41 @@
  */
 package services.complexity.wordLists;
 
+import data.AbstractDocument;
 import data.AnalysisElement;
 import data.sentiment.SentimentValence;
-import services.complexity.ComplexityIndecesEnum;
+import java.util.Objects;
+import services.complexity.AbstractComplexityIndex;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author stefan
  */
-public abstract class AvgWordsInList  extends ComplexityIndex {
+public class AvgWordsInList extends AbstractComplexityIndex {
 
     protected SentimentValence valence;
 
-    public AvgWordsInList(ComplexityIndecesEnum index, SentimentValence valence) {
-        super(index, valence.getName());
+    public AvgWordsInList(ComplexityIndicesEnum index, SentimentValence valence, IndexLevel level) {
+        super(index, valence.getName(), level);
         this.valence = valence;
     }
-    
-    protected double countWords(AnalysisElement data) {
+
+    private double countWords(AnalysisElement data) {
         return data.getWordOccurences().entrySet().stream()
-            .filter(e -> e.getKey().getSentiment() != null)
-            .filter(e -> e.getKey().getSentiment().get(valence) != null)
-            .mapToDouble(
-                    e -> e.getKey().getSentiment().get(valence) * e.getValue())
-            .sum();
+                .filter(e -> e.getKey().getSentiment() != null)
+                .filter(e -> e.getKey().getSentiment().get(valence) != null)
+                .mapToDouble(
+                        e -> e.getKey().getSentiment().get(valence) * e.getValue())
+                .sum();
+    }
+
+    @Override
+    public double compute(AbstractDocument d) {
+        return streamFunction.apply(d)
+                .mapToDouble(this::countWords)
+                .average().orElse(0.);
     }
 }

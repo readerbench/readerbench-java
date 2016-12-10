@@ -9,7 +9,7 @@ import data.AbstractDocument;
 import edu.stanford.nlp.util.Pair;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.nlp.listOfWords.ClassesOfWords;
 import services.nlp.listOfWords.ListOfWords;
@@ -22,7 +22,7 @@ public abstract class ReadabilityIndex extends ComplexityIndex {
 
     protected static ListOfWords simpleWords_en = null;
 
-    public ReadabilityIndex(ComplexityIndecesEnum index) {
+    public ReadabilityIndex(ComplexityIndicesEnum index) {
         super(index);
     }
 

@@ -17,7 +17,7 @@ package services.complexity.syntax;
 
 import data.AbstractDocument;
 import data.Lang;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.nlp.listOfWords.ClassesOfWords;
@@ -31,7 +31,7 @@ public class PronounsBlock extends ComplexityIndex{
     private final ClassesOfWords classes;
     
     public PronounsBlock(Lang lang, ClassesOfWords classes, String category) {
-        super(ComplexityIndecesEnum.AVERAGE_PRONOUNS_BLOCK, lang, null, category);
+        super(ComplexityIndicesEnum.AVERAGE_PRONOUNS_BLOCK, lang, null, category);
         this.classes = classes;
     }
 

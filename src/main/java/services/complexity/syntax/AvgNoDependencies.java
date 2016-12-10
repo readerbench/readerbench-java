@@ -16,7 +16,7 @@
 package services.complexity.syntax;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgNoDependencies extends ComplexityIndex {
 
     public AvgNoDependencies() {
-        super(ComplexityIndecesEnum.AVERAGE_NO_SEMANTIC_DEPENDENCIES);
+        super(ComplexityIndicesEnum.AVERAGE_NO_SEMANTIC_DEPENDENCIES);
     }
 
     @Override

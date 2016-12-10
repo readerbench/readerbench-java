@@ -26,7 +26,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 
 /**
@@ -35,7 +35,7 @@ import services.complexity.ComplexityIndex;
  */
 public abstract class CoreferenceIndex extends ComplexityIndex {
 
-    public CoreferenceIndex(ComplexityIndecesEnum index) {
+    public CoreferenceIndex(ComplexityIndicesEnum index) {
         super(index);
     }
     

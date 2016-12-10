@@ -17,7 +17,7 @@ package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
 import data.Block;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
@@ -29,7 +29,7 @@ import services.commons.DoubleStatistics;
 public class BlockScoreSD extends ComplexityIndex{
 
     public BlockScoreSD() {
-        super(ComplexityIndecesEnum.BLOCK_SCORE_STANDARD_DEVIATION);
+        super(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION);
     }
 
     @Override

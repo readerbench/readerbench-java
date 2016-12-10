@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import services.commons.VectorAlgebra;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -35,7 +35,7 @@ public class DialogismMutualInformationIndex extends ComplexityIndex {
     private transient final Function<Stream<? extends Number>, Double> combine;
     private transient final Function<SemanticChain, double[]> listFunction;
 
-    public DialogismMutualInformationIndex(ComplexityIndecesEnum index,
+    public DialogismMutualInformationIndex(ComplexityIndicesEnum index,
             Function<SemanticChain, double[]> listFunction,
             Function<Stream<? extends Number>, Double> combine) {
         super(index);

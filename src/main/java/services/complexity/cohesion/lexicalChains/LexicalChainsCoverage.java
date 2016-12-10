@@ -16,7 +16,7 @@
 package services.complexity.cohesion.lexicalChains;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.discourse.dialogism.DialogismComputations;
@@ -28,7 +28,7 @@ import services.discourse.dialogism.DialogismComputations;
 public class LexicalChainsCoverage extends ComplexityIndex {
 
     public LexicalChainsCoverage() {
-        super(ComplexityIndecesEnum.PERCENTAGE_LEXICAL_CHAINS_COVERAGE);
+        super(ComplexityIndicesEnum.PERCENTAGE_LEXICAL_CHAINS_COVERAGE);
     }
 
     @Override

@@ -18,14 +18,14 @@ package services.complexity.surface;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SurfaceFactory extends ComplexityIndecesFactory {
+public class SurfaceFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {

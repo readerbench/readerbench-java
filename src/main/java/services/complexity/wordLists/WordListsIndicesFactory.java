@@ -10,15 +10,16 @@ import data.Lang;
 import data.sentiment.SentimentValence;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author stefan
  */
-public class WordListsIndicesFactory extends ComplexityIndecesFactory {
+public class WordListsIndicesFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -26,10 +27,14 @@ public class WordListsIndicesFactory extends ComplexityIndecesFactory {
         ValenceDAO.getInstance().findByLang(lang).stream()
             .map(sv -> SentimentValence.get(sv.getIndexLabel()))
             .forEach(sv -> {
-                result.add(new AvgWordsInListPerBlock(
-                        ComplexityIndecesEnum.AVG_WORDS_IN_LIST_PER_BLOCK, sv));
-                result.add(new AvgWordsInListPerSentence(
-                        ComplexityIndecesEnum.AVG_WORDS_IN_LIST_PER_SENTENCE, sv));
+                result.add(new AvgWordsInList(
+                        ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_BLOCK, 
+                        sv,
+                        IndexLevel.BLOCK));
+                result.add(new AvgWordsInList(
+                        ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_SENTENCE, 
+                        sv,
+                        IndexLevel.SENTENCE));
             });
         return result;
     }

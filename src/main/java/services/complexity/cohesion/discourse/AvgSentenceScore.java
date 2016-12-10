@@ -17,7 +17,7 @@ package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
 import data.Sentence;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
 public class AvgSentenceScore extends ComplexityIndex{
 
     public AvgSentenceScore() {
-        super(ComplexityIndecesEnum.AVERAGE_SENTENCE_SCORE);
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_SCORE);
     }
 
     @Override

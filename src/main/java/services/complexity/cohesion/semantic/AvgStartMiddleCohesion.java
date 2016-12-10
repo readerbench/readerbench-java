@@ -18,7 +18,7 @@ package services.complexity.cohesion.semantic;
 import data.AbstractDocument;
 import data.Block;
 import data.discourse.SemanticCohesion;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.SimilarityType;
@@ -30,7 +30,7 @@ import services.semanticModels.SimilarityType;
 public class AvgStartMiddleCohesion extends ComplexityIndex {
 
     public AvgStartMiddleCohesion(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_START_MIDDLE_COHESION, simType);
+        super(ComplexityIndicesEnum.AVERAGE_START_MIDDLE_COHESION, simType);
     }
 
     @Override

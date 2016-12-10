@@ -23,7 +23,7 @@ import java.util.List;
  *
  * @author Stefan Ruseti
  */
-public abstract class ComplexityIndecesFactory implements Serializable {
+public abstract class ComplexityIndicesFactory implements Serializable {
 
     public abstract List<ComplexityIndex> build(Lang lang);
 }

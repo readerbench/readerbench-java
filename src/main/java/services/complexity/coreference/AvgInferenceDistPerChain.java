@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import scala.collection.parallel.ParIterableLike;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 import static services.complexity.coreference.CoreferenceIndex.analyse;
 
@@ -33,7 +33,7 @@ import static services.complexity.coreference.CoreferenceIndex.analyse;
 public class AvgInferenceDistPerChain extends CoreferenceIndex {
 
     public AvgInferenceDistPerChain() {
-        super(ComplexityIndecesEnum.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN);
+        super(ComplexityIndicesEnum.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN);
     }
 
     @Override

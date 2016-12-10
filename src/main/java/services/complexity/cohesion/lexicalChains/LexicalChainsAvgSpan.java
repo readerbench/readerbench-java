@@ -16,7 +16,7 @@
 package services.complexity.cohesion.lexicalChains;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class LexicalChainsAvgSpan extends ComplexityIndex {
 
     public LexicalChainsAvgSpan() {
-        super(ComplexityIndecesEnum.LEXICAL_CHAINS_AVERAGE_SPAN);
+        super(ComplexityIndicesEnum.LEXICAL_CHAINS_AVERAGE_SPAN);
     }
 
     @Override

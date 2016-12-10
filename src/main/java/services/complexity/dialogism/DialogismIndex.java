@@ -18,7 +18,7 @@ package services.complexity.dialogism;
 import data.AbstractDocument;
 import data.discourse.SemanticChain;
 import java.util.function.Function;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -30,7 +30,7 @@ public class DialogismIndex extends ComplexityIndex {
 
     private transient final Function<SemanticChain, Double> mapper;
 
-    public DialogismIndex(ComplexityIndecesEnum index, Function<SemanticChain, Double> mapper) {
+    public DialogismIndex(ComplexityIndicesEnum index, Function<SemanticChain, Double> mapper) {
         super(index);
         this.mapper = mapper;
     }

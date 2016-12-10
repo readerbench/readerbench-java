@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
@@ -35,7 +35,7 @@ import services.commons.DoubleStatistics;
 public class WordEntropy extends ComplexityIndex {
 
     public WordEntropy() {
-        super(ComplexityIndecesEnum.WORD_ENTROPY);
+        super(ComplexityIndicesEnum.WORD_ENTROPY);
     }
 
     @Override

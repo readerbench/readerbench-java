@@ -17,7 +17,7 @@ package services.complexity.CAF;
 
 import data.AbstractDocument;
 import java.util.ArrayList;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 
 /**
@@ -28,7 +28,7 @@ public class CAFIndex extends ComplexityIndex{
     
     private final int measureIndex;
     
-    public CAFIndex(ComplexityIndecesEnum index, int measureIndex) {
+    public CAFIndex(ComplexityIndicesEnum index, int measureIndex) {
         super(index);
         this.measureIndex = measureIndex;
     }
