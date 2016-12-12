@@ -515,7 +515,9 @@ public class Txt2XmlConverter {
     }
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException {
-        parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
+        //parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
+        parseMergedTxtFiles("resources/in/Philippe/DEPP/corrEssays/avaleur", Lang.fr, "UTF-8");
+        parseMergedTxtFiles("resources/in/Philippe/DEPP/corrEssays/matilda", Lang.fr, "UTF-8");
 //        parseDocFiles("resources/in/ViBOA_nl/design task 1/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 2/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
