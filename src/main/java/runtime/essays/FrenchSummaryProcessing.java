@@ -15,6 +15,7 @@
  */
 package runtime.essays;
 
+import data.AbstractDocument.SaveType;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -57,6 +58,7 @@ public class FrenchSummaryProcessing {
             logger.info("Processing file " + f.getAbsolutePath() + " ...");
             Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true);
             summary.computeAll(true);
+            summary.save(SaveType.SERIALIZED);
             loadedSummaries.add(summary);
         }
 
