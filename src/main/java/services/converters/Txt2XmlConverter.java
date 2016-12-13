@@ -447,6 +447,7 @@ public class Txt2XmlConverter {
                                         new String(content.getBytes("UTF-8"), "UTF-8"), lang, destination);
                             }
                             title = line.trim();
+                            content = "";
                         } else {
                             content += line.trim() + "\n";
                         }
