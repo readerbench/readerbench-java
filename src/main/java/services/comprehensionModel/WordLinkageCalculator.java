@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 import static services.ageOfExposure.TASAAnalyzer.getWordAcquisitionAge;
+import services.comprehensionModel.utils.AoAMetric;
 import services.comprehensionModel.utils.indexer.CMIndexer;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
@@ -105,28 +106,34 @@ public class WordLinkageCalculator {
         return new ArrayList<>(wordSet);
     }
 
-    public double getScore(String wordAcquisitionFile) {
-        Map<String, Double> birdAoA = getWordAcquisitionAge(wordAcquisitionFile);
+    public AoAMetric getScore(String wordAcquisitionFile) {
+        Map<String, Double> aoa = getWordAcquisitionAge(wordAcquisitionFile);
 
         double scoreSum = 0.0;
         double degreeSum = 0.0;
+        double sumAoa = 0.0;
         for (CMNodeDO node : this.graph.getNodeList()) {
             double nodeDegree = (double) this.graph.getEdgeList(node).size();
 
             double aoaScore = 0.0;
-            if (birdAoA.containsKey(node.getWord().getLemma())) {
-                aoaScore = birdAoA.get(node.getWord().getLemma());
-            } else if (birdAoA.containsKey(node.getWord().toString())) {
-                aoaScore = birdAoA.get(node.getWord().toString());
+            if (aoa.containsKey(node.getWord().getLemma())) {
+                aoaScore = aoa.get(node.getWord().getLemma());
+            } else if (aoa.containsKey(node.getWord().toString())) {
+                aoaScore = aoa.get(node.getWord().toString());
             }
 
             degreeSum += nodeDegree;
             scoreSum += nodeDegree * aoaScore;
+            sumAoa += aoaScore;
         }
         if (degreeSum == 0.0) {
-            return 0.0;
+            return new AoAMetric();
         }
-        return scoreSum / degreeSum;
+        
+        AoAMetric metric = new AoAMetric();
+        metric.setWeightedAvg(scoreSum / degreeSum);
+        metric.setAvg(sumAoa / (double)this.graph.getNodeList().size());
+        return metric;
     }
 
     public static void analyzeFiles() {
@@ -136,7 +143,7 @@ public class WordLinkageCalculator {
         String filePath = "resources/in/essays/essays_FYP_en/texts/";
         String saveLocation = "resources/in/essays/essays_FYP_en/";
         try {
-            Map<String, Double> scoreMap = new HashMap();
+            Map<String, AoAMetric> scoreMap = new HashMap();
 
             File folder = new File(filePath);
             FileFilter filter = (File f) -> f.getName().endsWith(".txt");
@@ -148,21 +155,25 @@ public class WordLinkageCalculator {
                 WordLinkageCalculator calculator = new WordLinkageCalculator(text, semanticModel, threshold);
                 
                 // Bird.csv Bristol.csv Cortese.csv Kuperman.csv Shock.csv
-                double score = calculator.getScore("Bird.csv");
+                AoAMetric metric = calculator.getScore("Bird.csv");
                 String fileKey = file.getName().replace(".txt", ".xml");
-                scoreMap.put(fileKey, score);
+                scoreMap.put(fileKey, metric);
             }
             
             BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements_word_linkage.csv", true));
+            StringBuilder concat = new StringBuilder();
+            concat.append("File,Avg,Weighted Avg\n");
+                
             scoreMap.entrySet().stream().forEach(score -> {
-                StringBuilder concat = new StringBuilder();
-                concat.append(score.getKey() + "," + score.getValue() + "\n");
-                try {
-                    out.write(concat.toString());
-                } catch (IOException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+                String fileName = score.getKey();
+                AoAMetric metric = score.getValue();
+                concat.append(fileName + "," + metric.getAvg() + "," + metric.getWeightedAvg() + "\n");
             });
+            try {
+                out.write(concat.toString());
+            } catch (IOException ex) {
+                Exceptions.printStackTrace(ex);
+            }
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
