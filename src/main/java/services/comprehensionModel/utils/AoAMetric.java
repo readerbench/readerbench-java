@@ -22,10 +22,12 @@ package services.comprehensionModel.utils;
 public class AoAMetric {
     private double weightedAvg;
     private double avg;
+    private double weightedIdfAvg;
     
     public AoAMetric() {
         this.weightedAvg = 0.0;
         this.avg = 0.0;
+        this.weightedIdfAvg = 0.0;
     }
     
     public double getWeightedAvg() {
@@ -40,5 +42,12 @@ public class AoAMetric {
     }
     public void setAvg(double avg) {
         this.avg = avg;
+    }
+    
+    public double getWeightedIdfAvg() {
+        return this.weightedIdfAvg;
+    }
+    public void setWeightedIdfAvg(double weightedIdfAvg) {
+        this.weightedIdfAvg = weightedIdfAvg;
     }
 }

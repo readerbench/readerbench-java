@@ -97,10 +97,7 @@ public class WordLinkageCalculator {
         Set<Word> wordSet = new TreeSet();
         document.getBlocks().forEach((block) -> {
             block.getSentences().forEach((sentence) -> {
-                List<Word> wordList = sentence.getAllWords();
-                wordList.forEach((word) -> {
-                    wordSet.add(word);
-                });
+                wordSet.addAll(sentence.getAllWords());
             });
         });
         return new ArrayList<>(wordSet);
@@ -109,21 +106,32 @@ public class WordLinkageCalculator {
     public AoAMetric getScore(String wordAcquisitionFile) {
         Map<String, Double> aoa = getWordAcquisitionAge(wordAcquisitionFile);
 
-        double scoreSum = 0.0;
-        double degreeSum = 0.0;
+        double scoreSum = 0.0, degreeSum = 0.0, idfSum = 0.0;
         double sumAoa = 0.0;
+        double idsAoaSum = 0.0;
+        double numNodes = 0.0;
+        
         for (CMNodeDO node : this.graph.getNodeList()) {
-            double nodeDegree = (double) this.graph.getEdgeList(node).size();
-
             double aoaScore = 0.0;
             if (aoa.containsKey(node.getWord().getLemma())) {
                 aoaScore = aoa.get(node.getWord().getLemma());
             } else if (aoa.containsKey(node.getWord().toString())) {
                 aoaScore = aoa.get(node.getWord().toString());
             }
-
-            degreeSum += nodeDegree;
+            else {
+                continue;
+            }
+            numNodes ++;
+            
+            double nodeDegree = (double) this.graph.getEdgeList(node).size();
+            double idf = this.semanticModel.getWordIDf(node.getWord());
+            
+            idsAoaSum += idf * aoaScore;
+            idfSum += idf;
+            
             scoreSum += nodeDegree * aoaScore;
+            degreeSum += nodeDegree;
+            
             sumAoa += aoaScore;
         }
         if (degreeSum == 0.0) {
@@ -132,7 +140,8 @@ public class WordLinkageCalculator {
         
         AoAMetric metric = new AoAMetric();
         metric.setWeightedAvg(scoreSum / degreeSum);
-        metric.setAvg(sumAoa / (double)this.graph.getNodeList().size());
+        metric.setAvg(sumAoa / numNodes);
+        metric.setWeightedIdfAvg(idsAoaSum / idfSum);
         return metric;
     }
 
@@ -143,7 +152,9 @@ public class WordLinkageCalculator {
         String filePath = "resources/in/essays/essays_FYP_en/texts/";
         String saveLocation = "resources/in/essays/essays_FYP_en/";
         try {
-            Map<String, AoAMetric> scoreMap = new HashMap();
+            Map<String, List<AoAMetric>> scoreMap = new HashMap();
+            
+            String[] aoaFiles = {"Bird.csv", "Bristol.csv", "Cortese.csv", "Kuperman.csv", "Shock.csv"};
 
             File folder = new File(filePath);
             FileFilter filter = (File f) -> f.getName().endsWith(".txt");
@@ -154,20 +165,34 @@ public class WordLinkageCalculator {
                 String text = readFile(file.getPath());
                 WordLinkageCalculator calculator = new WordLinkageCalculator(text, semanticModel, threshold);
                 
-                // Bird.csv Bristol.csv Cortese.csv Kuperman.csv Shock.csv
-                AoAMetric metric = calculator.getScore("Bird.csv");
-                String fileKey = file.getName().replace(".txt", ".xml");
-                scoreMap.put(fileKey, metric);
+                List<AoAMetric> metricList = new ArrayList();
+                for(String aoaFile : aoaFiles) {
+                    AoAMetric metric = calculator.getScore(aoaFile);
+                    metricList.add(metric);
+                }
+                
+                String fileKey = file.getName().replace(".txt", "");
+                scoreMap.put(fileKey, metricList);
             }
             
             BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements_word_linkage.csv", true));
             StringBuilder concat = new StringBuilder();
-            concat.append("File,Avg,Weighted Avg\n");
+            concat.append("File");
+            for(String aoaFile : aoaFiles) {
+                String scoreDesc = aoaFile.replace(".csv", "");
+                concat.append("," + scoreDesc + " Avg," + scoreDesc + " Degree Avg," + scoreDesc + " Idf Avg");
+            }
+            concat.append("\n");
                 
             scoreMap.entrySet().stream().forEach(score -> {
                 String fileName = score.getKey();
-                AoAMetric metric = score.getValue();
-                concat.append(fileName + "," + metric.getAvg() + "," + metric.getWeightedAvg() + "\n");
+                List<AoAMetric> metricList = score.getValue();
+                
+                concat.append(fileName);
+                metricList.forEach((metric) -> {
+                    concat.append("," + metric.getAvg() + "," + metric.getWeightedAvg() + "," + metric.getWeightedIdfAvg());
+                });
+                concat.append("\n");
             });
             try {
                 out.write(concat.toString());
