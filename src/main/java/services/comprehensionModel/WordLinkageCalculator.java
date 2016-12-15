@@ -54,17 +54,19 @@ import services.semanticModels.LSA.LSA;
 public class WordLinkageCalculator {
     public static final Logger logger = Logger.getLogger("");
 
-    private final ISemanticModel semanticModel;
+    private final LSA semanticModel;
     private final double threshold;
+    private AbstractDocument document;
 
     private CMGraphDO graph;
 
-    public WordLinkageCalculator(String text, ISemanticModel semanticModel, double threshold) {
+    public WordLinkageCalculator(String text, LSA semanticModel, double threshold) {
         this.semanticModel = semanticModel;
         this.threshold = threshold;
 
         CMIndexer cmIndexer = new CMIndexer(text, semanticModel);
         this.graph = this.buildSemanticGraph(cmIndexer.getDocument());
+        this.document = cmIndexer.getDocument();
         List<WordDistanceIndexer> syntacticIndexers = cmIndexer.getSyntacticIndexerList();
         for (WordDistanceIndexer indexer : syntacticIndexers) {
             this.graph.combineWithLinksFrom(indexer.getCMGraph(CMNodeType.TextBased));
@@ -122,22 +124,26 @@ public class WordLinkageCalculator {
                 continue;
             }
             numNodes ++;
+            double noOccurences = 1.0;
+            if (document.getWordOccurences().containsKey(node.getWord())) {
+                noOccurences = (double)document.getWordOccurences().get(node.getWord());
+            }
             
             double nodeDegree = (double) this.graph.getEdgeList(node).size();
             double idf = this.semanticModel.getWordIDf(node.getWord());
             
-            idsAoaSum += idf * aoaScore;
+            idsAoaSum += noOccurences * idf * aoaScore;
             idfSum += idf;
             
             scoreSum += nodeDegree * aoaScore;
             degreeSum += nodeDegree;
             
-            sumAoa += aoaScore;
+            sumAoa += noOccurences * aoaScore;
         }
         if (degreeSum == 0.0) {
             return new AoAMetric();
         }
-        
+                
         AoAMetric metric = new AoAMetric();
         metric.setWeightedAvg(scoreSum / degreeSum);
         metric.setAvg(sumAoa / numNodes);
@@ -146,7 +152,7 @@ public class WordLinkageCalculator {
     }
 
     public static void analyzeFiles() {
-        ISemanticModel semanticModel = LSA.loadLSA(CSCLConstants.LSA_PATH, Lang.en);
+        LSA semanticModel = LSA.loadLSA(CSCLConstants.LSA_PATH, Lang.en);
         double threshold = 0.3;
 
         String filePath = "resources/in/essays/essays_FYP_en/texts/";
