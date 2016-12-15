@@ -112,6 +112,7 @@ public class WordLinkageCalculator {
         double sumAoa = 0.0;
         double idsAoaSum = 0.0;
         double numNodes = 0.0;
+        double totalNoOccurences = 0.0;
         
         for (CMNodeDO node : this.graph.getNodeList()) {
             double aoaScore = 0.0;
@@ -128,6 +129,7 @@ public class WordLinkageCalculator {
             if (document.getWordOccurences().containsKey(node.getWord())) {
                 noOccurences = (double)document.getWordOccurences().get(node.getWord());
             }
+            totalNoOccurences += noOccurences;
             
             double nodeDegree = (double) this.graph.getEdgeList(node).size();
             double idf = this.semanticModel.getWordIDf(node.getWord());
@@ -145,9 +147,9 @@ public class WordLinkageCalculator {
         }
                 
         AoAMetric metric = new AoAMetric();
-        metric.setWeightedAvg(scoreSum / degreeSum);
+        metric.setWeightedAvg(scoreSum / (degreeSum * totalNoOccurences));
         metric.setAvg(sumAoa / numNodes);
-        metric.setWeightedIdfAvg(idsAoaSum / idfSum);
+        metric.setWeightedIdfAvg(idsAoaSum / (idfSum * totalNoOccurences));
         return metric;
     }
 
