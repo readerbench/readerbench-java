@@ -129,17 +129,17 @@ public class WordLinkageCalculator {
             if (document.getWordOccurences().containsKey(node.getWord())) {
                 noOccurences = (double)document.getWordOccurences().get(node.getWord());
             }
-            totalNoOccurences += noOccurences;
             
             double nodeDegree = (double) this.graph.getEdgeList(node).size();
             double idf = this.semanticModel.getWordIDf(node.getWord());
             
             idsAoaSum += noOccurences * idf * aoaScore;
-            idfSum += idf;
+            idfSum += noOccurences * idf;
             
             scoreSum += nodeDegree * aoaScore;
             degreeSum += nodeDegree;
             
+            totalNoOccurences += noOccurences;
             sumAoa += noOccurences * aoaScore;
         }
         if (degreeSum == 0.0) {
@@ -147,9 +147,9 @@ public class WordLinkageCalculator {
         }
                 
         AoAMetric metric = new AoAMetric();
-        metric.setAvg(sumAoa / (numNodes * totalNoOccurences));
+        metric.setAvg(sumAoa / totalNoOccurences);
         metric.setWeightedAvg(scoreSum / degreeSum);
-        metric.setWeightedIdfAvg(idsAoaSum / (idfSum * totalNoOccurences));
+        metric.setWeightedIdfAvg(idsAoaSum / idfSum);
         return metric;
     }
 
