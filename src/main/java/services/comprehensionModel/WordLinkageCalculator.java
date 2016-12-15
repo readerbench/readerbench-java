@@ -147,8 +147,8 @@ public class WordLinkageCalculator {
         }
                 
         AoAMetric metric = new AoAMetric();
-        metric.setWeightedAvg(scoreSum / (degreeSum * totalNoOccurences));
-        metric.setAvg(sumAoa / numNodes);
+        metric.setAvg(sumAoa / (numNodes * totalNoOccurences));
+        metric.setWeightedAvg(scoreSum / degreeSum);
         metric.setWeightedIdfAvg(idsAoaSum / (idfSum * totalNoOccurences));
         return metric;
     }
