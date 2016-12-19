@@ -621,9 +621,12 @@ public class ReaderBenchServer {
 
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
+            Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             PdfToTextConverter pdfConverter = new PdfToTextConverter();
             String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cvFile"), true);
+            // ignore lines containing at least one of the words in the ignoreList list
+            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
 
             LOGGER.info("Continut cv: " + cvContent);
             hm.put("text", cvContent);
@@ -634,7 +637,7 @@ public class ReaderBenchServer {
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
                     hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
-            result.setText(cvDocument.getText());
+            result.setText(cvDocument.getProcessedText());
 
             queryResult.setData(result);
 
