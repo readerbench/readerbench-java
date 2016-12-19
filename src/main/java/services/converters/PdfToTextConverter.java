@@ -15,16 +15,19 @@
  */
 package services.converters;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.FileUtils;
@@ -43,6 +46,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import org.openide.util.Exceptions;
 import webService.ReaderBenchServer;
 
 public class PdfToTextConverter {
@@ -516,6 +520,38 @@ public class PdfToTextConverter {
         }
 
         return parsedText;
+    }
+    
+    /**
+     * Removes lines from a given string that contain at least one word of a list
+     * 
+     * @param textContent
+     *          The text that has to be processed
+     * @param wordsToRemoveLines
+     *          Set of words to look for
+     * @return 
+     *          The cleaned String
+     */
+    public String removeLines(String textContent, Set<String> wordsToRemoveLines) {
+        StringBuilder newTextContent = new StringBuilder();
+        try {
+            BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
+            String line;
+            while( (line = bufferReader.readLine()) != null )
+            {
+                boolean cleanLine = true;
+                for (String word : wordsToRemoveLines) {
+                    if (line.contains(word)) {
+                        cleanLine = false;
+                        break;
+                    }
+                }
+                if (cleanLine) newTextContent.append(line).append("\n");
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return newTextContent.toString();
     }
 
     public Integer getPages() {
