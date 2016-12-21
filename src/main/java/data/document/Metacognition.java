@@ -108,7 +108,7 @@ public class Metacognition extends Document {
 
             logger.info("Building internal representation ...");
             Metacognition meta = new Metacognition(pathToDoc, tmp, initialReadingMaterial, usePOSTagging);
-            extractDocumentDescriptors(doc, meta);
+            extractDocumentDescriptors(doc, meta, usePOSTagging);
 
             // add corresponding links from verbalizations to initial document
             nl = doc.getElementsByTagName("verbalization");
@@ -262,9 +262,15 @@ public class Metacognition extends Document {
      * @param meta
      * @throws ParseException
      */
-    protected static void extractDocumentDescriptors(Element doc, Metacognition meta) throws ParseException {
+    protected static void extractDocumentDescriptors(Element doc, Metacognition meta, boolean usePOSTagging) throws ParseException {
         Element el;
         NodeList nl;
+        // determine title
+        nl = doc.getElementsByTagName("title");
+        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+            meta.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), meta.getSemanticModels(), meta.getLanguage(), usePOSTagging);
+        }
+        
         // get author
         nl = doc.getElementsByTagName("author");
         if (nl != null && nl.getLength() > 0) {
