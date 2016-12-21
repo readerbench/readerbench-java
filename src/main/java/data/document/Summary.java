@@ -73,7 +73,7 @@ public class Summary extends Metacognition {
             logger.info("Building summary internal representation ...");
             Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging);
 
-            extractDocumentDescriptors(doc, meta);
+            extractDocumentDescriptors(doc, meta, usePOSTagging);
             return meta;
         } catch (ParserConfigurationException | SAXException | IOException | ParseException e) {
             logger.severe("Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "!");
