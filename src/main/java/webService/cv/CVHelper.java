@@ -148,8 +148,11 @@ public class CVHelper {
         result.setMaxFontSize(pdfConverter.getMaxFontSize());
         result.setTotalCharacters(pdfConverter.getTotalCharacters());
         result.setBoldCharacters(pdfConverter.getBoldCharacters());
+        result.setBoldCharsCoverage(pdfConverter.getBoldCharsCoverage());
         result.setItalicCharacters(pdfConverter.getItalicCharacters());
+        result.setItalicCharsCoverage(pdfConverter.getItalicCharsCoverage());
         result.setBoldItalicCharacters(pdfConverter.getBoldItalicCharacters());
+        result.setBoldItalicCharsCoverage(pdfConverter.getBoldItalicCharsCoverage());
 
         // positive words
         result.setPositiveWords(positiveWords);
