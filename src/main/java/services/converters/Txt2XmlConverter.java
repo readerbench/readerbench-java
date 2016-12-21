@@ -434,16 +434,27 @@ public class Txt2XmlConverter {
             String title = "";
             String line;
             Pattern p = Pattern.compile("^[0-9]+");
+            Pattern pMatildaAvaleur = Pattern.compile("^XPANE[0-9]+[A-Z]{1}[0-9]+");
 
             try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding))) {
                 while ((line = in.readLine()) != null) {
                     if (line.trim().length() > 0) {
                         Matcher m = p.matcher(line);
+                        Matcher mMatildaAvaleur = pMatildaAvaleur.matcher(line);
                         if (m.find()) {
                             // flush previous content
                             if (content.length() > 0) {
                                 String destination = dir.getPath() + "/" + title + ".xml";
                                 processContent(title.replaceAll("[0-9]", "").trim(),
+                                        new String(content.getBytes("UTF-8"), "UTF-8"), lang, destination);
+                            }
+                            title = line.trim();
+                            content = "";
+                        } else if (mMatildaAvaleur.find()) {
+                            // flush previous content
+                            if (content.length() > 0) {
+                                String destination = dir.getPath() + "/" + title + ".xml";
+                                processContent(title.trim(),
                                         new String(content.getBytes("UTF-8"), "UTF-8"), lang, destination);
                             }
                             title = line.trim();
