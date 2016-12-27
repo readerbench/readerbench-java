@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 public class ResultCv {
 
     private String text;
+    private String processedText;
+    
     private List<String> feedback;
     private ResultTopic concepts;
     private Map<String, Integer> wordOccurences;
@@ -145,6 +147,14 @@ public class ResultCv {
         this.text = text;
     }
 
+    public String getProcessedText() {
+        return processedText;
+    }
+
+    public void setProcessedText(String processedText) {
+        this.processedText = processedText;
+    }
+    
     public List<ResultKeyword> getKeywords() {
         return keywords;
     }
