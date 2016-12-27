@@ -637,7 +637,8 @@ public class ReaderBenchServer {
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
                     hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
-            result.setText(cvDocument.getProcessedText());
+            result.setText(cvDocument.getText());
+            result.setProcessedText(cvDocument.getProcessedText());
 
             queryResult.setData(result);
 
