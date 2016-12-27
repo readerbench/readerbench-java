@@ -20,10 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ResultCv {
+public class ResultCv extends Result {
 
     private String text;
     private String processedText;
+    private Map<String, String> socialNetworksLinksFound;
     
     private List<String> feedback;
     private ResultTopic concepts;
@@ -151,6 +152,14 @@ public class ResultCv {
         return processedText;
     }
 
+    public Map<String, String> getSocialNetworksLinksFound() {
+        return socialNetworksLinksFound;
+    }
+
+    public void setSocialNetworksLinksFound(Map<String, String> socialNetworksLinksFound) {
+        this.socialNetworksLinksFound = socialNetworksLinksFound;
+    }
+    
     public void setProcessedText(String processedText) {
         this.processedText = processedText;
     }

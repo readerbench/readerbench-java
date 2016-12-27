@@ -609,6 +609,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/cvProcessing", (request, response) -> {
+            
+            Set<String> socialNetworksLinks = new HashSet<String>();
+            socialNetworksLinks.add("LinkedIn");
+            socialNetworksLinks.add("Viadeo");
+    
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -627,8 +632,9 @@ public class ReaderBenchServer {
             String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cvFile"), true);
             // ignore lines containing at least one of the words in the ignoreList list
             cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
+            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
 
-            LOGGER.info("Continut cv: " + cvContent);
+            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
             hm.put("text", cvContent);
             AbstractDocument cvDocument = QueryHelper.processQuery(hm);
             hm.put("text", hm.get("keywords"));
@@ -639,7 +645,13 @@ public class ReaderBenchServer {
                     hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
-
+            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+            
+            if (socialNetworksLinksFound.get("LinkedIn") == null)
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
+            if (socialNetworksLinksFound.get("Viadeo") == null)
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
+            
             queryResult.setData(result);
 
             response.type("application/json");

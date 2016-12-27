@@ -173,7 +173,7 @@ public class PdfToTextConverter {
     public Integer getBoldCharacters() {
         return boldCharacters;
     }
-    
+
     public void setBoldCharacters(Integer boldCharacters) {
         this.boldCharacters = boldCharacters;
     }
@@ -193,11 +193,11 @@ public class PdfToTextConverter {
     public void setItalicCharacters(Integer italicCharacters) {
         this.italicCharacters = italicCharacters;
     }
-    
+
     public Float getItalicCharsCoverage() {
         return italicCharsCoverage;
     }
-    
+
     public void setItalicCharsCoverage(Float italicCharsCoverage) {
         this.italicCharsCoverage = italicCharsCoverage;
     }
@@ -209,11 +209,11 @@ public class PdfToTextConverter {
     public void setBoldItalicCharacters(Integer boldItalicCharacters) {
         this.boldItalicCharacters = boldItalicCharacters;
     }
-    
+
     public Float getBoldItalicCharsCoverage() {
         return boldItalicCharsCoverage;
     }
-    
+
     public void setBoldItalicCharsCoverage(Float boldItalicCharsCoverage) {
         this.boldItalicCharsCoverage = boldItalicCharsCoverage;
     }
@@ -546,24 +546,21 @@ public class PdfToTextConverter {
 
         return parsedText;
     }
-    
+
     /**
-     * Removes lines from a given string that contain at least one word of a list
-     * 
-     * @param textContent
-     *          The text that has to be processed
-     * @param wordsToRemoveLines
-     *          Set of words to look for
-     * @return 
-     *          The cleaned String
+     * Removes lines from a given string that contain at least one word of a
+     * list
+     *
+     * @param textContent The text that has to be processed
+     * @param wordsToRemoveLines Set of words to look for
+     * @return The cleaned String
      */
     public String removeLines(String textContent, Set<String> wordsToRemoveLines) {
         StringBuilder newTextContent = new StringBuilder();
         try {
             BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
             String line;
-            while( (line = bufferReader.readLine()) != null )
-            {
+            while ((line = bufferReader.readLine()) != null) {
                 boolean cleanLine = true;
                 for (String word : wordsToRemoveLines) {
                     if (line.contains(word)) {
@@ -571,12 +568,38 @@ public class PdfToTextConverter {
                         break;
                     }
                 }
-                if (cleanLine) newTextContent.append(line).append("\n");
+                if (cleanLine) {
+                    newTextContent.append(line).append("\n");
+                }
             }
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
         return newTextContent.toString();
+    }
+
+    public Map<String, String> extractSocialLinks(String textContent, Set<String> socialNetworksLinks) {
+        Map<String, String> socialNetworksLinksFound = new HashMap<>();
+        try {
+            BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
+            String line;
+            while ((line = bufferReader.readLine()) != null) {
+                for (String socialNetworkLink : socialNetworksLinks) {
+                    if (socialNetworksLinksFound.get(socialNetworkLink) == null) {
+                        int pos;
+                        if (-1 != (pos = line.toLowerCase().indexOf(socialNetworkLink.toLowerCase()))) {
+                            int start = line.toLowerCase().substring(0, pos).lastIndexOf("http");
+                            int end = line.indexOf(' ', pos);
+                            socialNetworksLinksFound.put(socialNetworkLink, line.substring(start, end));
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return socialNetworksLinksFound;
     }
 
     public Integer getPages() {
