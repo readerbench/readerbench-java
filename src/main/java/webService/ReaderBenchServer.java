@@ -369,21 +369,22 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/search", (request, response) -> {
-            Set<String> requiredParams = setInitialRequiredParams();
-            // TODO: refactor here similar to other endpoints
-            response.type("application/json");
+            Set<String> requiredParams = new HashSet<>();
+            requiredParams.add("text");
+            requiredParams.add("path");
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String text = request.queryParams("text");
-            String path = request.queryParams("path");
-
+            Map<String, String> hm = hmParams(request);
             int maxContentSize = Integer.MAX_VALUE;
-            String maxContentSizeStr = request.queryParams("mcs");
+            String maxContentSizeStr = hm.get("mcs");
             if (maxContentSizeStr != null) {
                 maxContentSize = Integer.parseInt(maxContentSizeStr);
             }
 
             QueryResultSearch queryResult = new QueryResultSearch();
-            queryResult.setData(SearchClient.search(text, setDocuments(path), maxContentSize));
+            queryResult.setData(SearchClient.search(hm.get("text"), setDocuments(hm.get("path")), maxContentSize));
+            
+            response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
