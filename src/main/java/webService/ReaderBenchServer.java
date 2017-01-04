@@ -647,6 +647,27 @@ public class ReaderBenchServer {
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(socialNetworksLinksFound);
             
+            StringBuilder sb = new StringBuilder();
+            boolean keywordWarning = false;
+            sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
+            for(String keyword : keywordsList) {
+                boolean found = false;
+                for(ResultKeyword resultKeyword : result.getKeywords()) {
+                    if (keyword.equals(resultKeyword.getName())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (!keywordWarning) keywordWarning = true;
+                    sb.append(keyword).append(", ");
+                }
+            }
+            if (keywordWarning) result.getWarnings().add(sb.toString());
+            
+            if (result.getPages() > 2)
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_pages"));
+            
             if (socialNetworksLinksFound.get("LinkedIn") == null)
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             if (socialNetworksLinksFound.get("Viadeo") == null)
