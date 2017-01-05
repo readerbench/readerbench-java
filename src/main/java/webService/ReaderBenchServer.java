@@ -87,6 +87,7 @@ import webService.queryResult.QueryResultSearch;
 import webService.queryResult.QueryResultSelfExplanation;
 import webService.queryResult.QueryResultSemanticAnnotation;
 import webService.queryResult.QueryResultSentiment;
+import webService.queryResult.QueryResultSimilarConcepts;
 import webService.queryResult.QueryResultTextCategorization;
 import webService.queryResult.QueryResultTextSimilarity;
 import webService.queryResult.QueryResultTextualComplexity;
@@ -102,6 +103,7 @@ import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
 import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
+import webService.result.ResultSimilarConcepts;
 import webService.result.ResultTextCategorization;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
@@ -262,6 +264,44 @@ public class ReaderBenchServer {
         );
         
         return new ResultTextSimilarity(Formatting.formatNumber(semanticModel.getSimilarity(docText1, docText2), 2));
+    }
+    
+    /**
+     * Retrieves similar concepts for a given concepts
+     * 
+     * @param seed  The word
+     * @param language  Language of the word
+     * @param model Semantic model to be used
+     * @param corpus    Corpus to be used for semantic model
+     * @param minThreshold  Threshold to be used for similar concepts
+     * @return 
+     */
+    private ResultSimilarConcepts similarConcepts(String seed, String language, String model, String corpus, double minThreshold) {
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        Lang lang = Lang.getLang(language);
+        if (lang == null) return null;
+        
+        ISemanticModel semanticModel = null;
+        List<ISemanticModel> models = new ArrayList<>();
+        if (model.toLowerCase().compareTo("lsa") == 0) {
+            semanticModel = LSA.loadLSA(corpus, lang);
+        }
+        else if (model.toLowerCase().compareTo("lda") == 0){
+            semanticModel = LDA.loadLDA(corpus, lang);    
+        }
+        
+        if (semanticModel == null) return null;
+        models.add(semanticModel);
+        
+        Document docSeed = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(seed),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -892,6 +932,32 @@ public class ReaderBenchServer {
 
             QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
             queryResult.setData(textSimilarity(hm.get("text1"), hm.get("text2"), hm.get("lang"), hm.get("model"), hm.get("corpus")));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        
+        Spark.post("/similarConcepts", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("seed");
+            requiredParams.add("lang");
+            requiredParams.add("model");
+            requiredParams.add("corpus");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
+            double minThreshold;
+            try {
+                minThreshold = Double.parseDouble(hm.get("threshold"));
+            }
+            catch(NullPointerException e) {
+                minThreshold = 0.3;
+            }
+            
+            QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
+            queryResult.setData(similarConcepts(hm.get("seed"), hm.get("lang"), hm.get("model"), hm.get("corpus"), minThreshold));
 
             response.type("application/json");
             return queryResult.convertToJson();
