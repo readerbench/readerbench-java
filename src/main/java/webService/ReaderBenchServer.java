@@ -87,7 +87,9 @@ import webService.queryResult.QueryResultSearch;
 import webService.queryResult.QueryResultSelfExplanation;
 import webService.queryResult.QueryResultSemanticAnnotation;
 import webService.queryResult.QueryResultSentiment;
+import webService.queryResult.QueryResultSimilarConcepts;
 import webService.queryResult.QueryResultTextCategorization;
+import webService.queryResult.QueryResultTextSimilarity;
 import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
 import webService.queryResult.QueryResultvCoP;
@@ -101,7 +103,9 @@ import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
 import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
+import webService.result.ResultSimilarConcepts;
 import webService.result.ResultTextCategorization;
+import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
@@ -216,6 +220,88 @@ public class ReaderBenchServer {
         summary.append(s.getAlternateText());
 
         return new ResultSelfExplanation(summary.toString(), readingStrategies);
+    }
+    
+    /**
+     * Computes text similarity between two strings
+     * 
+     * @param text1 First text
+     * @param text2 Second text
+     * @param hm    Map that must contain the language, model and corpus to be used
+     * @return 
+     */
+    private ResultTextSimilarity textSimilarity(String text1, String text2, String language, String model, String corpus) {
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        Lang lang = Lang.getLang(language);
+        if (lang == null) return null;
+        
+        ISemanticModel semanticModel = null;
+        List<ISemanticModel> models = new ArrayList<>();
+        if (model.toLowerCase().compareTo("lsa") == 0) {
+            semanticModel = LSA.loadLSA(corpus, lang);
+        }
+        else if (model.toLowerCase().compareTo("lda") == 0){
+            semanticModel = LDA.loadLDA(corpus, lang);    
+        }
+        
+        if (semanticModel == null) return null;
+        models.add(semanticModel);
+        
+        Document docText1 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text1),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        Document docText2 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text2),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        return new ResultTextSimilarity(Formatting.formatNumber(semanticModel.getSimilarity(docText1, docText2), 2));
+    }
+    
+    /**
+     * Retrieves similar concepts for a given concepts
+     * 
+     * @param seed  The word
+     * @param language  Language of the word
+     * @param model Semantic model to be used
+     * @param corpus    Corpus to be used for semantic model
+     * @param minThreshold  Threshold to be used for similar concepts
+     * @return 
+     */
+    private ResultSimilarConcepts similarConcepts(String seed, String language, String model, String corpus, double minThreshold) {
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        Lang lang = Lang.getLang(language);
+        if (lang == null) return null;
+        
+        ISemanticModel semanticModel = null;
+        List<ISemanticModel> models = new ArrayList<>();
+        if (model.toLowerCase().compareTo("lsa") == 0) {
+            semanticModel = LSA.loadLSA(corpus, lang);
+        }
+        else if (model.toLowerCase().compareTo("lda") == 0){
+            semanticModel = LDA.loadLDA(corpus, lang);    
+        }
+        
+        if (semanticModel == null) return null;
+        models.add(semanticModel);
+        
+        Document docSeed = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(seed),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -369,21 +455,22 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/search", (request, response) -> {
-            Set<String> requiredParams = setInitialRequiredParams();
-            // TODO: refactor here similar to other endpoints
-            response.type("application/json");
+            Set<String> requiredParams = new HashSet<>();
+            requiredParams.add("text");
+            requiredParams.add("path");
+            errorIfParamsMissing(requiredParams, request.queryParams());
 
-            String text = request.queryParams("text");
-            String path = request.queryParams("path");
-
+            Map<String, String> hm = hmParams(request);
             int maxContentSize = Integer.MAX_VALUE;
-            String maxContentSizeStr = request.queryParams("mcs");
+            String maxContentSizeStr = hm.get("mcs");
             if (maxContentSizeStr != null) {
                 maxContentSize = Integer.parseInt(maxContentSizeStr);
             }
 
             QueryResultSearch queryResult = new QueryResultSearch();
-            queryResult.setData(SearchClient.search(text, setDocuments(path), maxContentSize));
+            queryResult.setData(SearchClient.search(hm.get("text"), setDocuments(hm.get("path")), maxContentSize));
+            
+            response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
@@ -647,6 +734,27 @@ public class ReaderBenchServer {
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(socialNetworksLinksFound);
             
+            StringBuilder sb = new StringBuilder();
+            boolean keywordWarning = false;
+            sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
+            for(String keyword : keywordsList) {
+                boolean found = false;
+                for(ResultKeyword resultKeyword : result.getKeywords()) {
+                    if (keyword.equals(resultKeyword.getName())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (!keywordWarning) keywordWarning = true;
+                    sb.append(keyword).append(", ");
+                }
+            }
+            if (keywordWarning) result.getWarnings().add(sb.toString());
+            
+            if (result.getPages() > 2)
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_pages"));
+            
             if (socialNetworksLinksFound.get("LinkedIn") == null)
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             if (socialNetworksLinksFound.get("Viadeo") == null)
@@ -807,6 +915,52 @@ public class ReaderBenchServer {
             LOGGER.log(Level.INFO, "queryResult{0}", result);
 
             return result;
+        });
+        
+        Spark.post("/textSimilarity", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("text1");
+            requiredParams.add("text2");
+            requiredParams.add("lang");
+            requiredParams.add("model");
+            requiredParams.add("corpus");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
+
+            QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
+            queryResult.setData(textSimilarity(hm.get("text1"), hm.get("text2"), hm.get("lang"), hm.get("model"), hm.get("corpus")));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        
+        Spark.post("/similarConcepts", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("seed");
+            requiredParams.add("lang");
+            requiredParams.add("model");
+            requiredParams.add("corpus");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
+            double minThreshold;
+            try {
+                minThreshold = Double.parseDouble(hm.get("threshold"));
+            }
+            catch(NullPointerException e) {
+                minThreshold = 0.3;
+            }
+            
+            QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
+            queryResult.setData(similarConcepts(hm.get("seed"), hm.get("lang"), hm.get("model"), hm.get("corpus"), minThreshold));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
 
         Spark.get("/lak/nodes", (request, response) -> {
