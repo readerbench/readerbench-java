@@ -152,7 +152,7 @@ public class RunMeasurementsView extends JFrame {
                         .getString("RunMeasurementsView.panelRunMeasurements.title"));
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 560, 150);
+        setBounds(100, 100, 560, 160);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
