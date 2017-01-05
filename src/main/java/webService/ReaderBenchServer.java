@@ -88,6 +88,7 @@ import webService.queryResult.QueryResultSelfExplanation;
 import webService.queryResult.QueryResultSemanticAnnotation;
 import webService.queryResult.QueryResultSentiment;
 import webService.queryResult.QueryResultTextCategorization;
+import webService.queryResult.QueryResultTextSimilarity;
 import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
 import webService.queryResult.QueryResultvCoP;
@@ -102,6 +103,7 @@ import webService.result.ResultReadingStrategy;
 import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
 import webService.result.ResultTextCategorization;
+import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
@@ -216,6 +218,50 @@ public class ReaderBenchServer {
         summary.append(s.getAlternateText());
 
         return new ResultSelfExplanation(summary.toString(), readingStrategies);
+    }
+    
+    /**
+     * Computes text similarity between two strings
+     * 
+     * @param text1 First text
+     * @param text2 Second text
+     * @param hm    Map that must contain the language, model and corpus to be used
+     * @return 
+     */
+    private ResultTextSimilarity textSimilarity(String text1, String text2, String language, String model, String corpus) {
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        Lang lang = Lang.getLang(language);
+        if (lang == null) return null;
+        
+        ISemanticModel semanticModel = null;
+        List<ISemanticModel> models = new ArrayList<>();
+        if (model.toLowerCase().compareTo("lsa") == 0) {
+            semanticModel = LSA.loadLSA(corpus, lang);
+        }
+        else if (model.toLowerCase().compareTo("lda") == 0){
+            semanticModel = LDA.loadLDA(corpus, lang);    
+        }
+        
+        if (semanticModel == null) return null;
+        models.add(semanticModel);
+        
+        Document docText1 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text1),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        Document docText2 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text2),
+                models,
+                lang,
+                false   // pos tagging
+        );
+        
+        return new ResultTextSimilarity(Formatting.formatNumber(semanticModel.getSimilarity(docText1, docText2), 2));
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -829,6 +875,26 @@ public class ReaderBenchServer {
             LOGGER.log(Level.INFO, "queryResult{0}", result);
 
             return result;
+        });
+        
+        Spark.post("/textSimilarity", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("text1");
+            requiredParams.add("text2");
+            requiredParams.add("lang");
+            requiredParams.add("model");
+            requiredParams.add("corpus");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+            
+            Map<String, String> hm = hmParams(json);
+
+            QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
+            queryResult.setData(textSimilarity(hm.get("text1"), hm.get("text2"), hm.get("lang"), hm.get("model"), hm.get("corpus")));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
 
         Spark.get("/lak/nodes", (request, response) -> {
