@@ -20,9 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class ResultCv {
+public class ResultCv extends Result {
 
     private String text;
+    private String processedText;
+    private Map<String, String> socialNetworksLinksFound;
+    
     private List<String> feedback;
     private ResultTopic concepts;
     private Map<String, Integer> wordOccurences;
@@ -44,8 +47,11 @@ public class ResultCv {
     private Float maxFontSize;
     private Integer totalCharacters;
     private Integer boldCharacters;
+    private Float boldCharsCoverage;
     private Integer italicCharacters;
+    private Float italicCharsCoverage;
     private Integer boldItalicCharacters;
+    private Float boldItalicCharsCoverage;
 
     private List<String> positiveWords;
     private List<String> negativeWords;
@@ -142,6 +148,22 @@ public class ResultCv {
         this.text = text;
     }
 
+    public String getProcessedText() {
+        return processedText;
+    }
+
+    public Map<String, String> getSocialNetworksLinksFound() {
+        return socialNetworksLinksFound;
+    }
+
+    public void setSocialNetworksLinksFound(Map<String, String> socialNetworksLinksFound) {
+        this.socialNetworksLinksFound = socialNetworksLinksFound;
+    }
+    
+    public void setProcessedText(String processedText) {
+        this.processedText = processedText;
+    }
+    
     public List<ResultKeyword> getKeywords() {
         return keywords;
     }
@@ -342,12 +364,28 @@ public class ResultCv {
         this.boldCharacters = boldCharacters;
     }
 
+    public Float getBoldCharsCoverage() {
+        return boldCharsCoverage;
+    }
+
+    public void setBoldCharsCoverage(Float boldCharsCoverage) {
+        this.boldCharsCoverage = boldCharsCoverage;
+    }
+
     public Integer getItalicCharacters() {
         return italicCharacters;
     }
 
     public void setItalicCharacters(Integer italicCharacters) {
         this.italicCharacters = italicCharacters;
+    }
+    
+    public Float getItalicCharsCoverage() {
+        return italicCharsCoverage;
+    }
+    
+    public void setItalicCharsCoverage(Float italicCharsCoverage) {
+        this.italicCharsCoverage = italicCharsCoverage;
     }
 
     public Integer getBoldItalicCharacters() {
@@ -356,6 +394,14 @@ public class ResultCv {
 
     public void setBoldItalicCharacters(Integer boldItalicCharacters) {
         this.boldItalicCharacters = boldItalicCharacters;
+    }
+    
+    public Float getBoldItalicCharsCoverage() {
+        return boldItalicCharsCoverage;
+    }
+    
+    public void setBoldItalicCharsCoverage(Float boldItalicCharsCoverage) {
+        this.boldItalicCharsCoverage = boldItalicCharsCoverage;
     }
 
 }

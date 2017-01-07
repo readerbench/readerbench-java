@@ -96,7 +96,7 @@ public class EssayProcessingView extends JFrame {
                     List<ISemanticModel> models = new ArrayList<>();
                     models.add(lsa);
                     models.add(lda);
-                    DataGathering.processTexts(path, -1, true, models, lang, usePOSTagging, computeDialogism);
+                    DataGathering.processTexts(path, "", true, models, lang, usePOSTagging, computeDialogism);
                 } catch (Exception e) {
                     System.err.println("Error: " + e.getMessage());
                     e.printStackTrace();

@@ -5,6 +5,9 @@
  */
 package runtime.cv;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  *
  * @author gabigutu
@@ -31,7 +34,9 @@ public class CVConstants {
     public static final double FAN_DELTA = 1;
     public static final String KEYWORDS = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
     public static final String IGNORE = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
-    
+    // the following keywords should lead to the deletion of the entire row when met
+    public static final String IGNORE_LINES = "rue";
+        
     public static final String CSV_DELIM = ",";
     public static final String CV_PATH_SAMPLE = "resources/in/cv/cv_sample/";
     public static final String CV_PATH = "resources/in/cv_new/cv_analyse/";
