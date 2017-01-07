@@ -434,11 +434,13 @@ public class Txt2XmlConverter {
             String title = "";
             String line;
             Pattern p = Pattern.compile("^[0-9]+");
+            Pattern pMatildaAvaleur = Pattern.compile("^XPANE[0-9]+[A-Z]{1}[0-9]+");
 
             try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding))) {
                 while ((line = in.readLine()) != null) {
                     if (line.trim().length() > 0) {
                         Matcher m = p.matcher(line);
+                        Matcher mMatildaAvaleur = pMatildaAvaleur.matcher(line);
                         if (m.find()) {
                             // flush previous content
                             if (content.length() > 0) {
@@ -447,6 +449,16 @@ public class Txt2XmlConverter {
                                         new String(content.getBytes("UTF-8"), "UTF-8"), lang, destination);
                             }
                             title = line.trim();
+                            content = "";
+                        } else if (mMatildaAvaleur.find()) {
+                            // flush previous content
+                            if (content.length() > 0) {
+                                String destination = dir.getPath() + "/" + title + ".xml";
+                                processContent(title.trim(),
+                                        new String(content.getBytes("UTF-8"), "UTF-8"), lang, destination);
+                            }
+                            title = line.trim();
+                            content = "";
                         } else {
                             content += line.trim() + "\n";
                         }
@@ -515,7 +527,9 @@ public class Txt2XmlConverter {
     }
 
     public static void main(String[] args) throws ParserConfigurationException, SAXException, TransformerException {
-        parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
+        //parseDocFiles("resources/in/ViBOA_nl/analysis/", Lang.nl);
+        parseMergedTxtFiles("resources/in/Philippe/DEPP/corrEssays/avaleur", Lang.fr, "UTF-8");
+        parseMergedTxtFiles("resources/in/Philippe/DEPP/corrEssays/matilda", Lang.fr, "UTF-8");
 //        parseDocFiles("resources/in/ViBOA_nl/design task 1/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/design task 2/", Lang.nl);
 //        parseDocFiles("resources/in/ViBOA_nl/evaluation task 1/", Lang.nl);
