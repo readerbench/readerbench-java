@@ -209,7 +209,7 @@ public class TASAAnalyzer {
         String word;
         try {
             try (BufferedReader br = new BufferedReader(
-                    new FileReader("resources/config/EN/word list/AoA/" + normFile))) {
+                    new FileReader("resources/config/EN/word lists/AoA/" + normFile))) {
                 while ((line = br.readLine()) != null) {
                     tokens = line.split(",");
                     word = tokens[0].trim().replaceAll(" ", "");

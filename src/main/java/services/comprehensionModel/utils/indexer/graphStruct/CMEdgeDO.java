@@ -64,4 +64,8 @@ public class CMEdgeDO {
         }
         return null;
     }
+    @Override
+    public String toString() {
+            return this.node1.getWord().getLemma() + " - " + this.node2.getWord().getLemma() + ": " + this.score;
+    }
 }
