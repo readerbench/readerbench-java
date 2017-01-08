@@ -1023,10 +1023,11 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.get("/lak/topics", (request, response) -> {
+        Spark.post("/lak/topics", (request, response) -> {
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             final List<ResearchArticle> filteredArticles = new ArrayList();
+            double threshold = 0.4;
             try {
                 JSONObject json = (JSONObject) new JSONParser().parse(request.body());
                 int year = ((Long) json.get("year")).intValue();
@@ -1037,11 +1038,10 @@ public class ReaderBenchServer {
                         filteredArticles.add(article);
                     }
                 });
+                threshold = (Double)json.get("threshold");
             } catch (Exception e) {
                 filteredArticles.addAll(articles);
             }
-            
-            double threshold = 0.8;
             QueryResultTopic queryResult = new QueryResultTopic();
             ResultTopic resultTopic = ConceptMap.getTopics(filteredArticles, threshold, null, 50);
             queryResult.setData(resultTopic);
