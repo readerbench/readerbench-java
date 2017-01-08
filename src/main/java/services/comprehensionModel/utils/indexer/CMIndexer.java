@@ -56,6 +56,14 @@ public class CMIndexer {
         this.indexFullSemanticSpaceDistances(threshold, noTopSimilarWords);
         this.indexSyntacticDistances();
     }
+    
+    public CMIndexer(String text, ISemanticModel semanticModel) {
+        this.text = text;
+        this.semanticModel = semanticModel;
+        this.nodeActivationScoreMap = new TreeMap<>();
+        this.loadDocument();
+        this.indexSyntacticDistances();
+    }
 
     private void loadDocument() {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(this.text);
@@ -105,5 +113,9 @@ public class CMIndexer {
 
     public Map<CMNodeDO, Double> getNodeActivationScoreMap() {
         return this.nodeActivationScoreMap;
+    }
+    
+    public AbstractDocument getDocument() {
+        return this.document;
     }
 }

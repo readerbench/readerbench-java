@@ -40,7 +40,7 @@ public class CMGraphDO {
         return nodeListContainsNode(this.nodeList, otherNode);
     }
 
-    private void addNodeIfNotExists(CMNodeDO otherNode) {
+    public void addNodeIfNotExists(CMNodeDO otherNode) {
         if (!this.containsNode(otherNode)) {
             this.nodeList.add(otherNode);
         }
@@ -115,5 +115,10 @@ public class CMGraphDO {
         outGraph.edgeList = thisEdgeList;
 
         return outGraph;
+    }
+    
+    @Override
+    public String toString() {
+        return this.nodeList.toString() + "\n" + this.edgeList.toString();
     }
 }
