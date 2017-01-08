@@ -23,6 +23,7 @@ import data.AbstractDocumentTemplate;
 import data.Block;
 import data.Lang;
 import data.Word;
+import data.article.ResearchArticle;
 import data.cscl.Community;
 import data.cscl.Conversation;
 import data.discourse.SemanticCohesion;
@@ -41,6 +42,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -115,6 +117,7 @@ import webService.services.TextualComplexity;
 import webService.services.cscl.CSCL;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
+import webService.services.lak.result.QueryResultDocumentYears;
 import webService.services.lak.result.QueryResultGraphMeasures;
 import webService.services.lak.result.QueryResultTwoModeGraph;
 import webService.services.lak.result.QueryResultTwoModeGraphNodes;
@@ -1003,6 +1006,47 @@ public class ReaderBenchServer {
             List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
             QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
             return qResult.convertToJson();
+        });
+        Spark.get("/lak/years", (request, response) -> {
+            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+            List<ResearchArticle> articles = graphBuilder.getArticles();
+            Set<Integer> yearSet = new HashSet();
+            articles.forEach((article) -> {
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(article.getDate());
+                yearSet.add(cal.get(Calendar.YEAR));
+            });
+            List<Integer> yearList = new ArrayList();
+            yearList.addAll(yearSet);
+            Collections.sort(yearList);
+            QueryResultDocumentYears queryResult = new QueryResultDocumentYears(yearList);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/lak/topics", (request, response) -> {
+            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+            List<ResearchArticle> articles = graphBuilder.getArticles();
+            final List<ResearchArticle> filteredArticles = new ArrayList();
+            double threshold = 0.4;
+            try {
+                JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                int year = ((Long) json.get("year")).intValue();
+                articles.forEach((article) -> {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(article.getDate());
+                    if(cal.get(Calendar.YEAR) == year) {
+                        filteredArticles.add(article);
+                    }
+                });
+                threshold = (Double)json.get("threshold");
+            } catch (Exception e) {
+                filteredArticles.addAll(articles);
+            }
+            QueryResultTopic queryResult = new QueryResultTopic();
+            ResultTopic resultTopic = ConceptMap.getTopics(filteredArticles, threshold, null, 50);
+            queryResult.setData(resultTopic);
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
     }
 
