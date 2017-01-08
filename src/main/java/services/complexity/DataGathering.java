@@ -101,7 +101,7 @@ public class DataGathering {
             Document d = null;
             try {
                 if (meta) {
-                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
+                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Section, 5);
                 } else {
                     d = Document.load(file, models, lang, usePOSTagging);
                 }

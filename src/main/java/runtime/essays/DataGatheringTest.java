@@ -24,11 +24,13 @@ import data.document.Document;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
+import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 public class DataGatheringTest {
@@ -62,23 +64,24 @@ public class DataGatheringTest {
 //        LDA lda = LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la);
 //        LSA lsa = LSA.loadLSA("resources/config/RO/LSA/Religie", Lang.ro);
 //        LDA lda = LDA.loadLDA("resources/config/RO/LDA/Religie", Lang.ro);
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.en);
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde_Nursery", Lang.fr);
-//        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
+        LDA lda = LDA.loadLDA("resources/config/NL/LDA/INL", Lang.nl);
+        //Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/NL/word2vec/INL", Lang.nl);
         List<ISemanticModel> models = new ArrayList<>();
-        models.add(lsa);
+        //models.add(w2v);
         models.add(lda);
 
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
         try {
 //            DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
-            DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
+//            DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //            DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.en, true, true);
@@ -92,7 +95,7 @@ public class DataGatheringTest {
 
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/pretest", -1, true, lsa, lda, Lang.fr, true, true);
 //            DataGathering.processTexts("resources/in/Philippe/chaprou/posttest", -1, true, lsa, lda, Lang.fr, true, true);
-//            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis", null, lda, Lang.nl, false, true);
+            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/analysis H1", models, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 1", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/design task 2", null, null, Lang.nl, false, true);
 //            DataGathering.processMetaDocuments("resources/in/ViBOA_nl/evaluation task 1", null, null, Lang.nl, false, true);

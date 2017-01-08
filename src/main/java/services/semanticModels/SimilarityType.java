@@ -32,21 +32,23 @@ import services.semanticModels.word2vec.Word2VecModel;
  * @author Stefan
  */
 public enum SimilarityType {
-    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", OntologySupport::getAvailableLanguages),
-    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", OntologySupport::getAvailableLanguages),
-    PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages),
-    LSA("LSA", "Cosine similarity in LSA vector space", services.semanticModels.LSA.LSA::getAvailableLanguages),
-    LDA("LDA", "Inverse JSH in LDA probability distribution", services.semanticModels.LDA.LDA::getAvailableLanguages),
-    WORD2VEC("W2V", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages);
+    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
+    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
+    PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages, false),
+    LSA("LSA", "Cosine similarity in LSA vector space", services.semanticModels.LSA.LSA::getAvailableLanguages, true),
+    LDA("LDA", "Inverse JSH in LDA probability distribution", services.semanticModels.LDA.LDA::getAvailableLanguages, true),
+    WORD2VEC("W2V", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
 
     private final String acronym;
     private final String name;
     private final Supplier<Set<Lang>> supplier;
-
-    private SimilarityType(String acronym, String name, Supplier<Set<Lang>> supplier) {
+    private final boolean loadable;
+    
+    private SimilarityType(String acronym, String name, Supplier<Set<Lang>> supplier, boolean loadable) {
         this.acronym = acronym;
         this.name = name;
         this.supplier = supplier;
+        this.loadable = loadable;
     }
 
     public String getName() {
@@ -61,6 +63,10 @@ public enum SimilarityType {
         return supplier.get();
     }
 
+    public boolean isLoadable() {
+        return loadable;
+    }
+    
     public static List<ISemanticModel> loadVectorModels(Map<SimilarityType, String> modelPaths, Lang lang) {
         // load also LSA vector space and LDA model
         List<ISemanticModel> models = new ArrayList<>();

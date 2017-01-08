@@ -82,8 +82,8 @@ public class Language implements Serializable {
             convertion.put(Lang.es, LanguageDAO.getInstance().findById(2));
             convertion.put(Lang.fr, LanguageDAO.getInstance().findById(3));
             convertion.put(Lang.it, LanguageDAO.getInstance().findById(4));
-            convertion.put(Lang.nl, LanguageDAO.getInstance().findById(5));
-            convertion.put(Lang.ro, LanguageDAO.getInstance().findById(6));
+            convertion.put(Lang.nl, LanguageDAO.getInstance().findById(6));
+            convertion.put(Lang.ro, LanguageDAO.getInstance().findById(7));
         }
         return convertion.get(lang);
     }
