@@ -312,7 +312,7 @@ public class DocumentProcessingView extends JInternalFrame {
         super.setClosable(true);
         super.setMaximizable(true);
         super.setIconifiable(true);
-        super.setBounds(20, 20, 840, 450);
+        super.setBounds(20, 20, 900, 450);
         desktopPane = new JDesktopPane();
         desktopPane.setBackground(Color.WHITE);
 
