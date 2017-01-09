@@ -15,6 +15,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import services.semanticModels.WordNet.OntologySupport;
+import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
@@ -29,7 +30,7 @@ public class MihalceaSimilarity {
     // SUM(maxSim(word, T1) * idf(word)) /
     // SUM(word)) // word from T2
     public static double compute(Utterance firstUtt, Utterance secondUtt, SimilarityType simType,
-            LSA lsa, LDA lda) {
+            LSA lsa, LDA lda, Word2VecModel word2Vec) {
         double sim;
         double leftHandSideUp = 0.0;
         double leftHandSideDown = 0.0;
@@ -56,6 +57,9 @@ public class MihalceaSimilarity {
                             break;
                         case LDA:
                             sim = lda.getSimilarity(wordFirstUtt, wordSecondUtt);
+                            break;
+                        case WORD2VEC:
+                            sim = word2Vec.getSimilarity(wordFirstUtt, wordSecondUtt);
                             break;
                         case LEACOCK_CHODOROW:
                             sim = OntologySupport.semanticSimilarity(wordFirstUtt, wordSecondUtt,
@@ -103,6 +107,9 @@ public class MihalceaSimilarity {
                             break;
                         case LDA:
                             sim = lda.getSimilarity(wordFirstUtt, wordSecondUtt);
+                            break;
+                        case WORD2VEC:
+                            sim = word2Vec.getSimilarity(wordFirstUtt, wordSecondUtt);
                             break;
                         case LEACOCK_CHODOROW:
                             sim = OntologySupport.semanticSimilarity(wordFirstUtt, wordSecondUtt,
