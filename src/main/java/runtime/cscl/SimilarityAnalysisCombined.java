@@ -42,6 +42,7 @@ import org.openide.util.Exceptions;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 /**
@@ -62,6 +63,7 @@ public class SimilarityAnalysisCombined {
     private final int maxTimeFrame;
     private final LSA lsa;
     private final LDA lda;
+    private final Word2VecModel word2Vec;
 
     private final Map<Integer, Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Integer>>>> totalSimDetected;
     private final Map<Integer, Map<Integer, Map<SimilarityFormula, Map<SimilarityType, Double>>>> percentageSimDetected;
@@ -80,11 +82,12 @@ public class SimilarityAnalysisCombined {
      * @param timeFrames
      * @param lsa
      * @param lda
+     * @param word2Vec
      */
     public SimilarityAnalysisCombined(String path, Lang lang,
             boolean usePOSTagging, boolean computeDialogism,
             List<Integer> windowSizes, List<Integer> timeFrames,
-            LSA lsa, LDA lda) {
+            LSA lsa, LDA lda, Word2VecModel word2Vec) {
         this.path = path;
         this.lang = lang;
         this.usePOSTagging = usePOSTagging;
@@ -97,6 +100,7 @@ public class SimilarityAnalysisCombined {
         this.maxTimeFrame = Collections.max(timeFrames);
         this.lsa = lsa;
         this.lda = lda;
+        this.word2Vec = word2Vec;
 
         totalSimDetected = new HashMap<>();
         percentageSimDetected = new HashMap<>();
@@ -150,6 +154,7 @@ public class SimilarityAnalysisCombined {
         methods.add(SimilarityType.LEACOCK_CHODOROW);
         methods.add(SimilarityType.WU_PALMER);
         methods.add(SimilarityType.PATH_SIM);
+        methods.add(SimilarityType.WORD2VEC);
 
         List<SimilarityFormula> formulas = new ArrayList();
         formulas.add(SimilarityFormula.READERBENCH_SIM);
@@ -209,6 +214,7 @@ public class SimilarityAnalysisCombined {
             Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
             modelPaths.put(SimilarityType.LSA, lsa.getPath());
             modelPaths.put(SimilarityType.LDA, lda.getPath());
+            modelPaths.put(SimilarityType.WORD2VEC, word2Vec.getPath());
 
             Files.walk(Paths.get(path)).forEach((Path filePath) -> {
                 Integer explicitLinks = 0;
@@ -320,7 +326,7 @@ public class SimilarityAnalysisCombined {
                                                         sim = sc.getSemanticSimilarities().get(method) / (i - j + 1);
                                                         break;
                                                     case MIHALCEA_SIM:
-                                                        sim = MihalceaSimilarity.compute(firstUtt, secondUtt, method, lsa, lda);
+                                                        sim = MihalceaSimilarity.compute(firstUtt, secondUtt, method, lsa, lda, word2Vec);
                                                         break;
                                                     default:
                                                         sim = -1;
@@ -651,6 +657,7 @@ public class SimilarityAnalysisCombined {
         // TASA_LAK was used before!
         LSA lsa = LSA.loadLSA(CSCLConstants.LSA_PATH, Lang.en);
         LDA lda = LDA.loadLDA(CSCLConstants.LDA_PATH, Lang.en);
+        Word2VecModel word2Vec = Word2VecModel.loadWord2Vec(CSCLConstants.WORD2VEC_PATH, Lang.en);
 
         List<Integer> windowSizes = new ArrayList<>();
         windowSizes.add(10);
@@ -668,7 +675,8 @@ public class SimilarityAnalysisCombined {
                 windowSizes,
                 timeFrames,
                 lsa,
-                lda);
+                lda,
+                word2Vec);
         corpusSample.process();
     }
 }
