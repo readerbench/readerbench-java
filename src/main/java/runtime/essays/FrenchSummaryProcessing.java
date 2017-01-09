@@ -15,6 +15,7 @@
  */
 package runtime.essays;
 
+import data.AbstractDocument.SaveType;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -22,11 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-
 import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
+import java.util.logging.Level;
 
 import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
@@ -37,15 +38,15 @@ import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 
-public class ChapouRougeTest {
+public class FrenchSummaryProcessing {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final String path;
     private final Document refDoc;
     private final List<Summary> loadedSummaries;
 
-    public ChapouRougeTest(String path, Document refDoc) {
+    public FrenchSummaryProcessing(String path, Document refDoc) {
         this.path = path;
         this.loadedSummaries = new ArrayList<>();
         this.refDoc = refDoc;
@@ -54,13 +55,14 @@ public class ChapouRougeTest {
     public void process() {
         File folder = new File(path);
         for (File f : folder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
-            logger.info("Processing file " + f.getAbsolutePath() + " ...");
+            LOGGER.log(Level.INFO, "Processing file {0} ...", f.getAbsolutePath());
             Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true);
             summary.computeAll(true);
+            summary.save(SaveType.SERIALIZED);
             loadedSummaries.add(summary);
         }
 
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/measurements_rs.csv"))) {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/measurements.csv"))) {
             out.write("Filename");
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
                 out.write("," + rs.getName());
@@ -79,35 +81,39 @@ public class ChapouRougeTest {
                     out.write("," + summary.getAllRS(summary.getAutomatedRS()).get(rs));
                 }
                 for (SimilarityType semDist : SimilarityType.values()) {
-                    out.write("," + summary.getCohesion().getSemanticSimilarities().get(semDist));
+                    if (summary.getCohesion().getSemanticSimilarities().get(semDist) != null) {
+                        out.write("," + summary.getCohesion().getSemanticSimilarities().get(semDist));
+                    } else {
+                        out.write(",-1");
+                    }
                 }
                 for (ComplexityIndex index : indices) {
                     out.write("," + summary.getComplexityIndices().get(index));
                 }
             }
-            logger.info("Finished all files for processing ...");
+            LOGGER.info("Finished all files for processing ...");
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
     public static void main(String[] args) {
-        
         ReaderBenchServer.initializeDB();
 
         Lang lang = Lang.fr;
-        String pathToOriginalFile = "resources/in/Philippe/chaprou/chaprou-original.xml";
+        String pathToOriginalFile = "resources/in/Philippe/DEPP/Essays/avaleur/avaleur_original.xml";
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", lang);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", lang);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
-        
-        Document chaprouge = Document.load(new File(pathToOriginalFile), models, lang, true);
-        ChapouRougeTest crt = new ChapouRougeTest("resources/in/Philippe/chaprou/pretest", chaprouge);
+
+        Document originalDocument = Document.load(new File(pathToOriginalFile), models, lang, true);
+        FrenchSummaryProcessing crt;
+        crt = new FrenchSummaryProcessing("resources/in/Philippe/DEPP/Essays/avaleur/txt-corriges-avaleur", originalDocument);
         crt.process();
 
-        crt = new ChapouRougeTest("resources/in/Philippe/chaprou/postTest", chaprouge);
+        crt = new FrenchSummaryProcessing("resources/in/Philippe/DEPP/Essays/avaleur/txt-non-corriges-avaleur", originalDocument);
         crt.process();
     }
 }

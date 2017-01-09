@@ -15,25 +15,24 @@
  */
 package services.converters;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-
-import org.apache.commons.vfs2.FileContent;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
 
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
@@ -43,7 +42,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import webService.ReaderBenchServer;
+import org.openide.util.Exceptions;
 
 public class PdfToTextConverter {
 
@@ -117,8 +116,11 @@ public class PdfToTextConverter {
     private Float maxFontSize;
     private Integer totalCharacters;
     private Integer boldCharacters;
+    private Float boldCharsCoverage;
     private Integer italicCharacters;
+    private Float italicCharsCoverage;
     private Integer boldItalicCharacters;
+    private Float boldItalicCharsCoverage;
 
     public Integer getFontTypes() {
         return fontTypes;
@@ -176,6 +178,14 @@ public class PdfToTextConverter {
         this.boldCharacters = boldCharacters;
     }
 
+    public Float getBoldCharsCoverage() {
+        return boldCharsCoverage;
+    }
+
+    public void setBoldCharsCoverage(Float boldCharsCoverage) {
+        this.boldCharsCoverage = boldCharsCoverage;
+    }
+
     public Integer getItalicCharacters() {
         return italicCharacters;
     }
@@ -184,12 +194,28 @@ public class PdfToTextConverter {
         this.italicCharacters = italicCharacters;
     }
 
+    public Float getItalicCharsCoverage() {
+        return italicCharsCoverage;
+    }
+
+    public void setItalicCharsCoverage(Float italicCharsCoverage) {
+        this.italicCharsCoverage = italicCharsCoverage;
+    }
+
     public Integer getBoldItalicCharacters() {
         return boldItalicCharacters;
     }
 
     public void setBoldItalicCharacters(Integer boldItalicCharacters) {
         this.boldItalicCharacters = boldItalicCharacters;
+    }
+
+    public Float getBoldItalicCharsCoverage() {
+        return boldItalicCharsCoverage;
+    }
+
+    public void setBoldItalicCharsCoverage(Float boldItalicCharsCoverage) {
+        this.boldItalicCharsCoverage = boldItalicCharsCoverage;
     }
 
     public Integer getColors() {
@@ -423,15 +449,18 @@ public class PdfToTextConverter {
             this.setFontTypes(fontStats.size());
             this.setFontSizes(fontSizes.size());
             logger.info("*****Styles*****");
-            logger.info("Total: " + totalCharacters + " characters");
+            logger.log(Level.INFO, "Total chars: {0}", totalCharacters);
             this.setTotalCharacters(totalCharacters);
-            logger.info("Bold: " + bold + " characters");
+            logger.log(Level.INFO, "Bold chars: {0}", bold);
             this.setBoldCharacters(bold);
-            logger.info("Italic: " + italic + " characters");
+            setBoldCharsCoverage(new Float(bold * 1.0 / totalCharacters));
+            logger.log(Level.INFO, "Italic chars: {0}", italic);
             this.setItalicCharacters(italic);
-            logger.info("BoldItalic: " + boldItalic + " characters");
+            setItalicCharsCoverage(new Float(italic * 1.0 / totalCharacters));
+            logger.log(Level.INFO, "BoldItalic chars: {0}", boldItalic);
             this.setBoldItalicCharacters(boldItalic);
-            logger.info("How many fonts did I find: " + simpleFonts.size());
+            setBoldItalicCharsCoverage(new Float(boldItalic * 1.0 / totalCharacters));
+            logger.log(Level.INFO, "No. of fonts: {0}", simpleFonts.size());
             this.setFontTypesSimple(simpleFonts.size());
 
             // Sort FontSizes
@@ -516,6 +545,61 @@ public class PdfToTextConverter {
         }
 
         return parsedText;
+    }
+
+    /**
+     * Removes lines from a given string that contain at least one word of a
+     * list
+     *
+     * @param textContent The text that has to be processed
+     * @param wordsToRemoveLines Set of words to look for
+     * @return The cleaned String
+     */
+    public String removeLines(String textContent, Set<String> wordsToRemoveLines) {
+        StringBuilder newTextContent = new StringBuilder();
+        try {
+            BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
+            String line;
+            while ((line = bufferReader.readLine()) != null) {
+                boolean cleanLine = true;
+                for (String word : wordsToRemoveLines) {
+                    if (line.contains(word)) {
+                        cleanLine = false;
+                        break;
+                    }
+                }
+                if (cleanLine) {
+                    newTextContent.append(line).append("\n");
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return newTextContent.toString();
+    }
+
+    public Map<String, String> extractSocialLinks(String textContent, Set<String> socialNetworksLinks) {
+        Map<String, String> socialNetworksLinksFound = new HashMap<>();
+        try {
+            BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
+            String line;
+            while ((line = bufferReader.readLine()) != null) {
+                for (String socialNetworkLink : socialNetworksLinks) {
+                    if (socialNetworksLinksFound.get(socialNetworkLink) == null) {
+                        int pos;
+                        if (-1 != (pos = line.toLowerCase().indexOf(socialNetworkLink.toLowerCase()))) {
+                            int start = line.toLowerCase().substring(0, pos).lastIndexOf("http");
+                            int end = line.indexOf(' ', pos);
+                            socialNetworksLinksFound.put(socialNetworkLink, line.substring(start, end));
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return socialNetworksLinksFound;
     }
 
     public Integer getPages() {

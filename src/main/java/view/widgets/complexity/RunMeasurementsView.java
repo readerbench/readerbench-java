@@ -19,9 +19,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileFilter;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -38,19 +36,20 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 
-
-
 import data.Lang;
 import edu.stanford.nlp.util.Timing;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
+import services.converters.Txt2XmlConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
 public class RunMeasurementsView extends JFrame {
@@ -59,74 +58,79 @@ public class RunMeasurementsView extends JFrame {
 
     public static final String C_BASE_FOLDER_NAME = "grade";
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
-    private JPanel contentPane;
+    private final JPanel contentPane;
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
-    private JComboBox<String> comboBoxLanguage;
     private JButton btnRun;
     private JCheckBox chckbxUsePosTagging;
+    private JCheckBox chckbxUseTxtFiles;
+    private JCheckBox chckbxUseDeepSearch;
     private Lang lang = null;
 
     private class Task extends SwingWorker<Void, Void> {
 
-        private String path;
-        private String pathToLSA;
-        private String pathToLDA;
-        private Lang lang;
-        private boolean usePOSTagging;
+        private final String path;
+        private final String pathToLSA;
+        private final String pathToLDA;
+        private final Lang lang;
+        private final boolean usePOSTagging;
+        private final boolean useTxtFiles;
+        private final boolean useDeepSearch;
 
-        public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
+        public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging, boolean useTxtFiles, boolean useDeepSearch) {
             super();
             this.path = path;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
             this.lang = lang;
             this.usePOSTagging = usePOSTagging;
+            this.useTxtFiles = useTxtFiles;
+            this.useDeepSearch = useDeepSearch;
         }
 
+        @Override
         public Void doInBackground() {
             try {
-                logger.info("Processing all documents found in " + path);
-                try {
-                    LSA lsa = LSA.loadLSA(pathToLSA, lang);
-                    LDA lda = LDA.loadLDA(pathToLDA, lang);
-                    List<ISemanticModel> models = new ArrayList<>();
-                    models.add(lsa);
-                    models.add(lda);
-                    
-                    // determine number of classes
-                    int noGrades = (new File(path)).listFiles(new FileFilter() {
-                        public boolean accept(File pathname) {
-                            if (pathname.isDirectory()) {
-                                return true;
-                            }
-                            return false;
+                LOGGER.log(Level.INFO, "Processing all documents found in {0}", path);
+                LSA lsa = LSA.loadLSA(pathToLSA, lang);
+                LDA lda = LDA.loadLDA(pathToLDA, lang);
+                List<ISemanticModel> models = new ArrayList<>();
+                models.add(lsa);
+                models.add(lda);
+
+                Timing totalTiming = new Timing();
+                totalTiming.start();
+
+                if (useDeepSearch) {
+                    File[] files = new File(path).listFiles((File pathname) -> {
+                        if (pathname.isDirectory()) {
+                            return true;
                         }
-                    }).length;
-
-                    logger.info("Found " + noGrades + " document grade levels");
-                    Timing totalTiming = new Timing();
-                    totalTiming.start();
-
-                    DataGathering.writeHeader(path, lang);
-
-                    for (int gradeLevel = 1; gradeLevel <= noGrades; gradeLevel++) {
-                        DataGathering.processTexts(path + "/" + C_BASE_FOLDER_NAME + gradeLevel, path, gradeLevel,
-                                false, models, lang, usePOSTagging, usePOSTagging);
+                        return false;
+                    });
+                    DataGathering.writeHeader(path, lang, true);
+                    for (File f : files) {
+                        if (useTxtFiles) {
+                            Txt2XmlConverter.parseTxtFiles("",
+                                    path + "/" + f.getName() + "/", Lang.en, "UTF-8");
+                        }
+                        DataGathering.processTexts(path + "/" + f.getName() + "/",
+                                path, f.getName(), false, models, lang, usePOSTagging, usePOSTagging);
                     }
-
-                    logger.info("Finished processing all documents");
-                    logger.info("Time elasped:" + totalTiming.report() / 1000 + "s (" + totalTiming.report() / 1000 / 60
-                            + "min)");
-                } catch (Exception e) {
-                    System.err.println("Error: " + e.getMessage());
-                    e.printStackTrace();
+                } else if (useTxtFiles) {
+                    Txt2XmlConverter.parseTxtFiles("", path + "/", Lang.en, "UTF-8");
+                    DataGathering.processTexts(path + "/", path, "", true, models, lang, usePOSTagging, usePOSTagging);
+                } else {
+                    DataGathering.processTexts(path + "/", path, "", true, models, lang, usePOSTagging, usePOSTagging);
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.info("Finished processing all documents");
+                LOGGER.log(Level.INFO, "Time elasped:{0}s ({1}min)", new Object[]{totalTiming.report() / 1000, totalTiming.report() / 1000 / 60});
+
+            } catch (IOException e) {
+                Exceptions.printStackTrace(e);
             }
             return null;
         }
@@ -145,10 +149,10 @@ public class RunMeasurementsView extends JFrame {
     public RunMeasurementsView() {
         setTitle("ReaderBench - "
                 + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("RunMeasurementsView.panelRunMeasurements.title"));
+                        .getString("RunMeasurementsView.panelRunMeasurements.title"));
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 560, 220);
+        setBounds(100, 100, 560, 160);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -162,9 +166,9 @@ public class RunMeasurementsView extends JFrame {
         JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
                 .getString("RunMeasurementsView.lblLDAvector.text") + ":");
 
-        comboBoxLSA = new JComboBox<String>();
+        comboBoxLSA = new JComboBox<>();
         comboBoxLSA.setEnabled(false);
-        comboBoxLDA = new JComboBox<String>();
+        comboBoxLDA = new JComboBox<>();
         comboBoxLDA.setEnabled(false);
 
         textFieldPath = new JTextField();
@@ -172,37 +176,35 @@ public class RunMeasurementsView extends JFrame {
         textFieldPath.setColumns(10);
 
         JButton btnSearch = new JButton("...");
-        btnSearch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = new JFileChooser(new File("resources/in"));
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int returnVal = fc.showOpenDialog(RunMeasurementsView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    textFieldPath.setText(file.getPath());
-                }
+        btnSearch.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = new JFileChooser(new File("resources/in"));
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int returnVal = fc.showOpenDialog(RunMeasurementsView.this);
+            
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                textFieldPath.setText(file.getPath());
+                btnRun.setEnabled(true);
             }
         });
 
         btnRun = new JButton("Run");
         btnRun.setEnabled(false);
-        btnRun.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (!textFieldPath.getText().equals("")) {
-                    Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-                            (String) comboBoxLDA.getSelectedItem(), RunMeasurementsView.this.lang,
-                            chckbxUsePosTagging.isSelected());
-                    btnRun.setEnabled(false);
-                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    task.execute();
-                } else {
-                    JOptionPane
-                            .showMessageDialog(RunMeasurementsView.this,
-                                    ResourceBundle.getBundle("utils.localization.messages")
-                .getString("RunMeasurementsView.msgSelectAnotherDirectory.text") + "!",
-                                    "Error", JOptionPane.WARNING_MESSAGE);
-                }
+        btnRun.addActionListener((ActionEvent e) -> {
+            if (!textFieldPath.getText().equals("")) {
+                Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
+                        (String) comboBoxLDA.getSelectedItem(), RunMeasurementsView.this.lang,
+                        chckbxUsePosTagging.isSelected(), chckbxUseTxtFiles.isSelected(),
+                        chckbxUseDeepSearch.isSelected());
+                btnRun.setEnabled(false);
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                task.execute();
+            } else {
+                JOptionPane
+                        .showMessageDialog(RunMeasurementsView.this,
+                                ResourceBundle.getBundle("utils.localization.messages")
+                                        .getString("RunMeasurementsView.msgSelectAnotherDirectory.text") + "!",
+                                "Error", JOptionPane.WARNING_MESSAGE);
             }
         });
 
@@ -210,26 +212,17 @@ public class RunMeasurementsView extends JFrame {
                 .getString("RunMeasurementsView.boxUsePOSTagging.text"));
         chckbxUsePosTagging.setSelected(true);
 
-        JLabel lblLanguage = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("RunMeasurementsView.lblLanguage.text") + ":");
+        chckbxUseTxtFiles = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.boxUseTxtFile.text"));
+        chckbxUseTxtFiles.setSelected(true);
 
-        comboBoxLanguage = new JComboBox<>();
-        comboBoxLanguage.addItem("<< " + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("RunMeasurementsView.cmbboxPleaseSelectLanguage") + " >>");
-        for (Lang l : Lang.values()) {
-            comboBoxLanguage.addItem(l.getDescription());
-        }
+        chckbxUseDeepSearch = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("RunMeasurementsView.boxDeepSearch.text"));
+        chckbxUseDeepSearch.setSelected(false);
 
-        comboBoxLanguage.addActionListener((ActionEvent e) -> {
-            if (comboBoxLanguage.getSelectedIndex() > 0) {
-                // set final analysis language
-                lang = Lang.getLang((String) comboBoxLanguage.getSelectedItem());
+        lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
-                ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
-
-                btnRun.setEnabled(true);
-            }
-        });
+        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
@@ -249,22 +242,20 @@ public class RunMeasurementsView extends JFrame {
                                                         .addPreferredGap(ComponentPlacement.RELATED)
                                                         .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                                 GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE).addComponent(
-                                                comboBoxLanguage, Alignment.LEADING, 0, 404, Short.MAX_VALUE))
+                                                .addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE))
                                         .addGap(6))
                                 .addGroup(Alignment.LEADING,
                                         gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
-                                        .addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
-                                        .addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 73,
-                                                GroupLayout.PREFERRED_SIZE)
-                                        .addContainerGap())
-                                .addGroup(gl_contentPane.createSequentialGroup().addComponent(lblLanguage)
-                                        .addContainerGap(469, Short.MAX_VALUE)))));
+                                                .addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
+                                                .addComponent(chckbxUseTxtFiles)
+                                                .addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
+                                                .addComponent(chckbxUseDeepSearch)
+                                                .addPreferredGap(ComponentPlacement.RELATED, 319, Short.MAX_VALUE)
+                                                .addComponent(btnRun, GroupLayout.PREFERRED_SIZE, 73,
+                                                        GroupLayout.PREFERRED_SIZE)
+                                                .addContainerGap()))));
         gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(gl_contentPane
                 .createSequentialGroup().addContainerGap()
-                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblLanguage).addComponent(
-                        comboBoxLanguage, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                        GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(ComponentPlacement.RELATED)
                 .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblPath)
                         .addComponent(btnSearch).addComponent(textFieldPath, GroupLayout.PREFERRED_SIZE,
@@ -279,7 +270,8 @@ public class RunMeasurementsView extends JFrame {
                                 GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblLdaModel))
                 .addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
-                .createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
+                .createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(chckbxUseTxtFiles)
+                .addComponent(chckbxUseDeepSearch).addComponent(btnRun))
                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         contentPane.setLayout(gl_contentPane);
     }

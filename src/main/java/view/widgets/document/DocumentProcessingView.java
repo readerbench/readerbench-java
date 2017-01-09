@@ -135,7 +135,7 @@ public class DocumentProcessingView extends JInternalFrame {
                 try {
                     d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
                 } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.", "Error", JOptionPane.ERROR);
+                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.", "Error", JOptionPane.ERROR_MESSAGE);
                     Exceptions.printStackTrace(ex);
                 }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
@@ -312,7 +312,7 @@ public class DocumentProcessingView extends JInternalFrame {
         super.setClosable(true);
         super.setMaximizable(true);
         super.setIconifiable(true);
-        super.setBounds(20, 20, 840, 450);
+        super.setBounds(20, 20, 900, 450);
         desktopPane = new JDesktopPane();
         desktopPane.setBackground(Color.WHITE);
 

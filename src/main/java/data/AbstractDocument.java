@@ -794,4 +794,8 @@ public abstract class AbstractDocument extends AnalysisElement {
     public void setGenre(String genre) {
         this.genre = genre;
     }
+    
+    public boolean canUseSimType(SimilarityType simType) {
+        return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
+    }
 }

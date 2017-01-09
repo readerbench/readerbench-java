@@ -28,13 +28,13 @@ import data.AbstractDocumentTemplate;
 import data.discourse.SemanticCohesion;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
 import services.complexity.ComplexityIndices;
-import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
 
 public class Summary extends Metacognition {
@@ -70,13 +70,13 @@ public class Summary extends Metacognition {
                 return null;
             }
 
-            logger.info("Building summary internal representation ...");
+            LOGGER.info("Building summary internal representation ...");
             Summary meta = new Summary(pathToDoc, contents, initialReadingMaterial, usePOSTagging);
 
-            extractDocumentDescriptors(doc, meta);
+            extractDocumentDescriptors(doc, meta, usePOSTagging);
             return meta;
         } catch (ParserConfigurationException | SAXException | IOException | ParseException e) {
-            logger.severe("Error evaluating input file: " + pathToDoc + ", error:" + e.toString() + "!");
+            LOGGER.log(Level.SEVERE, "Error evaluating input file: {0}, error:{1}!", new Object[]{pathToDoc, e.toString()});
             Exceptions.printStackTrace(e);
             return null;
         }
@@ -103,7 +103,7 @@ public class Summary extends Metacognition {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -117,6 +117,6 @@ public class Summary extends Metacognition {
         computeDiscourseAnalysis(computeDialogism);
         ReadingStrategies.detReadingStrategies(this);
         ComplexityIndices.computeComplexityFactors(this);
-        logger.info("Finished processing summary ...");
+        LOGGER.info("Finished processing summary ...");
     }
 }

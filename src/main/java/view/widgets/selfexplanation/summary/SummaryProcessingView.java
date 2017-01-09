@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -102,10 +101,9 @@ public class SummaryProcessingView extends JInternalFrame {
 
             if (e != null) {
                 if (e.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-                    SummaryProcessingView.getLoadedSummaries().add(e);
                     addSummary(e);
                 } else {
-                    JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!",
+                    JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded summary!",
                             "Information", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
@@ -121,12 +119,7 @@ public class SummaryProcessingView extends JInternalFrame {
             if (isSerialized) {
                 if (file.isDirectory()) {
                     // process each individual ser file
-                    files = file.listFiles(new FilenameFilter() {
-                        @Override
-                        public boolean accept(File dir, String name) {
-                            return name.endsWith(".ser");
-                        }
-                    });
+                    files = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                 }
             } else if (file.isDirectory()) {
                 // process each individual xml file
@@ -226,7 +219,7 @@ public class SummaryProcessingView extends JInternalFrame {
 
         btnAddSerializedSummary = new JButton(LocalizationUtils.getTranslation("Add serialized summary(s)"));
         btnAddSerializedSummary.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = null;
+            JFileChooser fc;
             if (lastDirectory == null) {
                 fc = new JFileChooser(new File("resources/in"));
             } else {
@@ -234,6 +227,7 @@ public class SummaryProcessingView extends JInternalFrame {
             }
             fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             fc.setFileFilter(new FileFilter() {
+                @Override
                 public boolean accept(File f) {
                     if (f.isDirectory()) {
                         return true;
@@ -241,6 +235,7 @@ public class SummaryProcessingView extends JInternalFrame {
                     return f.getName().endsWith(".ser");
                 }
 
+                @Override
                 public String getDescription() {
                     return "Serialized document (*.ser) or directory";
                 }
@@ -338,6 +333,7 @@ public class SummaryProcessingView extends JInternalFrame {
                     dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                     dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                     summariesTableModel.addRow(dataRow.toArray());
+                    LOADED_SUMMARIES.add(e);
                 }
                 if (LOADED_SUMMARIES.size() > 0) {
                     btnRemoveSummary.setEnabled(true);

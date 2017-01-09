@@ -27,62 +27,58 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
-
-
 import data.Lang;
 import data.complexity.Measurement;
 import data.document.Document;
 import data.document.MetaDocument;
-import java.util.HashMap;
+import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import services.semanticModels.ISemanticModel;
-import webService.query.QueryHelper;
-import webService.queryResult.QueryResultTopic;
-import webService.result.ResultNode;
-import webService.result.ResultTopic;
-import webService.services.ConceptMap;
 
 public class DataGathering {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
-    public static final int MAX_PROCESSED_FILES = 10000;
-
-    public static void writeHeader(String path, Lang lang) {
+    public static void writeHeader(String path, Lang lang, boolean writeName) {
         // create measurements.csv header
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/measurements.csv", false))) {
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/" + new File(path).getName() + "-" + "measurements.csv", false))) {
             StringBuilder concat = new StringBuilder();
-            concat.append("File name,Grade Level,Genre,Complexity,Paragraphs,Sentences,Words,Content words");
+            concat.append("sep=,\n");
+            if (writeName) {
+                concat.append("File name,Folder Name,Paragraphs,Sentences,Words,Content words");
+            } else {
+                concat.append("File name,Paragraphs,Sentences,Words,Content words");
+            }
             ComplexityIndices.getIndices(lang).stream().forEach((factor) -> {
                 concat.append(",RB.").append(factor.getAcronym());
             });
             out.write(concat.toString());
         } catch (Exception e) {
-            logger.severe("Runtime error while initializing measurements.csv file");
+            LOGGER.severe("Runtime error while initializing measurements.csv file");
             Exceptions.printStackTrace(e);
         }
     }
 
-    public static void processTexts(String path, int gradeLevel, boolean writeHeader, 
-            List<ISemanticModel> models, Lang lang, boolean usePOSTagging, 
+    public static void processTexts(String path, String folderName, boolean writeHeader,
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging,
             boolean computeDialogism) throws IOException {
-        processTexts(path, path, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism);
+        processTexts(path, path, folderName, writeHeader, models, lang, usePOSTagging, computeDialogism);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, 
-            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, 
+    public static void processTexts(String processingPath, String saveLocation,
+            String folderName, boolean writeHeader, List<ISemanticModel> models,
             Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, saveLocation, gradeLevel, writeHeader, models, lang, usePOSTagging, computeDialogism, false);
+        processTexts(processingPath, saveLocation, folderName, writeHeader, models, lang, usePOSTagging, computeDialogism, false);
     }
 
-    public static void processMetaDocuments(String processingPath, List<ISemanticModel> models, 
+    public static void processMetaDocuments(String processingPath, List<ISemanticModel> models,
             Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, processingPath, 0, true, models, lang, usePOSTagging, computeDialogism, true);
+        processTexts(processingPath, processingPath, "", true, models, lang, usePOSTagging, computeDialogism, true);
     }
 
-    public static void processTexts(String processingPath, String saveLocation, 
-            int gradeLevel, boolean writeHeader, List<ISemanticModel> models, Lang lang, 
+    public static void processTexts(String processingPath, String saveLocation,
+            String folderName, boolean writeHeader, List<ISemanticModel> models, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
         File dir = new File(processingPath);
 
@@ -94,35 +90,35 @@ public class DataGathering {
             return pathname.getName().toLowerCase().endsWith(".xml");
         });
 
-        if (writeHeader) {
-            writeHeader(saveLocation, lang);
+        if (writeHeader & folderName.equals("")) {
+            writeHeader(saveLocation, lang, false);
         }
 
-        int noProcessedFiles = 0;
         for (File file : files) {
-            logger.info("Processing " + file.getName() + " file");
+            LOGGER.log(Level.INFO, "Processing {0} file", file.getName());
             // Create file
 
             Document d = null;
             try {
                 if (meta) {
-                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Subsection, 5);
+                    d = MetaDocument.load(file, models, lang, usePOSTagging, MetaDocument.DocumentLevel.Section, 5);
                 } else {
                     d = Document.load(file, models, lang, usePOSTagging);
                 }
                 d.computeAll(computeDialogism);
             } catch (Exception e) {
-                logger.severe("Runtime error while processing " + file.getName() + ": " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1}", new Object[]{file.getName(), e.getMessage()});
                 Exceptions.printStackTrace(e);
             }
 
             if (d != null) {
-                try (BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements.csv", true))) {
+                try (BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/" + new File(saveLocation).getName() + "-" + "measurements.csv", true))) {
                     StringBuilder concat = new StringBuilder();
                     String fileName = FilenameUtils.removeExtension(file.getName().replaceAll(",", ""));
-                    concat.append("\n").append(fileName).append(",").append(gradeLevel)
-                            .append(",").append((d.getGenre() != null ? d.getGenre().trim() : ""))
-                            .append(",").append((d.getComplexityLevel() != null ? d.getComplexityLevel().trim() : ""));
+                    concat.append("\n").append(fileName);
+                    if (!folderName.equals("")) {
+                        concat.append(",").append(folderName);
+                    };
                     concat.append(",").append(d.getNoBlocks());
                     concat.append(",").append(d.getNoSentences());
                     concat.append(",").append(d.getNoWords());
@@ -132,57 +128,10 @@ public class DataGathering {
                     }
                     out.write(concat.toString());
                 } catch (IOException ex) {
-                    logger.severe("Runtime error while initializing measurements.csv file");
+                    LOGGER.severe("Runtime error while initializing measurements.csv file");
                     Exceptions.printStackTrace(ex);
                     throw ex;
                 }
-
-                // [Gabi] added for quick concept map generation
-                try (BufferedWriter outConcept = new BufferedWriter(new FileWriter(d.getPath() + "_concepts.csv"))) {
-                    Map<String, String> hm = new HashMap<>();
-                    hm.put("text", d.getProcessedText());
-                    hm.put("lang", "French");
-                    hm.put("lsa", "resources/config/FR/LSA/Le_Monde");
-                    hm.put("lda", "resources/config/FR/LDA/Le_Monde");
-                    hm.put("postagging", "false");
-                    hm.put("dialogism", "false");
-                    hm.put("threshold", "0.3");
-                    ResultTopic resultTopic = ConceptMap.getTopics(
-                            QueryHelper.processQuery(hm),
-                            Double.parseDouble(hm.get("threshold")),
-                            null,
-                            50);
-                    StringBuilder concat = new StringBuilder();
-                    for (ResultNode node : resultTopic.getNodes()) {
-                        concat.append(node.getName()).append(',').append(node.getValue()).append(',');
-                    }
-                    outConcept.write(concat.toString());
-                    outConcept.close();
-
-                    QueryResultTopic queryResult = new QueryResultTopic();
-                    queryResult.setData(
-                            ConceptMap.getTopics(
-                                    QueryHelper.processQuery(hm),
-                                    Double.parseDouble(hm.get("threshold")),
-                                    null,
-                                    50));
-                    
-                    try (BufferedWriter outResult = new BufferedWriter(new FileWriter(d.getPath() + "_response.json"))) {
-                        outResult.write(queryResult.convertToJson());
-                        outResult.close();
-                    }
-                    catch (IOException ex) {
-                    }
-                } catch (IOException ex) {
-                    logger.severe("Runtime error while initializing " + d.getPath() + " concept map file");
-                    Exceptions.printStackTrace(ex);
-                    throw ex;
-                }
-            }
-
-            noProcessedFiles++;
-            if (noProcessedFiles >= MAX_PROCESSED_FILES) {
-                break;
             }
         }
     }
@@ -197,7 +146,8 @@ public class DataGathering {
                 String[] fields = line.split("[;,]");
                 double[] values = new double[fields.length - 4];
 
-                double classNumber = Double.parseDouble(fields[0]);
+                double classNumber;
+                classNumber = Double.parseDouble(fields[0]);
                 for (int i = 4; i < fields.length; i++) {
                     values[i - 4] = Double.parseDouble(fields[i]);
                 }
