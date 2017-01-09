@@ -20,8 +20,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -33,7 +31,6 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -44,6 +41,7 @@ import data.AbstractDocumentTemplate.BlockTemplate;
 import data.discourse.SemanticCohesion;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -54,8 +52,6 @@ import services.complexity.ComplexityIndices;
 import services.discourse.selfExplanations.VerbalizationAssessment;
 import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 
 /**
@@ -68,7 +64,7 @@ public class Metacognition extends Document {
 
     private static final long serialVersionUID = 3740041983851246989L;
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private Document referredDoc; // the initial referred document
     private SemanticCohesion[] blockSimilarities; // similarities with referred document blocks
@@ -94,7 +90,7 @@ public class Metacognition extends Document {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             File toProcess = new File(pathToDoc);
-            logger.info("Processing self-explanation " + toProcess.getName() + " ...");
+            LOGGER.log(Level.INFO, "Processing self-explanation {0} ...", toProcess.getName());
             InputSource input = new InputSource(new FileInputStream(toProcess));
             input.setEncoding("UTF-8");
 
@@ -106,7 +102,7 @@ public class Metacognition extends Document {
             // determine contents
             AbstractDocumentTemplate tmp = extractDocumentContent(doc, "verbalization");
 
-            logger.info("Building internal representation ...");
+            LOGGER.info("Building internal representation ...");
             Metacognition meta = new Metacognition(pathToDoc, tmp, initialReadingMaterial, usePOSTagging);
             extractDocumentDescriptors(doc, meta, usePOSTagging);
 
@@ -127,7 +123,7 @@ public class Metacognition extends Document {
                         meta.getAnnotatedRS().get(id).put(ReadingStrategyType.BRIDGING, Integer.valueOf(nl.item(i).getAttributes().getNamedItem("no_bridging").getNodeValue()));
                         meta.getAnnotatedRS().get(id).put(ReadingStrategyType.TEXT_BASED_INFERENCES, meta.getAnnotatedRS().get(id).get(ReadingStrategyType.BRIDGING) + meta.getAnnotatedRS().get(id).get(ReadingStrategyType.CAUSALITY));
                     } catch (DOMException | NumberFormatException e) {
-                        logger.info("Verbalization " + id + " has no annotated reading strategies!");
+                        LOGGER.log(Level.INFO, "Verbalization {0} has no annotated reading strategies!", id);
                         Exceptions.printStackTrace(e);
                     }
                 }
@@ -135,7 +131,7 @@ public class Metacognition extends Document {
 
             return meta;
         } catch (ParserConfigurationException | SAXException | IOException | ParseException | DOMException | NumberFormatException e) {
-            logger.severe("Error evaluating input file " + pathToDoc + "!");
+            LOGGER.log(Level.SEVERE, "Error evaluating input file {0}!", pathToDoc);
             Exceptions.printStackTrace(e);
         }
         return null;
@@ -167,7 +163,7 @@ public class Metacognition extends Document {
 
             writeDOMforXMLexport(path, dom);
         } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -270,12 +266,14 @@ public class Metacognition extends Document {
         if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
             meta.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), meta.getSemanticModels(), meta.getLanguage(), usePOSTagging);
         }
-        
+
         // get author
         nl = doc.getElementsByTagName("author");
         if (nl != null && nl.getLength() > 0) {
             el = (Element) nl.item(0);
-            meta.getAuthors().add(el.getFirstChild().getNodeValue());
+            if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null) {
+                meta.getAuthors().add(el.getFirstChild().getNodeValue());
+            }
         }
 
         // get teachers
@@ -332,7 +330,7 @@ public class Metacognition extends Document {
     }
 
     public void determineCohesion() {
-        logger.info("Identyfing average cohesion to previous paragraphs ...");
+        LOGGER.info("Identyfing average cohesion to previous paragraphs ...");
         // add average cohesion between verbalization and text paragraphs
         int startIndex = 0, endIndex, noBlocks;
 
@@ -361,7 +359,7 @@ public class Metacognition extends Document {
     }
 
     public void exportMetacognition() {
-        logger.info("Writing advanced document export");
+        LOGGER.info("Writing advanced document export");
         File output = new File(getPath().replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
             out.write("Referred document:," + getReferredDoc().getTitleText() + "\n");
@@ -372,9 +370,9 @@ public class Metacognition extends Document {
             out.write("\n");
             for (ISemanticModel model : getSemanticModels()) {
                 out.write(model.getType() + " space:," + model.getPath() + "\n");
-            
+
             }
-            
+
             out.write("Text");
             for (ReadingStrategyType rs : ReadingStrategyType.values()) {
                 out.write("," + rs.getName());
@@ -417,9 +415,9 @@ public class Metacognition extends Document {
                 out.write(allAutomatedRS.get(rs) + ",");
             }
             out.write("\n");
-            logger.info("Successfully finished writing file " + output.getName());
+            LOGGER.log(Level.INFO, "Successfully finished writing file {0}", output.getName());
         } catch (Exception e) {
-            logger.severe(e.getMessage());
+            LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
         }
     }
@@ -432,7 +430,7 @@ public class Metacognition extends Document {
         computeDiscourseAnalysis(computeDialogism);
         ComplexityIndices.computeComplexityFactors(this);
         determineCohesion();
-        logger.info("Finished processing self-explanations ...");
+        LOGGER.info("Finished processing self-explanations ...");
     }
 
     //global count of reading strategies given as input argument
