@@ -21,6 +21,7 @@ import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
 import data.sentiment.SentimentGrid;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,19 +61,12 @@ public class ConceptMap {
         List<ResultNode> nodes = new ArrayList<>();
         List<ResultEdge> links = new ArrayList<>();
 
-        Set<Keyword> topicSet = new TreeSet();
-        queryDocs.stream().map((doc) -> {
-            List<Keyword> docTopics = doc.getTopics();
-            if (ignoredWords != null) {
-                docTopics = KeywordModeling.filterTopics(doc, ignoredWords);
-            }
-            return docTopics;
-        }).forEachOrdered((docTopics) -> {
-            topicSet.addAll(docTopics);
-        });
-        
         List<Keyword> topics = new ArrayList();
-        topics.addAll(topicSet);
+        Map<Word, Double> topicScores = KeywordModeling.getCollectionTopics(queryDocs);
+        for (Map.Entry<Word, Double> entry : topicScores.entrySet()) {
+            topics.add(new Keyword(entry.getKey(), entry.getValue()));
+        }
+        Collections.sort(topics);
         
         // TODO: remove this and add at line #84 visible concepts sublist extraction
         topics = KeywordModeling.getSublist(topics, noTopics, true, true);
