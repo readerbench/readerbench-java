@@ -36,6 +36,7 @@ import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -1012,9 +1013,11 @@ public class ReaderBenchServer {
             List<ResearchArticle> articles = graphBuilder.getArticles();
             Set<Integer> yearSet = new HashSet();
             articles.forEach((article) -> {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(article.getDate());
-                yearSet.add(cal.get(Calendar.YEAR));
+                if (article.getDate() != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(article.getDate());
+                    yearSet.add(cal.get(Calendar.YEAR));
+                }
             });
             List<Integer> yearList = new ArrayList();
             yearList.addAll(yearSet);
@@ -1032,10 +1035,12 @@ public class ReaderBenchServer {
                 JSONObject json = (JSONObject) new JSONParser().parse(request.body());
                 int year = ((Long) json.get("year")).intValue();
                 articles.forEach((article) -> {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(article.getDate());
-                    if(cal.get(Calendar.YEAR) == year) {
-                        filteredArticles.add(article);
+                    if (article.getDate() != null) {
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(article.getDate());
+                        if(cal.get(Calendar.YEAR) == year) {
+                            filteredArticles.add(article);
+                        }
                     }
                 });
                 threshold = (Double)json.get("threshold");
