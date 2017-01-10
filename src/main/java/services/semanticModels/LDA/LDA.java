@@ -524,16 +524,21 @@ public class LDA implements ISemanticModel, Serializable {
             try {
                 File ldaFolder = lang.listFiles(file -> file.getName().equals("LDA"))[0];
                 for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith(".") && !file.getName().equals("INL"))) {
-                    LDA lda = loadLDA(folder.getPath(), Lang.valueOf(lang.getName().toLowerCase()));
-                    ObjectManipulation.saveObject(lda.wordProbDistributions, lda.path + "/LDA-small.model");
+                    ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject(folder.getPath() + "/LDA.model");
+                    Map<Word, double[]> vectors = buildWordVectors(model, Lang.valueOf(lang.getName().toLowerCase()));
+                    ObjectManipulation.saveObject(vectors, folder.getPath() + "/LDA-small.model");
+                    System.out.println("Converted: " + folder.getPath());
                 }
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                //Exceptions.printStackTrace(ex);
             }
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         convertModels();
+//        ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject("resources/config/NL/LDA/INL/LDA.model");
+//        Map<Word, double[]> vectors = buildWordVectors(model, Lang.nl);
+//        ObjectManipulation.saveObject(vectors, "resources/config/NL/LDA/INL/LDA-small.model");
     }
 }

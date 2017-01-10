@@ -6,7 +6,9 @@
 package services.complexity.wordLists;
 
 import data.AnalysisElement;
+import data.Word;
 import data.sentiment.SentimentValence;
+import java.util.Map;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndex;
 
@@ -14,7 +16,7 @@ import services.complexity.ComplexityIndex;
  *
  * @author stefan
  */
-public abstract class AvgWordsInList  extends ComplexityIndex {
+public abstract class AvgWordsInList extends ComplexityIndex {
 
     protected SentimentValence valence;
 
@@ -22,13 +24,18 @@ public abstract class AvgWordsInList  extends ComplexityIndex {
         super(index, valence.getName());
         this.valence = valence;
     }
-    
+
     protected double countWords(AnalysisElement data) {
-        return data.getWordOccurences().entrySet().stream()
-            .filter(e -> e.getKey().getSentiment() != null)
-            .filter(e -> e.getKey().getSentiment().get(valence) != null)
-            .mapToDouble(
-                    e -> e.getKey().getSentiment().get(valence) * e.getValue())
-            .sum();
+        double sum = 0;
+        int count = 0;
+        for (Map.Entry<Word, Integer> e : data.getWordOccurences().entrySet()) {
+            if (e.getKey().getSentiment() != null
+                    && e.getKey().getSentiment().get(valence) != null) {
+                sum += e.getKey().getSentiment().get(valence) * e.getValue();
+                count += e.getValue();
+            }
+        }
+        if (count == 0) return 0;
+        return sum / count;
     }
 }

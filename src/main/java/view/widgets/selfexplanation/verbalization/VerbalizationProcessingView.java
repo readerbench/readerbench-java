@@ -46,6 +46,7 @@ import data.document.Document;
 import data.document.Metacognition;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
@@ -103,7 +104,6 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
             if (v != null) {
                 if (v.getLanguage() == ReaderBenchView.RUNTIME_LANGUAGE) {
-                    VerbalizationProcessingView.getLoadedVervalizations().add(v);
                     addVerbalization(v);
                 } else {
                     JOptionPane.showMessageDialog(desktopPane, "Incorrect language for the loaded verbalization!", "Information", JOptionPane.INFORMATION_MESSAGE);
@@ -132,11 +132,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     File[] SERfiles = file.listFiles((File dir, String name1) -> name1.endsWith(".ser"));
                     for (File i : XMLfiles) {
                         for (File j : SERfiles) {
-//                            System.out.println("I'm here " + XMLfiles.length + " " + SERfiles.length);
-//                            System.out.println(i.getName().replace(".xml", ".ser"));
-//                            System.out.println("Ceva");
                             if (i.getName().replace(".xml", "").equals(j.getName().replace(".ser", ""))) {
-                                System.out.println("Found one");
                                 files[size] = j;
                                 size++;
                                 found = true;
@@ -152,7 +148,6 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     File[] parent = file.getParentFile().listFiles();
                     for (File i : parent) {
                         if (i.getName().equals(file.getName().replace(".xml", ".ser"))) {
-                            System.out.println("Found a .ser " + i.getName());
                             files[0] = i;
                         }
                     }
@@ -163,14 +158,10 @@ public class VerbalizationProcessingView extends JInternalFrame {
             }
             for (File f : files) {
                 try {
-                    if (f.getName().contains(".ser")) {
-                        isSerialized = true;
-                    } else {
-                        isSerialized = false;
-                    }
+                    isSerialized = f.getName().contains(".ser");
                     addSingleVerbalisation(f.getPath());
                 } catch (Exception ex) {
-                    LOGGER.severe(f.getName() + ": " + ex.getMessage());
+                    LOGGER.log(Level.SEVERE, "{0}: {1}", new Object[]{f.getName(), ex.getMessage()});
                     Exceptions.printStackTrace(ex);
                 }
             }
@@ -276,7 +267,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
         btnAddSerializedVerbalization = new JButton("Add serialized verbalization(s)");
         btnAddSerializedVerbalization.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = null;
+            JFileChooser fc;
             if (lastDirectory == null) {
                 fc = new JFileChooser(new File("resources/in"));
             } else {
@@ -310,12 +301,9 @@ public class VerbalizationProcessingView extends JInternalFrame {
 
         btnViewCummulativeStatistics = new JButton(LocalizationUtils.getTranslation("View cummulative statistics"));
         btnViewCummulativeStatistics.addActionListener((ActionEvent e) -> {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(LOADED_VERBALIZATIONS);
-                    view.setVisible(true);
-                }
+            EventQueue.invokeLater(() -> {
+                VerbalizationsCumulativeView view = new VerbalizationsCumulativeView(LOADED_VERBALIZATIONS);
+                view.setVisible(true);
             });
         });
         btnViewCummulativeStatistics.setEnabled(false);
@@ -402,6 +390,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                     dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
                     verbalizationsTableModel.addRow(dataRow.toArray());
+                    LOADED_VERBALIZATIONS.add(v);
                 }
                 if (LOADED_VERBALIZATIONS.size() > 0) {
                     updateButtons(true);

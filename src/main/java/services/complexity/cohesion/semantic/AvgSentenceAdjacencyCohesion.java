@@ -34,7 +34,7 @@ public class AvgSentenceAdjacencyCohesion extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        if (!d.getModelVectors().keySet().contains(simType)) {
+        if (!d.canUseSimType(simType)) {
             return ComplexityIndices.IDENTITY;
         }
         int noBlocks = 0;
