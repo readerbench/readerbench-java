@@ -23,6 +23,7 @@ import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class CVHelper {
             AbstractDocument keywordsDocument,
             PdfToTextConverter pdfConverter,
             Set<String> keywords,
-            Set<String> ignore,
+            Set<String> ignoreWords,
             Map<String, String> hm,
             double deltaFAN,
             int noTopics
@@ -50,7 +51,11 @@ public class CVHelper {
         ResultCv result = new ResultCv();
 
         // topic extraction
-        result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignore, noTopics));
+        Set<Word> ignoreWordsAsObject = new HashSet<>();
+        for(String word : ignoreWords) {
+            ignoreWordsAsObject.add(Word.getWordFromConcept(word.replaceAll("\\s+","").toLowerCase(), Lang.fr));
+        }
+        result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignoreWordsAsObject, noTopics));
 
         // word occurrences
         List<String> positiveWords = new ArrayList<>();
