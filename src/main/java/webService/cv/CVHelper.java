@@ -22,21 +22,22 @@ import data.discourse.SemanticCohesion;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-import runtime.cv.CVValidation;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
+import services.semanticModels.SimilarityType;
 import webService.keywords.KeywordsHelper;
 import webService.result.ResultCv;
 import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 
 public class CVHelper {
-
     public static ResultCv process(
             AbstractDocument document,
             AbstractDocument keywordsDocument,
@@ -47,13 +48,12 @@ public class CVHelper {
             double deltaFAN,
             int noTopics
     ) {
-
         ResultCv result = new ResultCv();
 
         // topic extraction
         Set<Word> ignoreWordsAsObject = new HashSet<>();
-        for(String word : ignoreWords) {
-            ignoreWordsAsObject.add(Word.getWordFromConcept(word.replaceAll("\\s+","").toLowerCase(), Lang.fr));
+        for (String word : ignoreWords) {
+            ignoreWordsAsObject.add(Word.getWordFromConcept(word.replaceAll("\\s+", "").toLowerCase(), Lang.fr));
         }
         result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignoreWordsAsObject, noTopics));
 
@@ -70,15 +70,11 @@ public class CVHelper {
             }
         }
 
-        double upperValue = 0;
-        double lowerValue = 0;
-        Map<Word, Integer> wordOccurences = document.getWordOccurences();
+        double upperValue = 0, lowerValue = 0;
         for (Map.Entry<Word, Integer> entry : document.getWordOccurences().entrySet()) {
             Word word = entry.getKey();
             SentimentEntity se = word.getSentiment();
-            if (se == null) {
-                continue;
-            }
+            if (se == null) continue;
 
             // FAN (ANEW FR)
             SentimentValence sv = SentimentValence.get("Valence_ANEW");
@@ -117,35 +113,19 @@ public class CVHelper {
                     }
                 }
             }
-
         }
 
         // textual complexity
         Lang lang = Lang.getLang(hm.get("lang"));
         TextualComplexity textualComplexity = new TextualComplexity(document, lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
         result.setTextualComplexity(textualComplexity.getComplexityIndices());
-
-        // number of images
         result.setImages(pdfConverter.getImages());
-
-        // number of colors
         result.setColors(pdfConverter.getColors());
-
-        // number of pages
         result.setPages(pdfConverter.getPages());
-
-        // number of paragraphs
         result.setParagraphs(document.getNoBlocks());
-
-        // number of sentences
         result.setSentences(document.getNoSentences());
-
-        // number of words
         result.setWords(document.getNoWords());
-
-        // number of content words
         result.setContentWords(document.getNoContentWords());
-
         result.setFontTypes(pdfConverter.getFontTypes());
         result.setFontTypesSimple(pdfConverter.getFontTypesSimple());
         result.setFontSizes(pdfConverter.getFontSizes());
@@ -158,28 +138,22 @@ public class CVHelper {
         result.setItalicCharsCoverage(pdfConverter.getItalicCharsCoverage());
         result.setBoldItalicCharacters(pdfConverter.getBoldItalicCharacters());
         result.setBoldItalicCharsCoverage(pdfConverter.getBoldItalicCharsCoverage());
-
-        // positive words
         result.setPositiveWords(positiveWords);
-
-        // negative words
         result.setNegativeWords(negativeWords);
-
-        // neutral words
         result.setNeutralWords(neutralWords);
-
-        // LIWC emotions
         result.setLiwcEmotions(liwcEmotions);
-
-        // specific keywords
         result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, hm));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);
         result.setKeywordsDocumentRelevance(Formatting.formatNumber(scKeywordsDocument.getCohesion()));
+        EnumMap<SimilarityType, Double> semanticSimilarities = scKeywordsDocument.getSemanticSimilarities();
+        Map<String, Double> similarityScores = new HashMap<>();
+        for (Entry<SimilarityType, Double> semanticSimilarity : semanticSimilarities.entrySet()) {
+            similarityScores.put(semanticSimilarity.getKey().getAcronym(), Formatting.formatNumber(semanticSimilarity.getValue()));
+        }
+        result.setKeywordsDocumentSimilarity(similarityScores);
 
         return result;
-
     }
-
 }
