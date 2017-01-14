@@ -16,6 +16,7 @@
 package webService.result;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -60,6 +61,7 @@ public class ResultCv extends Result {
     private Map<String, List<String>> liwcEmotions;
     private List<ResultKeyword> keywords;
     private double keywordsDocumentRelevance;
+    private Map<String, Double> keywordsDocumentSimilarity;
     
     public static Logger logger = Logger.getLogger("");
 
@@ -130,7 +132,7 @@ public class ResultCv extends Result {
         this.keywords = keywords;
         this.keywordsDocumentRelevance = keywordsDocumentRelevance;
         this.feedback = new ArrayList<>();
-
+        this.keywordsDocumentSimilarity = new HashMap<>();
     }
     
     public void addFeedback(List<String> fb) {
@@ -402,6 +404,14 @@ public class ResultCv extends Result {
     
     public void setBoldItalicCharsCoverage(Float boldItalicCharsCoverage) {
         this.boldItalicCharsCoverage = boldItalicCharsCoverage;
+    }
+
+    public Map<String, Double> getKeywordsDocumentSimilarity() {
+        return keywordsDocumentSimilarity;
+    }
+
+    public void setKeywordsDocumentSimilarity(Map<String, Double> keywordsDocumentSimilarity) {
+        this.keywordsDocumentSimilarity = keywordsDocumentSimilarity;
     }
 
 }
