@@ -114,6 +114,12 @@ public class CVHelper {
                 }
             }
         }
+        
+        // remove any LIWC category that does not contain words
+        for (SentimentValence svLiwc : sentimentValences) {
+            if (liwcEmotions.get(svLiwc.getName()).isEmpty())
+                liwcEmotions.remove(svLiwc.getName());
+        }
 
         // textual complexity
         Lang lang = Lang.getLang(hm.get("lang"));
