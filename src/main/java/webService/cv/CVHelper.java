@@ -38,6 +38,7 @@ import webService.services.ConceptMap;
 import webService.services.TextualComplexity;
 
 public class CVHelper {
+
     public static ResultCv process(
             AbstractDocument document,
             AbstractDocument keywordsDocument,
@@ -74,7 +75,9 @@ public class CVHelper {
         for (Map.Entry<Word, Integer> entry : document.getWordOccurences().entrySet()) {
             Word word = entry.getKey();
             SentimentEntity se = word.getSentiment();
-            if (se == null) continue;
+            if (se == null) {
+                continue;
+            }
 
             // FAN (ANEW FR)
             SentimentValence sv = SentimentValence.get("Valence_ANEW");
@@ -114,11 +117,14 @@ public class CVHelper {
                 }
             }
         }
-        
+
         // remove any LIWC category that does not contain words
         for (SentimentValence svLiwc : sentimentValences) {
-            if (liwcEmotions.get(svLiwc.getName()).isEmpty())
-                liwcEmotions.remove(svLiwc.getName());
+            if (svLiwc.getName().contains("LIWC")) {
+                if (liwcEmotions.get(svLiwc.getName()).isEmpty()) {
+                    liwcEmotions.remove(svLiwc.getName());
+                }
+            }
         }
 
         // textual complexity
