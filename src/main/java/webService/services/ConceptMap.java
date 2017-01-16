@@ -64,7 +64,12 @@ public class ConceptMap {
         List<Keyword> topics = new ArrayList();
         Map<Word, Double> topicScores = KeywordModeling.getCollectionTopics(queryDocs);
         for (Map.Entry<Word, Double> entry : topicScores.entrySet()) {
-            if (ignoredWords != null && !ignoredWords.contains(entry.getKey())) {
+            if (ignoredWords != null) {
+                if (!ignoredWords.contains(entry.getKey())) {
+                    topics.add(new Keyword(entry.getKey(), entry.getValue()));
+                }
+            }
+            else {
                 topics.add(new Keyword(entry.getKey(), entry.getValue()));
             }
         }
