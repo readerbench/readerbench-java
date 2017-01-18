@@ -15,6 +15,8 @@
  */
 package webService.result;
 
+import java.io.Serializable;
+
 public class ResultNode implements Comparable<ResultNode> {
 
 	private int id;

@@ -95,6 +95,7 @@ import webService.queryResult.QueryResultTextCategorization;
 import webService.queryResult.QueryResultTextSimilarity;
 import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
+import webService.queryResult.QueryResultTopicAdvanced;
 import webService.queryResult.QueryResultvCoP;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
@@ -110,6 +111,7 @@ import webService.result.ResultSimilarConcepts;
 import webService.result.ResultTextCategorization;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
+import webService.result.ResultTopicAdvanced;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
@@ -405,16 +407,35 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(request);
             QueryResultTopic queryResult = new QueryResultTopic();
-            queryResult.setData(
-                    ConceptMap.getTopics(
+            ResultTopic resultTopic = ConceptMap.getTopics(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
                             null,
-                            50)
-            );
+                            50);
+            queryResult.setData(resultTopic);
 
             response.type("application/json");
             return queryResult.convertToJson();
+        });
+        Spark.post("/topicsAdvanced", (request, response) -> {
+           Set<String> requiredParams = setInitialRequiredParams();
+            // additional required parameters
+            requiredParams.add("text");
+            requiredParams.add("threshold");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, request.queryParams());
+
+            Map<String, String> hm = hmParams(request);
+            QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
+            ResultTopicAdvanced resultTopic = ConceptMap.getTopicsAdvanced(
+                            QueryHelper.processQuery(hm),
+                            Double.parseDouble(hm.get("threshold")),
+                            null,
+                            50);
+            queryResult.setData(resultTopic);
+
+            response.type("application/json");
+            return queryResult.convertToJson(); 
         });
         Spark.get("/getSentiment", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
