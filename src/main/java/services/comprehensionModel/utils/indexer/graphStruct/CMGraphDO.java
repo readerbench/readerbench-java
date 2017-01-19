@@ -17,6 +17,22 @@ package services.comprehensionModel.utils.indexer.graphStruct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import org.gephi.graph.api.Column;
+import org.gephi.graph.api.DirectedGraph;
+import org.gephi.graph.api.Edge;
+import org.gephi.graph.api.GraphController;
+import org.gephi.graph.api.GraphModel;
+import org.gephi.graph.api.Node;
+import org.gephi.project.api.ProjectController;
+import org.gephi.statistics.plugin.ClusteringCoefficient;
+import org.gephi.statistics.plugin.ConnectedComponents;
+import org.gephi.statistics.plugin.GraphDensity;
+import org.gephi.statistics.plugin.GraphDistance;
+import org.gephi.statistics.plugin.Modularity;
+import org.openide.util.Lookup;
+import services.commons.Formatting;
 
 public class CMGraphDO {
 
@@ -120,5 +136,75 @@ public class CMGraphDO {
     @Override
     public String toString() {
         return this.nodeList.toString() + "\n" + this.edgeList.toString();
+    }
+    
+    
+    public CMGraphStatistics getGraphStatistics() {
+        CMGraphStatistics statistics = new CMGraphStatistics();
+        
+        ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
+        pc.newProject();
+
+        // get models
+        GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+        DirectedGraph graph = graphModel.getDirectedGraph();
+        Map<String, Node> associations = new TreeMap<>();
+
+        // build all nodes
+        this.nodeList.forEach(node -> {
+            Node wordNode = graphModel.factory().newNode(node.getWord().getLemma());
+            wordNode.setLabel(node.getWord().getLemma());
+            associations.put(node.getWord().getLemma(), wordNode);
+            graph.addNode(wordNode);
+        });
+        
+        this.edgeList.forEach(edge -> {
+            Edge e = graphModel.factory().newEdge(associations.get(edge.getNode1().getWord().getLemma()), associations.get(edge.getNode2().getWord().getLemma()));
+            e.setWeight((float) (edge.getScore()));
+            graph.addEdge(e);
+        });
+        
+
+        GraphDensity density = new GraphDensity();
+        density.setDirected(false);
+        density.execute(graphModel);
+        
+        statistics.setDensity(density.getDensity());
+
+        ConnectedComponents connectedComponents = new ConnectedComponents();
+        connectedComponents.setDirected(false);
+        connectedComponents.execute(graphModel);
+        statistics.setConnectedComponentsCount(connectedComponents.getConnectedComponentsCount());
+
+        ClusteringCoefficient clusteringCoefficient = new ClusteringCoefficient();
+        clusteringCoefficient.setDirected(false);
+        clusteringCoefficient.execute(graphModel);
+        statistics.setAverageClusteringCoefficient(clusteringCoefficient.getAverageClusteringCoefficient());
+
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(false);
+        distance.execute(graphModel);
+
+        // Determine various metrics
+        double avgBetweenness = 0, avgCloseness = 0, avgEccentricity = 0;
+        Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+        Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+
+        for (Node n : graph.getNodes()) {
+            avgBetweenness += (Double) n.getAttribute(betweeennessColumn);
+            avgCloseness += (Double) n.getAttribute(closenessColumn);
+            avgEccentricity += (Double) n.getAttribute(eccentricityColumn);
+        }
+        if (graph.getNodeCount() != 0) {
+            statistics.setBetweenness(avgBetweenness / (double)graph.getNodeCount());
+            statistics.setCloseness(avgCloseness / (double)graph.getNodeCount());
+            statistics.setEccentricity(avgEccentricity / (double)graph.getNodeCount());
+        }
+        
+        statistics.setDiameter(distance.getDiameter());
+        statistics.setPathLength(distance.getPathLength());
+
+        return statistics;
     }
 }
