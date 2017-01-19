@@ -18,26 +18,29 @@ package services.commons;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import org.openide.util.Exceptions;
 
 public class Formatting {
-    
-	public static Double formatNumber(double scoreValue) {
-		return Formatting.formatNumber(scoreValue, 3);
-	}
-    
+
+    public static Double formatNumber(double scoreValue) {
+        return Formatting.formatNumber(scoreValue, 3);
+    }
+
     public static Double formatNumber(double scoreValue, int decimals) {
-		DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
-	    decimalFormatSymbols.setDecimalSeparator('.');
-	    
+        DecimalFormatSymbols decimalFormatSymbols = new DecimalFormatSymbols();
+        decimalFormatSymbols.setDecimalSeparator('.');
+
         StringBuilder sbDecimalFormat = new StringBuilder("#.");
-        for (int i = 0; i < decimals; i++) sbDecimalFormat.append('#');
-		DecimalFormat formatter = new DecimalFormat(sbDecimalFormat.toString());
-		try {
-			return formatter.parse(formatter.format(scoreValue)).doubleValue();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return 0.0;
-	}
-    
+        for (int i = 0; i < decimals; i++) {
+            sbDecimalFormat.append('#');
+        }
+        DecimalFormat formatter = new DecimalFormat(sbDecimalFormat.toString());
+        try {
+            return formatter.parse(formatter.format(scoreValue)).doubleValue();
+        } catch (ParseException e) {
+            Exceptions.printStackTrace(e);
+        }
+        return 0.0;
+    }
+
 }
