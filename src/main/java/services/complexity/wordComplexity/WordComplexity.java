@@ -90,7 +90,9 @@ public class WordComplexity extends ComplexityIndex {
 			// get the first sense for the word
 			senseId = OntologySupport.getFirstSense(word);
 		}
-		return OntologySupport.getDictionary(word).getAverageDepthBySynset(senseId);
+		double avg = OntologySupport.getDictionary(word).getAverageDepthBySynset(senseId);
+        if (avg == 1) return 0;
+        return avg;
 	}
 
 	public static int getPathCountToHypernymTreeRoot(Word word, Lang lang) {
