@@ -38,10 +38,12 @@ import org.apache.commons.io.FilenameUtils;
 
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
+import services.converters.Txt2XmlConverter;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 /**
@@ -54,18 +56,16 @@ public class TopicRankings {
 
     private final String processingPath;
     private final int noTopKeyWords;
-    private final LSA lsa;
-    private final LDA lda;
+    private final List<ISemanticModel> models;
     private final Lang lang;
     private final boolean usePOSTagging;
     private final boolean computeDialogism;
     private final boolean meta;
 
-    public TopicRankings(String processingPath, int noTopKeyWords, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
+    public TopicRankings(String processingPath, int noTopKeyWords, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
         this.processingPath = processingPath;
         this.noTopKeyWords = noTopKeyWords;
-        this.lsa = lsa;
-        this.lda = lda;
+        this.models = models;
         this.lang = lang;
         this.usePOSTagging = usePOSTagging;
         this.computeDialogism = computeDialogism;
@@ -142,9 +142,6 @@ public class TopicRankings {
             File[] files = dir.listFiles((File pathname) -> {
                 return pathname.getName().toLowerCase().endsWith(".xml");
             });
-            List<ISemanticModel> models = new ArrayList<>();
-            models.add(lsa);
-            models.add(lda);
 
             for (File file : files) {
                 LOGGER.log(Level.INFO, "Processing {0} file", file.getName());
@@ -211,9 +208,26 @@ public class TopicRankings {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
-        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
-        TopicRankings tr = new TopicRankings("resources/in/Philippe/Linard_Travaux/Textes longs", 30, lsa, lda, Lang.fr, true, true, false);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_625", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_625", Lang.en);
+        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/ENEA_625", Lang.en);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(lsa);
+        models.add(lda);
+        models.add(w2v);
+        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses_per_cat_ENEA_625", Lang.en, "UTF-8");
+        TopicRankings tr = new TopicRankings("resources/in/ENEA/responses_per_cat_ENEA_625", 30, models, Lang.en, true, true, false);
+        tr.processTexts(false);
+        
+        lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_625_TASA", Lang.en);
+        lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_625_TASA", Lang.en);
+        w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/ENEA_625_TASA", Lang.en);
+        models = new ArrayList<>();
+        models.add(lsa);
+        models.add(lda);
+        models.add(w2v);
+        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses_per_cat_ENEA_625_TASA", Lang.en, "UTF-8");
+        tr = new TopicRankings("resources/in/ENEA/responses_per_cat_ENEA_625_TASA", 30, models, Lang.en, true, true, false);
         tr.processTexts(false);
     }
 }
