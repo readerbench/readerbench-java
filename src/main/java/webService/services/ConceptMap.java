@@ -183,6 +183,7 @@ public class ConceptMap {
             nodeIndexes.put(t.getWord(), i);
             node.setLemma(t.getWord().getLemma());
             node.setPos(t.getWord().getPOS());
+            t.updateRelevance(queryDocs.get(0), t.getWord());
             node.setTf(Formatting.formatNumber(t.getTermFrequency()));
             node.setIdf(Formatting.formatNumber(mapIdf.get(t.getWord())));
             
