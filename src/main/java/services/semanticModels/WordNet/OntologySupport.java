@@ -311,7 +311,14 @@ public class OntologySupport {
     }
 
     public static String getFirstSense(Word word) {
-        return getDictionary(word).getFirstSynsetString(word.getLemma());
+        if (!getDictionary(word).entryToSynsets.containsKey(word.getLemma())) {
+            return "";
+        }
+        ArrayList<String> synsets = getDictionary(word).entryToSynsets.get(word.getLemma());
+        if (synsets.isEmpty()) {
+            return "";
+        }
+        return synsets.get(0);
     }
 
     public static Set<String> getRootSenses(Lang lang) {
