@@ -182,7 +182,8 @@ public class ConceptMap {
             ResultNodeAdvanced node = new ResultNodeAdvanced(i++, t.getWord().getText(), Formatting.formatNumber(t.getRelevance()), 1);
             nodeIndexes.put(t.getWord(), i);
             node.setLemma(t.getWord().getLemma());
-            node.setTf(Formatting.formatNumber(1 + Math.log(wordOcc.get(t.getWord()))));
+            node.setPos(t.getWord().getPOS());
+            node.setTf(Formatting.formatNumber(t.getTermFrequency()));
             node.setIdf(Formatting.formatNumber(mapIdf.get(t.getWord())));
             
             // similarity scores between word and document using each semantic model

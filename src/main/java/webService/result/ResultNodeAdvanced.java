@@ -16,6 +16,7 @@ import java.util.List;
 public class ResultNodeAdvanced extends ResultNode implements Serializable {
 
     private String lemma;
+    private String pos;
     private double tf;
     private double idf;
 
@@ -38,6 +39,14 @@ public class ResultNodeAdvanced extends ResultNode implements Serializable {
         this.lemma = lemma;
     }
 
+    public String getPos() {
+        return pos;
+    }
+
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+    
     public double getTf() {
         return tf;
     }
