@@ -177,11 +177,12 @@ public class ConceptMap {
         LDA lda = (LDA) queryDocs.get(0).getSemanticModel(SimilarityType.LDA);
         Word2VecModel word2Vec = (Word2VecModel) queryDocs.get(0).getSemanticModel(SimilarityType.WORD2VEC);
         Map<Word, Double> mapIdf = lsa.getMapIdf();
+        Map<Word, Integer> wordOcc = queryDocs.get(0).getWordOccurences();
         for (Keyword t : topics) {
             ResultNodeAdvanced node = new ResultNodeAdvanced(i++, t.getWord().getText(), Formatting.formatNumber(t.getRelevance()), 1);
             nodeIndexes.put(t.getWord(), i);
             node.setLemma(t.getWord().getLemma());
-            node.setTf(Formatting.formatNumber(t.getWord().getIdf()));
+            node.setTf(Formatting.formatNumber(1 + Math.log(wordOcc.get(t.getWord()))));
             node.setIdf(Formatting.formatNumber(mapIdf.get(t.getWord())));
             
             // similarity scores between word and document using each semantic model
