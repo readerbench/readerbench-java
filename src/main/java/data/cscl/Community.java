@@ -16,11 +16,7 @@
 package data.cscl;
 
 import java.awt.EventQueue;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -42,11 +38,14 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
-import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
@@ -388,6 +387,53 @@ public class Community extends AnalysisElement {
         });
     }
 
+    /**
+     * Generate json file with all participants for graph representation (using d3.js)
+     * @param path - the path where json file will be saved
+     */
+    public void generateParticipantViewD3(String path) {
+        EventQueue.invokeLater(() -> {
+            JSONObject jsonObject = new JSONObject();
+
+            JSONArray nodes = new JSONArray();
+            participants.forEach(p -> {
+                JSONObject name = new JSONObject();
+                name.put("name", p.getName());
+                nodes.add(name);
+            });
+
+            JSONArray links = new JSONArray();
+
+            for (int row=0; row < participantContributions.length; row++)
+            {
+                for (int col=0; col < participantContributions[row].length; col++)
+                {
+                    if (participantContributions[row][col] > 0) {
+                        JSONObject link = new JSONObject();
+                        link.put("source", row);
+                        link.put("target", col);
+                        links.add(link);
+                    }
+                }
+            }
+
+            jsonObject.put("nodes", nodes);
+            jsonObject.put("links", links);
+
+            try {
+
+                FileWriter file = new FileWriter(path);
+                file.write(jsonObject.toJSONString());
+                file.flush();
+                file.close();
+
+            } catch (IOException e) {
+                LOGGER.severe(e.getMessage());
+                Exceptions.printStackTrace(e);
+            }
+        });
+    }
+
     public void generateConceptView(String path) {
         EventQueue.invokeLater(() -> {
             PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
@@ -511,7 +557,8 @@ public class Community extends AnalysisElement {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
             dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
             dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
         }
     }
