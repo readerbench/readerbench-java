@@ -428,7 +428,8 @@ public class Community extends AnalysisElement {
                 file.close();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe(e.getMessage());
+                Exceptions.printStackTrace(e);
             }
         });
     }
