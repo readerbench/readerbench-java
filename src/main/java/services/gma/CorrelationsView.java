@@ -1,4 +1,4 @@
-package gma;
+package services.gma;
 
 import java.awt.BorderLayout;
 import java.awt.Checkbox;
@@ -18,8 +18,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import gma.models.Cell;
-import view.widgets.chat.models.CorrelationsTableModel;
+import services.gma.models.Cell;
+import services.gma.models.CorrelationsTableModel;
 
 public class CorrelationsView extends JFrame{
 	

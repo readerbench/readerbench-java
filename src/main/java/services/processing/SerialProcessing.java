@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.replicatedWorker;
+package services.processing;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -49,7 +49,7 @@ import org.w3c.dom.DOMException;
 import org.xml.sax.SAXException;
 import services.semanticModels.SimilarityType;
 
-public class SerialCorpusAssessment {
+public class SerialProcessing {
 
     static final Logger LOGGER = Logger.getLogger("");
 

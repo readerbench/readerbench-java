@@ -1,8 +1,8 @@
-package view.widgets.chat.models;
+package services.gma.models;
 
 import data.Word;
 import data.discourse.Keyword;
-import gma.models.Cell;
+import services.gma.models.Cell;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;

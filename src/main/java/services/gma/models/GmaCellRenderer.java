@@ -1,6 +1,6 @@
-package view.widgets.chat.models;
+package services.gma.models;
 
-import gma.models.Cell;
+import services.gma.models.Cell;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;

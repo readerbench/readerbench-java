@@ -1,4 +1,4 @@
-package gma.models;
+package services.gma.models;
 
 import data.Word;
 import data.discourse.Keyword;

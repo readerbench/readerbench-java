@@ -39,10 +39,8 @@ import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
 
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -50,12 +48,11 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
-import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.keywordMining.KeywordModeling;
-import services.replicatedWorker.SerialCorpusAssessment;
+import services.processing.SerialProcessing;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
 import webService.result.ResultvCoP;
@@ -579,7 +576,7 @@ public class Community extends AnalysisElement {
                             checkpoint.delete();
                         }
                     }
-                    SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
                             startDate, endDate, monthIncrement, dayIncrement);

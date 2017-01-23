@@ -22,14 +22,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-
-
-
 import data.Lang;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
-import services.nlp.lemmatizer.morphalou.Digest_FR;
-import services.nlp.lemmatizer.morphalou.Digest_IT;
 
 public class StaticLemmatizerPOS {
 
@@ -104,20 +99,20 @@ public class StaticLemmatizerPOS {
 
     public static Map<String, String> getLemmasFr() {
         if (lemmas_fr == null) {
-            lemmas_fr = initialize(Digest_FR.PATH_TO_TEXT_LEMMAS_FR, Lang.fr);
+            lemmas_fr = initialize("resources/config/FR/word lists/lemmas_pos_fr.txt", Lang.fr);
         }
         return lemmas_fr;
     }
 
     public static Map<String, String> getLemmasIt() {
         if (lemmas_it == null) {
-            lemmas_it = initialize(Digest_IT.PATH_TO_TEXT_LEMMAS_IT, Lang.it);
+            lemmas_it = initialize("resources/config/IT/word lists/lemmas_pos_it.txt", Lang.it);
         }
         return lemmas_it;
     }
 
     public static void main(String[] args) {
-        
+
         System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null, Lang.fr));
         System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB", Lang.it));
     }

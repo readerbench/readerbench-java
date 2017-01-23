@@ -1,4 +1,4 @@
-package gma;
+package services.gma;
 
 import data.AnalysisElement;
 import java.awt.Color;
@@ -20,8 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
-import gma.models.Cell;
-import view.widgets.chat.models.WikiResult;
+import services.gma.models.Cell;
+import services.gma.models.WikiResult;
 
 public class WikiResultsView extends JFrame {
 	private static final long serialVersionUID = 1L;
