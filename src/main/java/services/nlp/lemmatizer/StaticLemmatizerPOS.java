@@ -23,18 +23,19 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import data.Lang;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
 public class StaticLemmatizerPOS {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static Map<String, String> lemmas_fr = null;
     private static Map<String, String> lemmas_it = null;
 
     private static Map<String, String> initialize(String path, Lang lang) {
-        logger.info("Initializing lemmas from " + path + " ...");
+        LOGGER.log(Level.INFO, "Initializing lemmas from {0} ...", path);
         Map<String, String> lemmas = new TreeMap<>();
         BufferedReader in;
         try {
@@ -64,13 +65,8 @@ public class StaticLemmatizerPOS {
             case it:
                 lemmas = getLemmasIt();
                 break;
-            case es:
-                return StaticLemmatizer.lemmaStatic(w, Lang.es);
-            case en:
-                return StaticLemmatizer.lemmaStatic(w, Lang.en);
-            // return Morphology.lemmaStatic(w, pos, true);
             default:
-                lemmas = null;
+                return StaticLemmatizer.lemmaStatic(w, lang);
         }
         if (lemmas == null) {
             return w;
@@ -112,7 +108,6 @@ public class StaticLemmatizerPOS {
     }
 
     public static void main(String[] args) {
-
         System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null, Lang.fr));
         System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB", Lang.it));
     }

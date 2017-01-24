@@ -252,28 +252,23 @@ public abstract class Parsing {
         // uses Stanford Core NLP
         Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModels(), lang);
 
-        sentence
-                .get(TokensAnnotation.class
-                ).stream().forEach((token) -> {
-                    String word = token.get(OriginalTextAnnotation.class
-                    );
-                    String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class
-                    ));
-                    String ne = token.get(NamedEntityTagAnnotation.class
-                    );
-                    if (TextPreprocessing.isWord(word, lang)) {
-                        Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
-                        s.getAllWords().add(w);
-                        if (w.isContentWord()) {
-                            s.getWords().add(w);
-                            if (s.getWordOccurences().containsKey(w)) {
-                                s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
-                            } else {
-                                s.getWordOccurences().put(w, 1);
-                            }
-                        }
+        sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
+            String word = token.get(OriginalTextAnnotation.class);
+            String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
+            String ne = token.get(NamedEntityTagAnnotation.class);
+            if (TextPreprocessing.isWord(word, lang)) {
+                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
+                s.getAllWords().add(w);
+                if (w.isContentWord()) {
+                    s.getWords().add(w);
+                    if (s.getWordOccurences().containsKey(w)) {
+                        s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
+                    } else {
+                        s.getWordOccurences().put(w, 1);
                     }
-                });
+                }
+            }
+        });
 
         if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
