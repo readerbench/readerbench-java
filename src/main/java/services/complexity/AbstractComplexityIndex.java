@@ -18,7 +18,7 @@ import utils.IndexLevel;
  */
 public abstract class AbstractComplexityIndex extends ComplexityIndex {
 
-    protected Function<AbstractDocument, Stream<? extends AnalysisElement>> streamFunction;
+    protected transient Function<AbstractDocument, Stream<? extends AnalysisElement>> streamFunction;
     
     public AbstractComplexityIndex(
             ComplexityIndicesEnum index,
@@ -38,6 +38,7 @@ public abstract class AbstractComplexityIndex extends ComplexityIndex {
             String aux, 
             Function<AbstractDocument, Stream<? extends AnalysisElement>> streamFunction) {
         super(index, aux);
+        this.streamFunction = streamFunction;
     }
 
     

@@ -307,6 +307,9 @@ public class OntologySupport {
         } else {
             wnd = getDictionary(word.getLanguage(), getPOS(word.getPOS()));
         }
+        if (wnd == null) {
+            System.out.println("hopa");
+        }
         return new HashSet<>(wnd.entryToSynsets.getOrDefault(word.getLemma(), new ArrayList<>()));
     }
 

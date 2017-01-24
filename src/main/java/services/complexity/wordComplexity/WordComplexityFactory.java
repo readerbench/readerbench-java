@@ -16,11 +16,19 @@
 package services.complexity.wordComplexity;
 
 import data.Lang;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
@@ -54,7 +62,54 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
                     ComplexityIndicesEnum.WORD_SYLLABLE_COUNT, lang,
                     WordComplexity::getSyllables));
         }
+        Map<String, Map<String, Double>> aoaMap = readAoA(lang);
+        for (Map.Entry<String, Map<String, Double>> e : aoaMap.entrySet()) {
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOA_PER_BLOCK, 
+                    e.getKey(), 
+                    IndexLevel.BLOCK, 
+                    e.getValue()));
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOA_PER_SENTENCE, 
+                    e.getKey(), 
+                    IndexLevel.SENTENCE, 
+                    e.getValue()));
+        }
         return result;
     }
 
+    private Map<String, Map<String, Double>> readAoA(Lang lang) {
+        Map<String, Map<String, Double>> map = new HashMap<>();
+        String aoaFile = "resources/config/" + lang.toString() + "/word lists/AoA.csv";
+        try (BufferedReader in = new BufferedReader(new FileReader(aoaFile))) {
+            in.readLine();
+            String line = in.readLine();
+            String[] header = line.split(",");
+            for (int i = 1; i < header.length; i++) {
+                map.put(header[i], new HashMap<>());
+            }
+            while ((line = in.readLine()) != null) {
+                String[] split = line.split(",", -1);
+                if (split.length != header.length) {
+                    System.out.println("straniu");
+                }
+                String word = split[0];
+                for (int i = 1; i < header.length; i++) {
+                    try {
+                        double val = Double.parseDouble(split[i]);
+                        map.get(header[i]).put(word, val);
+                    }
+                    catch (NumberFormatException ex) {
+                        
+                    }
+                }
+            }
+        }
+        catch (FileNotFoundException ex) {
+        }
+        catch (IOException ex) {
+        }
+        return map;
+    }
+    
 }
