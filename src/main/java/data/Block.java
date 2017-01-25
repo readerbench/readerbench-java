@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 
 import data.discourse.SemanticCohesion;
 import data.discourse.SemanticRelatedness;
-import edu.stanford.nlp.dcoref.CorefChain;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import services.semanticModels.ISemanticModel;

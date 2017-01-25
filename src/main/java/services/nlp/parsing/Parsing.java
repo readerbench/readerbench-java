@@ -32,7 +32,8 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.sentiment.SentimentEntity;
-import edu.stanford.nlp.dcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -277,10 +278,12 @@ public abstract class Parsing {
             if (lang.equals(Lang.en)) {
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
-                // Stanford Valence
-                int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
-                se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
-                s.setSentimentEntity(se);
+                // TODO: parse Stanford Valence
+                if(tree != null) {
+                    int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
+                    se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
+                    s.setSentimentEntity(se);
+                }
             }
         }
 

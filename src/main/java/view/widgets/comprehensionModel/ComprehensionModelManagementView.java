@@ -41,7 +41,9 @@ import javax.swing.border.EmptyBorder;
 
 import services.comprehensionModel.ComprehensionModel;
 import services.semanticModels.LDA.LDA;
+import services.semanticModels.LSA.LSA;
 import utils.localization.LocalizationUtils;
+import view.widgets.ReaderBenchView;
 
 public class ComprehensionModelManagementView extends JFrame {
 
@@ -206,9 +208,16 @@ public class ComprehensionModelManagementView extends JFrame {
 
         EventQueue.invokeLater(() -> {
             ComprehensionModel cm = new ComprehensionModel(text,
-                    LDA.loadLDA("resources/in/HDP/grade" + hdpGrade, Lang.en), semanticThreshold, noTopConcepts,
+                    LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en), semanticThreshold, noTopConcepts,
                     activationThreshold, noActiveWords, noActiveWordsIncrement);
             ComprehensionModelView view = new ComprehensionModelView(cm);
+            view.setVisible(true);
+        });
+    }
+    
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            ComprehensionModelManagementView view = new ComprehensionModelManagementView();
             view.setVisible(true);
         });
     }

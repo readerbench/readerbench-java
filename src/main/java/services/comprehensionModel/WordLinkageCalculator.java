@@ -47,6 +47,7 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
@@ -155,7 +156,8 @@ public class WordLinkageCalculator {
     }
 
     public static void analyzeFiles() {
-        LSA semanticModel = LSA.loadLSA(CSCLConstants.LSA_PATH, Lang.en);
+        LSA semanticModel = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
+//        LSA semanticModel = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
         double threshold = 0.3;
 
 //        String filePath = "resources/in/essays/essays_FYP_en/texts/";
@@ -208,7 +210,7 @@ public class WordLinkageCalculator {
                 String scoreDesc = aoaFile.replace(".csv", "");
                 concat.append("," + scoreDesc + " Avg," + scoreDesc + " Degree Avg," + scoreDesc + " Idf Avg");
             }
-            concat.append(", Density, Connected Components Count, Average Clustering Coefficient, Betweenness, Closeness, Eccentricity, Diameter, Path Length");
+            concat.append(", Density, Connected Components Count, Average Clustering Coefficient, Betweenness, Closeness, Eccentricity, Diameter, Average Shortest Path Length");
             concat.append("\n");
                 
             scoreMap.entrySet().stream().forEach(score -> {

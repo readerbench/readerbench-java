@@ -15,9 +15,13 @@
  */
 package services.comprehensionModel.utils.indexer.graphStruct;
 
+import data.Lang;
+import data.Word;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.TreeMap;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
@@ -33,6 +37,8 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.gephi.statistics.plugin.Modularity;
 import org.openide.util.Lookup;
 import services.commons.Formatting;
+import services.semanticModels.utils.WordSimilarity;
+import services.semanticModels.utils.WordSimilarityContainer;
 
 public class CMGraphDO {
 
@@ -112,6 +118,54 @@ public class CMGraphDO {
                     && this.containsNode(otherGraphEdge.getNode2())).forEach((otherGraphEdge) -> {
                 this.edgeList.add(otherGraphEdge);
             }); // add direct nodes with links
+        }
+    }
+    
+    public void combineWithLinksFrom(WordSimilarityContainer wordSimilarityContainer, int noTopSimilarWords) {
+        List<CMNodeDO> thisNodeList = new ArrayList<>(this.nodeList);
+        for (CMNodeDO node : thisNodeList) {
+            Map<String, PriorityQueue<WordSimilarity>> map = wordSimilarityContainer.getWordSimilarityMap();
+            if (!map.containsKey(node.getWord().getLemma())) {
+                continue;
+            }
+            
+            PriorityQueue<WordSimilarity> wsQueue = map.get(node.getWord().getLemma());
+            Iterator<WordSimilarity> wSymIter = wsQueue.iterator();
+            int step = 0;
+            while(wSymIter.hasNext()) {
+                WordSimilarity s = wSymIter.next();
+                if (noTopSimilarWords == step) {
+                    break;
+                }
+                Word w = Word.getWordFromConcept(s.getWordLemma(), Lang.en);
+                CMNodeDO wNode = new CMNodeDO(w, CMNodeType.Inferred);
+                CMEdgeDO wEdge = new CMEdgeDO(node, wNode, CMEdgeType.Semantic, s.getSimilarity());
+                this.addNodeIfNotExists(wNode);
+                if(!this.containsEdge(wEdge)) {
+                    this.edgeList.add(wEdge);
+                }
+                step ++;
+            }
+        }
+        // add missing links from the second graph
+        thisNodeList = new ArrayList<>(this.nodeList);
+        for (CMNodeDO node : thisNodeList) {
+            Map<String, PriorityQueue<WordSimilarity>> map = wordSimilarityContainer.getWordSimilarityMap();
+            if (!map.containsKey(node.getWord().getLemma())) {
+                continue;
+            }
+            
+            PriorityQueue<WordSimilarity> wsQueue = map.get(node.getWord().getLemma());
+            Iterator<WordSimilarity> wSymIter = wsQueue.iterator();
+            while(wSymIter.hasNext()) {
+                WordSimilarity s = wSymIter.next();
+                Word w = Word.getWordFromConcept(s.getWordLemma(), Lang.en);
+                CMNodeDO wNode = new CMNodeDO(w, CMNodeType.Inferred);
+                CMEdgeDO wEdge = new CMEdgeDO(node, wNode, CMEdgeType.Semantic, s.getSimilarity());
+                if (this.containsNode(wNode) && !this.containsEdge(wEdge)) {
+                    this.edgeList.add(wEdge);
+                }
+            }
         }
     }
 
