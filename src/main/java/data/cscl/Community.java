@@ -388,50 +388,73 @@ public class Community extends AnalysisElement {
     }
 
     /**
+     * Generate participants view for communities
+     * @param path - location where .json files will be saved
+     */
+    public JSONArray generateParticipantViewSubCommunities(String path) {
+        int i = 1;
+        JSONArray participantsSubCommunities = new JSONArray();
+        for (Community subCommunity : timeframeSubCommunities){
+            JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(path + i + ".json");
+
+            JSONObject subCommunityJson = new JSONObject();
+            subCommunityJson.put("week", i);
+            subCommunityJson.put("participants", participantSubCommunity);
+
+            participantsSubCommunities.add(subCommunityJson);
+
+            i++;
+        }
+
+        return participantsSubCommunities;
+    }
+    /**
      * Generate json file with all participants for graph representation (using d3.js)
      * @param path - the path where json file will be saved
      */
-    public void generateParticipantViewD3(String path) {
-        EventQueue.invokeLater(() -> {
-            JSONObject jsonObject = new JSONObject();
+    public JSONObject generateParticipantViewD3(String path) {
 
-            JSONArray nodes = new JSONArray();
-            participants.forEach(p -> {
-                JSONObject name = new JSONObject();
-                name.put("name", p.getName());
-                nodes.add(name);
-            });
+        JSONObject jsonObject = new JSONObject();
 
-            JSONArray links = new JSONArray();
+        JSONArray nodes = new JSONArray();
+        participants.forEach(p -> {
+            JSONObject name = new JSONObject();
+            name.put("name", p.getName());
+            nodes.add(name);
+        });
 
-            for (int row=0; row < participantContributions.length; row++)
+        JSONArray links = new JSONArray();
+
+        for (int row=0; row < participantContributions.length; row++)
+        {
+            for (int col=0; col < participantContributions[row].length; col++)
             {
-                for (int col=0; col < participantContributions[row].length; col++)
-                {
-                    if (participantContributions[row][col] > 0) {
-                        JSONObject link = new JSONObject();
-                        link.put("source", row);
-                        link.put("target", col);
-                        links.add(link);
-                    }
+                if (participantContributions[row][col] > 0) {
+                    JSONObject link = new JSONObject();
+                    link.put("source", row);
+                    link.put("target", col);
+                    links.add(link);
                 }
             }
+        }
 
-            jsonObject.put("nodes", nodes);
-            jsonObject.put("links", links);
+        jsonObject.put("nodes", nodes);
+        jsonObject.put("links", links);
 
-            try {
+        try {
 
-                FileWriter file = new FileWriter(path);
-                file.write(jsonObject.toJSONString());
-                file.flush();
-                file.close();
+            FileWriter file = new FileWriter(path);
+            file.write(jsonObject.toJSONString());
+            file.flush();
+            file.close();
 
-            } catch (IOException e) {
-                LOGGER.severe(e.getMessage());
-                Exceptions.printStackTrace(e);
-            }
-        });
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+
+        return jsonObject;
+
     }
 
     public void generateConceptView(String path) {
@@ -557,8 +580,9 @@ public class Community extends AnalysisElement {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
             dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
-            dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
+            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
+            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
         }
     }
