@@ -72,6 +72,8 @@ import services.mail.SendMail;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SimilarityType;
+import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -91,6 +93,7 @@ import webService.queryResult.QueryResultSemanticAnnotation;
 import webService.queryResult.QueryResultSentiment;
 import webService.queryResult.QueryResultSimilarConcepts;
 import webService.queryResult.QueryResultTextCategorization;
+import webService.queryResult.QueryResultTextSimilarities;
 import webService.queryResult.QueryResultTextSimilarity;
 import webService.queryResult.QueryResultTextualComplexity;
 import webService.queryResult.QueryResultTopic;
@@ -108,6 +111,7 @@ import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
 import webService.result.ResultSimilarConcepts;
 import webService.result.ResultTextCategorization;
+import webService.result.ResultTextSimilarities;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
 import webService.result.ResultTopicAdvanced;
@@ -317,6 +321,57 @@ public class ReaderBenchServer {
         );
 
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
+    }
+
+    /**
+     * Computes text similarities between two strings
+     *
+     * @param text1 First text
+     * @param text2 Second text
+     * @param hm Map that must contain the language and corpora of the models
+     * @return
+     */
+    private ResultTextSimilarities textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
+        if (language == null || language.isEmpty() || models == null || models.isEmpty()) {
+            return null;
+        }
+        Lang lang = Lang.getLang(language);
+        if (lang == null) {
+            return null;
+        }
+
+        Document docText1 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text1),
+                models,
+                lang,
+                usePOSTagging
+        );
+
+        Document docText2 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text2),
+                models,
+                lang,
+                usePOSTagging
+        );
+        
+        SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
+        
+        List<SimilarityType> methods = new ArrayList();
+        methods.add(SimilarityType.LSA);
+        methods.add(SimilarityType.LDA);
+        methods.add(SimilarityType.LEACOCK_CHODOROW);
+        methods.add(SimilarityType.WU_PALMER);
+        methods.add(SimilarityType.PATH_SIM);
+        methods.add(SimilarityType.WORD2VEC);
+        
+        Map<String, Double> similarityScores = new HashMap<>();
+        for (SimilarityType method : methods) {
+            similarityScores.put(method.getAcronym(), Formatting.formatNumber(sc.getSemanticSimilarities().get(method), 2));
+        }
+
+        return new ResultTextSimilarities(similarityScores);
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -996,6 +1051,36 @@ public class ReaderBenchServer {
 
             QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
             queryResult.setData(similarConcepts(hm.get("seed"), hm.get("lang"), hm.get("model"), hm.get("corpus"), minThreshold));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+
+        // In contrast to textSimilarity, this endpoint returns similarity
+        // scores of two texts using every similarity method available
+        Spark.post("/textSimilarities", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("text1");
+            requiredParams.add("text2");
+            requiredParams.add("lang");
+            requiredParams.add("postagging");
+            requiredParams.add("lsa");
+            requiredParams.add("lda");
+            requiredParams.add("word2vec");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+
+            Map<String, String> hm = hmParams(json);
+
+            QueryResultTextSimilarities queryResult = new QueryResultTextSimilarities();
+            List<ISemanticModel> models = new ArrayList<>();
+            Lang lang = Lang.getLang(hm.get("lang"));
+            models.add(LSA.loadLSA(hm.get("lsa"), lang));
+            models.add(LDA.loadLDA(hm.get("lda"), lang));
+            models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
+            
+            queryResult.setData(textSimilarities(hm.get("text1"), hm.get("text2"), hm.get("lang"), models, Boolean.parseBoolean(hm.get("postagging"))));
 
             response.type("application/json");
             return queryResult.convertToJson();
