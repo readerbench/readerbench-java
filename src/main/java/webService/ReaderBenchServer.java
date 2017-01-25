@@ -60,6 +60,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
@@ -965,6 +966,26 @@ public class ReaderBenchServer {
 
             String result = queryResult.convertToJson();
             return result;
+
+        });
+        Spark.post("/vcopD3", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+            response.type("application/json");
+
+            StringBuilder communityFolder = new StringBuilder();
+            communityFolder.append("resources/in/Reddit/");
+            String communityName = (String) json.get("community");
+            communityFolder.append(communityName);
+            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+
+            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
+                    0, 7);
+            community.computeMetrics(useTextualComplexity, true, true);
+
+            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
+
+            return participantsCommunities;
 
         });
         Spark.post("/sendContactEmail", (request, response) -> {
