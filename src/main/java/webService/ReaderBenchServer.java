@@ -81,23 +81,7 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
-import webService.queryResult.QueryResult;
-import webService.queryResult.QueryResultCscl;
-import webService.queryResult.QueryResultCv;
-import webService.queryResult.QueryResultCvCover;
-import webService.queryResult.QueryResultFile;
-import webService.queryResult.QueryResultMailgun;
-import webService.queryResult.QueryResultSearch;
-import webService.queryResult.QueryResultSelfExplanation;
-import webService.queryResult.QueryResultSemanticAnnotation;
-import webService.queryResult.QueryResultSentiment;
-import webService.queryResult.QueryResultSimilarConcepts;
-import webService.queryResult.QueryResultTextCategorization;
-import webService.queryResult.QueryResultTextSimilarity;
-import webService.queryResult.QueryResultTextualComplexity;
-import webService.queryResult.QueryResultTopic;
-import webService.queryResult.QueryResultTopicAdvanced;
-import webService.queryResult.QueryResultvCoP;
+import webService.queryResult.*;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -916,8 +900,10 @@ public class ReaderBenchServer {
 
             JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
 
-            return participantsCommunities;
-
+            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+            queryResult.setParticipants(participantsCommunities);
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
         Spark.post("/sendContactEmail", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
