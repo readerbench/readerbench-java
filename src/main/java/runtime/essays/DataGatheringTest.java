@@ -66,22 +66,19 @@ public class DataGatheringTest {
     public static void main(String[] args) throws IOException {
         ReaderBenchServer.initializeDB();
 
-        Lang lang = Lang.en;
 //        LSA lsa = LSA.loadLSA("resources/config/LA/LSA/Letters", Lang.la);
 //        LDA lda = LDA.loadLDA("resources/config/LA/LDA/Letters", Lang.la);
 //        LSA lsa = LSA.loadLSA("resources/config/RO/LSA/Religie", Lang.ro);
 //        LDA lda = LDA.loadLDA("resources/config/RO/LDA/Religie", Lang.ro);
-//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", lang);
-//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", lang);
-//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang);
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", lang);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/COCA_newspaper", lang);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", lang);
-
-//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
+//        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
+//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/COCA_newspaper", Lang.en);
+//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.en);
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.en);
+
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
@@ -92,19 +89,21 @@ public class DataGatheringTest {
         models.add(lsa);
         models.add(lda);
         models.add(w2v);
+//
+//        convertAndProcess("resources/in/creativity/individual creativity tasks (txt)", Lang.en, models);
+//        convertAndProcess("resources/in/pairwise/texts", Lang.en, models);
 
-        convertAndProcess("resources/in/cohesion/Archive/texts", lang, models);
-        convertAndProcess("resources/in/cohesion/CohMetrix/texts", lang, models);
-        convertAndProcess("resources/in/cohesion/msu timed/posttest essays fall 2009", lang, models);
-        convertAndProcess("resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays", lang, models);
-
+//        convertAndProcess("resources/in/cohesion/Archive/texts", Lang.en, models);
+//        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
+//        convertAndProcess("resources/in/cohesion/msu timed/posttest essays fall 2009", Lang.en, models);
+//        convertAndProcess("resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays", Lang.en, models);
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
 //        DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.en, true, true);
-//        DataGathering.processTexts("resources/in/SEvsTA/texts", -1, true, lsa, lda, Lang.en, true, true);
+        DataGathering.processTexts("resources/in/SEvsTA/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/posttest_fall_2009/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/pretest_spring_2010/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/texts 2 for familiarity", -1, true, lsa, lda, Lang.en, true, true);

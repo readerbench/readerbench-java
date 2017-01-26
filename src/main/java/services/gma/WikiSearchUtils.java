@@ -1,7 +1,7 @@
-package gma;
+package services.gma;
 
 import data.discourse.Keyword;
-import gma.models.Cell;
+import services.gma.models.Cell;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,7 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import view.widgets.chat.models.WikiResult;
+import services.gma.models.WikiResult;
 
 public class WikiSearchUtils {
 

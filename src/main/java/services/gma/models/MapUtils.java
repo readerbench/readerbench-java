@@ -1,4 +1,4 @@
-package view.widgets.chat.models;
+package services.gma.models;
 
 import java.util.Collections;
 import java.util.Comparator;

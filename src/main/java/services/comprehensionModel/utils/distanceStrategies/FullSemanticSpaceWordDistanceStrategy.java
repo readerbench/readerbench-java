@@ -97,4 +97,8 @@ public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrat
     public List<Word> getWordList() {
         return this.uniqueWordList;
     }
+    
+    public WordSimilarityContainer getWordSimilarityContainer() {
+        return this.wordDistanceContainer;
+    }
 }

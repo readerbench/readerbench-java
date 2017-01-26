@@ -1,4 +1,4 @@
-package gma;
+package services.gma;
 
 import data.AnalysisElement;
 import data.discourse.SemanticCohesion;

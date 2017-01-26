@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +38,7 @@ import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndexType;
 import services.converters.PdfToTextConverter;
+import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 import webService.cv.CVHelper;
 import webService.query.QueryHelper;
@@ -101,21 +103,21 @@ public class CVAnalyzer {
     private String csvBuildHeader() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("CV,pages,images,avg images per page,colors,avg colors per page,paragraphs,avg paragraphs per page,sentences,avg sentences per page,words,avg words per page,content words,avg content words per page,")
-                .append("font types,avg font types per page,simple font types,simple font types per page,font sizes,avg font sizes per page,min font size,max font size,bold characters,avg bold characters per page,bold chars by total chars,italic characters,italic characters per pace,italic chars by total chars,bold italic characters,bold italic characters per page,bold italic chars by total chars,")
-                .append("positive words (FAN >= ").append(CVConstants.FAN_DELTA)
-                .append("),pos words percentage," + "negative words (FAN <= ").append(-CVConstants.FAN_DELTA)
-                .append("),neg words percentage," + "neutral words (FAN > ").append(-CVConstants.FAN_DELTA)
-                .append(" & FAN < ").append(CVConstants.FAN_DELTA)
-                .append("),neutral words percentage,")
-                .append("FAN weighted average,");
+        sb.append("cv,pages,images,avg_images_per_page,colors,avg_colors_per_page,paragraphs,avg_paragraphs_per_page,sentences,avg_sentences_per_page,words,avg_words_per_page,content_words,avg_content_words_per_page,")
+                .append("font_types,avg_font_types_per_page,simple_font_types,simple_font_types_per_page,font_sizes,avg_font_sizes_per_page,min_font_size,max_font_size,bold_characters,avg_bold_characters_per_page,bold_chars_by_total_chars,italic_characters,italic_characters_per_page,italic_chars_by_total_chars,bold_italic_characters,bold_italic_characters_per_page,bold_italic_chars_by_total_chars,")
+                .append("positive_words_FAN_gte_").append(CVConstants.FAN_DELTA)
+                .append(",pos_words_percentage," + "negative_words_FAN_lte_").append(-CVConstants.FAN_DELTA)
+                .append(",neg_words_percentage," + "neutral_words_FAN_gt_").append(-CVConstants.FAN_DELTA)
+                .append("_FAN_lt_").append(CVConstants.FAN_DELTA)
+                .append(",neutral_words_percentage,")
+                .append("FAN_weighted_average,");
 
         // LIWC sentiment valences
         List<SentimentValence> sentimentValences = SentimentValence.getAllValences();
         for (SentimentValence svLiwc : sentimentValences) {
             if (svLiwc != null && svLiwc.getName().contains("LIWC")) {
                 sb.append(svLiwc.getName()).append(CVConstants.CSV_DELIM);
-                sb.append(svLiwc.getName()).append(" percentage").append(CVConstants.CSV_DELIM);
+                sb.append(svLiwc.getName()).append("_percentage").append(CVConstants.CSV_DELIM);
             }
         }
 
@@ -127,18 +129,71 @@ public class CVAnalyzer {
                 sb.append(index.getAcronym()).append(CVConstants.CSV_DELIM);
             }
         }
-        sb.append("keywords document relevance,");
+        sb.append("keywords_document_relevance").append(CVConstants.CSV_DELIM);
+        
+        sb.append("keywords_doc_sim_lsa").append(CVConstants.CSV_DELIM);
+        sb.append("keywords_doc_sim_lda").append(CVConstants.CSV_DELIM);
+        sb.append("keywords_doc_sim_word2vec").append(CVConstants.CSV_DELIM);
+        sb.append("keywords_doc_sim_leacock").append(CVConstants.CSV_DELIM);
+        sb.append("keywords_doc_sim_wu").append(CVConstants.CSV_DELIM);
+        sb.append("keywords_doc_sim_path").append(CVConstants.CSV_DELIM);
 
         // keywords
-        sb.append(
-                "prospection_sim,prospection_no,prospect_sim,prospect_no,développement_sim,développement_no,clients_sim,clients_no,fidélisation_sim,fidélisation_no,chiffre d’affaires_sim,chiffre d’affaires_no,marge_sim,marge_no,vente_sim,vente_no,portefeuille_sim,portefeuille_no,négociation_sim,négociation_no,budget_sim,budget_no,rendez-vous_sim,rendez-vous_no,proposition_sim,proposition_no,terrain_sim,terrain_no,téléphone_sim,téléphone_no,rentabilité_sim,rentabilité_no,business_sim,business_no,reporting_sim,reporting_no,veille_sim,veille_no,secteur_sim,secteur_no,objectifs_sim,objectifs_no,comptes_sim,comptes_no,animation_sim,animation_no,suivi_sim,suivi_no,création_sim,création_no,gestion_sim,gestion_no,");
+//        sb.append("prospection_sim").append(CVConstants.CSV_DELIM)
+//                .append("prospection_no").append(CVConstants.CSV_DELIM)
+//                .append("developpement_sim").append(CVConstants.CSV_DELIM)
+//                .append("developpement_no").append(CVConstants.CSV_DELIM)
+//                .append("clients_sim").append(CVConstants.CSV_DELIM)
+//                .append("clients_no").append(CVConstants.CSV_DELIM)
+//                .append("fidelisation_sim").append(CVConstants.CSV_DELIM)
+//                .append("fidelisation_no").append(CVConstants.CSV_DELIM)
+//                .append("chiffre_d_affaires_sim").append(CVConstants.CSV_DELIM)
+//                .append("chiffre_d_affaires_sim_no").append(CVConstants.CSV_DELIM)
+//                .append("marge_sim").append(CVConstants.CSV_DELIM)
+//                .append("marge_no").append(CVConstants.CSV_DELIM)
+//                .append("vente_sim").append(CVConstants.CSV_DELIM)
+//                .append("vente_no").append(CVConstants.CSV_DELIM)
+//                .append("negociation_sim").append(CVConstants.CSV_DELIM)
+//                .append("negociation_no").append(CVConstants.CSV_DELIM)
+//                .append("budget_sim").append(CVConstants.CSV_DELIM)
+//                .append("budget_no").append(CVConstants.CSV_DELIM)
+//                .append("rendez-vous_sim").append(CVConstants.CSV_DELIM)
+//                .append("rendez-vous_no").append(CVConstants.CSV_DELIM)
+//                .append("proposition_sim").append(CVConstants.CSV_DELIM)
+//                .append("proposition_no").append(CVConstants.CSV_DELIM)
+//                .append("terrain_sim").append(CVConstants.CSV_DELIM)
+//                .append("terrain_no").append(CVConstants.CSV_DELIM)
+//                .append("telephone_sim").append(CVConstants.CSV_DELIM)
+//                .append("telephone_no").append(CVConstants.CSV_DELIM)
+//                .append("rentabilite_sim").append(CVConstants.CSV_DELIM)
+//                .append("rentabilite_no").append(CVConstants.CSV_DELIM)
+//                .append("business_sim").append(CVConstants.CSV_DELIM)
+//                .append("business_no").append(CVConstants.CSV_DELIM)
+//                .append("reporting_sim").append(CVConstants.CSV_DELIM)
+//                .append("reporting_no").append(CVConstants.CSV_DELIM)
+//                .append("veille_sim").append(CVConstants.CSV_DELIM)
+//                .append("veille_no").append(CVConstants.CSV_DELIM)
+//                .append("secteur_sim").append(CVConstants.CSV_DELIM)
+//                .append("secteur_no").append(CVConstants.CSV_DELIM)
+//                .append("objectifs_sim").append(CVConstants.CSV_DELIM)
+//                .append("objectifs_no").append(CVConstants.CSV_DELIM)
+//                .append("comptes_sim").append(CVConstants.CSV_DELIM)
+//                .append("comptes_no").append(CVConstants.CSV_DELIM)
+//                .append("animation_sim").append(CVConstants.CSV_DELIM)
+//                .append("animation_no").append(CVConstants.CSV_DELIM)
+//                .append("suivi_sim").append(CVConstants.CSV_DELIM)
+//                .append("suivi_no").append(CVConstants.CSV_DELIM)
+//                .append("creation_sim").append(CVConstants.CSV_DELIM)
+//                .append("creation_no").append(CVConstants.CSV_DELIM)
+//                .append("gestion_sim").append(CVConstants.CSV_DELIM)
+//                .append("gestion_no").append(CVConstants.CSV_DELIM);
 
         // concepts
         /*for (int i = 0; i < 25; i++) {
             sb.append("concept" + i + ',');
             sb.append("rel" + i + ',');
             }*/
-        sb.append("\n");
+        sb.append(CVConstants.CSV_NEW_LINE_DELIM);
         return sb.toString();
     }
     
@@ -224,14 +279,21 @@ public class CVAnalyzer {
         }
         // sb.append(CVConstants.CSV_DELIM);
         sb.append(result.getKeywordsDocumentRelevance()).append(CVConstants.CSV_DELIM);
+        Map<String, Double> keywordsDocumentSimilarity = result.getKeywordsDocumentSimilarity();
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.LSA.getAcronym())).append(CVConstants.CSV_DELIM);
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.LDA.getAcronym())).append(CVConstants.CSV_DELIM);
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.WORD2VEC.getAcronym())).append(CVConstants.CSV_DELIM);
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.LEACOCK_CHODOROW.getAcronym())).append(CVConstants.CSV_DELIM);
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.WU_PALMER.getAcronym())).append(CVConstants.CSV_DELIM);
+        sb.append(keywordsDocumentSimilarity.get(SimilarityType.PATH_SIM.getAcronym())).append(CVConstants.CSV_DELIM);
         // keywords
-        for (ResultKeyword keyword : result.getKeywords()) {
-            // sb.append(keyword.getName() + '(' +
-            // keyword.getRelevance() + ") - " +
-            // keyword.getNoOccurences() + " occurences,");
-            sb.append(keyword.getRelevance()).append(CVConstants.CSV_DELIM);
-            sb.append(keyword.getNoOccurences()).append(CVConstants.CSV_DELIM);
-        }
+//        for (ResultKeyword keyword : result.getKeywords()) {
+//            // sb.append(keyword.getName() + '(' +
+//            // keyword.getRelevance() + ") - " +
+//            // keyword.getNoOccurences() + " occurences,");
+//            sb.append(keyword.getRelevance()).append(CVConstants.CSV_DELIM);
+//            sb.append(keyword.getNoOccurences()).append(CVConstants.CSV_DELIM);
+//        }
         // sb.append(CVConstants.CSV_DELIM);
         // concepts
         /*ResultTopic resultTopic = result.getConcepts();
@@ -248,7 +310,7 @@ public class CVAnalyzer {
         if (i == 25)
         break;
         }*/
-        sb.append("\n");
+        sb.append(CVConstants.CSV_NEW_LINE_DELIM);
         return sb.toString();
     }
 
@@ -285,7 +347,9 @@ public class CVAnalyzer {
             Files.walk(Paths.get(path)).forEach(filePath -> {
                 // TODO: replace with mimetype check
                 if (filePath.toString().contains(".pdf")) {
-                    sb.append(csvBuildRow(filePath.getFileName().toString(),
+                    String fileName = filePath.getFileName().toString().replaceAll("\\s+", "_");
+                    int extensionStart = fileName.lastIndexOf(".");
+                    sb.append(csvBuildRow(fileName.substring(0, extensionStart),
                             processFile(filePath.toString(), keywordsList,
                                     ignoreList, pdfConverter)));
                 }
@@ -303,6 +367,7 @@ public class CVAnalyzer {
         Map<String, String> hm = new HashMap<>();
         hm.put("lsa",           CVConstants.LSA_PATH_FR);
         hm.put("lda",           CVConstants.LDA_PATH_FR);
+        hm.put("word2vec",      CVConstants.WOR2VEC_PATH_FR);
         hm.put("lang",          CVConstants.LANG_FR);
         hm.put("postagging",    CVConstants.POS_TAGGING);
         hm.put("dialogism",     CVConstants.DIALOGISM);
@@ -316,7 +381,7 @@ public class CVAnalyzer {
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(hm);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
-        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH);
         frenchCVAnalyzer.processPath();
     }
 

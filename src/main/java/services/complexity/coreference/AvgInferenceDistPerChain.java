@@ -16,15 +16,8 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import data.Block;
-import edu.stanford.nlp.hcoref.data.CorefChain;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import scala.collection.parallel.ParIterableLike;
 import services.complexity.ComplexityIndecesEnum;
 import services.complexity.ComplexityIndices;
-import static services.complexity.coreference.CoreferenceIndex.analyse;
 
 /**
  *

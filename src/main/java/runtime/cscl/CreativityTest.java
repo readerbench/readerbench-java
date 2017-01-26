@@ -48,7 +48,7 @@ import services.converters.lifeConverter.Dialog;
 import services.converters.lifeConverter.Person;
 import services.converters.lifeConverter.Turn;
 import services.converters.lifeConverter.Utterance;
-import services.replicatedWorker.SerialCorpusAssessment;
+import services.processing.SerialProcessing;
 import webService.ReaderBenchServer;
 
 /**
@@ -119,7 +119,7 @@ public class CreativityTest {
                     checkpoint.delete();
                 }
             }
-            SerialCorpusAssessment.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+            SerialProcessing.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                     true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
             processConversations(dir.getAbsolutePath());
         }

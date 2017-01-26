@@ -69,7 +69,8 @@ class ParsingParams_EN extends Properties {
 
     public ParsingParams_EN() {
         super();
-        this.put("annotators", "tokenize, ssplit, pos, lemma, parse, ner, mention, dcoref, sentiment");
+        // TODO: sentiment should be parameterized
+        this.put("annotators", "tokenize, ssplit, pos, lemma, depparse, ner, mention, coref");
         this.put("coref.md.type", "dependency");
     }
 }

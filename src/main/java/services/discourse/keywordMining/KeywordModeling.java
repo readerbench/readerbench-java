@@ -49,7 +49,7 @@ public class KeywordModeling {
         LOGGER.info("Filtering toppics ...");
         List<Keyword> filteredTopics = new ArrayList<>();
         for (Keyword t : e.getTopics()) {
-            if (!ignoredWords.contains(t.getWord().getText())) {
+            if (!ignoredWords.contains(t.getWord().getLemma())) {
                 filteredTopics.add(t);
             }
         }

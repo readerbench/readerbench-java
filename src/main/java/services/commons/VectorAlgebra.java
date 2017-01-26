@@ -143,13 +143,14 @@ public class VectorAlgebra {
         }
         return result;
     }
-    
+
     public static double[] normalize2(double[] v) {
         final double sum = Arrays.stream(v).map(x -> x * x).sum();
-        if (sum == 0) return new double[v.length];
+        if (sum == 0) {
+            return new double[v.length];
+        }
         return Arrays.stream(v).map(x -> x * x / sum).toArray();
     }
-
 
     public static double[] and(double[] v1, double[] v2) {
         if (v1.length != v2.length) {
@@ -277,6 +278,17 @@ public class VectorAlgebra {
         double[] result = new double[v1.length];
         for (int i = 0; i < v1.length; i++) {
             result[i] = v1[i] + v2[i];
+        }
+        return result;
+    }
+
+    public static double[] difference(double[] v1, double[] v2) {
+        if (v1.length != v2.length) {
+            return null;
+        }
+        double[] result = new double[v1.length];
+        for (int i = 0; i < v1.length; i++) {
+            result[i] = v1[i] - v2[i];
         }
         return result;
     }
@@ -449,6 +461,14 @@ public class VectorAlgebra {
             return Math.sqrt(s0 * s2 - Math.pow(s1, 2)) / s0;
         }
         return 0;
+    }
+
+    public static double norm(double[] v, int p) {
+        double sum = 0;
+        for (int i = 0; i < v.length; i++) {
+            sum += Math.pow(Math.abs(v[i]), p);
+        }
+        return Math.pow(sum, 1d / p);
     }
 
     public static void main(String[] args) {

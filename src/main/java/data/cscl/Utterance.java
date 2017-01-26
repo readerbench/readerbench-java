@@ -18,7 +18,6 @@ package data.cscl;
 import java.util.Date;
 
 import data.Block;
-import data.Sentence;
 import java.util.EnumMap;
 
 public class Utterance extends Block {
