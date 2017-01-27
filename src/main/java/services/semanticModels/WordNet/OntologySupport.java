@@ -65,8 +65,6 @@ public class OntologySupport {
         THRESHOLDS.put(SimilarityType.WU_PALMER, 1.);
         THRESHOLDS.put(SimilarityType.PATH_SIM, 1.);
     }
-    private static final int MAX_NO_SYNONYMS = 2;
-    private static final int MAX_NO_HYPERNYMS = 1;
 
     private static final Map<Lang, WordnetPOSData> DICTIONARIES = new EnumMap<>(Lang.class);
     private static final Map<Lang, String> WORDNET_FILEs = new EnumMap<>(Lang.class);
@@ -268,18 +266,12 @@ public class OntologySupport {
         }
         TreeMap<Word, Double> results = new TreeMap<>();
         Set<String> synonyms = getSynonyms(word);
-        int no = 0;
         for (String s : synonyms) {
             if (!StopWords.isStopWord(s, word.getLanguage()) && Dictionary.isDictionaryWord(s, word.getLanguage())) {
                 results.put(new Word(s, s, Stemmer.stemWord(s.toLowerCase(), word.getLanguage()), word.getPOS(), null,
                         word.getLanguage()), SYNONYM_WEIGHT);
-                no++;
-            }
-            if (no >= MAX_NO_SYNONYMS) {
-                break;
             }
         }
-        no = 0;
         Set<String> hypernyms = getHypernyms(word);
         for (String s : hypernyms) {
             Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(), word.getLanguage()), word.getPOS(), null,
@@ -287,13 +279,8 @@ public class OntologySupport {
             if (results.containsKey(newWord) && !StopWords.isStopWord(s, word.getLanguage())
                     && Dictionary.isDictionaryWord(s, word.getLanguage())) {
                 results.put(newWord, HYPERNYM_WEIGHT);
-                no++;
-            }
-            if (no >= MAX_NO_HYPERNYMS) {
-                break;
             }
         }
-
         return results;
     }
 
@@ -374,7 +361,6 @@ public class OntologySupport {
         System.out.println("first set: " + results);
 
         //gets hyponyms
-        int no = 0;
         Set<String> related = getOtherRelatedWords(word);
         for (String s : related) {
             Word newWord = new Word(s, s, Stemmer.stemWord(s.toLowerCase(),
@@ -384,25 +370,22 @@ public class OntologySupport {
                     && !StopWords.isStopWord(s, word.getLanguage())
                     && Dictionary.isDictionaryWord(s, word.getLanguage())) {
                 results.put(newWord, HYPERNYM_WEIGHT);
-                no++;
-            }
-            if (no >= MAX_NO_HYPERNYMS) {
-                break;
             }
         }
 
-        System.out.println("Found " + no + " related");
+        System.out.println("Found " + results.size() + " related");
         return results;
     }
 
     public static void main(String[] args) {
-        Word w1 = Word.getWordFromConcept("dog_NN", Lang.en);
+        Word w1 = Word.getWordFromConcept("country_NN", Lang.en);
         Word w2 = Word.getWordFromConcept("frog_NN", Lang.en);
         System.out.println(OntologySupport.semanticSimilarity(w1, w2, SimilarityType.WU_PALMER));
         System.out.println(OntologySupport.getWordSenses(w1));
         System.out.println(OntologySupport.getSynonyms(w1));
         System.out.println(OntologySupport.getSynonyms(w2));
-        System.out.println(OntologySupport.getSimilarConcepts(w1));
+        System.out.println("w1 similar -> " +  OntologySupport.getSimilarConcepts(w1));
+        System.out.println("w1 extended -> " +  OntologySupport.getExtendedSymilarConcepts(w1));
         
         /*Word w1 = Word.getWordFromConcept("horse", Lang.eng);
         Word w2 = Word.getWordFromConcept("dog", Lang.eng);
