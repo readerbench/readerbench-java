@@ -1,4 +1,4 @@
-package gma;
+package services.gma;
 
 import data.AbstractDocument;
 import data.AnalysisElement;
@@ -29,11 +29,11 @@ import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import gma.models.Cell;
+import services.gma.models.Cell;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import view.widgets.chat.models.GmaCellRenderer;
-import view.widgets.chat.models.GmaTableModel;
+import services.gma.models.GmaCellRenderer;
+import services.gma.models.GmaTableModel;
 
 //!!!!!!!!!!!! modificari in OntologySupport
 //!!!!!!!!!!!! modificari in Word

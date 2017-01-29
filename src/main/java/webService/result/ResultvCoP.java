@@ -15,7 +15,6 @@
  */
 package webService.result;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class ResultvCoP {

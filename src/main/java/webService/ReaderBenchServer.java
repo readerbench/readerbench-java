@@ -38,7 +38,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -68,7 +67,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.openide.util.Exceptions;
-import runtime.cv.CVAnalyzer;
 import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
@@ -78,13 +76,33 @@ import services.mail.SendMail;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SimilarityType;
+import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
+import spark.Response;
 import spark.Spark;
 import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
-import webService.queryResult.*;
+import webService.queryResult.QueryResult;
+import webService.queryResult.QueryResultCscl;
+import webService.queryResult.QueryResultCv;
+import webService.queryResult.QueryResultCvCover;
+import webService.queryResult.QueryResultFile;
+import webService.queryResult.QueryResultMailgun;
+import webService.queryResult.QueryResultSearch;
+import webService.queryResult.QueryResultSelfExplanation;
+import webService.queryResult.QueryResultSemanticAnnotation;
+import webService.queryResult.QueryResultSentiment;
+import webService.queryResult.QueryResultSimilarConcepts;
+import webService.queryResult.QueryResultTextCategorization;
+import webService.queryResult.QueryResultTextSimilarities;
+import webService.queryResult.QueryResultTextSimilarity;
+import webService.queryResult.QueryResultTextualComplexity;
+import webService.queryResult.QueryResultTopic;
+import webService.queryResult.QueryResultTopicAdvanced;
+import webService.queryResult.QueryResultvCoP;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -97,6 +115,7 @@ import webService.result.ResultSelfExplanation;
 import webService.result.ResultSemanticAnnotation;
 import webService.result.ResultSimilarConcepts;
 import webService.result.ResultTextCategorization;
+import webService.result.ResultTextSimilarities;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
 import webService.result.ResultTopicAdvanced;
@@ -206,7 +225,7 @@ public class ReaderBenchServer {
 
         StringBuilder summary = new StringBuilder();
         for (Block b : s.getBlocks()) {
-            LOGGER.info("Block alternate text: " + b.getAlternateText());
+            LOGGER.log(Level.INFO, "Block alternate text: {0}", b.getAlternateText());
             summary.append(b.getAlternateText());
             summary.append("<br/>");
         }
@@ -227,77 +246,138 @@ public class ReaderBenchServer {
      * @return
      */
     private ResultTextSimilarity textSimilarity(String text1, String text2, String language, String model, String corpus) {
-        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) {
+            return null;
+        }
         Lang lang = Lang.getLang(language);
-        if (lang == null) return null;
-        
+        if (lang == null) {
+            return null;
+        }
+
         ISemanticModel semanticModel = null;
         List<ISemanticModel> models = new ArrayList<>();
         if (model.toLowerCase().compareTo("lsa") == 0) {
             semanticModel = LSA.loadLSA(corpus, lang);
+        } else if (model.toLowerCase().compareTo("lda") == 0) {
+            semanticModel = LDA.loadLDA(corpus, lang);
         }
-        else if (model.toLowerCase().compareTo("lda") == 0){
-            semanticModel = LDA.loadLDA(corpus, lang);    
+
+        if (semanticModel == null) {
+            return null;
         }
-        
-        if (semanticModel == null) return null;
         models.add(semanticModel);
-        
+
         Document docText1 = new Document(
                 null,
                 AbstractDocumentTemplate.getDocumentModel(text1),
                 models,
                 lang,
-                false   // pos tagging
+                false // pos tagging
         );
-        
+
         Document docText2 = new Document(
                 null,
                 AbstractDocumentTemplate.getDocumentModel(text2),
                 models,
                 lang,
-                false   // pos tagging
+                false // pos tagging
         );
-        
+
         return new ResultTextSimilarity(Formatting.formatNumber(semanticModel.getSimilarity(docText1, docText2), 2));
     }
-    
+
     /**
      * Retrieves similar concepts for a given concepts
-     * 
-     * @param seed  The word
-     * @param language  Language of the word
+     *
+     * @param seed The word
+     * @param language Language of the word
      * @param model Semantic model to be used
-     * @param corpus    Corpus to be used for semantic model
-     * @param minThreshold  Threshold to be used for similar concepts
-     * @return 
+     * @param corpus Corpus to be used for semantic model
+     * @param minThreshold Threshold to be used for similar concepts
+     * @return
      */
     private ResultSimilarConcepts similarConcepts(String seed, String language, String model, String corpus, double minThreshold) {
-        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
+        if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) {
+            return null;
+        }
         Lang lang = Lang.getLang(language);
-        if (lang == null) return null;
-        
+        if (lang == null) {
+            return null;
+        }
+
         ISemanticModel semanticModel = null;
         List<ISemanticModel> models = new ArrayList<>();
         if (model.toLowerCase().compareTo("lsa") == 0) {
             semanticModel = LSA.loadLSA(corpus, lang);
+        } else if (model.toLowerCase().compareTo("lda") == 0) {
+            semanticModel = LDA.loadLDA(corpus, lang);
         }
-        else if (model.toLowerCase().compareTo("lda") == 0){
-            semanticModel = LDA.loadLDA(corpus, lang);    
+
+        if (semanticModel == null) {
+            return null;
         }
-        
-        if (semanticModel == null) return null;
         models.add(semanticModel);
-        
+
         Document docSeed = new Document(
                 null,
                 AbstractDocumentTemplate.getDocumentModel(seed),
                 models,
                 lang,
-                false   // pos tagging
+                false // pos tagging
         );
-        
+
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
+    }
+
+    /**
+     * Computes text similarities between two strings
+     *
+     * @param text1 First text
+     * @param text2 Second text
+     * @param hm Map that must contain the language and corpora of the models
+     * @return
+     */
+    private ResultTextSimilarities textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
+        if (language == null || language.isEmpty() || models == null || models.isEmpty()) {
+            return null;
+        }
+        Lang lang = Lang.getLang(language);
+        if (lang == null) {
+            return null;
+        }
+
+        Document docText1 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text1),
+                models,
+                lang,
+                usePOSTagging
+        );
+
+        Document docText2 = new Document(
+                null,
+                AbstractDocumentTemplate.getDocumentModel(text2),
+                models,
+                lang,
+                usePOSTagging
+        );
+
+        SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
+
+        List<SimilarityType> methods = new ArrayList();
+        methods.add(SimilarityType.LSA);
+        methods.add(SimilarityType.LDA);
+        methods.add(SimilarityType.LEACOCK_CHODOROW);
+        methods.add(SimilarityType.WU_PALMER);
+        methods.add(SimilarityType.PATH_SIM);
+        methods.add(SimilarityType.WORD2VEC);
+
+        Map<String, Double> similarityScores = new HashMap<>();
+        for (SimilarityType method : methods) {
+            similarityScores.put(method.getAcronym(), Formatting.formatNumber(sc.getSemanticSimilarities().get(method), 2));
+        }
+
+        return new ResultTextSimilarities(similarityScores);
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -398,17 +478,17 @@ public class ReaderBenchServer {
             Map<String, String> hm = hmParams(request);
             QueryResultTopic queryResult = new QueryResultTopic();
             ResultTopic resultTopic = ConceptMap.getTopics(
-                            QueryHelper.processQuery(hm),
-                            Double.parseDouble(hm.get("threshold")),
-                            null,
-                            50);
+                    QueryHelper.processQuery(hm),
+                    Double.parseDouble(hm.get("threshold")),
+                    null,
+                    50);
             queryResult.setData(resultTopic);
 
             response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.post("/topicsAdvanced", (request, response) -> {
-           Set<String> requiredParams = setInitialRequiredParams();
+            Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             requiredParams.add("threshold");
@@ -418,14 +498,14 @@ public class ReaderBenchServer {
             Map<String, String> hm = hmParams(request);
             QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
             ResultTopicAdvanced resultTopic = ConceptMap.getTopicsAdvanced(
-                            QueryHelper.processQuery(hm),
-                            Double.parseDouble(hm.get("threshold")),
-                            null,
-                            50);
+                    QueryHelper.processQuery(hm),
+                    Double.parseDouble(hm.get("threshold")),
+                    null,
+                    50);
             queryResult.setData(resultTopic);
 
             response.type("application/json");
-            return queryResult.convertToJson(); 
+            return queryResult.convertToJson();
         });
         Spark.get("/getSentiment", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -443,7 +523,7 @@ public class ReaderBenchServer {
                         )
                 );
             } catch (Exception e) {
-                LOGGER.severe("Exception: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
 
             response.type("application/json");
@@ -484,7 +564,7 @@ public class ReaderBenchServer {
 
             QueryResultSearch queryResult = new QueryResultSearch();
             queryResult.setData(SearchClient.search(hm.get("text"), setDocuments(hm.get("path")), maxContentSize));
-            
+
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -711,11 +791,11 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/cvProcessing", (request, response) -> {
-            
+
             Set<String> socialNetworksLinks = new HashSet<String>();
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
-    
+
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -748,33 +828,40 @@ public class ReaderBenchServer {
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(socialNetworksLinksFound);
-            
+
             StringBuilder sb = new StringBuilder();
             boolean keywordWarning = false;
             sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
-            for(String keyword : keywordsList) {
+            for (String keyword : keywordsList) {
                 boolean found = false;
-                for(ResultKeyword resultKeyword : result.getKeywords()) {
+                for (ResultKeyword resultKeyword : result.getKeywords()) {
                     if (keyword.equals(resultKeyword.getName())) {
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    if (!keywordWarning) keywordWarning = true;
+                    if (!keywordWarning) {
+                        keywordWarning = true;
+                    }
                     sb.append(keyword).append(", ");
                 }
             }
-            if (keywordWarning) result.getWarnings().add(sb.toString());
-            
-            if (result.getPages() > 2)
+            if (keywordWarning) {
+                result.getWarnings().add(sb.toString());
+            }
+
+            if (result.getPages() > 2) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_pages"));
-            
-            if (socialNetworksLinksFound.get("LinkedIn") == null)
+            }
+
+            if (socialNetworksLinksFound.get("LinkedIn") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
-            if (socialNetworksLinksFound.get("Viadeo") == null)
+            }
+            if (socialNetworksLinksFound.get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
-            
+            }
+
             queryResult.setData(result);
 
             response.type("application/json");
@@ -786,7 +873,7 @@ public class ReaderBenchServer {
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
-            // input in the upload form
+            // input in the upload formx
             QueryResultFile queryResult = new QueryResultFile();
             ResultFile result = FileProcessor.getInstance().saveFile(file);
             List<CVFeedback> cvFeedback = CVValidation.validateFileSize(result.getSize());
@@ -795,8 +882,7 @@ public class ReaderBenchServer {
                     result.getErrors().add(feedback.getFeedback());
                     queryResult.setErrorMsg(ResourceBundle.getBundle("utils.localization.cv_errors").getString("error_general"));
                     queryResult.setSuccess(false);
-                }
-                else {
+                } else {
                     result.getWarnings().add(feedback.getFeedback());
                 }
             }
@@ -841,7 +927,7 @@ public class ReaderBenchServer {
         Spark.options("/folderUpload", (request, response) -> {
             return "";
         });
-        Spark.post("/vcop", (request, response) -> {
+        Spark.post("/vcop", (Request request, Response response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -884,7 +970,6 @@ public class ReaderBenchServer {
             queryResult.setData(resultVcop);
 
             String result = queryResult.convertToJson();
-            LOGGER.info("queryResult" + result);
             return result;
 
         });
@@ -985,7 +1070,7 @@ public class ReaderBenchServer {
 
             return result;
         });
-        
+
         Spark.post("/textSimilarity", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -996,7 +1081,7 @@ public class ReaderBenchServer {
             requiredParams.add("corpus");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
-            
+
             Map<String, String> hm = hmParams(json);
 
             QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
@@ -1005,7 +1090,7 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        
+
         Spark.post("/similarConcepts", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -1015,18 +1100,47 @@ public class ReaderBenchServer {
             requiredParams.add("corpus");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
-            
+
             Map<String, String> hm = hmParams(json);
             double minThreshold;
             try {
                 minThreshold = Double.parseDouble(hm.get("threshold"));
-            }
-            catch(NullPointerException e) {
+            } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
-            
+
             QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
             queryResult.setData(similarConcepts(hm.get("seed"), hm.get("lang"), hm.get("model"), hm.get("corpus"), minThreshold));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+
+        // In contrast to textSimilarity, this endpoint returns similarity
+        // scores of two texts using every similarity method available
+        Spark.post("/textSimilarities", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("text1");
+            requiredParams.add("text2");
+            requiredParams.add("lang");
+            requiredParams.add("postagging");
+            requiredParams.add("lsa");
+            requiredParams.add("lda");
+            requiredParams.add("word2vec");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+
+            Map<String, String> hm = hmParams(json);
+
+            QueryResultTextSimilarities queryResult = new QueryResultTextSimilarities();
+            List<ISemanticModel> models = new ArrayList<>();
+            Lang lang = Lang.getLang(hm.get("lang"));
+            models.add(LSA.loadLSA(hm.get("lsa"), lang));
+            models.add(LDA.loadLDA(hm.get("lda"), lang));
+            models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
+
+            queryResult.setData(textSimilarities(hm.get("text1"), hm.get("text2"), hm.get("lang"), models, Boolean.parseBoolean(hm.get("postagging"))));
 
             response.type("application/json");
             return queryResult.convertToJson();
@@ -1103,12 +1217,12 @@ public class ReaderBenchServer {
                     if (article.getDate() != null) {
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(article.getDate());
-                        if(cal.get(Calendar.YEAR) == year) {
+                        if (cal.get(Calendar.YEAR) == year) {
                             filteredArticles.add(article);
                         }
                     }
                 });
-                threshold = (Double)json.get("threshold");
+                threshold = (Double) json.get("threshold");
             } catch (Exception e) {
                 filteredArticles.addAll(articles);
             }

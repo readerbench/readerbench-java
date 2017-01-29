@@ -30,12 +30,14 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.comprehensionModel.utils.pageRank.NodeRank;
 import services.comprehensionModel.utils.pageRank.PageRank;
 import services.semanticModels.ISemanticModel;
+import services.semanticModels.utils.WordSimilarityContainer;
 
 public class ComprehensionModel {
 
     private final double minActivationThreshold;
     private final int maxNoActiveWords;
     private final int maxNoActiveWordsIncrement;
+    private final int noTopSimilarWords;
     private final ActivationScoreLogger activationScoreLogger;
 
     private final CMIndexer cmIndexer;
@@ -49,10 +51,11 @@ public class ComprehensionModel {
         this.maxNoActiveWords = maxNoActiveWords;
         this.maxNoActiveWordsIncrement = maxNoActiveWordsIncrement;
         this.activationScoreLogger = new ActivationScoreLogger();
+        this.noTopSimilarWords = noTopSimilarWords;
     }
 
-    public WordDistanceIndexer getSemanticIndexer() {
-        return this.cmIndexer.getSemanticIndexer();
+    public WordSimilarityContainer getWordSimilarityContainer() {
+        return this.cmIndexer.getWordSimilarityContainer();
     }
 
     public CMGraphDO getCurrentGraph() {
@@ -150,6 +153,10 @@ public class ComprehensionModel {
 //		});
     }
 
+    public int getNoTopSimilarWords() {
+        return this.noTopSimilarWords;
+    }
+    
     public void logSavedScores(CMGraphDO syntacticGraph, int sentenceIndex) {
         this.activationScoreLogger.saveNodes(syntacticGraph);
         this.activationScoreLogger.saveNodes(this.currentGraph);

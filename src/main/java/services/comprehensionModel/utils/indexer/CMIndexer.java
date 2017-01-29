@@ -33,6 +33,7 @@ import data.AbstractDocumentTemplate;
 import data.Sentence;
 import data.Word;
 import data.document.Document;
+import services.semanticModels.utils.WordSimilarityContainer;
 
 /**
  *
@@ -44,7 +45,7 @@ public class CMIndexer {
     private final String text;
     public AbstractDocument document;
 
-    private WordDistanceIndexer semanticIndexer;
+    private WordSimilarityContainer wordSimilarityContainer;
     private List<WordDistanceIndexer> syntacticIndexerList;
     private final Map<CMNodeDO, Double> nodeActivationScoreMap;
 
@@ -72,8 +73,8 @@ public class CMIndexer {
 
     private void indexFullSemanticSpaceDistances(double threshold, int noTopSimilarWords) {
         FullSemanticSpaceWordDistanceStrategy wdStrategy = new FullSemanticSpaceWordDistanceStrategy(this.semanticModel, threshold, noTopSimilarWords);
-        this.semanticIndexer = new WordDistanceIndexer(wdStrategy.getWordList(), wdStrategy);
-        this.addWordListToWordActivationScoreMap(this.semanticIndexer.getWordList());
+        this.wordSimilarityContainer = wdStrategy.getWordSimilarityContainer();
+        this.addWordListToWordActivationScoreMap(wdStrategy.getWordList());
     }
 
     private void indexSyntacticDistances() {
@@ -103,8 +104,8 @@ public class CMIndexer {
         }
     }
 
-    public WordDistanceIndexer getSemanticIndexer() {
-        return this.semanticIndexer;
+    public WordSimilarityContainer getWordSimilarityContainer() {
+        return this.wordSimilarityContainer;
     }
 
     public List<WordDistanceIndexer> getSyntacticIndexerList() {

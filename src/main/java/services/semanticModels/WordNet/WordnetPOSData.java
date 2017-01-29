@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import data.POS;
 import data.Word;
+import java.util.List;
 import vu.wntools.wnsimilarity.WordnetSimilarityApi;
 import vu.wntools.wnsimilarity.measures.SimilarityPair;
 import vu.wntools.wordnet.WordnetData;
@@ -45,21 +46,33 @@ public class WordnetPOSData {
 
     public WordnetData getDictionary() {
         if (general == null) {
-            WordnetLmfSaxParser parser = new WordnetLmfSaxParser();
-            parser.parseFile(fileName);
-            general = parser.wordnetData;
+            general = initWordNet(fileName, null);
         }
         return general;
     }
     
     public WordnetData getByPOS(POS pos) {
         if (!dictionaries.containsKey(pos)) {
-            WordnetLmfSaxParser parser = new WordnetLmfSaxParser();
-            parser.setPos(pos.name());
-            parser.parseFile(fileName);
-            dictionaries.put(pos, parser.wordnetData);
+            dictionaries.put(pos, initWordNet(fileName, pos));
         }
         return dictionaries.get(pos);
+    }
+    
+    public static WordnetData initWordNet(String fileName, POS pos) {
+        WordnetLmfSaxParser parser = new WordnetLmfSaxParser();
+        if (pos != null) {
+            parser.setPos(pos.name());
+        }
+        parser.parseFile(fileName);
+        for (Map.Entry<String, ArrayList<String>> e : parser.wordnetData.entryToSynsets.entrySet()) {
+            for (String synset : e.getValue()) {
+                if (!parser.wordnetData.synsetToEntries.containsKey(synset)) {
+                    parser.wordnetData.synsetToEntries.put(synset, new ArrayList<>());
+                }
+                parser.wordnetData.synsetToEntries.get(synset).add(e.getKey());
+            }
+        }
+        return parser.wordnetData;
     }
 
     public double semanticSimilarity(Word w1, Word w2, SimilarityType type) {

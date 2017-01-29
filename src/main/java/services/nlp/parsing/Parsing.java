@@ -32,7 +32,8 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.sentiment.SentimentEntity;
-import edu.stanford.nlp.hcoref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.CorefCoreAnnotations;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -41,7 +42,7 @@ import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
@@ -252,43 +253,37 @@ public abstract class Parsing {
         // uses Stanford Core NLP
         Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModels(), lang);
 
-        sentence
-                .get(TokensAnnotation.class
-                ).stream().forEach((token) -> {
-                    String word = token.get(OriginalTextAnnotation.class
-                    );
-                    String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class
-                    ));
-                    String ne = token.get(NamedEntityTagAnnotation.class
-                    );
-                    if (TextPreprocessing.isWord(word, lang)) {
-                        Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
-                        s.getAllWords().add(w);
-                        if (w.isContentWord()) {
-                            s.getWords().add(w);
-                            if (s.getWordOccurences().containsKey(w)) {
-                                s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
-                            } else {
-                                s.getWordOccurences().put(w, 1);
-                            }
-                        }
+        sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
+            String word = token.get(OriginalTextAnnotation.class);
+            String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
+            String ne = token.get(NamedEntityTagAnnotation.class);
+            if (TextPreprocessing.isWord(word, lang)) {
+                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
+                s.getAllWords().add(w);
+                if (w.isContentWord()) {
+                    s.getWords().add(w);
+                    if (s.getWordOccurences().containsKey(w)) {
+                        s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
+                    } else {
+                        s.getWordOccurences().put(w, 1);
                     }
-                });
+                }
+            }
+        });
 
         if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
             if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
-                s.setDependencies(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class
-                ));
-
+                s.setDependencies(sentence.get(EnhancedPlusPlusDependenciesAnnotation.class));
             }
             if (lang.equals(Lang.en)) {
-                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class
-                );
+                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
-                // Stanford Valence
-                int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
-                se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
-                s.setSentimentEntity(se);
+                // TODO: parse Stanford Valence
+                if(tree != null) {
+                    int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
+                    se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
+                    s.setSentimentEntity(se);
+                }
             }
         }
 

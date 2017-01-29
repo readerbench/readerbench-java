@@ -2,7 +2,6 @@ package services.semanticModels.procrustes;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -11,16 +10,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseMatrix;
-import org.apache.mahout.math.DiagonalMatrix;
 import org.apache.mahout.math.Matrix;
-import org.apache.mahout.math.MatrixWritable;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.decompositions.SSVD;
 

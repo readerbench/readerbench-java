@@ -50,7 +50,7 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.Keyword;
-import gma.ProblemSpaceView;
+import services.gma.ProblemSpaceView;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
 import view.models.document.ChatTable;

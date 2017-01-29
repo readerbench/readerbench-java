@@ -114,17 +114,6 @@ public class WordDAO extends AbstractDAO<Word> {
         if (cache.containsKey(lang)) {
             return;
         }
-        List<String> words = findByLang(lang).stream()
-                .map(Word::getLabel).collect(Collectors.toList());
-        Map<String, String> set = new HashMap<>();
-        for (String w : words) {
-            if (!set.containsKey(w)) {
-                set.put(w, w);
-            }
-            else {
-                System.out.println(w + " " + set.get(w));
-            }
-        }
         Map<String, Word> map = findByLang(lang).stream().collect(
                 Collectors.toConcurrentMap(Word::getLabel, Function.identity()));
         cache.put(lang, map);
