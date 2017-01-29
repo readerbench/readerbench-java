@@ -35,11 +35,14 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -212,14 +215,16 @@ public class ReaderBenchServer {
 
         return new ResultSelfExplanation(summary.toString(), readingStrategies);
     }
-    
+
     /**
      * Computes text similarity between two strings
-     * 
+     *
      * @param text1 First text
      * @param text2 Second text
-     * @param hm    Map that must contain the language, model and corpus to be used
-     * @return 
+     * @param language Language to be used
+     * @param model Model to be used
+     * @param corpus Corpus to be used
+     * @return
      */
     private ResultTextSimilarity textSimilarity(String text1, String text2, String language, String model, String corpus) {
         if (language == null || language.isEmpty() || model == null || model.isEmpty() || corpus == null || corpus.isEmpty()) return null;
@@ -342,7 +347,7 @@ public class ReaderBenchServer {
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
-     * @param request the request sent to the server
+     * @param json the request sent to the server
      * @return the HashMap if there are any parameters or null otherwise
      */
     private static Map<String, String> hmParams(JSONObject json) {
@@ -900,6 +905,38 @@ public class ReaderBenchServer {
 
             JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
 
+            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+            queryResult.setParticipants(participantsCommunities);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/vcopD3Week", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+
+            response.type("application/json");
+
+            StringBuilder communityFolder = new StringBuilder();
+            communityFolder.append("resources/in/Reddit/");
+            String communityName = (String) json.get("community");
+            Integer weekNumber = Integer.valueOf((String) json.get("week"));
+
+            JSONArray participantsCommunities = new JSONArray();
+            JSONParser parser = new JSONParser();
+            try {
+                String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
+                LOGGER.info("Get participants for week " + weekNumber + " from file " + fileName);
+                Object obj = parser.parse(new FileReader(fileName));
+                JSONObject participantSubCommunity =  (JSONObject) obj;
+                JSONObject subCommunityJson = new JSONObject();
+                subCommunityJson.put("week", weekNumber);
+                subCommunityJson.put("participants", participantSubCommunity);
+                participantsCommunities.add(subCommunityJson);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
             queryResult.setParticipants(participantsCommunities);
             response.type("application/json");
