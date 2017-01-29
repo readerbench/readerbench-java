@@ -85,24 +85,7 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
-import webService.queryResult.QueryResult;
-import webService.queryResult.QueryResultCscl;
-import webService.queryResult.QueryResultCv;
-import webService.queryResult.QueryResultCvCover;
-import webService.queryResult.QueryResultFile;
-import webService.queryResult.QueryResultMailgun;
-import webService.queryResult.QueryResultSearch;
-import webService.queryResult.QueryResultSelfExplanation;
-import webService.queryResult.QueryResultSemanticAnnotation;
-import webService.queryResult.QueryResultSentiment;
-import webService.queryResult.QueryResultSimilarConcepts;
-import webService.queryResult.QueryResultTextCategorization;
-import webService.queryResult.QueryResultTextSimilarities;
-import webService.queryResult.QueryResultTextSimilarity;
-import webService.queryResult.QueryResultTextualComplexity;
-import webService.queryResult.QueryResultTopic;
-import webService.queryResult.QueryResultTopicAdvanced;
-import webService.queryResult.QueryResultvCoP;
+import webService.queryResult.*;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -329,12 +312,14 @@ public class ReaderBenchServer {
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
     }
 
+
     /**
-     * Computes text similarities between two strings
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param hm Map that must contain the language and corpora of the models
+     * @param language The language of the models
+     * @param models The models
+     * @param usePOSTagging use or not POS tagging
      * @return
      */
     private ResultTextSimilarities textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
