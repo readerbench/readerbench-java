@@ -414,11 +414,13 @@ public class Community extends AnalysisElement {
         JSONObject jsonObject = new JSONObject();
 
         JSONArray nodes = new JSONArray();
-        participants.forEach(p -> {
-            JSONObject name = new JSONObject();
-            name.put("name", p.getName());
-            nodes.add(name);
-        });
+        for (int i = 0; i < participants.size(); i++) {
+            JSONObject participant = new JSONObject();
+            participant.put("name", participants.get(i).getName());
+            participant.put("id", i);
+            participant.put("value", participants.get(i).getGradeAnnotator());
+            nodes.add(participant);
+        }
 
         JSONArray links = new JSONArray();
 
@@ -430,6 +432,7 @@ public class Community extends AnalysisElement {
                     JSONObject link = new JSONObject();
                     link.put("source", row);
                     link.put("target", col);
+                    link.put("score", participantContributions[row][col]);
                     links.add(link);
                 }
             }

@@ -35,10 +35,13 @@ import data.pojo.CategoryPhrase;
 import data.sentiment.SentimentWeights;
 import java.awt.Color;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,24 +85,7 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
-import webService.queryResult.QueryResult;
-import webService.queryResult.QueryResultCscl;
-import webService.queryResult.QueryResultCv;
-import webService.queryResult.QueryResultCvCover;
-import webService.queryResult.QueryResultFile;
-import webService.queryResult.QueryResultMailgun;
-import webService.queryResult.QueryResultSearch;
-import webService.queryResult.QueryResultSelfExplanation;
-import webService.queryResult.QueryResultSemanticAnnotation;
-import webService.queryResult.QueryResultSentiment;
-import webService.queryResult.QueryResultSimilarConcepts;
-import webService.queryResult.QueryResultTextCategorization;
-import webService.queryResult.QueryResultTextSimilarities;
-import webService.queryResult.QueryResultTextSimilarity;
-import webService.queryResult.QueryResultTextualComplexity;
-import webService.queryResult.QueryResultTopic;
-import webService.queryResult.QueryResultTopicAdvanced;
-import webService.queryResult.QueryResultvCoP;
+import webService.queryResult.*;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -237,7 +223,9 @@ public class ReaderBenchServer {
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param hm Map that must contain the language, model and corpus to be used
+     * @param language Language to be used
+     * @param model Model to be used
+     * @param corpus Corpus to be used
      * @return
      */
     private ResultTextSimilarity textSimilarity(String text1, String text2, String language, String model, String corpus) {
@@ -324,12 +312,14 @@ public class ReaderBenchServer {
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
     }
 
+
     /**
-     * Computes text similarities between two strings
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param hm Map that must contain the language and corpora of the models
+     * @param language The language of the models
+     * @param models The models
+     * @param usePOSTagging use or not POS tagging
      * @return
      */
     private ResultTextSimilarities textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
@@ -356,9 +346,9 @@ public class ReaderBenchServer {
                 lang,
                 usePOSTagging
         );
-        
+
         SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
-        
+
         List<SimilarityType> methods = new ArrayList();
         methods.add(SimilarityType.LSA);
         methods.add(SimilarityType.LDA);
@@ -366,7 +356,7 @@ public class ReaderBenchServer {
         methods.add(SimilarityType.WU_PALMER);
         methods.add(SimilarityType.PATH_SIM);
         methods.add(SimilarityType.WORD2VEC);
-        
+
         Map<String, Double> similarityScores = new HashMap<>();
         for (SimilarityType method : methods) {
             similarityScores.put(method.getAcronym(), Formatting.formatNumber(sc.getSemanticSimilarities().get(method), 2));
@@ -422,7 +412,7 @@ public class ReaderBenchServer {
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
-     * @param request the request sent to the server
+     * @param json the request sent to the server
      * @return the HashMap if there are any parameters or null otherwise
      */
     private static Map<String, String> hmParams(JSONObject json) {
@@ -985,8 +975,42 @@ public class ReaderBenchServer {
 
             JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
 
-            return participantsCommunities;
+            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+            queryResult.setParticipants(participantsCommunities);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/vcopD3Week", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
+            response.type("application/json");
+
+            StringBuilder communityFolder = new StringBuilder();
+            communityFolder.append("resources/in/Reddit/");
+            String communityName = (String) json.get("community");
+            Integer weekNumber = Integer.valueOf((String) json.get("week"));
+
+            JSONArray participantsCommunities = new JSONArray();
+            JSONParser parser = new JSONParser();
+            try {
+                String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
+                LOGGER.info("Get participants for week " + weekNumber + " from file " + fileName);
+                Object obj = parser.parse(new FileReader(fileName));
+                JSONObject participantSubCommunity =  (JSONObject) obj;
+                JSONObject subCommunityJson = new JSONObject();
+                subCommunityJson.put("week", weekNumber);
+                subCommunityJson.put("participants", participantSubCommunity);
+                participantsCommunities.add(subCommunityJson);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+            queryResult.setParticipants(participantsCommunities);
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
         Spark.post("/sendContactEmail", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -1100,7 +1124,7 @@ public class ReaderBenchServer {
             models.add(LSA.loadLSA(hm.get("lsa"), lang));
             models.add(LDA.loadLDA(hm.get("lda"), lang));
             models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
-            
+
             queryResult.setData(textSimilarities(hm.get("text1"), hm.get("text2"), hm.get("lang"), models, Boolean.parseBoolean(hm.get("postagging"))));
 
             response.type("application/json");
