@@ -21,8 +21,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
@@ -37,6 +41,9 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.gephi.statistics.plugin.Modularity;
 import org.openide.util.Lookup;
 import services.commons.Formatting;
+import services.commons.VectorAlgebra;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.WordNet.OntologySupport;
 import services.semanticModels.utils.WordSimilarity;
 import services.semanticModels.utils.WordSimilarityContainer;
 
@@ -60,6 +67,24 @@ public class CMGraphDO {
 
     public boolean containsNode(CMNodeDO otherNode) {
         return nodeListContainsNode(this.nodeList, otherNode);
+    }
+    public CMNodeDO getNode(CMNodeDO otherNode) {
+        Optional<CMNodeDO> retrievedNode = nodeList.stream().filter(((node) -> (node.equals(otherNode)))).findFirst();
+        try {
+            return retrievedNode.get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+    public void removeNode(CMNodeDO node) {
+        if(!this.containsNode(node)) {
+            return;
+        }
+        CMNodeDO actualNode = this.getNode(node);
+        this.nodeList.remove(actualNode);
+        this.edgeList.removeIf(edge -> {
+            return edge.getOppositeNode(actualNode) != null;
+        });
     }
 
     public void addNodeIfNotExists(CMNodeDO otherNode) {
@@ -121,52 +146,105 @@ public class CMGraphDO {
         }
     }
     
-    public void combineWithLinksFrom(WordSimilarityContainer wordSimilarityContainer, int noTopSimilarWords) {
+    // TODO: remove wordSimilarityContainer
+    public void combineWithLinksFrom(CMGraphDO syntacticGraph, ISemanticModel semanticModel, int noTopSimilarWords) {
+        List<ISemanticModel> models = new ArrayList();
+        models.add(semanticModel);
+        
+        // set of all the potential semantic words
+        Map<Word, Double> potentialInferredWords = new TreeMap<>();
+        
+        
+        for (CMNodeDO node : syntacticGraph.getNodeList()) {
+            node.getWord().setSemanticModels(models);
+            
+            // add the new text based nodes
+            if(this.containsNode(node)) {
+                CMNodeDO associatedNode = this.getNode(node);
+                associatedNode.setNodeType(CMNodeType.TextBased);
+            }
+            else {
+                this.addNodeIfNotExists(node);
+            }
+            
+            // add the related words from the dictionary in the potentialInferredWords set
+            TreeMap<Word, Double> similarConcepts = OntologySupport.getSimilarConcepts(node.getWord());
+            Iterator<Word> dictionaryWordIterator = similarConcepts.keySet().iterator();
+            while(dictionaryWordIterator.hasNext()) {
+                Word dictionaryWord = dictionaryWordIterator.next();
+                
+                if(dictionaryWord.isNoun() || dictionaryWord.isVerb()) {
+                    dictionaryWord.setSemanticModels(models);
+                    potentialInferredWords.put(dictionaryWord, 0.0);
+                }
+            }
+        }
+        syntacticGraph.edgeList.stream().filter((otherGraphEdge) -> (!edgeListContainsEdge(this.edgeList, otherGraphEdge))).forEach((otherGraphEdge) -> {
+            this.edgeList.add(otherGraphEdge);
+        });
+        
+        // remove the existing inferred nodes and add them to the potentialInferredWords set
         List<CMNodeDO> thisNodeList = new ArrayList<>(this.nodeList);
         for (CMNodeDO node : thisNodeList) {
-            Map<String, PriorityQueue<WordSimilarity>> map = wordSimilarityContainer.getWordSimilarityMap();
-            if (!map.containsKey(node.getWord().getLemma())) {
-                continue;
-            }
-            
-            PriorityQueue<WordSimilarity> wsQueue = map.get(node.getWord().getLemma());
-            Iterator<WordSimilarity> wSymIter = wsQueue.iterator();
-            int step = 0;
-            while(wSymIter.hasNext()) {
-                WordSimilarity s = wSymIter.next();
-                if (noTopSimilarWords == step) {
-                    break;
-                }
-                Word w = Word.getWordFromConcept(s.getWordLemma(), Lang.en);
-                CMNodeDO wNode = new CMNodeDO(w, CMNodeType.Inferred);
-                CMEdgeDO wEdge = new CMEdgeDO(node, wNode, CMEdgeType.Semantic, s.getSimilarity());
-                this.addNodeIfNotExists(wNode);
-                if(!this.containsEdge(wEdge)) {
-                    this.edgeList.add(wEdge);
-                }
-                step ++;
+            if(node.getNodeType() == CMNodeType.Inferred) {
+                potentialInferredWords.put(node.getWord(), 0.0);
+                this.removeNode(node);
             }
         }
-        // add missing links from the second graph
+        
+        Iterator<Word> it = potentialInferredWords.keySet().iterator();
+        double[] distances = new double[potentialInferredWords.keySet().size()];
+        int i = 0;
+        while(it.hasNext()) {
+            Word potentialWord = it.next();
+            
+            double distance = 0.0;
+            for(CMNodeDO node: this.nodeList) {
+                distance += semanticModel.getSimilarity(node.getWord(), potentialWord);
+            }
+            if(this.nodeList.size() > 0) {
+                distance = distance / (double)this.nodeList.size();
+            }
+            potentialInferredWords.put(potentialWord, distance);
+            distances[i] = distance;
+            
+            i++;
+        }
+        
+        double avg = VectorAlgebra.avg(distances);
+        double stdev = VectorAlgebra.stdev(distances);
+        double minDistance = Math.min(0.3, Math.abs(avg + stdev));
+        //double minDistance = Math.abs(avg - stdev);
+        
+        // add the nodes with avg > minDistance
+        it = potentialInferredWords.keySet().iterator();
+        while(it.hasNext()) {
+            Word potentialWord = it.next();
+            double distance = potentialInferredWords.get(potentialWord);
+            if(distance >= minDistance) {
+                CMNodeDO node = new CMNodeDO(potentialWord, CMNodeType.Inferred);
+                this.addNodeIfNotExists(node);
+            }
+        }
+        
+        // add missing semantic links
         thisNodeList = new ArrayList<>(this.nodeList);
-        for (CMNodeDO node : thisNodeList) {
-            Map<String, PriorityQueue<WordSimilarity>> map = wordSimilarityContainer.getWordSimilarityMap();
-            if (!map.containsKey(node.getWord().getLemma())) {
-                continue;
-            }
-            
-            PriorityQueue<WordSimilarity> wsQueue = map.get(node.getWord().getLemma());
-            Iterator<WordSimilarity> wSymIter = wsQueue.iterator();
-            while(wSymIter.hasNext()) {
-                WordSimilarity s = wSymIter.next();
-                Word w = Word.getWordFromConcept(s.getWordLemma(), Lang.en);
-                CMNodeDO wNode = new CMNodeDO(w, CMNodeType.Inferred);
-                CMEdgeDO wEdge = new CMEdgeDO(node, wNode, CMEdgeType.Semantic, s.getSimilarity());
-                if (this.containsNode(wNode) && !this.containsEdge(wEdge)) {
+        for(i = 0; i < thisNodeList.size(); i++) {
+            for(int j = i + 1; j < thisNodeList.size(); j++) {
+                CMNodeDO node1 = this.nodeList.get(i), node2 = this.nodeList.get(j);
+                double distance = semanticModel.getSimilarity(node1.getWord(), node2.getWord());
+                if(distance > minDistance) {
+                    CMEdgeDO wEdge = new CMEdgeDO(node1, node2, CMEdgeType.Semantic, distance);
                     this.edgeList.add(wEdge);
                 }
             }
         }
+        
+        // TODO: these are potential words
+        // remove all previous semantic links
+        // for each compute the semantic relatedness with all the other previous nodes ( MIN(avg +/- stdev, MIN(semantic similarity))) 
+        // add the semantic links that satisfy the cdt
+        // build the graph 
     }
 
     public CMGraphDO getCombinedGraph(CMGraphDO otherGraph) {

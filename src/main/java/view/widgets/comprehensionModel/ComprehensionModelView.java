@@ -227,18 +227,24 @@ public class ComprehensionModelView extends JFrame {
 
         this.cm.markAllNodesAsInactive();
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
-
-        CMGraphDO cmGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
-        WordSimilarityContainer wordSimilarityContainer = this.cm.getWordSimilarityContainer();
-        cmGraph.combineWithLinksFrom(wordSimilarityContainer, this.cm.getNoTopSimilarWords());
-        cmGraph = cmGraph.getCombinedGraph(this.cm.getCurrentGraph());
-
-        this.cm.setCurrentGraph(cmGraph);
+        CMGraphDO currentSyntacticGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
+        CMGraphDO currentGraph = this.cm.getCurrentGraph();
+        
+        currentGraph.combineWithLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel(), this.cm.getNoTopSimilarWords());
+        
+        
+        // TODO : removed getNoTopSimilarWords
+        // refactor the combine with getCurrentGraph
+        // TODO with LOGGER: should generate csv for each graph (w1-type(type) - w2-(type(w2)) - weight)
+        // currentSyntacticGraph = currentSyntacticGraph.getCombinedGraph(this.cm.getCurrentGraph());
+        
+        this.cm.setCurrentGraph(currentGraph);
         this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
+        
         this.cm.applyPageRank(this.sentenceIndex);
         this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
 
-        List<CMNodeDO> nodeItemList = cmGraph.getNodeList();
+        List<CMNodeDO> nodeItemList = currentGraph.getNodeList();
 
         nodeItemList.stream().forEach((currentNode) -> {
             String text = currentNode.getWord().getLemma();
@@ -260,7 +266,7 @@ public class ComprehensionModelView extends JFrame {
             outMap.put(n, currentNode);
         });
 
-        for (CMEdgeDO edge : cmGraph.getEdgeList()) {
+        for (CMEdgeDO edge : currentGraph.getEdgeList()) {
             int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
             Edge e = graphModel.factory().newEdge(nodes.get(edge.getNode1()), nodes.get(edge.getNode2()), distanceLbl, edge.getScore(), false);
             e.setLabel("");
@@ -272,9 +278,12 @@ public class ComprehensionModelView extends JFrame {
             }
             e.setColor(color);
 
-            graph.addEdge(e);
+            try {
+                graph.addEdge(e);
+            } catch(Exception ee) {
+                ee.printStackTrace();
+            }
         }
-
         return outMap;
     }
 

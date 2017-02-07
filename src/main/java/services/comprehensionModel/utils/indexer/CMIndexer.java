@@ -119,4 +119,8 @@ public class CMIndexer {
     public AbstractDocument getDocument() {
         return this.document;
     }
+    
+    public ISemanticModel getSemanticModel() {
+        return this.semanticModel;
+    }
 }
