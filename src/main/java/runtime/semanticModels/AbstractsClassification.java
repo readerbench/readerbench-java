@@ -156,10 +156,10 @@ public class AbstractsClassification {
             System.out.println("Generating output files...");
             for (SimilarityType method : methods) {
                 matchedAnnotations.put(method, 0);
-                matchedFiles.put(method, new FileWriter(abstractsPath + "/" + method.getAcronym() + ".txt"));
+                matchedFiles.put(method, new FileWriter(abstractsPath + "/" + method.getAcronym() + ".out"));
             }
             cohesionMatchedAnnotations = 0;
-            cohesionMatchedFile = new FileWriter(abstractsPath + "/cohesion.txt");
+            cohesionMatchedFile = new FileWriter(abstractsPath + "/cohesion.out");
 
             // compute similarity scores
             System.out.println("Computing similarity scores...");
