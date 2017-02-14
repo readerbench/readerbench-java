@@ -180,7 +180,7 @@ public class AbstractsClassification {
                 for (SimilarityType method : methods) {
                     Map.Entry<String, Double> maxSimilarityScore = Collections.max(similarityScores.get(abstractFile).get(method).entrySet(), Map.Entry.comparingByValue());
                     System.out.println("Abstract [" + method.getAcronym() + "]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
-                    matchedFiles.get(method).write(abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                    matchedFiles.get(method).write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                     if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                         matchedAnnotations.put(method, matchedAnnotations.get(method) + 1);
                     }
@@ -196,7 +196,8 @@ public class AbstractsClassification {
             System.out.println("Printing final detection percentage rates...");
             for (SimilarityType method : methods) {
                 Double score = matchedAnnotations.get(method) * 1.0 / abstractsAnnotations.size();
-                matchedFiles.get(method).write(score.toString());
+                matchedFiles.get(method).write("Total matched: " + matchedAnnotations.get(method) + " of " + abstractsAnnotations.size() + "\n");
+                matchedFiles.get(method).write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
                 matchedFiles.get(method).close();
             }
             Double score = cohesionMatchedAnnotations * 1.0 / abstractsAnnotations.size();
@@ -256,10 +257,10 @@ public class AbstractsClassification {
         methods.add(SimilarityType.LEACOCK_CHODOROW);
         methods.add(SimilarityType.WU_PALMER);
         methods.add(SimilarityType.PATH_SIM);
-        methods.add(SimilarityType.WORD2VEC);
+        //methods.add(SimilarityType.WORD2VEC);
 
         boolean ignoreAbstractsFirstLine = false;
-        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
+        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts_sample", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
         ac.process(ignoreAbstractsFirstLine);
     }
 
