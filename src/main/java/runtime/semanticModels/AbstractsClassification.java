@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
+import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -64,7 +65,6 @@ public class AbstractsClassification {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
                 if (fileExtension.compareTo("txt") == 0) {
                     try {
-                        int lineNumber = 0;
                         Files.lines(filePath).forEach((String line) -> {
                             String fileName = filePath.getFileName().toString();
                             String categoryLetter = fileName.substring(0, 1);
@@ -80,7 +80,7 @@ public class AbstractsClassification {
         }
     }
 
-    private void extractAbstracts() {
+    private void extractAbstracts(boolean ignoreAbstractsFirstLine) {
         abstractsAnnotations = new HashMap<>();
         abstractsClassifications = new HashMap<>();
         abstractsTexts = new HashMap<>();
@@ -89,12 +89,11 @@ public class AbstractsClassification {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
                 if (fileExtension.compareTo("txt") == 0) {
                     try {
-                        int lineNumber = 0;
                         List<String> lines = Files.readAllLines(filePath);
                         int k = 0;
                         for (String line : lines) {
                             k++;
-                            if (k == 1) {
+                            if (ignoreAbstractsFirstLine && k == 1) {
                                 continue;
                             }
                             String fileName = filePath.getFileName().toString();
@@ -112,7 +111,7 @@ public class AbstractsClassification {
             Exceptions.printStackTrace(ex);
         }
     }
-
+    
     private void buildDocuments() {
         System.out.println("Building documents of categories");
         documentsCategories = new HashMap<>();
@@ -186,7 +185,7 @@ public class AbstractsClassification {
                 }
                 Map.Entry<String, Double> maxSimilarityScore = Collections.max(cohesionScores.get(abstractFile).entrySet(), Map.Entry.comparingByValue());
                 System.out.println("Abstract [cohesion]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
-                cohesionMatchedFile.write(abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                cohesionMatchedFile.write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                 if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                     cohesionMatchedAnnotations++;
                 }
@@ -199,20 +198,21 @@ public class AbstractsClassification {
                 matchedFiles.get(method).close();
             }
             Double score = cohesionMatchedAnnotations * 1.0 / abstractsAnnotations.size();
-            cohesionMatchedFile.write(score.toString());
+            cohesionMatchedFile.write("Total matched: " + cohesionMatchedAnnotations + " of " + abstractsAnnotations.size() + "\n");
+            cohesionMatchedFile.write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
             cohesionMatchedFile.close();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
-    private void process() {
+    private void process(boolean ignoreAbstractsFirstLine) {
         System.out.println("Extracting categories...");
         extractCategories();
         //System.out.println(categoriesToString());
         //System.out.println("Number of categories: " + categories.size());
         System.out.println("Extracting abstracts...");
-        extractAbstracts();
+        extractAbstracts(ignoreAbstractsFirstLine);
         //System.out.println(abstractsToString());
         //System.out.println("Number of abstracts: " + abstractsAnnotations.size());
         System.out.println("Building documents...");
@@ -256,8 +256,9 @@ public class AbstractsClassification {
         methods.add(SimilarityType.PATH_SIM);
         methods.add(SimilarityType.WORD2VEC);
 
-        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/abstracts", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
-        ac.process();
+        boolean ignoreAbstractsFirstLine = false;
+        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
+        ac.process(ignoreAbstractsFirstLine);
     }
 
 }
