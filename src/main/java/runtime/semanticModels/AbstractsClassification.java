@@ -91,17 +91,19 @@ public class AbstractsClassification {
                     try {
                         List<String> lines = Files.readAllLines(filePath);
                         int k = 0;
+                        StringBuilder sb = new StringBuilder();
                         for (String line : lines) {
                             k++;
                             if (ignoreAbstractsFirstLine && k == 1) {
                                 continue;
                             }
-                            String fileName = filePath.getFileName().toString();
-                            String categoryLetter = fileName.substring(0, 1);
-                            abstractsAnnotations.put(filePath.getFileName().toString(), categoryLetter);
-                            abstractsClassifications.put(filePath.getFileName().toString(), "Z");
-                            abstractsTexts.put(filePath.getFileName().toString(), line);
-                        };
+                            sb.append(line).append("\n");
+                        }
+                        String fileName = filePath.getFileName().toString();
+                        String categoryLetter = fileName.substring(0, 1);
+                        abstractsAnnotations.put(filePath.getFileName().toString(), categoryLetter);
+                        abstractsClassifications.put(filePath.getFileName().toString(), "Z");
+                        abstractsTexts.put(filePath.getFileName().toString(), sb.toString());
                     } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -111,7 +113,7 @@ public class AbstractsClassification {
             Exceptions.printStackTrace(ex);
         }
     }
-    
+
     private void buildDocuments() {
         System.out.println("Building documents of categories");
         documentsCategories = new HashMap<>();
@@ -244,9 +246,9 @@ public class AbstractsClassification {
     public static void main(String args[]) {
         List<ISemanticModel> semanticModels = new ArrayList<>();
         Lang lang = Lang.en;
-        semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/TASA", lang));
-        semanticModels.add(LDA.loadLDA("resources/config/EN/LDA/TASA", lang));
-        semanticModels.add(Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang));
+        semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/SciRef", lang));
+        semanticModels.add(LDA.loadLDA("resources/config/EN/LDA/SciRef", lang));
+        //semanticModels.add(Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang));
 
         List<SimilarityType> methods = new ArrayList();
         methods.add(SimilarityType.LSA);
