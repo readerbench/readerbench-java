@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
+import services.commons.Formatting;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -64,7 +65,6 @@ public class AbstractsClassification {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
                 if (fileExtension.compareTo("txt") == 0) {
                     try {
-                        int lineNumber = 0;
                         Files.lines(filePath).forEach((String line) -> {
                             String fileName = filePath.getFileName().toString();
                             String categoryLetter = fileName.substring(0, 1);
@@ -80,7 +80,7 @@ public class AbstractsClassification {
         }
     }
 
-    private void extractAbstracts() {
+    private void extractAbstracts(boolean ignoreAbstractsFirstLine) {
         abstractsAnnotations = new HashMap<>();
         abstractsClassifications = new HashMap<>();
         abstractsTexts = new HashMap<>();
@@ -89,20 +89,21 @@ public class AbstractsClassification {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
                 if (fileExtension.compareTo("txt") == 0) {
                     try {
-                        int lineNumber = 0;
                         List<String> lines = Files.readAllLines(filePath);
                         int k = 0;
+                        StringBuilder sb = new StringBuilder();
                         for (String line : lines) {
                             k++;
-                            if (k == 1) {
+                            if (ignoreAbstractsFirstLine && k == 1) {
                                 continue;
                             }
-                            String fileName = filePath.getFileName().toString();
-                            String categoryLetter = fileName.substring(0, 1);
-                            abstractsAnnotations.put(filePath.getFileName().toString(), categoryLetter);
-                            abstractsClassifications.put(filePath.getFileName().toString(), "Z");
-                            abstractsTexts.put(filePath.getFileName().toString(), line);
-                        };
+                            sb.append(line).append("\n");
+                        }
+                        String fileName = filePath.getFileName().toString();
+                        String categoryLetter = fileName.substring(0, 1);
+                        abstractsAnnotations.put(filePath.getFileName().toString(), categoryLetter);
+                        abstractsClassifications.put(filePath.getFileName().toString(), "Z");
+                        abstractsTexts.put(filePath.getFileName().toString(), sb.toString());
                     } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -155,10 +156,10 @@ public class AbstractsClassification {
             System.out.println("Generating output files...");
             for (SimilarityType method : methods) {
                 matchedAnnotations.put(method, 0);
-                matchedFiles.put(method, new FileWriter(abstractsPath + "/" + method.getAcronym() + ".txt"));
+                matchedFiles.put(method, new FileWriter(abstractsPath + "/" + method.getAcronym() + ".out"));
             }
             cohesionMatchedAnnotations = 0;
-            cohesionMatchedFile = new FileWriter(abstractsPath + "/cohesion.txt");
+            cohesionMatchedFile = new FileWriter(abstractsPath + "/cohesion.out");
 
             // compute similarity scores
             System.out.println("Computing similarity scores...");
@@ -179,14 +180,14 @@ public class AbstractsClassification {
                 for (SimilarityType method : methods) {
                     Map.Entry<String, Double> maxSimilarityScore = Collections.max(similarityScores.get(abstractFile).get(method).entrySet(), Map.Entry.comparingByValue());
                     System.out.println("Abstract [" + method.getAcronym() + "]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
-                    matchedFiles.get(method).write(abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                    matchedFiles.get(method).write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                     if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                         matchedAnnotations.put(method, matchedAnnotations.get(method) + 1);
                     }
                 }
                 Map.Entry<String, Double> maxSimilarityScore = Collections.max(cohesionScores.get(abstractFile).entrySet(), Map.Entry.comparingByValue());
                 System.out.println("Abstract [cohesion]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
-                cohesionMatchedFile.write(abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                cohesionMatchedFile.write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                 if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                     cohesionMatchedAnnotations++;
                 }
@@ -195,24 +196,26 @@ public class AbstractsClassification {
             System.out.println("Printing final detection percentage rates...");
             for (SimilarityType method : methods) {
                 Double score = matchedAnnotations.get(method) * 1.0 / abstractsAnnotations.size();
-                matchedFiles.get(method).write(score.toString());
+                matchedFiles.get(method).write("Total matched: " + matchedAnnotations.get(method) + " of " + abstractsAnnotations.size() + "\n");
+                matchedFiles.get(method).write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
                 matchedFiles.get(method).close();
             }
             Double score = cohesionMatchedAnnotations * 1.0 / abstractsAnnotations.size();
-            cohesionMatchedFile.write(score.toString());
+            cohesionMatchedFile.write("Total matched: " + cohesionMatchedAnnotations + " of " + abstractsAnnotations.size() + "\n");
+            cohesionMatchedFile.write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
             cohesionMatchedFile.close();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
-    private void process() {
+    private void process(boolean ignoreAbstractsFirstLine) {
         System.out.println("Extracting categories...");
         extractCategories();
         //System.out.println(categoriesToString());
         //System.out.println("Number of categories: " + categories.size());
         System.out.println("Extracting abstracts...");
-        extractAbstracts();
+        extractAbstracts(ignoreAbstractsFirstLine);
         //System.out.println(abstractsToString());
         //System.out.println("Number of abstracts: " + abstractsAnnotations.size());
         System.out.println("Building documents...");
@@ -244,9 +247,9 @@ public class AbstractsClassification {
     public static void main(String args[]) {
         List<ISemanticModel> semanticModels = new ArrayList<>();
         Lang lang = Lang.en;
-        semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/TASA", lang));
-        semanticModels.add(LDA.loadLDA("resources/config/EN/LDA/TASA", lang));
-        semanticModels.add(Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang));
+        semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/SciRef", lang));
+        semanticModels.add(LDA.loadLDA("resources/config/EN/LDA/SciRef", lang));
+        //semanticModels.add(Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang));
 
         List<SimilarityType> methods = new ArrayList();
         methods.add(SimilarityType.LSA);
@@ -254,10 +257,11 @@ public class AbstractsClassification {
         methods.add(SimilarityType.LEACOCK_CHODOROW);
         methods.add(SimilarityType.WU_PALMER);
         methods.add(SimilarityType.PATH_SIM);
-        methods.add(SimilarityType.WORD2VEC);
+        //methods.add(SimilarityType.WORD2VEC);
 
-        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/abstracts", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
-        ac.process();
+        boolean ignoreAbstractsFirstLine = false;
+        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts_sample", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
+        ac.process(ignoreAbstractsFirstLine);
     }
 
 }

@@ -151,6 +151,18 @@ public class VectorAlgebra {
         }
         return Arrays.stream(v).map(x -> x * x / sum).toArray();
     }
+    
+    public static double norm2(double[] x) {
+        double norm = 0.0;
+
+        for (double n : x) {
+            norm += n * n;
+        }
+
+        norm = Math.sqrt(norm);
+
+        return norm;
+    }
 
     public static double[] and(double[] v1, double[] v2) {
         if (v1.length != v2.length) {
