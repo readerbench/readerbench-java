@@ -15,6 +15,8 @@
  */
 package webService;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
@@ -38,6 +40,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -394,7 +397,7 @@ public class ReaderBenchServer {
         }
         return null;
     }
-
+    
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -452,6 +455,7 @@ public class ReaderBenchServer {
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
         });
+        // DEPRECTATED: Shall be removed
         Spark.get("/getTopics", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
@@ -472,15 +476,37 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.post("/topicsAdvanced", (request, response) -> {
+        Spark.post("/topics", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             requiredParams.add("threshold");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(request);
+            Map<String, String> hm = hmParams(json);
+            QueryResultTopic queryResult = new QueryResultTopic();
+            ResultTopic resultTopic = ConceptMap.getTopics(
+                    QueryHelper.processQuery(hm),
+                    Double.parseDouble(hm.get("threshold")),
+                    null,
+                    50);
+            queryResult.setData(resultTopic);
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/topicsAdvanced", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Set<String> requiredParams = setInitialRequiredParams();
+            // additional required parameters
+            requiredParams.add("text");
+            requiredParams.add("threshold");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+
+            Map<String, String> hm = hmParams(json);
             QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
             ResultTopicAdvanced resultTopic = ConceptMap.getTopicsAdvanced(
                     QueryHelper.processQuery(hm),
@@ -1258,7 +1284,7 @@ public class ReaderBenchServer {
         SentimentWeights.initialize();
         LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
     }
-
+    
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
         ReaderBenchServer server = new ReaderBenchServer();

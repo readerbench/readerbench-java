@@ -19,11 +19,14 @@ import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
 import data.document.Document;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
@@ -37,21 +40,30 @@ public class QueryHelper {
     public static AbstractDocument processQuery(Map<String, String> hm) {
         LOGGER.info("Processign query ...");
         Lang lang = Lang.getLang(hm.get("lang"));
-        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(hm.get("text"));
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(LSA.loadLSA(hm.get("lsa"), lang));
-        models.add(LDA.loadLDA(hm.get("lda"), lang));
-        if (hm.get("word2vec") != null) models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
-        AbstractDocument document = new Document(
-                null,
-                template,
-                models,
-                lang,
-                Boolean.parseBoolean(hm.get("postagging"))
-        );
-        LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
-        document.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
-        ComplexityIndices.computeComplexityFactors(document);
-        return document;
+        AbstractDocumentTemplate template;
+        try {
+            template = AbstractDocumentTemplate.getDocumentModel(URLDecoder.decode(hm.get("text"), "UTF-8"));
+
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(LSA.loadLSA(hm.get("lsa"), lang));
+            models.add(LDA.loadLDA(hm.get("lda"), lang));
+            if (hm.get("word2vec") != null && (hm.get("word2vec").compareTo("") != 0)) {
+                models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
+            }
+            AbstractDocument document = new Document(
+                    null,
+                    template,
+                    models,
+                    lang,
+                    Boolean.parseBoolean(hm.get("postagging"))
+            );
+            LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
+            document.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
+            ComplexityIndices.computeComplexityFactors(document);
+            return document;
+        } catch (UnsupportedEncodingException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
 }
