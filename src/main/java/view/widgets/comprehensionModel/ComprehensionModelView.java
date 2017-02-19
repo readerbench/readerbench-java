@@ -230,17 +230,9 @@ public class ComprehensionModelView extends JFrame {
         CMGraphDO currentSyntacticGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
         CMGraphDO currentGraph = this.cm.getCurrentGraph();
         
-        currentGraph.combineWithLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel(), this.cm.getNoTopSimilarWords());
-        
-        
-        // TODO : removed getNoTopSimilarWords
-        // refactor the combine with getCurrentGraph
-        // TODO with LOGGER: should generate csv for each graph (w1-type(type) - w2-(type(w2)) - weight)
-        // currentSyntacticGraph = currentSyntacticGraph.getCombinedGraph(this.cm.getCurrentGraph());
-        
+        currentGraph.combineWithSyntacticLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel(), this.cm.getNoTopSimilarWords());
         this.cm.setCurrentGraph(currentGraph);
         this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
-        
         this.cm.applyPageRank(this.sentenceIndex);
         this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
 

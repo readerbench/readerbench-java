@@ -114,20 +114,20 @@ public class ComprehensionModel {
         List<NodeRank> nodeRankList = NodeRank.convertMapToNodeRankList(updatedNodeActivationScoreMap);
         Collections.sort(nodeRankList, Collections.reverseOrder());
         
-        this.activateFirstWords(nodeRankList, maxWords);
-        this.pruneInferredConcepts(updatedNodeActivationScoreMap);
-        
+        updatedNodeActivationScoreMap = this.normalizeActivationScoreMap(updatedNodeActivationScoreMap);
         Iterator<CMNodeDO> nodeIterator = updatedNodeActivationScoreMap.keySet().iterator();
         while (nodeIterator.hasNext()) {
             CMNodeDO node = nodeIterator.next();
             this.getNodeActivationScoreMap().put(node, updatedNodeActivationScoreMap.get(node));
         }
+        this.activateFirstWords(nodeRankList, maxWords);
+        // this.pruneInferredConcepts(updatedNodeActivationScoreMap);
         
         this.activationScoreLogger.saveScores(updatedNodeActivationScoreMap);
     }
 
     private void activateFirstWords(List<NodeRank> nodeRankList, int maxWords) {
-        int noActivatedWord = 0;
+        int noActivatedWord = 0;        
         for (NodeRank nodeRank : nodeRankList) {
             if (nodeRank.getValue() < this.minActivationThreshold) {
                 break;
@@ -144,31 +144,47 @@ public class ComprehensionModel {
 //            }
         }
     }
-    
-    private void pruneInferredConcepts(Map<CMNodeDO, Double> activationMap) {
-        double[] scores = new double[activationMap.values().size()];
-        int i = 0;
-        for (double value : activationMap.values()) {
-            scores [i ++] = value;
+    private Map<CMNodeDO, Double> normalizeActivationScoreMap(Map<CMNodeDO, Double> activationScoreMap) {
+        double maxActivationScore = this.getMaxActivationScore(activationScoreMap);
+        Iterator<Map.Entry<CMNodeDO, Double>> activationScoreIt = activationScoreMap.entrySet().iterator();
+        while(activationScoreIt.hasNext()) {
+            Map.Entry<CMNodeDO, Double> entry = activationScoreIt.next();
+            entry.setValue(entry.getValue() / maxActivationScore);
         }
-        double mean = VectorAlgebra.avg(scores);
-        double stdev = VectorAlgebra.stdev(scores);
-        double filter = mean - stdev;
-        
-        // all the words < activationScore will be removed !
-        // the visible attr should not exist on the node
-        // if the Inferred node is  < activationScore => will be removed completely
-        List<CMNodeDO> nodeList =  new ArrayList(this.currentGraph.getNodeList());
-        nodeList.stream().forEach(node -> {
-            if(node.getNodeType() != CMNodeType.TextBased) {
-                double activationScore = activationMap.get(node);
-                if (activationScore < filter) {
-                    activationMap.put(node, 0.0);
-                    this.currentGraph.removeNode(node);
-                }
-            }
-        });
+        return activationScoreMap;
     }
+    private double getMaxActivationScore(Map<CMNodeDO, Double> activationScoreMap) {
+        double maxActivationScore = 0.0;
+        for(double score : activationScoreMap.values()) {
+            maxActivationScore = Math.max(maxActivationScore, score);
+        }
+        return maxActivationScore;
+    }
+    
+//    private void pruneInferredConcepts(Map<CMNodeDO, Double> activationMap) {
+//        double[] scores = new double[activationMap.values().size()];
+//        int i = 0;
+//        for (double value : activationMap.values()) {
+//            scores [i ++] = value;
+//        }
+//        double mean = VectorAlgebra.avg(scores);
+//        double stdev = VectorAlgebra.stdev(scores);
+//        double filter = mean - stdev;
+//        
+//        // all the words < activationScore will be removed !
+//        // the visible attr should not exist on the node
+//        // if the Inferred node is  < activationScore => will be removed completely
+//        List<CMNodeDO> nodeList =  new ArrayList(this.currentGraph.getNodeList());
+//        nodeList.stream().forEach(node -> {
+//            if(node.getNodeType() != CMNodeType.TextBased) {
+//                double activationScore = activationMap.get(node);
+//                if (activationScore < filter) {
+//                    activationMap.put(node, 0.0);
+//                    this.currentGraph.removeNode(node);
+//                }
+//            }
+//        });
+//    }
 
     public int getNoTopSimilarWords() {
         return this.noTopSimilarWords;
