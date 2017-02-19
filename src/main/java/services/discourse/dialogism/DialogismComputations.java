@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
-
 import services.commons.VectorAlgebra;
 import data.AbstractDocument;
 import data.AnalysisElement;
@@ -42,7 +40,7 @@ import java.util.logging.Logger;
 
 public class DialogismComputations {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static final int WINDOW_SIZE = 5; // no sentences
     public static final int MAXIMUM_INTERVAL = 60; // seconds
@@ -51,7 +49,7 @@ public class DialogismComputations {
     public static void determineVoices(AbstractDocument d) {
         // merge chains based on LSA / LDA in order to generate semantic
         // chains
-        logger.info("Starting to assess voices by first building semantic chains");
+        LOGGER.info("Starting to assess voices by first building semantic chains");
         List<SemanticChain> semanticChains = new LinkedList<>();
         for (LexicalChain chain : d.getLexicalChains()) {
             SemanticChain newChain = new SemanticChain(chain, d.getSemanticModels());
@@ -129,7 +127,7 @@ public class DialogismComputations {
     }
 
     public static void determineVoiceDistributions(AbstractDocument d) {
-        logger.info("Identifying voice distributions");
+        LOGGER.info("Identifying voice distributions");
         // determine distribution of each lexical chain
         int noSentences = 0;
         int[][] traceability = new int[d.getBlocks().size()][];
@@ -197,7 +195,7 @@ public class DialogismComputations {
                     Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
 
                     if (s.getWords().size() > 0) {
-                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getOverallScore()
+                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore()
                         // * (1 + Math.log(voiceOccurrences.get(key)))
                         );
                     }
@@ -272,7 +270,7 @@ public class DialogismComputations {
 
     public static void implicitLinksCohesion(AbstractDocument d) {
         // build voice distribution vectors for each block
-        logger.info("Comparing implicit links");
+        LOGGER.info("Comparing implicit links");
         for (Block b : d.getBlocks()) {
             if (b != null && b.getRefBlock() != null) {
                 System.out.println(b.getIndex() + "->" + b.getRefBlock().getIndex() + "\t"

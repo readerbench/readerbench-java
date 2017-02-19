@@ -18,8 +18,6 @@ package services.discourse.CSCL;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,7 +69,7 @@ public class ParticipantEvaluation {
         for (int i = 0; i < participants.size(); i++) {
             // if (!namesToIgnore.contains(participants.get(i).getName())) {
             // build block element
-            Node participant = null;
+            Node participant;
             if (needsAnonymization) {
                 participant = graphModel.factory().newNode(GENERIC_NAME + " " + i);
                 participant.setLabel(GENERIC_NAME + " " + i);
@@ -121,20 +119,16 @@ public class ParticipantEvaluation {
     public static void evaluateInteraction(Conversation c) {
         if (c.getParticipants().size() > 0) {
             c.setParticipantContributions(new double[c.getParticipants().size()][c.getParticipants().size()]);
-            List<Participant> lsPart = c.getParticipants();
             // determine strength of links
             for (int i = 0; i < c.getBlocks().size(); i++) {
                 if (c.getBlocks().get(i) != null) {
                     Participant p1 = ((Utterance) c.getBlocks().get(i)).getParticipant();
-                    int index1 = lsPart.indexOf(p1);
-                    // c.getParticipantContributions()[index1][index1] += c
-                    // .getBlocks().get(i).getOverallScore();
+                    int index1 = c.getParticipants().indexOf(p1);
                     for (int j = 0; j < i; j++) {
                         if (c.getPrunnedBlockDistances()[i][j] != null) {
                             Participant p2 = ((Utterance) c.getBlocks().get(j)).getParticipant();
-                            int index2 = lsPart.indexOf(p2);
-                            c.getParticipantContributions()[index1][index2] += c.getBlocks().get(i).getIndividualScore()
-                                    * c.getPrunnedBlockDistances()[i][j].getCohesion();
+                            int index2 = c.getParticipants().indexOf(p2);
+                            c.getParticipantContributions()[index1][index2] += c.getBlocks().get(i).getScore() * c.getPrunnedBlockDistances()[i][j].getCohesion();
                         }
                     }
                 }
@@ -147,8 +141,8 @@ public class ParticipantEvaluation {
             for (Block b : c.getBlocks()) {
                 if (b != null) {
                     Utterance u = (Utterance) b;
-                    u.getParticipant().getIndices().put(CSCLIndices.OVERALL_SCORE,
-                            u.getParticipant().getIndices().get(CSCLIndices.OVERALL_SCORE) + b.getOverallScore());
+                    u.getParticipant().getIndices().put(CSCLIndices.SCORE,
+                            u.getParticipant().getIndices().get(CSCLIndices.SCORE) + b.getScore());
                     u.getParticipant().getIndices().put(CSCLIndices.PERSONAL_KB,
                             u.getParticipant().getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
                     u.getParticipant().getIndices().put(CSCLIndices.SOCIAL_KB,
@@ -184,15 +178,16 @@ public class ParticipantEvaluation {
     }
 
     public static void performSNA(List<Participant> participants, double[][] participantContributions, boolean needsAnonymization, String exportPath) {
-
         for (int index1 = 0; index1 < participants.size(); index1++) {
             for (int index2 = 0; index2 < participants.size(); index2++) {
-                participants.get(index1).getIndices().put(CSCLIndices.OUTDEGREE,
-                        participants.get(index1).getIndices().get(CSCLIndices.OUTDEGREE)
-                        + participantContributions[index1][index2]);
-                participants.get(index2).getIndices().put(CSCLIndices.INDEGREE,
-                        participants.get(index2).getIndices().get(CSCLIndices.INDEGREE)
-                        + participantContributions[index1][index2]);
+                if (index1 != index2) {
+                    participants.get(index1).getIndices().put(CSCLIndices.OUTDEGREE,
+                            participants.get(index1).getIndices().get(CSCLIndices.OUTDEGREE)
+                            + participantContributions[index1][index2]);
+                    participants.get(index2).getIndices().put(CSCLIndices.INDEGREE,
+                            participants.get(index2).getIndices().get(CSCLIndices.INDEGREE)
+                            + participantContributions[index1][index2]);
+                }
             }
         }
 

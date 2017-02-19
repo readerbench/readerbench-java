@@ -16,15 +16,32 @@
 package data;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AbstractDocumentTemplate implements Serializable {
 
     private static final long serialVersionUID = 6486392022508461270L;
+    static final Logger LOGGER = Logger.getLogger("");
+    public static final SimpleDateFormat[] DATE_FORMATS = {
+        new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"),
+        new SimpleDateFormat("EEE MM/dd/yyyy HH:mm aaa", Locale.ENGLISH),
+        new SimpleDateFormat("kk.mm.ss"),
+        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
+        new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
+        new SimpleDateFormat("HH:mm:ss"),
+        new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
+    };
+
     private String genre;
-    private List<BlockTemplate> blocks = new ArrayList<BlockTemplate>();
+    private List<BlockTemplate> blocks = new ArrayList<>();
 
     public static AbstractDocumentTemplate getDocumentModel(String text) {
         AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
@@ -43,7 +60,7 @@ public class AbstractDocumentTemplate implements Serializable {
         private static final long serialVersionUID = -4411300040028049069L;
 
         private String speaker;
-        private String time;
+        private Date time;
         private Integer id;
         private Integer refId;
         private Integer verbId;
@@ -57,12 +74,28 @@ public class AbstractDocumentTemplate implements Serializable {
             this.speaker = speaker;
         }
 
-        public String getTime() {
+        public Date getTime() {
             return time;
         }
 
         public void setTime(String time) {
-            this.time = time;
+            Date aux = null;
+            for (SimpleDateFormat format : DATE_FORMATS) {
+                try {
+                    aux = format.parse(time);
+                    break;
+                } catch (ParseException e) {
+                }
+            }
+            if (time == null) {
+                try {
+                    Long longTime = Long.parseLong(time);
+                    aux = new Date(longTime * 1000);
+                } catch (NumberFormatException e) {
+                    LOGGER.log(Level.SEVERE, "Unparsable date: {0}", time);
+                }
+            }
+            this.time = aux;
         }
 
         public Integer getId() {
@@ -151,9 +184,9 @@ public class AbstractDocumentTemplate implements Serializable {
 
     public String getText() {
         StringBuilder build = new StringBuilder();
-        for (BlockTemplate temp : blocks) {
-            build.append(temp.getContent() + "\n");
-        }
+        blocks.stream().forEach((temp) -> {
+            build.append(temp.getContent()).append("\n");
+        });
         return build.toString();
     }
 
@@ -161,5 +194,4 @@ public class AbstractDocumentTemplate implements Serializable {
     public String toString() {
         return "DocumentTemplate [blocks=" + blocks + "]";
     }
-
 }

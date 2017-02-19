@@ -20,12 +20,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CoreMap;
 import java.util.ArrayList;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
-import services.semanticModels.LSA.LSA;
 
 /**
  *
@@ -58,9 +54,9 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public void finalProcessing() {
         // write the processedText
         StringBuilder processedText = new StringBuilder();
-        for (Word word : getWords()) {
+        getWords().stream().forEach((word) -> {
             processedText.append(word.getLemma()).append(" ");
-        }
+        });
         setProcessedText(processedText.toString().trim());
 
         // determine LSA utterance vector
@@ -101,12 +97,12 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                 s += w.toString() + " ";
             }
         }
-        s += "[" + getOverallScore() + "]";
+        s += "[" + getScore() + "]";
         return s;
     }
 
     @Override
     public int compareTo(Sentence o) {
-        return (int) (Math.signum(o.getOverallScore() - this.getOverallScore()));
+        return (int) (Math.signum(o.getScore() - this.getScore()));
     }
 }
