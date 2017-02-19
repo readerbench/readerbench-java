@@ -17,6 +17,9 @@ public class ResultNodeAdvanced extends ResultNode implements Serializable {
 
     private String lemma;
     private String pos;
+    private int noOcc;
+    private int noLinks;
+    private double degree;
     private double tf;
     private double idf;
 
@@ -45,6 +48,30 @@ public class ResultNodeAdvanced extends ResultNode implements Serializable {
 
     public void setPos(String pos) {
         this.pos = pos;
+    }
+
+    public int getNoOcc() {
+        return noOcc;
+    }
+
+    public void setNoOcc(int noOcc) {
+        this.noOcc = noOcc;
+    }
+    
+    public int getNoLinks() {
+        return noLinks;
+    }
+
+    public void setNoLinks(int noLinks) {
+        this.noLinks = noLinks;
+    }
+    
+    public double getDegree() {
+        return degree;
+    }
+
+    public void setDegree(double degree) {
+        this.degree = degree;
     }
     
     public double getTf() {

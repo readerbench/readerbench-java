@@ -315,7 +315,6 @@ public class ReaderBenchServer {
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(docSeed, minThreshold));
     }
 
-
     /**
      *
      * @param text1 First text
@@ -397,7 +396,7 @@ public class ReaderBenchServer {
         }
         return null;
     }
-    
+
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -511,8 +510,7 @@ public class ReaderBenchServer {
             ResultTopicAdvanced resultTopic = ConceptMap.getTopicsAdvanced(
                     QueryHelper.processQuery(hm),
                     Double.parseDouble(hm.get("threshold")),
-                    null,
-                    50);
+                    null);
             queryResult.setData(resultTopic);
 
             response.type("application/json");
@@ -1022,7 +1020,7 @@ public class ReaderBenchServer {
                 String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
                 LOGGER.info("Get participants for week " + weekNumber + " from file " + fileName);
                 Object obj = parser.parse(new FileReader(fileName));
-                JSONObject participantSubCommunity =  (JSONObject) obj;
+                JSONObject participantSubCommunity = (JSONObject) obj;
                 JSONObject subCommunityJson = new JSONObject();
                 subCommunityJson.put("week", weekNumber);
                 subCommunityJson.put("participants", participantSubCommunity);
@@ -1284,7 +1282,7 @@ public class ReaderBenchServer {
         SentimentWeights.initialize();
         LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
     }
-    
+
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
         ReaderBenchServer server = new ReaderBenchServer();
