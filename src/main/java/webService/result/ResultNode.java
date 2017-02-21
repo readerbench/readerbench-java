@@ -1,59 +1,129 @@
-/* 
- * Copyright 2016 ReaderBench.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package webService.result;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ResultNode implements Comparable<ResultNode> {
+/**
+ *
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
+public class ResultNodeAdvanced extends ResultNode implements Serializable {
 
-	private int id;
-	private String name;
-	private double value;
-	private int group;
+    private String lemma;
+    private String pos;
+    private int noOcc;
+    private int noLinks;
+    private double degree;
+    private double tf;
+    private double idf;
 
-	public ResultNode(int id, String name, double value, int group) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.value = value;
-		this.group = group;
-	}
+    private double averageDistanceToHypernymTreeRoot;
+    private double maxDistanceToHypernymTreeRoot;
+    private int polysemyCount;
 
-	public int getId() {
-		return id;
-	}
+    private List<ResultValence> semanticSimilarities;
 
-	public String getName() {
-		return name;
-	}
+    public ResultNodeAdvanced(int id, String name, double value, int group) {
+        super(id, name, value, group);
+        semanticSimilarities = new ArrayList<>();
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getLemma() {
+        return lemma;
+    }
 
-	public double getValue() {
-		return value;
-	}
+    public void setLemma(String lemma) {
+        this.lemma = lemma;
+    }
 
-	public double getGroup() {
-		return group;
-	}
+    public String getPos() {
+        return pos;
+    }
 
-	@Override
-	public int compareTo(ResultNode o) {
-		return (int) Math.signum(o.getValue() - this.getValue());
-	}
+    public void setPos(String pos) {
+        this.pos = pos;
+    }
+
+    public int getNoOcc() {
+        return noOcc;
+    }
+
+    public void setNoOcc(int noOcc) {
+        this.noOcc = noOcc;
+    }
+    
+    public int getNoLinks() {
+        return noLinks;
+    }
+
+    public void setNoLinks(int noLinks) {
+        this.noLinks = noLinks;
+    }
+    
+    public double getDegree() {
+        return degree;
+    }
+
+    public void setDegree(double degree) {
+        this.degree = degree;
+    }
+    
+    public double getTf() {
+        return tf;
+    }
+
+    public void setTf(double tf) {
+        this.tf = tf;
+    }
+
+    public double getIdf() {
+        return idf;
+    }
+
+    public void setIdf(double idf) {
+        this.idf = idf;
+    }
+
+    public double getAverageDistanceToHypernymTreeRoot() {
+        return averageDistanceToHypernymTreeRoot;
+    }
+
+    public void setAverageDistanceToHypernymTreeRoot(double averageDistanceToHypernymTreeRoot) {
+        this.averageDistanceToHypernymTreeRoot = averageDistanceToHypernymTreeRoot;
+    }
+
+    public double getMaxDistanceToHypernymTreeRoot() {
+        return maxDistanceToHypernymTreeRoot;
+    }
+
+    public void setMaxDistanceToHypernymTreeRoot(double maxDistanceToHypernymTreeRoot) {
+        this.maxDistanceToHypernymTreeRoot = maxDistanceToHypernymTreeRoot;
+    }
+
+    public int getPolysemyCount() {
+        return polysemyCount;
+    }
+
+    public void setPolysemyCount(int polysemyCount) {
+        this.polysemyCount = polysemyCount;
+    }
+
+    public List<ResultValence> getSemanticSimilarities() {
+        return semanticSimilarities;
+    }
+
+    public void setSemanticSimilarities(List<ResultValence> semanticSimilarities) {
+        this.semanticSimilarities = semanticSimilarities;
+    }
+
+    public void addSemanticSimilarity(String similarity, double score) {
+        semanticSimilarities.add(new ResultValence(similarity, score));
+    }
+
 }

@@ -49,11 +49,12 @@ import javax.swing.table.DefaultTableModel;
 
 
 
-import services.complexity.Clustering;
+import services.commons.Clustering;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import data.AbstractDocument;
 import data.complexity.Measurement;
+import services.complexity.ComplexityClustering;
 import services.complexity.ComplexityIndex;
 import services.semanticModels.SimilarityType;
 
@@ -208,9 +209,10 @@ public class DocumentEvaluationView extends JFrame {
                 scrollPane.setViewportView(table);
                 out.close();
 
-                Clustering.performKMeansClustering(documents,
+                ComplexityClustering cc = new ComplexityClustering();
+                cc.performKMeansClustering(documents,
                         Math.min(6, (documents.size() + 1) / 2));
-                Clustering.performAglomerativeClustering(documents);
+                cc.performAglomerativeClustering(documents);
             } catch (Exception e) {
                 e.printStackTrace();
             }
