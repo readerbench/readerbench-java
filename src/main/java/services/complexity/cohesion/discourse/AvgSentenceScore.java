@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndices;
  *
  * @author Stefan Ruseti
  */
-public class AvgSentenceScore extends ComplexityIndex{
+public class AvgSentenceScore extends ComplexityIndex {
 
     public AvgSentenceScore() {
         super(ComplexityIndecesEnum.AVERAGE_SENTENCE_SCORE);
@@ -34,7 +34,7 @@ public class AvgSentenceScore extends ComplexityIndex{
     @Override
     public double compute(AbstractDocument d) {
         return d.getSentencesInDocument().parallelStream()
-                .mapToDouble(Sentence::getOverallScore)
+                .mapToDouble(Sentence::getScore)
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 }

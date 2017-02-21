@@ -106,7 +106,7 @@ public class Utterance extends Block {
         }
         s += "{\n";
         s = getSentences().stream().map((sentence) -> "\t" + sentence.toString() + "\n").reduce(s, String::concat);
-        s += "}\n[" + getOverallScore() + "]\n";
+        s += "}\n[" + getScore() + "]\n";
         return s;
     }
 

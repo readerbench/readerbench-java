@@ -26,7 +26,7 @@ import services.commons.DoubleStatistics;
  *
  * @author Stefan Ruseti
  */
-public class SentenceScoreSD extends ComplexityIndex{
+public class SentenceScoreSD extends ComplexityIndex {
 
     public SentenceScoreSD() {
         super(ComplexityIndecesEnum.SENTENCE_SCORE_STANDARD_DEVIATION);
@@ -35,7 +35,7 @@ public class SentenceScoreSD extends ComplexityIndex{
     @Override
     public double compute(AbstractDocument d) {
         return d.getSentencesInDocument().parallelStream()
-                .map(Sentence::getOverallScore)
+                .map(Sentence::getScore)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }

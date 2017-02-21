@@ -23,7 +23,6 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.RowSorterEvent;
-import javax.swing.event.RowSorterListener;
 import javax.swing.table.DefaultTableModel;
 
 import services.commons.Formatting;
@@ -49,7 +48,7 @@ public class SentenceView extends JFrame {
         // adjust view to desktop size
         int margin = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(margin, margin, screenSize.width - margin * 2,
+        super.setBounds(margin, margin, screenSize.width - margin * 2,
                 screenSize.height - margin * 2);
 
         createView();
@@ -84,12 +83,7 @@ public class SentenceView extends JFrame {
         tableUtterances.getColumnModel().getColumn(2).setPreferredWidth(400);
         tableUtterances.setFillsViewportHeight(true);
 
-        tableUtterances.getRowSorter().addRowSorterListener(
-                new RowSorterListener() {
-            @Override
-            public void sorterChanged(RowSorterEvent rsevent) {
-                // tableUtterances.repaint();
-            }
+        tableUtterances.getRowSorter().addRowSorterListener((RowSorterEvent rsevent) -> {
         });
 
         JScrollPane tableContainer = new JScrollPane(tableUtterances);
@@ -106,9 +100,7 @@ public class SentenceView extends JFrame {
 
                     dataRow.add(globalIndex++);
                     dataRow.add(b.getIndex());
-                    dataRow.add(u.getText() + " ["
-                            + Formatting.formatNumber(u.getOverallScore())
-                            + "]");
+                    dataRow.add(u.getText() + " [" + Formatting.formatNumber(u.getScore()) + "]");
                     if (index > 0) {
                         SemanticCohesion coh = b.getSentenceDistances()[index - 1][index];
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LSA)));

@@ -51,8 +51,7 @@ public abstract class AnalysisElement implements Serializable {
     private String processedText; // lemmas without stop-words and punctuation
     private String alternateText; // text used for display in different colors
     private Map<Word, Integer> wordOccurences;
-    private double individualScore;
-    private double overallScore;
+    private double score;
     private double[] voiceDistribution;
     // specificity score computed for a specific class of topics
 
@@ -200,29 +199,15 @@ public abstract class AnalysisElement implements Serializable {
     /**
      * @return initial score for the analysis element
      */
-    public double getIndividualScore() {
-        return individualScore;
+    public double getScore() {
+        return score;
     }
 
     /**
-     * @param individualScore score for the analysis element to be set
+     * @param score score for the analysis element to be set
      */
-    public void setIndividualScore(double individualScore) {
-        this.individualScore = individualScore;
-    }
-
-    /**
-     * @return total score after augmentation from the cohesion graph
-     */
-    public double getOverallScore() {
-        return overallScore;
-    }
-
-    /**
-     * @param overallScore total score to be set
-     */
-    public void setOverallScore(double overallScore) {
-        this.overallScore = overallScore;
+    public void setScore(double score) {
+        this.score = score;
     }
 
     /**

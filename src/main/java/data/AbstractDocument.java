@@ -389,7 +389,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write(model.getType() + " space:," + model.getPath() + "\n");
             }
 
-            out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Personal Knowledge Building,Social Knowledge Building,Initial Text,Processed Text\n");
+            out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Social Knowledge Building,Initial Text,Processed Text\n");
             for (Block b : blocks) {
                 if (b != null) {
                     out.write(b.getIndex() + ",");
@@ -406,12 +406,9 @@ public abstract class AbstractDocument extends AnalysisElement {
                             out.write(((Utterance) b).getTime() + "");
                         }
                         out.write(",");
-                        out.write(b.getOverallScore() + "," + ((Utterance) b).getPersonalKB() + ","
-                                + ((Utterance) b).getSocialKB() + "," + b.getText().replaceAll(",", "") + ","
-                                + b.getProcessedText() + "\n");
+                        out.write(b.getScore() + "," + ((Utterance) b).getSocialKB() + "," + b.getText().replaceAll(",", "") + "," + b.getProcessedText() + "\n");
                     } else {
-                        out.write(",," + b.getOverallScore() + ",," + b.getText().replaceAll(",", "") + ","
-                                + b.getProcessedText() + "\n");
+                        out.write(",," + b.getScore() + ",," + b.getText().replaceAll(",", "") + "," + b.getProcessedText() + "\n");
                     }
                 }
             }
@@ -589,7 +586,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                         out.write(globalIndex++ + ",");
                         out.write(b.getIndex() + ",");
                         out.write(u.getText().replaceAll(",", "") + ",");
-                        out.write(Formatting.formatNumber(u.getOverallScore()) + ",");
+                        out.write(Formatting.formatNumber(u.getScore()) + ",");
                         if (index > 0) {
                             SemanticCohesion coh = b.getSentenceDistances()[index - 1][index];
                             out.write(coh.print() + "\n");
@@ -794,7 +791,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     public void setGenre(String genre) {
         this.genre = genre;
     }
-    
+
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
     }

@@ -26,7 +26,7 @@ import services.commons.DoubleStatistics;
  *
  * @author Stefan Ruseti
  */
-public class BlockScoreSD extends ComplexityIndex{
+public class BlockScoreSD extends ComplexityIndex {
 
     public BlockScoreSD() {
         super(ComplexityIndecesEnum.BLOCK_SCORE_STANDARD_DEVIATION);
@@ -36,9 +36,8 @@ public class BlockScoreSD extends ComplexityIndex{
     public double compute(AbstractDocument d) {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
-                .map(Block::getOverallScore)
+                .map(Block::getScore)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }
 }
-

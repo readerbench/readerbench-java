@@ -170,8 +170,8 @@ public class Community extends AnalysisElement {
                         // participantContributions[index1][index1] += d
                         // .getBlocks().get(i).getCombinedScore();
                         Participant participantToUpdate = participants.get(index1);
-                        participantToUpdate.getIndices().put(CSCLIndices.OVERALL_SCORE,
-                                participantToUpdate.getIndices().get(CSCLIndices.OVERALL_SCORE) + u.getOverallScore());
+                        participantToUpdate.getIndices().put(CSCLIndices.SCORE,
+                                participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
                         participantToUpdate.getIndices().put(CSCLIndices.PERSONAL_KB,
                                 participantToUpdate.getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
                         participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
@@ -183,8 +183,7 @@ public class Community extends AnalysisElement {
                                 int index2 = participants.indexOf(p2);
                                 if (index2 >= 0) {
                                     // model knowledge building effect
-                                    double addedKB = d.getBlocks().get(i).getIndividualScore()
-                                            * d.getPrunnedBlockDistances()[i][j].getCohesion();
+                                    double addedKB = d.getBlocks().get(i).getScore() * d.getPrunnedBlockDistances()[i][j].getCohesion();
                                     participantContributions[index1][index2] += addedKB;
                                 }
                             }
@@ -237,7 +236,7 @@ public class Community extends AnalysisElement {
                                 participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
                         participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_OVERALL_SCORE)
-                                + d.getOverallScore());
+                                + d.getScore());
                         participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB,
                                 participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB)
                                 + VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
@@ -386,12 +385,13 @@ public class Community extends AnalysisElement {
 
     /**
      * Generate participants view for communities
+     *
      * @param path - location where .json files will be saved
      */
     public JSONArray generateParticipantViewSubCommunities(String path) {
         int i = 1;
         JSONArray participantsSubCommunities = new JSONArray();
-        for (Community subCommunity : timeframeSubCommunities){
+        for (Community subCommunity : timeframeSubCommunities) {
             JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(path + i + ".json");
 
             JSONObject subCommunityJson = new JSONObject();
@@ -405,8 +405,11 @@ public class Community extends AnalysisElement {
 
         return participantsSubCommunities;
     }
+
     /**
-     * Generate json file with all participants for graph representation (using d3.js)
+     * Generate json file with all participants for graph representation (using
+     * d3.js)
+     *
      * @param path - the path where json file will be saved
      */
     public JSONObject generateParticipantViewD3(String path) {
@@ -424,10 +427,8 @@ public class Community extends AnalysisElement {
 
         JSONArray links = new JSONArray();
 
-        for (int row=0; row < participantContributions.length; row++)
-        {
-            for (int col=0; col < participantContributions[row].length; col++)
-            {
+        for (int row = 0; row < participantContributions.length; row++) {
+            for (int col = 0; col < participantContributions[row].length; col++) {
                 if (participantContributions[row][col] > 0) {
                     JSONObject link = new JSONObject();
                     link.put("source", row);
@@ -534,21 +535,15 @@ public class Community extends AnalysisElement {
                     out.write("Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
                     for (AbstractDocument d : documents) {
                         int noBlocks = 0;
-                        for (Block b : d.getBlocks()) {
-                            if (b != null) {
-                                noBlocks++;
-                            }
-                        }
+                        noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
 
                         out.write(
                                 new File(d.getPath()).getName() + "," + noBlocks + ","
                                 + ((Conversation) d).getParticipants().size() + ","
-                                + Formatting.formatNumber(d.getOverallScore()) + ","
-                                + Formatting.formatNumber(
-                                        VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                                + Formatting.formatNumber(d.getScore()) + ","
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
                                 + ","
-                                + Formatting.formatNumber(
-                                        VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
                                 + "\n");
                     }
                 }

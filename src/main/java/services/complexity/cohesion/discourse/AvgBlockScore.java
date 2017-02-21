@@ -35,7 +35,7 @@ public class AvgBlockScore extends ComplexityIndex{
     public double compute(AbstractDocument d) {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
-                .mapToDouble(Block::getOverallScore)
+                .mapToDouble(Block::getScore)
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 }
