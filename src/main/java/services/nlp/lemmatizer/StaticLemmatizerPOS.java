@@ -22,24 +22,20 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
-
-
-
 import data.Lang;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
-import services.nlp.lemmatizer.morphalou.Digest_FR;
-import services.nlp.lemmatizer.morphalou.Digest_IT;
 
 public class StaticLemmatizerPOS {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private static Map<String, String> lemmas_fr = null;
     private static Map<String, String> lemmas_it = null;
 
     private static Map<String, String> initialize(String path, Lang lang) {
-        logger.info("Initializing lemmas from " + path + " ...");
+        LOGGER.log(Level.INFO, "Initializing lemmas from {0} ...", path);
         Map<String, String> lemmas = new TreeMap<>();
         BufferedReader in;
         try {
@@ -69,13 +65,8 @@ public class StaticLemmatizerPOS {
             case it:
                 lemmas = getLemmasIt();
                 break;
-            case es:
-                return StaticLemmatizer.lemmaStatic(w, Lang.es);
-            case en:
-                return StaticLemmatizer.lemmaStatic(w, Lang.en);
-            // return Morphology.lemmaStatic(w, pos, true);
             default:
-                lemmas = null;
+                return StaticLemmatizer.lemmaStatic(w, lang);
         }
         if (lemmas == null) {
             return w;
@@ -104,20 +95,19 @@ public class StaticLemmatizerPOS {
 
     public static Map<String, String> getLemmasFr() {
         if (lemmas_fr == null) {
-            lemmas_fr = initialize(Digest_FR.PATH_TO_TEXT_LEMMAS_FR, Lang.fr);
+            lemmas_fr = initialize("resources/config/FR/word lists/lemmas_pos_fr.txt", Lang.fr);
         }
         return lemmas_fr;
     }
 
     public static Map<String, String> getLemmasIt() {
         if (lemmas_it == null) {
-            lemmas_it = initialize(Digest_IT.PATH_TO_TEXT_LEMMAS_IT, Lang.it);
+            lemmas_it = initialize("resources/config/IT/word lists/lemmas_pos_it.txt", Lang.it);
         }
         return lemmas_it;
     }
 
     public static void main(String[] args) {
-        
         System.out.println(StaticLemmatizerPOS.lemmaStatic("pointés", null, Lang.fr));
         System.out.println(StaticLemmatizerPOS.lemmaStatic("mangio", "VB", Lang.it));
     }

@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
 
 public enum CSCLIndices {
 	NO_CONTRIBUTION(true),
-	OVERALL_SCORE(true),
+	SCORE(true),
 	PERSONAL_KB(false),
 	SOCIAL_KB(true),
 	INTER_ANIMATION_DEGREE(false),

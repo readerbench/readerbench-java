@@ -18,6 +18,7 @@ package services.complexity.cohesion.discourse;
 import data.AbstractDocument;
 import data.AnalysisElement;
 import services.complexity.AbstractComplexityIndex;
+import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 import utils.IndexLevel;
@@ -28,14 +29,14 @@ import utils.IndexLevel;
  */
 public class AvgScore extends AbstractComplexityIndex {
 
-    public AvgScore(IndexLevel level) {
-        super(ComplexityIndicesEnum.AVERAGE_BLOCK_SCORE, level);
+    public AvgScore(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
         return streamFunction.apply(d)
-                .mapToDouble(AnalysisElement::getOverallScore)
+                .mapToDouble(AnalysisElement::getScore)
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 }

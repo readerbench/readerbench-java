@@ -69,6 +69,7 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
 import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
+import services.semanticModels.utils.WordSimilarityContainer;
 import view.models.PreviewSketch;
 
 public class ComprehensionModelView extends JFrame {
@@ -228,9 +229,8 @@ public class ComprehensionModelView extends JFrame {
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
 
         CMGraphDO cmGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
-        CMGraphDO semanticGraph = this.cm.getSemanticIndexer().getCMGraph(CMNodeType.Inferred);
-
-        cmGraph.combineWithLinksFrom(semanticGraph);
+        WordSimilarityContainer wordSimilarityContainer = this.cm.getWordSimilarityContainer();
+        cmGraph.combineWithLinksFrom(wordSimilarityContainer, this.cm.getNoTopSimilarWords());
         cmGraph = cmGraph.getCombinedGraph(this.cm.getCurrentGraph());
 
         this.cm.setCurrentGraph(cmGraph);

@@ -18,7 +18,7 @@ package runtime.cscl;
 import data.AbstractDocument.SaveType;
 import data.Lang;
 import data.cscl.Community;
-import services.replicatedWorker.SerialCorpusAssessment;
+import services.processing.SerialProcessing;
 import view.widgets.ReaderBenchView;
 import webService.ReaderBenchServer;
 
@@ -31,9 +31,9 @@ public class CSCLCommunityTest {
         ReaderBenchView.adjustToSystemGraphics();
         // Community.processAllFolders("resources/in/blogs_Nic/diana/new", "", false, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, null, null, 0, 7);
 
-        String path = "resources/in/Reddit/assasinscreed test";
-        SerialCorpusAssessment.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
-        Community.processDocumentCollection(path, Lang.en, false, true, null, null, 0, 7);
+        String path = "resources/in/Barnes_MOOC";
+        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
+        Community.processDocumentCollection(path, Lang.en, false, false, null, null, 0, 7);
 
         // String path = "resources/in/forum_Nic";
         // SerialCorpusAssessment.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.eng, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);

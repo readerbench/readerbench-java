@@ -11,5 +11,6 @@ package utils;
  */
 public enum IndexLevel {
     BLOCK,
-    SENTENCE
+    SENTENCE,
+    DOC
 }

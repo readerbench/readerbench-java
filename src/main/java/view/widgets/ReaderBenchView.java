@@ -50,6 +50,8 @@ import javax.swing.border.TitledBorder;
 
 import data.AbstractDocument;
 import data.Lang;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -57,7 +59,6 @@ import org.openide.util.Exceptions;
 import utils.localization.LocalizationUtils;
 import utils.settings.SettingsUtils;
 import view.events.TCPopupEventQueue;
-import view.widgets.complexity.CorpusEvaluationView;
 import view.widgets.complexity.DocumentEvaluationView;
 import view.widgets.complexity.EssayProcessingView;
 import view.widgets.complexity.RunMeasurementsView;
@@ -79,20 +80,12 @@ public class ReaderBenchView extends JFrame {
     private static final long serialVersionUID = 4565038532352428650L;
     public static final Logger LOGGER = Logger.getLogger("");
 
-    public static final Map<Lang, String[]> LSA_SPACES = new HashMap();
-    public static final Map<Lang, String[]> LDA_SPACES = new HashMap();
+    public static final Map<Lang, List<String>> LSA_SPACES = new HashMap();
+    public static final Map<Lang, List<String>> LDA_SPACES = new HashMap();
 
     static {
-        LSA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LSA/TASA", "resources/config/EN/LSA/COCA_newspaper", ""});
-        LSA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LSA/Le_Monde", "resources/config/FR/LSA/Text_Enfants_Nursery", ""});
-        LSA_SPACES.put(Lang.it, new String[]{""});
-        LSA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LSA/Jose_Antonio", ""});
-        LSA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LSA/Letters", ""});
-        LDA_SPACES.put(Lang.en, new String[]{"resources/config/EN/LDA/TASA", "resources/config/EN/LDA/COCA_newspaper", ""});
-        LDA_SPACES.put(Lang.fr, new String[]{"resources/config/FR/LDA/Le_Monde", "resources/config/FR/LDA/Text_Enfants", "resources/config/FR/LDA/Philosophy", ""});
-        LDA_SPACES.put(Lang.it, new String[]{"resources/config/IT/LDA/Paisa", ""});
-        LDA_SPACES.put(Lang.es, new String[]{"resources/config/ES/LDA/Jose_Antonio", ""});
-        LDA_SPACES.put(Lang.la, new String[]{"resources/config/LA/LDA/Letters", ""});
+        identifyModels(LSA_SPACES, "LSA");
+        identifyModels(LDA_SPACES, "LDA");
     }
 
     public static Lang RUNTIME_LANGUAGE;
@@ -109,7 +102,6 @@ public class ReaderBenchView extends JFrame {
 
     // pre-processing
     private final JButton btnPreprocessingTrainSemanticModels;
-    private final JButton btnRunTextualComplexityIndices;
 
     // document analysis
     private final JButton btnDocProcessing;
@@ -117,7 +109,7 @@ public class ReaderBenchView extends JFrame {
     private final JButton btnPredictTextualComplexity;
 
     // textual complexity
-    private final JButton btnCorpusEvaluation;
+    private final JButton btnRunTextualComplexity;
     private final JButton btnEssayProcessing;
 
     // self-explanations
@@ -133,11 +125,26 @@ public class ReaderBenchView extends JFrame {
     private final JButton btnVcopprocessingevaluation;
     private final JButton btnConversationProcessing;
 
+    private static void identifyModels(Map<Lang, List<String>> models, String type) {
+        for (Lang lang : Lang.values()) {
+            List<String> paths = new ArrayList<>();
+            File path = new File("resources/config/" + lang.toString().toUpperCase() + "/" + type);
+            if (path.exists() && path.isDirectory()) {
+                for (File folder : path.listFiles((File current, String name) -> new File(current, name).isDirectory())) {
+                    paths.add(folder.getPath());
+                }
+            }
+            paths.add("");
+            models.put(lang, paths);
+        }
+    }
+
     public ReaderBenchView() {
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         super.getContentPane().setBackground(Color.WHITE);
         super.getContentPane().setLayout(new BorderLayout(0, 0));
-        super.setTitle("ReaderBench " + SettingsUtils.getReaderBenchVersion());
+        super.setTitle("ReaderBench " + SettingsUtils.getReaderBenchVersion() + " (" + RUNTIME_LANGUAGE.getDescription()
+                + ")");
         super.setIconImage(Toolkit.getDefaultToolkit().getImage("resources/config/Logos/reader_bench_icon.png"));
         Locale.setDefault(LOADED_LOCALE);
 
@@ -169,10 +176,8 @@ public class ReaderBenchView extends JFrame {
         panelDataInput = new JPanel();
         panelDataInput.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
         panelDataInput.setBackground(Color.WHITE);
-        tabbedPane.addTab(
-                ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ReaderBenchView.panelDataInput.title"),
-                null, panelDataInput, null);
+        tabbedPane.addTab(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.panelDataInput.title"), null, panelDataInput, null);
 
         btnCreateDocument = new JButton(ResourceBundle.getBundle("utils.localization.messages")
                 .getString("ReaderBenchView.btnCreateDocument.text"));
@@ -214,59 +219,17 @@ public class ReaderBenchView extends JFrame {
                         .addContainerGap(53, Short.MAX_VALUE)));
         panelDataInput.setLayout(gl_panelDataInput);
 
-        JPanel panelPreProcessing = new JPanel();
-        panelPreProcessing.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-        panelPreProcessing.setBackground(Color.WHITE);
-        tabbedPane.addTab(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelPreProcessing"),
-                null, panelPreProcessing, null);
-
-        btnPreprocessingTrainSemanticModels = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text"));
-        btnPreprocessingTrainSemanticModels.addActionListener((ActionEvent e) -> {
-            EventQueue.invokeLater(() -> {
-                try {
-                    SemanticModelsTraining frame = new SemanticModelsTraining();
-                    frame.setVisible(true);
-                } catch (Exception ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-            });
-        });
-
-        btnRunTextualComplexityIndices = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ReaderBenchView.btnRunTextualComplexityIndices.text"));
-        btnRunTextualComplexityIndices.addActionListener((ActionEvent e) -> {
-            RunMeasurementsView frame = new RunMeasurementsView();
-            frame.setVisible(true);
-        });
-        GroupLayout gl_panelPreProcessing = new GroupLayout(panelPreProcessing);
-        gl_panelPreProcessing.setHorizontalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
-                        .addComponent(btnPreprocessingTrainSemanticModels, GroupLayout.PREFERRED_SIZE, 220,
-                                GroupLayout.PREFERRED_SIZE)
-                        .addGap(18).addComponent(btnRunTextualComplexityIndices, GroupLayout.PREFERRED_SIZE, 220,
-                        GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(874, Short.MAX_VALUE)));
-        gl_panelPreProcessing.setVerticalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_panelPreProcessing.createSequentialGroup().addContainerGap()
-                        .addGroup(gl_panelPreProcessing.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(btnPreprocessingTrainSemanticModels, GroupLayout.PREFERRED_SIZE, 25,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addComponent(btnRunTextualComplexityIndices))
-                        .addContainerGap(53, Short.MAX_VALUE)));
-        panelPreProcessing.setLayout(gl_panelPreProcessing);
-
         JPanel panelDocument = new JPanel();
         tabbedPane.addTab(
-                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDocument"),
-                null, panelDocument, null);
+                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelDocument"), null,
+                panelDocument, null);
 
         panelDocument.setBackground(Color.WHITE);
         panelDocument.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-        btnPredictTextualComplexity = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnTrainSVMDocs"));
+        btnPredictTextualComplexity = new JButton(
+                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnTrainSVMDocs"));
         btnPredictTextualComplexity.addActionListener((ActionEvent e) -> {
             if (DocumentProcessingView.getLoadedDocuments().size() > 0) {
                 List<AbstractDocument> abstractDocs = new LinkedList<>();
@@ -277,12 +240,13 @@ public class ReaderBenchView extends JFrame {
                 view.setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(desktopPane,
-                        "At least one document must be loaded for evaluating its textual complexity!",
-                        "Information", JOptionPane.INFORMATION_MESSAGE);
+                        "At least one document must be loaded for evaluating its textual complexity!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        btnDocProcessing = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnDocProcessing"));
+        btnDocProcessing = new JButton(
+                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "btnDocProcessing"));
         btnDocProcessing.addActionListener((ActionEvent e) -> {
             DocumentProcessingView frame = new DocumentProcessingView();
             frame.setVisible(true);
@@ -328,15 +292,16 @@ public class ReaderBenchView extends JFrame {
         panelDocument.setLayout(gl_panelDocSpecific);
 
         JPanel panelTextualComplexity = new JPanel();
-        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelTextualComplexity"), null, panelTextualComplexity, null);
+        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE,
+                "panelTextualComplexity"), null, panelTextualComplexity, null);
         panelTextualComplexity.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelTextualComplexity.setBackground(Color.WHITE);
 
-        btnCorpusEvaluation = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ReaderBenchView.btnCorpusEvaluation.text"));
-        btnCorpusEvaluation.addActionListener((ActionEvent e) -> {
-            CorpusEvaluationView frame = new CorpusEvaluationView();
+        btnRunTextualComplexity = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnRunTextualComplexityIndices.text"));
+        btnRunTextualComplexity.addActionListener((ActionEvent e) -> {
+            RunMeasurementsView frame = new RunMeasurementsView();
             frame.setVisible(true);
         });
 
@@ -349,21 +314,24 @@ public class ReaderBenchView extends JFrame {
         GroupLayout gl_panel = new GroupLayout(panelTextualComplexity);
         gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_panel.createSequentialGroup().addContainerGap()
-                        .addComponent(btnCorpusEvaluation, GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnRunTextualComplexity, GroupLayout.PREFERRED_SIZE, 220,
+                                GroupLayout.PREFERRED_SIZE)
                         .addGap(18)
                         .addComponent(btnEssayProcessing, GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(874, Short.MAX_VALUE)));
         gl_panel.setVerticalGroup(gl_panel.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_panel.createSequentialGroup().addContainerGap()
                         .addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(btnCorpusEvaluation, GroupLayout.PREFERRED_SIZE, 25,
+                                .addComponent(btnRunTextualComplexity, GroupLayout.PREFERRED_SIZE, 25,
                                         GroupLayout.PREFERRED_SIZE)
                                 .addComponent(btnEssayProcessing))
                         .addContainerGap(53, Short.MAX_VALUE)));
         panelTextualComplexity.setLayout(gl_panel);
 
         JPanel panelSelfExplanations = new JPanel();
-        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelSelfExplanations"), null, panelSelfExplanations, null);
+        tabbedPane.addTab(
+                LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelSelfExplanations"),
+                null, panelSelfExplanations, null);
         panelSelfExplanations.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelSelfExplanations.setBackground(Color.WHITE);
@@ -429,7 +397,8 @@ public class ReaderBenchView extends JFrame {
                         .addContainerGap()));
 
         JPanel panelCSCL = new JPanel();
-        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelCSCL"), null, panelCSCL, null);
+        tabbedPane.addTab(LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TITLE, "panelCSCL"),
+                null, panelCSCL, null);
         panelCSCL.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "",
                 TitledBorder.LEADING, TitledBorder.TOP, null, null));
         panelCSCL.setBackground(Color.WHITE);
@@ -478,6 +447,37 @@ public class ReaderBenchView extends JFrame {
                                 .addComponent(btnVCoPProcessing))
                         .addContainerGap(49, Short.MAX_VALUE)));
         panelCSCL.setLayout(gl_panelSettingsSpecific);
+
+        JPanel panelPreProcessing = new JPanel();
+        panelPreProcessing.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        panelPreProcessing.setBackground(Color.WHITE);
+        tabbedPane.addTab("Additional", null, panelPreProcessing, null);
+
+        btnPreprocessingTrainSemanticModels = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("ReaderBenchView.btnPreprocessingTrainSemanticModels.text"));
+        btnPreprocessingTrainSemanticModels.addActionListener((ActionEvent e) -> {
+            EventQueue.invokeLater(() -> {
+                try {
+                    SemanticModelsTraining frame = new SemanticModelsTraining();
+                    frame.setVisible(true);
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            });
+        });
+        GroupLayout gl_panelPreProcessing = new GroupLayout(panelPreProcessing);
+        gl_panelPreProcessing.setHorizontalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelPreProcessing
+                        .createSequentialGroup().addContainerGap().addComponent(btnPreprocessingTrainSemanticModels,
+                                GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(917, Short.MAX_VALUE)));
+        gl_panelPreProcessing.setVerticalGroup(gl_panelPreProcessing.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelPreProcessing
+                        .createSequentialGroup().addContainerGap().addComponent(btnPreprocessingTrainSemanticModels,
+                                GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(40, Short.MAX_VALUE)));
+        panelPreProcessing.setLayout(gl_panelPreProcessing);
+
         desktopPane.setLayout(gl_desktopPane);
 
     }
@@ -486,12 +486,12 @@ public class ReaderBenchView extends JFrame {
         comboBoxLSA.removeAllItems();
         comboBoxLDA.removeAllItems();
 
-        for (String url : ReaderBenchView.LSA_SPACES.get(lang)) {
+        ReaderBenchView.LSA_SPACES.get(lang).stream().forEach((url) -> {
             comboBoxLSA.addItem(url);
-        }
-        for (String url : ReaderBenchView.LDA_SPACES.get(lang)) {
+        });
+        ReaderBenchView.LDA_SPACES.get(lang).stream().forEach((url) -> {
             comboBoxLDA.addItem(url);
-        }
+        });
 
         comboBoxLSA.setEnabled(true);
         comboBoxLDA.setEnabled(true);

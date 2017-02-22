@@ -27,8 +27,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
 import data.AbstractDocumentTemplate;
 import data.AbstractDocumentTemplate.BlockTemplate;
 import data.document.Document;
@@ -41,6 +39,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
@@ -56,15 +55,15 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.tools.ant.filters.StringInputStream;
+import org.jsoup.Jsoup;
 import org.openide.util.Exceptions;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
-import services.semanticModels.ISemanticModel;
 
 public class Txt2XmlConverter {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     private final static DocumentBuilderFactory DBF = DocumentBuilderFactory.newInstance();
 
     private int currentBlock = 0;
@@ -85,7 +84,7 @@ public class Txt2XmlConverter {
         while (st.hasMoreTokens()) {
             BlockTemplate block = docTmp.new BlockTemplate();
             block.setId(crtBlock++);
-            block.setContent(st.nextToken().trim());
+            block.setContent(Jsoup.parse(st.nextToken().trim()).text());
             docTmp.getBlocks().add(block);
         }
         Document d = new Document(null, docTmp, new ArrayList<>(), lang, false);
@@ -322,9 +321,8 @@ public class Txt2XmlConverter {
                 return;
             }
             int total_docs_to_process = new File(path).listFiles((File pathname)
-                    -> pathname.getName().endsWith(".txt")
-            ).length;
-            logger.info("Processing " + total_docs_to_process + " documents in total");
+                    -> pathname.getName().endsWith(".txt")).length;
+            LOGGER.log(Level.INFO, "Processing {0} documents in total", total_docs_to_process);
 
             int current_doc_to_process = 0;
 
@@ -344,15 +342,15 @@ public class Txt2XmlConverter {
                         }
                     }
                     if ((++current_doc_to_process) % 1000 == 0) {
-                        logger.info("Finished processing " + (current_doc_to_process) + " documents of "
-                                + total_docs_to_process);
+                        LOGGER.log(Level.INFO, "Finished processing {0} documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
                     }
                     if (meta) {
                         converter.processMetaContent(prefix + f.getName().replaceAll("\\.txt", ""),
                                 new String(content.getBytes("UTF-8"), "UTF-8"), f.getPath().replace(".txt", ".xml"));
                     } else {
                         processContent(prefix + f.getName().replaceAll("\\.txt", ""),
-                                new String(content.getBytes("UTF-8"), "UTF-8"), lang, f.getPath().replace(".txt", ".xml"));
+                                new String(content.getBytes("UTF-8"), "UTF-8"), lang, f.getPath().replace(".txt", ".xml")
+                        );
                     }
                 } catch (FileNotFoundException e) {
                     Exceptions.printStackTrace(e);
@@ -364,7 +362,7 @@ public class Txt2XmlConverter {
                     Exceptions.printStackTrace(ex);
                 }
             }
-            logger.info("Finished processing all files.");
+            LOGGER.info("Finished processing all files...");
         } catch (ParserConfigurationException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -379,7 +377,7 @@ public class Txt2XmlConverter {
             int total_docs_to_process = new File(path).listFiles((File pathname)
                     -> pathname.getName().endsWith(".docx")
             ).length;
-            logger.info("Processing " + total_docs_to_process + " documents in total");
+            LOGGER.log(Level.INFO, "Processing {0} documents in total", total_docs_to_process);
 
             int current_doc_to_process = 0;
 
@@ -389,13 +387,12 @@ public class Txt2XmlConverter {
             Txt2XmlConverter converter = new Txt2XmlConverter(lang);
             for (File f : listFiles) {
                 if ((++current_doc_to_process) % 1000 == 0) {
-                    logger.info("Finished processing " + (current_doc_to_process) + " documents of "
-                            + total_docs_to_process);
+                    LOGGER.log(Level.INFO, "Finished processing {0} documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
                 }
 
                 converter.processMetaDocFile(f, f.getPath().replace(".docx", ".xml"));
             }
-            logger.info("Finished processing all files.");
+            LOGGER.info("Finished processing all files.");
         } catch (FileNotFoundException e) {
             Exceptions.printStackTrace(e);
         } catch (UnsupportedEncodingException e) {
@@ -418,7 +415,7 @@ public class Txt2XmlConverter {
                 (File pathname) -> pathname.getName().endsWith(".txt"));
 
         for (File f : listFiles) {
-            logger.info("Processing " + f.getPath());
+            LOGGER.log(Level.INFO, "Processing {0}", f.getPath());
             // see if there are folders with genre names
             File dir = new File(path + "/" + f.getName().replaceAll("\\.txt", ""));
             if (dir.exists()) {
@@ -472,7 +469,7 @@ public class Txt2XmlConverter {
                 Exceptions.printStackTrace(e);
             }
         }
-        logger.info("Finished processing all files.");
+        LOGGER.info("Finished processing all files.");
     }
 
     public static class Paragraph {

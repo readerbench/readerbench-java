@@ -28,6 +28,10 @@ public class WordListsIndicesFactory extends ComplexityIndicesFactory {
             .map(sv -> SentimentValence.get(sv.getIndexLabel()))
             .forEach(sv -> {
                 result.add(new AvgWordsInList(
+                        ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_DOC, 
+                        sv,
+                        IndexLevel.DOC));
+                result.add(new AvgWordsInList(
                         ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_BLOCK, 
                         sv,
                         IndexLevel.BLOCK));

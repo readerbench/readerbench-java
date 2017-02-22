@@ -39,7 +39,7 @@ import services.readingStrategies.PatternMatching;
 
 public class TextPreprocessing {
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     // lowercase + eliminate numbers
     private static final Pair[] INITIAL = {new Pair<>(Pattern.compile("\\s+"), " "),
@@ -68,6 +68,9 @@ public class TextPreprocessing {
         patterns = new Pair[]{new Pair<>(Pattern.compile("[^a-z ,:;'\\-\\.\\!\\?\n]"), " ")};
         LANG_PATTERNS.put(Lang.en, patterns);
 
+        patterns = new Pair[]{new Pair<>(Pattern.compile("[^a-zàéèìóòù ,:;'\\-\\.\\!\\?\n]"), " ")};
+        LANG_PATTERNS.put(Lang.it, patterns);
+
         patterns = new Pair[]{ // replace accents
             new Pair<>(Pattern.compile("[áàâä]"), "a"), new Pair<>(Pattern.compile("[èéêë]"), "e"),
             new Pair<>(Pattern.compile("[íìîï]"), "i"), new Pair<>(Pattern.compile("[óòôö]"), "o"),
@@ -92,10 +95,13 @@ public class TextPreprocessing {
                 pattern = "[a-zăâîşţ]+";
                 break;
             case es:
-                pattern = "[^a-zñóéíáúü ,:;'\\-\\.\\!\\?\n]";
+                pattern = "[a-zñóéíáúü]+";
                 break;
             case nl:
-                pattern = "[^a-zäëÿüïöáéýúíóàèùìòãñõâêûîôç]+";
+                pattern = "[a-zäëÿüïöáéýúíóàèùìòãñõâêûîôç]+";
+                break;
+            case it:
+                pattern = "[a-zàéèìóòù]+";
                 break;
             default:
                 pattern = "[a-z]+";
@@ -274,7 +280,7 @@ public class TextPreprocessing {
                             }
                         }
                     } catch (ParserConfigurationException | SAXException | IOException | DOMException e) {
-                        logger.severe("Error processing " + f.getName() + ": " + e.getMessage());
+                        LOGGER.severe("Error processing " + f.getName() + ": " + e.getMessage());
                     }
                 }
             }

@@ -15,16 +15,12 @@
  */
 package services.discourse.cohesion;
 
-
-
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.discourse.SemanticCohesion;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -36,7 +32,7 @@ import utils.DoubleStatistics;
  */
 public class CohesionGraph {
 
-    static Logger logger = Logger.getLogger("");
+    static Logger LOGGER = Logger.getLogger("");
 
     /**
      * Build the cohesion graph of a document.
@@ -45,7 +41,7 @@ public class CohesionGraph {
      */
     public static void buildCohesionGraph(AbstractDocument d) {
 
-        logger.info("Building cohesion graph...");
+        LOGGER.info("Building cohesion graph...");
 
         // determine block-document semantic cohesion
         // initialize semantic cohesion vector for the semantic cohesion of (block, document) pairs
@@ -59,7 +55,7 @@ public class CohesionGraph {
         }
 
         // auxiliary variables used to compute mean and standard deviation of semantic cohesion
-        double s0 = 0, s1 = 0, s2 = 0, mean = 0, stdev = 0;
+        double s0 = 0, s1 = 0, s2 = 0, avg = 0, stdev = 0;
 
         // determine inner-block semantic cohesion
         // initialize semantic cohesion arrays for the semantic cohesion of (block, block) pairs
@@ -103,20 +99,18 @@ public class CohesionGraph {
 
         // determine mean and standard deviation values of semantic cohesion
         if (statistics.getCount() != 0) {
-            mean = statistics.getAverage();
+            avg = statistics.getAverage();
             stdev = statistics.getStandardDeviation();
         }
-
-        // prune initial graph, but always keep adjacent pairs of blocks or  explicitly referred blocks
+        
+        // prune initial graph, but always keep adjacent pairs of blocks or explicitly referred blocks
         // iterate through all pairs of blocks of the document
         for (int i = 0; i < d.getBlocks().size() - 1; i++) {
             for (int j = i + 1; j < d.getBlocks().size(); j++) {
                 Block b1 = d.getBlocks().get(i);
                 Block b2 = d.getBlocks().get(j);
                 // if the semantic cohesion is set for the pair of blocks (i, j)
-                if (d.getBlockDistances()[j][i] != null && ( // if the semantic cohesion is greater than sum of mean and 
-                        // standard deviation
-                        (d.getBlockDistances()[j][i].getCohesion() >= (mean + stdev))
+                if (d.getBlockDistances()[j][i] != null && ((d.getBlockDistances()[j][i].getCohesion() >= Math.min(0.3, (avg + stdev)))
                         // if j is the next block after i and there is not an explicit link set for j
                         || (b2.getRefBlock() == null && j == i + 1)
                         // if there is an explicit link set for j and it is i 
@@ -129,7 +123,7 @@ public class CohesionGraph {
         }
 
         // determine intra-block distances (semantic cohesion)
-        Block prevBlock = null, nextBlock = null;
+        Block prevBlock = null, nextBlock;
         // iterate through blocks
         for (Block b : d.getBlocks()) {
             if (b != null) {
@@ -167,18 +161,18 @@ public class CohesionGraph {
                 b.setSentenceDistances(new SemanticCohesion[b.getSentences().size()][b.getSentences().size()]);
                 b.setPrunnedSentenceDistances(new SemanticCohesion[b.getSentences().size()][b.getSentences().size()]);
 
-                mean = 0;
+                avg = 0;
                 stdev = 0;
 
                 IntStream.range(0, b.getSentences().size() - 1).parallel()
-                    .forEach(i -> {
-                        Sentence s = b.getSentences().get(i);
-                        for (int j = i + 1; j < b.getSentences().size(); j++) {
-                            SemanticCohesion coh = new SemanticCohesion(b.getSentences().get(j), s);
-                            b.getSentenceDistances()[i][j] = coh;
-                            b.getSentenceDistances()[j][i] = coh;
-                        }
-                    });
+                        .forEach(i -> {
+                            Sentence s = b.getSentences().get(i);
+                            for (int j = i + 1; j < b.getSentences().size(); j++) {
+                                SemanticCohesion coh = new SemanticCohesion(b.getSentences().get(j), s);
+                                b.getSentenceDistances()[i][j] = coh;
+                                b.getSentenceDistances()[j][i] = coh;
+                            }
+                        });
 
                 statistics = IntStream.range(0, b.getSentences().size() - 1).parallel()
                         .mapToObj(i -> i)
@@ -190,7 +184,7 @@ public class CohesionGraph {
 
                 // determine mean and standard deviation values of semantic cohesion
                 if (statistics.getCount() != 0) {
-                    mean = statistics.getAverage();
+                    avg = statistics.getAverage();
                     stdev = statistics.getStandardDeviation();
                 }
 
@@ -199,11 +193,11 @@ public class CohesionGraph {
                 for (int i = 0; i < b.getSentences().size() - 1; i++) {
                     for (int j = i + 1; j < b.getSentences().size(); j++) {
                         // if the semantic cohesion is greater than sum of mean and standard deviation and j is the next sentence after i
-                        if ((b.getSentenceDistances()[i][j].getCohesion() >= (mean + stdev)) || (j == i + 1)) {
+                        if ((b.getSentenceDistances()[i][j].getCohesion() >= Math.min(0.3, (avg + stdev))) || (j == i + 1)) {
                             // keep this semantic cohesion
                             b.getPrunnedSentenceDistances()[i][j] = b.getSentenceDistances()[i][j];
                             b.getPrunnedSentenceDistances()[j][i] = b.getPrunnedSentenceDistances()[i][j];
-                        } 
+                        }
                     }
                 }
 

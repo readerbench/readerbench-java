@@ -42,10 +42,12 @@ import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType;
 import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
+import services.comprehensionModel.utils.indexer.graphStruct.CMGraphStatistics;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
@@ -154,13 +156,28 @@ public class WordLinkageCalculator {
     }
 
     public static void analyzeFiles() {
-        LSA semanticModel = LSA.loadLSA(CSCLConstants.LSA_PATH, Lang.en);
+        LSA semanticModel = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
+//        LSA semanticModel = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
         double threshold = 0.3;
 
-        String filePath = "resources/in/essays/essays_FYP_en/texts/";
-        String saveLocation = "resources/in/essays/essays_FYP_en/";
+//        String filePath = "resources/in/essays/essays_FYP_en/texts/";
+//        String saveLocation = "resources/in/essays/essays_FYP_en/";
+        
+//        String filePath = "resources/in/cohesion/Archive/texts/";
+//        String saveLocation = "resources/in/cohesion/Archive/";
+
+//        String filePath = "resources/in/cohesion/CohMetrix/texts/";
+//        String saveLocation = "resources/in/cohesion/CohMetrix/";
+        
+//        String filePath = "resources/in/cohesion/msu timed/posttest essays fall 2009/";
+//        String saveLocation = "resources/in/cohesion/msu timed/";
+
+        String filePath = "resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays/";
+        String saveLocation = "resources/in/cohesion/msu timed/pretest spring 2010/";
+
         try {
             Map<String, List<AoAMetric>> scoreMap = new HashMap();
+            Map<String, CMGraphStatistics> graphStatisticsMap = new HashMap();
             
             String[] aoaFiles = {"Bird.csv", "Bristol.csv", "Cortese.csv", "Kuperman.csv", "Shock.csv"};
 
@@ -181,6 +198,9 @@ public class WordLinkageCalculator {
                 
                 String fileKey = file.getName().replace(".txt", "");
                 scoreMap.put(fileKey, metricList);
+                
+                CMGraphStatistics statistics = calculator.graph.getGraphStatistics();
+                graphStatisticsMap.put(fileKey, statistics);
             }
             
             BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements_word_linkage.csv", true));
@@ -190,6 +210,7 @@ public class WordLinkageCalculator {
                 String scoreDesc = aoaFile.replace(".csv", "");
                 concat.append("," + scoreDesc + " Avg," + scoreDesc + " Degree Avg," + scoreDesc + " Idf Avg");
             }
+            concat.append(", Density, Connected Components Count, Average Clustering Coefficient, Betweenness, Closeness, Eccentricity, Diameter, Average Shortest Path Length");
             concat.append("\n");
                 
             scoreMap.entrySet().stream().forEach(score -> {
@@ -198,8 +219,19 @@ public class WordLinkageCalculator {
                 
                 concat.append(fileName);
                 metricList.forEach((metric) -> {
-                    concat.append("," + metric.getAvg() + "," + metric.getWeightedAvg() + "," + metric.getWeightedIdfAvg());
+                    concat.append(",").append(metric.getAvg()).append(",").append(metric.getWeightedAvg()).append(",").append(metric.getWeightedIdfAvg());
                 });
+                
+                CMGraphStatistics statistics = graphStatisticsMap.get(fileName);
+                concat.append(",").append(statistics.getDensity());
+                concat.append(",").append(statistics.getConnectedComponentsCount());
+                concat.append(",").append(statistics.getAverageClusteringCoefficient());
+                concat.append(",").append(statistics.getBetweenness());
+                concat.append(",").append(statistics.getCloseness());
+                concat.append(",").append(statistics.getEccentricity());
+                concat.append(",").append(statistics.getDiameter());
+                concat.append(",").append(statistics.getPathLength());
+                
                 concat.append("\n");
             });
             try {

@@ -41,7 +41,6 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import java.util.logging.Logger;
 
@@ -50,7 +49,7 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.Keyword;
-import gma.ProblemSpaceView;
+import services.gma.ProblemSpaceView;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
 import view.models.document.ChatTable;
@@ -220,46 +219,46 @@ public class ChatView extends JFrame {
                         .addComponent(separator, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 970, Short.MAX_VALUE)
                         .addComponent(lblContents, Alignment.LEADING).addGroup(Alignment.LEADING,
                         gl_panelContents.createSequentialGroup()
-                                .addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING, false)
-                                        .addComponent(btnParticipantEvolution, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(btnParticipantInvolvement, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(btnTimeEvolution).addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(btnCollaborationVoice, Alignment.TRAILING,
-                                                GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                                                Short.MAX_VALUE)
-                                        .addComponent(btnCollaborationSocialKB, Alignment.TRAILING,
-                                                GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-                                                Short.MAX_VALUE))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
-                                        .addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING, false)
+                                .addComponent(btnParticipantEvolution, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnParticipantInvolvement, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(btnTimeEvolution).addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+                                .addComponent(btnCollaborationVoice, Alignment.TRAILING,
+                                        GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE)
+                                .addComponent(btnCollaborationSocialKB, Alignment.TRAILING,
+                                        GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+                                .addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addContainerGap()));
         gl_panelContents
                 .setVerticalGroup(
                         gl_panelContents.createParallelGroup(Alignment.LEADING)
-                                .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-                                        .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
-                                                GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(scrollPaneConcept, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-                                                .addComponent(btnParticipantInvolvement).addComponent(btnTimeEvolution)
-                                                .addComponent(btnCollaborationSocialKB).addComponent(btnSelectVoices))
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-                                                .addComponent(btnParticipantEvolution)
-                                                .addComponent(btnCollaborationVoice)
-                                                .addComponent(btnDisplayVoiceInteranimation))
-                                        .addContainerGap()));
+                        .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+                                .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(scrollPaneConcept, GroupLayout.DEFAULT_SIZE, 522, Short.MAX_VALUE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(btnParticipantInvolvement).addComponent(btnTimeEvolution)
+                                        .addComponent(btnCollaborationSocialKB).addComponent(btnSelectVoices))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(btnParticipantEvolution)
+                                        .addComponent(btnCollaborationVoice)
+                                        .addComponent(btnDisplayVoiceInteranimation))
+                                .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
         JLabel lblTitle = new JLabel("Discussion topic:");
         lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
@@ -539,8 +538,8 @@ public class ChatView extends JFrame {
         for (Block b : chat.getBlocks()) {
             if (b != null) {
                 s0++;
-                s1 += b.getOverallScore();
-                s2 += Math.pow(b.getOverallScore(), 2);
+                s1 += b.getScore();
+                s2 += Math.pow(b.getScore(), 2);
             }
         }
 
@@ -563,13 +562,13 @@ public class ChatView extends JFrame {
                         }
                         text += ": </b>";
                     }
-                    if (chat.getBlocks().get(index).getOverallScore() >= mean + stdev) {
+                    if (chat.getBlocks().get(index).getScore() >= mean + stdev) {
                         text += "<b>" + chat.getBlocks().get(index).getText() + "</b>";
                     } else {
                         text += chat.getBlocks().get(index).getText();
                     }
                     Object[] row = {index + "", text + " ["
-                        + Formatting.formatNumber(chat.getBlocks().get(index).getOverallScore()) + "]"};
+                        + Formatting.formatNumber(chat.getBlocks().get(index).getScore()) + "]"};
                     modelContent.addRow(row);
                 }
             }

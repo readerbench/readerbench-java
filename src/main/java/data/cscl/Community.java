@@ -16,11 +16,7 @@
 package data.cscl;
 
 import java.awt.EventQueue;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -42,21 +38,21 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
-import java.io.IOException;
-import java.util.Arrays;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
-import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.keywordMining.KeywordModeling;
-import services.replicatedWorker.SerialCorpusAssessment;
+import services.processing.SerialProcessing;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
 import webService.result.ResultvCoP;
@@ -174,8 +170,8 @@ public class Community extends AnalysisElement {
                         // participantContributions[index1][index1] += d
                         // .getBlocks().get(i).getCombinedScore();
                         Participant participantToUpdate = participants.get(index1);
-                        participantToUpdate.getIndices().put(CSCLIndices.OVERALL_SCORE,
-                                participantToUpdate.getIndices().get(CSCLIndices.OVERALL_SCORE) + u.getOverallScore());
+                        participantToUpdate.getIndices().put(CSCLIndices.SCORE,
+                                participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
                         participantToUpdate.getIndices().put(CSCLIndices.PERSONAL_KB,
                                 participantToUpdate.getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
                         participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
@@ -187,8 +183,7 @@ public class Community extends AnalysisElement {
                                 int index2 = participants.indexOf(p2);
                                 if (index2 >= 0) {
                                     // model knowledge building effect
-                                    double addedKB = d.getBlocks().get(i).getIndividualScore()
-                                            * d.getPrunnedBlockDistances()[i][j].getCohesion();
+                                    double addedKB = d.getBlocks().get(i).getScore() * d.getPrunnedBlockDistances()[i][j].getCohesion();
                                     participantContributions[index1][index2] += addedKB;
                                 }
                             }
@@ -241,7 +236,7 @@ public class Community extends AnalysisElement {
                                 participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
                         participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_OVERALL_SCORE)
-                                + d.getOverallScore());
+                                + d.getScore());
                         participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB,
                                 participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB)
                                 + VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
@@ -388,6 +383,81 @@ public class Community extends AnalysisElement {
         });
     }
 
+    /**
+     * Generate participants view for communities
+     *
+     * @param path - location where .json files will be saved
+     */
+    public JSONArray generateParticipantViewSubCommunities(String path) {
+        int i = 1;
+        JSONArray participantsSubCommunities = new JSONArray();
+        for (Community subCommunity : timeframeSubCommunities) {
+            JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(path + i + ".json");
+
+            JSONObject subCommunityJson = new JSONObject();
+            subCommunityJson.put("week", i);
+            subCommunityJson.put("participants", participantSubCommunity);
+
+            participantsSubCommunities.add(subCommunityJson);
+
+            i++;
+        }
+
+        return participantsSubCommunities;
+    }
+
+    /**
+     * Generate json file with all participants for graph representation (using
+     * d3.js)
+     *
+     * @param path - the path where json file will be saved
+     */
+    public JSONObject generateParticipantViewD3(String path) {
+
+        JSONObject jsonObject = new JSONObject();
+
+        JSONArray nodes = new JSONArray();
+        for (int i = 0; i < participants.size(); i++) {
+            JSONObject participant = new JSONObject();
+            participant.put("name", participants.get(i).getName());
+            participant.put("id", i);
+            participant.put("value", participants.get(i).getGradeAnnotator());
+            nodes.add(participant);
+        }
+
+        JSONArray links = new JSONArray();
+
+        for (int row = 0; row < participantContributions.length; row++) {
+            for (int col = 0; col < participantContributions[row].length; col++) {
+                if (participantContributions[row][col] > 0) {
+                    JSONObject link = new JSONObject();
+                    link.put("source", row);
+                    link.put("target", col);
+                    link.put("score", participantContributions[row][col]);
+                    links.add(link);
+                }
+            }
+        }
+
+        jsonObject.put("nodes", nodes);
+        jsonObject.put("links", links);
+
+        try {
+
+            FileWriter file = new FileWriter(path);
+            file.write(jsonObject.toJSONString());
+            file.flush();
+            file.close();
+
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+
+        return jsonObject;
+
+    }
+
     public void generateConceptView(String path) {
         EventQueue.invokeLater(() -> {
             PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
@@ -465,21 +535,15 @@ public class Community extends AnalysisElement {
                     out.write("Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
                     for (AbstractDocument d : documents) {
                         int noBlocks = 0;
-                        for (Block b : d.getBlocks()) {
-                            if (b != null) {
-                                noBlocks++;
-                            }
-                        }
+                        noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
 
                         out.write(
                                 new File(d.getPath()).getName() + "," + noBlocks + ","
                                 + ((Conversation) d).getParticipants().size() + ","
-                                + Formatting.formatNumber(d.getOverallScore()) + ","
-                                + Formatting.formatNumber(
-                                        VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                                + Formatting.formatNumber(d.getScore()) + ","
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
                                 + ","
-                                + Formatting.formatNumber(
-                                        VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
                                 + "\n");
                     }
                 }
@@ -512,6 +576,8 @@ public class Community extends AnalysisElement {
             File f = new File(rootPath);
             dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
             dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
+            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
         }
     }
@@ -532,7 +598,7 @@ public class Community extends AnalysisElement {
                             checkpoint.delete();
                         }
                     }
-                    SerialCorpusAssessment.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
                             startDate, endDate, monthIncrement, dayIncrement);

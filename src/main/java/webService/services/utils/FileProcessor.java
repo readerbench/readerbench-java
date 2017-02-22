@@ -38,7 +38,7 @@ public class FileProcessor {
 	}
 	
 	public ResultFile saveFile(Part submitedFile) {
-		File targetFile = new File("tmp/" + System.currentTimeMillis() + '_' + submitedFile.getSubmittedFileName());
+		File targetFile = new File("tmp/" + System.currentTimeMillis() + '_' + submitedFile.getName());
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {
@@ -48,7 +48,7 @@ public class FileProcessor {
 	}
 	
 	public ResultFile saveFile(Part submitedFile, File folderPath) {
-		File targetFile = new File(folderPath +"/" + submitedFile.getSubmittedFileName());
+		File targetFile = new File(folderPath +"/" + submitedFile.getName());
 		try {
 			FileUtils.copyInputStreamToFile(submitedFile.getInputStream(), targetFile);
 		} catch (IOException e) {

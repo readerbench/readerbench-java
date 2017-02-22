@@ -36,6 +36,21 @@ public class Functions {
                 return Functions::streamOfBlocks;
             case SENTENCE:
                 return Functions::streamOfSentences;
+            case DOC:
+                return (d -> Stream.of(d));
+            default:
+                return null;
+        }
+    }
+            
+    public static Function<AbstractDocument, Integer> getNumberOfElements(IndexLevel level) {
+        switch (level) {
+            case BLOCK:
+                return (d -> d.getNoBlocks());
+            case SENTENCE:
+                return (d -> d.getNoSentences());
+            case DOC:
+                return (d -> 1);
             default:
                 return null;
         }

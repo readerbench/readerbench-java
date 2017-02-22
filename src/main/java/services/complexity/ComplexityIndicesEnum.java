@@ -72,9 +72,11 @@ public enum ComplexityIndicesEnum {
     WORD_PATH_COUNT_HYPERNYM_TREE(ComplexityIndexType.WORD_COMPLEXITY),
     WORD_POLYSEMY_COUNT(ComplexityIndexType.WORD_COMPLEXITY),
     WORD_SYLLABLE_COUNT(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOE_PER_DOC(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_AOE_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_AOE_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_AOA_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOA_PER_DOC(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_AOA_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_IDF_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
     AVG_IDF_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
@@ -154,6 +156,7 @@ public enum ComplexityIndicesEnum {
     DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
     DEPENDENCY_TYPES_PER_SENTENCE(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
     
+    AVG_WORDS_IN_LIST_PER_DOC(ComplexityIndexType.WORD_LISTS),
     AVG_WORDS_IN_LIST_PER_BLOCK(ComplexityIndexType.WORD_LISTS),
     AVG_WORDS_IN_LIST_PER_SENTENCE(ComplexityIndexType.WORD_LISTS);
     

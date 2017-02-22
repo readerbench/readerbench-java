@@ -55,7 +55,7 @@ public class DocumentFlowView extends JFrame {
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        this.setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
         JLabel lblSemanticDistance = new JLabel("Semantic distance:");
 
@@ -71,12 +71,12 @@ public class DocumentFlowView extends JFrame {
         }
 
         comboBoxSemDistance.addActionListener((ActionEvent e) -> {
-            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
+            updateContents((SimilarityType) comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
         comboBoxCriteria.addActionListener((ActionEvent e) -> {
-            updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(),
+            updateContents((SimilarityType) comboBoxSemDistance.getSelectedItem(),
                     (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
         });
 
@@ -143,7 +143,7 @@ public class DocumentFlowView extends JFrame {
         scrollPaneContent.setViewportView(tableContent);
         contentPane.setLayout(gl_contentPane);
 
-        updateContents((SimilarityType)comboBoxSemDistance.getSelectedItem(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
+        updateContents((SimilarityType) comboBoxSemDistance.getSelectedItem(), (DocFlowCriteria) comboBoxCriteria.getSelectedItem());
     }
 
     private void updateContents(SimilarityType simType, DocFlowCriteria crit) {
@@ -157,7 +157,7 @@ public class DocumentFlowView extends JFrame {
             for (Integer index : df.getOrderedParagraphs()) {
                 Block refBlock = doc.getBlocks().get(index);
                 Object[] row = {index,
-                    refBlock.getText() + "[" + Formatting.formatNumber(refBlock.getOverallScore()) + "]"};
+                    refBlock.getText() + "[" + Formatting.formatNumber(refBlock.getScore()) + "]"};
                 modelContent.addRow(row);
             }
 

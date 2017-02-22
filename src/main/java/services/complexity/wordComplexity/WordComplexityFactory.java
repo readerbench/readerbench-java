@@ -62,8 +62,13 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
                     ComplexityIndicesEnum.WORD_SYLLABLE_COUNT, lang,
                     WordComplexity::getSyllables));
         }
-        Map<String, Map<String, Double>> aoaMap = readAoA(lang);
-        for (Map.Entry<String, Map<String, Double>> e : aoaMap.entrySet()) {
+        Map<String, Map<String, Double>> map = readCSV(lang, "AoA.csv");
+        for (Map.Entry<String, Map<String, Double>> e : map.entrySet()) {
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOA_PER_DOC, 
+                    e.getKey(), 
+                    IndexLevel.DOC, 
+                    e.getValue()));
             result.add(new AvgAoAScore(
                     ComplexityIndicesEnum.AVG_AOA_PER_BLOCK, 
                     e.getKey(), 
@@ -75,12 +80,31 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
                     IndexLevel.SENTENCE, 
                     e.getValue()));
         }
+        
+        map = readCSV(lang, "AoE-small.csv");
+        for (Map.Entry<String, Map<String, Double>> e : map.entrySet()) {
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOE_PER_DOC, 
+                    e.getKey(), 
+                    IndexLevel.DOC, 
+                    e.getValue()));
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOE_PER_BLOCK, 
+                    e.getKey(), 
+                    IndexLevel.BLOCK, 
+                    e.getValue()));
+            result.add(new AvgAoAScore(
+                    ComplexityIndicesEnum.AVG_AOE_PER_SENTENCE, 
+                    e.getKey(), 
+                    IndexLevel.SENTENCE, 
+                    e.getValue()));
+        }
         return result;
     }
 
-    private Map<String, Map<String, Double>> readAoA(Lang lang) {
+    private Map<String, Map<String, Double>> readCSV(Lang lang, String fileName) {
         Map<String, Map<String, Double>> map = new HashMap<>();
-        String aoaFile = "resources/config/" + lang.toString() + "/word lists/AoA.csv";
+        String aoaFile = "resources/config/" + lang.toString() + "/word lists/" + fileName;
         try (BufferedReader in = new BufferedReader(new FileReader(aoaFile))) {
             in.readLine();
             String line = in.readLine();
@@ -90,9 +114,6 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
             }
             while ((line = in.readLine()) != null) {
                 String[] split = line.split(",", -1);
-                if (split.length != header.length) {
-                    System.out.println("straniu");
-                }
                 String word = split[0];
                 for (int i = 1; i < header.length; i++) {
                     try {

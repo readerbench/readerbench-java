@@ -7,6 +7,7 @@ package services.complexity.wordLists;
 
 import data.AbstractDocument;
 import data.AnalysisElement;
+import data.Word;
 import data.sentiment.SentimentValence;
 import java.util.Objects;
 import services.complexity.AbstractComplexityIndex;

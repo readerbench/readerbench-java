@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 
 import data.discourse.SemanticCohesion;
 import data.discourse.SemanticRelatedness;
-import edu.stanford.nlp.hcoref.data.CorefChain;
+import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
 import services.semanticModels.ISemanticModel;
@@ -105,16 +105,15 @@ public class Block extends AnalysisElement implements Serializable {
     }
 
     public static void addBlock(AbstractDocument d, Block b) {
-        if (b.getIndex() != -1) {
-            while (d.getBlocks().size() < b.getIndex()) {
-                d.getBlocks().add(null);
-            }
-            d.getBlocks().add(b.getIndex(), b);
-        } else {
-            d.getBlocks().add(b);
-        }
+//        if (b.getIndex() != -1) {
+//            while (d.getBlocks().size() < b.getIndex()) {
+//                d.getBlocks().add(null);
+//            }
+//            d.getBlocks().add(b.getIndex(), b);
+//        } else {
+        d.getBlocks().add(b);
+//        }
         d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
-
     }
 
     public List<Sentence> getSentences() {
@@ -315,10 +314,8 @@ public class Block extends AnalysisElement implements Serializable {
     public String toString() {
         String s = "";
         s += "{\n";
-        for (Sentence sentence : sentences) {
-            s += "\t" + sentence.toString() + "\n";
-        }
-        s += "}\n[" + getOverallScore() + "]\n";
+        s = sentences.stream().map((sentence) -> "\t" + sentence.toString() + "\n").reduce(s, String::concat);
+        s += "}\n[" + getScore() + "]\n";
         return s;
     }
 }

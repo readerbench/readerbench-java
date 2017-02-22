@@ -17,7 +17,6 @@ package view.widgets.cscl;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,13 +41,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-
-
-import services.replicatedWorker.SerialCorpusAssessment;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 import data.Lang;
 import data.AbstractDocument.SaveType;
+import services.processing.SerialProcessing;
 
 public class VCoPEvaluationView extends JFrame {
 
@@ -137,7 +134,7 @@ public class VCoPEvaluationView extends JFrame {
                         .addContainerGap(114, Short.MAX_VALUE)));
 
         lang = ReaderBenchView.RUNTIME_LANGUAGE;
- 
+
         JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
         comboBoxLSA = new JComboBox<>();
         comboBoxLSA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
@@ -153,15 +150,15 @@ public class VCoPEvaluationView extends JFrame {
         btnEvaluateCorpus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!textFieldPath.getText().equals("")) {
-                        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-                        SerialCorpusAssessment.processCorpus(textFieldPath.getText(),
-                                (String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(), lang,
-                                chckbxUsePosTagging.isSelected(), true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    SerialProcessing.processCorpus(textFieldPath.getText(),
+                            (String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(), lang,
+                            chckbxUsePosTagging.isSelected(), true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
-                        Toolkit.getDefaultToolkit().beep();
-                        logger.info("Finished processing all files");
-                        setCursor(null); // turn off the wait cursor
+                    Toolkit.getDefaultToolkit().beep();
+                    logger.info("Finished processing all files");
+                    setCursor(null); // turn off the wait cursor
                 } else {
                     JOptionPane.showMessageDialog(VCoPEvaluationView.this,
                             "Please select an appropriate input folder to be evaluated!", "Error",

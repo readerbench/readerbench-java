@@ -15,7 +15,6 @@
  */
 package data.document;
 
-import com.esotericsoftware.minlog.Log;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;

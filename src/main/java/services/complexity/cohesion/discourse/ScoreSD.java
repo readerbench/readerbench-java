@@ -31,14 +31,14 @@ import utils.IndexLevel;
  */
 public class ScoreSD extends AbstractComplexityIndex {
 
-    public ScoreSD(IndexLevel level) {
-        super(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION, level);
+    public ScoreSD(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
         return streamFunction.apply(d)
-                .map(AnalysisElement::getOverallScore)
+                .map(AnalysisElement::getScore)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }
