@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-
-
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.Conversation;
@@ -29,233 +27,239 @@ import data.discourse.SemanticChain;
 import java.util.logging.Logger;
 
 public class DialogismMeasures {
-	static Logger logger = Logger.getLogger("");
 
-	public static double[][] getSentenceCorrelationMatrix(
-			List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+    static Logger logger = Logger.getLogger("");
 
-		for (int i = 0; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
-						.get(i).getSentenceDistribution(), voices.get(j)
-						.getSentenceDistribution());
-			}
-		}
-		return correlations;
-	}
+    public static double[][] getSentenceCorrelationMatrix(
+            List<SemanticChain> voices) {
+        double[][] correlations = new double[voices.size()][voices.size()];
 
-	public static double[][] getBlockCorrelationMatrix(
-			List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+        for (int i = 0; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
+                        .get(i).getSentenceDistribution(), voices.get(j)
+                        .getSentenceDistribution());
+            }
+        }
+        return correlations;
+    }
 
-		for (int i = 0; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
-						.get(i).getBlockDistribution(), voices.get(j)
-						.getBlockDistribution());
-			}
-		}
-		return correlations;
-	}
+    public static double[][] getBlockCorrelationMatrix(
+            List<SemanticChain> voices) {
+        double[][] correlations = new double[voices.size()][voices.size()];
 
-	public static double[][] getMovingAverageCorrelationMatrix(
-			List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+        for (int i = 0; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
+                        .get(i).getBlockDistribution(), voices.get(j)
+                        .getBlockDistribution());
+            }
+        }
+        return correlations;
+    }
 
-		for (int i = 0; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
-						.get(i).getBlockMovingAverage(), voices.get(j)
-						.getBlockMovingAverage());
-			}
-		}
-		return correlations;
-	}
+    public static double[][] getMovingAverageCorrelationMatrix(
+            List<SemanticChain> voices) {
+        double[][] correlations = new double[voices.size()][voices.size()];
 
-	public static double[][] getSentenceMutualInformationMatrix(
-			List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+        for (int i = 0; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                correlations[i][j] = VectorAlgebra.pearsonCorrelation(voices
+                        .get(i).getBlockMovingAverage(), voices.get(j)
+                        .getBlockMovingAverage());
+            }
+        }
+        return correlations;
+    }
 
-		for (int i = 0; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				correlations[i][j] = VectorAlgebra.mutualInformation(voices
-						.get(j).getSentenceDistribution(), voices.get(j)
-						.getSentenceDistribution());
-			}
-		}
-		return correlations;
-	}
+    public static double[][] getSentenceMutualInformationMatrix(
+            List<SemanticChain> voices) {
+        double[][] correlations = new double[voices.size()][voices.size()];
 
-	public static double[][] getBlockMutualInformationMatrix(
-			List<SemanticChain> voices) {
-		double[][] correlations = new double[voices.size()][voices.size()];
+        for (int i = 0; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                correlations[i][j] = VectorAlgebra.mutualInformation(voices
+                        .get(j).getSentenceDistribution(), voices.get(j)
+                        .getSentenceDistribution());
+            }
+        }
+        return correlations;
+    }
 
-		for (int i = 0; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				correlations[i][j] = VectorAlgebra.mutualInformation(voices
-						.get(i).getBlockMovingAverage(), voices.get(j)
-						.getBlockMovingAverage());
-			}
-		}
-		return correlations;
-	}
+    public static double[][] getBlockMutualInformationMatrix(
+            List<SemanticChain> voices) {
+        double[][] correlations = new double[voices.size()][voices.size()];
 
-	public static double[] getAverageBlockMutualInformationEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getBlockMovingAverage().length];
+        for (int i = 0; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                correlations[i][j] = VectorAlgebra.mutualInformation(voices
+                        .get(i).getBlockMovingAverage(), voices.get(j)
+                        .getBlockMovingAverage());
+            }
+        }
+        return correlations;
+    }
 
-		int no = 0;
-		for (int i = 1; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				double[] mi = VectorAlgebra.discreteMutualInformation(voices
-						.get(i).getBlockMovingAverage(), voices.get(j)
-						.getBlockMovingAverage());
-				for (int k = 0; k < evolution.length; k++) {
-					evolution[k] += mi[k];
-				}
-				no++;
-			}
-		}
+    public static double[] getAverageBlockMutualInformationEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getBlockMovingAverage().length];
 
-		if (no > 0) {
-			for (int k = 0; k < evolution.length; k++) {
-				evolution[k] /= no;
-			}
-			return evolution;
-		}
-		return null;
-	}
+        int no = 0;
+        for (int i = 1; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                double[] mi = VectorAlgebra.discreteMutualInformation(voices
+                        .get(i).getBlockMovingAverage(), voices.get(j)
+                        .getBlockMovingAverage());
+                for (int k = 0; k < evolution.length; k++) {
+                    evolution[k] += mi[k];
+                }
+                no++;
+            }
+        }
 
-	// sentence level
-	public static double[] getAverageSentenceMutualInformationEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
+        if (no > 0) {
+            for (int k = 0; k < evolution.length; k++) {
+                evolution[k] /= no;
+            }
+            return evolution;
+        }
+        return null;
+    }
 
-		int no = 0;
-		for (int i = 1; i < voices.size(); i++) {
-			for (int j = 0; j < i; j++) {
-				double[] mi = VectorAlgebra.discreteMutualInformation(voices
-						.get(i).getSentenceDistribution(), voices.get(j)
-						.getSentenceDistribution());
-				for (int k = 0; k < evolution.length; k++) {
-					evolution[k] += mi[k];
-				}
-				no++;
-			}
-		}
+    // sentence level
+    public static double[] getAverageSentenceMutualInformationEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
 
-		if (no > 0) {
-			for (int k = 0; k < evolution.length; k++) {
-				evolution[k] /= no;
-			}
-			return evolution;
-		}
-		return null;
-	}
+        int no = 0;
+        for (int i = 1; i < voices.size(); i++) {
+            for (int j = 0; j < i; j++) {
+                double[] mi = VectorAlgebra.discreteMutualInformation(voices
+                        .get(i).getSentenceDistribution(), voices.get(j)
+                        .getSentenceDistribution());
+                for (int k = 0; k < evolution.length; k++) {
+                    evolution[k] += mi[k];
+                }
+                no++;
+            }
+        }
 
-	public static double[] getCoOccurrenceBlockEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getBlockDistribution().length];
+        if (no > 0) {
+            for (int k = 0; k < evolution.length; k++) {
+                evolution[k] /= no;
+            }
+            return evolution;
+        }
+        return null;
+    }
 
-		for (int k = 0; k < evolution.length; k++) {
-			for (int i = 0; i < voices.size(); i++) {
-				evolution[k] += voices.get(i).getBlockDistribution()[k] > 0 ? 1
-						: 0;
-			}
-		}
+    public static double[] getCoOccurrenceBlockEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getBlockDistribution().length];
 
-		return evolution;
-	}
+        for (int k = 0; k < evolution.length; k++) {
+            for (int i = 0; i < voices.size(); i++) {
+                evolution[k] += voices.get(i).getBlockDistribution()[k] > 0 ? 1
+                        : 0;
+            }
+        }
 
-	// sentence level
-	public static double[] getCoOccurrenceSentenceEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
+        return evolution;
+    }
 
-		for (int k = 0; k < evolution.length; k++) {
-			for (int i = 0; i < voices.size(); i++) {
-				evolution[k] += voices.get(i).getSentenceDistribution()[k] > 0 ? 1
-						: 0;
-			}
-		}
+    // sentence level
+    public static double[] getCoOccurrenceSentenceEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
 
-		return evolution;
-	}
+        for (int k = 0; k < evolution.length; k++) {
+            for (int i = 0; i < voices.size(); i++) {
+                evolution[k] += voices.get(i).getSentenceDistribution()[k] > 0 ? 1
+                        : 0;
+            }
+        }
 
-	public static double[] getCumulativeBlockMuvingAverageEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getBlockMovingAverage().length];
+        return evolution;
+    }
 
-		for (int k = 0; k < evolution.length; k++) {
-			for (int i = 0; i < voices.size(); i++) {
-				evolution[k] += voices.get(i).getBlockMovingAverage()[k];
-			}
-		}
+    public static double[] getCumulativeBlockMuvingAverageEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.size() == 0) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getBlockMovingAverage().length];
 
-		return evolution;
-	}
+        for (int k = 0; k < evolution.length; k++) {
+            for (int i = 0; i < voices.size(); i++) {
+                evolution[k] += voices.get(i).getBlockMovingAverage()[k];
+            }
+        }
 
-	// sentence level
-	public static double[] getCumulativeSentenceEvolution(
-			List<SemanticChain> voices) {
-		if (voices == null || voices.size() == 0)
-			return null;
-		double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
+        return evolution;
+    }
 
-		for (int k = 0; k < evolution.length; k++) {
-			for (int i = 0; i < voices.size(); i++) {
-				evolution[k] += voices.get(i).getSentenceDistribution()[k];
-			}
-		}
+    // sentence level
+    public static double[] getCumulativeSentenceEvolution(
+            List<SemanticChain> voices) {
+        if (voices == null || voices.isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[voices.get(0).getSentenceDistribution().length];
 
-		return evolution;
-	}
+        for (int k = 0; k < evolution.length; k++) {
+            for (int i = 0; i < voices.size(); i++) {
+                evolution[k] += voices.get(i).getSentenceDistribution()[k];
+            }
+        }
 
-	public static double[] getCollaborationEvolution(Conversation c) {
-		if (c.getVoices() == null || c.getVoices().size() == 0)
-			return null;
-		double[] evolution = new double[c.getVoices().get(0)
-				.getBlockMovingAverage().length];
+        return evolution;
+    }
 
-		Iterator<Participant> it = c.getParticipants().iterator();
-		List<Participant> lsPart = new ArrayList<Participant>();
-		while (it.hasNext()) {
-			Participant part = it.next();
-			lsPart.add(part);
-		}
+    public static double[] getCollaborationEvolution(Conversation c) {
+        if (c.getVoices() == null || c.getVoices().isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[c.getVoices().get(0).getBlockMovingAverage().length];
 
-		// take all voices
-		for (int i = 0; i < c.getVoices().size(); i++) {
-			// for different participants build collaboration based on
-			// inter-twined voices
-			for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
-				for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
-					double[] ditrib1 = c.getParticipantBlockMovingAverage(c
-							.getVoices().get(i), lsPart.get(p1));
-					double[] ditrib2 = c.getParticipantBlockMovingAverage(c
-							.getVoices().get(i), lsPart.get(p2));
-					double[] mi = VectorAlgebra.discreteMutualInformation(
-							ditrib1, ditrib2);
-					for (int j = 0; j < evolution.length; j++) {
-						evolution[j] += mi[j];
-					}
-				}
-			}
-		}
-		c.setIntenseCollabZonesVoice(Collaboration
-				.getCollaborationZones(evolution));
+        Iterator<Participant> it = c.getParticipants().iterator();
+        List<Participant> lsPart = new ArrayList<>();
+        while (it.hasNext()) {
+            Participant part = it.next();
+            lsPart.add(part);
+        }
 
-		return evolution;
-	}
+        // take all voices
+        for (int i = 0; i < c.getVoices().size(); i++) {
+            // for different participants build collaboration based on
+            // inter-twined voices
+            for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
+                for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
+                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c
+                            .getVoices().get(i), lsPart.get(p1));
+                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c
+                            .getVoices().get(i), lsPart.get(p2));
+                    double[] mi = VectorAlgebra.discreteMutualInformation(
+                            ditrib1, ditrib2);
+                    for (int j = 0; j < evolution.length; j++) {
+                        evolution[j] += mi[j];
+                    }
+                }
+            }
+        }
+        c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
+
+        return evolution;
+    }
 }

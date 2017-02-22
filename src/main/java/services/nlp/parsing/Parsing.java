@@ -15,11 +15,8 @@
  */
 package services.nlp.parsing;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
@@ -33,7 +30,6 @@ import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.sentiment.SentimentEntity;
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.OriginalTextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -48,7 +44,6 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.openide.util.Exceptions;
@@ -64,15 +59,6 @@ import services.nlp.stemmer.Stemmer;
 public abstract class Parsing {
 
     static final Logger LOGGER = Logger.getLogger("");
-    public static final SimpleDateFormat[] DATE_FORMATS = {
-        new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"),
-        new SimpleDateFormat("EEE MM/dd/yyyy HH:mm aaa", Locale.ENGLISH),
-        new SimpleDateFormat("kk.mm.ss"),
-        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
-        new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
-        new SimpleDateFormat("HH:mm:ss"),
-        new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
-    };
     public static final int STANFORD_ID = 10000;
 
     protected Lang lang;
@@ -122,27 +108,7 @@ public abstract class Parsing {
                 c.getParticipants().add(activeSpeaker);
             }
         }
-        Date time = null;
-        // extract date (if applicable)
-        if (blockTmp.getTime() != null) {
-            for (SimpleDateFormat format : DATE_FORMATS) {
-                try {
-                    time = format.parse(blockTmp.getTime());
-                    break;
-                } catch (ParseException e) {
-                }
-            }
-            if (time == null) {
-                try {
-                    Long longTime = Long.parseLong(blockTmp.getTime());
-                    time = new Date(longTime * 1000);
-                } catch (NumberFormatException e) {
-                    LOGGER.log(Level.SEVERE, "Unparsable date: {0}", blockTmp.getTime());
-                }
-            }
-        }
-
-        Utterance u = new Utterance(b, activeSpeaker, time);
+        Utterance u = new Utterance(b, activeSpeaker, blockTmp.getTime());
         return u;
     }
 
@@ -160,19 +126,8 @@ public abstract class Parsing {
                 for (BlockTemplate blockTmp : adt.getBlocks()) {
                     String text = annotations.get(blockTmp).toString();
                     // get block ID
-                    int id;
-                    try {
-                        id = Double.valueOf(blockTmp.getId()).intValue();
-                    } catch (Exception e) {
-                        id = -1;
-                    }
-                    // get ref ID
-                    int ref;
-                    try {
-                        ref = Double.valueOf(blockTmp.getRefId()).intValue();
-                    } catch (Exception e) {
-                        ref = 0;
-                    }
+                    Integer id = blockTmp.getId();
+                    Integer ref = blockTmp.getRefId();
 
                     boolean followedByVerbalization = false;
                     // mark if the block has a verbalization afterwards
@@ -189,9 +144,7 @@ public abstract class Parsing {
                     if (usePOSTagging) {
                         document = annotations.get(blockTmp);
                         // create an empty Annotation just with the given text
-                        b
-                                = processBlock(d, id, text, document.get(SentencesAnnotation.class
-                                ));
+                        b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
                     } else {
                         b = SimpleParsing.processBlock(d, id, text);
                     }
@@ -201,12 +154,11 @@ public abstract class Parsing {
                     b.setFollowedByVerbalization(followedByVerbalization);
                     Block.addBlock(d, b);
                     // add explicit reference, if the case
-                    if (ref > 0) {
+                    if (ref != null) {
                         for (Block refB : d.getBlocks()) {
                             if (refB != null && refB.getIndex() == ref) {
                                 b.setRefBlock(refB);
                                 break;
-
                             }
                         }
                     }
@@ -279,7 +231,7 @@ public abstract class Parsing {
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 SentimentEntity se = new SentimentEntity();
                 // TODO: parse Stanford Valence
-                if(tree != null) {
+                if (tree != null) {
                     int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
                     se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
                     s.setSentimentEntity(se);

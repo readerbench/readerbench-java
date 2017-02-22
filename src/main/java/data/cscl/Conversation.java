@@ -41,6 +41,9 @@ import data.discourse.SemanticChain;
 import data.Lang;
 import java.io.FileNotFoundException;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.w3c.dom.DOMException;
@@ -104,7 +107,7 @@ public class Conversation extends AbstractDocument {
         this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
-        this.determineParticipantInterventions();
+        this.determineParticipantContributions();
     }
 
     /**
@@ -137,7 +140,6 @@ public class Conversation extends AbstractDocument {
         List<BlockTemplate> blocks = new ArrayList<>();
 
         try {
-
             InputSource input = new InputSource(new FileInputStream(docFile));
             input.setEncoding("UTF-8");
 
@@ -181,8 +183,6 @@ public class Conversation extends AbstractDocument {
                                         }
                                     }
                                 }
-                                // String text = StringEscapeUtils.escapeXml(el
-                                // .getFirstChild().getNodeValue());
                                 String text = el.getFirstChild().getNodeValue();
                                 block.setContent(text);
                                 if (text.length() > 0
@@ -196,7 +196,9 @@ public class Conversation extends AbstractDocument {
                 }
             }
 
-            contents.setBlocks(blocks);
+            ConversationRestructuringSupport support = new ConversationRestructuringSupport();
+            support.mergeAdjacentContributions(blocks);
+            contents.setBlocks(support.newBlocks);
             c = new Conversation(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
             // set title as a concatenation of topics
             String title = "";
@@ -241,7 +243,6 @@ public class Conversation extends AbstractDocument {
                 }
             }
 
-            // obtain annotated collaboration zones
             double[] collabEv = new double[c.getBlocks().size()];
             nl1 = doc.getElementsByTagName("Collab_regions");
             if (nl1 != null && nl1.getLength() > 0) {
@@ -260,15 +261,25 @@ public class Conversation extends AbstractDocument {
                                 try {
                                     int start = Integer.valueOf(stZone.nextToken());
                                     int end = Integer.valueOf(stZone.nextToken());
-                                    // increment accordingly the intense
-                                    // collaboration zones distribution
-                                    if (start >= 0 && end <= c.getBlocks().size() & start < end) {
+                                    if (support.initialMapping.containsKey(start)) {
+                                        start = support.initialMapping.get(start);
+                                    } else {
+                                        start = -1;
+                                    }
+
+                                    if (support.initialMapping.containsKey(end)) {
+                                        end = Math.min(support.initialMapping.get(end), c.getBlocks().size() - 1);
+                                    } else {
+                                        end = -1;
+                                    }
+                                    // increment accordingly the intense collaboration zones distribution
+                                    if (start >= 0 && start < end) {
                                         for (int k = start; k <= end; k++) {
                                             collabEv[k]++;
                                         }
                                     }
                                 } catch (NumberFormatException e) {
-                                    LOGGER.info("Incorrect annotated collaboration zone format");
+                                    LOGGER.log(Level.WARNING, "Incorrect annotated collaboration zone format...");
                                 }
                             }
                         }
@@ -289,7 +300,7 @@ public class Conversation extends AbstractDocument {
     /**
      *
      */
-    private void determineParticipantInterventions() {
+    private void determineParticipantContributions() {
         if (getParticipants().size() > 0) {
             for (Participant p : getParticipants()) {
                 p.setContributions(new Conversation(null, getSemanticModels(), getLanguage()));
@@ -382,6 +393,98 @@ public class Conversation extends AbstractDocument {
         } catch (Exception ex) {
             LOGGER.severe(ex.getMessage());
             Exceptions.printStackTrace(ex);
+        }
+    }
+
+    private static class ConversationRestructuringSupport {
+
+        private Map<Integer, Integer> initialMapping;
+        private List<BlockTemplate> newBlocks;
+
+        public void mergeAdjacentContributions(List<BlockTemplate> blocks) {
+            //initialization: create mapping between block IDs and initial index positions in array
+            initialMapping = new TreeMap<>();
+            for (int i = 0; i < blocks.size(); i++) {
+                initialMapping.put(blocks.get(i).getId(), i);
+            }
+
+            //first iteration: merge contributions which have same speaker and timeframe <= 1 minute and no explicit ref other than previous contribution
+            for (int i = blocks.size() - 1; i > 0; i--) {
+                if (blocks.get(i) != null && blocks.get(i - 1) != null) {
+                    BlockTemplate crt = blocks.get(i);
+                    BlockTemplate prev = blocks.get(i - 1);
+                    long diffMinutes = (crt.getTime().getTime() - prev.getTime().getTime()) / (60 * 1000);
+
+                    //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
+                    boolean explicitRefCriterion = true;
+                    if (crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
+                        explicitRefCriterion = false;
+                    }
+                    if (crt.getSpeaker().equals(prev.getSpeaker()) && diffMinutes <= 1 && explicitRefCriterion) {
+                        LOGGER.log(Level.INFO, "Merging contributions with IDs {0} and {1}", new Object[]{prev.getId(), crt.getId()});
+                        prev.setContent(prev.getContent() + ". " + crt.getContent());
+                        blocks.set(i, null);
+                    }
+                }
+            }
+
+            //update refId
+            for (BlockTemplate b : blocks) {
+                if (b != null) {
+                    if (b.getRefId() > 0) {
+                        b.setRefId(initialMapping.get(b.getRefId()));
+                    } else {
+                        b.setRefId(null);
+                    }
+                }
+            }
+
+            //second iteration: fix explicit links that point now to null blocks
+            for (BlockTemplate b : blocks) {
+                if (b != null && b.getRefId() != null && blocks.get(b.getRefId()) == null) {
+                    //determine first block which is not null above the referenced block
+                    int index = b.getRefId() - 1;
+                    while (blocks.get(index) == null && index >= 0) {
+                        index--;
+                    }
+                    if (index >= 0) {
+                        b.setRefId(index);
+                    } else {
+                        b.setRefId(null);
+                    }
+                }
+            }
+
+            //third iteration: remove null blocks and perform a compacting operation on the whole conversation
+            newBlocks = new ArrayList<>();
+            Map<Integer, Integer> newMapping = new TreeMap<>();
+            int noCrt = 0;
+            for (int i = 0; i < blocks.size(); i++) {
+                if (blocks.get(i) != null) {
+                    newMapping.put(i, noCrt);
+                    BlockTemplate crt = blocks.get(i);
+                    crt.setId(noCrt);
+                    if (crt.getRefId() != null) {
+                        crt.setRefId(newMapping.get(crt.getRefId()));
+                    }
+                    newBlocks.add(crt);
+                    noCrt++;
+                }
+            }
+
+            //update mappings
+            for (Entry<Integer, Integer> e : initialMapping.entrySet()) {
+                if (newMapping.containsKey(e.getValue())) {
+                    initialMapping.put(e.getKey(), newMapping.get(e.getValue()));
+                } else {
+                    //search for closest match
+                    int index = e.getValue() - 1;
+                    while (!newMapping.containsKey(index) && index >= 0) {
+                        index--;
+                    }
+                    initialMapping.put(e.getKey(), index);
+                }
+            }
         }
     }
 

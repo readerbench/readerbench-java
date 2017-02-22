@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import data.cscl.Community;
-import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import services.commons.Formatting;
@@ -80,15 +79,11 @@ public class CommunityInteraction {
     public static List<ResultGraphPoint> buildParticipantEvolutionData(Community c, boolean needsAnonymization) {
 
         List<ResultGraphPoint> points = new ArrayList<>();
-        ArrayList<Participant> ls = new ArrayList<>();
-        for (Participant p : c.getParticipants()) {
-            ls.add(p);
-        }
 
         // participant evolution
         String[] names = new String[c.getParticipants().size()];
-        for (int j = 0; j < ls.size(); j++) {
-            names[j] = ls.get(j).getName();
+        for (int j = 0; j < c.getParticipants().size(); j++) {
+            names[j] = c.getParticipants().get(j).getName();
         }
 
         double[] current_value = new double[c.getParticipants().size()];
@@ -97,11 +92,10 @@ public class CommunityInteraction {
             if (c.getDocuments().get(k) != null) {
                 for (int i = 0; i < c.getDocuments().get(k).getBlocks().size(); i++) {
                     if (c.getDocuments().get(k).getBlocks().get(i) != null) {
-                        current_value[ls.indexOf((((Utterance) c.getDocuments().get(k).getBlocks().get(i)))
-                                .getParticipant())] += c.getDocuments().get(i)
-                                .getOverallScore();
+                        current_value[c.getParticipants().indexOf((((Utterance) c.getDocuments().get(k).getBlocks().get(i)))
+                                .getParticipant())] += c.getDocuments().get(i).getScore();
                     }
-                    for (int j = 0; j < ls.size(); j++) {
+                    for (int j = 0; j < c.getParticipants().size(); j++) {
                         if (!needsAnonymization) {
                             points.add(new ResultGraphPoint(names[j], i, current_value[j]));
                         } else {

@@ -41,8 +41,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import data.Block;
 import data.Sentence;
 import data.discourse.Keyword;
@@ -55,476 +53,481 @@ import view.models.document.DocumentTableModel;
 import view.models.document.TopicsTableModel;
 
 /**
- * 
+ *
  * @author Mihai Dascalu
  */
 public class DocumentView extends JFrame {
-	static Logger logger = Logger.getLogger("");
 
-	private static final long serialVersionUID = -4709511294166379162L;
-	private static final int MIN_ROW_HEIGHT = 20;
-	private static final int MAX_ROW_HEIGHT = 60;
+    static Logger logger = Logger.getLogger("");
 
-	private Document document;
-	private JTable tableTopics;
-	private JSlider sliderTopics;
-	private JCheckBox chckbxNounTopics;
-	private JCheckBox chckbxVerbTopics;
-	private DefaultTableModel modelTopics;
-	private DefaultTableModel modelContent;
-	private JTable tableContent;
-	private JLabel lblSourceDescription;
-	private JLabel lblURIDescription;
-	private JLabel lblTitleDescription;
-	private JLabel lblSubjectivityDescription;
+    private static final long serialVersionUID = -4709511294166379162L;
+    private static final int MIN_ROW_HEIGHT = 20;
+    private static final int MAX_ROW_HEIGHT = 60;
 
-	public DocumentView(Document documentToDisplay) {
-		super("ReaderBench - Document Visualization");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		getContentPane().setBackground(Color.WHITE);
-		this.document = documentToDisplay;
+    private Document document;
+    private JTable tableTopics;
+    private JSlider sliderTopics;
+    private JCheckBox chckbxNounTopics;
+    private JCheckBox chckbxVerbTopics;
+    private DefaultTableModel modelTopics;
+    private DefaultTableModel modelContent;
+    private JTable tableContent;
+    private JLabel lblSourceDescription;
+    private JLabel lblURIDescription;
+    private JLabel lblTitleDescription;
+    private JLabel lblSubjectivityDescription;
 
-		// adjust view to desktop size
-		setBounds(50, 50, 1180, 700);
+    public DocumentView(Document documentToDisplay) {
+        super("ReaderBench - Document Visualization");
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(Color.WHITE);
+        this.document = documentToDisplay;
 
-		generateLayout();
-		updateContent();
-		updateTopics();
-	}
+        // adjust view to desktop size
+        setBounds(50, 50, 1180, 700);
 
-	private void generateLayout() {
-		JPanel panelConcepts = new JPanel();
-		panelConcepts.setBackground(Color.WHITE);
+        generateLayout();
+        updateContent();
+        updateTopics();
+    }
 
-		JPanel panelHeader = new JPanel();
-		panelHeader.setBackground(Color.WHITE);
+    private void generateLayout() {
+        JPanel panelConcepts = new JPanel();
+        panelConcepts.setBackground(Color.WHITE);
 
-		JPanel panelContents = new JPanel();
-		panelContents.setBackground(Color.WHITE);
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout
-				.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addComponent(panelHeader, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
-										.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
-												.addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 868,
-														Short.MAX_VALUE)
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(panelConcepts,
-														GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE)))
-				.addContainerGap()));
-		groupLayout
-				.setVerticalGroup(
-						groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-										.addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-												.addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
-														Short.MAX_VALUE)
-										.addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
-				.addContainerGap()));
+        JPanel panelHeader = new JPanel();
+        panelHeader.setBackground(Color.WHITE);
 
-		JLabel lblContents = new JLabel("Contents");
-		lblContents.setFont(new Font("SansSerif", Font.BOLD, 13));
+        JPanel panelContents = new JPanel();
+        panelContents.setBackground(Color.WHITE);
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout
+                .setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(panelHeader, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
+                                        .addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+                                                .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 868,
+                                                        Short.MAX_VALUE)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(panelConcepts,
+                                                GroupLayout.PREFERRED_SIZE, 294, GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap()));
+        groupLayout
+                .setVerticalGroup(
+                        groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                .addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
+                                                Short.MAX_VALUE)
+                                        .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
+                                .addContainerGap()));
 
-		JSeparator separator = new JSeparator();
+        JLabel lblContents = new JLabel("Contents");
+        lblContents.setFont(new Font("SansSerif", Font.BOLD, 13));
 
-		JScrollPane scrollPaneContent = new JScrollPane();
-		scrollPaneContent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        JSeparator separator = new JSeparator();
 
-		JButton btnAdvancedView = new JButton("Advanced View");
-		btnAdvancedView.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						SentenceView view = new SentenceView(document);
-						view.setVisible(true);
-					}
-				});
-			}
-		});
+        JScrollPane scrollPaneContent = new JScrollPane();
+        scrollPaneContent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		JButton btnVisualizeCohesionGraph = new JButton("Multi-Layered Cohesion Graph");
-		btnVisualizeCohesionGraph.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						CohesionGraphView view = new CohesionGraphView(document);
-						view.setVisible(true);
-					}
-				});
-			}
-		});
+        JButton btnAdvancedView = new JButton("Advanced View");
+        btnAdvancedView.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        SentenceView view = new SentenceView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
 
-		JButton btnSelectVoices = new JButton("Select Voices");
-		btnSelectVoices.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						JFrame frame = new VoiceSelectionView(document);
-						frame.setVisible(true);
-					}
-				});
-			}
-		});
+        JButton btnVisualizeCohesionGraph = new JButton("Multi-Layered Cohesion Graph");
+        btnVisualizeCohesionGraph.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        CohesionGraphView view = new CohesionGraphView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
 
-		JButton btnDisplayVoiceInteranimation = new JButton("Voice Inter-animation");
-		btnDisplayVoiceInteranimation.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
-					EventQueue.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
-							frame.setVisible(true);
-						}
-					});
-				} else {
-					JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
-							"Information", JOptionPane.INFORMATION_MESSAGE);
-				}
-			}
-		});
+        JButton btnSelectVoices = new JButton("Select Voices");
+        btnSelectVoices.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame frame = new VoiceSelectionView(document);
+                        frame.setVisible(true);
+                    }
+                });
+            }
+        });
 
-		JButton btnVisualizeDocumentFlow = new JButton("Document Flow");
-		btnVisualizeDocumentFlow.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						JFrame view = new DocumentFlowView(document);
-						view.setVisible(true);
-					}
-				});
-			}
-		});
-		GroupLayout gl_panelContents = new GroupLayout(panelContents);
-		gl_panelContents
-				.setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
-						.addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-								.addGroup(gl_panelContents
-										.createParallelGroup(
-												Alignment.LEADING)
-										.addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
-										.addComponent(separator, GroupLayout.DEFAULT_SIZE, 856,
-												Short.MAX_VALUE)
-						.addGroup(gl_panelContents.createSequentialGroup().addComponent(btnAdvancedView)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeCohesionGraph)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeDocumentFlow)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSelectVoices)
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(btnDisplayVoiceInteranimation)).addComponent(lblContents))
-						.addContainerGap()));
-		gl_panelContents
-				.setVerticalGroup(
-						gl_panelContents.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-										.addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
-												GroupLayout.PREFERRED_SIZE)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-										.addPreferredGap(ComponentPlacement.RELATED)
-										.addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-												.addComponent(btnAdvancedView).addComponent(btnVisualizeCohesionGraph)
-												.addComponent(btnSelectVoices)
-												.addComponent(btnDisplayVoiceInteranimation)
-												.addComponent(btnVisualizeDocumentFlow))
-										.addContainerGap()));
-		panelContents.setLayout(gl_panelContents);
-		JLabel lblTitle = new JLabel("Title:\n");
-		lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-		JLabel lblSource = new JLabel("Source:");
-		JLabel lblURI = new JLabel("URI:");
-		JLabel lblSubj = new JLabel("Sentiment polarity:");
+        JButton btnDisplayVoiceInteranimation = new JButton("Voice Inter-animation");
+        btnDisplayVoiceInteranimation.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
+                    EventQueue.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
+                            frame.setVisible(true);
+                        }
+                    });
+                } else {
+                    JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
+                            "Information", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
 
-		lblURIDescription = new JLabel("");
-		lblSourceDescription = new JLabel("");
-		lblTitleDescription = new JLabel("");
-		lblTitleDescription.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-		lblSubjectivityDescription = new JLabel("");
+        JButton btnVisualizeDocumentFlow = new JButton("Document Flow");
+        btnVisualizeDocumentFlow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new DocumentFlowView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+        GroupLayout gl_panelContents = new GroupLayout(panelContents);
+        gl_panelContents
+                .setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
+                        .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+                                .addGroup(gl_panelContents
+                                        .createParallelGroup(
+                                                Alignment.LEADING)
+                                        .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
+                                        .addComponent(separator, GroupLayout.DEFAULT_SIZE, 856,
+                                                Short.MAX_VALUE)
+                                        .addGroup(gl_panelContents.createSequentialGroup().addComponent(btnAdvancedView)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeCohesionGraph)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeDocumentFlow)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSelectVoices)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnDisplayVoiceInteranimation)).addComponent(lblContents))
+                                .addContainerGap()));
+        gl_panelContents
+                .setVerticalGroup(
+                        gl_panelContents.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+                                .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(btnAdvancedView).addComponent(btnVisualizeCohesionGraph)
+                                        .addComponent(btnSelectVoices)
+                                        .addComponent(btnDisplayVoiceInteranimation)
+                                        .addComponent(btnVisualizeDocumentFlow))
+                                .addContainerGap()));
+        panelContents.setLayout(gl_panelContents);
+        JLabel lblTitle = new JLabel("Title:\n");
+        lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+        JLabel lblSource = new JLabel("Source:");
+        JLabel lblURI = new JLabel("URI:");
+        JLabel lblSubj = new JLabel("Sentiment polarity:");
 
-		JSeparator separatorDocument = new JSeparator();
+        lblURIDescription = new JLabel("");
+        lblSourceDescription = new JLabel("");
+        lblTitleDescription = new JLabel("");
+        lblTitleDescription.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+        lblSubjectivityDescription = new JLabel("");
 
-		if (document.getTitleText() != null) {
-			lblTitleDescription.setText(document.getTitleText());
-		}
-		if (document.getSource() != null) {
-			lblSourceDescription.setText(document.getSource());
-		}
-		if (document.getURI() != null) {
-			lblURIDescription.setText(document.getURI());
-			lblURIDescription.addMouseListener(new LinkMouseListener());
-		}
+        JSeparator separatorDocument = new JSeparator();
 
-		GroupLayout gl_panelHeader = new GroupLayout(panelHeader);
-		gl_panelHeader
-				.setHorizontalGroup(
-						gl_panelHeader.createParallelGroup(Alignment.LEADING)
-								.addGroup(
-										gl_panelHeader.createSequentialGroup().addContainerGap()
-												.addGroup(gl_panelHeader
-														.createParallelGroup(
-																Alignment.LEADING)
-														.addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
-																Short.MAX_VALUE)
-														.addGroup(gl_panelHeader.createSequentialGroup()
-																.addComponent(lblSource)
-																.addPreferredGap(ComponentPlacement.RELATED)
-																.addComponent(lblSourceDescription).addGap(18)
-																.addComponent(lblURI)
-																.addPreferredGap(ComponentPlacement.RELATED)
-																.addComponent(lblURIDescription)
-																.addPreferredGap(ComponentPlacement.UNRELATED)
-																.addComponent(lblSubj)
-																.addPreferredGap(ComponentPlacement.RELATED)
-																.addComponent(lblSubjectivityDescription))
-								.addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
-										.addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
-												GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
-		gl_panelHeader
-				.setVerticalGroup(
-						gl_panelHeader
-								.createParallelGroup(
-										Alignment.LEADING)
-								.addGroup(
-										gl_panelHeader.createSequentialGroup().addContainerGap()
-												.addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-														.addComponent(lblTitle).addComponent(
-																lblTitleDescription))
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-														.addComponent(lblSource).addComponent(lblSourceDescription)
-														.addComponent(lblURIDescription).addComponent(lblURI)
-														.addComponent(lblSubj).addComponent(lblSubjectivityDescription))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		panelHeader.setLayout(gl_panelHeader);
+        if (document.getTitleText() != null) {
+            lblTitleDescription.setText(document.getTitleText());
+        }
+        if (document.getSource() != null) {
+            lblSourceDescription.setText(document.getSource());
+        }
+        if (document.getURI() != null) {
+            lblURIDescription.setText(document.getURI());
+            lblURIDescription.addMouseListener(new LinkMouseListener());
+        }
 
-		JLabel lblTopics = new JLabel("Topics");
-		lblTopics.setFont(new Font("SansSerif", Font.BOLD, 12));
+        GroupLayout gl_panelHeader = new GroupLayout(panelHeader);
+        gl_panelHeader
+                .setHorizontalGroup(
+                        gl_panelHeader.createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_panelHeader.createSequentialGroup().addContainerGap()
+                                .addGroup(gl_panelHeader
+                                        .createParallelGroup(
+                                                Alignment.LEADING)
+                                        .addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
+                                                Short.MAX_VALUE)
+                                        .addGroup(gl_panelHeader.createSequentialGroup()
+                                                .addComponent(lblSource)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblSourceDescription).addGap(18)
+                                                .addComponent(lblURI)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblURIDescription)
+                                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                                .addComponent(lblSubj)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblSubjectivityDescription))
+                                        .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
+                                                GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
+        gl_panelHeader
+                .setVerticalGroup(
+                        gl_panelHeader
+                        .createParallelGroup(
+                                Alignment.LEADING)
+                        .addGroup(
+                                gl_panelHeader.createSequentialGroup().addContainerGap()
+                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblTitle).addComponent(
+                                        lblTitleDescription))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblSource).addComponent(lblSourceDescription)
+                                        .addComponent(lblURIDescription).addComponent(lblURI)
+                                        .addComponent(lblSubj).addComponent(lblSubjectivityDescription))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        panelHeader.setLayout(gl_panelHeader);
 
-		JSeparator separatorTopics = new JSeparator();
+        JLabel lblTopics = new JLabel("Topics");
+        lblTopics.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		JLabel lblFilterOnly = new JLabel("Filter only:");
+        JSeparator separatorTopics = new JSeparator();
 
-		chckbxVerbTopics = new JCheckBox("Verbs");
-		chckbxVerbTopics.setBackground(Color.WHITE);
-		chckbxVerbTopics.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				updateTopics();
-			}
-		});
-		chckbxVerbTopics.setSelected(true);
+        JLabel lblFilterOnly = new JLabel("Filter only:");
 
-		chckbxNounTopics = new JCheckBox("Nouns");
-		chckbxNounTopics.setBackground(Color.WHITE);
-		chckbxNounTopics.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				updateTopics();
-			}
-		});
-		chckbxNounTopics.setSelected(true);
+        chckbxVerbTopics = new JCheckBox("Verbs");
+        chckbxVerbTopics.setBackground(Color.WHITE);
+        chckbxVerbTopics.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                updateTopics();
+            }
+        });
+        chckbxVerbTopics.setSelected(true);
 
-		// determine appropriate scale
-		int noWords = (int) (document.getWordOccurences().keySet().size() * 0.2);
-		int noMaxTopics = 50;
-		if (noWords > 50)
-			if (noWords <= 75)
-				noMaxTopics = 75;
-			else
-				noMaxTopics = 100;
-		sliderTopics = new JSlider(0, noMaxTopics / 5, 5);
-		sliderTopics.setBackground(Color.WHITE);
-		sliderTopics.setFont(new Font("SansSerif", Font.PLAIN, 10));
-		sliderTopics.setMajorTickSpacing(5);
-		sliderTopics.setPaintLabels(true);
-		sliderTopics.setMinorTickSpacing(1);
-		java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
-		if (noMaxTopics == 20)
-			labelTable.put(new Integer(20), new JLabel("100"));
-		if (noMaxTopics >= 15)
-			labelTable.put(new Integer(15), new JLabel("75"));
-		labelTable.put(new Integer(10), new JLabel("50"));
-		labelTable.put(new Integer(5), new JLabel("25"));
-		labelTable.put(new Integer(0), new JLabel("0"));
-		sliderTopics.setLabelTable(labelTable);
-		sliderTopics.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				updateTopics();
-			}
-		});
+        chckbxNounTopics = new JCheckBox("Nouns");
+        chckbxNounTopics.setBackground(Color.WHITE);
+        chckbxNounTopics.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                updateTopics();
+            }
+        });
+        chckbxNounTopics.setSelected(true);
 
-		JButton btnGenerateNetwork = new JButton("Generate network of concepts");
-		btnGenerateNetwork.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						ConceptView view = new ConceptView(null, document,
-								KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
-										chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
-						view.setVisible(true);
-					}
-				});
-			}
-		});
+        // determine appropriate scale
+        int noWords = (int) (document.getWordOccurences().keySet().size() * 0.2);
+        int noMaxTopics = 50;
+        if (noWords > 50) {
+            if (noWords <= 75) {
+                noMaxTopics = 75;
+            } else {
+                noMaxTopics = 100;
+            }
+        }
+        sliderTopics = new JSlider(0, noMaxTopics / 5, 5);
+        sliderTopics.setBackground(Color.WHITE);
+        sliderTopics.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        sliderTopics.setMajorTickSpacing(5);
+        sliderTopics.setPaintLabels(true);
+        sliderTopics.setMinorTickSpacing(1);
+        java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
+        if (noMaxTopics == 20) {
+            labelTable.put(new Integer(20), new JLabel("100"));
+        }
+        if (noMaxTopics >= 15) {
+            labelTable.put(new Integer(15), new JLabel("75"));
+        }
+        labelTable.put(new Integer(10), new JLabel("50"));
+        labelTable.put(new Integer(5), new JLabel("25"));
+        labelTable.put(new Integer(0), new JLabel("0"));
+        sliderTopics.setLabelTable(labelTable);
+        sliderTopics.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                updateTopics();
+            }
+        });
 
-		JScrollPane scrollPaneTopics = new JScrollPane();
-		scrollPaneTopics.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        JButton btnGenerateNetwork = new JButton("Generate network of concepts");
+        btnGenerateNetwork.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        ConceptView view = new ConceptView(null, document,
+                                KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+                                        chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
 
-		GroupLayout gl_panelConcepts = new GroupLayout(panelConcepts);
-		gl_panelConcepts.setHorizontalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panelConcepts.createSequentialGroup().addContainerGap()
-						.addGroup(gl_panelConcepts.createParallelGroup(Alignment.TRAILING)
-								.addComponent(scrollPaneTopics, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 282,
-										Short.MAX_VALUE)
-								.addComponent(btnGenerateNetwork, Alignment.LEADING)
-								.addComponent(lblTopics,
-										Alignment.LEADING)
-						.addGroup(Alignment.LEADING, gl_panelConcepts.createSequentialGroup().addGap(6)
-								.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-										.addGroup(gl_panelConcepts.createSequentialGroup().addComponent(lblFilterOnly)
-												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(separatorTopics, GroupLayout.DEFAULT_SIZE, 203,
-														Short.MAX_VALUE))
-										.addGroup(gl_panelConcepts.createSequentialGroup()
-												.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-														.addComponent(chckbxNounTopics, GroupLayout.PREFERRED_SIZE, 105,
-																GroupLayout.PREFERRED_SIZE)
-												.addComponent(chckbxVerbTopics))
-												.addPreferredGap(ComponentPlacement.RELATED).addComponent(sliderTopics,
-														GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)))))
-						.addContainerGap()));
-		gl_panelConcepts.setVerticalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap().addComponent(lblTopics)
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
-								.addComponent(separatorTopics, GroupLayout.PREFERRED_SIZE, 2,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblFilterOnly))
-						.addPreferredGap(ComponentPlacement.RELATED)
-						.addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING, false)
-								.addGroup(gl_panelConcepts.createSequentialGroup().addComponent(chckbxNounTopics)
-										.addPreferredGap(ComponentPlacement.RELATED).addComponent(chckbxVerbTopics))
-								.addComponent(sliderTopics, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE))
-						.addPreferredGap(ComponentPlacement.UNRELATED)
-						.addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnGenerateNetwork)
-						.addContainerGap()));
-		modelTopics = new TopicsTableModel();
+        JScrollPane scrollPaneTopics = new JScrollPane();
+        scrollPaneTopics.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-		tableTopics = new JTable(modelTopics);
-		scrollPaneTopics.setViewportView(tableTopics);
-		tableTopics.setFillsViewportHeight(true);
+        GroupLayout gl_panelConcepts = new GroupLayout(panelConcepts);
+        gl_panelConcepts.setHorizontalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+                .addGroup(Alignment.TRAILING, gl_panelConcepts.createSequentialGroup().addContainerGap()
+                        .addGroup(gl_panelConcepts.createParallelGroup(Alignment.TRAILING)
+                                .addComponent(scrollPaneTopics, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 282,
+                                        Short.MAX_VALUE)
+                                .addComponent(btnGenerateNetwork, Alignment.LEADING)
+                                .addComponent(lblTopics,
+                                        Alignment.LEADING)
+                                .addGroup(Alignment.LEADING, gl_panelConcepts.createSequentialGroup().addGap(6)
+                                        .addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+                                                .addGroup(gl_panelConcepts.createSequentialGroup().addComponent(lblFilterOnly)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(separatorTopics, GroupLayout.DEFAULT_SIZE, 203,
+                                                                Short.MAX_VALUE))
+                                                .addGroup(gl_panelConcepts.createSequentialGroup()
+                                                        .addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+                                                                .addComponent(chckbxNounTopics, GroupLayout.PREFERRED_SIZE, 105,
+                                                                        GroupLayout.PREFERRED_SIZE)
+                                                                .addComponent(chckbxVerbTopics))
+                                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(sliderTopics,
+                                                        GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)))))
+                        .addContainerGap()));
+        gl_panelConcepts.setVerticalGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelConcepts.createSequentialGroup().addContainerGap().addComponent(lblTopics)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING)
+                                .addComponent(separatorTopics, GroupLayout.PREFERRED_SIZE, 2,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(lblFilterOnly))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_panelConcepts.createParallelGroup(Alignment.LEADING, false)
+                                .addGroup(gl_panelConcepts.createSequentialGroup().addComponent(chckbxNounTopics)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(chckbxVerbTopics))
+                                .addComponent(sliderTopics, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE))
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(scrollPaneTopics, GroupLayout.DEFAULT_SIZE, 453, Short.MAX_VALUE)
+                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnGenerateNetwork)
+                        .addContainerGap()));
+        modelTopics = new TopicsTableModel();
 
-		panelConcepts.setLayout(gl_panelConcepts);
-		getContentPane().setLayout(groupLayout);
+        tableTopics = new JTable(modelTopics);
+        scrollPaneTopics.setViewportView(tableTopics);
+        tableTopics.setFillsViewportHeight(true);
 
-		modelContent = new DocumentTableModel();
+        panelConcepts.setLayout(gl_panelConcepts);
+        getContentPane().setLayout(groupLayout);
 
-		tableContent = new DocumentTable(modelContent);
+        modelContent = new DocumentTableModel();
 
-		tableContent.getColumnModel().getColumn(0).setMinWidth(50);
-		tableContent.getColumnModel().getColumn(0).setMaxWidth(50);
-		tableContent.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tableContent = new DocumentTable(modelContent);
 
-		tableContent.setFillsViewportHeight(true);
-		tableContent.setTableHeader(null);
+        tableContent.getColumnModel().getColumn(0).setMinWidth(50);
+        tableContent.getColumnModel().getColumn(0).setMaxWidth(50);
+        tableContent.getColumnModel().getColumn(0).setPreferredWidth(50);
 
-		scrollPaneContent.setViewportView(tableContent);
-	}
+        tableContent.setFillsViewportHeight(true);
+        tableContent.setTableHeader(null);
 
-	private void updateTopics() {
-		// clean table
-		while (modelTopics.getRowCount() > 0) {
-			modelTopics.removeRow(0);
-		}
+        scrollPaneContent.setViewportView(tableContent);
+    }
 
-		// add new topics
-		List<Keyword> topTopics = KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
-				chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
-		for (Keyword topic : topTopics) {
-			Object[] row = { topic.getWord().getLemma(),
-					Double.valueOf(Formatting.formatNumber(topic.getRelevance())) };
-			modelTopics.addRow(row);
-		}
-	}
+    private void updateTopics() {
+        // clean table
+        while (modelTopics.getRowCount() > 0) {
+            modelTopics.removeRow(0);
+        }
 
-	private void updateContent() {
-		// clean table
-		while (modelContent.getRowCount() > 0) {
-			modelContent.removeRow(0);
-		}
+        // add new topics
+        List<Keyword> topTopics = KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+                chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
+        for (Keyword topic : topTopics) {
+            Object[] row = {topic.getWord().getLemma(),
+                Double.valueOf(Formatting.formatNumber(topic.getRelevance()))};
+            modelTopics.addRow(row);
+        }
+    }
 
-		double s0 = 0, s1 = 0, s2 = 0, mean = 0, stdev = 0;
+    private void updateContent() {
+        // clean table
+        while (modelContent.getRowCount() > 0) {
+            modelContent.removeRow(0);
+        }
 
-		for (Block b : document.getBlocks()) {
-			if (b != null) {
-				for (Sentence s : b.getSentences()) {
-					if (s != null) {
-						s0++;
-						s1 += s.getOverallScore();
-						s2 += Math.pow(s.getOverallScore(), 2);
-					}
-				}
-			}
-		}
+        double s0 = 0, s1 = 0, s2 = 0, mean = 0, stdev = 0;
 
-		// determine mean + stdev values
-		if (s0 != 0) {
-			mean = s1 / s0;
-			stdev = Math.sqrt(s0 * s2 - Math.pow(s1, 2)) / s0;
-		}
+        for (Block b : document.getBlocks()) {
+            if (b != null) {
+                for (Sentence s : b.getSentences()) {
+                    if (s != null) {
+                        s0++;
+                        s1 += s.getScore();
+                        s2 += Math.pow(s.getScore(), 2);
+                    }
+                }
+            }
+        }
 
-		if (document.getBlocks() != null && document.getBlocks().size() > 0) {
-			// add content
-			int index = 0;
-			double maxCohesion = Double.MIN_VALUE;
-			double minCohesion = Double.MAX_VALUE;
+        // determine mean + stdev values
+        if (s0 != 0) {
+            mean = s1 / s0;
+            stdev = Math.sqrt(s0 * s2 - Math.pow(s1, 2)) / s0;
+        }
 
-			for (; index < document.getBlocks().size() - 1; index++) {
-				if (document.getBlocks().get(index) != null) {
-					String text = "";
-					for (Sentence s : document.getBlocks().get(index).getSentences()) {
-						if (s != null) {
-							if (s.getOverallScore() >= mean + stdev) {
-								text += "<b>" + s.getText() + "</b> ";
-							} else {
-								text += s.getText() + " ";
-							}
-						}
-					}
-					Object[] row1 = { index, text + "["
-							+ Formatting.formatNumber(document.getBlocks().get(index).getOverallScore()) + "]" };
-					modelContent.addRow(row1);
-					Object[] row2 = { "", document.getBlockDistances()[index][index + 1].toString() };
-					modelContent.addRow(row2);
-					double dist = document.getBlockDistances()[index][index + 1].getCohesion();
-					maxCohesion = Math.max(maxCohesion, dist);
-					minCohesion = Math.min(minCohesion, dist);
-				}
-			}
-			if (document.getBlocks().get(index) != null) {
-				Object[] lastRow = { index, document.getBlocks().get(index).getText() + " ["
-						+ Formatting.formatNumber(document.getBlocks().get(index).getOverallScore()) + "]" };
-				modelContent.addRow(lastRow);
-			}
+        if (document.getBlocks() != null && document.getBlocks().size() > 0) {
+            // add content
+            int index = 0;
+            double maxCohesion = Double.MIN_VALUE;
+            double minCohesion = Double.MAX_VALUE;
 
-			if (document.getBlocks().size() > 1) {
-				for (index = 0; index < document.getBlocks().size() - 1; index++) {
-					double dist = 1 / document.getBlockDistances()[index][index + 1].getCohesion();
-					tableContent.setRowHeight(2 * index + 1, MIN_ROW_HEIGHT + ((int) ((dist - 1 / maxCohesion)
-							/ (1 / minCohesion - 1 / maxCohesion) * (MAX_ROW_HEIGHT - MIN_ROW_HEIGHT))));
-				}
-			}
-		}
-	}
+            for (; index < document.getBlocks().size() - 1; index++) {
+                if (document.getBlocks().get(index) != null) {
+                    String text = "";
+                    for (Sentence s : document.getBlocks().get(index).getSentences()) {
+                        if (s != null) {
+                            if (s.getScore() >= mean + stdev) {
+                                text += "<b>" + s.getText() + "</b> ";
+                            } else {
+                                text += s.getText() + " ";
+                            }
+                        }
+                    }
+                    Object[] row1 = {index, text + "["
+                        + Formatting.formatNumber(document.getBlocks().get(index).getScore()) + "]"};
+                    modelContent.addRow(row1);
+                    Object[] row2 = {"", document.getBlockDistances()[index][index + 1].toString()};
+                    modelContent.addRow(row2);
+                    double dist = document.getBlockDistances()[index][index + 1].getCohesion();
+                    maxCohesion = Math.max(maxCohesion, dist);
+                    minCohesion = Math.min(minCohesion, dist);
+                }
+            }
+            if (document.getBlocks().get(index) != null) {
+                Object[] lastRow = {index, document.getBlocks().get(index).getText() + " ["
+                    + Formatting.formatNumber(document.getBlocks().get(index).getScore()) + "]"};
+                modelContent.addRow(lastRow);
+            }
+
+            if (document.getBlocks().size() > 1) {
+                for (index = 0; index < document.getBlocks().size() - 1; index++) {
+                    double dist = 1 / document.getBlockDistances()[index][index + 1].getCohesion();
+                    tableContent.setRowHeight(2 * index + 1, MIN_ROW_HEIGHT + ((int) ((dist - 1 / maxCohesion)
+                            / (1 / minCohesion - 1 / maxCohesion) * (MAX_ROW_HEIGHT - MIN_ROW_HEIGHT))));
+                }
+            }
+        }
+    }
 }
