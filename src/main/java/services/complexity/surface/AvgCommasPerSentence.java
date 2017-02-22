@@ -17,7 +17,7 @@ package services.complexity.surface;
 
 import data.AbstractDocument;
 import org.apache.commons.lang3.StringUtils;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
 public class AvgCommasPerSentence extends ComplexityIndex {
 
     public AvgCommasPerSentence() {
-        super(ComplexityIndecesEnum.AVERAGE_COMMAS_PER_SENTENCE);
+        super(ComplexityIndicesEnum.AVERAGE_COMMAS_PER_SENTENCE);
     }
 
     @Override

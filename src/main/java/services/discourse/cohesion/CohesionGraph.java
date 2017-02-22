@@ -102,8 +102,7 @@ public class CohesionGraph {
             avg = statistics.getAverage();
             stdev = statistics.getStandardDeviation();
         }
-        System.out.println("BAU " + avg + " " + stdev);
-
+        
         // prune initial graph, but always keep adjacent pairs of blocks or explicitly referred blocks
         // iterate through all pairs of blocks of the document
         for (int i = 0; i < d.getBlocks().size() - 1; i++) {

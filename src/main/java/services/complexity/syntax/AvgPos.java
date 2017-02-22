@@ -13,30 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.surface;
+package services.complexity.syntax;
 
 import data.AbstractDocument;
+import data.Word;
+import java.util.Map;
+import services.complexity.AbstractComplexityIndex;
 import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.commons.DoubleStatistics;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SDWordsInSentence extends ComplexityIndex {
+public class AvgPos extends AbstractComplexityIndex {
 
-    public SDWordsInSentence() {
-        super(ComplexityIndicesEnum.SENTENCE_STANDARD_DEVIATION_NO_WORDS);
+    private final String pos;
+
+    public AvgPos(ComplexityIndicesEnum index, String pos, IndexLevel level) {
+        super(index, level);
+        this.pos = pos;
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .map(s -> s.getWords().size() * 1.)
-                .collect(DoubleStatistics.collector())
-                .getStandardDeviation(ComplexityIndices.IDENTITY);
+        return streamFunction.apply(d)
+                .mapToInt(b -> b.getWordOccurences().entrySet().stream()
+                        .filter(e -> e.getKey().getPOS() != null && e.getKey().getPOS().contains(pos))
+                        .mapToInt(Map.Entry::getValue)
+                        .sum())
+                .average().orElse(ComplexityIndices.IDENTITY);
     }
 
 }

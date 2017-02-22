@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
@@ -28,7 +28,7 @@ import services.commons.DoubleStatistics;
 public class SDUniqueWordsInSentence extends ComplexityIndex {
 
     public SDUniqueWordsInSentence() {
-        super(ComplexityIndecesEnum.SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS);
+        super(ComplexityIndicesEnum.SENTENCE_STANDARD_DEVIATION_NO_UNIQUE_WORDS);
     }
 
     @Override

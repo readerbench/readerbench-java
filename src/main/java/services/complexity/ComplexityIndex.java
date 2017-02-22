@@ -18,31 +18,31 @@ import services.semanticModels.SimilarityType;
  */
 public abstract class ComplexityIndex implements Serializable {
 
-    protected ComplexityIndecesEnum index;
+    protected ComplexityIndicesEnum index;
     protected Lang lang;
     protected SimilarityType simType;
     protected String param;
 
-    public ComplexityIndex(ComplexityIndecesEnum index, Lang lang, SimilarityType simType, String aux) {
+    public ComplexityIndex(ComplexityIndicesEnum index, Lang lang, SimilarityType simType, String aux) {
         this.index = index;
         this.lang = lang;
         this.simType = simType;
         this.param = aux;
     }
 
-    public ComplexityIndex(ComplexityIndecesEnum index) {
+    public ComplexityIndex(ComplexityIndicesEnum index) {
         this(index, null, null, null);
     }
 
-    public ComplexityIndex(ComplexityIndecesEnum index, Lang lang) {
+    public ComplexityIndex(ComplexityIndicesEnum index, Lang lang) {
         this(index, lang, null, null);
     }
 
-    public ComplexityIndex(ComplexityIndecesEnum index, SimilarityType simType) {
+    public ComplexityIndex(ComplexityIndicesEnum index, SimilarityType simType) {
         this(index, null, simType, null);
     }
 
-    public ComplexityIndex(ComplexityIndecesEnum index, String aux) {
+    public ComplexityIndex(ComplexityIndicesEnum index, String aux) {
         this(index, null, null, aux);
     }
 
@@ -124,7 +124,7 @@ public abstract class ComplexityIndex implements Serializable {
         return this.simType == other.simType;
     }
 
-    public ComplexityIndecesEnum getIndex() {
+    public ComplexityIndicesEnum getIndex() {
         return index;
     }
 }

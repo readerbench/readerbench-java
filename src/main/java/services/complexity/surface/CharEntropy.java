@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 
 /**
@@ -31,7 +31,7 @@ import services.complexity.ComplexityIndex;
 public class CharEntropy extends ComplexityIndex {
 
     public CharEntropy() {
-        super(ComplexityIndecesEnum.CHAR_ENTROPY);
+        super(ComplexityIndicesEnum.CHAR_ENTROPY);
     }
 
     @Override

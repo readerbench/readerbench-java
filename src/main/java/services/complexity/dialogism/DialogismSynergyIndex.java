@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -35,7 +35,7 @@ public class DialogismSynergyIndex extends ComplexityIndex {
     private transient final Function<SemanticChain, double[]> listFunction;
     private transient final Function<Double, Double> mapper;
 
-    public DialogismSynergyIndex(ComplexityIndecesEnum index,
+    public DialogismSynergyIndex(ComplexityIndicesEnum index,
             Function<SemanticChain, double[]> listFunction,
             Function<Stream<? extends Number>, Double> combine,
             Function<Double, Double> mapper) {
@@ -45,7 +45,7 @@ public class DialogismSynergyIndex extends ComplexityIndex {
         this.mapper = mapper;
     }
 
-    public DialogismSynergyIndex(ComplexityIndecesEnum index, Function<SemanticChain, double[]> listFunction, Function<Stream<? extends Number>, Double> combine) {
+    public DialogismSynergyIndex(ComplexityIndicesEnum index, Function<SemanticChain, double[]> listFunction, Function<Stream<? extends Number>, Double> combine) {
         this(index, listFunction, combine, Function.identity());
     }
 

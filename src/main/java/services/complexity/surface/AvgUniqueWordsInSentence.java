@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgUniqueWordsInSentence extends ComplexityIndex {
 
     public AvgUniqueWordsInSentence() {
-        super(ComplexityIndecesEnum.AVERAGE_UNIQUE_WORDS_IN_SENTENCE);
+        super(ComplexityIndicesEnum.AVERAGE_UNIQUE_WORDS_IN_SENTENCE);
     }
 
     @Override

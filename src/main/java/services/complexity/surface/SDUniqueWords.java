@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.cohesion.discourse;
+package services.complexity.surface;
 
 import data.AbstractDocument;
-import data.Block;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndex;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
+import services.complexity.AbstractComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class BlockScoreSD extends ComplexityIndex {
+public class SDUniqueWords extends AbstractComplexityIndex {
 
-    public BlockScoreSD() {
-        super(ComplexityIndecesEnum.BLOCK_SCORE_STANDARD_DEVIATION);
+    public SDUniqueWords(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getBlocks().parallelStream()
-                .filter(b -> b != null)
-                .map(Block::getScore)
+        return streamFunction.apply(d)
+                .map(b -> b.getWordOccurences().keySet().size() * 1.)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }
+
 }
+

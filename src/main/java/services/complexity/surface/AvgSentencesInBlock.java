@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgSentencesInBlock extends ComplexityIndex {
 
     public AvgSentencesInBlock() {
-        super(ComplexityIndecesEnum.AVERAGE_SENTENCES_IN_BLOCK);
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCES_IN_BLOCK);
     }
 
     @Override

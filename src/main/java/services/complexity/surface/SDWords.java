@@ -20,21 +20,25 @@ import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
+import services.complexity.AbstractComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SDWordsInSentence extends ComplexityIndex {
+public class SDWords extends AbstractComplexityIndex {
 
-    public SDWordsInSentence() {
-        super(ComplexityIndicesEnum.SENTENCE_STANDARD_DEVIATION_NO_WORDS);
+    public SDWords(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .map(s -> s.getWords().size() * 1.)
+        return streamFunction.apply(d)
+                .map(b -> b.getWordOccurences().values().stream()
+                        .mapToDouble(x -> x)
+                        .sum())
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }

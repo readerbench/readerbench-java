@@ -18,14 +18,14 @@ package services.complexity.readability;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class ReadabilityFactory extends ComplexityIndecesFactory{
+public class ReadabilityFactory extends ComplexityIndicesFactory{
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {

@@ -17,7 +17,7 @@ package services.complexity.surface;
 
 import data.AbstractDocument;
 import org.apache.commons.lang3.StringUtils;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
 public class AvgWordsInBlock extends ComplexityIndex {
 
     public AvgWordsInBlock() {
-        super(ComplexityIndecesEnum.AVERAGE_WORDS_IN_BLOCK);
+        super(ComplexityIndicesEnum.AVERAGE_WORDS_IN_BLOCK);
     }
 
     @Override

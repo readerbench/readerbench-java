@@ -16,27 +16,31 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
+import org.apache.commons.lang3.StringUtils;
+import services.complexity.AbstractComplexityIndex;
 import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.commons.DoubleStatistics;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SDWordsInSentence extends ComplexityIndex {
+public class AvgWords extends AbstractComplexityIndex {
 
-    public SDWordsInSentence() {
-        super(ComplexityIndicesEnum.SENTENCE_STANDARD_DEVIATION_NO_WORDS);
+    public AvgWords(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .map(s -> s.getWords().size() * 1.)
-                .collect(DoubleStatistics.collector())
-                .getStandardDeviation(ComplexityIndices.IDENTITY);
+        return streamFunction.apply(d)
+                .mapToInt(b -> b.getWordOccurences().values().stream()
+                        .mapToInt(x -> x)
+                        .sum())
+                .average().orElse(ComplexityIndices.IDENTITY);
     }
+    
 
 }

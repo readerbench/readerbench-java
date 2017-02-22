@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgSentenceLength extends ComplexityIndex {
 
     public AvgSentenceLength() {
-        super(ComplexityIndecesEnum.AVERAGE_SENTENCE_LENGTH);
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_LENGTH);
     }
 
     @Override

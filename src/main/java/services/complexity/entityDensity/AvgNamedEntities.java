@@ -13,30 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.cohesion.discourse;
+package services.complexity.entityDensity;
 
 import data.AbstractDocument;
-import data.Block;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndex;
+import java.util.Map;
+import services.complexity.AbstractComplexityIndex;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgBlockScore extends ComplexityIndex{
+public class AvgNamedEntities extends AbstractComplexityIndex {
 
-    public AvgBlockScore() {
-        super(ComplexityIndecesEnum.AVERAGE_BLOCK_SCORE);
+    public AvgNamedEntities(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getBlocks().parallelStream()
-                .filter(b -> b != null)
-                .mapToDouble(Block::getScore)
+        return streamFunction.apply(d)
+                .mapToInt(b -> b.getWordOccurences().entrySet().stream()
+                        .filter(e -> e.getKey().getNE() != null && !e.getKey().getNE().equals("O"))
+                        .mapToInt(Map.Entry::getValue)
+                        .sum())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
-}
 
+}

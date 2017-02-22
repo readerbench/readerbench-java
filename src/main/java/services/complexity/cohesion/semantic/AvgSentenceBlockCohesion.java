@@ -17,7 +17,7 @@ package services.complexity.cohesion.semantic;
 
 import data.AbstractDocument;
 import java.util.Arrays;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.SimilarityType;
@@ -29,7 +29,7 @@ import services.semanticModels.SimilarityType;
 public class AvgSentenceBlockCohesion extends ComplexityIndex {
 
     public AvgSentenceBlockCohesion(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_SENTENCE_BLOCK_COHESION, simType);
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_BLOCK_COHESION, simType);
     }
 
     @Override

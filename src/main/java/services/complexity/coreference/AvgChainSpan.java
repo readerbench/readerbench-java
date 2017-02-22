@@ -16,7 +16,7 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 import static services.complexity.coreference.CoreferenceIndex.analyse;
 
@@ -27,7 +27,7 @@ import static services.complexity.coreference.CoreferenceIndex.analyse;
 public class AvgChainSpan extends CoreferenceIndex {
 
     public AvgChainSpan() {
-        super(ComplexityIndecesEnum.AVERAGE_CHAIN_SPAN);
+        super(ComplexityIndicesEnum.AVERAGE_CHAIN_SPAN);
     }
 
     @Override

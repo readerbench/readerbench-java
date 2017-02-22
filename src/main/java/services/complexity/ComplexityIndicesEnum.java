@@ -9,7 +9,7 @@ package services.complexity;
  *
  * @author Stefan
  */
-public enum ComplexityIndecesEnum {
+public enum ComplexityIndicesEnum {
     READABILITY_FLESCH(ComplexityIndexType.READABILITY),
     READABILITY_FOG(ComplexityIndexType.READABILITY),
     READABILITY_KINCAID(ComplexityIndexType.READABILITY),
@@ -72,6 +72,14 @@ public enum ComplexityIndecesEnum {
     WORD_PATH_COUNT_HYPERNYM_TREE(ComplexityIndexType.WORD_COMPLEXITY),
     WORD_POLYSEMY_COUNT(ComplexityIndexType.WORD_COMPLEXITY),
     WORD_SYLLABLE_COUNT(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOE_PER_DOC(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOE_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOE_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOA_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOA_PER_DOC(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_AOA_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_IDF_PER_BLOCK(ComplexityIndexType.WORD_COMPLEXITY),
+    AVG_IDF_PER_SENTENCE(ComplexityIndexType.WORD_COMPLEXITY),
     
     AVERAGE_NO_NAMED_ENT_PER_BLOCK(ComplexityIndexType.ENTITY_DENSITY),
     AVERAGE_NO_NOUN_NAMED_ENT_PER_BLOCK(ComplexityIndexType.ENTITY_DENSITY),
@@ -148,6 +156,7 @@ public enum ComplexityIndecesEnum {
     DEPENDENCY_TYPES_PER_BLOCK(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
     DEPENDENCY_TYPES_PER_SENTENCE(ComplexityIndexType.SEMANTIC_DEPENDENCIES),
     
+    AVG_WORDS_IN_LIST_PER_DOC(ComplexityIndexType.WORD_LISTS),
     AVG_WORDS_IN_LIST_PER_BLOCK(ComplexityIndexType.WORD_LISTS),
     AVG_WORDS_IN_LIST_PER_SENTENCE(ComplexityIndexType.WORD_LISTS);
     
@@ -157,11 +166,11 @@ public enum ComplexityIndecesEnum {
         return type;
     }
 
-    private ComplexityIndecesEnum(ComplexityIndexType type) {
+    private ComplexityIndicesEnum(ComplexityIndexType type) {
         this.type = type;
     }
 
-    private ComplexityIndecesEnum() {
+    private ComplexityIndicesEnum() {
         this(null);
     }
 

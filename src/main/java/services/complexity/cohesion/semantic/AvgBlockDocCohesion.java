@@ -17,7 +17,7 @@ package services.complexity.cohesion.semantic;
 
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.SimilarityType;
@@ -29,7 +29,7 @@ import services.semanticModels.SimilarityType;
 public class AvgBlockDocCohesion extends ComplexityIndex {
 
     public AvgBlockDocCohesion(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_BLOCK_DOC_COHESION, simType);
+        super(ComplexityIndicesEnum.AVERAGE_BLOCK_DOC_COHESION, simType);
     }
 
     @Override

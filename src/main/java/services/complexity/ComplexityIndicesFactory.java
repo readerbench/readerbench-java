@@ -13,28 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.cohesion.discourse;
+package services.complexity;
 
-import data.AbstractDocument;
-import data.Sentence;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndex;
-import services.complexity.ComplexityIndices;
+import data.Lang;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class AvgSentenceScore extends ComplexityIndex {
+public abstract class ComplexityIndicesFactory implements Serializable {
 
-    public AvgSentenceScore() {
-        super(ComplexityIndecesEnum.AVERAGE_SENTENCE_SCORE);
-    }
-
-    @Override
-    public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .mapToDouble(Sentence::getScore)
-                .average().orElse(ComplexityIndices.IDENTITY);
-    }
+    public abstract List<ComplexityIndex> build(Lang lang);
 }
