@@ -16,7 +16,7 @@
 package services.complexity.readability;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 
 /**
@@ -26,7 +26,7 @@ import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 public class ReadabilityFog extends ReadabilityIndex{
 
     public ReadabilityFog() {
-        super(ComplexityIndecesEnum.READABILITY_FOG);
+        super(ComplexityIndicesEnum.READABILITY_FOG);
     }
 
     @Override

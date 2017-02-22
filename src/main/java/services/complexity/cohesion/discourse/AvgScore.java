@@ -13,30 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.complexity.surface;
+package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndicesEnum;
+import data.AnalysisElement;
+import services.complexity.AbstractComplexityIndex;
 import services.complexity.ComplexityIndex;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
-import services.commons.DoubleStatistics;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SDWordsInSentence extends ComplexityIndex {
+public class AvgScore extends AbstractComplexityIndex {
 
-    public SDWordsInSentence() {
-        super(ComplexityIndicesEnum.SENTENCE_STANDARD_DEVIATION_NO_WORDS);
+    public AvgScore(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .map(s -> s.getWords().size() * 1.)
-                .collect(DoubleStatistics.collector())
-                .getStandardDeviation(ComplexityIndices.IDENTITY);
+        return streamFunction.apply(d)
+                .mapToDouble(AnalysisElement::getScore)
+                .average().orElse(ComplexityIndices.IDENTITY);
     }
-
 }
+

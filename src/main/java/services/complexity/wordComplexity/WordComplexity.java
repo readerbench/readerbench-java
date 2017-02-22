@@ -23,7 +23,7 @@ import data.AbstractDocument;
 import data.Lang;
 import data.Word;
 import java.util.function.Function;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.readability.Syllable;
 import services.semanticModels.WordNet.OntologySupport;
@@ -33,12 +33,12 @@ public class WordComplexity extends ComplexityIndex {
 
     private transient final BiFunction<Word, Lang, ? extends Number> f;
     
-    public WordComplexity(ComplexityIndecesEnum index, Lang lang, BiFunction<Word, Lang, ? extends Number> f) {
+    public WordComplexity(ComplexityIndicesEnum index, Lang lang, BiFunction<Word, Lang, ? extends Number> f) {
         super(index, lang);
         this.f = f;
     }
     
-    public WordComplexity(ComplexityIndecesEnum index, Lang lang, Function<Word, ? extends Number> f) {
+    public WordComplexity(ComplexityIndicesEnum index, Lang lang, Function<Word, ? extends Number> f) {
         super(index, lang);
         this.f = ((Word w, Lang l) -> f.apply(w));
     }

@@ -19,7 +19,7 @@ import data.Block;
 import data.Sentence;
 import data.Word;
 import java.util.Iterator;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 
 /**
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndex;
  */
 public abstract class LexicalCohesion extends ComplexityIndex{
 
-    public LexicalCohesion(ComplexityIndecesEnum index) {
+    public LexicalCohesion(ComplexityIndicesEnum index) {
         super(index);
     }
     

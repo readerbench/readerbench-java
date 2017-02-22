@@ -8,7 +8,7 @@ package services.complexity.dependencies;
 import data.AbstractDocument;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 
 /**
@@ -17,7 +17,7 @@ import services.complexity.ComplexityIndex;
  */
 public class AvgDependenciesPerSentence extends ComplexityIndex{
 
-    public AvgDependenciesPerSentence(ComplexityIndecesEnum index, String dep) {
+    public AvgDependenciesPerSentence(ComplexityIndicesEnum index, String dep) {
         super(index, dep);
     }
 

@@ -16,16 +16,13 @@
 package services.complexity.cohesion;
 
 import data.Lang;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesEnum;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
-import services.complexity.cohesion.discourse.AvgBlockScore;
-import services.complexity.cohesion.discourse.AvgSentenceScore;
-import services.complexity.cohesion.discourse.BlockScoreSD;
-import services.complexity.cohesion.discourse.SentenceScoreSD;
+import services.complexity.cohesion.discourse.AvgScore;
+import services.complexity.cohesion.discourse.ScoreSD;
 import services.complexity.cohesion.flow.DocFlowCriteria;
 import services.complexity.cohesion.flow.DocFlowIndex;
 import services.complexity.cohesion.flow.DocumentFlow;
@@ -44,12 +41,13 @@ import services.complexity.cohesion.semantic.AvgStartMiddleCohesion;
 import services.complexity.cohesion.semantic.AvgTransitionCohesion;
 import services.complexity.cohesion.semantic.StartEndCohesion;
 import services.semanticModels.SimilarityType;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class CohesionFactory extends ComplexityIndecesFactory {
+public class CohesionFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -58,11 +56,11 @@ public class CohesionFactory extends ComplexityIndecesFactory {
         result.add(new LexicalChainsMaxSpan());
         result.add(new AvgLexicalChainsPerBlock());
         result.add(new LexicalChainsCoverage());
-        result.add(new AvgBlockScore());
-        result.add(new AvgSentenceScore());
-        result.add(new BlockScoreSD());
-        result.add(new SentenceScoreSD());
-
+        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_BLOCK_SCORE, IndexLevel.BLOCK));
+        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_SENTENCE_SCORE, IndexLevel.SENTENCE));
+        result.add(new ScoreSD(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION, IndexLevel.BLOCK));
+        result.add(new ScoreSD(ComplexityIndicesEnum.SENTENCE_SCORE_STANDARD_DEVIATION, IndexLevel.SENTENCE));
+        
         for (SimilarityType simType : SimilarityType.values()) {
             if (!simType.getAvailableLanguages().contains(lang)) continue;
             result.add(new AvgBlockAdjacencyCohesion(simType));
@@ -77,27 +75,27 @@ public class CohesionFactory extends ComplexityIndecesFactory {
             result.add(new StartEndCohesion(simType));
             for (DocFlowCriteria crit : DocFlowCriteria.values()) {
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY,
+                        ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY,
                         crit, simType,
                         DocumentFlow::getAbsolutePositionAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY,
+                        ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY,
                         crit, simType,
                         DocumentFlow::getAbsoluteDistanceAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY,
+                        ComplexityIndicesEnum.DOC_FLOW_ADJACENCY_ACCURACY,
                         crit, simType,
                         DocumentFlow::getAdjacencyAccuracy));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION,
+                        ComplexityIndicesEnum.DOC_FLOW_AVERAGE_COHESION,
                         crit, simType,
                         DocumentFlow::getAverageFlowCohesion));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE,
+                        ComplexityIndicesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE,
                         crit, simType,
                         DocumentFlow::getMaxOrderedSequence));
                 result.add(new DocFlowIndex(
-                        ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION,
+                        ComplexityIndicesEnum.DOC_FLOW_SPEARMAN_CORRELATION,
                         crit, simType,
                         DocumentFlow::getSpearmanCorrelation));
             }

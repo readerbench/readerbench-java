@@ -21,7 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import data.Block;
 import data.document.Document;
 import services.commons.Formatting;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.cohesion.flow.DocFlowCriteria;
 import services.complexity.cohesion.flow.DocFlowIndex;
 import services.complexity.cohesion.flow.DocumentFlow;
@@ -172,22 +172,22 @@ public class DocumentFlowView extends JFrame {
             }
             textAreaStats.append("\nCohesion flow specific indices:\n");
             textAreaStats.append(Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, crit, simType, null).getDescription()
                     + "\n");
             textAreaStats.append(Formatting.formatNumber(df.getAbsoluteDistanceAccuracy()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY, crit, simType, null).getDescription()
                     + "\n");
             textAreaStats.append(Formatting.formatNumber(df.getAdjacencyAccuracy()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_ADJACENCY_ACCURACY, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_ADJACENCY_ACCURACY, crit, simType, null).getDescription()
                     + "\n");
             textAreaStats.append(Formatting.formatNumber(df.getSpearmanCorrelation()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_SPEARMAN_CORRELATION, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_SPEARMAN_CORRELATION, crit, simType, null).getDescription()
                     + "\n");
             textAreaStats.append(Formatting.formatNumber(df.getMaxOrderedSequence()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE, crit, simType, null).getDescription()
                     + "\n");
             textAreaStats.append(Formatting.formatNumber(df.getAverageFlowCohesion()) + "\t"
-                    + new DocFlowIndex(ComplexityIndecesEnum.DOC_FLOW_AVERAGE_COHESION, crit, simType, null).getDescription()
+                    + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_AVERAGE_COHESION, crit, simType, null).getDescription()
                     + "\n");
         }
     }

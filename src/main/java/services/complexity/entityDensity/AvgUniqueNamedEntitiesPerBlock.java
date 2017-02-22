@@ -17,7 +17,7 @@ package services.complexity.entityDensity;
 
 import data.AbstractDocument;
 import java.util.stream.Collectors;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ import services.complexity.ComplexityIndices;
 public class AvgUniqueNamedEntitiesPerBlock extends ComplexityIndex {
 
     public AvgUniqueNamedEntitiesPerBlock() {
-        super(ComplexityIndecesEnum.AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK);
+        super(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_NAMED_ENT_PER_BLOCK);
     }
 
     @Override

@@ -16,27 +16,31 @@
 package services.complexity.cohesion.discourse;
 
 import data.AbstractDocument;
-import data.Sentence;
-import services.complexity.ComplexityIndecesEnum;
+import data.AnalysisElement;
+import data.Block;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
+import services.complexity.AbstractComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class SentenceScoreSD extends ComplexityIndex {
+public class ScoreSD extends AbstractComplexityIndex {
 
-    public SentenceScoreSD() {
-        super(ComplexityIndecesEnum.SENTENCE_SCORE_STANDARD_DEVIATION);
+    public ScoreSD(ComplexityIndicesEnum index, IndexLevel level) {
+        super(index, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getSentencesInDocument().parallelStream()
-                .map(Sentence::getScore)
+        return streamFunction.apply(d)
+                .map(AnalysisElement::getScore)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }
 }
+

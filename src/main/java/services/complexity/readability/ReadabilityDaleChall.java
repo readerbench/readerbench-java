@@ -16,7 +16,7 @@
 package services.complexity.readability;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 
 /**
  *
@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndecesEnum;
 public class ReadabilityDaleChall extends ReadabilityIndex{
 
     public ReadabilityDaleChall() {
-        super(ComplexityIndecesEnum.READABILITY_DALE_CHALL);
+        super(ComplexityIndicesEnum.READABILITY_DALE_CHALL);
     }
 
     @Override

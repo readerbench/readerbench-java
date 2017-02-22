@@ -16,7 +16,7 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 
 /**
  *
@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndecesEnum;
 public class CorefChainsWithBigSpan extends CoreferenceIndex {
 
     public CorefChainsWithBigSpan() {
-        super(ComplexityIndecesEnum.NO_COREF_CHAINS_WITH_BIG_SPAN);
+        super(ComplexityIndicesEnum.NO_COREF_CHAINS_WITH_BIG_SPAN);
     }
 
     @Override
