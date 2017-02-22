@@ -45,8 +45,12 @@ public class QueryHelper {
             template = AbstractDocumentTemplate.getDocumentModel(URLDecoder.decode(hm.get("text"), "UTF-8"));
 
             List<ISemanticModel> models = new ArrayList<>();
-            models.add(LSA.loadLSA(hm.get("lsa"), lang));
-            models.add(LDA.loadLDA(hm.get("lda"), lang));
+            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
+                models.add(LSA.loadLSA(hm.get("lsa"), lang));
+            }
+            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
+                models.add(LDA.loadLDA(hm.get("lda"), lang));
+            }
             if (hm.get("word2vec") != null && (hm.get("word2vec").compareTo("") != 0)) {
                 models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
             }

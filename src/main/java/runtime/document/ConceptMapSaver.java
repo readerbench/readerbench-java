@@ -36,7 +36,6 @@ public class ConceptMapSaver {
     static final Logger LOGGER = Logger.getLogger("");
 
     private final String processingPath;
-    private final int noTopics;
     private final LSA lsa;
     private final LDA lda;
     private final Lang lang;
@@ -45,9 +44,8 @@ public class ConceptMapSaver {
     private final double threshold;
     private final boolean meta;
 
-    public ConceptMapSaver(String processingPath, int noTopics, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold, boolean meta) {
+    public ConceptMapSaver(String processingPath, LSA lsa, LDA lda, Lang lang, boolean usePOSTagging, boolean computeDialogism, double threshold, boolean meta) {
         this.processingPath = processingPath;
-        this.noTopics = noTopics;
         this.lsa = lsa;
         this.lda = lda;
         this.lang = lang;
@@ -66,7 +64,6 @@ public class ConceptMapSaver {
         }
 
         List<Document> documents = new ArrayList<>();
-
         if (useSerialized) {
             File[] files = dir.listFiles((File pathname) -> {
                 return pathname.getName().toLowerCase().endsWith(".ser");
@@ -113,7 +110,7 @@ public class ConceptMapSaver {
 
         for (Document d : documents) {
             try {
-                ResultTopic resultTopic = ConceptMap.getTopics(d, threshold, null, noTopics);
+                ResultTopic resultTopic = ConceptMap.getKeywords(d, threshold, null);
                 if (saveCsv) {
                     BufferedWriter outCsv = new BufferedWriter(new FileWriter(d.getPath() + "_concepts.csv"));
                     StringBuilder sb = new StringBuilder();
@@ -139,12 +136,11 @@ public class ConceptMapSaver {
     }
 
     public static void main(String[] args) {
-
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
         LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
-        ConceptMapSaver cmj = new ConceptMapSaver("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", 50, lsa, lda, Lang.fr, true, true, 0.3, false);
+        ConceptMapSaver cmj = new ConceptMapSaver("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", lsa, lda, Lang.fr, true, true, 0.3, false);
         cmj.processTexts(false, true, true);
     }
 

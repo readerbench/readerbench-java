@@ -104,7 +104,7 @@ import webService.result.ResultTextCategorization;
 import webService.result.ResultTextSimilarities;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
-import webService.result.ResultTopicAdvanced;
+import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
@@ -122,6 +122,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
+import services.similarity.TextSimilarity;
 
 public class ReaderBenchServer {
 
@@ -168,7 +169,7 @@ public class ReaderBenchServer {
             Map<String, String> hm) {
 
         // concepts
-        ResultTopic resultTopic = ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), null, 50);
+        ResultTopic resultTopic = ConceptMap.getKeywords(document, Double.parseDouble(hm.get("threshold")), null);
         List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, hm);
         List<ResultCategory> resultCategories = getCategories(document.getText(), hm);
 
@@ -325,46 +326,12 @@ public class ReaderBenchServer {
      * @return
      */
     private ResultTextSimilarities textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
-        if (language == null || language.isEmpty() || models == null || models.isEmpty()) {
-            return null;
+        Map<SimilarityType, Double> similarityScores = TextSimilarity.textSimilarities(text1, text2, language, models, usePOSTagging);
+        Map<String, Double> similarityScoresToString = new HashMap<>();
+        for (Map.Entry<SimilarityType, Double> entry : similarityScores.entrySet()) {
+            similarityScoresToString.put(entry.getKey().getAcronym(), entry.getValue());
         }
-        Lang lang = Lang.getLang(language);
-        if (lang == null) {
-            return null;
-        }
-
-        Document docText1 = new Document(
-                null,
-                AbstractDocumentTemplate.getDocumentModel(text1),
-                models,
-                lang,
-                usePOSTagging
-        );
-
-        Document docText2 = new Document(
-                null,
-                AbstractDocumentTemplate.getDocumentModel(text2),
-                models,
-                lang,
-                usePOSTagging
-        );
-
-        SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
-
-        List<SimilarityType> methods = new ArrayList();
-        methods.add(SimilarityType.LSA);
-        methods.add(SimilarityType.LDA);
-        methods.add(SimilarityType.LEACOCK_CHODOROW);
-        methods.add(SimilarityType.WU_PALMER);
-        methods.add(SimilarityType.PATH_SIM);
-        methods.add(SimilarityType.WORD2VEC);
-
-        Map<String, Double> similarityScores = new HashMap<>();
-        for (SimilarityType method : methods) {
-            similarityScores.put(method.getAcronym(), Formatting.formatNumber(sc.getSemanticSimilarities().get(method), 2));
-        }
-
-        return new ResultTextSimilarities(similarityScores);
+        return new ResultTextSimilarities(similarityScoresToString);
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -465,11 +432,10 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(request);
             QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getTopics(
+            ResultTopic resultTopic = ConceptMap.getKeywords(
                     QueryHelper.processQuery(hm),
                     Double.parseDouble(hm.get("threshold")),
-                    null,
-                    50);
+                    null);
             queryResult.setData(resultTopic);
 
             response.type("application/json");
@@ -486,11 +452,11 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(json);
             QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getTopics(
+            ResultTopic resultTopic = ConceptMap.getKeywords(
                     QueryHelper.processQuery(hm),
                     Double.parseDouble(hm.get("threshold")),
-                    null,
-                    50);
+                    null);
+            KeywordsHelper.saveKeywordsCSVFile("resources/in/ENEA", "last_topics.csv", resultTopic);
             queryResult.setData(resultTopic);
 
             response.type("application/json");
@@ -507,7 +473,7 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(json);
             QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
-            ResultTopicAdvanced resultTopic = ConceptMap.getTopicsAdvanced(
+            ResultTopic resultTopic = ConceptMap.getKeywords(
                     QueryHelper.processQuery(hm),
                     Double.parseDouble(hm.get("threshold")),
                     null);
@@ -592,11 +558,10 @@ public class ReaderBenchServer {
 
             QueryResultTopic queryResult = new QueryResultTopic();
             queryResult.setData(
-                    ConceptMap.getTopics(
+                    ConceptMap.getKeywords(
                             QueryHelper.processQuery(hm),
                             Double.parseDouble(hm.get("threshold")),
-                            null,
-                            50)
+                            null)
             );
 
             response.type("application/json");
@@ -737,7 +702,7 @@ public class ReaderBenchServer {
             }
 
             hm.put("text", documentContent);
-            ResultTopic resultTopic = ConceptMap.getTopics(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null, 50);
+            ResultTopic resultTopic = ConceptMap.getKeywords(QueryHelper.processQuery(hm), Double.parseDouble(hm.get("threshold")), null);
             List<ResultCategory> resultCategories = getCategories(documentContent, hm);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
@@ -768,7 +733,7 @@ public class ReaderBenchServer {
             QueryResultCvCover queryResult = new QueryResultCvCover();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
-            resultCv.setConcepts(ConceptMap.getTopics(cvDocument, Double.parseDouble(hm.get("threshold")), null, 50));
+            resultCv.setConcepts(ConceptMap.getKeywords(cvDocument, Double.parseDouble(hm.get("threshold")), null));
             resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(cvDocument));
             result.setCv(resultCv);
 
@@ -777,7 +742,7 @@ public class ReaderBenchServer {
             AbstractDocument coverDocument = QueryHelper.processQuery(hm);
 
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
-            resultCover.setConcepts(ConceptMap.getTopics(coverDocument, Double.parseDouble(hm.get("threshold")), null, 50));
+            resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
             resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(coverDocument));
             result.setCover(resultCover);
 
@@ -799,7 +764,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
 
         });
-        Spark.post("/cvProcessing", (request, response) -> {
+        Spark.post("/cv-processing", (request, response) -> {
 
             Set<String> socialNetworksLinks = new HashSet<String>();
             socialNetworksLinks.add("LinkedIn");
@@ -808,7 +773,7 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
-            requiredParams.add("cvFile");
+            requiredParams.add("cv-file");
             requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
@@ -833,7 +798,7 @@ public class ReaderBenchServer {
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
+                    hm, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(socialNetworksLinksFound);
@@ -878,7 +843,7 @@ public class ReaderBenchServer {
 
         });
         // File Upload - send file as multipart form-data to be accepted
-        Spark.post("/fileUpload", (request, response) -> {
+        Spark.post("/file-upload", (request, response) -> {
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
@@ -1236,7 +1201,7 @@ public class ReaderBenchServer {
                 filteredArticles.addAll(articles);
             }
             QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getTopics(filteredArticles, threshold, null, 50);
+            ResultTopic resultTopic = ConceptMap.getKeywords(filteredArticles, threshold, null);
             queryResult.setData(resultTopic);
             response.type("application/json");
             return queryResult.convertToJson();

@@ -11,21 +11,21 @@ import java.util.List;
  *
  * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
  */
-public class ResultTopicAdvanced {
+public class ResultTopic {
 
-    private List<ResultNodeAdvanced> nodes;
+    private List<ResultNode> nodes;
     private List<ResultEdge> links;
 
-    public ResultTopicAdvanced(List<ResultNodeAdvanced> nodes, List<ResultEdge> links) {
+    public ResultTopic(List<ResultNode> nodes, List<ResultEdge> links) {
         this.nodes = nodes;
         this.links = links;
     }
 
-    public List<ResultNodeAdvanced> getNodes() {
+    public List<ResultNode> getNodes() {
         return nodes;
     }
 
-    public void setNodes(List<ResultNodeAdvanced> nodes) {
+    public void setNodes(List<ResultNode> nodes) {
         this.nodes = nodes;
     }
 

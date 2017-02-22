@@ -13,8 +13,13 @@ import java.util.List;
  *
  * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
  */
-public class ResultNodeAdvanced extends ResultNode implements Serializable {
+public class ResultNode implements Serializable, Comparable<ResultNode> {
 
+    private int id;
+	private String name;
+	private double value;
+	private int group;
+    
     private String lemma;
     private String pos;
     private int noOcc;
@@ -29,10 +34,33 @@ public class ResultNodeAdvanced extends ResultNode implements Serializable {
 
     private List<ResultValence> semanticSimilarities;
 
-    public ResultNodeAdvanced(int id, String name, double value, int group) {
-        super(id, name, value, group);
+    public ResultNode(int id, String name, double value, int group) {
+        this.id = id;
+        this.name = name;
+        this.value = value;
+        this.group = group;
         semanticSimilarities = new ArrayList<>();
     }
+    
+    public int getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	public double getGroup() {
+		return group;
+	}
 
     public String getLemma() {
         return lemma;
@@ -125,5 +153,10 @@ public class ResultNodeAdvanced extends ResultNode implements Serializable {
     public void addSemanticSimilarity(String similarity, double score) {
         semanticSimilarities.add(new ResultValence(similarity, score));
     }
+    
+    @Override
+	public int compareTo(ResultNode o) {
+		return (int) Math.signum(o.getValue() - this.getValue());
+	}
 
 }

@@ -7,7 +7,7 @@ package webService.queryResult;
 
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
-import webService.result.ResultTopicAdvanced;
+import webService.result.ResultTopic;
 
 /**
  *
@@ -17,19 +17,19 @@ public class QueryResultTopicAdvanced extends QueryResult {
 
     @Path("data")
     @ElementList(inline = true, entry = "result")
-    private ResultTopicAdvanced data; // list of result sentiments
+    private ResultTopic data; // list of result sentiments
 
-    public ResultTopicAdvanced getData() {
+    public ResultTopic getData() {
         return data;
     }
 
-    public void setData(ResultTopicAdvanced data) {
+    public void setData(ResultTopic data) {
         this.data = data;
     }
 
     public QueryResultTopicAdvanced() {
         super();
-        data = new ResultTopicAdvanced(null, null);
+        data = new ResultTopic(null, null);
     }
 
 }
