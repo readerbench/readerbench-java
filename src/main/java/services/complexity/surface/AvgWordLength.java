@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgWordLength extends ComplexityIndex {
 
     public AvgWordLength() {
-        super(ComplexityIndecesEnum.AVERAGE_WORD_LENGTH);
+        super(ComplexityIndicesEnum.AVERAGE_WORD_LENGTH);
     }
 
     @Override

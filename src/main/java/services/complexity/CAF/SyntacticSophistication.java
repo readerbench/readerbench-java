@@ -15,7 +15,7 @@
  */
 package services.complexity.CAF;
 
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 
 /**
  *
@@ -24,7 +24,7 @@ import services.complexity.ComplexityIndecesEnum;
 public class SyntacticSophistication extends CAFIndex{
     
     public SyntacticSophistication() {
-        super(ComplexityIndecesEnum.SYNTACTIC_SOPHISTICATION, 3);
+        super(ComplexityIndicesEnum.SYNTACTIC_SOPHISTICATION, 3);
     }
     
 }

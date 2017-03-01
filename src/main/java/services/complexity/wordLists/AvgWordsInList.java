@@ -5,37 +5,42 @@
  */
 package services.complexity.wordLists;
 
+import data.AbstractDocument;
 import data.AnalysisElement;
 import data.Word;
 import data.sentiment.SentimentValence;
-import java.util.Map;
-import services.complexity.ComplexityIndecesEnum;
+import java.util.Objects;
+import services.complexity.AbstractComplexityIndex;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
+import utils.IndexLevel;
 
 /**
  *
  * @author stefan
  */
-public abstract class AvgWordsInList extends ComplexityIndex {
+public class AvgWordsInList extends AbstractComplexityIndex {
 
     protected SentimentValence valence;
 
-    public AvgWordsInList(ComplexityIndecesEnum index, SentimentValence valence) {
-        super(index, valence.getName());
+    public AvgWordsInList(ComplexityIndicesEnum index, SentimentValence valence, IndexLevel level) {
+        super(index, valence.getName(), level);
         this.valence = valence;
     }
 
-    protected double countWords(AnalysisElement data) {
-        double sum = 0;
-        int count = 0;
-        for (Map.Entry<Word, Integer> e : data.getWordOccurences().entrySet()) {
-            if (e.getKey().getSentiment() != null
-                    && e.getKey().getSentiment().get(valence) != null) {
-                sum += e.getKey().getSentiment().get(valence) * e.getValue();
-                count += e.getValue();
-            }
-        }
-        if (count == 0) return 0;
-        return sum / count;
+    private double countWords(AnalysisElement data) {
+        return data.getWordOccurences().entrySet().stream()
+                .filter(e -> e.getKey().getSentiment() != null)
+                .filter(e -> e.getKey().getSentiment().get(valence) != null)
+                .mapToDouble(
+                        e -> e.getKey().getSentiment().get(valence) * e.getValue())
+                .sum();
+    }
+
+    @Override
+    public double compute(AbstractDocument d) {
+        return streamFunction.apply(d)
+                .mapToDouble(this::countWords)
+                .average().orElse(0.);
     }
 }

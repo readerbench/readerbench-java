@@ -16,7 +16,7 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 import static services.complexity.coreference.CoreferenceIndex.analyse;
 
@@ -27,7 +27,7 @@ import static services.complexity.coreference.CoreferenceIndex.analyse;
 public class ActiveCorefChainsPerWord extends CoreferenceIndex {
 
     public ActiveCorefChainsPerWord() {
-        super(ComplexityIndecesEnum.NO_ACTIVE_COREF_CHAINS_PER_WORD);
+        super(ComplexityIndicesEnum.NO_ACTIVE_COREF_CHAINS_PER_WORD);
     }
 
     @Override

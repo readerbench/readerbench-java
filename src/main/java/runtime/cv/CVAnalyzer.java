@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +42,6 @@ import webService.ReaderBenchServer;
 import webService.cv.CVHelper;
 import webService.query.QueryHelper;
 import webService.result.ResultCv;
-import webService.result.ResultKeyword;
 import webService.result.ResultTextualComplexity;
 import webService.result.ResultValence;
 import webService.services.TextualComplexity;
@@ -63,7 +61,7 @@ public class CVAnalyzer {
         this.keywords = null;
         this.ignoreWords = null;
     }
-    
+
     public CVAnalyzer() {
         this(null);
     }
@@ -74,7 +72,7 @@ public class CVAnalyzer {
 
     public void setHm(Map<String, String> hm) {
         this.hm = hm;
-    }   
+    }
 
     public String getPath() {
         return path;
@@ -130,7 +128,7 @@ public class CVAnalyzer {
             }
         }
         sb.append("keywords_document_relevance").append(CVConstants.CSV_DELIM);
-        
+
         sb.append("keywords_doc_sim_lsa").append(CVConstants.CSV_DELIM);
         sb.append("keywords_doc_sim_lda").append(CVConstants.CSV_DELIM);
         sb.append("keywords_doc_sim_word2vec").append(CVConstants.CSV_DELIM);
@@ -187,7 +185,6 @@ public class CVAnalyzer {
 //                .append("creation_no").append(CVConstants.CSV_DELIM)
 //                .append("gestion_sim").append(CVConstants.CSV_DELIM)
 //                .append("gestion_no").append(CVConstants.CSV_DELIM);
-
         // concepts
         /*for (int i = 0; i < 25; i++) {
             sb.append("concept" + i + ',');
@@ -196,8 +193,8 @@ public class CVAnalyzer {
         sb.append(CVConstants.CSV_NEW_LINE_DELIM);
         return sb.toString();
     }
-    
-    private void cvError() {        
+
+    private void cvError() {
     }
 
     private String csvBuildRow(String fileName, ResultCv result) {
@@ -324,7 +321,7 @@ public class CVAnalyzer {
         AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
         hm.put("text", cvContent);
         ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, CVConstants.FAN_DELTA, CVConstants.NO_CONCEPTS);
+                hm, CVConstants.FAN_DELTA);
 
         return result;
     }
@@ -365,13 +362,13 @@ public class CVAnalyzer {
 
     private static Map<String, String> loadDefaultParameters() {
         Map<String, String> hm = new HashMap<>();
-        hm.put("lsa",           CVConstants.LSA_PATH_FR);
-        hm.put("lda",           CVConstants.LDA_PATH_FR);
-        hm.put("word2vec",      CVConstants.WOR2VEC_PATH_FR);
-        hm.put("lang",          CVConstants.LANG_FR);
-        hm.put("postagging",    CVConstants.POS_TAGGING);
-        hm.put("dialogism",     CVConstants.DIALOGISM);
-        hm.put("threshold",     CVConstants.THRESHOLD);
+        hm.put("lsa", CVConstants.LSA_PATH_FR);
+        hm.put("lda", CVConstants.LDA_PATH_FR);
+        hm.put("word2vec", CVConstants.WOR2VEC_PATH_FR);
+        hm.put("lang", CVConstants.LANG_FR);
+        hm.put("postagging", CVConstants.POS_TAGGING);
+        hm.put("dialogism", CVConstants.DIALOGISM);
+        hm.put("threshold", CVConstants.THRESHOLD);
         return hm;
     }
 

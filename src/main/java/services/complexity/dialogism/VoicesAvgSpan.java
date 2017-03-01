@@ -16,7 +16,7 @@
 package services.complexity.dialogism;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class VoicesAvgSpan extends ComplexityIndex {
 
     public VoicesAvgSpan() {
-        super(ComplexityIndecesEnum.VOICES_AVERAGE_SPAN);
+        super(ComplexityIndicesEnum.VOICES_AVERAGE_SPAN);
     }
 
     @Override

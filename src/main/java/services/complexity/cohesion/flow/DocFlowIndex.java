@@ -17,7 +17,7 @@ package services.complexity.cohesion.flow;
 
 import data.AbstractDocument;
 import java.util.function.Function;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.semanticModels.SimilarityType;
 
@@ -29,7 +29,7 @@ public class DocFlowIndex extends ComplexityIndex {
     private final DocFlowCriteria crit;
     private transient final Function<DocumentFlow, Double> op;
 
-    public DocFlowIndex(ComplexityIndecesEnum index, DocFlowCriteria crit, SimilarityType simType, Function<DocumentFlow, Double> op) {
+    public DocFlowIndex(ComplexityIndicesEnum index, DocFlowCriteria crit, SimilarityType simType, Function<DocumentFlow, Double> op) {
         super(index, null, simType, crit.getAcronym());
         this.crit = crit;
         this.op = op;

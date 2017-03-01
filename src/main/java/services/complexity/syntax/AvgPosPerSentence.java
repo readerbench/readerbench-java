@@ -16,7 +16,7 @@
 package services.complexity.syntax;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -28,7 +28,7 @@ public class AvgPosPerSentence extends ComplexityIndex {
 
     private final String pos;
 
-    public AvgPosPerSentence(ComplexityIndecesEnum index, String pos) {
+    public AvgPosPerSentence(ComplexityIndicesEnum index, String pos) {
         super(index);
         this.pos = pos;
     }

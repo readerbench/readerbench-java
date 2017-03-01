@@ -47,13 +47,12 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-
-
-import services.complexity.Clustering;
+import services.commons.Clustering;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import data.AbstractDocument;
 import data.complexity.Measurement;
+import services.complexity.ComplexityClustering;
 import services.complexity.ComplexityIndex;
 import services.semanticModels.SimilarityType;
 
@@ -127,7 +126,7 @@ public class DocumentEvaluationView extends JFrame {
                             + "</html>";
                     out.write(","
                             + documents.get(i).getTitleText()
-                            .replaceAll(",", "") + "("
+                                    .replaceAll(",", "") + "("
                             + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath() + "/"
                             + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath() + ")");
                 }
@@ -208,9 +207,10 @@ public class DocumentEvaluationView extends JFrame {
                 scrollPane.setViewportView(table);
                 out.close();
 
-                Clustering.performKMeansClustering(documents,
+                ComplexityClustering cc = new ComplexityClustering();
+                cc.performKMeansClustering(documents,
                         Math.min(6, (documents.size() + 1) / 2));
-                Clustering.performAglomerativeClustering(documents);
+                cc.performAglomerativeClustering(documents, "out/aglomerative_clustering.txt");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -305,116 +305,116 @@ public class DocumentEvaluationView extends JFrame {
                         .createParallelGroup(Alignment.LEADING)
                         .addGroup(
                                 gl_contentPane
-                                .createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.TRAILING)
+                                        .createSequentialGroup()
+                                        .addContainerGap()
                                         .addGroup(
                                                 gl_contentPane
-                                                .createSequentialGroup()
-                                                .addGroup(
-                                                        gl_contentPane
                                                         .createParallelGroup(
-                                                                Alignment.LEADING)
+                                                                Alignment.TRAILING)
                                                         .addGroup(
                                                                 gl_contentPane
-                                                                .createSequentialGroup()
-                                                                .addComponent(
-                                                                        lblPath)
-                                                                .addPreferredGap(
-                                                                        ComponentPlacement.RELATED)
-                                                                .addComponent(
-                                                                        textFieldDirectory,
-                                                                        GroupLayout.DEFAULT_SIZE,
-                                                                        662,
-                                                                        Short.MAX_VALUE)
-                                                                .addPreferredGap(
-                                                                        ComponentPlacement.RELATED)
-                                                                .addComponent(
-                                                                        btnPath,
-                                                                        GroupLayout.PREFERRED_SIZE,
-                                                                        40,
-                                                                        GroupLayout.PREFERRED_SIZE)
-                                                                .addGap(31))
-                                                        .addGroup(
-                                                                gl_contentPane
-                                                                .createSequentialGroup()
-                                                                .addComponent(
-                                                                        lblResults)
-                                                                .addPreferredGap(
-                                                                        ComponentPlacement.RELATED)))
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED)
-                                                .addGroup(
-                                                        gl_contentPane
-                                                        .createParallelGroup(
-                                                                Alignment.TRAILING,
-                                                                false)
+                                                                        .createSequentialGroup()
+                                                                        .addGroup(
+                                                                                gl_contentPane
+                                                                                        .createParallelGroup(
+                                                                                                Alignment.LEADING)
+                                                                                        .addGroup(
+                                                                                                gl_contentPane
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                lblPath)
+                                                                                                        .addPreferredGap(
+                                                                                                                ComponentPlacement.RELATED)
+                                                                                                        .addComponent(
+                                                                                                                textFieldDirectory,
+                                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                                662,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                        .addPreferredGap(
+                                                                                                                ComponentPlacement.RELATED)
+                                                                                                        .addComponent(
+                                                                                                                btnPath,
+                                                                                                                GroupLayout.PREFERRED_SIZE,
+                                                                                                                40,
+                                                                                                                GroupLayout.PREFERRED_SIZE)
+                                                                                                        .addGap(31))
+                                                                                        .addGroup(
+                                                                                                gl_contentPane
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                lblResults)
+                                                                                                        .addPreferredGap(
+                                                                                                                ComponentPlacement.RELATED)))
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED)
+                                                                        .addGroup(
+                                                                                gl_contentPane
+                                                                                        .createParallelGroup(
+                                                                                                Alignment.TRAILING,
+                                                                                                false)
+                                                                                        .addComponent(
+                                                                                                btnTrainSVM,
+                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                Short.MAX_VALUE)
+                                                                                        .addComponent(
+                                                                                                btnSelectComplexityFactors,
+                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                Short.MAX_VALUE)))
                                                         .addComponent(
-                                                                btnTrainSVM,
+                                                                scrollPane,
+                                                                Alignment.LEADING,
                                                                 GroupLayout.DEFAULT_SIZE,
-                                                                GroupLayout.DEFAULT_SIZE,
+                                                                978,
                                                                 Short.MAX_VALUE)
                                                         .addComponent(
-                                                                btnSelectComplexityFactors,
+                                                                separator,
                                                                 GroupLayout.DEFAULT_SIZE,
-                                                                GroupLayout.DEFAULT_SIZE,
-                                                                Short.MAX_VALUE)))
-                                        .addComponent(
-                                                scrollPane,
-                                                Alignment.LEADING,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                978,
-                                                Short.MAX_VALUE)
-                                        .addComponent(
-                                                separator,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                978,
-                                                Short.MAX_VALUE))
-                                .addContainerGap()));
+                                                                978,
+                                                                Short.MAX_VALUE))
+                                        .addContainerGap()));
         gl_contentPane
                 .setVerticalGroup(gl_contentPane
                         .createParallelGroup(Alignment.LEADING)
                         .addGroup(
                                 gl_contentPane
-                                .createSequentialGroup()
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.BASELINE)
-                                        .addComponent(
-                                                textFieldDirectory,
+                                        .createSequentialGroup()
+                                        .addGroup(
+                                                gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.BASELINE)
+                                                        .addComponent(
+                                                                textFieldDirectory,
+                                                                GroupLayout.PREFERRED_SIZE,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(lblPath)
+                                                        .addComponent(btnPath)
+                                                        .addComponent(
+                                                                btnSelectComplexityFactors))
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addGroup(
+                                                gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.TRAILING)
+                                                        .addComponent(
+                                                                lblResults)
+                                                        .addComponent(
+                                                                btnTrainSVM))
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(separator,
                                                 GroupLayout.PREFERRED_SIZE,
                                                 GroupLayout.DEFAULT_SIZE,
                                                 GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(lblPath)
-                                        .addComponent(btnPath)
-                                        .addComponent(
-                                                btnSelectComplexityFactors))
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.TRAILING)
-                                        .addComponent(
-                                                lblResults)
-                                        .addComponent(
-                                                btnTrainSVM))
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(separator,
-                                        GroupLayout.PREFERRED_SIZE,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(scrollPane,
-                                        GroupLayout.DEFAULT_SIZE, 473,
-                                        Short.MAX_VALUE)
-                                .addContainerGap()));
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(scrollPane,
+                                                GroupLayout.DEFAULT_SIZE, 473,
+                                                Short.MAX_VALUE)
+                                        .addContainerGap()));
 
         contentPane.setLayout(gl_contentPane);
     }

@@ -18,7 +18,7 @@ package services.complexity.connectives;
 import data.AbstractDocument;
 import data.Lang;
 import java.util.function.Function;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.nlp.listOfWords.ClassesOfWords;
@@ -34,7 +34,7 @@ public class ConnectivesIndex extends ComplexityIndex {
     private transient final Function<AbstractDocument, Integer> countFunction;
 
     public ConnectivesIndex(
-            ComplexityIndecesEnum index,
+            ComplexityIndicesEnum index,
             Lang lang,
             Function<AbstractDocument, Integer> countFunction,
             String connective) {

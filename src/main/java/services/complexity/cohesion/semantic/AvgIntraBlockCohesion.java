@@ -16,7 +16,7 @@
 package services.complexity.cohesion.semantic;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.SimilarityType;
@@ -28,7 +28,7 @@ import services.semanticModels.SimilarityType;
 public class AvgIntraBlockCohesion extends ComplexityIndex {
 
     public AvgIntraBlockCohesion(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_INTRA_BLOCK_COHESION, simType);
+        super(ComplexityIndicesEnum.AVERAGE_INTRA_BLOCK_COHESION, simType);
     }
 
     @Override

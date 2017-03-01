@@ -16,7 +16,7 @@
 package services.complexity.cohesion.lexicalChains;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.discourse.dialogism.DialogismComputations;
@@ -28,7 +28,7 @@ import services.discourse.dialogism.DialogismComputations;
 public class AvgLexicalChainsPerBlock extends ComplexityIndex {
 
     public AvgLexicalChainsPerBlock() {
-        super(ComplexityIndecesEnum.AVERAGE_NO_LEXICAL_CHAINS);
+        super(ComplexityIndicesEnum.AVERAGE_NO_LEXICAL_CHAINS);
     }
 
     @Override

@@ -16,7 +16,7 @@
 package services.complexity.cohesion.lexical;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.semanticModels.SimilarityType;
 
 /**
@@ -26,7 +26,7 @@ import services.semanticModels.SimilarityType;
 public class AvgLexicalBlockCohesionAdjacentSentences extends LexicalCohesion{
 
     public AvgLexicalBlockCohesionAdjacentSentences(SimilarityType simType) {
-        super(ComplexityIndecesEnum.AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES);
+        super(ComplexityIndicesEnum.AVERAGE_LEXICAL_BLOCK_COHESION_ADJACENT_SENTENCES);
     }
 
     @Override

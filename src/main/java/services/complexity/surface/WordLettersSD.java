@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.commons.DoubleStatistics;
@@ -28,7 +28,7 @@ import services.commons.DoubleStatistics;
 public class WordLettersSD extends ComplexityIndex {
 
     public WordLettersSD() {
-        super(ComplexityIndecesEnum.WORD_LETTERS_STANDARD_DEVIATION);
+        super(ComplexityIndicesEnum.WORD_LETTERS_STANDARD_DEVIATION);
     }
 
     @Override

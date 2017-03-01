@@ -47,13 +47,13 @@ public enum ComplexityIndexType {
     SEMANTIC_DEPENDENCIES(new SyntacticDependenciesFactory()),
     WORD_LISTS(new WordListsIndicesFactory());
     
-    private final ComplexityIndecesFactory factory;
+    private final ComplexityIndicesFactory factory;
 
-    private ComplexityIndexType(ComplexityIndecesFactory factory) {
+    private ComplexityIndexType(ComplexityIndicesFactory factory) {
         this.factory = factory;
     }
 
-    public ComplexityIndecesFactory getFactory() {
+    public ComplexityIndicesFactory getFactory() {
         return factory;
     }
 }

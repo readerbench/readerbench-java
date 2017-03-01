@@ -16,7 +16,7 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndices;
 
 /**
@@ -26,7 +26,7 @@ import services.complexity.ComplexityIndices;
 public class AvgInferenceDistPerChain extends CoreferenceIndex {
 
     public AvgInferenceDistPerChain() {
-        super(ComplexityIndecesEnum.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN);
+        super(ComplexityIndicesEnum.AVERAGE_INFERENCE_DISTANCE_PER_CHAIN);
     }
 
     @Override

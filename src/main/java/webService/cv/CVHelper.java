@@ -46,8 +46,7 @@ public class CVHelper {
             Set<String> keywords,
             Set<String> ignoreWords,
             Map<String, String> hm,
-            double deltaFAN,
-            int noTopics
+            double deltaFAN
     ) {
         ResultCv result = new ResultCv();
 
@@ -56,7 +55,7 @@ public class CVHelper {
         for (String word : ignoreWords) {
             ignoreWordsAsObject.add(Word.getWordFromConcept(word.replaceAll("\\s+", "").toLowerCase(), Lang.fr));
         }
-        result.setConcepts(ConceptMap.getTopics(document, Double.parseDouble(hm.get("threshold")), ignoreWordsAsObject, noTopics));
+        result.setConcepts(ConceptMap.getKeywords(document, Double.parseDouble(hm.get("threshold")), ignoreWordsAsObject));
 
         // word occurrences
         List<String> positiveWords = new ArrayList<>();

@@ -18,7 +18,7 @@ package services.complexity.syntax;
 import data.AbstractDocument;
 import data.Word;
 import java.util.stream.Collectors;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -30,7 +30,7 @@ public class AvgUniquePosPerBlock extends ComplexityIndex {
 
     private final String pos;
 
-    public AvgUniquePosPerBlock(ComplexityIndecesEnum index, String pos) {
+    public AvgUniquePosPerBlock(ComplexityIndicesEnum index, String pos) {
         super(index);
         this.pos = pos;
     }

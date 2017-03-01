@@ -16,7 +16,7 @@
 package services.complexity.coreference;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 
 /**
  *
@@ -25,7 +25,7 @@ import services.complexity.ComplexityIndecesEnum;
 public class TotalCorefChains extends CoreferenceIndex {
 
     public TotalCorefChains() {
-        super(ComplexityIndecesEnum.TOTAL_NO_COREF_CHAINS_PER_DOC);
+        super(ComplexityIndicesEnum.TOTAL_NO_COREF_CHAINS_PER_DOC);
     }
 
     @Override

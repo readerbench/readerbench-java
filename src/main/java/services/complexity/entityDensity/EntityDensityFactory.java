@@ -18,14 +18,14 @@ package services.complexity.entityDensity;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.List;
-import services.complexity.ComplexityIndecesFactory;
+import services.complexity.ComplexityIndicesFactory;
 import services.complexity.ComplexityIndex;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class EntityDensityFactory extends ComplexityIndecesFactory {
+public class EntityDensityFactory extends ComplexityIndicesFactory {
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {

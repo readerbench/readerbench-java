@@ -15,7 +15,7 @@
  */
 package services.complexity.CAF;
 
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 
 /**
  *
@@ -24,7 +24,7 @@ import services.complexity.ComplexityIndecesEnum;
 public class BalancedCAF extends CAFIndex{
     
     public BalancedCAF() {
-        super(ComplexityIndecesEnum.BALANCED_CAF, 4);
+        super(ComplexityIndicesEnum.BALANCED_CAF, 4);
     }
     
 }

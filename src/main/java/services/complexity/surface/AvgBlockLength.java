@@ -16,7 +16,7 @@
 package services.complexity.surface;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 
@@ -27,7 +27,7 @@ import services.complexity.ComplexityIndices;
 public class AvgBlockLength extends ComplexityIndex {
 
     public AvgBlockLength() {
-        super(ComplexityIndecesEnum.AVERAGE_BLOCK_LENGTH);
+        super(ComplexityIndicesEnum.AVERAGE_BLOCK_LENGTH);
     }
 
     @Override

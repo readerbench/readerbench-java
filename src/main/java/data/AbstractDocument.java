@@ -537,6 +537,15 @@ public abstract class AbstractDocument extends AnalysisElement {
                         + VectorAlgebra.pearsonCorrelation(c.getVoicePMIEvolution(), c.getSocialKBEvolution()) + "\n");
             }
 
+            // print semantic chains
+            if (voices.size() > 0) {
+                out.write("\nVoices - Semantic chains\n");
+                for (SemanticChain voice : voices) {
+                    out.write(voice.toStringAllWords() + "\n");
+                }
+
+            }
+
             // print lexical chains
             if (lexicalChains.size() > 0) {
                 out.write("\nLexical chains\n");

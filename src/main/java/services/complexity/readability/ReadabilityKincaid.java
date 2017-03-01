@@ -16,7 +16,7 @@
 package services.complexity.readability;
 
 import data.AbstractDocument;
-import services.complexity.ComplexityIndecesEnum;
+import services.complexity.ComplexityIndicesEnum;
 import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 
 /**
@@ -26,7 +26,7 @@ import static services.complexity.readability.ReadabilityIndex.calcFlesch;
 public class ReadabilityKincaid extends ReadabilityIndex{
 
     public ReadabilityKincaid() {
-        super(ComplexityIndecesEnum.READABILITY_KINCAID);
+        super(ComplexityIndicesEnum.READABILITY_KINCAID);
     }
 
     @Override

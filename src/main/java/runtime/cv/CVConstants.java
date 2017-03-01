@@ -4,10 +4,6 @@
  * and open the template in the editor.
  */
 package runtime.cv;
-
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  *
  * @author gabigutu
@@ -22,8 +18,6 @@ public class CVConstants {
     public static final String POS_TAGGING = "true";
     public static final String DIALOGISM = "true";
     public static final String THRESHOLD = "0.3";
-    
-    public static final int NO_CONCEPTS = 10;
     
     public static final int FILESIZE_MAX        = 25 * 1024 * 1024; // 25MB
     public static final int FILESIZE_WARN       = 5 * 1024 * 1024; // 5MB

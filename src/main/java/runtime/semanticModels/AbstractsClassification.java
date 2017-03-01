@@ -20,20 +20,24 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
+import services.semanticModels.DocumentClustering;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
-import services.semanticModels.word2vec.Word2VecModel;
 
 /**
  *
  * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
  */
 public class AbstractsClassification {
+
+    public static final Logger LOGGER = Logger.getLogger("");
 
     private final String abstractsPath;
     private final String categoriesPath;
@@ -115,20 +119,27 @@ public class AbstractsClassification {
     }
 
     private void buildDocuments() {
-        System.out.println("Building documents of categories");
+        buildCategoriesDocuments();
+        buildAbstractsDocument();
+    }
+
+    private void buildCategoriesDocuments() {
+        LOGGER.info("Building documents of categories");
         documentsCategories = new HashMap<>();
         for (Map.Entry<String, String> category : categories.entrySet()) {
             AbstractDocumentTemplate templateCategory = AbstractDocumentTemplate.getDocumentModel(category.getValue());
-            AbstractDocument documentCategory = new Document(null, templateCategory, semanticModels, lang, usePosTagging);
+            AbstractDocument documentCategory = new Document(category.getKey(), templateCategory, semanticModels, lang, usePosTagging);
             documentsCategories.put(category.getKey(), documentCategory);
         }
+    }
 
-        System.out.println("Building documents of abstracts");
+    private void buildAbstractsDocument() {
+        LOGGER.info("Building documents of abstracts");
         documentsAbstractsClassifications = new HashMap<>();
         for (String abstractFile : abstractsClassifications.keySet()) {
-            System.out.println("Building document for abstract " + abstractFile);
+            LOGGER.log(Level.INFO, "Building document for abstract {0}", abstractFile);
             AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(abstractsTexts.get(abstractFile));
-            AbstractDocument documentAbstract = new Document(null, templateAbstract, semanticModels, lang, usePosTagging);
+            AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
             documentsAbstractsClassifications.put(abstractFile, documentAbstract);
         }
     }
@@ -142,7 +153,7 @@ public class AbstractsClassification {
         Map<String, Map<String, Double>> cohesionScores = new HashMap<>();
         Integer cohesionMatchedAnnotations;
         FileWriter cohesionMatchedFile;
-        System.out.println("Generating similarity score matrix...");
+        LOGGER.info("Generating similarity score matrix...");
         for (String abstractFile : abstractsClassifications.keySet()) {
             similarityScores.put(abstractFile, new HashMap<>());
             for (SimilarityType method : methods) {
@@ -153,7 +164,7 @@ public class AbstractsClassification {
 
         try {
             // generate output files - one for each semantic model
-            System.out.println("Generating output files...");
+            LOGGER.info("Generating output files...");
             for (SimilarityType method : methods) {
                 matchedAnnotations.put(method, 0);
                 matchedFiles.put(method, new FileWriter(abstractsPath + "/" + method.getAcronym() + ".out"));
@@ -162,7 +173,7 @@ public class AbstractsClassification {
             cohesionMatchedFile = new FileWriter(abstractsPath + "/cohesion.out");
 
             // compute similarity scores
-            System.out.println("Computing similarity scores...");
+            LOGGER.info("Computing similarity scores...");
             int k = 0;
             for (String abstractFile : abstractsClassifications.keySet()) {
                 k++;
@@ -176,24 +187,24 @@ public class AbstractsClassification {
                     }
                 }
                 // gather the maximum of the similarity scores and print it to the file
-                System.out.println("Gathering maximum similarity score for abstract no " + k + "...");
+                LOGGER.log(Level.INFO, "Gathering maximum similarity score for abstract no {0}...", k);
                 for (SimilarityType method : methods) {
                     Map.Entry<String, Double> maxSimilarityScore = Collections.max(similarityScores.get(abstractFile).get(method).entrySet(), Map.Entry.comparingByValue());
-                    System.out.println("Abstract [" + method.getAcronym() + "]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                    LOGGER.log(Level.INFO, "Abstract [{0}]: {1} - {2}", new Object[]{method.getAcronym(), abstractsAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
                     matchedFiles.get(method).write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                     if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                         matchedAnnotations.put(method, matchedAnnotations.get(method) + 1);
                     }
                 }
                 Map.Entry<String, Double> maxSimilarityScore = Collections.max(cohesionScores.get(abstractFile).entrySet(), Map.Entry.comparingByValue());
-                System.out.println("Abstract [cohesion]: " + abstractsAnnotations.get(abstractFile) + " - " + maxSimilarityScore.getKey());
+                LOGGER.log(Level.INFO, "Abstract [cohesion]: {0} - {1}", new Object[]{abstractsAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
                 cohesionMatchedFile.write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
                 if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
                     cohesionMatchedAnnotations++;
                 }
             }
             // print detection percentages to dedicated files for each semantic model and close the files
-            System.out.println("Printing final detection percentage rates...");
+            LOGGER.info("Printing final detection percentage rates...");
             for (SimilarityType method : methods) {
                 Double score = matchedAnnotations.get(method) * 1.0 / abstractsAnnotations.size();
                 matchedFiles.get(method).write("Total matched: " + matchedAnnotations.get(method) + " of " + abstractsAnnotations.size() + "\n");
@@ -209,19 +220,65 @@ public class AbstractsClassification {
         }
     }
 
+    private void clusterizeAbstracts(int noCats) {
+
+        Map<ISemanticModel, FileWriter> clusterFiles = new HashMap<>();
+        Map<ISemanticModel, DocumentClustering> dc = new HashMap<>();
+
+        try {
+            // generate output files - one for each semantic model
+            LOGGER.info("Generating output files...");
+            List<AbstractDocument> docs = new ArrayList<>(documentsAbstractsClassifications.values());
+            LOGGER.log(Level.INFO, "{0} docs available", docs.size());
+            LOGGER.log(Level.INFO, "{0} semantic models", semanticModels.size());
+            for (ISemanticModel model : semanticModels) {
+                LOGGER.log(Level.INFO, "Creating file for {0}", model.getType().getAcronym());
+                clusterFiles.put(model, new FileWriter(abstractsPath + "/" + model.getType().getAcronym() + ".cluster"));
+                dc.put(model, new DocumentClustering(model));
+                LOGGER.log(Level.INFO, "Performing clustering for {0}", model.getType().getAcronym());
+                dc.get(model).performKMeansClustering(docs, noCats);
+                LOGGER.log(Level.INFO, "Found {0} clustroids", dc.get(model).getClustroids().size());
+                
+                LOGGER.log(Level.INFO, "Printing clusters to file {0}", model.getType().getAcronym());
+                for (int i = 0; i < dc.get(model).getClustroids().size(); i++) {
+                    LOGGER.log(Level.INFO, "Printing cluster {0}", (i + 1));
+                    clusterFiles.get(model).write("Cluster " + (i + 1) + "\n");
+                    for (AbstractDocument d : dc.get(model).getClusters().get(i)) {
+                        LOGGER.log(Level.INFO, "Checking whether document {0} is clustroid.", d.getPath());
+                        if (dc.get(model).getClustroids().contains(d)) {
+                            clusterFiles.get(model).write("(" + d.getPath() + ")\n");
+                        }
+                        else {
+                            clusterFiles.get(model).write(d.getPath() + "\n");
+                        }
+                    }
+                }
+                clusterFiles.get(model).close();
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
     private void process(boolean ignoreAbstractsFirstLine) {
-        System.out.println("Extracting categories...");
+        LOGGER.info("Extracting categories...");
         extractCategories();
-        //System.out.println(categoriesToString());
-        //System.out.println("Number of categories: " + categories.size());
-        System.out.println("Extracting abstracts...");
+        //LOGGER.info(categoriesToString());
+        //LOGGER.info("Number of categories: " + categories.size());
+        LOGGER.info("Extracting abstracts...");
         extractAbstracts(ignoreAbstractsFirstLine);
-        //System.out.println(abstractsToString());
-        //System.out.println("Number of abstracts: " + abstractsAnnotations.size());
-        System.out.println("Building documents...");
+        //LOGGER.info(abstractsToString());
+        //LOGGER.info("Number of abstracts: " + abstractsAnnotations.size());
+        LOGGER.info("Building documents...");
         buildDocuments();
-        System.out.println("Categorizing abstracts...");
+        LOGGER.info("Categorizing abstracts...");
         categorizeAbstracts();
+    }
+
+    private void performClustering(boolean ignoreAbstractsFirstLine, int noClusters) {
+        extractAbstracts(ignoreAbstractsFirstLine);
+        buildAbstractsDocument();
+        clusterizeAbstracts(noClusters);
     }
 
     private String categoriesToString() {
@@ -247,7 +304,7 @@ public class AbstractsClassification {
     public static void main(String args[]) {
         List<ISemanticModel> semanticModels = new ArrayList<>();
         Lang lang = Lang.en;
-        semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/SciRef", lang));
+        //semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/SciRef", lang));
         semanticModels.add(LDA.loadLDA("resources/config/EN/LDA/SciRef", lang));
         //semanticModels.add(Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", lang));
 
@@ -260,8 +317,9 @@ public class AbstractsClassification {
         //methods.add(SimilarityType.WORD2VEC);
 
         boolean ignoreAbstractsFirstLine = false;
-        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts_sample", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
-        ac.process(ignoreAbstractsFirstLine);
+        AbstractsClassification ac = new AbstractsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
+//        ac.process(ignoreAbstractsFirstLine);
+        ac.performClustering(ignoreAbstractsFirstLine, 4);
     }
 
 }
