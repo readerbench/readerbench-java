@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +52,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
-
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -72,6 +70,7 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.Word;
+import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
@@ -104,12 +103,15 @@ public class PaperConceptView extends JFrame {
         }
     }
 
-    public PaperConceptView(Map<Word, Double> wordRelevanceMap, String path) {
+    public PaperConceptView(List<Keyword> keywords, String path) {
         paperConceptView = this;
-        setTitle("Network of Concepts Visualization");
-        getContentPane().setBackground(Color.WHITE);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        this.wordRelevanceMap = wordRelevanceMap;
+        super.setTitle("Network of Concepts Visualization");
+        super.getContentPane().setBackground(Color.WHITE);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.wordRelevanceMap = new TreeMap<>();
+        for (Keyword k : keywords) {
+            wordRelevanceMap.put(k.getWord(), k.getRelevance());
+        }
         this.path = path;
 
         // adjust view to desktop size

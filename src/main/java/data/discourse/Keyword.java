@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 import data.AnalysisElement;
 import data.Word;
-import services.semanticModels.ISemanticModel;
+import services.commons.Formatting;
 
 /**
  *
@@ -105,5 +105,9 @@ public class Keyword implements Comparable<Keyword>, Serializable {
     @Override
     public String toString() {
         return "{" + word + ", relevance=" + getRelevance() + "}";
+    }
+
+    public String getDescription() {
+        return "(" + word.getLemma() + ", " + Formatting.formatNumber(getRelevance(), 3) + ")";
     }
 }

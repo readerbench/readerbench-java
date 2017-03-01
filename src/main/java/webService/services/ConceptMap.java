@@ -54,18 +54,12 @@ public class ConceptMap {
         List<ResultNode> nodes = new ArrayList<>();
         List<ResultEdge> links = new ArrayList<>();
 
-        List<Keyword> topics = new ArrayList();
-        Map<Word, Double> topicScores = KeywordModeling.getCollectionTopics(queryDocs);
-        for (Map.Entry<Word, Double> entry : topicScores.entrySet()) {
-            if (ignoredWords != null) {
-                if (!ignoredWords.contains(entry.getKey())) {
-                    topics.add(new Keyword(entry.getKey(), entry.getValue()));
-                }
-            } else {
-                topics.add(new Keyword(entry.getKey(), entry.getValue()));
+        List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs);
+        for (Keyword k : keywords) {
+            if (ignoredWords.contains(k.getWord())) {
+                keywords.remove(k);
             }
         }
-        Collections.sort(topics);
 
         // build nodes
         Map<Word, Integer> nodeIndexes = new TreeMap<>();
@@ -76,10 +70,13 @@ public class ConceptMap {
         LDA lda = (LDA) queryDocs.get(0).getSemanticModel(SimilarityType.LDA);
         Word2VecModel word2Vec = (Word2VecModel) queryDocs.get(0).getSemanticModel(SimilarityType.WORD2VEC);
         Map<Word, Double> mapIdf;
-        if (lsa != null) mapIdf = lsa.getMapIdf();
-        else mapIdf = null;
+        if (lsa != null) {
+            mapIdf = lsa.getMapIdf();
+        } else {
+            mapIdf = null;
+        }
         Map<Word, Integer> wordOcc = queryDocs.get(0).getWordOccurences();
-        for (Keyword t : topics) {
+        for (Keyword t : keywords) {
             ResultNode node = new ResultNode(i, t.getWord().getText(), t.getRelevance(), 1);
             nodeIndexes.put(t.getWord(), i);
             node.setLemma(t.getWord().getLemma());
@@ -110,11 +107,11 @@ public class ConceptMap {
             nodes.add(node);
             i++;
         }
-        
+
         // determine similarities
         i = 0;
-        for (Keyword t1 : topics) {
-            for (Keyword t2 : topics) {
+        for (Keyword t1 : keywords) {
+            for (Keyword t2 : keywords) {
                 if (!t1.equals(t2)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getWord(), t2.getWord());
                     if (sim >= threshold) {

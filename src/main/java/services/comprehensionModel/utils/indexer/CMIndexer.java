@@ -57,7 +57,7 @@ public class CMIndexer {
         this.indexFullSemanticSpaceDistances(threshold, noTopSimilarWords);
         this.indexSyntacticDistances();
     }
-    
+
     public CMIndexer(String text, ISemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;
@@ -68,7 +68,9 @@ public class CMIndexer {
 
     private void loadDocument() {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(this.text);
-        this.document = new Document(contents, this.semanticModel, true);
+        List<ISemanticModel> models = new ArrayList<>();
+        models.add(semanticModel);
+        this.document = new Document(contents, models, semanticModel.getLanguage(), true);
     }
 
     private void indexFullSemanticSpaceDistances(double threshold, int noTopSimilarWords) {
@@ -115,7 +117,7 @@ public class CMIndexer {
     public Map<CMNodeDO, Double> getNodeActivationScoreMap() {
         return this.nodeActivationScoreMap;
     }
-    
+
     public AbstractDocument getDocument() {
         return this.document;
     }

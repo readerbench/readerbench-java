@@ -89,16 +89,14 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public Document(AbstractDocumentTemplate docTmp, ISemanticModel semModel, boolean usePOSTagging) {
-        setLanguage(semModel.getLanguage());
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(semModel);
-        super.setSemanticModels(models);
-        setDisambiguationGraph(new DisambiguationGraph(semModel.getLanguage()));
+    public Document(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels, Lang lang, boolean usePOSTagging) {
+        setLanguage(lang);
+        super.setSemanticModels(semModels);
+        setDisambiguationGraph(new DisambiguationGraph(lang));
         setText(docTmp.getText());
 
         setDocTmp(docTmp);
-        Parsing.getParser(semModel.getLanguage()).parseDoc(docTmp, this, usePOSTagging);
+        Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }
 
     public static Document load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {

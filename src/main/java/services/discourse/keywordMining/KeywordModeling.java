@@ -17,7 +17,6 @@ package services.discourse.keywordMining;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +105,7 @@ public class KeywordModeling {
         }
     }
 
-    public static Map<Word, Double> getCollectionTopics(List<? extends AbstractDocument> loadedDocuments) {
+    public static List<Keyword> getCollectionTopics(List<? extends AbstractDocument> loadedDocuments) {
         Map<String, Double> topicScoreMap = new TreeMap<>();
         Map<String, Word> lemmaToWord = new TreeMap<>();
 
@@ -133,13 +132,7 @@ public class KeywordModeling {
             topicL.add(new Keyword(lemmaToWord.get(entry.getKey()), entry.getValue()));
         }
         Collections.sort(topicL);
-        Map<Word, Double> newTopicScoreMap = new HashMap<>();
-
-        for (Keyword t : topicL) {
-            newTopicScoreMap.put(t.getWord(), t.getRelevance());
-        }
-
-        return newTopicScoreMap;
+        return topicL;
     }
 
     private static boolean containsLemma(Word word, Set<Word> words) {

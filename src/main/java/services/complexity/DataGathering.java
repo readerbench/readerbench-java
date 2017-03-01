@@ -44,7 +44,7 @@ public class DataGathering {
         // create measurements.csv header
         try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/" + new File(path).getName() + "-" + "measurements.csv", false))) {
             StringBuilder concat = new StringBuilder();
-            concat.append("sep=,\n");
+            concat.append("SEP=,\n");
             if (writeName) {
                 concat.append("File name,Folder Name,Paragraphs,Sentences,Words,Content words");
             } else {
