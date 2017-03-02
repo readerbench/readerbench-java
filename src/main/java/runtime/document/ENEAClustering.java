@@ -53,7 +53,7 @@ public class ENEAClustering extends Clustering {
             while ((line = in.readLine()) != null) {
                 if (line.trim().length() > 0) {
                     Document d = new Document(AbstractDocumentTemplate.getDocumentModel(line), models, lang, true);
-                    d.setTitleText(lineCounter + "");
+                    d.setTitleText((lineCounter + 1) + "");
                     CohesionGraph.buildCohesionGraph(d);
                     KeywordModeling.determineKeywords(d);
                     if (d.getNoContentWords() >= 5) {
