@@ -220,14 +220,15 @@ public abstract class Clustering {
             // display groups
             try (BufferedWriter out = new BufferedWriter(new FileWriter(output, true), 32768)) {
                 out.write("\n\n" + noInterations + " iteration (max similarity = " + Formatting.formatNumber(maxSim, 3) + "):\n");
+//                out.write(noInterations + "\t" + Formatting.formatNumber(maxSim, 5)+"\n");
                 for (int i = 0; i < groups.size(); i++) {
                     List<AbstractDocument> groupDocs = new ArrayList<>();
-                    StringBuilder groupText = new StringBuilder(">>" + (i + 1) + ": ");
+                    StringBuilder groupText = new StringBuilder(">>" + (i + 1) + "<<\t" + groups.get(i).size() + ((groups.get(i).size() == 1) ? " response\t" : " responses\t"));
                     for (int j : groups.get(i)) {
                         groupText.append(docs.get(j).getTitleText()).append(" ");
                         groupDocs.add(docs.get(j));
                     }
-
+                    groupText.append("\t");
                     List<Keyword> keywords = KeywordModeling.getCollectionTopics(groupDocs);
 
                     for (int j = 0; j < Math.min(10, keywords.size()); j++) {
