@@ -55,8 +55,9 @@ public class ConceptMap {
         List<ResultNode> nodes = new ArrayList<>();
         List<ResultEdge> links = new ArrayList<>();
 
-        List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs).stream()
-                .filter(k -> !ignoredWords.isEmpty() && !ignoredWords.contains(k.getWord()))
+        List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs);
+        if (ignoredWords != null && !ignoredWords.isEmpty()) keywords = keywords.stream()
+                .filter(k -> !ignoredWords.contains(k.getWord()))
                 .collect(Collectors.toList());
         
         // build nodes
