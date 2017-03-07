@@ -19,24 +19,24 @@ import java.util.List;
 
 public class ResultTextualComplexity {
 
-	private String content;
-	private List<ResultValence> valences;
+	private String category;
+	private List<ResultComplexityIndex> valences;
 
-	public ResultTextualComplexity(String content, List<ResultValence> valences) {
+	public ResultTextualComplexity(String content, List<ResultComplexityIndex> valences) {
 		super();
-		this.content = content;
+		this.category = content;
 		this.valences = valences;
 	}
 
-	public String getContent() {
-		return content;
+	public String getCategory() {
+		return category;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
-	public List<ResultValence> getValences() {
+	public List<ResultComplexityIndex> getValences() {
 		return valences;
 	}
 }

@@ -43,8 +43,8 @@ public class SentimentAnalysis {
      * @return List of sentiment values per entity
      * @throws java.lang.Exception
      */
-    public static List<ResultSentiment> getSentiment(AbstractDocument queryDoc) throws Exception {
-        List<ResultSentiment> resultsSentiments = new ArrayList<>();
+    public static ResultSentiment computeSentiments(AbstractDocument queryDoc) throws Exception {
+        ResultSentiment resultsSentiment;
 
         logger.info("Starting building sentiments...");
         Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
@@ -109,8 +109,8 @@ public class SentimentAnalysis {
             }
             blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments, b.getText()));
         }
-        resultsSentiments.add(new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText()));
+        resultsSentiment = new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText());
 
-        return resultsSentiments;
+        return resultsSentiment;
     }
 }

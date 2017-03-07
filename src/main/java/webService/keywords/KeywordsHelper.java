@@ -46,6 +46,7 @@ public class KeywordsHelper {
             AbstractDocument document,
             AbstractDocument keywordsDocument,
             Set<String> keywords,
+            double threshold,
             Map<String, String> hm) {
 
         ArrayList<ResultKeyword> resultKeywords = new ArrayList<>();
@@ -53,7 +54,6 @@ public class KeywordsHelper {
         ListOfWords usedList = new ListOfWords();
         usedList.setWords(keywords);
 
-        double threshold = Double.parseDouble(hm.get("threshold"));
         usedList.getWords().stream().forEach((pattern) -> {
             hm.put("text", pattern);
             AbstractDocument patterDocument = QueryHelper.processQuery(hm);

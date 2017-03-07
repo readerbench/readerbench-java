@@ -15,8 +15,6 @@
  */
 package webService;
 
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
@@ -40,11 +38,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,12 +56,11 @@ import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.FileHandler;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -81,6 +76,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import services.semanticModels.word2vec.Word2VecModel;
+import services.similarity.TextSimilarity;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -104,7 +100,6 @@ import webService.result.ResultTextCategorization;
 import webService.result.ResultTextSimilarities;
 import webService.result.ResultTextSimilarity;
 import webService.result.ResultTopic;
-import webService.result.ResultTopic;
 import webService.result.ResultvCoP;
 import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
@@ -122,7 +117,6 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
-import services.similarity.TextSimilarity;
 
 public class ReaderBenchServer {
 
@@ -170,7 +164,7 @@ public class ReaderBenchServer {
 
         // concepts
         ResultTopic resultTopic = ConceptMap.getKeywords(document, Double.parseDouble(hm.get("threshold")), null);
-        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, hm);
+        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, Double.parseDouble(hm.get("threshold")), hm);
         List<ResultCategory> resultCategories = getCategories(document.getText(), hm);
 
         // (abstract, document) relevance
@@ -190,20 +184,9 @@ public class ReaderBenchServer {
         return rsa;
     }
 
-    private ResultSelfExplanation getSelfExplanation(String initialText, String selfExplanation, Map<String, String> hm) {
-        Lang lang = Lang.getLang(hm.get("lang"));
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(LSA.loadLSA(hm.get("lsa"), lang));
-        models.add(LDA.loadLDA(hm.get("lda"), lang));
-        Document queryInitialText = new Document(
-                null,
-                AbstractDocumentTemplate.getDocumentModel(initialText),
-                models,
-                lang,
-                Boolean.parseBoolean(hm.get("postagging")));
-
-        Summary s = new Summary(selfExplanation, queryInitialText, true);
-        s.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
+    private ResultSelfExplanation getSelfExplanation(AbstractDocument document, String selfExplanation, boolean computeDialogism) {
+        Summary s = new Summary(selfExplanation, (Document)document, true);
+        s.computeAll(computeDialogism);
 
         List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
         for (ReadingStrategyType rs : ReadingStrategyType.values()) {
@@ -399,10 +382,10 @@ public class ReaderBenchServer {
      */
     public static Set<String> setInitialRequiredParams() {
         Set<String> requiredParams = new HashSet<>();
-        requiredParams.add("lang");
+        requiredParams.add("language");
         requiredParams.add("lsa");
         requiredParams.add("lda");
-        requiredParams.add("postagging");
+        requiredParams.add("pos-tagging");
         requiredParams.add("dialogism");
         return requiredParams;
     }
@@ -421,48 +404,7 @@ public class ReaderBenchServer {
             response.header("Access-Control-Request-Method", "*");
             response.header("Access-Control-Allow-Headers", "*");
         });
-        // DEPRECTATED: Shall be removed
-        Spark.get("/getTopics", (request, response) -> {
-            Set<String> requiredParams = setInitialRequiredParams();
-            // additional required parameters
-            requiredParams.add("text");
-            requiredParams.add("threshold");
-            // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, request.queryParams());
-
-            Map<String, String> hm = hmParams(request);
-            QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getKeywords(
-                    QueryHelper.processQuery(hm),
-                    Double.parseDouble(hm.get("threshold")),
-                    null);
-            queryResult.setData(resultTopic);
-
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/topics", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Set<String> requiredParams = setInitialRequiredParams();
-            // additional required parameters
-            requiredParams.add("text");
-            requiredParams.add("threshold");
-            // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
-
-            Map<String, String> hm = hmParams(json);
-            QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getKeywords(
-                    QueryHelper.processQuery(hm),
-                    Double.parseDouble(hm.get("threshold")),
-                    null);
-            KeywordsHelper.saveKeywordsCSVFile("resources/in/ENEA", "last_topics.csv", resultTopic);
-            queryResult.setData(resultTopic);
-
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/topicsAdvanced", (request, response) -> {
+        Spark.post("/keywords", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
@@ -482,21 +424,19 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.get("/getSentiment", (request, response) -> {
+        Spark.post("/sentiment-analysis", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(request);
+            Map<String, String> hm = hmParams(json);
+            
             QueryResultSentiment queryResult = new QueryResultSentiment();
             try {
-                queryResult.setData(
-                        SentimentAnalysis.getSentiment(
-                                QueryHelper.processQuery(hm)
-                        )
-                );
+                queryResult.setData(SentimentAnalysis.computeSentiments(QueryHelper.processQuery(hm)));
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
@@ -504,33 +444,43 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.get("/getComplexity", (request, response) -> {
+        Spark.post("/textual-complexity", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             // additional required parameters
             requiredParams.add("text");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(request);
+            Map<String, String> hm = hmParams(json);
+            
             QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
-            TextualComplexity textualComplexity = new TextualComplexity(
+            try {
+                TextualComplexity textualComplexity = new TextualComplexity(
                     QueryHelper.processQuery(hm),
-                    Lang.getLang(hm.get("lang")),
-                    Boolean.parseBoolean(hm.get("postagging")),
+                    Lang.getLang(hm.get("language")),
+                    Boolean.parseBoolean(hm.get("pos-tagging")),
                     Boolean.parseBoolean(hm.get("dialogism"))
-            );
-            queryResult.setData(textualComplexity.getComplexityIndices());
-
+                );
+                queryResult.setData(textualComplexity.getComplexityIndices());
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
+            }
+            
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.get("/search", (request, response) -> {
+        Spark.post("/semantic-search", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = new HashSet<>();
+            // additional required parameters
             requiredParams.add("text");
             requiredParams.add("path");
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(request);
+            Map<String, String> hm = hmParams(json);
+            
             int maxContentSize = Integer.MAX_VALUE;
             String maxContentSizeStr = hm.get("mcs");
             if (maxContentSizeStr != null) {
@@ -568,7 +518,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
 
         });
-        Spark.post("/semanticProcessUri", (request, response) -> {
+        Spark.post("/semantic-annotation-uri", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -603,7 +553,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
 
         });
-        Spark.post("/semanticProcess", (request, response) -> {
+        Spark.post("/semantic-annotation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -633,7 +583,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
 
         });
-        Spark.post("/selfExplanation", (request, response) -> {
+        Spark.post("/self-explanation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -644,18 +594,19 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(json);
 
+            AbstractDocument document = QueryHelper.processQuery(hm);
             QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
-            queryResult.setData(getSelfExplanation(hm.get("text"), hm.get("explanation"), hm));
+            queryResult.setData(getSelfExplanation(document, hm.get("explanation"), Boolean.parseBoolean(hm.get("dialogism"))));
 
             response.type("application/json");
             return queryResult.convertToJson();
 
         });
-        Spark.post("/csclProcessing", (request, response) -> {
+        Spark.post("/cscl-processing", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
-            requiredParams.add("csclFile");
+            requiredParams.add("cscl-file");
             requiredParams.add("threshold");
             // check whether all the required parameters are available
             errorIfParamsMissing(requiredParams, json.keySet());
@@ -734,7 +685,7 @@ public class ReaderBenchServer {
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
             resultCv.setConcepts(ConceptMap.getKeywords(cvDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCv.setSentiments(webService.services.SentimentAnalysis.getSentiment(cvDocument));
+            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument));
             result.setCv(resultCv);
 
             String coverContent = getTextFromPdf("tmp/" + hm.get("coverFile"), true).getContent();
@@ -743,7 +694,7 @@ public class ReaderBenchServer {
 
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.getSentiment(coverDocument));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument));
             result.setCover(resultCover);
 
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
@@ -762,11 +713,9 @@ public class ReaderBenchServer {
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         Spark.post("/cv-processing", (request, response) -> {
-
-            Set<String> socialNetworksLinks = new HashSet<String>();
+            Set<String> socialNetworksLinks = new HashSet<>();
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
 
@@ -785,7 +734,7 @@ public class ReaderBenchServer {
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cvFile"), true);
+            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
             // ignore lines containing at least one of the words in the ignoreList list
             cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
             Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
@@ -798,7 +747,7 @@ public class ReaderBenchServer {
 
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                    hm, CVConstants.FAN_DELTA);
+                    Lang.getLang(hm.get("language")), Boolean.parseBoolean(hm.get("pos-tagging")), Boolean.parseBoolean(hm.get("dialogism")), Double.parseDouble(hm.get("threshold")), CVConstants.FAN_DELTA, hm);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(socialNetworksLinksFound);
@@ -864,7 +813,7 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.options("/fileUpload", (request, response) -> {
+        Spark.options("/file-upload", (request, response) -> {
             return "";
         });
         Spark.get("/fileDownload", (request, response) -> {

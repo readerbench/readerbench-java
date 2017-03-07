@@ -35,31 +35,34 @@ import services.semanticModels.word2vec.Word2VecModel;
 
 public class QueryHelper {
 
-    private static Logger LOGGER = Logger.getLogger("");
+    private static final Logger LOGGER = Logger.getLogger("");
+    private static final String SEMANTIC_MODELS_ROOT = "resources/config/";
 
     public static AbstractDocument processQuery(Map<String, String> hm) {
         LOGGER.info("Processign query ...");
-        Lang lang = Lang.getLang(hm.get("lang"));
+        Lang lang = Lang.getLang(hm.get("language"));
+        String semanticModelsPath = SEMANTIC_MODELS_ROOT + '/' + lang.toString().toUpperCase();
+        
         AbstractDocumentTemplate template;
         try {
             template = AbstractDocumentTemplate.getDocumentModel(URLDecoder.decode(hm.get("text"), "UTF-8"));
 
             List<ISemanticModel> models = new ArrayList<>();
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
-                models.add(LSA.loadLSA(hm.get("lsa"), lang));
+                models.add(LSA.loadLSA(semanticModelsPath + '/' + "LSA" + '/' + hm.get("lsa"), lang));
             }
             if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
-                models.add(LDA.loadLDA(hm.get("lda"), lang));
+                models.add(LDA.loadLDA(semanticModelsPath + '/' + "LDA" + '/' + hm.get("lda"), lang));
             }
-            if (hm.get("word2vec") != null && (hm.get("word2vec").compareTo("") != 0)) {
-                models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
+            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
+                models.add(Word2VecModel.loadWord2Vec(semanticModelsPath + '/' + "word2vec" + '/' + hm.get("w2v"), lang));
             }
             AbstractDocument document = new Document(
                     null,
                     template,
                     models,
                     lang,
-                    Boolean.parseBoolean(hm.get("postagging"))
+                    Boolean.parseBoolean(hm.get("pos-tagging"))
             );
             LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
             document.computeAll(Boolean.parseBoolean(hm.get("dialogism")));

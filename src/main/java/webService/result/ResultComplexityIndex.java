@@ -15,27 +15,31 @@
  */
 package webService.result;
 
-public class ResultCvOrCover {
-    
-    private ResultTopic concepts;
-	private ResultSentiment sentiments;
+public class ResultComplexityIndex implements Comparable<ResultComplexityIndex> {
 
-	public ResultTopic getConcepts() {
-		return concepts;
-	}
-	public void setConcepts(ResultTopic concepts) {
-		this.concepts = concepts;
-	}
-	public ResultSentiment getSentiments() {
-		return sentiments;
-	}
-	public void setSentiments(ResultSentiment sentiments) {
-		this.sentiments = sentiments;
-	}
-	public ResultCvOrCover(ResultTopic concepts, ResultSentiment sentiments) {
+	private String index;
+	private final double value;
+
+	public ResultComplexityIndex(String content, double score) {
 		super();
-		this.concepts = concepts;
-		this.sentiments = sentiments;
+		this.index = content;
+		this.value = score;
 	}
-		
+
+	public String getIndex() {
+		return index;
+	}
+
+	public void setIndex(String index) {
+		this.index = index;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	@Override
+	public int compareTo(ResultComplexityIndex o) {
+		return (int) Math.signum(o.getValue() - this.getValue());
+	}
 }
