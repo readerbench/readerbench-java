@@ -21,12 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
@@ -518,14 +515,7 @@ public class Community extends AnalysisElement {
                     // print discussed topics
                     out.write("\nDiscussed topics\n");
                     out.write("Concept,Relevance\n");
-                    List<Keyword> topicL = new ArrayList<>();
-                    Iterator<Map.Entry<Word, Double>> mapIter = KeywordModeling.getCollectionTopics(documents).entrySet()
-                            .iterator();
-                    while (mapIter.hasNext()) {
-                        Map.Entry<Word, Double> entry = mapIter.next();
-                        topicL.add(new Keyword(entry.getKey(), entry.getValue()));
-                    }
-                    Collections.sort(topicL);
+                    List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
                     for (Keyword t : topicL) {
                         out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
                     }

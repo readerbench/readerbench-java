@@ -16,16 +16,22 @@
 package services.commons;
 
 import data.AbstractDocument;
+import data.discourse.Keyword;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
+import services.discourse.keywordMining.KeywordModeling;
 
 public abstract class Clustering {
 
     public static final Logger LOGGER = Logger.getLogger("");
     public static final int MAXIMUM_NUMBER_OF_ITERATIONS = 1000;
-    
+
     private List<AbstractDocument> clustroids;
     private List<List<AbstractDocument>> clusters;
 
@@ -36,7 +42,7 @@ public abstract class Clustering {
     public List<List<AbstractDocument>> getClusters() {
         return clusters;
     }
-    
+
     public void performKMeansClustering(List<AbstractDocument> docs, int K) {
 
         clustroids = new ArrayList<>();
@@ -170,11 +176,10 @@ public abstract class Clustering {
                 }
             }
         }
-        
+
     }
 
-    public void performAglomerativeClustering(List<AbstractDocument> docs) {
-
+    public void performAglomerativeClustering(List<AbstractDocument> docs, String outputPath) {
         List<List<Integer>> groups = new ArrayList<>();
 
         // initialize groups
@@ -185,6 +190,10 @@ public abstract class Clustering {
         }
 
         int noInterations = 0;
+        File output = new File(outputPath);
+        if (output.exists()) {
+            output.delete();
+        }
 
         while (noInterations < docs.size() - 1) {
             // determine max similarity
@@ -207,24 +216,38 @@ public abstract class Clustering {
             groups.remove(group2);
 
             noInterations++;
-            // display groups
-            System.out.println("\n" + noInterations
-                    + " iteration (max similarity = " + maxSim + "):");
-            for (int i = 0; i < groups.size(); i++) {
-                System.out.print(">>" + (i + 1) + ": ");
-                for (int j : groups.get(i)) {
-                    System.out.print(docs.get(j).getTitleText() + "; ");
-                }
-                System.out.println();
-            }
 
+            // display groups
+            try (BufferedWriter out = new BufferedWriter(new FileWriter(output, true), 32768)) {
+                out.write("\n\n" + noInterations + " iteration (max similarity = " + Formatting.formatNumber(maxSim, 3) + "):\n");
+//                out.write(noInterations + "\t" + Formatting.formatNumber(maxSim, 5)+"\n");
+                for (int i = 0; i < groups.size(); i++) {
+                    List<AbstractDocument> groupDocs = new ArrayList<>();
+                    StringBuilder groupText = new StringBuilder(">>" + (i + 1) + "<<\t" + groups.get(i).size() + ((groups.get(i).size() == 1) ? " response\t" : " responses\t"));
+                    for (int j : groups.get(i)) {
+                        groupText.append(docs.get(j).getTitleText()).append(" ");
+                        groupDocs.add(docs.get(j));
+                    }
+                    groupText.append("\t");
+                    List<Keyword> keywords = KeywordModeling.getCollectionTopics(groupDocs);
+
+                    for (int j = 0; j < Math.min(10, keywords.size()); j++) {
+                        groupText.append(keywords.get(j).getDescription()).append(" ");
+                    }
+                    groupText.append("\n");
+
+                    out.write(groupText.toString());
+                }
+            } catch (Exception ex) {
+                LOGGER.severe(ex.getMessage());
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 
     public abstract double compareDocs(AbstractDocument d1, AbstractDocument d2);
 
-    public double compareGroups(List<AbstractDocument> docs,
-            List<Integer> group1, List<Integer> group2) {
+    public double compareGroups(List<AbstractDocument> docs, List<Integer> group1, List<Integer> group2) {
         // determine group average
         double dist = 0;
         for (int i : group1) {

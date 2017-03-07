@@ -7,7 +7,7 @@ ReaderBench targets both tutors and students by providing an integrated learning
 
 ## Build
 
-* Version: 2.2
+* Version: 2.3
 * Demo available online at: http://www.readerbench.com/
 * Repo owner: mihai.dascalu@cs.pub.ro
 
