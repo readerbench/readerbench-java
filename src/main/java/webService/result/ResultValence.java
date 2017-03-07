@@ -17,21 +17,21 @@ package webService.result;
 
 public class ResultValence implements Comparable<ResultValence> {
 
-	private String content;
+	private String valence;
 	private final double score;
 
 	public ResultValence(String content, double score) {
 		super();
-		this.content = content;
+		this.valence = content;
 		this.score = score;
 	}
 
-	public String getContent() {
-		return content;
+	public String getValence() {
+		return valence;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setValence(String valence) {
+		this.valence = valence;
 	}
 
 	public double getScore() {

@@ -41,6 +41,7 @@ import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 import webService.cv.CVHelper;
 import webService.query.QueryHelper;
+import webService.result.ResultComplexityIndex;
 import webService.result.ResultCv;
 import webService.result.ResultTextualComplexity;
 import webService.result.ResultValence;
@@ -54,12 +55,21 @@ public class CVAnalyzer {
     private String path;
     private String keywords;
     private String ignoreWords;
+    
+    private Lang lang;
+    private boolean usePosTagging;
+    private boolean computeDialogism;
+    private double threshold;
 
     public CVAnalyzer(Map<String, String> hm) {
         this.hm = hm;
         this.path = null;
         this.keywords = null;
         this.ignoreWords = null;
+        lang = Lang.getLang(hm.get("language"));
+        usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
+        computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+        threshold = Double.parseDouble(hm.get("threshold"));
     }
 
     public CVAnalyzer() {
@@ -120,7 +130,6 @@ public class CVAnalyzer {
         }
 
         // textual complexity factors
-        Lang lang = Lang.getLang(hm.get("lang"));
         TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
         for (ComplexityIndexType cat : textualComplexity.getList()) {
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
@@ -267,10 +276,10 @@ public class CVAnalyzer {
                 = result.getTextualComplexity();
         for (ResultTextualComplexity category : complexityFactors) {
             // sb.append(category.getContent() + ": ");
-            for (ResultValence factor : category.getValences()) {
+            for (ResultComplexityIndex factor : category.getValences()) {
                 // sb.append(factor.getContent() + '(' +
                 // factor.getScore() + ')');
-                sb.append(factor.getScore()).append(CVConstants.CSV_DELIM);
+                sb.append(factor.getValue()).append(CVConstants.CSV_DELIM);
             }
             // sb.append('|');
         }
@@ -311,19 +320,16 @@ public class CVAnalyzer {
         return sb.toString();
     }
 
-    public ResultCv processFile(String filePath, Set<String> keywordsList,
-            Set<String> ignoreList, PdfToTextConverter pdfConverter) {
+    public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList, 
+            Lang lang, boolean usePosTagging, boolean computeDialogism, double threshold, PdfToTextConverter pdfConverter) {
         String cvContent = pdfConverter.pdftoText(filePath, true);
-        //logger.info("CV textual content: " + cvContent);
         hm.put("text", cvContent);
         AbstractDocument cvDocument = QueryHelper.processQuery(hm);
         hm.put("text", keywords);
         AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
         hm.put("text", cvContent);
-        ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                hm, CVConstants.FAN_DELTA);
-
-        return result;
+        return CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
+                lang, usePosTagging, computeDialogism, threshold, CVConstants.FAN_DELTA, hm);
     }
 
     public void processPath() {
@@ -347,8 +353,7 @@ public class CVAnalyzer {
                     String fileName = filePath.getFileName().toString().replaceAll("\\s+", "_");
                     int extensionStart = fileName.lastIndexOf(".");
                     sb.append(csvBuildRow(fileName.substring(0, extensionStart),
-                            processFile(filePath.toString(), keywordsList,
-                                    ignoreList, pdfConverter)));
+                            processFile(filePath.toString(), keywordsList, ignoreList, lang, usePosTagging, computeDialogism, threshold, pdfConverter)));
                 }
             });
             FileUtils.writeStringToFile(globalStatsFile, sb.toString(), "UTF-8");
@@ -365,8 +370,8 @@ public class CVAnalyzer {
         hm.put("lsa", CVConstants.LSA_PATH_FR);
         hm.put("lda", CVConstants.LDA_PATH_FR);
         hm.put("word2vec", CVConstants.WOR2VEC_PATH_FR);
-        hm.put("lang", CVConstants.LANG_FR);
-        hm.put("postagging", CVConstants.POS_TAGGING);
+        hm.put("language", CVConstants.LANG_FR);
+        hm.put("pos-tagging", CVConstants.POS_TAGGING);
         hm.put("dialogism", CVConstants.DIALOGISM);
         hm.put("threshold", CVConstants.THRESHOLD);
         return hm;

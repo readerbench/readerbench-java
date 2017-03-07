@@ -15,14 +15,12 @@
  */
 package webService.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import data.AbstractDocument;
 import data.Lang;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
-import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
@@ -32,8 +30,8 @@ public class TextualComplexity {
 
     private AbstractDocument d;
     private Lang lang;
-    private boolean posTagging;
-    private boolean computeDialogism;
+    private final boolean posTagging;
+    private final boolean computeDialogism;
     private List<ComplexityIndexType> list;
 
     public TextualComplexity(Lang lang, boolean posTagging, boolean computeDialogism) {
@@ -99,10 +97,9 @@ public class TextualComplexity {
         
         // complexity indices save to result list
         for (ComplexityIndexType cat : list) {
-            List<ResultValence> localResults = new ArrayList<>();
+            List<ResultComplexityIndex> localResults = new ArrayList<>();
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
-                localResults.add(new ResultValence(index.getDescription(),
-                        Formatting.formatNumber(d.getComplexityIndices().get(index))));
+                localResults.add(new ResultComplexityIndex(index.getDescription(), d.getComplexityIndices().get(index)));
             }
             resultsComplexity.add(new ResultTextualComplexity(cat.name(), localResults));
         }

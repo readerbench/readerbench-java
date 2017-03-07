@@ -32,7 +32,7 @@ public class ResultNode implements Serializable, Comparable<ResultNode> {
     private double maxDistanceToHypernymTreeRoot;
     private int polysemyCount;
 
-    private List<ResultValence> semanticSimilarities;
+    private List<ResultSimilarityScore> semanticSimilarities;
 
     public ResultNode(int id, String name, double value, int group) {
         this.id = id;
@@ -142,16 +142,16 @@ public class ResultNode implements Serializable, Comparable<ResultNode> {
         this.polysemyCount = polysemyCount;
     }
 
-    public List<ResultValence> getSemanticSimilarities() {
+    public List<ResultSimilarityScore> getSemanticSimilarities() {
         return semanticSimilarities;
     }
 
-    public void setSemanticSimilarities(List<ResultValence> semanticSimilarities) {
+    public void setSemanticSimilarities(List<ResultSimilarityScore> semanticSimilarities) {
         this.semanticSimilarities = semanticSimilarities;
     }
 
     public void addSemanticSimilarity(String similarity, double score) {
-        semanticSimilarities.add(new ResultValence(similarity, score));
+        semanticSimilarities.add(new ResultSimilarityScore(similarity, score));
     }
     
     @Override

@@ -17,6 +17,9 @@ out
 *.o
 *.so
 
+# Log files #
+*.log
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

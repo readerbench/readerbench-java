@@ -45,8 +45,12 @@ public class CVHelper {
             PdfToTextConverter pdfConverter,
             Set<String> keywords,
             Set<String> ignoreWords,
-            Map<String, String> hm,
-            double deltaFAN
+            Lang lang,
+            boolean usePosTagging,
+            boolean computeDialogism,
+            double threshold,
+            double deltaFAN,
+            Map<String, String> hm
     ) {
         ResultCv result = new ResultCv();
 
@@ -55,7 +59,7 @@ public class CVHelper {
         for (String word : ignoreWords) {
             ignoreWordsAsObject.add(Word.getWordFromConcept(word.replaceAll("\\s+", "").toLowerCase(), Lang.fr));
         }
-        result.setConcepts(ConceptMap.getKeywords(document, Double.parseDouble(hm.get("threshold")), ignoreWordsAsObject));
+        result.setConcepts(ConceptMap.getKeywords(document, threshold, ignoreWordsAsObject));
 
         // word occurrences
         List<String> positiveWords = new ArrayList<>();
@@ -127,8 +131,7 @@ public class CVHelper {
         }
 
         // textual complexity
-        Lang lang = Lang.getLang(hm.get("lang"));
-        TextualComplexity textualComplexity = new TextualComplexity(document, lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
+        TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
         result.setTextualComplexity(textualComplexity.getComplexityIndices());
         result.setImages(pdfConverter.getImages());
         result.setColors(pdfConverter.getColors());
@@ -153,7 +156,7 @@ public class CVHelper {
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, hm));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, threshold, hm));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

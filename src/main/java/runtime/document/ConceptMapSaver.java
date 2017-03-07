@@ -138,10 +138,10 @@ public class ConceptMapSaver {
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
-        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
-        ConceptMapSaver cmj = new ConceptMapSaver("resources/in/grenoble/sciedu/pdessus/cours/cours-qcm", lsa, lda, Lang.fr, true, true, 0.3, false);
-        cmj.processTexts(false, true, true);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        ConceptMapSaver cmj = new ConceptMapSaver("resources/in/tasa_search_en", lsa, lda, Lang.en, true, true, 0.3, false);
+        cmj.processTexts(false, false, false);
     }
 
 }
