@@ -93,20 +93,18 @@ public class DataGatheringTest {
         models.add(w2v);
 
 //        convertAndProcess("resources/in/Cohesion/artificial cohesion_es", Lang.es, models);
-        
 //        convertAndProcess("resources/in/Cohesion/artificial cohesion_en", Lang.en, models);
-
 //        convertAndProcess("resources/in/creativity/individual creativity tasks (txt)", Lang.en, models);
 //        convertAndProcess("resources/in/pairwise/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/Archive/texts", Lang.en, models);
-//        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
+        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/posttest essays fall 2009", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays", Lang.en, models);
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
+//        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/stairstepper_en/texts", Lang.en, "ISO-8859-1");
 //        DataGathering.processTexts("resources/in/essays/stairstepper_en/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
-        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
+//        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/msu_timed_en/texts", -1, true, lsa, lda, Lang.en, true, true);

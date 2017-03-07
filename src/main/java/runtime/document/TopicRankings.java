@@ -175,7 +175,7 @@ public class TopicRankings {
 
         try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/relevance.csv", true));
                 BufferedWriter outIndex = new BufferedWriter(new FileWriter(processingPath + "/index.csv", true));) {
-            StringBuilder header = new StringBuilder("Filename");
+            StringBuilder header = new StringBuilder("SEP=,\nFilename");
             documents.stream().forEach((d) -> {
                 header.append(",").append(FilenameUtils.removeExtension(Paths.get(d.getPath()).getFileName().toString()));
             });
@@ -208,26 +208,13 @@ public class TopicRankings {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_625", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_625", Lang.en);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/ENEA_625", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_TASA", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
-        models.add(w2v);
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses_per_cat_ENEA_625", Lang.en, "UTF-8");
-        TopicRankings tr = new TopicRankings("resources/in/ENEA/responses_per_cat_ENEA_625", 30, models, Lang.en, true, true, false);
-        tr.processTexts(false);
-        
-        lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_625_TASA", Lang.en);
-        lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_625_TASA", Lang.en);
-        w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/ENEA_625_TASA", Lang.en);
-        models = new ArrayList<>();
-        models.add(lsa);
-        models.add(lda);
-        models.add(w2v);
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses_per_cat_ENEA_625_TASA", Lang.en, "UTF-8");
-        tr = new TopicRankings("resources/in/ENEA/responses_per_cat_ENEA_625_TASA", 30, models, Lang.en, true, true, false);
+        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses per profession", Lang.en, "UTF-8");
+        TopicRankings tr = new TopicRankings("resources/in/ENEA/responses per profession", 50, models, Lang.en, true, true, false);
         tr.processTexts(false);
     }
 }
