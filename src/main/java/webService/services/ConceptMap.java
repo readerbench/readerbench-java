@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import services.complexity.wordComplexity.WordComplexity;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.LSA.LSA;
@@ -55,12 +56,10 @@ public class ConceptMap {
         List<ResultEdge> links = new ArrayList<>();
 
         List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs);
-        for (Keyword k : keywords) {
-            if (ignoredWords.contains(k.getWord())) {
-                keywords.remove(k);
-            }
-        }
-
+        if (ignoredWords != null && !ignoredWords.isEmpty()) keywords = keywords.stream()
+                .filter(k -> !ignoredWords.contains(k.getWord()))
+                .collect(Collectors.toList());
+        
         // build nodes
         Map<Word, Integer> nodeIndexes = new TreeMap<>();
 

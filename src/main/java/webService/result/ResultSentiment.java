@@ -19,31 +19,35 @@ import java.util.List;
 
 public class ResultSentiment {
 
-	private String content;
-	private List<ResultValence> valences;
-	private List<ResultSentiment> innerObjects;
-    private String text;
+	private String level;
+	private final List<ResultValence> valences;
+	private final List<ResultSentiment> children;
+    private final String text;
 
-	public ResultSentiment(String content, List<ResultValence> valences, List<ResultSentiment> innerObjects, String text) {
+	public ResultSentiment(String content, List<ResultValence> valences, List<ResultSentiment> children, String text) {
 		super();
-		this.content = content;
+		this.level = content;
 		this.valences = valences;
-		this.innerObjects = innerObjects;
+		this.children = children;
         this.text = text;
 	}
 
-	public String getContent() {
-		return content;
+	public String getLevel() {
+		return level;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setLevel(String level) {
+		this.level = level;
 	}
 
 	public List<ResultValence> getValences() {
 		return valences;
 	}
 
+    public List<ResultSentiment> getChildren() {
+        return children;
+    }
+    
     public String getText() {
         return text;
     }
