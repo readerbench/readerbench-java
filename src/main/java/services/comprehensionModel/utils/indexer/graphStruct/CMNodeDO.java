@@ -39,7 +39,7 @@ public class CMNodeDO implements Comparable<CMNodeDO> {
     public void setNodeType(CMNodeType nodeType) {
         this.nodeType = nodeType;
     }
-	
+
     public boolean isActive() {
         return isActive;
     }
@@ -52,23 +52,20 @@ public class CMNodeDO implements Comparable<CMNodeDO> {
         isActive = false;
     }
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-	
     @Override
     public boolean equals(Object obj) {
         CMNodeDO node = (CMNodeDO) obj;
         return this.word.getLemma().equals(node.word.getLemma());
     }
     public int hashCode() {
-    return this.word.getLemma().hashCode();
+        return this.word.getLemma().hashCode();
     }
     @Override
     public int compareTo(CMNodeDO otherNode) {
-            return this.word.getLemma().compareTo(otherNode.word.getLemma());
+        return this.word.getLemma().compareTo(otherNode.word.getLemma());
     }
     public String toString() {
-            return this.word.getLemma();
+        return this.word.getLemma() + " (" + this.nodeType.toString()
+                + ")" + " " + (this.isActive ? "1" : "0");
     }
 }
