@@ -109,28 +109,22 @@ public class ComprehensionModel {
         PageRank pageRank = new PageRank();
         Map<CMNodeDO, Double> updatedNodeActivationScoreMap = pageRank.runPageRank(this.getNodeActivationScoreMap(),
                 this.currentGraph);
-
-        int maxWords = this.maxNoActiveWords + (sentenceIndex * this.maxNoActiveWordsIncrement);
-
-        List<NodeRank> nodeRankList = NodeRank.convertMapToNodeRankList(updatedNodeActivationScoreMap);
-        Collections.sort(nodeRankList, Collections.reverseOrder());
-
         updatedNodeActivationScoreMap = this.normalizeActivationScoreMapWithMax(updatedNodeActivationScoreMap);
         Iterator<CMNodeDO> nodeIterator = updatedNodeActivationScoreMap.keySet().iterator();
         while (nodeIterator.hasNext()) {
             CMNodeDO node = nodeIterator.next();
             this.getNodeActivationScoreMap().put(node, updatedNodeActivationScoreMap.get(node));
         }
-        this.activateFirstWords(nodeRankList);
-        // this.pruneInferredConcepts(updatedNodeActivationScoreMap);
-
+        this.activateWordsOverThreshold(updatedNodeActivationScoreMap);
         this.activationScoreLogger.saveScores(updatedNodeActivationScoreMap);
     }
 
-    private void activateFirstWords(List<NodeRank> nodeRankList) {
-        for (NodeRank nodeRank : nodeRankList) {
-            CMNodeDO node = this.currentGraph.getNode(nodeRank.getNode());
-            if (nodeRank.getValue() < this.minActivationThreshold) {
+    private void activateWordsOverThreshold(Map<CMNodeDO, Double> activationMap) {
+        Iterator<CMNodeDO> nodeIterator = activationMap.keySet().iterator();
+        while (nodeIterator.hasNext()) {
+            CMNodeDO node = nodeIterator.next();
+            Double value = activationMap.get(node);
+            if (value < this.minActivationThreshold) {
                 node.deactivate();
                 List<CMEdgeDO> edgeList = this.currentGraph.getEdgeList(node);
                 for (CMEdgeDO edge : edgeList) {

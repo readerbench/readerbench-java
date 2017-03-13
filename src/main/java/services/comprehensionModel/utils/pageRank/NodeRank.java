@@ -15,11 +15,6 @@
  */
 package services.comprehensionModel.utils.pageRank;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 
 public class NodeRank implements Comparable<NodeRank> {
@@ -48,18 +43,5 @@ public class NodeRank implements Comparable<NodeRank> {
     @Override
     public String toString() {
         return "{" + this.node.getWord() + ": " + this.value + "}";
-    }
-
-    public static List<NodeRank> convertMapToNodeRankList(Map<CMNodeDO, Double> nodeActivationScoreMap) {
-        List<NodeRank> rankList = new ArrayList<>();
-        Iterator<CMNodeDO> nodeIterator = nodeActivationScoreMap.keySet().iterator();
-        while (nodeIterator.hasNext()) {
-            NodeRank rank = new NodeRank();
-            rank.node = nodeIterator.next();
-            rank.value = nodeActivationScoreMap.get(rank.node);
-            rankList.add(rank);
-        }
-        return rankList;
-
     }
 }

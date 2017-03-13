@@ -99,6 +99,9 @@ public class ActivationScoreLogger {
 
     public void logSavedScores() {
         try (FileWriter fwrt = new FileWriter(ActivationScoreLogger.OUTPUT_FILE_NAME); BufferedWriter bfwrt = new BufferedWriter(fwrt)) {
+            bfwrt.write("SEP=,");
+            bfwrt.newLine();
+
             String header = "Word,Type";
             for (int i = 0; i < activationHistory.size(); i++) {
                 header += ",Phrase " + (i + 1) + ",Active?";
