@@ -85,6 +85,6 @@ public class CMNodeDO implements Comparable<CMNodeDO> {
 
     @Override
     public String toString() {
-        return this.word.getLemma() + " (" + this.nodeType.toString() + ")" + " " + (this.isActive ? "1" : "0");
+        return this.word.getLemma() + " (" + this.nodeType.toString() + "-" + this.activationScore + ")" + " " + (this.isActive ? "1" : "0");
     }
 }

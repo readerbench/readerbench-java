@@ -17,12 +17,16 @@ package services.comprehensionModel.utils.indexer.graphStruct;
 
 import data.Word;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
@@ -180,8 +184,7 @@ public class CMGraphDO {
         List<ISemanticModel> models = new ArrayList();
         models.add(semanticModel);
 
-        System.out.println("--- Current Graph ---");
-        System.out.println(this);
+        Set<CMNodeDO> allPotentialInferredNodeSet = new TreeSet<>();
 
         // ** STEP 1 ** Add all the links & nodes from the syntactic graph
         for (CMNodeDO node : syntacticGraph.getNodeList()) {
@@ -201,7 +204,7 @@ public class CMGraphDO {
                     dictionaryWord.setSemanticModels(models);
                     CMNodeDO inferredNode = new CMNodeDO(dictionaryWord, CMNodeType.Inferred);
                     inferredNode.activate();
-                    this.addNodeIfNotExistsOrUpdate(inferredNode);
+                    allPotentialInferredNodeSet.add(inferredNode);
                 }
             }
         }
@@ -217,6 +220,35 @@ public class CMGraphDO {
             if (edge.getEdgeType() == CMEdgeType.Semantic) {
                 edge.deactivate();
             }
+        });
+
+        // get all the potential inferred edge list
+        final List<CMNodeDO> potentialInferredNodeList = new ArrayList<>();
+        allPotentialInferredNodeSet.stream().forEach(potentialInferredNode -> {
+            double avgSimilarity = 0.0;
+
+            for (CMNodeDO syntacticNode : syntacticGraph.getNodeList()) {
+                avgSimilarity += semanticModel.getSimilarity(potentialInferredNode.getWord(), syntacticNode.getWord());
+            }
+
+            if (syntacticGraph.getNodeList().size() > 0) {
+                avgSimilarity = avgSimilarity / ((double) syntacticGraph.getNodeList().size());
+            }
+
+            // use the activationScore to keep its mean avg similarity to the rest of the inferred nodes
+            potentialInferredNode.setActivationScore(avgSimilarity);
+            potentialInferredNodeList.add(potentialInferredNode);
+        });
+
+        // sort the potential inferred edge list
+        Collections.sort(potentialInferredNodeList, (n1, n2) -> (-1) * new Double(n1.getActivationScore()).compareTo(n2.getActivationScore()));
+
+        // keep only the first `maxSemanticExpand` possible inf
+        int maxInferredExpand = syntacticGraph.getNodeList().size();
+        List<CMNodeDO> inferredNodeList = potentialInferredNodeList.subList(0, Math.min(maxInferredExpand, potentialInferredNodeList.size()));
+
+        inferredNodeList.stream().forEach(inferredNode -> {
+            this.addNodeIfNotExistsOrUpdate(inferredNode);
         });
 
         List<CMNodeDO> activeNodeList = this.nodeList.stream().filter(node -> node.isActive()).collect(Collectors.toList());
