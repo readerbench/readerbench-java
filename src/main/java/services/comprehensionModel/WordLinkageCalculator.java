@@ -79,7 +79,7 @@ public class WordLinkageCalculator {
         CMGraphDO semanticGraph = new CMGraphDO();
         List<Word> wordList = this.getWordList(document);
         wordList.forEach((word) -> {
-            semanticGraph.addNodeIfNotExists(new CMNodeDO(word, CMNodeType.TextBased));
+            semanticGraph.addNodeIfNotExistsOrUpdate(new CMNodeDO(word, CMNodeType.TextBased));
         });
 
         List<CMNodeDO> nodeList = semanticGraph.getNodeList();

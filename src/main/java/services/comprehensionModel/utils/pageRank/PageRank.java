@@ -32,7 +32,16 @@ public class PageRank {
     public PageRank() {
     }
 
-    public Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
+    public void runPageRank(CMGraphDO graph) {
+        Map<CMNodeDO, Double> pageRankValues = graph.getActivationMap();
+        Map<CMNodeDO, Double> newPageRankValues = this.runPageRank(pageRankValues, graph);
+        newPageRankValues.entrySet().stream().forEach(entry -> {
+            CMNodeDO actualNode = graph.getNode(entry.getKey());
+            actualNode.setActivationScore(entry.getValue());
+        });
+    }
+
+    private Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
         int algIteration = 0;
         Map<CMNodeDO, Double> currentPageRankValues = new TreeMap<>(pageRankValues);
         while (algIteration < PageRank.MAX_ITER) {

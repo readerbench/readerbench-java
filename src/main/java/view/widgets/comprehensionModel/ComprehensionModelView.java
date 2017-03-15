@@ -227,14 +227,12 @@ public class ComprehensionModelView extends JFrame {
 
         Map<CMNodeDO, Node> nodes = new TreeMap<>();
 
-        this.cm.markAllNodesAsInactive();
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
         CMGraphDO currentSyntacticGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
         CMGraphDO currentGraph = this.cm.getCurrentGraph();
 
         currentGraph.combineWithSyntacticLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel());
         this.cm.setCurrentGraph(currentGraph);
-        this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
         this.cm.applyPageRank(this.sentenceIndex);
         this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
 

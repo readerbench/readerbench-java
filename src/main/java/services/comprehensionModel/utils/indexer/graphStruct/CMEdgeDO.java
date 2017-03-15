@@ -50,7 +50,8 @@ public class CMEdgeDO {
     public boolean equals(CMEdgeDO otherEdge) {
         return ((this.node1.equals(otherEdge.node1) && this.node2.equals(otherEdge.node2))
                 || (this.node1.equals(otherEdge.node2) && this.node2.equals(otherEdge.node1)))
-                && this.edgeType == otherEdge.edgeType;
+                && this.edgeType == otherEdge.edgeType
+                && this.score == otherEdge.score;
     }
 
     public String getEdgeTypeString() {
@@ -68,15 +69,15 @@ public class CMEdgeDO {
     }
 
     public boolean isActive() {
-        return isActive;
+        return this.isActive;
     }
 
     public void activate() {
-        isActive = true;
+        this.isActive = true;
     }
 
     public void deactivate() {
-        isActive = false;
+        this.isActive = false;
     }
 
     @Override

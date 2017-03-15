@@ -90,9 +90,32 @@ public class CMGraphDO {
         });
     }
 
-    public void addNodeIfNotExists(CMNodeDO otherNode) {
+    public void addNodeIfNotExistsOrUpdate(CMNodeDO otherNode) {
         if (!this.containsNode(otherNode)) {
             this.nodeList.add(otherNode);
+        } else {
+            CMNodeDO actualNode = this.getNode(otherNode);
+            actualNode.setActivationScore(actualNode.getActivationScore() + otherNode.getActivationScore());
+            actualNode.deactivate();
+            if (otherNode.isActive()) {
+                actualNode.activate();
+            }
+            // if the other node is inferred we keey the actual node as it is
+            if (otherNode.getNodeType() == CMNodeType.TextBased) {
+                actualNode.setNodeType(CMNodeType.TextBased);
+            }
+        }
+    }
+
+    public void addEdgeIfNotExistsOrUpdate(CMEdgeDO otherEdge) {
+        if (!this.containsEdge(otherEdge)) {
+            this.edgeList.add(otherEdge);
+        } else {
+            CMEdgeDO actualEdge = this.getEdge(otherEdge);
+            actualEdge.deactivate();
+            if (otherEdge.isActive()) {
+                actualEdge.activate();
+            }
         }
     }
 
@@ -128,15 +151,15 @@ public class CMGraphDO {
         return this.getEdgeList(node).stream().filter(edge -> edge.isActive()).collect(Collectors.toList());
     }
 
-    public void combineWithLinksFrom(CMGraphDO otherGraph) {        
+    public void combineWithLinksFrom(CMGraphDO otherGraph) {
         List<CMNodeDO> thisNodeList = new ArrayList<>(this.nodeList);
         for (CMNodeDO node : thisNodeList) {
             List<CMEdgeDO> otherGraphEdgeList = otherGraph.getEdgeList(node);
             otherGraphEdgeList.stream().filter((otherGraphEdge) -> (!this.containsEdge(otherGraphEdge))).map((otherGraphEdge) -> {
-                this.addNodeIfNotExists(otherGraphEdge.getNode1());
+                this.addNodeIfNotExistsOrUpdate(otherGraphEdge.getNode1());
                 return otherGraphEdge;
             }).map((otherGraphEdge) -> {
-                this.addNodeIfNotExists(otherGraphEdge.getNode2());
+                this.addNodeIfNotExistsOrUpdate(otherGraphEdge.getNode2());
                 return otherGraphEdge;
             }).forEach((otherGraphEdge) -> {
                 this.edgeList.add(otherGraphEdge);
@@ -157,19 +180,17 @@ public class CMGraphDO {
         List<ISemanticModel> models = new ArrayList();
         models.add(semanticModel);
 
+        System.out.println("--- Current Graph ---");
+        System.out.println(this);
+
         // ** STEP 1 ** Add all the links & nodes from the syntactic graph
         for (CMNodeDO node : syntacticGraph.getNodeList()) {
             node.getWord().setSemanticModels(models);
             node.activate();
+            node.incrementActivationScore();
 
-            // add the new text based nodes
-            if (this.containsNode(node)) {
-                CMNodeDO associatedNode = this.getNode(node);
-                associatedNode.setNodeType(CMNodeType.TextBased);
-                associatedNode.activate();
-            } else {
-                this.addNodeIfNotExists(node);
-            }
+            // add the new text based nodes or update existing ones
+            this.addNodeIfNotExistsOrUpdate(node);
 
             // add the related words from the dictionary as nodes with no links
             TreeMap<Word, Double> similarConcepts = OntologySupport.getSimilarConcepts(node.getWord());
@@ -180,13 +201,16 @@ public class CMGraphDO {
                     dictionaryWord.setSemanticModels(models);
                     CMNodeDO inferredNode = new CMNodeDO(dictionaryWord, CMNodeType.Inferred);
                     inferredNode.activate();
-                    this.addNodeIfNotExists(inferredNode);
+                    this.addNodeIfNotExistsOrUpdate(inferredNode);
                 }
             }
         }
-        syntacticGraph.edgeList.stream().filter((otherGraphEdge) -> (!edgeListContainsEdge(this.edgeList, otherGraphEdge))).forEach((otherGraphEdge) -> {
-            this.edgeList.add(otherGraphEdge);
+        syntacticGraph.edgeList.stream().forEach((otherGraphEdge) -> {
+            this.addEdgeIfNotExistsOrUpdate(otherGraphEdge);
         });
+
+        System.out.println("--- Current Graph After Adding Syntactic & Semantic ---");
+        System.out.println(this);
 
         // deactivate all te semantic links
         this.edgeList.stream().forEach(edge -> {
@@ -213,15 +237,17 @@ public class CMGraphDO {
         double stdev = VectorAlgebra.stdev(distances);
         double minDistance = Math.min(0.3, avg + stdev);
 
+        System.out.println("AVG = " + avg);
+        System.out.println("STDEV = " + stdev);
+        System.out.println("MIN DISTANCE = " + minDistance);
+
         potentialEdgeList.stream().filter((potentialEdge) -> (potentialEdge.getScore() >= minDistance))
                 .forEach((potentialEdge) -> {
-                    if (this.containsEdge(potentialEdge)) {
-                        CMEdgeDO edge = this.getEdge(potentialEdge);
-                        edge.activate();
-                    } else {
-                        this.edgeList.add(potentialEdge);
-                    }
+                    this.addEdgeIfNotExistsOrUpdate(potentialEdge);
                 });
+
+        System.out.println("--- Current Graph After Adding Potential Semantic Links ---");
+        System.out.println(this);
     }
 
     public CMGraphDO getCombinedGraph(CMGraphDO otherGraph) {
@@ -245,6 +271,14 @@ public class CMGraphDO {
     @Override
     public String toString() {
         return this.nodeList.toString() + "\n" + this.edgeList.toString();
+    }
+
+    public Map<CMNodeDO, Double> getActivationMap() {
+        Map<CMNodeDO, Double> activationMap = new TreeMap();
+        this.getNodeList().stream().forEach(node -> {
+            activationMap.put(node, node.getActivationScore());
+        });
+        return activationMap;
     }
 
     public CMGraphStatistics getGraphStatistics() {
