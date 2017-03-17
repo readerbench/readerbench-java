@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.FileHandler;
@@ -85,6 +86,7 @@ import webService.cv.CVHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
+import webService.result.ResultAnswerMatching;
 import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
@@ -316,6 +318,25 @@ public class ReaderBenchServer {
         }
         return new ResultTextSimilarities(similarityScoresToString);
     }
+    
+    private ResultAnswerMatching computeBestAnswer(AbstractDocument userInputDocument, List<AbstractDocument> predefinedAnswerDocuments) {
+        List<Double> scores = new ArrayList();
+        for (AbstractDocument predefinedAnswerDocument : predefinedAnswerDocuments) {
+            SemanticCohesion sc = new SemanticCohesion(userInputDocument, predefinedAnswerDocument);
+            scores.add(sc.getCohesion());
+        }
+        Double maxScore = Collections.max(scores);
+        Integer indexId = -1;
+        int k = 0;
+        for (Double score : scores) {
+            if (Objects.equals(score, maxScore)) {
+                indexId = k;
+                break;
+            }
+            k++;
+        }
+        return new ResultAnswerMatching(indexId, maxScore);
+    }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
         PdfToTextConverter pdfConverter = new PdfToTextConverter();
@@ -488,7 +509,7 @@ public class ReaderBenchServer {
             }
 
             QueryResultSearch queryResult = new QueryResultSearch();
-            queryResult.setData(SearchClient.search(hm.get("text"), setDocuments(hm.get("path")), maxContentSize));
+            queryResult.setData(SearchClient.search(hm.get("text"), setDocuments(hm.get("path").toString()), maxContentSize));
 
             response.type("application/json");
             return queryResult.convertToJson();
@@ -502,7 +523,7 @@ public class ReaderBenchServer {
             errorIfParamsMissing(requiredParams, request.queryParams());
 
             Map<String, String> hm = hmParams(request);
-            LOGGER.info("URI primit: " + hm.get("uri"));
+            LOGGER.log(Level.INFO, "URI primit: {0}", hm.get("uri"));
             hm.put("text", getTextFromPdf(hm.get("contents"), true).getContent());
             hm.remove("uri");
 
@@ -516,7 +537,6 @@ public class ReaderBenchServer {
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         Spark.post("/semantic-annotation-uri", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -536,7 +556,6 @@ public class ReaderBenchServer {
             }
 
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-
             hm.put("text", documentContent);
             AbstractDocument document = QueryHelper.processQuery(hm);
 
@@ -551,7 +570,6 @@ public class ReaderBenchServer {
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         Spark.post("/semantic-annotation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -564,7 +582,6 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(json);
             String documentContent = getTextFromPdf("tmp/" + hm.get("file"), true).getContent();
-
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
 
             hm.put("text", documentContent);
@@ -581,7 +598,6 @@ public class ReaderBenchServer {
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         Spark.post("/self-explanation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -593,14 +609,12 @@ public class ReaderBenchServer {
             errorIfParamsMissing(requiredParams, json.keySet());
 
             Map<String, String> hm = hmParams(json);
-
             AbstractDocument document = QueryHelper.processQuery(hm);
             QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
             queryResult.setData(getSelfExplanation(document, hm.get("explanation"), Boolean.parseBoolean(hm.get("dialogism"))));
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         Spark.post("/cscl-processing", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -612,8 +626,7 @@ public class ReaderBenchServer {
             errorIfParamsMissing(requiredParams, json.keySet());
 
             Map<String, String> hm = hmParams(json);
-
-            Lang lang = Lang.getLang(hm.get("lang"));
+            Lang lang = Lang.getLang(hm.get("language"));
             List<ISemanticModel> models = new ArrayList<>();
             models.add(LSA.loadLSA(hm.get("lsa"), lang));
             models.add(LDA.loadLDA(hm.get("lda"), lang));
@@ -622,7 +635,7 @@ public class ReaderBenchServer {
                     new File("tmp/" + json.get("csclFile")),
                     models,
                     lang,
-                    Boolean.parseBoolean(hm.get("postagging")));
+                    Boolean.parseBoolean(hm.get("pos-tagging")));
             conversation.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
             hm.put("text", conversation.getText());
             AbstractDocument conversationDocument = QueryHelper.processQuery(hm);
@@ -644,7 +657,6 @@ public class ReaderBenchServer {
             errorIfParamsMissing(requiredParams, json.keySet());
 
             Map<String, String> hm = hmParams(json);
-
             String documentContent;
             if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
                 documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
@@ -674,7 +686,6 @@ public class ReaderBenchServer {
             errorIfParamsMissing(requiredParams, json.keySet());
 
             Map<String, String> hm = hmParams(json);
-
             Map<String, Integer> commonWords = new HashMap<>();
             String cvContent = getTextFromPdf("tmp/" + hm.get("cvFile"), true).getContent();
             hm.put("text", cvContent);
@@ -789,7 +800,6 @@ public class ReaderBenchServer {
 
             response.type("application/json");
             return queryResult.convertToJson();
-
         });
         // File Upload - send file as multipart form-data to be accepted
         Spark.post("/file-upload", (request, response) -> {
@@ -894,7 +904,6 @@ public class ReaderBenchServer {
 
             String result = queryResult.convertToJson();
             return result;
-
         });
         Spark.post("/vcopD3", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -993,13 +1002,12 @@ public class ReaderBenchServer {
 
             return result;
         });
-
         Spark.post("/textSimilarity", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
             requiredParams.add("text2");
-            requiredParams.add("lang");
+            requiredParams.add("language");
             requiredParams.add("model");
             requiredParams.add("corpus");
             // check whether all the required parameters are available
@@ -1008,17 +1016,16 @@ public class ReaderBenchServer {
             Map<String, String> hm = hmParams(json);
 
             QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
-            queryResult.setData(textSimilarity(hm.get("text1"), hm.get("text2"), hm.get("lang"), hm.get("model"), hm.get("corpus")));
+            queryResult.setData(textSimilarity(hm.get("text1"), hm.get("text2"), hm.get("language"), hm.get("model"), hm.get("corpus")));
 
             response.type("application/json");
             return queryResult.convertToJson();
         });
-
         Spark.post("/similarConcepts", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("seed");
-            requiredParams.add("lang");
+            requiredParams.add("language");
             requiredParams.add("model");
             requiredParams.add("corpus");
             // check whether all the required parameters are available
@@ -1027,18 +1034,17 @@ public class ReaderBenchServer {
             Map<String, String> hm = hmParams(json);
             double minThreshold;
             try {
-                minThreshold = Double.parseDouble(hm.get("threshold"));
+                minThreshold = Double.parseDouble(hm.get("threshold").toString());
             } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
 
             QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
-            queryResult.setData(similarConcepts(hm.get("seed"), hm.get("lang"), hm.get("model"), hm.get("corpus"), minThreshold));
+            queryResult.setData(similarConcepts(hm.get("seed"), hm.get("language"), hm.get("model"), hm.get("corpus"), minThreshold));
 
             response.type("application/json");
             return queryResult.convertToJson();
         });
-
         // In contrast to textSimilarity, this endpoint returns similarity
         // scores of two texts using every similarity method available
         Spark.post("/textSimilarities", (request, response) -> {
@@ -1046,8 +1052,8 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
             requiredParams.add("text2");
-            requiredParams.add("lang");
-            requiredParams.add("postagging");
+            requiredParams.add("language");
+            requiredParams.add("pos-tagging");
             requiredParams.add("lsa");
             requiredParams.add("lda");
             requiredParams.add("word2vec");
@@ -1058,12 +1064,44 @@ public class ReaderBenchServer {
 
             QueryResultTextSimilarities queryResult = new QueryResultTextSimilarities();
             List<ISemanticModel> models = new ArrayList<>();
-            Lang lang = Lang.getLang(hm.get("lang"));
+            Lang lang = Lang.getLang(hm.get("language"));
             models.add(LSA.loadLSA(hm.get("lsa"), lang));
             models.add(LDA.loadLDA(hm.get("lda"), lang));
-            models.add(Word2VecModel.loadWord2Vec(hm.get("word2vec"), lang));
+            models.add(Word2VecModel.loadWord2Vec(hm.get("w2v"), lang));
 
-            queryResult.setData(textSimilarities(hm.get("text1"), hm.get("text2"), hm.get("lang"), models, Boolean.parseBoolean(hm.get("postagging"))));
+            queryResult.setData(textSimilarities(hm.get("text1"), hm.get("text2"), hm.get("language"), models, Boolean.parseBoolean(hm.get("pos-tagging"))));
+
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/answer-matching", (request, response) -> {
+            Set<String> requiredParams = new HashSet<>();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("language");
+            requiredParams.add("pos-tagging");
+            requiredParams.add("dialogism");
+            requiredParams.add("lsa");
+            requiredParams.add("lda");
+            requiredParams.add("w2v");
+            requiredParams.add("user-answer");
+            requiredParams.add("predefined-answers");
+            // check whether all the required parameters are available
+            errorIfParamsMissing(requiredParams, json.keySet());
+                        
+            Map<String, String> hm = hmParams(json);   
+            QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
+            List<ISemanticModel> models = QueryHelper.getSemanticModels(hm);
+
+            hm.put("text", hm.get("user-answer"));
+            AbstractDocument userAnswerDocument = QueryHelper.processQuery(hm);
+            List<String> predefinedAnswers = (ArrayList<String>) json.get("predefined-answers");
+            List<AbstractDocument> predefinedAnswerDocuments = new ArrayList<>();
+            for(String answer : predefinedAnswers) {
+                hm.put("text", answer);
+                predefinedAnswerDocuments.add(QueryHelper.processQuery(hm));
+            }
+            
+            queryResult.setData(computeBestAnswer(userAnswerDocument, predefinedAnswerDocuments));
 
             response.type("application/json");
             return queryResult.convertToJson();
@@ -1103,7 +1141,6 @@ public class ReaderBenchServer {
             String result = queryResult.convertToJson();
             return result;
         });
-
         Spark.get("/lak/measures", (request, response) -> {
             response.type("application/json");
             List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();

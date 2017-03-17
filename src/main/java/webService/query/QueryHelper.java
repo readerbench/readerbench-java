@@ -38,25 +38,30 @@ public class QueryHelper {
     private static final Logger LOGGER = Logger.getLogger("");
     private static final String SEMANTIC_MODELS_ROOT = "resources/config/";
 
+    public static List<ISemanticModel> getSemanticModels(Map<String, String> hm) {
+        Lang lang = Lang.getLang(hm.get("language"));
+        String semanticModelsPath = SEMANTIC_MODELS_ROOT + '/' + lang.toString().toUpperCase();
+        List<ISemanticModel> models = new ArrayList<>();
+        if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
+            models.add(LSA.loadLSA(semanticModelsPath + '/' + "LSA" + '/' + hm.get("lsa"), lang));
+        }
+        if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
+            models.add(LDA.loadLDA(semanticModelsPath + '/' + "LDA" + '/' + hm.get("lda"), lang));
+        }
+        if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
+            models.add(Word2VecModel.loadWord2Vec(semanticModelsPath + '/' + "word2vec" + '/' + hm.get("w2v"), lang));
+        }
+        return models;
+    }
+
     public static AbstractDocument processQuery(Map<String, String> hm) {
         LOGGER.info("Processign query ...");
         Lang lang = Lang.getLang(hm.get("language"));
-        String semanticModelsPath = SEMANTIC_MODELS_ROOT + '/' + lang.toString().toUpperCase();
-        
         AbstractDocumentTemplate template;
         try {
             template = AbstractDocumentTemplate.getDocumentModel(URLDecoder.decode(hm.get("text"), "UTF-8"));
 
-            List<ISemanticModel> models = new ArrayList<>();
-            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
-                models.add(LSA.loadLSA(semanticModelsPath + '/' + "LSA" + '/' + hm.get("lsa"), lang));
-            }
-            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
-                models.add(LDA.loadLDA(semanticModelsPath + '/' + "LDA" + '/' + hm.get("lda"), lang));
-            }
-            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
-                models.add(Word2VecModel.loadWord2Vec(semanticModelsPath + '/' + "word2vec" + '/' + hm.get("w2v"), lang));
-            }
+            List<ISemanticModel> models = getSemanticModels(hm);
             AbstractDocument document = new Document(
                     null,
                     template,
