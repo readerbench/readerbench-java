@@ -141,6 +141,20 @@
                 </executions>
             </plugin>
         </plugins>
+
+        <resources>
+            <!-- config file -->
+            <resource>
+                <directory>src/main/config</directory>
+            </resource>
+
+            <!-- Java resources -->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
+
     </build>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -183,6 +197,8 @@
         <!--<jaxen.version>1.1.6</jaxen.version>-->
         <!--<apache.jena.version>3.1.1</apache.jena.version>-->
         <javax.mail.version>1.5.5</javax.mail.version>
+        <akka.scala.version>2.10</akka.scala.version>
+        <akka.version>2.3.5</akka.version>
     </properties>
     <dependencies>
         <dependency>
@@ -500,6 +516,37 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.0-b01</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.solr/solr-solrj -->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>6.3.0</version>
+        </dependency>
+
+        <!-- BEGIN akka dependency -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-remote_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-contrib_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- BEGIN akka dependency -->
+
     </dependencies>
     <!--<reporting>
         <plugins>
