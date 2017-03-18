@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actors.CommunityActor;
+import akka.actors.DataProcessingActor;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,29 +16,31 @@ public class AkkaActorSystem {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AkkaActorSystem.class);
 
-    public static ActorSystem actorSystem;
+    public static ActorSystem ACTOR_SYSTEM;
 
     public ActorRef communityActor;
+    public ActorRef dataProcessingActor;
 
     /**
      * Actors' initialization
      */
     public void init() {
         LOGGER.info("Create Akka Actor System ...");
-        actorSystem = ActorSystem.create("readerBenchActorSystem", ConfigFactory.load("akka.conf"));
+        ACTOR_SYSTEM = ActorSystem.create("readerBenchActorSystem", ConfigFactory.load("akka.conf"));
 
         LOGGER.info("Init actors ...");
-        communityActor = this.actorSystem.actorOf(Props.create(CommunityActor.class), "community-actor");
-        //TODO
+        communityActor = this.ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
+        dataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DataProcessingActor.class), "data-processing-actor");
+        //TODO - add other actors
     }
 
     /**
      * Stop Akka Actor System
      */
     public static void stop() {
-        actorSystem.shutdown();
-        actorSystem.awaitTermination();
-        actorSystem = null;
+        ACTOR_SYSTEM.shutdown();
+        ACTOR_SYSTEM.awaitTermination();
+        ACTOR_SYSTEM = null;
 
         LOGGER.info("Akka Actor System shutdown ...");
     }
