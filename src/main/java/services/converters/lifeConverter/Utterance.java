@@ -47,12 +47,12 @@ public class Utterance {
     }
     
     @XmlValue
-    void setMesg(String m) {
+   public void setMesg(String m) {
         this.mesg = m;
     }
 
     @XmlAttribute (name = "genid")
-    void setGenid(int id) {
+    public void setGenid(int id) {
         this.genid = id;
     }
     
