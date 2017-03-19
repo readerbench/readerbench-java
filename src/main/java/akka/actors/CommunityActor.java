@@ -5,7 +5,7 @@ import akka.messages.CommunityMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.duration.Duration;
-import services.processing.TestActors;
+import services.solr.TestActors;
 
 import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
@@ -40,14 +40,15 @@ public class CommunityActor extends UntypedActor{
             /**
              * send message to DataProcessingActor
              */
+            LOGGER.info("Send CommunityMessage to DataProcessingActor.");
             TestActors.akkaActorSystem.dataProcessingActor.tell(communityMessage, self());
 
             /**
              * trigger job at 12 PM every day
              */
-            getContext().system().scheduler().scheduleOnce(
-                    Duration.create(computeDelayOfJob(), TimeUnit.MILLISECONDS),
-                    getSelf(), START_PROCESSING, getContext().dispatcher(), null);
+//            getContext().system().scheduler().scheduleOnce(
+//                    Duration.create(computeDelayOfJob(), TimeUnit.MILLISECONDS),
+//                    getSelf(), START_PROCESSING, getContext().dispatcher(), null);
 
         } else {
             LOGGER.warn("Unhandled message.");
