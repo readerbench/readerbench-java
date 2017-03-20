@@ -20,7 +20,7 @@ public class ProcessSolrData {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessSolrData.class);
 
     private SolrService solrService = new SolrService();
-    private static Integer MAX_RECORDS_NUMBER = 30000;
+    private static Integer MAX_RECORDS_NUMBER = 50000;
 
     /**
      * Get data by community name
@@ -116,11 +116,14 @@ public class ProcessSolrData {
      * @return - the index of parent
      */
     private int getRefId(SolrDocument solrDocument, List<SolrDocument> solrDocuments) {
-        String parentId = solrDocument.get("parent_id").toString();
-        SolrDocument result = solrDocuments.stream()
+        String parentId = solrDocument.get("comment_parent_id").toString();
+        Optional<SolrDocument> result = solrDocuments.stream()
                 .filter(document -> document.get("comment_id").toString().equals(parentId))
-                .findFirst().get();
-        return solrDocuments.indexOf(result);
+                .findFirst();
+        if (result.isPresent())
+            return solrDocuments.indexOf(result);
+        else
+            return 0;
 
     }
 
@@ -133,6 +136,16 @@ public class ProcessSolrData {
         Date date = new Date(timestamp);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return sdf.format(date);
+    }
+
+    public static void main(String[] args) {
+        ProcessSolrData processSolrData = new ProcessSolrData();
+
+        SolrDocumentList solrDocuments = processSolrData.getDataByCommunityName("Games");
+        System.out.println("Data from solr: " + solrDocuments.size());
+        Map<String, List<SolrDocument>> submissions = processSolrData.processSolrDocuments(solrDocuments);
+        List<Dialog> dialogs = processSolrData.generateDialogs(submissions);
+        System.out.println("Dialogs: " + dialogs.size());
     }
 
 }
