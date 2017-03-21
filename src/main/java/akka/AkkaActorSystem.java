@@ -4,7 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actors.CommunityActor;
-import akka.actors.DataProcessingActor;
+import akka.actors.SolrDataProcessingActor;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class AkkaActorSystem {
 
         LOGGER.info("Init actors ...");
         communityActor = this.ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
-        dataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DataProcessingActor.class), "data-processing-actor");
+        dataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class), "data-processing-actor");
         //TODO - add other actors
     }
 

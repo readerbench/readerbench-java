@@ -17,11 +17,11 @@ import java.util.*;
 /**
  * Created by Dorinela on 3/18/2017.
  */
-public class DataProcessingActor extends UntypedActor {
+public class SolrDataProcessingActor extends UntypedActor {
 
     private static SolrService solrService = new SolrService();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataProcessingActor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SolrDataProcessingActor.class);
 
     @Override
     public void onReceive(Object message) throws Exception {

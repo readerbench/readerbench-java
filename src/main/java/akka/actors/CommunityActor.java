@@ -34,13 +34,13 @@ public class CommunityActor extends UntypedActor{
         if (message instanceof String && message.equals(START_PROCESSING)) {
             LOGGER.info("Received " + START_PROCESSING + " message.");
             /**
-             * create CommunityMessage to send to DataProcessingActor
+             * create CommunityMessage to send to SolrDataProcessingActor
              */
             CommunityMessage communityMessage = new CommunityMessage("Games");
             /**
-             * send message to DataProcessingActor
+             * send message to SolrDataProcessingActor
              */
-            LOGGER.info("Send CommunityMessage to DataProcessingActor.");
+            LOGGER.info("Send CommunityMessage to SolrDataProcessingActor.");
             TestActors.akkaActorSystem.dataProcessingActor.tell(communityMessage, self());
 
             /**
