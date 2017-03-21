@@ -2,6 +2,7 @@ package akka.actors;
 
 import akka.actor.UntypedActor;
 import akka.messages.CommunityMessage;
+import akka.messages.DialogMessage;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import services.converters.lifeConverter.Dialog;
 import services.converters.lifeConverter.Turn;
 import services.converters.lifeConverter.Utterance;
 import services.solr.SolrService;
+import services.solr.TestActors;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -37,7 +39,12 @@ public class SolrDataProcessingActor extends UntypedActor {
             List<Dialog> dialogs = generateDialogs(submissions);
             LOGGER.info("Community name: " + communityMessage.getCommunity() + " - dialogs size: " + dialogs.size());
 
-            //TODO - send message to actor to process dialogs
+            /**
+             * Send message to DialogProcessingActor in order to process the data
+             */
+            LOGGER.info("Send DialogMessage to DialogProcessingActor.");
+            DialogMessage dialogMessage = new DialogMessage(dialogs);
+            TestActors.akkaActorSystem.dialogProcessingActor.tell(dialogMessage, self());
 
         } else {
             LOGGER.warn("Unhandled message.");

@@ -41,7 +41,7 @@ public class CommunityActor extends UntypedActor{
              * send message to SolrDataProcessingActor
              */
             LOGGER.info("Send CommunityMessage to SolrDataProcessingActor.");
-            TestActors.akkaActorSystem.dataProcessingActor.tell(communityMessage, self());
+            TestActors.akkaActorSystem.solrDataProcessingActor.tell(communityMessage, self());
 
             /**
              * trigger job at 12 PM every day
