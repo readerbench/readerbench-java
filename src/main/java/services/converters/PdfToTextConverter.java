@@ -468,9 +468,9 @@ public class PdfToTextConverter {
 
             if (fontSizes.size() > 0) {
                 Collections.max(fontSizes.keySet());
-                logger.info("MaxFont: " + Collections.max(fontSizes.keySet()));
+                logger.log(Level.INFO, "MaxFont: {0}", Collections.max(fontSizes.keySet()));
                 this.setMaxFontSize(Collections.max(fontSizes.keySet()));
-                logger.info("MinFont: " + Collections.min(fontSizes.keySet()));
+                logger.log(Level.INFO, "MinFont: {0}", Collections.min(fontSizes.keySet()));
                 this.setMinFontSize(Collections.min(fontSizes.keySet()));
             } else {
                 logger.info("MaxFont: " + "N/A");
