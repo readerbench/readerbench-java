@@ -18,15 +18,8 @@ package data.cscl;
 import java.awt.EventQueue;
 import java.io.*;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 
 import data.AbstractDocument;
 import data.AbstractDocument.SaveType;
@@ -46,10 +39,13 @@ import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.converters.lifeConverter.Dialog;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.keywordMining.KeywordModeling;
 import services.processing.SerialProcessing;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import view.widgets.cscl.ParticipantInteractionView;
 import view.widgets.document.corpora.PaperConceptView;
 import webService.result.ResultvCoP;
@@ -73,9 +69,25 @@ public class Community extends AnalysisElement {
     private final Date startDate, endDate;
     private Date fistContributionDate, lastContributionDate;
 
+    public Community() {
+        startDate = null;
+        endDate = null;
+        needsAnonymization = false;
+    }
+
     public Community(String path, Lang lang, boolean needsAnonymization, Date startDate, Date endDate) {
         super(null, 0, null, null, lang);
         this.path = path;
+        this.needsAnonymization = needsAnonymization;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        participants = new ArrayList<>();
+        documents = new ArrayList<>();
+        timeframeSubCommunities = new ArrayList<>();
+    }
+
+    public Community(Lang lang, boolean needsAnonymization, Date startDate, Date endDate) {
+        super(null, 0, null, null, lang);
         this.needsAnonymization = needsAnonymization;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -372,6 +384,55 @@ public class Community extends AnalysisElement {
         return community;
     }
 
+    public Community loadMultipleDialogs(List<Dialog> dialogs, Lang lang, boolean needsAnonymization, Date startDate,
+                                         Date endDate, int monthIncrement, int dayIncrement, String pathToLSA,
+                                         String pathToLDA, boolean usePOSTagging, boolean computeDialogism) {
+
+        Community community = new Community(lang, needsAnonymization, startDate, endDate);
+        for (Dialog dialog : dialogs) {
+
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            modelPaths.put(SimilarityType.LSA, pathToLSA);
+            modelPaths.put(SimilarityType.LDA, pathToLDA);
+
+            Conversation c = (Conversation) AbstractDocument.loadGenericDocumentFromDialog(dialog, modelPaths, lang, usePOSTagging,
+                    computeDialogism);
+
+            community.getDocuments().add(c);
+
+        }
+
+
+
+        community.updateParticipantContributions();
+        // create corresponding sub-communities
+        Calendar cal = Calendar.getInstance();
+        Date startSubCommunities = community.getFistContributionDate();
+        cal.setTime(startSubCommunities);
+        cal.add(Calendar.MONTH, monthIncrement);
+        cal.add(Calendar.DATE, dayIncrement);
+        Date endSubCommunities = cal.getTime();
+
+        while (endSubCommunities.before(community.getLastContributionDate())) {
+            community.getTimeframeSubCommunities()
+                    .add(getSubCommunity(community, startSubCommunities, endSubCommunities));
+
+            // update timeStamps
+            startSubCommunities = endSubCommunities;
+            cal.add(Calendar.MONTH, monthIncrement);
+            cal.add(Calendar.DATE, dayIncrement);
+            endSubCommunities = cal.getTime();
+        }
+        // create partial community with remaining contributions
+        community.getTimeframeSubCommunities()
+                .add(getSubCommunity(community, startSubCommunities, community.getLastContributionDate()));
+
+        LOGGER.log(Level.INFO, "Finished creating {0} timeframe sub-communities spanning from {1} to {2}", new Object[]{community.getTimeframeSubCommunities().size(), community.getFistContributionDate(), community.getLastContributionDate()});
+
+        return community;
+
+    }
+
     public void generateParticipantView(String path) {
         EventQueue.invokeLater(() -> {
             ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
@@ -414,15 +475,16 @@ public class Community extends AnalysisElement {
         JSONObject jsonObject = new JSONObject();
 
         JSONArray nodes = new JSONArray();
-        for (int i = 0; i < participants.size(); i++) {
-            JSONObject participant = new JSONObject();
-            participant.put("name", participants.get(i).getName());
-            participant.put("id", i);
-            participant.put("value", participants.get(i).getGradeAnnotator());
-            nodes.add(participant);
-        }
+//        for (int i = 0; i < participants.size(); i++) {
+//            JSONObject participant = new JSONObject();
+//            participant.put("name", participants.get(i).getName());
+//            participant.put("id", i);
+//            participant.put("value", participants.get(i).getContributions().getBlocks().size());
+//            nodes.add(participant);
+//        }
 
         JSONArray links = new JSONArray();
+        List<String> names = new ArrayList<>();
 
         for (int row = 0; row < participantContributions.length; row++) {
             for (int col = 0; col < participantContributions[row].length; col++) {
@@ -432,6 +494,27 @@ public class Community extends AnalysisElement {
                     link.put("target", col);
                     link.put("score", participantContributions[row][col]);
                     links.add(link);
+
+                    if (!names.contains(participants.get(row).getName())) {
+                        names.add( participants.get(row).getName());
+                        JSONObject rowP = new JSONObject();
+                        rowP.put("name", participants.get(row).getName());
+                        rowP.put("id", row);
+                        rowP.put("value", participants.get(row).getContributions().getBlocks().size());
+                        nodes.add(rowP);
+                    }
+
+                    if (!names.contains(participants.get(col).getName())) {
+                        names.add( participants.get(col).getName());
+                        JSONObject colP = new JSONObject();
+                        colP.put("name", participants.get(col).getName());
+                        colP.put("id", col);
+                        colP.put("value", participants.get(col).getContributions().getBlocks().size());
+                        nodes.add(colP);
+
+                    }
+
+
                 }
             }
         }
@@ -565,9 +648,9 @@ public class Community extends AnalysisElement {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
             dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
             //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
+            dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
         }
     }

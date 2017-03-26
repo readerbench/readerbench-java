@@ -30,11 +30,11 @@ public class Utterance {
     String time;
     String mesg;
 
-    String getMesg() {
+    public String getMesg() {
         return mesg;
     }
     
-    int getGenid() {
+    public int getGenid() {
         return genid;
     }
    

@@ -63,6 +63,7 @@ import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
+import services.converters.lifeConverter.Dialog;
 import services.discourse.CSCL.Collaboration;
 import services.discourse.cohesion.CohesionGraph;
 import services.discourse.cohesion.DisambiguisationGraphAndLexicalChains;
@@ -124,6 +125,8 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     protected Map<SimilarityType, String> modelPaths;
 
+    private Dialog dialog;
+
     public AbstractDocument() {
         super();
         this.blocks = new ArrayList<>();
@@ -133,6 +136,14 @@ public abstract class AbstractDocument extends AnalysisElement {
     public AbstractDocument(String path, List<ISemanticModel> models, Lang lang) {
         this();
         this.path = path;
+        setLanguage(lang);
+        this.disambiguationGraph = new DisambiguationGraph(lang);
+        super.setSemanticModels(models);
+    }
+
+    public AbstractDocument(Dialog dialog, List<ISemanticModel> models, Lang lang) {
+        this();
+        this.dialog = dialog;
         setLanguage(lang);
         this.disambiguationGraph = new DisambiguationGraph(lang);
         super.setSemanticModels(models);
@@ -259,6 +270,13 @@ public abstract class AbstractDocument extends AnalysisElement {
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
+    public static AbstractDocument loadGenericDocumentFromDialog(Dialog dialog,
+                                                       Map<SimilarityType, String> modelPaths, Lang lang,
+                                                       boolean usePOSTagging, boolean computeDialogism) {
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
+        return loadGenericDocumentFromDialog(dialog, models, lang, usePOSTagging, computeDialogism);
+    }
+
     public static boolean checkTagsDocument(File f, String tag) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         InputSource input;
@@ -316,6 +334,16 @@ public abstract class AbstractDocument extends AnalysisElement {
 
         return null;
     }
+
+    public static AbstractDocument loadGenericDocumentFromDialog(Dialog dialog, List<ISemanticModel> models,
+                                                       Lang lang, boolean usePOSTagging, boolean computeDialogism) {
+
+        Conversation c = new Conversation().loadDialog(dialog, models, lang, usePOSTagging);
+        c.computeAll(computeDialogism);
+        return c;
+
+    }
+
 
     public void saveSerializedDocument() {
         LOGGER.info("Saving serialized document ...");

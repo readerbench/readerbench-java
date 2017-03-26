@@ -66,8 +66,8 @@ public class CommunityActor extends UntypedActor{
      */
     private Long computeDelayOfJob() {
         GregorianCalendar gCalendar = new GregorianCalendar();
-        gCalendar.set(GregorianCalendar.HOUR_OF_DAY, 24);
-        gCalendar.set(GregorianCalendar.MINUTE, 0);
+        gCalendar.set(GregorianCalendar.HOUR_OF_DAY, 23);
+        gCalendar.set(GregorianCalendar.MINUTE, 58);
         gCalendar.set(GregorianCalendar.SECOND, 0);
         Long delay = gCalendar.getTimeInMillis() - System.currentTimeMillis();
 
