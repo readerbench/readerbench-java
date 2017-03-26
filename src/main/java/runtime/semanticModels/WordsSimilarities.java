@@ -112,7 +112,7 @@ public class WordsSimilarities {
                     LOGGER.info(Arrays.toString(array));
                     if (array.length > 1) {
                         for (int i = 2; i < array.length; i = i + 2) {
-                            Map<SimilarityType, Double> similarityScores = TextSimilarity.textSimilarities(array[0], array[i], "English", models, true);
+                            Map<SimilarityType, Double> similarityScores = TextSimilarity.textSimilarities(array[0], array[i], lang, models, true);
                             StringBuilder sb = new StringBuilder();
                             sb.append(array[0]).append(",").append(array[1]).append(",");
                             sb.append(array[i]).append(",").append(array[i + 1]).append(",");

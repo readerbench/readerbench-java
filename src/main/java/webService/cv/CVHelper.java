@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.keywords.KeywordsHelper;
 import webService.result.ResultCv;
@@ -46,11 +47,11 @@ public class CVHelper {
             Set<String> keywords,
             Set<String> ignoreWords,
             Lang lang,
-            boolean usePosTagging,
-            boolean computeDialogism,
-            double threshold,
-            double deltaFAN,
-            Map<String, String> hm
+            List<ISemanticModel> models,
+            Boolean usePosTagging,
+            Boolean computeDialogism,
+            Double threshold,
+            Double deltaFAN
     ) {
         ResultCv result = new ResultCv();
 
@@ -156,7 +157,7 @@ public class CVHelper {
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, threshold, hm));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);
