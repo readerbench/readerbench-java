@@ -16,6 +16,7 @@
 package webService.keywords;
 
 import data.AbstractDocument;
+import data.Lang;
 import data.discourse.SemanticCohesion;
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.nlp.listOfWords.ListOfWords;
+import services.semanticModels.ISemanticModel;
 import webService.query.QueryHelper;
 import webService.result.ResultEdge;
 import webService.result.ResultKeyword;
@@ -46,17 +48,12 @@ public class KeywordsHelper {
             AbstractDocument document,
             AbstractDocument keywordsDocument,
             Set<String> keywords,
-            double threshold,
-            Map<String, String> hm) {
-
+            Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) {
         ArrayList<ResultKeyword> resultKeywords = new ArrayList<>();
-
         ListOfWords usedList = new ListOfWords();
         usedList.setWords(keywords);
-
         usedList.getWords().stream().forEach((pattern) -> {
-            hm.put("text", pattern);
-            AbstractDocument patterDocument = QueryHelper.processQuery(hm);
+            AbstractDocument patterDocument = QueryHelper.generateDocument(pattern, lang, models, usePosTagging, computeDialogism);
             int occ = 0;
             Pattern javaPattern = Pattern.compile(" " + pattern + " ");
             Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");
@@ -65,8 +62,8 @@ public class KeywordsHelper {
             while (matcher.find()) {
                 occ++;
             }
-            if (occ > 0 && cohesion >= threshold) {
-                resultKeywords.add(new ResultKeyword(pattern, occ, Formatting.formatNumber(cohesion)));
+            if (occ > 0 && cohesion >= minThreshold) {
+                resultKeywords.add(new ResultKeyword(pattern, occ, cohesion));
             }
         });
 
