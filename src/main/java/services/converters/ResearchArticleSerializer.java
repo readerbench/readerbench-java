@@ -51,6 +51,6 @@ public class ResearchArticleSerializer {
 
         ResearchArticle d = ResearchArticle.load(filePath, modelPaths, Lang.en, false, true);
         d.computeAll(false);
-        d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+        d.save(AbstractDocument.SaveType.SERIALIZED);
     }
 }
