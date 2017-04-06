@@ -26,10 +26,12 @@ import services.semanticModels.SimilarityType;
 public enum SemanticCorpora implements Serializable {
     tasa_en_lsa("TASA", Lang.en, SimilarityType.LSA),
     tasa_en_lda("TASA", Lang.en, SimilarityType.LDA),
+    tasa_en_word2vec("TASA", Lang.en, SimilarityType.WORD2VEC),
     tasa_lak_en_lsa("TASA_LAK", Lang.en, SimilarityType.LSA),
     tasa_lak_en_lda("TASA_LAK", Lang.en, SimilarityType.LDA),
     le_monde_fr_lsa("Le_Monde", Lang.fr, SimilarityType.LSA),
-    le_monde_fr_lda("Le_Monde", Lang.fr, SimilarityType.LDA);
+    le_monde_fr_lda("Le_Monde", Lang.fr, SimilarityType.LDA),
+    le_monde_fr_word2vec("Le_Monde", Lang.fr, SimilarityType.WORD2VEC);
     
     private final static String SEMANTIC_CORPORA_ROOT = "resources/config/";
     private final String corpora;
