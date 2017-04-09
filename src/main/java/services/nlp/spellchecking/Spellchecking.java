@@ -7,7 +7,10 @@ package services.nlp.spellchecking;
 
 import data.Lang;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.AmericanEnglish;
 import org.languagetool.language.Dutch;
@@ -15,7 +18,6 @@ import org.languagetool.language.French;
 import org.languagetool.language.Italian;
 import org.languagetool.language.Romanian;
 import org.languagetool.language.Spanish;
-import org.languagetool.rules.Rule;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.openide.util.Exceptions;
@@ -26,6 +28,8 @@ import org.openide.util.Exceptions;
  */
 public class Spellchecking {
 
+    static final Logger LOGGER = Logger.getLogger("");
+
     public static JLanguageTool spellechecker_ro = null;
     public static JLanguageTool spellechecker_fr = null;
     public static JLanguageTool spellechecker_it = null;
@@ -33,19 +37,32 @@ public class Spellchecking {
     public static JLanguageTool spellechecker_es = null;
     public static JLanguageTool spellechecker_nl = null;
 
-    public static void checkText(String text, Lang lang) {
+    private List<String> messages;
+
+    public String checkText(String text, Lang lang) {
+        if (text == null || text.length() == 0) {
+            return "";
+        }
         try {
             JLanguageTool langTool = getSpellcheckerInstance(lang);
+            StringBuilder correctText = new StringBuilder(text);
             List<RuleMatch> matches = langTool.check(text);
+            messages = new ArrayList<>();
+
+            int offset = 0;
             for (RuleMatch match : matches) {
-                System.out.println("Potential typo at characters "
-                        + match.getFromPos() + "-" + match.getToPos() + ": "
-                        + match.getMessage());
-                System.out.println("Suggested correction(s): "
-                        + match.getSuggestedReplacements());
+                messages.add(match.getMessage() + " (characters " + match.getFromPos() + " - " + match.getToPos() + "); Suggested correction(s): " + match.getSuggestedReplacements());
+                LOGGER.log(Level.WARNING, "{0} (characters {1} - {2}); Suggested correction(s): {3}", new Object[]{match.getMessage(), match.getFromPos(), match.getToPos(), match.getSuggestedReplacements()});
+                if (match.getSuggestedReplacements().size() > 0) {
+                    correctText.replace(match.getFromPos() - offset, match.getToPos() - offset, match.getSuggestedReplacements().get(0));
+                    offset += (match.getToPos() - match.getFromPos() - match.getSuggestedReplacements().get(0).length());
+                }
             }
+
+            return correctText.toString();
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
+            return text;
         }
     }
 
@@ -107,11 +124,6 @@ public class Spellchecking {
     public static JLanguageTool getSpellcheckerEn() {
         if (spellechecker_en == null) {
             spellechecker_en = new JLanguageTool(new AmericanEnglish());
-//            for (Rule rule : spellechecker_en.getAllRules()) {
-//                if (!rule.isDictionaryBasedSpellingRule()) {
-//                    spellechecker_en.disableRule(rule.getId());
-//                }
-//            }
         }
         return spellechecker_en;
     }
@@ -130,7 +142,7 @@ public class Spellchecking {
         return spellechecker_nl;
     }
 
-    public static void main(String[] args) {
-        checkText("A speling error is not that bad.", Lang.en);
+    public List<String> getMessages() {
+        return messages;
     }
 }
