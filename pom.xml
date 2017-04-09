@@ -183,6 +183,7 @@
         <!--<jaxen.version>1.1.6</jaxen.version>-->
         <!--<apache.jena.version>3.1.1</apache.jena.version>-->
         <javax.mail.version>1.5.5</javax.mail.version>
+        <languagetool.version>3.7</languagetool.version>
     </properties>
     <dependencies>
         <dependency>
@@ -235,6 +236,36 @@
             <artifactId>mallet</artifactId>
             <version>${mallet.version}</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-en</artifactId>
+            <version>${languagetool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-fr</artifactId>
+            <version>${languagetool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-it</artifactId>
+            <version>${languagetool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-es</artifactId>
+            <version>${languagetool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-nl</artifactId>
+            <version>${languagetool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-ro</artifactId>
+            <version>${languagetool.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
@@ -397,7 +428,7 @@
             <artifactId>nd4j-native</artifactId>
             <version>${dl4j.version}</version>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.apache.cassandra</groupId>
             <artifactId>cassandra-all</artifactId>
             <version>0.8.1</version>
