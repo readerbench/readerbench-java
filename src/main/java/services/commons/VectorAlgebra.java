@@ -50,10 +50,9 @@ public class VectorAlgebra {
 
         for (int i = 0; i < v.length; i++) {
             double sum = v[i];
-            INNER_LOOP:
             for (int j = 1; j < window; j++) {
                 if (i + j >= v.length || t[i + j] > max) {
-                    break INNER_LOOP;
+                    break;
                 }
                 if (i + j < v.length) {
                     sum += v[i + j];
@@ -72,12 +71,11 @@ public class VectorAlgebra {
 
         for (int i = 0; i < v.length; i++) {
             double sum = v[i];
-            INNER_LOOP:
             for (int j = 1; j < window; j++) {
                 if (i + j < v.length) {
                     sum += v[i + j];
                 } else {
-                    break INNER_LOOP;
+                    break;
                 }
             }
             result[i] = sum / window;
@@ -150,7 +148,7 @@ public class VectorAlgebra {
         }
         return Arrays.stream(v).map(x -> x * x / sum).toArray();
     }
-    
+
     public static double norm2(double[] x) {
         double norm = 0.0;
 
@@ -189,10 +187,7 @@ public class VectorAlgebra {
         if (sum1 > 0 && sum2 > 0) {
             sum = sum / (Math.sqrt(sum1) * Math.sqrt(sum2));
         }
-        if (sum >= 0 && sum <= 1) {
-            return sum;
-        }
-        return 0;
+        return Math.max(0, Math.min(sum, 1));
     }
 
     public static double pearsonCorrelation(double[] v1, double[] v2) {
