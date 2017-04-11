@@ -35,30 +35,6 @@ public class ActivationScoreLogger {
     private final List<Map<Word, WordActivation>> activationHistory;
     private final List<CMNodeDO> uniqueWordList;
 
-    private class WordActivation {
-
-        private final double activationValue;
-        private final boolean isActive;
-
-        public WordActivation(double activationValue, boolean isActive) {
-            this.activationValue = activationValue;
-            this.isActive = isActive;
-        }
-
-        public double getActivationValue() {
-            return activationValue;
-        }
-
-        public boolean isActive() {
-            return isActive;
-        }
-
-        @Override
-        public String toString() {
-            return this.activationValue + "," + (this.isActive ? "X" : "");
-        }
-    }
-
     public ActivationScoreLogger() {
         this.activationHistory = new ArrayList<>();
         this.uniqueWordList = new ArrayList<>();
@@ -140,5 +116,11 @@ public class ActivationScoreLogger {
         }
         return line;
     }
-
+    
+    public List<Map<Word, WordActivation>> getActivationHistory() {
+        return this.activationHistory;
+    }
+    public List<CMNodeDO> getUniqueWordList() {
+        return this.uniqueWordList;
+    }
 }
