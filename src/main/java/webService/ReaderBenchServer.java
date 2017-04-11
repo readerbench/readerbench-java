@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import org.apache.log4j.BasicConfigurator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -1452,6 +1453,8 @@ public class ReaderBenchServer {
 
     public static void initializeDB() {
         LOGGER.setLevel(Level.INFO); // changing log level
+        org.apache.log4j.BasicConfigurator.configure();
+        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         FileHandler fh;
         try {
             fh = new FileHandler("ReaderBenchServer.log");

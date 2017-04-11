@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -41,13 +40,13 @@ import data.document.Document;
 import data.document.Summary;
 import data.Lang;
 import data.document.ReadingStrategyType;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
-import services.readingStrategies.ReadingStrategies;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -56,15 +55,14 @@ import webService.ReaderBenchServer;
 
 public class Millington {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private final String path;
     private final Map<String, String> loadedDocuments;
     private final LSA lsa;
     private final LDA lda;
     private final Lang lang;
-    private List<ISemanticModel> models = new ArrayList<>();
-        
+    private final List<ISemanticModel> models = new ArrayList<>();
 
     public Millington(String path) {
         this.path = path;
@@ -74,7 +72,6 @@ public class Millington {
         this.lda = LDA.loadLDA("resources/config/EN/LDA/TASA", lang);
         models.add(lsa);
         models.add(lda);
-    
     }
 
     private String getTextFromFile(String path) {
@@ -193,7 +190,7 @@ public class Millington {
             }
 
             if (content == null || !content.contains(targetText)) {
-                logger.severe("Error processing row " + rowNo);
+                LOGGER.severe("Error processing row " + rowNo);
                 continue;
             }
 
@@ -238,16 +235,16 @@ public class Millington {
             out.close();
 
             if (rowNo % 10 == 0) {
-                logger.info("Finished processing " + rowNo + " rows ...");
+                LOGGER.log(Level.INFO, "Finished processing {0} rows ...", rowNo);
             }
             rowNo++;
         }
-        logger.info("Finished processing all rows...");
+        LOGGER.info("Finished processing all rows...");
     }
 
     public static void main(String[] args) {
         try {
-            
+
             ReaderBenchServer.initializeDB();
 
             Millington m = new Millington("resources/in/Millington");
