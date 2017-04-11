@@ -200,7 +200,7 @@ public class WordAssociationTest {
 //        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", lda1, 3, false, 20, 0.3);
 //        lda1 = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
 //        comp.compare("resources/config/ES/word lists/Normas Palabras C4819_es.csv", lda1, 3, true, 20, 0.3);
-        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
+        Word2VecModel w2v1 = Word2VecModel.loadWord2Vec("resources/in/AoE w2v/grade2", Lang.en);
         comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
 //        w2v1 = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en);
 //        comp.compare("resources/config/EN/word lists/Nelson norms_en.csv", w2v1, 3, true, 20, 0.3);
