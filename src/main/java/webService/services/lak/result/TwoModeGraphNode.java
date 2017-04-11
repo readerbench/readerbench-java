@@ -8,11 +8,13 @@ public class TwoModeGraphNode {
     private final TwoModeGraphNodeType type;
     private final String uri;
     private final String displayName;
+    private boolean active;
     
     public TwoModeGraphNode(TwoModeGraphNodeType type, String uri, String displayName) {
         this.type = type;
         this.uri = uri;
         this.displayName = displayName;
+        this.active = true;
     }
     
     public String getUri() {
@@ -23,6 +25,13 @@ public class TwoModeGraphNode {
     }
     public String getDisplayName() {
         return this.displayName;
+    }
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
     
     @Override

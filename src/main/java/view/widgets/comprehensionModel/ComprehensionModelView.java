@@ -231,10 +231,10 @@ public class ComprehensionModelView extends JFrame {
         CMGraphDO currentSyntacticGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
         CMGraphDO currentGraph = this.cm.getCurrentGraph();
 
-        currentGraph.combineWithSyntacticLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel());
+        currentGraph.combineWithSyntacticLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel(), this.cm.getMaxDictionaryExpansion());
         this.cm.setCurrentGraph(currentGraph);
         this.cm.applyPageRank(this.sentenceIndex);
-        this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
+        this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex, true);
 
         List<CMNodeDO> nodeItemList = currentGraph.getNodeList();
 

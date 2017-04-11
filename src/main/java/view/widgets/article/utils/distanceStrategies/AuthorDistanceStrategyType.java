@@ -16,5 +16,5 @@
 package view.widgets.article.utils.distanceStrategies;
 
 public enum AuthorDistanceStrategyType {
-	SemanticDistance, SemanticPrunnedByCoCitOrCoAuth, CoAuthorshipDistance, CoCitationsDistance
+	SemanticDistance, SemanticPrunnedByCoCitOrCoAuth, CoAuthorshipDistance, CoCitationsDistance, SyntacticDistance
 }

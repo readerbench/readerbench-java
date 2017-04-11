@@ -199,17 +199,17 @@ public class ComprehensionModelManagementView extends JFrame {
     public void openComprehensionModel() {
         int hdpGrade = Integer.parseInt(this.txtFieldHdpGrade.getText());
         double semanticThreshold = Double.parseDouble(this.textFieldSemanticThreshold.getText());
-        double activationThreshold = Double.parseDouble(this.textFieldActivationThreshold.getText());
-        int noActiveWords = Integer.parseInt(this.textFieldNoActiveWords.getText());
         int noActiveWordsIncrement = Integer.parseInt(this.textFieldNoActiveWordsIncrement.getText());
         int noTopConcepts = Integer.parseInt(this.textFieldTopConcepts.getText());
 
+        double activationThreshold = Double.parseDouble(this.textFieldActivationThreshold.getText());
+        int noActiveWords = Integer.parseInt(this.textFieldNoActiveWords.getText());
+        
         String text = this.textAreaContent.getText();
 
         EventQueue.invokeLater(() -> {
             ComprehensionModel cm = new ComprehensionModel(text,
-                    LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en), semanticThreshold, noTopConcepts,
-                    activationThreshold, noActiveWords, noActiveWordsIncrement);
+                    LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en), activationThreshold, noActiveWords);
             ComprehensionModelView view = new ComprehensionModelView(cm);
             view.setVisible(true);
         });

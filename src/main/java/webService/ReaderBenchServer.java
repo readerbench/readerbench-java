@@ -110,6 +110,9 @@ import webService.semanticSearch.SearchClient;
 import webService.services.ConceptMap;
 import webService.services.SentimentAnalysis;
 import webService.services.TextualComplexity;
+import webService.services.cimodel.ComprehensionModelService;
+import webService.services.cimodel.result.CMResult;
+import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -1426,6 +1429,32 @@ public class ReaderBenchServer {
             queryResult.setData(resultTopic);
             response.type("application/json");
             return queryResult.convertToJson();
+        });
+        
+        
+        Spark.post("/ciModel", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+            
+            double minActivationThreshold;
+            try {
+                minActivationThreshold = Double.parseDouble(hm.get("minActivationThreshold"));
+            } catch (NullPointerException e) {
+                minActivationThreshold = 0.3;
+            }
+            
+            int maxSemanticExpand;
+            try {
+                maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
+            } catch(Exception e) {
+                maxSemanticExpand = 5;
+            }
+            
+            ComprehensionModelService cmService = new ComprehensionModelService(minActivationThreshold, maxSemanticExpand);
+            CMResult result = cmService.run(hm.get("text"));
+            QueryResultCM queryResult = new QueryResultCM(result);
+            String resultStr = queryResult.convertToJson();
+            return resultStr;
         });
     }
 
