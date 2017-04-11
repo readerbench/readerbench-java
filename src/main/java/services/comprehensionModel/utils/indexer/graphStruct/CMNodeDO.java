@@ -19,15 +19,17 @@ import data.Word;
 
 public class CMNodeDO implements Comparable<CMNodeDO> {
 
-	private final Word word;
-	private final CMNodeType nodeType;
-	private boolean isActive;
-	
-	public CMNodeDO(Word word, CMNodeType nodeType) {
-		this.word = word;
-		this.nodeType = nodeType;
-		this.isActive = false;
-	}
+    private final Word word;
+    private CMNodeType nodeType;
+    private boolean isActive;
+    private double activationScore;
+
+    public CMNodeDO(Word word, CMNodeType nodeType) {
+        this.word = word;
+        this.nodeType = nodeType;
+        this.isActive = false;
+        this.activationScore = 0.0;
+    }
 
     public Word getWord() {
         return word;
@@ -36,7 +38,11 @@ public class CMNodeDO implements Comparable<CMNodeDO> {
     public CMNodeType getNodeType() {
         return nodeType;
     }
-	
+
+    public void setNodeType(CMNodeType nodeType) {
+        this.nodeType = nodeType;
+    }
+
     public boolean isActive() {
         return isActive;
     }
@@ -48,20 +54,37 @@ public class CMNodeDO implements Comparable<CMNodeDO> {
     public void deactivate() {
         isActive = false;
     }
-	
-	@Override
-	public boolean equals(Object obj) {
-		CMNodeDO node = (CMNodeDO) obj;
-		return this.word.getLemma().equals(node.word.getLemma());
-	}
-	public int hashCode() {
+
+    public double getActivationScore() {
+        return this.activationScore;
+    }
+
+    public void setActivationScore(double activationScore) {
+        this.activationScore = activationScore;
+    }
+
+    public void incrementActivationScore() {
+        this.activationScore += 1.0;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        CMNodeDO node = (CMNodeDO) obj;
+        return this.word.getLemma().equals(node.word.getLemma());
+    }
+
+    @Override
+    public int hashCode() {
         return this.word.getLemma().hashCode();
     }
-	@Override
-	public int compareTo(CMNodeDO otherNode) {
-		return this.word.getLemma().compareTo(otherNode.word.getLemma());
-	}
-	public String toString() {
-		return this.word.getLemma();
-	}
+
+    @Override
+    public int compareTo(CMNodeDO otherNode) {
+        return this.word.getLemma().compareTo(otherNode.word.getLemma());
+    }
+
+    @Override
+    public String toString() {
+        return this.word.getLemma() + " (" + this.nodeType.toString() + "-" + this.activationScore + ")" + " " + (this.isActive ? "1" : "0");
+    }
 }

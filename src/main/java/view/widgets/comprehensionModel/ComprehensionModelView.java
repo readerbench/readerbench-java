@@ -37,7 +37,6 @@ import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.EtchedBorder;
 
-
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -177,11 +176,14 @@ public class ComprehensionModelView extends JFrame {
         Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
         Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
                 RankingNodeSizeTransformer.class);
-        RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-                .getTransformer();
-        centralityTransformer.setMinSize(3);
-        centralityTransformer.setMaxSize(10);
-        appearanceController.transform(centralityRanking);
+        try {
+            RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+                    .getTransformer();
+            centralityTransformer.setMinSize(3);
+            centralityTransformer.setMaxSize(10);
+            appearanceController.transform(centralityRanking);
+        } catch (Exception e) {
+        }
 
         // Preview configuration
         PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
@@ -225,20 +227,16 @@ public class ComprehensionModelView extends JFrame {
 
         Map<CMNodeDO, Node> nodes = new TreeMap<>();
 
-        this.cm.markAllNodesAsInactive();
         WordDistanceIndexer syntacticIndexer = this.cm.getSyntacticIndexerAtIndex(this.sentenceIndex);
+        CMGraphDO currentSyntacticGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
+        CMGraphDO currentGraph = this.cm.getCurrentGraph();
 
-        CMGraphDO cmGraph = syntacticIndexer.getCMGraph(CMNodeType.TextBased);
-        WordSimilarityContainer wordSimilarityContainer = this.cm.getWordSimilarityContainer();
-        cmGraph.combineWithLinksFrom(wordSimilarityContainer, this.cm.getNoTopSimilarWords());
-        cmGraph = cmGraph.getCombinedGraph(this.cm.getCurrentGraph());
-
-        this.cm.setCurrentGraph(cmGraph);
-        this.cm.updateActivationScoreMapAtIndex(this.sentenceIndex);
+        currentGraph.combineWithSyntacticLinksFrom(currentSyntacticGraph, this.cm.getSemanticModel());
+        this.cm.setCurrentGraph(currentGraph);
         this.cm.applyPageRank(this.sentenceIndex);
         this.cm.logSavedScores(syntacticIndexer.getCMGraph(CMNodeType.TextBased), this.sentenceIndex);
 
-        List<CMNodeDO> nodeItemList = cmGraph.getNodeList();
+        List<CMNodeDO> nodeItemList = currentGraph.getNodeList();
 
         nodeItemList.stream().forEach((currentNode) -> {
             String text = currentNode.getWord().getLemma();
@@ -260,7 +258,11 @@ public class ComprehensionModelView extends JFrame {
             outMap.put(n, currentNode);
         });
 
-        for (CMEdgeDO edge : cmGraph.getEdgeList()) {
+        for (CMEdgeDO edge : currentGraph.getEdgeList()) {
+            if (!edge.isActive()) {
+                continue;
+            }
+
             int distanceLbl = graphModel.addEdgeType(edge.getEdgeTypeString());
             Edge e = graphModel.factory().newEdge(nodes.get(edge.getNode1()), nodes.get(edge.getNode2()), distanceLbl, edge.getScore(), false);
             e.setLabel("");
@@ -272,17 +274,20 @@ public class ComprehensionModelView extends JFrame {
             }
             e.setColor(color);
 
-            graph.addEdge(e);
+            try {
+                graph.addEdge(e);
+            } catch (Exception ee) {
+                ee.printStackTrace();
+            }
         }
-
         return outMap;
     }
 
     private Color getNodeColor(CMNodeDO node) {
-    	if (!node.isActive()) {
+        if (!node.isActive()) {
             return COLOR_INACTIVE;
         }
-    	if (node.getNodeType() == CMNodeType.Inferred) {
+        if (node.getNodeType() == CMNodeType.Inferred) {
             return COLOR_SEMANTIC;
         }
         if (node.getNodeType() == CMNodeType.TextBased) {

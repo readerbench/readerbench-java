@@ -84,6 +84,7 @@ import spark.Response;
 import spark.Spark;
 import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
+import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
@@ -93,6 +94,7 @@ import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
 import webService.result.ResultFile;
+import webService.result.ResultJobQuest;
 import webService.result.ResultKeyword;
 import webService.result.ResultPdfToText;
 import webService.result.ResultReadingStrategy;
@@ -871,6 +873,142 @@ public class ReaderBenchServer {
 
             queryResult.setData(result);
 
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/job-quest", (request, response) -> {
+            Double notEnoughWords = .5;
+            Double tooManyWords = 1.5;
+
+            Integer juniorAvgWords = 320;
+            Integer seniorAvgWords = 376;
+            Set<String> socialNetworksLinks = new HashSet<>();
+            socialNetworksLinks.add("LinkedIn");
+            socialNetworksLinks.add("Viadeo");
+
+            Set<String> competencesSectionTitles = new HashSet<>();
+            competencesSectionTitles.add("Compétences");
+            competencesSectionTitles.add("Competences");
+            competencesSectionTitles.add("Compétence");
+            competencesSectionTitles.add("Competence");
+            competencesSectionTitles.add("Skills");
+
+            Set<String> requiredParams = setInitialRequiredParams();
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            requiredParams.add("experience"); // junior or senior
+            requiredParams.add("cv-file");
+            requiredParams.add("threshold");
+            errorIfParamsMissing(requiredParams, json.keySet());
+
+            Map<String, String> hm = hmParams(json);
+            Lang lang = Lang.getLang(hm.get("language"));
+            Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
+            Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
+            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
+                lsaCorpora = hm.get("lsa");
+            }
+            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
+                ldaCorpora = hm.get("lda");
+            }
+            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
+                w2vCorpora = hm.get("w2v");
+            }
+            List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+            Integer experience = Integer.parseInt(hm.get("experience"));
+            Double minThreshold;
+            try {
+                minThreshold = Double.parseDouble(hm.get("threshold"));
+            } catch (NullPointerException e) {
+                minThreshold = 0.3;
+            }
+            Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
+            Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
+            Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
+
+            PdfToTextConverter pdfConverter = new PdfToTextConverter();
+            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
+            // ignore lines containing at least one of the words in the ignoreList list
+            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
+            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
+
+            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            String keywordsText = hm.get("keywords");
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+
+            QueryResultJobQuest queryResult = new QueryResultJobQuest();
+            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
+            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+
+            StringBuilder sb = new StringBuilder();
+            boolean keywordWarning = false;
+            sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
+            for (String keyword : keywordsList) {
+                boolean found = false;
+                for (ResultKeyword resultKeyword : result.getKeywords()) {
+                    if (keyword.equals(resultKeyword.getName())) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (!keywordWarning) {
+                        keywordWarning = true;
+                    }
+                    sb.append(keyword).append(", ");
+                }
+            }
+            if (keywordWarning) {
+                result.getWarnings().add(sb.toString());
+            }
+
+            if (socialNetworksLinksFound.get("LinkedIn") == null) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
+            }
+            if (socialNetworksLinksFound.get("Viadeo") == null) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
+            }
+
+            if (experience == 0) {
+                if (result.getPages() > 1) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("junior_too_many_pages"));
+                }
+            } else if (experience == 1) {
+                if (result.getPages() == 1) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("senior_too_few_pages"));
+                } else if (result.getPages() > 3) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("senior_too_many_pages"));
+                }
+            }
+
+            if (!pdfConverter.sectionExists(cvContent, competencesSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("competences_not_found"));
+            }
+
+            if (experience == 0) {
+                if (result.getWords() < notEnoughWords * juniorAvgWords) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("junior_too_few_words"));
+                } else if (result.getWords() > tooManyWords * juniorAvgWords) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("junior_too_many_words"));
+                }
+            } else if (experience == 1) {
+                if (result.getWords() < notEnoughWords * seniorAvgWords) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("senior_too_few_words"));
+                } else if (result.getWords() > tooManyWords * seniorAvgWords) {
+                    result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("senior_too_many_words"));
+                }
+            }
+
+            if (result.getColors() > 3) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_colors"));
+            }
+            
+            if (result.getImages() > 10) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_images"));
+            }
+
+            queryResult.setData(result);
             response.type("application/json");
             return queryResult.convertToJson();
         });
