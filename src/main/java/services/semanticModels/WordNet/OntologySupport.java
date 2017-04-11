@@ -240,6 +240,7 @@ public class OntologySupport {
         return wnd.lemmaToSynsets.getOrDefault(word.getLemma(), new ArrayList<>()).stream()
                 .flatMap(synset -> wnd.hyperRelations.getOrDefault(synset, new ArrayList<>()).stream())
                 .flatMap(synset -> wnd.synsetToEntries.getOrDefault(synset, new ArrayList<>()).stream())
+                .filter(syn -> !syn.equals(word.getLemma()))
                 .collect(Collectors.toSet());
     }
 
@@ -330,14 +331,11 @@ public class OntologySupport {
                         in.close();
                         new File(fileName).delete();
                         new File(fileName + ".tmp").renameTo(new File(fileName));
-                    }
-                    catch (FileNotFoundException ex) {
+                    } catch (FileNotFoundException ex) {
                         Exceptions.printStackTrace(ex);
-                    }
-                    catch (IOException ex) {
+                    } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
-                    }
-                    finally {
+                    } finally {
                         try {
                             if (in != null) {
                                 in.close();
@@ -345,8 +343,7 @@ public class OntologySupport {
                             if (out != null) {
                                 out.close();
                             }
-                        }
-                        catch (IOException ex) {
+                        } catch (IOException ex) {
                             Exceptions.printStackTrace(ex);
                         }
                     }
@@ -387,9 +384,9 @@ public class OntologySupport {
         System.out.println(OntologySupport.getWordSenses(w1));
         System.out.println(OntologySupport.getSynonyms(w1));
         System.out.println(OntologySupport.getSynonyms(w2));
-        System.out.println("w1 similar -> " +  OntologySupport.getSimilarConcepts(w1));
-        System.out.println("w1 extended -> " +  OntologySupport.getExtendedSymilarConcepts(w1));
-        
+        System.out.println("w1 similar -> " + OntologySupport.getSimilarConcepts(w1));
+        System.out.println("w1 extended -> " + OntologySupport.getExtendedSymilarConcepts(w1));
+
         /*Word w1 = Word.getWordFromConcept("horse", Lang.eng);
         Word w2 = Word.getWordFromConcept("dog", Lang.eng);
         w1.setPOS("noun");

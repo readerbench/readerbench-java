@@ -15,22 +15,13 @@
  */
 package services.comprehensionModel;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import data.Sentence;
 import services.comprehensionModel.utils.ActivationScoreLogger;
 import services.comprehensionModel.utils.indexer.CMIndexer;
 import services.comprehensionModel.utils.indexer.WordDistanceIndexer;
 import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
-import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
-import services.comprehensionModel.utils.pageRank.NodeRank;
 import services.comprehensionModel.utils.pageRank.PageRank;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.utils.WordSimilarityContainer;
 
 public class ComprehensionModel {
 
@@ -54,10 +45,6 @@ public class ComprehensionModel {
         this.noTopSimilarWords = noTopSimilarWords;
     }
 
-    public WordSimilarityContainer getWordSimilarityContainer() {
-        return this.cmIndexer.getWordSimilarityContainer();
-    }
-
     public CMGraphDO getCurrentGraph() {
         return currentGraph;
     }
@@ -65,7 +52,7 @@ public class ComprehensionModel {
     public void setCurrentGraph(CMGraphDO currentGraph) {
         this.currentGraph = currentGraph;
     }
-    
+
     public int getTotalNoOfPhrases() {
         return this.cmIndexer.getSyntacticIndexerList().size();
     }
@@ -78,85 +65,57 @@ public class ComprehensionModel {
         return this.cmIndexer.getSyntacticIndexerList().get(index);
     }
 
-    public Map<CMNodeDO, Double> getNodeActivationScoreMap() {
-        return this.cmIndexer.getNodeActivationScoreMap();
-    }
-
-    public void updateActivationScoreMapAtIndex(int index) {
-        WordDistanceIndexer indexer = this.getSyntacticIndexerAtIndex(index);
-        for (int i = 0; i < indexer.getWordList().size(); i++) {
-            CMNodeDO node = new CMNodeDO(indexer.getWordList().get(i), CMNodeType.TextBased);
-            double score = this.getNodeActivationScoreMap().get(node);
-            score++;
-            this.getNodeActivationScoreMap().put(node, score);
-        }
-        this.currentGraph.getNodeList().stream().filter((otherNode) -> (!this.getNodeActivationScoreMap().containsKey(otherNode))).forEach((otherNode) -> {
-            this.getNodeActivationScoreMap().put(otherNode, 0.0);
-        });
-    }
-
-    public void markAllNodesAsInactive() {
-        this.currentGraph.getNodeList().stream().forEach((node) -> {
-            node.deactivate();
-        });
-    }
-
     public void applyPageRank(int sentenceIndex) {
         PageRank pageRank = new PageRank();
-        Map<CMNodeDO, Double> updatedNodeActivationScoreMap = pageRank.runPageRank(this.getNodeActivationScoreMap(),
-                this.currentGraph);
-
-        int maxWords = this.maxNoActiveWords + (sentenceIndex * this.maxNoActiveWordsIncrement);
-
-        List<NodeRank> nodeRankList = NodeRank.convertMapToNodeRankList(updatedNodeActivationScoreMap);
-        Collections.sort(nodeRankList, Collections.reverseOrder());
-
-        this.activateFirstWords(//updatedNodeActivationScoreMap, 
-                nodeRankList, maxWords);
-
-        Iterator<CMNodeDO> nodeIterator = updatedNodeActivationScoreMap.keySet().iterator();
-        while (nodeIterator.hasNext()) {
-            CMNodeDO node = nodeIterator.next();
-            this.getNodeActivationScoreMap().put(node, updatedNodeActivationScoreMap.get(node));
-        }
-
-        this.activationScoreLogger.saveScores(updatedNodeActivationScoreMap);
+        pageRank.runPageRank(this.currentGraph);
+        this.normalizeActivationScoreMapWithMax();
+        this.activateWordsOverThreshold();
+        this.activationScoreLogger.saveScores(this.currentGraph.getActivationMap());
     }
 
-    private void activateFirstWords(//Map<CMNodeDO, Double> updatedNodeActivationScoreMap, 
-            List<NodeRank> nodeRankList, int maxWords) {
-        int noActivatedWord = 0;
-        //Set<CMNodeDO> activeNodeSet = new TreeSet<>();
-        for (NodeRank nodeRank : nodeRankList) {
-            if (nodeRank.getValue() < this.minActivationThreshold) {
-                break;
+    private void activateWordsOverThreshold() {
+        this.currentGraph.getNodeList().stream().forEach(node -> {
+            if (node.getActivationScore() < this.minActivationThreshold) {
+                node.deactivate();
+                this.currentGraph.getEdgeList(node).stream().forEach(edge -> {
+                    edge.deactivate();
+                });
+            } else {
+                node.activate();
             }
-            for (CMNodeDO currentNode : this.currentGraph.getNodeList()) {
-                if (currentNode.equals(nodeRank.getNode())) {
-                    currentNode.activate();
-//                    activeNodeSet.add(currentNode);
-                    noActivatedWord++;
-                    break;
-                }
-            }
-            if (noActivatedWord >= maxWords) {
-                break;
-            }
+        });
+    }
+
+    private void normalizeActivationScoreMapWithMax() {
+        double maxValue = this.currentGraph.getNodeList()
+                .stream()
+                .filter(node -> node.isActive())
+                .map(node -> {
+                    return node.getActivationScore();
+                })
+                .max(Double::compare).get();
+
+        if (maxValue == 0.0) {
+            return;
         }
-//		updatedNodeActivationScoreMap.keySet().forEach((node) -> {
-//			if (!activeNodeSet.contains(node)) {
-//				double oldValue = updatedNodeActivationScoreMap.get(node);
-//				updatedNodeActivationScoreMap.put(node, oldValue + 1.0);
-//			} else {
-//				updatedNodeActivationScoreMap.put(node, 0.0);
-//			}
-//		});
+
+        this.currentGraph.getNodeList()
+                .stream()
+                .filter(node -> node.isActive())
+                .forEach(node -> {
+                    double normalizedActivationScore = node.getActivationScore() / maxValue;
+                    node.setActivationScore(normalizedActivationScore);
+                });
     }
 
     public int getNoTopSimilarWords() {
         return this.noTopSimilarWords;
     }
-    
+
+    public ISemanticModel getSemanticModel() {
+        return this.cmIndexer.getSemanticModel();
+    }
+
     public void logSavedScores(CMGraphDO syntacticGraph, int sentenceIndex) {
         this.activationScoreLogger.saveNodes(syntacticGraph);
         this.activationScoreLogger.saveNodes(this.currentGraph);
