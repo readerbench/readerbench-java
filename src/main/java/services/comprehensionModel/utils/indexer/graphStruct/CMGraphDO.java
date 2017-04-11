@@ -18,7 +18,6 @@ package services.comprehensionModel.utils.indexer.graphStruct;
 import data.Word;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -243,8 +242,8 @@ public class CMGraphDO {
         // sort the potential inferred edge list
         Collections.sort(potentialInferredNodeList, (n1, n2) -> (-1) * new Double(n1.getActivationScore()).compareTo(n2.getActivationScore()));
 
-        // keep only the first `maxSemanticExpand` possible inf
-        int maxInferredExpand = syntacticGraph.getNodeList().size();
+        // keep only the first `maxInferredExpand` possible inf
+        int maxInferredExpand = Math.min(5, syntacticGraph.getNodeList().size());
         List<CMNodeDO> inferredNodeList = potentialInferredNodeList.subList(0, Math.min(maxInferredExpand, potentialInferredNodeList.size()));
 
         inferredNodeList.stream().forEach(inferredNode -> {

@@ -61,6 +61,10 @@ public class ResearchArticle extends Document {
             List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         super(path, docTmp, models, lang, usePOSTagging);
     }
+    
+    public ResearchArticle(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels, Lang lang, boolean usePOSTagging) {
+        super(docTmp, semModels, lang, usePOSTagging);
+    }
 
     public static ResearchArticle load(String pathToDoc, Map<SimilarityType, String> modelPaths,
             Lang lang, boolean usePOSTagging, boolean cleanInput) {
