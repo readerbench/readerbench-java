@@ -72,7 +72,7 @@ public class ComprehensionModelService {
                 graph.nodeList.add(node);
             });
             
-            currentGraph.getEdgeList().stream().filter((edge) -> edge.isActive()).map((edge) -> {
+            currentGraph.getEdgeList().stream().map((edge) -> {
                 TwoModeGraphEdge outEdge = new TwoModeGraphEdge(AuthorDistanceStrategyType.SemanticDistance, edge.getScore(), 
                         edge.getNode1().getWord().getLemma(), edge.getNode2().getWord().getLemma());
                 if(edge.getEdgeType() == CMEdgeType.Syntactic) {
