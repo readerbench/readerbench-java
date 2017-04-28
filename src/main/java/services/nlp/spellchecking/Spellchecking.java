@@ -8,9 +8,14 @@ package services.nlp.spellchecking;
 import data.Lang;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.languagetool.JLanguageTool;
 import org.languagetool.language.AmericanEnglish;
 import org.languagetool.language.Dutch;
@@ -37,9 +42,9 @@ public class Spellchecking {
     public static JLanguageTool spellechecker_es = null;
     public static JLanguageTool spellechecker_nl = null;
 
-    private List<String> messages;
+    private List<String> messages = new ArrayList<>();
 
-    public String checkText(String text, Lang lang) {
+    public String checkText(String text, Lang lang, String inputText) {
         if (text == null || text.length() == 0) {
             return "";
         }
@@ -49,13 +54,27 @@ public class Spellchecking {
             List<RuleMatch> matches = langTool.check(text);
             messages = new ArrayList<>();
 
+            Matcher m = Pattern.compile("\\w+").matcher(inputText);
+            Set<String> tokens = new TreeSet<>();
+            while (m.find()) {
+                tokens.add(m.group(0));
+            }
+
             int offset = 0;
             for (RuleMatch match : matches) {
                 messages.add(match.getMessage() + " (characters " + match.getFromPos() + " - " + match.getToPos() + "); Suggested correction(s): " + match.getSuggestedReplacements());
                 LOGGER.log(Level.WARNING, "{0} (characters {1} - {2}); Suggested correction(s): {3}", new Object[]{match.getMessage(), match.getFromPos(), match.getToPos(), match.getSuggestedReplacements()});
                 if (match.getSuggestedReplacements().size() > 0) {
-                    correctText.replace(match.getFromPos() - offset, match.getToPos() - offset, match.getSuggestedReplacements().get(0));
-                    offset += (match.getToPos() - match.getFromPos() - match.getSuggestedReplacements().get(0).length());
+                    //prioritize words from the previous text
+                    int bestMatch = 0;
+                    for (int i = 0; i < match.getSuggestedReplacements().size(); i++) {
+                        if (tokens.contains(match.getSuggestedReplacements().get(i))) {
+                            bestMatch = i;
+                            break;
+                        }
+                    }
+                    correctText.replace(match.getFromPos() - offset, match.getToPos() - offset, match.getSuggestedReplacements().get(bestMatch));
+                    offset += (match.getToPos() - match.getFromPos() - match.getSuggestedReplacements().get(bestMatch).length());
                 }
             }
 
