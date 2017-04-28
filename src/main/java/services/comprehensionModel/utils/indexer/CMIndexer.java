@@ -40,13 +40,6 @@ public class CMIndexer {
 
     private List<WordDistanceIndexer> syntacticIndexerList;
 
-    public CMIndexer(String text, ISemanticModel semanticModel, double threshold, int noTopSimilarWords) {
-        this.text = text;
-        this.semanticModel = semanticModel;
-        this.loadDocument();
-        this.indexSyntacticDistances();
-    }
-
     public CMIndexer(String text, ISemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;

@@ -531,6 +531,11 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.0-b01</version>
         </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-nlp-uima</artifactId>
+            <version>0.8.0</version>
+        </dependency>
     </dependencies>
     <!--<reporting>
         <plugins>

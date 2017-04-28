@@ -25,24 +25,19 @@ import services.semanticModels.ISemanticModel;
 
 public class ComprehensionModel {
 
-    private final double minActivationThreshold;
-    private final int maxNoActiveWords;
-    private final int maxNoActiveWordsIncrement;
-    private final int noTopSimilarWords;
+    private final double minActivationScore;
+    private final int maxDictionaryExpansion;
     private final ActivationScoreLogger activationScoreLogger;
 
     private final CMIndexer cmIndexer;
     private CMGraphDO currentGraph;
 
-    public ComprehensionModel(String text, ISemanticModel semModel, double semanticThreshold, int noTopSimilarWords, double minActivationThreshold,
-            int maxNoActiveWords, int maxNoActiveWordsIncrement) {
-        this.cmIndexer = new CMIndexer(text, semModel, semanticThreshold, noTopSimilarWords);
+    public ComprehensionModel(String text, ISemanticModel semModel, double minActivationScore, int maxDictionaryExpansion) {
+        this.cmIndexer = new CMIndexer(text, semModel);
         this.currentGraph = new CMGraphDO();
-        this.minActivationThreshold = minActivationThreshold;
-        this.maxNoActiveWords = maxNoActiveWords;
-        this.maxNoActiveWordsIncrement = maxNoActiveWordsIncrement;
+        this.minActivationScore = minActivationScore;
+        this.maxDictionaryExpansion = maxDictionaryExpansion;
         this.activationScoreLogger = new ActivationScoreLogger();
-        this.noTopSimilarWords = noTopSimilarWords;
     }
 
     public CMGraphDO getCurrentGraph() {
@@ -75,7 +70,7 @@ public class ComprehensionModel {
 
     private void activateWordsOverThreshold() {
         this.currentGraph.getNodeList().stream().forEach(node -> {
-            if (node.getActivationScore() < this.minActivationThreshold) {
+            if (node.getActivationScore() < this.minActivationScore) {
                 node.deactivate();
                 this.currentGraph.getEdgeList(node).stream().forEach(edge -> {
                     edge.deactivate();
@@ -107,18 +102,24 @@ public class ComprehensionModel {
                     node.setActivationScore(normalizedActivationScore);
                 });
     }
-
-    public int getNoTopSimilarWords() {
-        return this.noTopSimilarWords;
-    }
-
+    
     public ISemanticModel getSemanticModel() {
         return this.cmIndexer.getSemanticModel();
     }
+    
+    public int getMaxDictionaryExpansion() {
+        return this.maxDictionaryExpansion;
+    }
+    
+    public ActivationScoreLogger getActivationScoreLogger() {
+        return this.activationScoreLogger;
+    }
 
-    public void logSavedScores(CMGraphDO syntacticGraph, int sentenceIndex) {
+    public void logSavedScores(CMGraphDO syntacticGraph, int sentenceIndex, boolean toFile) {
         this.activationScoreLogger.saveNodes(syntacticGraph);
         this.activationScoreLogger.saveNodes(this.currentGraph);
-        this.activationScoreLogger.logSavedScores();
+        if(toFile) {
+            this.activationScoreLogger.logSavedScores();
+        }
     }
 }

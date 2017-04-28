@@ -179,7 +179,7 @@ public class CMGraphDO {
         }
     }
 
-    public void combineWithSyntacticLinksFrom(CMGraphDO syntacticGraph, ISemanticModel semanticModel) {
+    public void combineWithSyntacticLinksFrom(CMGraphDO syntacticGraph, ISemanticModel semanticModel, int maxDictionaryExpansion) {
         List<ISemanticModel> models = new ArrayList();
         models.add(semanticModel);
 
@@ -242,8 +242,9 @@ public class CMGraphDO {
         // sort the potential inferred edge list
         Collections.sort(potentialInferredNodeList, (n1, n2) -> (-1) * new Double(n1.getActivationScore()).compareTo(n2.getActivationScore()));
 
-        // keep only the first `maxInferredExpand` possible inf
-        int maxInferredExpand = Math.min(5, syntacticGraph.getNodeList().size());
+        // expand up to maxDictionaryExpansion dictionary words
+        int maxInferredExpand = maxDictionaryExpansion;
+        
         List<CMNodeDO> inferredNodeList = potentialInferredNodeList.subList(0, Math.min(maxInferredExpand, potentialInferredNodeList.size()));
 
         inferredNodeList.stream().forEach(inferredNode -> {

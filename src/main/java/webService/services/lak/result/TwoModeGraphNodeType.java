@@ -7,5 +7,7 @@ package webService.services.lak.result;
 public enum TwoModeGraphNodeType {
     Author,
     Article,
-    UserQuery
+    UserQuery,
+    Inferred,
+    TextBased
 }
