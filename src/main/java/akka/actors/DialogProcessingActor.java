@@ -41,13 +41,13 @@ public class DialogProcessingActor extends UntypedActor {
             LOGGER.info("The number of dialogs for processing are: " + dialogMessage.getDialogs().size());
 
             //TODO - test process dialogs
-//            SerialProcessing.processCorpusDialogs(dialogMessage.getDialogs(),"resources/config/EN/LSA/TASA_LAK",
-//                    "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true);
+            LOGGER.info("Loading multiple dialogs ...");
             Community community = new Community().loadMultipleDialogs(dialogMessage.getDialogs(), LANGUAGE,
                     NEEDS_ANONYMIZATION, START_DATE, END_DATE, MONTH_INCREMENT, DAY_INCREMENT, LSA_PATH, LDA_PATH,
                     USE_POS_TAGGING, COMPUTE_DIALOGISM);
 
             if (community != null) {
+                LOGGER.info("Compute metrics ...");
                 community.computeMetrics(USE_TEXTUAL_COMPLEXITY, true, true);
                 File f = new File(ROOT_PATH);
                 community.export(ROOT_PATH + "/" + f.getName() + ".csv", true, true);

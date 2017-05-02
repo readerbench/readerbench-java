@@ -583,6 +583,14 @@
         </dependency>
         <!-- BEGIN akka dependency -->
 
+        <!-- SolrReaderBench -->
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>solr</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <!-- /SolrReaderBench -->
+
     </dependencies>
     <!--<reporting>
         <plugins>

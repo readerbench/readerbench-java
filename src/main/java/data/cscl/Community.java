@@ -391,6 +391,7 @@ public class Community extends AnalysisElement {
         Community community = new Community(lang, needsAnonymization, startDate, endDate);
         for (Dialog dialog : dialogs) {
 
+            LOGGER.info("Start - loading Dialog " + dialog.getId());
             Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
             modelPaths.put(SimilarityType.LSA, pathToLSA);
             modelPaths.put(SimilarityType.LDA, pathToLDA);
@@ -399,7 +400,7 @@ public class Community extends AnalysisElement {
                     computeDialogism);
 
             community.getDocuments().add(c);
-
+            LOGGER.info("End - loading Dialog " + dialog.getId());
         }
 
 

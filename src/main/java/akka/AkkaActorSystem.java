@@ -34,8 +34,8 @@ public class AkkaActorSystem {
         communityActor = this.ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
         solrDataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class),
                 "solr-data-processing-actor");
-        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class),
-                "dialog-processing-actor");
+        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
+                        .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
         //TODO - add other actors
     }
 
