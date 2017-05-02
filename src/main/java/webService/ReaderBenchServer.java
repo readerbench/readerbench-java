@@ -72,7 +72,6 @@ import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.converters.PdfToTextConverter;
-import services.mail.SendMail;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -86,6 +85,7 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;
+import webService.mail.SendMail;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
 import webService.result.ResultAnswerMatching;
@@ -197,7 +197,7 @@ public class ReaderBenchServer {
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param language Language to be used
+     * @param lang Language to be used
      * @param model Model to be used
      * @param corpus Corpus to be used
      * @return
@@ -226,7 +226,7 @@ public class ReaderBenchServer {
      * Retrieves similar concepts for a given concepts
      *
      * @param seed The word
-     * @param language Language of the word
+     * @param lang Language of the word
      * @param model Semantic model to be used
      * @param corpus Corpus to be used for semantic model
      * @param minThreshold Threshold to be used for similar concepts
@@ -257,7 +257,7 @@ public class ReaderBenchServer {
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param language The language of the models
+     * @param lang The language of the models
      * @param models The models
      * @param usePOSTagging use or not POS tagging
      * @return
