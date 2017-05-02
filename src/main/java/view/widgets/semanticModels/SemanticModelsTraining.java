@@ -44,7 +44,6 @@ import javax.swing.filechooser.FileFilter;
 import data.Lang;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
-import services.nlp.listOfWords.ListOfWords;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;

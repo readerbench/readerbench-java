@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package services.sentiment;
+package runtime.db;
 
 import dao.DAOService;
 import dao.EntityXValenceDAO;
@@ -42,7 +42,7 @@ import services.nlp.listOfWords.ListOfWords;
  *
  * @author Stefan
  */
-public class Seanse {
+public class Lexicons {
 
     private static final String BASE_DIR = "resources/config/EN/word lists";
     private static final String AFFECTIVE_LIST = "affective_list.txt";
@@ -319,7 +319,7 @@ public class Seanse {
     }
 
     public static void main(String[] args) throws IOException {
-        Seanse seanse = new Seanse();
+        Lexicons seanse = new Lexicons();
         //seanse.loadWords();
         //seanse.saveWordsToDB(Lang.fr);
         //seanse.createValences();

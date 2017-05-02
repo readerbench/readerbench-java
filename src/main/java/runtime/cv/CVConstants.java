@@ -27,6 +27,7 @@ public class CVConstants {
     public static final int PAGES_MAX = 2;
     
     public static final Double FAN_DELTA = 1.0;
+    public static final Double FAN_DELTA_VERY = 2.0;
     public static final String KEYWORDS = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
     public static final String IGNORE = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
     // the following keywords should lead to the deletion of the entire row when met

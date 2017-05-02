@@ -481,6 +481,9 @@ public class Conversation extends AbstractDocument {
                 if (blocks.get(i) != null && blocks.get(i - 1) != null) {
                     BlockTemplate crt = blocks.get(i);
                     BlockTemplate prev = blocks.get(i - 1);
+                    if (crt.getTime() == null || prev.getTime() == null) {
+                        continue;
+                    }
                     long diffMinutes = (crt.getTime().getTime() - prev.getTime().getTime()) / (60 * 1000);
 
                     //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
@@ -499,7 +502,7 @@ public class Conversation extends AbstractDocument {
             //update refId
             for (BlockTemplate b : blocks) {
                 if (b != null) {
-                    if (b.getRefId() > 0) {
+                    if (b.getRefId() != null && b.getRefId() > 0) {
                         b.setRefId(initialMapping.get(b.getRefId()));
                     } else {
                         b.setRefId(null);

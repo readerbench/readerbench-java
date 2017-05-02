@@ -44,6 +44,15 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Level;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
+import org.apache.uima.resource.ResourceInitializationException;
+import org.deeplearning4j.text.annotator.SentenceAnnotator;
+import org.deeplearning4j.text.annotator.TokenizerAnnotator;
+import org.deeplearning4j.text.sentenceiterator.UimaSentenceIterator;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.UimaTokenizerFactory;
+import org.deeplearning4j.text.uima.UimaResource;
 import org.openide.util.Exceptions;
 import services.commons.VectorAlgebra;
 import services.semanticModels.SimilarityType;
@@ -54,7 +63,7 @@ import services.semanticModels.SimilarityType;
  */
 public class Word2VecModel implements ISemanticModel {
 
-    static final Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     private static final List<Word2VecModel> LOADED_WORD2VEC_MODELS = new ArrayList<>();
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en);
 
@@ -76,13 +85,8 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     private static Word2Vec loadWord2Vec(String path) {
-        logger.info("Loading word2vec model " + path + " ...");
-        Word2Vec word2Vec = null;
-        try {
-            word2Vec = WordVectorSerializer.loadFullModel(path + "/word2vec.model");
-        } catch (IOException e) {
-            logger.severe(e.getMessage());
-        }
+        LOGGER.log(Level.INFO, "Loading word2vec model {0} ...", path);
+        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(path + "/word2vec.model");
         return word2Vec;
     }
 
@@ -105,12 +109,7 @@ public class Word2VecModel implements ISemanticModel {
                 return w2v;
             }
         }
-        Word2VecModel w2vm = null;
-        try {
-            w2vm = new Word2VecModel(path, Lang.en, (Word2Vec) WordVectorSerializer.loadGoogleModel(new File(path + "/GoogleNews-vectors-negative300.bin"), true));
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        Word2VecModel w2vm = new Word2VecModel(path, Lang.en, WordVectorSerializer.readWord2VecModel(path + "/GoogleNews-vectors-negative300.bin"));
         return w2vm;
     }
 
@@ -172,26 +171,31 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     public static void trainModel(String inputFile) throws FileNotFoundException {
-        SentenceIterator iter = new BasicLineIterator(inputFile);
-        // Split on white spaces in the line to get words
-        TokenizerFactory t = new DefaultTokenizerFactory();
-        t.setTokenPreProcessor(new CommonPreprocessor());
-        logger.info("Building word2vec model ...");
-        Word2Vec word2Vec = new Word2Vec.Builder()
-                .minWordFrequency(5)
-                .iterations(5)
-                .layerSize(300)
-                .seed(42)
-                .windowSize(5)
-                .negativeSample(10)
-                .iterate(iter)
-                .tokenizerFactory(t)
-                .build();
-        word2Vec.fit();
-
-        logger.info("Writing word vectors to text file ...");
-        String outputPath = new File(inputFile).getParentFile().getAbsolutePath() + "/word2vec.model";
-        WordVectorSerializer.writeFullModel(word2Vec, outputPath);
+        try {
+            SentenceIterator iter = new UimaSentenceIterator(inputFile,
+                    new UimaResource(UimaTokenizerFactory.defaultAnalysisEngine()));
+            // Split on white spaces in the line to get words
+            TokenizerFactory t = new DefaultTokenizerFactory();
+            t.setTokenPreProcessor(new CommonPreprocessor());
+            LOGGER.info("Building word2vec model ...");
+            Word2Vec word2Vec = new Word2Vec.Builder()
+                    .minWordFrequency(5)
+                    .epochs(9)
+                    .layerSize(300)
+                    .seed(42)
+                    .windowSize(5)
+                    .negativeSample(10)
+                    .iterate(iter)
+                    .tokenizerFactory(t)
+                    .build();
+            word2Vec.fit();
+            
+            LOGGER.info("Writing word vectors to text file ...");
+            String outputPath = new File(inputFile).getParentFile().getAbsolutePath() + "/word2vec.model";
+            WordVectorSerializer.writeWord2VecModel(word2Vec, outputPath);
+        } catch (ResourceInitializationException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public static Set<Lang> getAvailableLanguages() {

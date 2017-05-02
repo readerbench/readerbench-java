@@ -131,7 +131,7 @@ public class ReaderBenchView extends JFrame {
             File path = new File("resources/config/" + lang.toString().toUpperCase() + "/" + type);
             if (path.exists() && path.isDirectory()) {
                 for (File folder : path.listFiles((File current, String name) -> new File(current, name).isDirectory())) {
-                    paths.add(folder.getPath());
+                    paths.add(folder.getPath().replace("\\", "/"));
                 }
             }
             paths.add("");
