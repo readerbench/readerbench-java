@@ -149,6 +149,13 @@ public abstract class AbstractDocument extends AnalysisElement {
         super.setSemanticModels(models);
     }
 
+    public AbstractDocument(List<ISemanticModel> models, Lang lang) {
+        this();
+        setLanguage(lang);
+        this.disambiguationGraph = new DisambiguationGraph(lang);
+        super.setSemanticModels(models);
+    }
+
     public void rebuildSemanticSpaces(List<ISemanticModel> models) {
         setSemanticModels(models);
         for (Block b : getBlocks()) {

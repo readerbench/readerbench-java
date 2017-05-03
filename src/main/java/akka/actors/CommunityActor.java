@@ -2,6 +2,9 @@ package akka.actors;
 
 import akka.actor.UntypedActor;
 import akka.messages.CommunityMessage;
+import akka.messages.ConversationMessage;
+import com.readerbench.solr.entities.cscl.Community;
+import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
@@ -22,7 +25,7 @@ public class CommunityActor extends UntypedActor{
     private static final String START_PROCESSING = "START_PROCESSING";
 
     private static final String SOLR_ADDRESS = "http://141.85.232.57:8983/solr/";
-    private static final String SOLR_COLLECTION = "tes";
+    private static final String SOLR_COLLECTION = "test";
     SolrService solrService = new SolrService(SOLR_ADDRESS, SOLR_COLLECTION, Integer.MAX_VALUE);
 
     @Override
@@ -57,10 +60,23 @@ public class CommunityActor extends UntypedActor{
 //                    getSelf(), START_PROCESSING, getContext().dispatcher(), null);
 
         } else if (message instanceof CommunityMessage) {
-
+            LOGGER.info("Received CommunityMessage ...");
             String communityName = ((CommunityMessage) message).getCommunity();
 
+            /**
+             * get community by name from SOLR
+             */
+            Community community = solrService.getCommunityByQuery("name:" + communityName);
+            LOGGER.info("Community with name {} is {}", communityName, community);
 
+            for (Conversation conversation : community.getConversations()) {
+                ConversationMessage conversationMessage = new ConversationMessage(conversation);
+                /**
+                 * send ConversationMessage to ConversationActor to process it
+                 */
+                LOGGER.info("Send ConversationMessage to ConversationActor to process it");
+                TestActors.akkaActorSystem.conversationActor.tell(conversationMessage, self());
+            }
         } else {
             LOGGER.warn("Unhandled message.");
             unhandled(message);

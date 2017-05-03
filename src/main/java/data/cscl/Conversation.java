@@ -22,13 +22,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.readerbench.solr.entities.cscl.Contribution;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -40,9 +39,7 @@ import data.Block;
 import data.discourse.SemanticChain;
 import data.Lang;
 import java.io.FileNotFoundException;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
@@ -107,6 +104,14 @@ public class Conversation extends AbstractDocument {
         intenseCollabZonesVoice = new ArrayList<>();
         annotatedCollabZones = new ArrayList<>();
     }
+
+    public Conversation(List<ISemanticModel> models, Lang lang) {
+        super(models, lang);
+        participants = new ArrayList<>();
+        intenseCollabZonesSocialKB = new ArrayList<>();
+        intenseCollabZonesVoice = new ArrayList<>();
+        annotatedCollabZones = new ArrayList<>();
+    }
     /**
      * @param path
      * @param contents
@@ -124,6 +129,14 @@ public class Conversation extends AbstractDocument {
 
     public Conversation(Dialog dialog, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(models, lang, dialog);
+        this.setText(contents.getText());
+        setDocTmp(contents);
+        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
+        this.determineParticipantContributions();
+    }
+
+    public Conversation(AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        this(models, lang);
         this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
@@ -315,6 +328,67 @@ public class Conversation extends AbstractDocument {
             Exceptions.printStackTrace(ex);
         }
         return c;
+    }
+
+    /**
+     * Load conversation
+     * @param conversation - conversation
+     * @param models - semantic models
+     * @param lang - language
+     * @param usePOSTagging - use or not POSTagging
+     * @return
+     */
+    public static Conversation loadConversation(com.readerbench.solr.entities.cscl.Conversation conversation, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+        Conversation c = null;
+        // determine contents
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        List<BlockTemplate> blocks = new ArrayList<>();
+
+        try {
+            List<Contribution> contributions = conversation.getContributions();
+            if (contributions != null && contributions.size() > 0) {
+                for (Contribution contribution : contributions) {
+                    BlockTemplate block = contents.new BlockTemplate();
+                    if (contribution.getParticipant().getNickname() != null) {
+                        block.setSpeaker(contribution.getParticipant().getNickname());
+                    } else {
+                        block.setSpeaker("unregistered member");
+                    }
+
+                    if (contribution.getTime() != null) {
+                        block.setTime(dateTransformer(contribution.getTime()));
+                    }
+
+                    block.setId(contribution.getGenid());
+                    block.setRefId(contribution.getRef());
+                    block.setContent(contribution.getContent());
+
+                    blocks.add(block);
+                }
+            }
+
+            ConversationRestructuringSupport support = new ConversationRestructuringSupport();
+            support.mergeAdjacentContributions(blocks);
+            contents.setBlocks(support.newBlocks);
+            c = new Conversation(contents, models, lang, usePOSTagging);
+
+            c.setDocumentTitle("reddit", models, lang, usePOSTagging);
+
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return c;
+    }
+
+    /**
+     * Transform long date to String date - "yyyy-MM-dd HH:mm:ss" format
+     * @param time - Long date
+     * @return - String date
+     */
+    private static String dateTransformer(Long time) {
+        Date date = new Date(time);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return  sdf.format(date);
     }
 
     public Conversation loadDialog(Dialog dialog, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {

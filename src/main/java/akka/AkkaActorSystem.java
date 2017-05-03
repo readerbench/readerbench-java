@@ -4,6 +4,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actors.CommunityActor;
+import akka.actors.ConversationActor;
 import akka.actors.DialogProcessingActor;
 import akka.actors.SolrDataProcessingActor;
 import com.typesafe.config.ConfigFactory;
@@ -22,6 +23,7 @@ public class AkkaActorSystem {
     public ActorRef communityActor;
     public ActorRef solrDataProcessingActor;
     public ActorRef dialogProcessingActor;
+    public ActorRef conversationActor;
 
     /**
      * Actors' initialization
@@ -36,6 +38,8 @@ public class AkkaActorSystem {
                 "solr-data-processing-actor");
         dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
                         .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
+
+        conversationActor = this.ACTOR_SYSTEM.actorOf(Props.create(ConversationActor.class), "conversation-actor");
         //TODO - add other actors
     }
 
