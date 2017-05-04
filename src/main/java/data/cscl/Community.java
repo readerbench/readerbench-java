@@ -96,6 +96,26 @@ public class Community extends AnalysisElement {
         timeframeSubCommunities = new ArrayList<>();
     }
 
+    public static int getMinNoContributions() {
+        return MIN_NO_CONTRIBUTIONS;
+    }
+
+    public static int getMinNoContentWords() {
+        return MIN_NO_CONTENT_WORDS;
+    }
+
+    public boolean isNeedsAnonymization() {
+        return needsAnonymization;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
     private void updateParticipantContributions() {
         for (Conversation c : documents) {
             // update the community correspondingly

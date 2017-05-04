@@ -2,6 +2,7 @@ package akka.actors;
 
 import akka.actor.UntypedActor;
 import akka.messages.ConversationMessage;
+import akka.messages.ConversationResponseMessage;
 import com.readerbench.solr.entities.cscl.Conversation;
 import data.AbstractDocument;
 import data.Lang;
@@ -24,13 +25,31 @@ public class ConversationActor extends UntypedActor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConversationActor.class);
 
+    private static boolean USE_POS_TAGGING = true;
+    private static boolean COMPUTE_DIALOGISM = true;
+    private static String LSA_PATH = "resources/config/EN/LSA/TASA_LAK";
+    private static String LDA_PATH = "resources/config/EN/LDA/TASA_LAK";
+    private static Lang LANGUAGE = Lang.en;
+
     public void onReceive(Object message) throws Exception {
 
         if (message instanceof ConversationMessage) {
             LOGGER.info("Received ConversationMessage ...");
             ConversationMessage conversationMessage = (ConversationMessage) message;
 
-            //todo
+            /**
+             * Process conversation
+             */
+            LOGGER.info("Start processing conversation {} ", conversationMessage.getConversation());
+            AbstractDocument abstractDocument = processConversation(conversationMessage.getConversation(), LSA_PATH,
+                    LDA_PATH, LANGUAGE, USE_POS_TAGGING, COMPUTE_DIALOGISM);
+            LOGGER.info("End processing conversation {} ", conversationMessage.getConversation());
+
+            /**
+             * Send message response to CommunityActor
+             */
+            ConversationResponseMessage conversationResponseMessage = new ConversationResponseMessage(abstractDocument);
+            sender().tell(conversationResponseMessage, self());
 
         }
     }
