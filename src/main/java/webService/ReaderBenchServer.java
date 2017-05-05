@@ -1425,7 +1425,7 @@ public class ReaderBenchServer {
                 filteredArticles.addAll(articles);
             }
             QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getKeywords(filteredArticles, threshold, null);
+            ResultTopic resultTopic = ConceptMap.getKeywords(filteredArticles, threshold, 25);
             queryResult.setData(resultTopic);
             response.type("application/json");
             return queryResult.convertToJson();
