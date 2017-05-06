@@ -349,8 +349,8 @@ public class Conversation extends AbstractDocument {
             if (contributions != null && contributions.size() > 0) {
                 for (Contribution contribution : contributions) {
                     BlockTemplate block = contents.new BlockTemplate();
-                    if (contribution.getParticipant().getNickname() != null) {
-                        block.setSpeaker(contribution.getParticipant().getNickname());
+                    if (contribution.getParticipantNickname() != null) {
+                        block.setSpeaker(contribution.getParticipantNickname());
                     } else {
                         block.setSpeaker("unregistered member");
                     }
@@ -359,8 +359,8 @@ public class Conversation extends AbstractDocument {
                         block.setTime(dateTransformer(contribution.getTime()));
                     }
 
-                    block.setId(contribution.getGenid());
-                    block.setRefId(contribution.getRef());
+                    block.setId(contribution.getGenId());
+                    block.setRefId(contribution.getRefId());
                     block.setContent(contribution.getContent());
 
                     blocks.add(block);

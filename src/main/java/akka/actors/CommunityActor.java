@@ -79,12 +79,12 @@ public class CommunityActor extends UntypedActor{
             String communityName = ((CommunityMessage) message).getCommunity();
 
             /**
-             * get community by name from SOLR
+             * get conversations for a community
              */
-            Community community = solrService.getCommunityByQuery("name:" + communityName);
-            LOGGER.info("Community with name {} is {}", communityName, community);
+            List<Conversation> conversations = solrService.getConversationsForCommunity(communityName);
+            LOGGER.info("Conversations for community name {} are {}", communityName, conversations.size());
 
-            for (Conversation conversation : community.getConversations()) {
+            for (Conversation conversation : conversations) {
                 ConversationMessage conversationMessage = new ConversationMessage(conversation);
                 /**
                  * send ConversationMessage to ConversationActor to process it
