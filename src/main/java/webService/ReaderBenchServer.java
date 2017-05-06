@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -114,12 +115,15 @@ import webService.services.cimodel.ComprehensionModelService;
 import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
+import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
 import webService.services.lak.result.QueryResultDocumentYears;
 import webService.services.lak.result.QueryResultGraphMeasures;
+import webService.services.lak.result.QueryResultTopicEvolution;
 import webService.services.lak.result.QueryResultTwoModeGraph;
 import webService.services.lak.result.QueryResultTwoModeGraphNodes;
+import webService.services.lak.result.TopicEvolution;
 import webService.services.lak.result.TwoModeGraph;
 import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
@@ -1006,7 +1010,7 @@ public class ReaderBenchServer {
             if (result.getColors() > 3) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_colors"));
             }
-            
+
             if (result.getImages() > 10) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_images"));
             }
@@ -1403,6 +1407,16 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
+        Spark.get("/lak/topicEvolution", (request, response) -> {
+            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+            List<ResearchArticle> articles = graphBuilder.getArticles();
+            TopicEvolutionBuilder builder = new TopicEvolutionBuilder(articles);
+            TopicEvolution topicEvolution = builder.build();
+            QueryResultTopicEvolution queryResult = new QueryResultTopicEvolution(topicEvolution);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+
         Spark.post("/lak/topics", (request, response) -> {
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
@@ -1430,26 +1444,26 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        
-        
+
+
         Spark.post("/ciModel", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
-            
+
             double minActivationThreshold;
             try {
                 minActivationThreshold = Double.parseDouble(hm.get("minActivationThreshold"));
             } catch (NullPointerException e) {
                 minActivationThreshold = 0.3;
             }
-            
+
             int maxSemanticExpand;
             try {
                 maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
             } catch(Exception e) {
                 maxSemanticExpand = 5;
             }
-            
+
             ComprehensionModelService cmService = new ComprehensionModelService(minActivationThreshold, maxSemanticExpand);
             CMResult result = cmService.run(hm.get("text"));
             QueryResultCM queryResult = new QueryResultCM(result);
