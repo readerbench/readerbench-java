@@ -22,7 +22,7 @@ import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
-import services.similarity.TextSimilarity;
+import services.semanticModels.TextSimilarity;
 
 /**
  *

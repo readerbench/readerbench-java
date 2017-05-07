@@ -78,7 +78,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import services.semanticModels.word2vec.Word2VecModel;
-import services.similarity.TextSimilarity;
+import services.semanticModels.TextSimilarity;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
