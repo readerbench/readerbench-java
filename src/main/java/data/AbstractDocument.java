@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.StringJoiner;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -803,5 +804,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
+    }
+    
+    @Override
+    public List<NGram> getBiGrams() {
+        return blocks.stream()
+                .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
     }
 }

@@ -18,6 +18,7 @@ package data.discourse;
 import java.io.Serializable;
 
 import data.AnalysisElement;
+import data.NGram;
 import data.Word;
 import services.commons.Formatting;
 
@@ -29,11 +30,11 @@ public class Keyword implements Comparable<Keyword>, Serializable {
 
     private static final long serialVersionUID = -2955989168004509623L;
 
-    private Word word;
+    private AnalysisElement word;
     private double relevance;
     private double termFrequency;
     private double semanticSimilarity;
-
+    
     public Keyword(Word word, AnalysisElement e) {
         this.word = word;
         this.updateRelevance(e, word);
@@ -58,7 +59,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         this.relevance += tf * semSim;
         this.semanticSimilarity = Math.max(this.semanticSimilarity, semSim);
     }
-
+    
     public double getTermFrequency() {
         return termFrequency;
     }
