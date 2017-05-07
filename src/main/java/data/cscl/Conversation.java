@@ -354,6 +354,11 @@ public class Conversation extends AbstractDocument {
                     } else {
                         block.setSpeaker("unregistered member");
                     }
+                    if (contribution.getParticipantAliasName() != null) {
+                        block.setSpeakerAlias(contribution.getParticipantAliasName());
+                    } else {
+                        block.setSpeakerAlias("");
+                    }
 
                     if (contribution.getTime() != null) {
                         block.setTime(dateTransformer(contribution.getTime()));
@@ -386,9 +391,16 @@ public class Conversation extends AbstractDocument {
      * @return - String date
      */
     private static String dateTransformer(Long time) {
-        Date date = new Date(time);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        return  sdf.format(date);
+        try {
+            Date date = new Date(time);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return  sdf.format(date);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Error transforming date..." + time);
+            //e.printStackTrace();
+            return "";
+        }
+
     }
 
     public Conversation loadDialog(Dialog dialog, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {

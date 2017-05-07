@@ -126,7 +126,7 @@ public class Community extends AnalysisElement {
                     if (index >= 0) {
                         participantToUpdate = participants.get(index);
                     } else {
-                        participantToUpdate = new Participant(p.getName(), c);
+                        participantToUpdate = new Participant(p.getName(), p.getAlias(), c);
                         participants.add(participantToUpdate);
                     }
 
@@ -594,7 +594,7 @@ public class Community extends AnalysisElement {
 
                 for (int index = 0; index < participants.size(); index++) {
                     Participant p = participants.get(index);
-                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + p.getAlias());
                     for (CSCLIndices CSCLindex : CSCLIndices.values()) {
                         out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
                     }

@@ -5,6 +5,7 @@ import akka.messages.CommunityMessage;
 import akka.messages.ConversationMessage;
 import akka.messages.ConversationResponseMessage;
 import com.readerbench.solr.entities.cscl.Community;
+import com.readerbench.solr.entities.cscl.Contribution;
 import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
@@ -23,8 +24,11 @@ import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
+import services.semanticModels.ISemanticModel;
+import services.semanticModels.SimilarityType;
 import services.solr.TestActors;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -39,74 +43,114 @@ public class CommunityActor extends UntypedActor{
 
     private static final String START_PROCESSING = "START_PROCESSING";
 
-    private static final String SOLR_ADDRESS = "http://141.85.232.57:8983/solr/";
-    private static final String SOLR_COLLECTION = "test";
+    private static final String SOLR_ADDRESS = "http://141.85.232.56:8983/solr/";
+    private static final String SOLR_COLLECTION = "community";
     SolrService solrService = new SolrService(SOLR_ADDRESS, SOLR_COLLECTION, Integer.MAX_VALUE);
+
+    List<AbstractDocument> abstractDocuments = new ArrayList<>();
+    private static int CONVERSATION_NUMBER = 0;
+    private static String FILENAME;
+    private static String PATH = "resources/out";
 
     @Override
     public void preStart() {
         Long delay = computeDelayOfJob();
 
-        getContext().system().scheduler().scheduleOnce(
-                Duration.create(delay, TimeUnit.MILLISECONDS),
-                getSelf(), START_PROCESSING, getContext().dispatcher(), null);
+//        getContext().system().scheduler().scheduleOnce(
+//                Duration.create(delay, TimeUnit.MILLISECONDS),
+//                getSelf(), START_PROCESSING, getContext().dispatcher(), null);
     }
 
     @Override
     public void onReceive(Object message) throws Exception {
 
-        if (message instanceof String && message.equals(START_PROCESSING)) {
-            LOGGER.info("Received " + START_PROCESSING + " message.");
-            /**
-             * create CommunityMessage to send to SolrDataProcessingActor
-             */
-            CommunityMessage communityMessage = new CommunityMessage("Games");
-            /**
-             * send message to SolrDataProcessingActor
-             */
-            LOGGER.info("Send CommunityMessage to SolrDataProcessingActor.");
-            TestActors.akkaActorSystem.solrDataProcessingActor.tell(communityMessage, self());
-
-            /**
-             * trigger job at 12 PM every day
-             */
-//            getContext().system().scheduler().scheduleOnce(
-//                    Duration.create(computeDelayOfJob(), TimeUnit.MILLISECONDS),
-//                    getSelf(), START_PROCESSING, getContext().dispatcher(), null);
-
-        } else if (message instanceof CommunityMessage) {
+        if (message instanceof CommunityMessage) {
             LOGGER.info("Received CommunityMessage ...");
             String communityName = ((CommunityMessage) message).getCommunity();
+            FILENAME = communityName + ".csv";
 
             /**
              * get conversations for a community
              */
             List<Conversation> conversations = solrService.getConversationsForCommunity(communityName);
-            LOGGER.info("Conversations for community name {} are {}", communityName, conversations.size());
 
+            //todo - delete this because the participantAliasName should be in SOLR.
+            int i = 1;
             for (Conversation conversation : conversations) {
-                ConversationMessage conversationMessage = new ConversationMessage(conversation);
-                /**
-                 * send ConversationMessage to ConversationActor to process it
-                 */
-                LOGGER.info("Send ConversationMessage to ConversationActor to process it");
-                TestActors.akkaActorSystem.conversationActor.tell(conversationMessage, self());
+                i = 1;
+                for (Contribution c : conversation.getContributions()) {
+                    c.setParticipantAliasName("Test " + i++);
+                }
 
             }
+
+            CONVERSATION_NUMBER = conversations.size();
+            LOGGER.info("The number of conversations for community {} are {}", communityName, CONVERSATION_NUMBER);
+
+
+            String LSA_PATH = "resources/config/EN/LSA/TASA_LAK";
+            String LDA_PATH = "resources/config/EN/LDA/TASA_LAK";
+            Lang LANGUAGE = Lang.en;
+            Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+            modelPaths.put(SimilarityType.LSA, LSA_PATH);
+            modelPaths.put(SimilarityType.LDA, LDA_PATH);
+            //modelPaths.put(SimilarityType.WORD2VEC, pathToWORD2VEC);
+
+            try {
+                Long start = System.currentTimeMillis();
+
+                LOGGER.info("Load vector models.");
+                List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, LANGUAGE);
+
+                for (Conversation conversation : conversations) {
+                    ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
+                    /**
+                     * send ConversationMessage to ConversationActor to process it
+                     */
+                    LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
+                    TestActors.akkaActorSystem.conversationActor.tell(conversationMessage, self());
+
+                }
+
+
+            } catch (Exception e) {
+                LOGGER.info("Error in loading vector models!!!");
+            }
+
+
         } else if (message instanceof ConversationResponseMessage) {
             LOGGER.info("Received ConversationResponseMessage ...");
             ConversationResponseMessage conversationResponseMessage = (ConversationResponseMessage) message;
 
-            List<AbstractDocument> abstractDocuments = new ArrayList<>();
             abstractDocuments.add(conversationResponseMessage.getAbstractDocument());
-
-            //todo - load multiple conversation
+            if (abstractDocuments.size() == CONVERSATION_NUMBER) {
+                LOGGER.info("End processing all conversations ...");
+                LOGGER.info("Start processing document collection ...");
+                processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+                LOGGER.info("------------- End processing document collection --------- ");
+            }
 
         } else {
             LOGGER.warn("Unhandled message.");
             unhandled(message);
         }
 
+    }
+
+    public void processDocumentCollection(List<AbstractDocument> abstractDocumentList, Lang lang,
+                                                 boolean needsAnonymization, boolean useTextualComplexity, Date startDate,
+                                                 Date endDate, int monthIncrement, int dayIncrement) {
+        data.cscl.Community community = loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
+                endDate, monthIncrement, dayIncrement);
+        community.setPath(PATH);
+        if (community != null) {
+            community.computeMetrics(useTextualComplexity, true, true);
+            community.export(PATH + "/" + FILENAME, true, true);
+            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
+            //community.generateParticipantViewSubCommunities("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_d3_");
+            //community.generateConceptView("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_concepts.pdf");
+        }
     }
 
     public data.cscl.Community loadMultipleConversations (List<AbstractDocument> abstractDocumentList, Lang lang,
@@ -284,7 +328,7 @@ public class CommunityActor extends UntypedActor{
                     if (index >= 0) {
                         participantToUpdate = community.getParticipants().get(index);
                     } else {
-                        participantToUpdate = new Participant(p.getName(), c);
+                        participantToUpdate = new Participant(p.getName(), p.getAlias(), c);
                         community.getParticipants().add(participantToUpdate);
                     }
 

@@ -96,7 +96,7 @@ public abstract class Parsing {
     private Utterance getUtterance(Conversation c, BlockTemplate blockTmp, Block b) {
         Participant activeSpeaker = null;
         if (!blockTmp.getSpeaker().isEmpty()) {
-            activeSpeaker = new Participant(blockTmp.getSpeaker(), c);
+            activeSpeaker = new Participant(blockTmp.getSpeaker(), blockTmp.getSpeakerAlias(), c);
             boolean contains = false;
             for (Participant p : c.getParticipants()) {
                 if (p.equals(activeSpeaker)) {

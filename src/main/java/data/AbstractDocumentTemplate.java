@@ -65,6 +65,7 @@ public class AbstractDocumentTemplate implements Serializable {
         private Integer refId;
         private Integer verbId;
         private String content;
+        private String speakerAlias;
 
         public String getSpeaker() {
             return speaker;
@@ -84,7 +85,7 @@ public class AbstractDocumentTemplate implements Serializable {
                 try {
                     aux = format.parse(time);
                     break;
-                } catch (ParseException e) {
+                } catch (Exception e) {
                 }
             }
             if (time == null) {
@@ -130,10 +131,18 @@ public class AbstractDocumentTemplate implements Serializable {
             this.content = content;
         }
 
+        public String getSpeakerAlias() {
+            return speakerAlias;
+        }
+
+        public void setSpeakerAlias(String speakerAlias) {
+            this.speakerAlias = speakerAlias;
+        }
+
         @Override
         public String toString() {
-            return "BlockTemplate [speaker=" + speaker + ", time=" + time + ", id=" + id + ", refId=" + refId
-                    + ", verbId=" + verbId + ", content=" + content + "]";
+            return "BlockTemplate [speaker=" + speaker + ", speakerAlias=" + speakerAlias + ", time=" + time + ", " +
+                    "id=" + id + ", refId=" + refId + ", verbId=" + verbId + ", content=" + content + "]";
         }
 
         @Override

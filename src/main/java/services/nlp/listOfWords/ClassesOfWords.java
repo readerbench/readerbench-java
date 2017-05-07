@@ -69,6 +69,7 @@ public class ClassesOfWords implements Serializable {
                     }
                 }
             }
+            logger.info("Finished loading file " + path + " ...");
         } catch (IOException ex) {
             logger.severe(ex.getMessage());
         }

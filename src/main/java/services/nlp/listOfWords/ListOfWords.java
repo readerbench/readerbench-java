@@ -56,6 +56,7 @@ public class ListOfWords {
                     }
                 }
             }
+            LOGGER.log(Level.INFO, "Finished loading file {0} ...", path);
         } catch (IOException ex) {
             LOGGER.severe(ex.getMessage());
         }

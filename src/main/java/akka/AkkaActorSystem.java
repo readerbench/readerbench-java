@@ -7,6 +7,7 @@ import akka.actors.CommunityActor;
 import akka.actors.ConversationActor;
 import akka.actors.DialogProcessingActor;
 import akka.actors.SolrDataProcessingActor;
+import akka.routing.RoundRobinPool;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,14 @@ public class AkkaActorSystem {
 
         LOGGER.info("Init actors ...");
         communityActor = this.ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
-        solrDataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class),
-                "solr-data-processing-actor");
-        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
-                        .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
+//        solrDataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class),
+//                "solr-data-processing-actor");
+//        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
+//                        .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
 
-        conversationActor = this.ACTOR_SYSTEM.actorOf(Props.create(ConversationActor.class), "conversation-actor");
+        conversationActor = this.ACTOR_SYSTEM.actorOf(new RoundRobinPool(1).props(Props.create(ConversationActor.class)),
+                "conversation-actor");
+
         //TODO - add other actors
     }
 

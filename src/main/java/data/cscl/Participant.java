@@ -28,6 +28,7 @@ public class Participant implements Comparable<Participant>, Serializable {
     private static final long serialVersionUID = -4515721505776009876L;
 
     private String name;
+    private String alias;
     private AbstractDocument contributions;
     private AbstractDocument significantContributions;
     private double gradeAnnotator;
@@ -42,6 +43,18 @@ public class Participant implements Comparable<Participant>, Serializable {
         this.significantContributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
+        this.alias = alias;
+        this.resetIndices();
+    }
+
+    public Participant(String name, String alias, AbstractDocument d) {
+        super();
+        this.name = name;
+        this.alias = alias;
+        this.contributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.significantContributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.indices = new EnumMap<>(CSCLIndices.class);
+        this.longitudinalIndices = new HashMap<>();
         this.resetIndices();
     }
 
@@ -49,8 +62,13 @@ public class Participant implements Comparable<Participant>, Serializable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+//    public void setName(String name) {
+//        this.name = name;
+//    }
+
+
+    public String getAlias() {
+        return alias;
     }
 
     public AbstractDocument getContributions() {
