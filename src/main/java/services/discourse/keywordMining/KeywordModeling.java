@@ -25,11 +25,14 @@ import java.util.TreeMap;
 
 import data.AbstractDocument;
 import data.AnalysisElement;
+import data.NGram;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import java.util.EnumMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -65,6 +68,21 @@ public class KeywordModeling {
                 // update frequency for identical lemmas
                 Keyword refTopic = e.getTopics().get(index);
                 refTopic.updateRelevance(e, w);
+            } else {
+                e.getTopics().add(newTopic);
+            }
+        }
+        Map<NGram, Long> ngrams = e.getBiGrams().stream()
+                .collect(Collectors.groupingBy(
+                        Function.identity(), 
+                        Collectors.counting()));
+        for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
+            Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
+            int index = e.getTopics().indexOf(newTopic);
+            if (index >= 0) {
+                // update frequency for identical lemmas
+                Keyword refTopic = e.getTopics().get(index);
+                refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
             } else {
                 e.getTopics().add(newTopic);
             }
@@ -168,7 +186,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using LSA ...");
             TreeMap<Word, Double> listLSA;
             for (Keyword t : topics) {
-                listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLSA, LSA_WEIGHT);
             }
         }
@@ -178,7 +196,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using LDA ...");
             TreeMap<Word, Double> listLDA;
             for (Keyword t : topics) {
-                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLDA, LDA_WEIGHT);
             }
         }
@@ -188,7 +206,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using word2vec ...");
             TreeMap<Word, Double> listW2V;
             for (Keyword t : topics) {
-                listW2V = e.getSemanticModel(SimilarityType.WORD2VEC).getSimilarConcepts(t.getWord(), minThreshold);
+                listW2V = e.getSemanticModel(SimilarityType.WORD2VEC).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listW2V, W2V_WEIGHT);
             }
         }

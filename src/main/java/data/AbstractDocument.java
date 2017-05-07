@@ -428,7 +428,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getWord().getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
+                    Integer probClass = LDA.findMaxResemblance(t.getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
