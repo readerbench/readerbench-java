@@ -127,6 +127,14 @@ public class Keyword implements Comparable<Keyword>, Serializable {
 
     @Override
     public int compareTo(Keyword o) {
+        if (o.getRelevance() == this.getRelevance()) {
+            if (this.equals(o)) {
+                return 0;
+            }
+            else {
+                return getElement().getText().compareTo(o.getElement().getText());
+            }
+        }
         return (int) Math.signum(o.getRelevance() - this.getRelevance());
     }
 

@@ -49,6 +49,7 @@ public class NGram extends AnalysisElement {
                 .collect(Collectors.groupingBy(
                         Function.identity(), 
                         Collectors.reducing(0, e -> 1, Integer::sum))));
+        semanticModels = words.get(0).semanticModels;
         determineSemanticDimensions();
         String label = words.stream()
                 .map(Word::getLemma)
@@ -95,6 +96,11 @@ public class NGram extends AnalysisElement {
             return false;
         }
         return true;
+    }
+    
+    @Override
+    public String getText() {
+        return unified.getText();
     }
     
     public static void main(String[] args) {
