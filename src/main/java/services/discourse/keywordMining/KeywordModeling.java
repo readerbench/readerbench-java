@@ -91,19 +91,40 @@ public class KeywordModeling {
     }
 
     public static List<Keyword> getSublist(List<Keyword> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
+        if (noTopics == 0) return topics;
         List<Keyword> results = new ArrayList<>();
         for (Keyword t : topics) {
             if (results.size() >= noTopics || t.getRelevance() < 0) {
                 break;
             }
-            if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("NN")) {
-                results.add(t);
+            if (t.getElement() instanceof Word) {
+                if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("NN")) {
+                    results.add(t);
+                }
+                if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
+                    results.add(t);
+                }
+                if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
+                    results.add(t);
+                }
             }
-            if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
-                results.add(t);
-            }
-            if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
-                results.add(t);
+            else if (t.getElement() instanceof NGram) {
+                NGram nGram = (NGram) t.getElement();
+                boolean keep = true;
+                for (Word w : nGram.getWords()) {
+                    if (nounsOnly && w.getPOS() != null && !w.getPOS().startsWith("NN")) {
+                        keep = false;
+                        break;
+                    }
+                    if (verbsOnly && w.getPOS() != null && !w.getPOS().startsWith("VB")) {
+                        keep = false;
+                        break;
+                    }
+                    if ((!nounsOnly && !verbsOnly) || w.getPOS() == null) {
+                        keep = true;
+                    }
+                }
+                if (keep) results.add(t);
             }
         }
         return results;

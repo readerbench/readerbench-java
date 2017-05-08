@@ -38,6 +38,10 @@ public class NGram extends AnalysisElement {
         words.add(third);
         initialize();
     }
+
+    public List<Word> getWords() {
+        return words;
+    }
     
     private void initialize() {
 //        setWordOccurences();
