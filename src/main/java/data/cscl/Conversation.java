@@ -211,7 +211,7 @@ public class Conversation extends AbstractDocument {
                                     } else {
                                         try {
                                             block.setRefId(Integer.parseInt(el.getAttribute("ref")));
-                                        } catch (Exception e) {
+                                        } catch (NumberFormatException e) {
                                             block.setRefId(0);
                                         }
                                     }
@@ -470,6 +470,7 @@ public class Conversation extends AbstractDocument {
             }
             for (Participant p : getParticipants()) {
                 p.getContributions().determineWordOccurences(p.getContributions().getBlocks());
+                p.getContributions().determineSemanticDimensions();
             }
         }
     }

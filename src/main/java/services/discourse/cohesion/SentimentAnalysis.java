@@ -18,8 +18,6 @@ package services.discourse.cohesion;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;

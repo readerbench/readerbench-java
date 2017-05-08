@@ -42,15 +42,14 @@ public class DialogismComputations {
 
     static final Logger LOGGER = Logger.getLogger("");
 
-    public static final int WINDOW_SIZE = 5; // no sentences
+    public static final int WINDOW_SIZE = 5; // no contributions
     public static final int MAXIMUM_INTERVAL = 60; // seconds
-    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 3; //no words per voice
+    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 5; //no words per voice
 
     public static void determineVoices(AbstractDocument d) {
-        // merge chains based on LSA / LDA in order to generate semantic
-        // chains
+        // merge chains based on LSA / LDA in order to generate semantic chains
         LOGGER.info("Starting to assess voices by first building semantic chains");
-        List<SemanticChain> semanticChains = new LinkedList<>();
+        List<SemanticChain> semanticChains = new ArrayList<>();
         for (LexicalChain chain : d.getLexicalChains()) {
             SemanticChain newChain = new SemanticChain(chain, d.getSemanticModels());
             newChain.updateSemanticRepresentation();
@@ -127,7 +126,7 @@ public class DialogismComputations {
     }
 
     public static void determineVoiceDistributions(AbstractDocument d) {
-        LOGGER.info("Identifying voice distributions");
+        LOGGER.info("Identifying voice distributions...");
         // determine distribution of each lexical chain
         int noSentences = 0;
         int[][] traceability = new int[d.getBlocks().size()][];
@@ -143,7 +142,7 @@ public class DialogismComputations {
         // build time intervals
         d.setBlockOccurrencePattern(new long[d.getBlocks().size()]);
         if (d instanceof Conversation) {
-            Date earlierDate = null, laterDate = null;
+            Date earlierDate = null, laterDate;
             for (int blockIndex = 0; blockIndex < d.getBlocks().size(); blockIndex++) {
                 if (d.getBlocks().get(blockIndex) != null) {
                     Utterance u = (Utterance) d.getBlocks().get(blockIndex);
@@ -152,8 +151,7 @@ public class DialogismComputations {
                     } else {
                         laterDate = u.getTime();
                         if (laterDate != null) {
-                            d.getBlockOccurrencePattern()[blockIndex] = Math
-                                    .min((laterDate.getTime() - earlierDate.getTime()) / 1000, 0);
+                            d.getBlockOccurrencePattern()[blockIndex] = Math.min((laterDate.getTime() - earlierDate.getTime()) / 1000, 0);
                         }
                     }
                 }
@@ -178,8 +176,7 @@ public class DialogismComputations {
 
                     chain.getBlockDistribution()[blockIndex] += 1;
 
-                    // build cumulative importance in terms of sentences in
-                    // which occurrences have been spotted
+                    // build cumulative importance in terms of sentences in which occurrences have been spotted
                     if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
                         voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
                                 voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
@@ -195,9 +192,7 @@ public class DialogismComputations {
                     Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
 
                     if (s.getWords().size() > 0) {
-                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore()
-                        // * (1 + Math.log(voiceOccurrences.get(key)))
-                        );
+                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore());
                     }
                 }
                 // normalize
@@ -205,8 +200,7 @@ public class DialogismComputations {
                     chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
                 }
 
-                // normalize occurrences
-                // at sentence level
+                // normalize occurrences at sentence level
                 for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
                     if (chain.getSentenceDistribution()[i] > 0) {
                         chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
@@ -218,8 +212,7 @@ public class DialogismComputations {
                         chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
                     }
                 }
-                // define moving average at block level, relevant for chat
-                // conversations
+                // define moving average at block level, relevant for chat conversations
                 chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
                         d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
             }
@@ -237,12 +230,12 @@ public class DialogismComputations {
     }
 
     public static void determineParticipantInterAnimation(Conversation c) {
-        if (c.getVoices() == null || c.getVoices().size() == 0) {
+        if (c.getVoices() == null || c.getVoices().isEmpty()) {
             return;
         }
 
         Iterator<Participant> it = c.getParticipants().iterator();
-        List<Participant> lsPart = new ArrayList<Participant>();
+        List<Participant> lsPart = new ArrayList<>();
         while (it.hasNext()) {
             Participant part = it.next();
             lsPart.add(part);
@@ -258,29 +251,10 @@ public class DialogismComputations {
                     double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
 
                     lsPart.get(p1).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
-                            lsPart.get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)
-                            + addedInterAnimationDegree);
+                            lsPart.get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
                     lsPart.get(p2).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
-                            lsPart.get(p2).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)
-                            + addedInterAnimationDegree);
+                            lsPart.get(p2).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
                 }
-            }
-        }
-    }
-
-    public static void implicitLinksCohesion(AbstractDocument d) {
-        // build voice distribution vectors for each block
-        LOGGER.info("Comparing implicit links");
-        for (Block b : d.getBlocks()) {
-            if (b != null && b.getRefBlock() != null) {
-                System.out.println(b.getIndex() + "->" + b.getRefBlock().getIndex() + "\t"
-                        + VectorAlgebra.pearsonCorrelation(b.getVoiceDistribution(),
-                                b.getRefBlock().getVoiceDistribution())
-                        + "\t"
-                        + VectorAlgebra.mutualInformation(b.getVoiceDistribution(),
-                                b.getRefBlock().getVoiceDistribution())
-                        + "\t" + d.getBlockDistances()[d.getBlocks().indexOf(b)][d.getBlocks().indexOf(b.getRefBlock())]
-                        .getCohesion());
             }
         }
     }
