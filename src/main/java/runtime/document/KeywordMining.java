@@ -151,7 +151,7 @@ public class KeywordMining {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
                     d.computeAll(computeDialogism);
-                    d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    //d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
@@ -170,19 +170,20 @@ public class KeywordMining {
         }*/
         
         try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/keywords.csv", true))) {
-            StringBuilder csv = new StringBuilder("SEP=;\nkeyword;relevance\n");
+            StringBuilder csv = new StringBuilder("SEP=;\ntype;keyword;relevance\n");
             for (Keyword keyword : keywords) {
                 if (keyword.getElement() instanceof Word) {
-                    csv.append(keyword.getWord().getText()).append(";");
+                    csv.append("word;").append(keyword.getWord().getText()).append(";");
                 }
                 else if (keyword.getElement() instanceof NGram) {
                     NGram nGram = (NGram) keyword.getElement();
+                    csv.append("ngram;");
                     for (Word w : nGram.getWords()) {
-                        csv.append(w.getText()).append(" + ");
+                        csv.append(w.getText()).append(" ");
                     }
                     csv.append(";");
+                    csv.append(keyword.getRelevance()).append(";");
                 }
-                csv.append(keyword.getRelevance()).append(";");
                 csv.append("\n");
             }
             outRelevance.write(csv.toString());
@@ -235,6 +236,6 @@ public class KeywordMining {
 
         Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses per profession copy", Lang.en, "UTF-8");
         KeywordMining keywordMining = new KeywordMining("resources/in/ENEA/responses per profession copy", 0, models, Lang.en, true, true, false);
-        keywordMining.processTexts(false);
+        keywordMining.processTexts(true);
     }
 }
