@@ -60,7 +60,12 @@ public class Keyword implements Comparable<Keyword>, Serializable {
     }
 
     public final void updateRelevance(AnalysisElement e, Word newWord) {
-        double tf = 1 + Math.log(e.getWordOccurences().get(newWord));
+        int newCount = e.getWordOccurences().get(newWord);
+        //Replace old word if the new one is more relevant
+        if (newCount > e.getWordOccurences().get(word)) {
+            word = newWord;
+        }
+        double tf = 1 + Math.log(newCount);
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
         this.termFrequency += tf;
