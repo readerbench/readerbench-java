@@ -151,7 +151,7 @@ public class KeywordMining {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
                     d.computeAll(computeDialogism);
-                    //d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
@@ -182,9 +182,8 @@ public class KeywordMining {
                         csv.append(w.getText()).append(" ");
                     }
                     csv.append(";");
-                    csv.append(keyword.getRelevance()).append(";");
                 }
-                csv.append("\n");
+                csv.append(keyword.getRelevance()).append("\n");
             }
             outRelevance.write(csv.toString());
             outRelevance.close();
@@ -228,14 +227,14 @@ public class KeywordMining {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
 
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses per profession copy", Lang.en, "UTF-8");
-        KeywordMining keywordMining = new KeywordMining("resources/in/ENEA/responses per profession copy", 0, models, Lang.en, true, true, false);
-        keywordMining.processTexts(true);
+        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
+        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, true, false);
+        keywordMining.processTexts(false);
     }
 }
