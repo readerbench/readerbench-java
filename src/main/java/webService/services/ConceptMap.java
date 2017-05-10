@@ -87,13 +87,13 @@ public class ConceptMap {
 
             // similarity scores between word and document using each semantic model
             if (lsa != null) {
-                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getElement(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getElement(), queryDoc));
             }
             if (lda != null) {
-                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getElement(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getElement(), queryDoc));
             }
             if (word2Vec != null) {
-                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getElement(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getElement(), queryDoc));
             }
 
             node.setAverageDistanceToHypernymTreeRoot(WordComplexity.getAverageDistanceToHypernymTreeRoot(t.getWord(), lang));
