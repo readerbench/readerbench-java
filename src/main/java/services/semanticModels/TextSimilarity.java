@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package services.similarity;
+package services.semanticModels;
 
 import data.AbstractDocumentTemplate;
 import data.Lang;

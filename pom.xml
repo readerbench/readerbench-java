@@ -536,6 +536,12 @@
             <artifactId>deeplearning4j-nlp-uima</artifactId>
             <version>0.8.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.solr/solr-solrj -->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>6.3.0</version>
+        </dependency>
     </dependencies>
     <!--<reporting>
         <plugins>

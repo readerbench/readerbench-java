@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import services.complexity.wordComplexity.WordComplexity;
 import services.discourse.keywordMining.KeywordModeling;
@@ -45,42 +46,37 @@ import webService.result.ResultTopic;
 public class ConceptMap {
 
     public static ResultTopic getKeywords(AbstractDocument queryDoc, double threshold, Set<Word> ignoredWords) {
-        List<AbstractDocument> queryDocs = new ArrayList();
-        queryDocs.add(queryDoc);
-        return getKeywords(queryDocs, threshold, ignoredWords);
-    }
-
-    public static ResultTopic getKeywords(List<? extends AbstractDocument> queryDocs, double threshold, Set<Word> ignoredWords) {
 
         List<ResultNode> nodes = new ArrayList<>();
-        List<ResultEdge> links = new ArrayList<>();
 
-        List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs);
-        if (ignoredWords != null && !ignoredWords.isEmpty()) keywords = keywords.stream()
-                .filter(k -> !ignoredWords.contains(k.getWord()))
-                .collect(Collectors.toList());
-        
+        List<Keyword> keywords = queryDoc.getTopics();
+        if (ignoredWords != null && !ignoredWords.isEmpty()) {
+            keywords = keywords.stream()
+                    .filter(k -> !ignoredWords.contains(k.getWord()))
+                    .collect(Collectors.toList());
+        }
+
         // build nodes
         Map<Word, Integer> nodeIndexes = new TreeMap<>();
 
         int i = 0, j = 0;
-        Lang lang = queryDocs.get(0).getLanguage();
-        LSA lsa = (LSA) queryDocs.get(0).getSemanticModel(SimilarityType.LSA);
-        LDA lda = (LDA) queryDocs.get(0).getSemanticModel(SimilarityType.LDA);
-        Word2VecModel word2Vec = (Word2VecModel) queryDocs.get(0).getSemanticModel(SimilarityType.WORD2VEC);
+        Lang lang = queryDoc.getLanguage();
+        LSA lsa = (LSA) queryDoc.getSemanticModel(SimilarityType.LSA);
+        LDA lda = (LDA) queryDoc.getSemanticModel(SimilarityType.LDA);
+        Word2VecModel word2Vec = (Word2VecModel) queryDoc.getSemanticModel(SimilarityType.WORD2VEC);
         Map<Word, Double> mapIdf;
         if (lsa != null) {
             mapIdf = lsa.getMapIdf();
         } else {
             mapIdf = null;
         }
-        Map<Word, Integer> wordOcc = queryDocs.get(0).getWordOccurences();
+        Map<Word, Integer> wordOcc = queryDoc.getWordOccurences();
         for (Keyword t : keywords) {
             ResultNode node = new ResultNode(i, t.getWord().getText(), t.getRelevance(), 1);
             nodeIndexes.put(t.getWord(), i);
             node.setLemma(t.getWord().getLemma());
             node.setPos(t.getWord().getPOS());
-            t.updateRelevance(queryDocs.get(0), t.getWord());
+            t.updateRelevance(queryDoc, t.getWord());
             node.setNoOcc(wordOcc.get(t.getWord()));
             node.setTf(t.getTermFrequency());
             if (mapIdf != null && mapIdf.containsKey(t.getWord())) {
@@ -108,7 +104,37 @@ public class ConceptMap {
         }
 
         // determine similarities
-        i = 0;
+        List<ResultEdge> links = buildLinks(keywords, threshold, nodeIndexes);
+        appendDegreeValues(nodes, links, nodeIndexes);
+
+        return new ResultTopic(nodes, links);
+    }
+
+    public static ResultTopic getKeywords(List<? extends AbstractDocument> documents, double threshold, Integer maxNoWords) {
+        List<ResultNode> nodes = new ArrayList<>();
+
+        List<Keyword> keywords = KeywordModeling.getCollectionTopics(documents);
+        if(maxNoWords != null) {
+            Collections.sort(keywords);
+            keywords = keywords.subList(0, Math.min(keywords.size(), maxNoWords));
+        }
+        Map<Word, Integer> nodeIndexes = new TreeMap<>();
+
+        for (int i = 0; i < keywords.size(); i++) {
+            Keyword keyword = keywords.get(i);
+            double relevance = Math.round(keyword.getRelevance() * 100.0) / 100.0;
+            ResultNode node = new ResultNode(i, keyword.getWord().getLemma(), relevance, 1);
+            nodeIndexes.put(keyword.getWord(), i);
+            nodes.add(node);
+        }
+        List<ResultEdge> links = buildLinks(keywords, threshold, nodeIndexes);
+        appendDegreeValues(nodes, links, nodeIndexes);
+      
+        return new ResultTopic(nodes, links);
+    }
+
+    private static List<ResultEdge> buildLinks(List<Keyword> keywords, double threshold, Map<Word, Integer> nodeIndexes) {
+        List<ResultEdge> links = new ArrayList<>();
         for (Keyword t1 : keywords) {
             for (Keyword t2 : keywords) {
                 if (!t1.equals(t2)) {
@@ -120,8 +146,10 @@ public class ConceptMap {
             }
         }
         Collections.sort(links);
+        return links;
+    }
 
-        // determine number of links and degree of nodes
+    private static void appendDegreeValues(List<ResultNode> nodes, List<ResultEdge> links, Map<Word, Integer> nodeIndexes) {
         Map<Integer, Integer> noLinks = new HashMap<>();
         Map<Integer, Double> degree = new HashMap<>();
         for (Integer index : nodeIndexes.values()) {
@@ -136,7 +164,5 @@ public class ConceptMap {
             node.setNoLinks(noLinks.get(node.getId()));
             node.setDegree(degree.get(node.getId()));
         }
-
-        return new ResultTopic(nodes, links);
     }
 }

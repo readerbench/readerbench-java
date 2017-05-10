@@ -383,6 +383,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         LOGGER.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
+            out.write("SEP=,\n");
             if (titleText != null) {
                 out.write(titleText.replaceAll(",", "").replaceAll("\\s+", " ") + "\n");
             }
@@ -523,13 +524,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
