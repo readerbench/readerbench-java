@@ -363,4 +363,8 @@ public abstract class AnalysisElement implements Serializable {
     public ISemanticModel getSemanticModel(SimilarityType type) {
         return semanticModels.get(type);
     }
+    
+    public List<NGram> getBiGrams() {
+        return new ArrayList<>();
+    }
 }

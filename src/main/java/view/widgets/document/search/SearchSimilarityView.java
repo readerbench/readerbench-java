@@ -169,7 +169,7 @@ public class SearchSimilarityView extends JFrame {
         }
         Collections.sort(topicL);
         for (Keyword t : topicL) {
-            double relevance = SemanticCohesion.getAverageSemanticModelSimilarity(t.getWord(), this.query);
+            double relevance = SemanticCohesion.getAverageSemanticModelSimilarity(t.getElement(), this.query);
             t.setRelevance(relevance);
             System.out.print(relevance + " ");
         }

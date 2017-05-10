@@ -144,4 +144,8 @@ public class TwoModeGraphBuilder {
         LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER, gaphBuilder);
         return gaphBuilder;
     }
+    
+    public static void main(String[] args) {
+        TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+    }
 }
