@@ -24,6 +24,11 @@ public class NGram extends AnalysisElement {
     private List<Word> words;
     private Word unified;
     
+    public NGram(List<Word> words) {
+        this.words = words;
+        initialize();
+    }
+    
     public NGram(Word first, Word second) {
         words = new ArrayList<>();
         words.add(first);

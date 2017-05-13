@@ -116,6 +116,15 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        List<NGram> result = new ArrayList<>();
+        for (int i = 0; i <= words.size() - n; i++) {
+            result.add(new NGram(words.subList(i, i + n)));
+        }
+        return result;
+    }
 
     @Override
     public String toString() {

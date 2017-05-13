@@ -66,7 +66,7 @@ public class CommunityUtils {
             exportCNAOnlyData(dc, rootPath+ "/clusterdata_" + f.getName() + ".csv",
                     Arrays.asList(CSCLIndices.INDEGREE, CSCLIndices.OUTDEGREE));
             hierarchicalClustering(dc, rootPath + "/clustered_results_" + f.getName() + ".csv");
-//            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
         }
     }
 

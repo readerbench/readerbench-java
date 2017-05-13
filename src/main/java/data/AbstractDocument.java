@@ -813,4 +813,11 @@ public abstract class AbstractDocument extends AnalysisElement {
                 .flatMap(s -> s.getBiGrams().stream())
                 .collect(Collectors.toList());
     }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        return blocks.stream()
+                .flatMap(s -> s.getNGrams(n).stream())
+                .collect(Collectors.toList());
+    }
 }
