@@ -259,8 +259,12 @@ public class Community extends AnalysisElement {
 
         if (useTextualComplexity) {
 
+            LOGGER.log(Level.INFO, participants.toString());
             // determine complexity indices
             for (Participant p : participants) {
+                LOGGER.log(Level.INFO, p.toString());
+                LOGGER.log(Level.INFO, p.getSignificantContributions().toString());
+
                 // establish minimum criteria
                 int noContentWords = 0;
                 for (Block b : p.getSignificantContributions().getBlocks()) {
@@ -590,8 +594,8 @@ public class Community extends AnalysisElement {
                     }
                     SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
-                    Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
-                            startDate, endDate, monthIncrement, dayIncrement);
+                    //Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
+                    //        startDate, endDate, monthIncrement, dayIncrement);
                 }
             }
         }

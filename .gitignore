@@ -51,3 +51,5 @@ Thumbs.db
 /nb-configuration.xml
 /ReaderBenchServer.log*
 /ReaderBench.log*
+/dragos-resources/
+/dragos-processed/

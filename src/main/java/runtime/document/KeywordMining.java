@@ -228,12 +228,12 @@ public class KeywordMining {
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
+        //LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
-        models.add(lda);
+        //models.add(lda);
 
-        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
+        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts", Lang.en, "UTF-8");
         KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, true, false);
         keywordMining.processTexts(false);
     }

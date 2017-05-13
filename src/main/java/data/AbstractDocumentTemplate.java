@@ -87,10 +87,11 @@ public class AbstractDocumentTemplate implements Serializable {
                 } catch (ParseException e) {
                 }
             }
-            if (time == null) {
+            if (aux == null) {
                 try {
                     Long longTime = Long.parseLong(time);
-                    aux = new Date(longTime * 1000);
+                    //aux = new Date(longTime * 1000);
+                    aux = new Date(longTime);
                 } catch (NumberFormatException e) {
                     LOGGER.log(Level.SEVERE, "Unparsable date: {0}", time);
                 }

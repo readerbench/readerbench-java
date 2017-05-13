@@ -31,7 +31,7 @@ public class FrenchData {
 
     private static String LSA_PATH = "resources/config/FR/LSA/Le_Monde";
     private static String LDA_PATH = "resources/config/FR/LDA/Le_Monde";
-    private static String WORD2VEC_PATH = "resources/config/FR/word2vec/Le_Monde";
+//    private static String WORD2VEC_PATH = "resources/config/FR/word2vec/Le_Monde";
 
     public static void main(String[] args) {
 
@@ -115,7 +115,7 @@ public class FrenchData {
                     start++;
                 }
             //}
-            FileOutputStream outputStream = new FileOutputStream("D:\\Facultate\\MASTER\\french_reviews\\french_reviews.xlsx");
+            FileOutputStream outputStream = new FileOutputStream("C:\\Users\\Administrator\\Desktop\\french_reviews\\french_reviews.xlsx");
             workbook.write(outputStream);
             System.out.println("Finish to write all data in file !!!");
         } catch (Exception e) {
@@ -148,7 +148,7 @@ public class FrenchData {
         Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
         modelPaths.put(SimilarityType.LSA, LSA_PATH);
         modelPaths.put(SimilarityType.LDA, LDA_PATH);
-        modelPaths.put(SimilarityType.WORD2VEC, WORD2VEC_PATH);
+//        modelPaths.put(SimilarityType.WORD2VEC, WORD2VEC_PATH);
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, Lang.fr);
 
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(text);
