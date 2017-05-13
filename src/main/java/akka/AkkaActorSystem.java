@@ -19,24 +19,24 @@ public class AkkaActorSystem {
 
     public static ActorSystem ACTOR_SYSTEM;
 
-    public ActorRef communityActor;
-    public ActorRef conversationActor;
+    public static ActorRef communityActor;
+    public static ActorRef conversationActor;
 
     /**
      * Actors' initialization
      */
-    public void init() {
+    public static void init() {
         LOGGER.info("Create Akka Actor System ...");
         ACTOR_SYSTEM = ActorSystem.create("readerBenchActorSystem", ConfigFactory.load("akka.conf"));
 
         LOGGER.info("Init actors ...");
-        communityActor = this.ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
+        communityActor = ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
 //        solrDataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class),
 //                "solr-data-processing-actor");
 //        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
 //                        .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
 
-        conversationActor = this.ACTOR_SYSTEM.actorOf(new RoundRobinPool(1).props(Props.create(ConversationActor.class)),
+        conversationActor = ACTOR_SYSTEM.actorOf(new RoundRobinPool(1).props(Props.create(ConversationActor.class)),
                 "conversation-actor");
 
         //TODO - add other actors

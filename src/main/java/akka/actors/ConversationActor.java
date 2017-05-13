@@ -80,6 +80,7 @@ public class ConversationActor extends UntypedActor {
                                                                 boolean usePOSTagging, boolean computeDialogism) {
         data.cscl.Conversation c = new data.cscl.Conversation().loadConversation(message.getConversation(), models, lang, usePOSTagging);
         c.setPath(message.getPath());
+        LOGGER.info("Start computeAll ... ");
         c.computeAll(computeDialogism);
         return c;
     }

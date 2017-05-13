@@ -199,26 +199,33 @@ public abstract class AbstractDocument extends AnalysisElement {
     public void computeDiscourseAnalysis(boolean computeDialogism) {
         if (computeDialogism) {
             // build disambiguisation graph and lexical chains
+            LOGGER.info("Build disambiguation graph");
             DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
+            LOGGER.info("Prune disambiguation graph");
             DisambiguisationGraphAndLexicalChains.pruneDisambiguationGraph(this);
             // System.out.println(d.disambiguationGraph);
 
+            LOGGER.info("Build lexical chains");
             DisambiguisationGraphAndLexicalChains.buildLexicalChains(this);
             // for (LexicalChain chain : lexicalChains) {
             // System.out.println(chain);
             // }
 
+            LOGGER.info("Compute word distances");
             DisambiguisationGraphAndLexicalChains.computeWordDistances(this);
             // System.out.println(LexicalCohesion.getDocumentCohesion(this));
 
             // determine semantic chains / voices
+            LOGGER.info("Determine semantic chains / voices");
             DialogismComputations.determineVoices(this);
 
             // determine voice distributions & importance
+            LOGGER.info("Determine voice distributions & importance");
             DialogismComputations.determineVoiceDistributions(this);
         }
 
         // build coherence graph
+        LOGGER.log(Level.INFO, "Build coherence graph");
         CohesionGraph.buildCohesionGraph(this);
 
 //        t1 = System.currentTimeMillis();
@@ -227,11 +234,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        t2 = System.currentTimeMillis();
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
         // determine topics
+        LOGGER.info("Determine topics");
         KeywordModeling.determineKeywords(this);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
         // assign sentiment values
+        LOGGER.info("Assign sentiment values");
         SentimentAnalysis.weightSemanticValences(this);
 
         LOGGER.info("Finished all discourse analysis processes ...");

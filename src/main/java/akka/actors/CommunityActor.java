@@ -1,38 +1,29 @@
 package akka.actors;
 
+import akka.AkkaActorSystem;
 import akka.actor.UntypedActor;
+import akka.dispatch.Futures;
+import akka.dispatch.OnSuccess;
 import akka.messages.CommunityMessage;
 import akka.messages.ConversationMessage;
 import akka.messages.ConversationResponseMessage;
-import com.readerbench.solr.entities.cscl.Community;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 import com.readerbench.solr.entities.cscl.Contribution;
 import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
-import data.Block;
+import data.AbstractDocumentTemplate;
 import data.Lang;
-import data.Word;
-import data.cscl.CSCLCriteria;
-import data.cscl.CSCLIndices;
-import data.cscl.Participant;
-import data.cscl.Utterance;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import services.commons.VectorAlgebra;
-import services.complexity.ComplexityIndices;
-import services.discourse.CSCL.ParticipantEvaluation;
-import services.discourse.cohesion.CohesionGraph;
-import services.semanticModels.ISemanticModel;
-import services.semanticModels.SimilarityType;
-import services.solr.TestActors;
+import scala.concurrent.duration.FiniteDuration;
+import services.nlp.parsing.Parsing;
 
-import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 /**
  * Created by Dorinela on 3/17/2017.
@@ -51,11 +42,6 @@ public class CommunityActor extends UntypedActor{
     private static int CONVERSATION_NUMBER = 0;
     private static String FILENAME;
     private static String PATH = "resources/out";
-
-    @Override
-    public void preStart() {
-
-    }
 
     @Override
     public void onReceive(Object message) throws Exception {
@@ -80,39 +66,64 @@ public class CommunityActor extends UntypedActor{
 
             }
 
-            CONVERSATION_NUMBER = conversations.size();
+            List<Conversation> conv = new ArrayList<>();
+            conv.add(conversations.get(0));
+            conv.add(conversations.get(1));
+            CONVERSATION_NUMBER = conv.size();
+            List<ConversationMessage> messages = new ArrayList<>();
+            conv.forEach(m -> {
+                messages.add(new ConversationMessage(m));
+            });
             LOGGER.info("The number of conversations for community {} are {}", communityName, CONVERSATION_NUMBER);
 
-            try {
-                Long start = System.currentTimeMillis();
 
-                for (Conversation conversation : conversations) {
-                    ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
-                    /**
-                     * send ConversationMessage to ConversationActor to process it
-                     */
-                    LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
-                    TestActors.akkaActorSystem.conversationActor.tell(conversationMessage, self());
+            Long start = System.currentTimeMillis();
 
+            for (Conversation conversation : conv) {
+                ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
+                /**
+                 * send ConversationMessage to ConversationActor to process it
+                 */
+                LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
+                AkkaActorSystem.conversationActor.tell(conversationMessage, self());
+            }
+
+            List<Future<Object>> futures = new LinkedList<>();
+            messages.forEach(msg -> {
+                Timeout timeout = new Timeout(Duration.create(10, TimeUnit.MINUTES));
+                Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
+                futures.add(future);
+            });
+
+            Future<Iterable<Object>> futureResult = Futures.sequence(futures, AkkaActorSystem.ACTOR_SYSTEM.dispatcher());
+
+            futureResult.onSuccess(new OnSuccess<Iterable<Object>>(){
+                @Override
+                public void onSuccess(Iterable<Object> conversationResponseMessages) throws Throwable {
+                    conversationResponseMessages.forEach(msg -> {
+                        ConversationResponseMessage cm = (ConversationResponseMessage) msg;
+                        abstractDocuments.add(cm.getAbstractDocument());
+                    });
+
+                    processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+                    System.out.println("Took " + (System.currentTimeMillis() - start) + " millis");
                 }
-            } catch (Exception e) {
-                LOGGER.info("Error in loading vector models!!!");
-            }
+            }, AkkaActorSystem.ACTOR_SYSTEM.dispatcher());
 
-
-        } else if (message instanceof ConversationResponseMessage) {
-            LOGGER.info("Received ConversationResponseMessage ...");
-            ConversationResponseMessage conversationResponseMessage = (ConversationResponseMessage) message;
-
-            abstractDocuments.add(conversationResponseMessage.getAbstractDocument());
-            if (abstractDocuments.size() == CONVERSATION_NUMBER) {
-                LOGGER.info("End processing all conversations ...");
-                LOGGER.info("Start processing document collection ...");
-                processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
-                LOGGER.info("------------- End processing document collection --------- ");
-            }
-
-        } else {
+        }
+//       else if (message instanceof ConversationResponseMessage) {
+//            LOGGER.info("Received ConversationResponseMessage ...");
+//            ConversationResponseMessage conversationResponseMessage = (ConversationResponseMessage) message;
+//
+//            abstractDocuments.add(conversationResponseMessage.getAbstractDocument());
+//            if (abstractDocuments.size() == CONVERSATION_NUMBER) {
+//                LOGGER.info("End processing all conversations ...");
+//                LOGGER.info("Start processing document collection ...");
+//                processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+//                LOGGER.info("------------- End processing document collection --------- ");
+//            }
+//        }
+        else {
             LOGGER.warn("Unhandled message.");
             unhandled(message);
         }
@@ -134,27 +145,5 @@ public class CommunityActor extends UntypedActor{
             //community.generateParticipantViewSubCommunities("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_d3_");
             //community.generateConceptView("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_concepts.pdf");
         }
-    }
-
-    /**
-     * compute the time until the job starts
-     *
-     * In this case the job will start every day at 12:00 PM
-     *
-     * @return
-     */
-    private Long computeDelayOfJob() {
-        GregorianCalendar gCalendar = new GregorianCalendar();
-        gCalendar.set(GregorianCalendar.HOUR_OF_DAY, 23);
-        gCalendar.set(GregorianCalendar.MINUTE, 58);
-        gCalendar.set(GregorianCalendar.SECOND, 0);
-        Long delay = gCalendar.getTimeInMillis() - System.currentTimeMillis();
-
-        if (delay < 0) {
-            gCalendar.add(GregorianCalendar.DAY_OF_MONTH, 1);
-            delay = gCalendar.getTimeInMillis() - System.currentTimeMillis();
-        }
-
-        return  delay;
     }
 }
