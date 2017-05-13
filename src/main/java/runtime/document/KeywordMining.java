@@ -17,6 +17,7 @@ package runtime.document;
 
 import data.AbstractDocument;
 import data.Lang;
+import data.NGram;
 import data.Word;
 import data.discourse.Keyword;
 import data.document.Document;
@@ -25,7 +26,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,23 +34,19 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FilenameUtils;
-
 import org.openide.util.Exceptions;
-import services.commons.Formatting;
 import services.converters.Txt2XmlConverter;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 /**
  *
  * @author Mihai Dascalu
  */
-public class TopicRankings {
+public class KeywordMining {
 
     static final Logger LOGGER = Logger.getLogger("");
 
@@ -62,7 +58,7 @@ public class TopicRankings {
     private final boolean computeDialogism;
     private final boolean meta;
 
-    public TopicRankings(String processingPath, int noTopKeyWords, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
+    public KeywordMining(String processingPath, int noTopKeyWords, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
         this.processingPath = processingPath;
         this.noTopKeyWords = noTopKeyWords;
         this.models = models;
@@ -72,16 +68,16 @@ public class TopicRankings {
         this.meta = meta;
     }
 
-    public Set<Word> getTopKeywords(List<Document> documents, int noTopKeyWords) {
-        Set<Word> words = new TreeSet<>();
+    public Set<Keyword> getTopKeywords(List<Document> documents, int noTopKeyWords) {
+        Set<Keyword> keywords = new TreeSet<>();
 
         for (Document d : documents) {
             List<Keyword> topics = KeywordModeling.getSublist(d.getTopics(), noTopKeyWords, false, false);
             for (Keyword t : topics) {
-                words.add(t.getWord());
+                keywords.add(t);
             }
         }
-        return words;
+        return keywords;
     }
 
     public Map<Word, Double> getRelevance(Document d, Set<Word> keywords) {
@@ -165,15 +161,38 @@ public class TopicRankings {
         }
 
         //determing joint keywords
-        Set<Word> keywords = getTopKeywords(documents, noTopKeyWords);
-        Map<Document, Map<Word, Double>> docRelevance = new TreeMap<>();
-        Map<Document, Map<Word, Integer>> docIndex = new TreeMap<>();
-        for (Document d : documents) {
+        Set<Keyword> keywords = getTopKeywords(documents, noTopKeyWords);
+        //Map<Document, Map<Word, Double>> docRelevance = new TreeMap<>();
+        //Map<Document, Map<Word, Integer>> docIndex = new TreeMap<>();
+        /*for (Document d : documents) {
             docRelevance.put(d, getRelevance(d, keywords));
             docIndex.put(d, getIndex(d, keywords));
+        }*/
+        
+        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/keywords.csv", true))) {
+            StringBuilder csv = new StringBuilder("SEP=;\ntype;keyword;relevance\n");
+            for (Keyword keyword : keywords) {
+                if (keyword.getElement() instanceof Word) {
+                    csv.append("word;").append(keyword.getWord().getText()).append(";");
+                }
+                else if (keyword.getElement() instanceof NGram) {
+                    NGram nGram = (NGram) keyword.getElement();
+                    csv.append("ngram;");
+                    for (Word w : nGram.getWords()) {
+                        csv.append(w.getText()).append(" ");
+                    }
+                    csv.append(";");
+                }
+                csv.append(keyword.getRelevance()).append("\n");
+            }
+            outRelevance.write(csv.toString());
+            outRelevance.close();
+        } catch (IOException ex) {
+            LOGGER.severe("Runtime error while analyzing selected folder ...");
+            Exceptions.printStackTrace(ex);
         }
 
-        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/relevance.csv", true));
+        /*try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/relevance.csv", true));
                 BufferedWriter outIndex = new BufferedWriter(new FileWriter(processingPath + "/index.csv", true));) {
             StringBuilder header = new StringBuilder("SEP=,\nFilename");
             documents.stream().forEach((d) -> {
@@ -201,20 +220,21 @@ public class TopicRankings {
         } catch (IOException ex) {
             LOGGER.severe("Runtime error while analyzing selected folder ...");
             Exceptions.printStackTrace(ex);
-        }
+        }*/
     }
 
     public static void main(String[] args) {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA copy/responses per profession", Lang.en, "UTF-8");
-        TopicRankings tr = new TopicRankings("resources/in/ENEA copy/responses per profession", 50, models, Lang.en, true, true, false);
-        tr.processTexts(false);
+
+        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
+        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, true, false);
+        keywordMining.processTexts(false);
     }
 }

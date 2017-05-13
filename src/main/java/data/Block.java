@@ -26,6 +26,7 @@ import data.discourse.SemanticRelatedness;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
+import java.util.stream.Collectors;
 import services.semanticModels.ISemanticModel;
 
 /**
@@ -114,6 +115,12 @@ public class Block extends AnalysisElement implements Serializable {
         d.getBlocks().add(b);
 //        }
         d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
+        if (d.getText() == null) {
+            d.setText(d.getText() + "\n");
+        }
+        else {
+            d.setText(d.getText() + b.getText() + "\n");
+        }
     }
 
     public List<Sentence> getSentences() {
@@ -310,6 +317,13 @@ public class Block extends AnalysisElement implements Serializable {
         this.nextSentenceBlockDistance = nextSentenceBlockDistance;
     }
 
+    @Override
+    public List<NGram> getBiGrams() {
+        return sentences.stream()
+                .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
+    }
+    
     @Override
     public String toString() {
         String s = "";
