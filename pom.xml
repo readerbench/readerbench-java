@@ -365,6 +365,11 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>weka-dev</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>${apache.commons.math.version}</version>
