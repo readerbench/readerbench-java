@@ -208,13 +208,13 @@ public class TopicRankings {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/ENEA_TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/ENEA_TASA", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA/responses per profession", Lang.en, "UTF-8");
-        TopicRankings tr = new TopicRankings("resources/in/ENEA/responses per profession", 50, models, Lang.en, true, true, false);
+        Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA copy/responses per profession", Lang.en, "UTF-8");
+        TopicRankings tr = new TopicRankings("resources/in/ENEA copy/responses per profession", 50, models, Lang.en, true, true, false);
         tr.processTexts(false);
     }
 }

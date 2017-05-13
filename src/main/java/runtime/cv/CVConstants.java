@@ -15,9 +15,9 @@ public class CVConstants {
     public static final String LDA_PATH_FR = "resources/config/FR/LDA/Le_Monde";
     public static final String WOR2VEC_PATH_FR = "resources/config/FR/word2vec/Le_Monde";
     public static final String LANG_FR = "French";
-    public static final String POS_TAGGING = "true";
-    public static final String DIALOGISM = "true";
-    public static final String THRESHOLD = "0.3";
+    public static final Boolean POS_TAGGING = true;
+    public static final Boolean DIALOGISM = true;
+    public static final Double THRESHOLD = 0.3;
     
     public static final int FILESIZE_MAX        = 25 * 1024 * 1024; // 25MB
     public static final int FILESIZE_WARN       = 5 * 1024 * 1024; // 5MB
@@ -26,7 +26,8 @@ public class CVConstants {
     public static final int PAGES_MIN = 1;
     public static final int PAGES_MAX = 2;
     
-    public static final double FAN_DELTA = 1;
+    public static final Double FAN_DELTA = 1.0;
+    public static final Double FAN_DELTA_VERY = 2.0;
     public static final String KEYWORDS = "prospection, prospect, développement, clients, fidélisation, chiffre d’affaires, marge, vente, portefeuille, négociation, budget, rendez-vous, proposition, terrain, téléphone, rentabilité, business, reporting, veille, secteur, objectifs, comptes, animation, suivi, création, gestion";
     public static final String IGNORE = "janvier, février, mars, avril, mai, juin, juillet, août, septembre, octobre, novembre, décembre";
     // the following keywords should lead to the deletion of the entire row when met

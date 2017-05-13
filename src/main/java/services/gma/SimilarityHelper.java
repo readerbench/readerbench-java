@@ -2,6 +2,7 @@ package services.gma;
 
 import data.AnalysisElement;
 import data.Lang;
+import data.NGram;
 import data.Word;
 import data.cscl.CSCLConstants;
 import java.util.Map;
@@ -32,12 +33,20 @@ public class SimilarityHelper {
         this.useLatentSimilarities = useLatentSimilarities;
     }
 
-    public TreeMap<Word, Double> getSimilarTopics(Word word, LSA lsa, LDA lda) {
+    public TreeMap<Word, Double> getSimilarTopics(AnalysisElement elem, LSA lsa, LDA lda) {
 
         TreeMap<Word, Double> similarConcepts;
 
-        similarConcepts = new TreeMap<Word, Double>();
-        word.ldaSimilarityToUnderlyingConcept = 1.0; // make sure it passes
+        similarConcepts = new TreeMap<>();
+        Word word;
+        if (elem instanceof Word) {
+            word = (Word)elem;
+        }
+        else {
+            word = ((NGram)elem).getUnified();
+        }
+        word.ldaSimilarityToUnderlyingConcept = 1.0;
+        // make sure it passes
         // further
         // verifications
         similarConcepts.put(word, 1.0);
@@ -45,14 +54,14 @@ public class SimilarityHelper {
                 .putAll(OntologySupport.getExtendedSymilarConcepts(word));
 
         if (useLatentSimilarities) {
-            similarConcepts.putAll(getLatentSimilarities(word, lsa, lda));
+            similarConcepts.putAll(getLatentSimilarities(elem, lsa, lda));
         }
 
         return similarConcepts;
 
     }
 
-    private TreeMap<Word, Double> getLatentSimilarities(Word word, LSA lsa, LDA lda) {
+    private TreeMap<Word, Double> getLatentSimilarities(AnalysisElement word, LSA lsa, LDA lda) {
 
         TreeMap<Word, Double> similarConcepts = new TreeMap<Word, Double>();
 

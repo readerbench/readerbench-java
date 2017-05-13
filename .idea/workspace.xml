@@ -2,27 +2,114 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="01b98c39-da71-46de-8fa9-3ae6839cbf28" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.classpath" afterPath="$PROJECT_DIR$/.classpath" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/NGram.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/SemanticCorpora.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/ClusterCommunity.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/CommunityUtils.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/ParticipantGroup.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/ParticipantNormalized.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/runtime/cscl/PostQuality.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/runtime/cscl/frenchdata/Doc.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/runtime/cscl/frenchdata/FrenchData.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/runtime/document/KeywordMining.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/WordActivation.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/services/converters/ResearchArticleSerializer.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/services/nlp/spellchecking/Spellchecking.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/procrustes/ExperimentAoE.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/procrustes/TrainAoEModels.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/cv/JobQuestHelper.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/queryResult/QueryResultAnswerMatching.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/queryResult/QueryResultJobQuest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/result/ResultAnswerMatching.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/result/ResultJobQuest.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/ComprehensionModelService.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/result/CMResult.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/result/CMSentence.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/result/CMWordActivationResult.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/result/CMWordResult.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/cimodel/result/QueryResultCM.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/TopicEvolutionBuilder.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/ArticleKeyword.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/QueryResultTopicEvolution.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/TopicEvolution.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/procrustes/ExperimentW2V.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/word2vec/TrainWord2VecModels.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/services/sentiment/Test.java" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/services/sentiment/Seanse.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/db/Lexicons.java" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/src/main/java/services/similarity/TextSimilarity.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/TextSimilarity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/run.bat" afterPath="$PROJECT_DIR$/run.bat" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/AbstractDocument.java" afterPath="$PROJECT_DIR$/src/main/java/data/AbstractDocument.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/AnalysisElement.java" afterPath="$PROJECT_DIR$/src/main/java/data/AnalysisElement.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/Block.java" afterPath="$PROJECT_DIR$/src/main/java/data/Block.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/Lang.java" afterPath="$PROJECT_DIR$/src/main/java/data/Lang.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/Sentence.java" afterPath="$PROJECT_DIR$/src/main/java/data/Sentence.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/discourse/SemanticChain.java" afterPath="$PROJECT_DIR$/src/main/java/data/discourse/SemanticChain.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/sentiment/SentimentEntity.java" afterPath="$PROJECT_DIR$/src/main/java/data/sentiment/SentimentEntity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/sentiment/SentimentValence.java" afterPath="$PROJECT_DIR$/src/main/java/data/sentiment/SentimentValence.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/cohesion/SentimentAnalysis.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/cohesion/SentimentAnalysis.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/article/ResearchArticle.java" afterPath="$PROJECT_DIR$/src/main/java/data/article/ResearchArticle.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/cscl/Community.java" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/Community.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/cscl/Conversation.java" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/Conversation.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/cscl/Participant.java" afterPath="$PROJECT_DIR$/src/main/java/data/cscl/Participant.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/data/discourse/Keyword.java" afterPath="$PROJECT_DIR$/src/main/java/data/discourse/Keyword.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/converters/PdfToText.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/converters/PdfToText.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/cscl/CSCLCommunityTest.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/cscl/CSCLCommunityTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/cv/CVAnalyzer.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/cv/CVAnalyzer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/cv/CVConstants.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/cv/CVConstants.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/document/TopicRankings.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/document/TopicRankings.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/essays/DataGatheringTest.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/essays/DataGatheringTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/selfexplanation/Millington.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/selfexplanation/Millington.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/Categorization.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/Categorization.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/WordAssociationTest.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/WordAssociationTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/WordsSimilarities.java" afterPath="$PROJECT_DIR$/src/main/java/runtime/semanticModels/WordsSimilarities.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/commons/VectorAlgebra.java" afterPath="$PROJECT_DIR$/src/main/java/services/commons/VectorAlgebra.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/complexity/CAF/WordTokenizer.java" afterPath="$PROJECT_DIR$/src/main/java/services/complexity/CAF/WordTokenizer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/ComprehensionModel.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/ComprehensionModel.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/WordLinkageCalculator.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/WordLinkageCalculator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/ActivationScoreLogger.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/ActivationScoreLogger.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/CMIndexer.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/CMIndexer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMEdgeDO.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMEdgeDO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMEdgeType.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMEdgeType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMGraphDO.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMGraphDO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMGraphStatistics.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMGraphStatistics.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMNodeDO.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMNodeDO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMNodeType.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/indexer/graphStruct/CMNodeType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/pageRank/NodeRank.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/pageRank/NodeRank.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/pageRank/PageRank.java" afterPath="$PROJECT_DIR$/src/main/java/services/comprehensionModel/utils/pageRank/PageRank.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/converters/PdfToTextConverter.java" afterPath="$PROJECT_DIR$/src/main/java/services/converters/PdfToTextConverter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/converters/Txt2XmlConverter.java" afterPath="$PROJECT_DIR$/src/main/java/services/converters/Txt2XmlConverter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/cohesion/LexicalCohesion.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/cohesion/LexicalCohesion.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismComputations.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismComputations.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismMeasures.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismMeasures.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing.java" afterPath="$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing_EN.java" afterPath="$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing_EN.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/keywordMining/KeywordModeling.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/keywordMining/KeywordModeling.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/relatedness/RelatednessGraph.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/relatedness/RelatednessGraph.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/discourse/selfExplanations/VerbalizationAssessment.java" afterPath="$PROJECT_DIR$/src/main/java/services/discourse/selfExplanations/VerbalizationAssessment.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/gma/ProblemSpaceView.java" afterPath="$PROJECT_DIR$/src/main/java/services/gma/ProblemSpaceView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/gma/SimilarityHelper.java" afterPath="$PROJECT_DIR$/src/main/java/services/gma/SimilarityHelper.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/LSA/LSA.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/LSA/LSA.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/SimilarityType.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/SimilarityType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/WordNet/OntologySupport.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/WordNet/OntologySupport.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/WordNet/WordnetPOSData.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/WordNet/WordnetPOSData.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/services/semanticModels/word2vec/Word2VecModel.java" afterPath="$PROJECT_DIR$/src/main/java/services/semanticModels/word2vec/Word2VecModel.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/ReaderBenchView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/ReaderBenchView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/AddConversationView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/AddConversationView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/article/utils/distanceStrategies/AuthorDistanceStrategyType.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/article/utils/distanceStrategies/AuthorDistanceStrategyType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/comprehensionModel/ComprehensionModelManagementView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/comprehensionModel/ComprehensionModelManagementView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/comprehensionModel/ComprehensionModelView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/comprehensionModel/ComprehensionModelView.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatVoiceInterAnimationView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatVoiceInterAnimationView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/EvolutionGraph.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/EvolutionGraph.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/VoiceSynergyView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/VoiceSynergyView.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/document/SentenceLevelInterAnimationView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/document/SentenceLevelInterAnimationView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ParticipantInteractionView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ParticipantInteractionView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/document/ConceptView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/document/ConceptView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/document/search/SearchSimilarityView.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/document/search/SearchSimilarityView.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/view/widgets/semanticModels/SemanticModelsTraining.java" afterPath="$PROJECT_DIR$/src/main/java/view/widgets/semanticModels/SemanticModelsTraining.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/ReaderBenchServer.java" afterPath="$PROJECT_DIR$/src/main/java/webService/ReaderBenchServer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/cv/CVHelper.java" afterPath="$PROJECT_DIR$/src/main/java/webService/cv/CVHelper.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/keywords/KeywordsHelper.java" afterPath="$PROJECT_DIR$/src/main/java/webService/keywords/KeywordsHelper.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/mail/SendMail.java" afterPath="$PROJECT_DIR$/src/main/java/webService/mail/SendMail.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/query/QueryHelper.java" afterPath="$PROJECT_DIR$/src/main/java/webService/query/QueryHelper.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/ConceptMap.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/ConceptMap.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/SentimentAnalysis.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/SentimentAnalysis.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/lak/TwoModeGraphBuilder.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/TwoModeGraphBuilder.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/lak/TwoModeGraphDegreeCalculator.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/TwoModeGraphDegreeCalculator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/TwoModeGraphNode.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/TwoModeGraphNode.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/TwoModeGraphNodeType.java" afterPath="$PROJECT_DIR$/src/main/java/webService/services/lak/result/TwoModeGraphNodeType.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/utils/localization/cv_errors.properties" afterPath="$PROJECT_DIR$/src/main/resources/utils/localization/cv_errors.properties" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -51,11 +138,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Parsing.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Parsing.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="415">
-              <caret line="247" column="0" lean-forward="true" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
+              <caret line="247" column="0" lean-forward="false" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SentimentAnalysis.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/webService/services/SentimentAnalysis.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="50" column="53" lean-forward="false" selection-start-line="50" selection-start-column="52" selection-end-line="50" selection-end-column="53" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ChatView.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatView.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="228" column="3" lean-forward="false" selection-start-line="228" selection-start-column="3" selection-end-line="228" selection-end-column="3" />
               <folding />
             </state>
           </provider>
@@ -142,6 +249,7 @@
       <find>loadSentimentEntity()</find>
       <find>get</find>
       <find>spell</find>
+      <find>ChatView</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -169,6 +277,7 @@
         <option value="$PROJECT_DIR$/src/main/java/services/nlp/parsing/Context.java" />
         <option value="$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismComputations.java" />
         <option value="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatVoiceInterAnimationView.java" />
+        <option value="$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatView.java" />
       </list>
     </option>
   </component>
@@ -220,6 +329,62 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ReaderBench" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ReaderBench" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webService" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ReaderBench" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="ReaderBench" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webService" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="services" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -606,13 +771,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/data/discourse/SemanticChain.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="252" column="33" lean-forward="false" selection-start-line="252" selection-start-column="33" selection-end-line="252" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/services/discourse/dialogism/DialogismMeasures.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4950">
@@ -625,40 +783,40 @@
         <state relative-caret-position="7546">
           <caret line="399" column="0" lean-forward="false" selection-start-line="399" selection-start-column="0" selection-end-line="399" selection-end-column="0" />
           <folding>
-            <element signature="e#0#25038#0" expanded="false" />
+            <element signature="e#0#25297#0" expanded="false" />
             <element signature="imports" expanded="false" />
-            <element signature="e#21599#21600#0" expanded="false" />
-            <element signature="e#21634#21635#0" expanded="false" />
-            <element signature="e#21749#21750#0" expanded="false" />
-            <element signature="e#21797#21798#0" expanded="false" />
-            <element signature="e#21883#21884#0" expanded="false" />
-            <element signature="e#21930#21931#0" expanded="false" />
-            <element signature="e#22242#22243#0" expanded="false" />
-            <element signature="e#22291#22292#0" expanded="false" />
-            <element signature="e#22623#22624#0" expanded="false" />
-            <element signature="e#22669#22670#0" expanded="false" />
-            <element signature="e#22983#22984#0" expanded="false" />
-            <element signature="e#23026#23027#0" expanded="false" />
-            <element signature="e#23309#23310#0" expanded="false" />
-            <element signature="e#23353#23354#0" expanded="false" />
-            <element signature="e#23621#23622#0" expanded="false" />
-            <element signature="e#23662#23663#0" expanded="false" />
-            <element signature="e#23779#23780#0" expanded="false" />
-            <element signature="e#23839#23840#0" expanded="false" />
-            <element signature="e#23912#23913#0" expanded="false" />
-            <element signature="e#23950#23951#0" expanded="false" />
-            <element signature="e#24058#24059#0" expanded="false" />
-            <element signature="e#24112#24113#0" expanded="false" />
-            <element signature="e#24189#24190#0" expanded="false" />
-            <element signature="e#24229#24230#0" expanded="false" />
-            <element signature="e#24345#24346#0" expanded="false" />
-            <element signature="e#24403#24404#0" expanded="false" />
-            <element signature="e#24480#24481#0" expanded="false" />
-            <element signature="e#24520#24521#0" expanded="false" />
-            <element signature="e#24636#24637#0" expanded="false" />
-            <element signature="e#24694#24695#0" expanded="false" />
-            <element signature="e#24778#24779#0" expanded="false" />
-            <element signature="e#24825#24826#0" expanded="false" />
+            <element signature="e#21858#21859#0" expanded="false" />
+            <element signature="e#21893#21894#0" expanded="false" />
+            <element signature="e#22008#22009#0" expanded="false" />
+            <element signature="e#22056#22057#0" expanded="false" />
+            <element signature="e#22142#22143#0" expanded="false" />
+            <element signature="e#22189#22190#0" expanded="false" />
+            <element signature="e#22501#22502#0" expanded="false" />
+            <element signature="e#22550#22551#0" expanded="false" />
+            <element signature="e#22882#22883#0" expanded="false" />
+            <element signature="e#22928#22929#0" expanded="false" />
+            <element signature="e#23242#23243#0" expanded="false" />
+            <element signature="e#23285#23286#0" expanded="false" />
+            <element signature="e#23568#23569#0" expanded="false" />
+            <element signature="e#23612#23613#0" expanded="false" />
+            <element signature="e#23880#23881#0" expanded="false" />
+            <element signature="e#23921#23922#0" expanded="false" />
+            <element signature="e#24038#24039#0" expanded="false" />
+            <element signature="e#24098#24099#0" expanded="false" />
+            <element signature="e#24171#24172#0" expanded="false" />
+            <element signature="e#24209#24210#0" expanded="false" />
+            <element signature="e#24317#24318#0" expanded="false" />
+            <element signature="e#24371#24372#0" expanded="false" />
+            <element signature="e#24448#24449#0" expanded="false" />
+            <element signature="e#24488#24489#0" expanded="false" />
+            <element signature="e#24604#24605#0" expanded="false" />
+            <element signature="e#24662#24663#0" expanded="false" />
+            <element signature="e#24739#24740#0" expanded="false" />
+            <element signature="e#24779#24780#0" expanded="false" />
+            <element signature="e#24895#24896#0" expanded="false" />
+            <element signature="e#24953#24954#0" expanded="false" />
+            <element signature="e#25037#25038#0" expanded="false" />
+            <element signature="e#25084#25085#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -793,13 +951,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="264">
           <caret line="32" column="37" lean-forward="true" selection-start-line="32" selection-start-column="37" selection-end-line="32" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/webService/services/SentimentAnalysis.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="54" column="32" lean-forward="true" selection-start-line="54" selection-start-column="32" selection-end-line="54" selection-end-column="32" />
         </state>
       </provider>
     </entry>
@@ -1029,7 +1180,23 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/services/nlp/parsing/Parsing.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="415">
-          <caret line="247" column="0" lean-forward="true" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
+          <caret line="247" column="0" lean-forward="false" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/webService/services/SentimentAnalysis.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="50" column="53" lean-forward="false" selection-start-line="50" selection-start-column="52" selection-end-line="50" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/view/widgets/cscl/ChatView.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="228" column="3" lean-forward="false" selection-start-line="228" selection-start-column="3" selection-end-line="228" selection-end-column="3" />
           <folding />
         </state>
       </provider>

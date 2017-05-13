@@ -80,7 +80,6 @@ public class DataGatheringTest {
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/ES/LSA/Jose_Antonio", Lang.es);
 //        LDA lda = LDA.loadLDA("resources/config/ES/LDA/Jose_Antonio", Lang.es);
-
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde", Lang.fr);
 //        LDA lda = LDA.loadLDA("resources/config/FR/LDA/Le_Monde", Lang.fr);
 //        LSA lsa = LSA.loadLSA("resources/config/FR/LSA/Le_Monde_Nursery", Lang.fr);
@@ -97,11 +96,15 @@ public class DataGatheringTest {
 //        convertAndProcess("resources/in/creativity/individual creativity tasks (txt)", Lang.en, models);
 //        convertAndProcess("resources/in/pairwise/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/Archive/texts", Lang.en, models);
-        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
+//        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/posttest essays fall 2009", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays", Lang.en, models);
-//        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
-//        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/stairstepper_en/texts", Lang.en, "ISO-8859-1");
+//        convertAndProcess("resources/in/essays/iStart mini-games/texts", Lang.en, models);
+//        convertAndProcess("resources/in/essays/stairstepper_en/texts", Lang.en, models);
+//        convertAndProcess("resources/in/Philippe/nursery_fr", Lang.fr, models);
+//        convertAndProcess("resources/in/essays/all essays", Lang.en, models);
+        convertAndProcess("resources/in/essays/texts 2 for familiarity", Lang.en, models);
+        
 //        DataGathering.processTexts("resources/in/essays/stairstepper_en/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);

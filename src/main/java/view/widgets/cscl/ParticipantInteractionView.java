@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,19 +15,11 @@
  */
 package view.widgets.cscl;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Logger;
-
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-
+import org.gephi.appearance.api.AppearanceController;
+import org.gephi.appearance.api.AppearanceModel;
+import org.gephi.appearance.api.Function;
+import org.gephi.appearance.plugin.RankingNodeSizeTransformer;
+import org.gephi.graph.api.Column;
 import org.gephi.graph.api.DirectedGraph;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
@@ -44,6 +36,15 @@ import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
 
 import data.cscl.Participant;
 import services.discourse.CSCL.ParticipantEvaluation;
@@ -93,6 +94,8 @@ public class ParticipantInteractionView extends JFrame {
 		// get models
 		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
 		DirectedGraph graph = graphModel.getDirectedGraph();
+        AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+        AppearanceModel appearanceModel = appearanceController.getModel();
 
 		ParticipantEvaluation.buildParticipantGraph(graph, graphModel, this.participants,
 				this.participantContributions, displayEdgeLabels, isAnonymized);
@@ -112,25 +115,41 @@ public class ParticipantInteractionView extends JFrame {
 		layout.setOptimalDistance(max * 10);
 
 		layout.initAlgo();
+
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(false);
+        distance.execute(graphModel);
+
+        Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+                RankingNodeSizeTransformer.class);
+        RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+                .getTransformer();
+        centralityTransformer.setMinSize(3);
+        centralityTransformer.setMaxSize(10);
+        appearanceController.transform(centralityRanking);
+
 		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
 			layout.goAlgo();
 		}
 		layout.endAlgo();
 
-		// Get centrality
-		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel);
+//		// Get centrality
+//		GraphDistance distance = new GraphDistance();
+//		distance.setDirected(true);
+//		distance.execute(graphModel);
 
 		// Preview configuration
 		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
 		PreviewModel previewModel = previewController.getModel();
 		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-				new DependantOriginalColor(Color.BLACK));
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+                new DependantOriginalColor(DependantOriginalColor.Mode.ORIGINAL));
+//        previewModel.getProperties().putValue(PreviewProperty.EDGE_LABEL_COLOR,
+//                new DependantOriginalColor(DependantOriginalColor.Mode.ORIGINAL));
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
 		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
+		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.FALSE);
 		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
 
 		// New Processing target, get the PApplet

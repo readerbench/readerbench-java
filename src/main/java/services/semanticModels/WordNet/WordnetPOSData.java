@@ -39,7 +39,7 @@ public class WordnetPOSData {
     private final Map<POS, WordnetData> dictionaries = new HashMap<>();
     private WordnetData general = null;
     private String fileName;
-    
+
     public WordnetPOSData(String fileName) {
         this.fileName = fileName;
     }
@@ -50,14 +50,14 @@ public class WordnetPOSData {
         }
         return general;
     }
-    
+
     public WordnetData getByPOS(POS pos) {
         if (!dictionaries.containsKey(pos)) {
             dictionaries.put(pos, initWordNet(fileName, pos));
         }
         return dictionaries.get(pos);
     }
-    
+
     public static WordnetData initWordNet(String fileName, POS pos) {
         WordnetLmfSaxParser parser = new WordnetLmfSaxParser();
         if (pos != null) {
@@ -80,15 +80,15 @@ public class WordnetPOSData {
         String word2 = w2.getLemma();
         return semanticSimilarity(word1, word2, OntologySupport.getPOS(w1.getPOS()), type);
     }
-    
+
     public double semanticSimilarity(String word1, String word2, POS pos, SimilarityType type) {
         WordnetData wordnetData = getByPOS(pos);
-        if (!wordnetData.entryToSynsets.containsKey(word1) || 
-            !wordnetData.entryToSynsets.containsKey(word2)) {
+        if (!wordnetData.entryToSynsets.containsKey(word1)
+                || !wordnetData.entryToSynsets.containsKey(word2)) {
             wordnetData = getDictionary();
         }
-        if (!wordnetData.entryToSynsets.containsKey(word1) || 
-            !wordnetData.entryToSynsets.containsKey(word2)) {
+        if (!wordnetData.entryToSynsets.containsKey(word1)
+                || !wordnetData.entryToSynsets.containsKey(word2)) {
             return 0;
         }
         ArrayList<SimilarityPair> similarities = new ArrayList<>();
@@ -105,11 +105,12 @@ public class WordnetPOSData {
         }
         return WordnetSimilarityApi.getTopScoringSimilarityPair(similarities).getScore();
     }
-    
+
     public Set<String> getSynonyms(String lemma, POS pos) {
         final WordnetData wnd = getByPOS(pos);
         return wnd.entryToSynsets.getOrDefault(lemma, new ArrayList<>()).stream()
                 .flatMap(synset -> wnd.getSynonyms(synset).stream())
+                .filter(syn -> !syn.equals(lemma))
                 .collect(Collectors.toSet());
     }
 

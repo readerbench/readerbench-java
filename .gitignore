@@ -47,7 +47,7 @@ Thumbs.db
 !/src/main/resources/
 /db.properties
 /tmp/
-/nbactions.xml
+/nbactions*.xml
 /nb-configuration.xml
 /ReaderBenchServer.log*
 /ReaderBench.log*

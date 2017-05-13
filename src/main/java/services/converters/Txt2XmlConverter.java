@@ -338,9 +338,12 @@ public class Txt2XmlConverter {
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f), encoding))) {
                     while ((line = in.readLine()) != null) {
                         if (line.trim().length() > 0) {
+//                            clean HTML tags
+//                            content += Jsoup.parse(line.trim()).text() + "\n";
                             content += line.trim() + "\n";
                         }
                     }
+
                     if ((++current_doc_to_process) % 1000 == 0) {
                         LOGGER.log(Level.INFO, "Finished processing {0} documents of {1}", new Object[]{current_doc_to_process, total_docs_to_process});
                     }
@@ -354,12 +357,10 @@ public class Txt2XmlConverter {
                     }
                 } catch (FileNotFoundException e) {
                     Exceptions.printStackTrace(e);
-                } catch (UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException | SAXException | TransformerException e) {
                     Exceptions.printStackTrace(e);
                 } catch (IOException e) {
                     Exceptions.printStackTrace(e);
-                } catch (SAXException | TransformerException ex) {
-                    Exceptions.printStackTrace(ex);
                 }
             }
             LOGGER.info("Finished processing all files...");

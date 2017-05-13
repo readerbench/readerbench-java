@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.StringJoiner;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -384,6 +385,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         LOGGER.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
+            out.write("SEP=,\n");
             if (titleText != null) {
                 out.write(titleText.replaceAll(",", "").replaceAll("\\s+", " ") + "\n");
             }
@@ -429,7 +431,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getWord().getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
+                    Integer probClass = LDA.findMaxResemblance(t.getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
@@ -524,13 +526,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
@@ -805,5 +807,12 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
+    }
+    
+    @Override
+    public List<NGram> getBiGrams() {
+        return blocks.stream()
+                .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
     }
 }

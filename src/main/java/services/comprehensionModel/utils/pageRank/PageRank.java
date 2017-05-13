@@ -32,7 +32,16 @@ public class PageRank {
     public PageRank() {
     }
 
-    public Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
+    public void runPageRank(CMGraphDO graph) {
+        Map<CMNodeDO, Double> pageRankValues = graph.getActivationMap();
+        Map<CMNodeDO, Double> newPageRankValues = this.runPageRank(pageRankValues, graph);
+        newPageRankValues.entrySet().stream().forEach(entry -> {
+            CMNodeDO actualNode = graph.getNode(entry.getKey());
+            actualNode.setActivationScore(entry.getValue());
+        });
+    }
+
+    private Map<CMNodeDO, Double> runPageRank(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph) {
         int algIteration = 0;
         Map<CMNodeDO, Double> currentPageRankValues = new TreeMap<>(pageRankValues);
         while (algIteration < PageRank.MAX_ITER) {
@@ -63,7 +72,7 @@ public class PageRank {
         double r = 0;
         double N = (double) graph.getNodeList().size();
         for (CMNodeDO node : graph.getNodeList()) {
-            List<CMEdgeDO> nodeEdgeList = graph.getEdgeList(node);
+            List<CMEdgeDO> nodeEdgeList = graph.getActiveEdgeList(node);
             double nodeDegree = (double) nodeEdgeList.size();
             double nodePageRankVal = this.getPageRankValue(pageRankValues, node, graph);
             if (nodeDegree > 0) {
@@ -77,10 +86,10 @@ public class PageRank {
 
     private double computeTempPageRankValue(Map<CMNodeDO, Double> pageRankValues, CMGraphDO graph, CMNodeDO node, double r) {
         double res = r;
-        List<CMEdgeDO> nodeEdgeList = graph.getEdgeList(node);
+        List<CMEdgeDO> nodeEdgeList = graph.getActiveEdgeList(node);
         for (CMEdgeDO edge : nodeEdgeList) {
             CMNodeDO neighbor = edge.getOppositeNode(node);
-            List<CMEdgeDO> neighborEdgeList = graph.getEdgeList(neighbor);
+            List<CMEdgeDO> neighborEdgeList = graph.getActiveEdgeList(neighbor);
             double normalize = (double) neighborEdgeList.size();
             res += PageRank.PROB * (this.getPageRankValue(pageRankValues, neighbor, graph) / normalize);
         }

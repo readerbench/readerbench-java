@@ -18,7 +18,7 @@ import java.text.Normalizer;
 import java.util.regex.Pattern;
 
 public class WordTokenizer {
-	public static final String CEliminatedTokens = "[^a-zA-Z]";
+	public static final String CEliminatedTokens  = "[^a-zA-Z]";
 	public static final Pattern DIACRITICS_AND_FRIENDS = Pattern
 			.compile("[\\p{InCombiningDiacriticalMarks}\\p{IsLm}\\p{IsSk}]+");
 

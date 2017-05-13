@@ -60,42 +60,6 @@ public class PdfToTextConverter {
 
     private Integer contentWords;
 
-    public PdfToTextConverter() {
-        this.imagesPerPage = new HashMap<>();
-        this.colorsPerPage = new HashMap<>();
-    }
-
-    public Integer getParagraphs() {
-        return paragraphs;
-    }
-
-    public void setParagraphs(Integer paragraphs) {
-        this.paragraphs = paragraphs;
-    }
-
-    public Integer getSentences() {
-        return sentences;
-    }
-
-    public void setSentences(Integer sentences) {
-        this.sentences = sentences;
-    }
-
-    public Integer getWords() {
-        return words;
-    }
-
-    public void setWords(Integer words) {
-        this.words = words;
-    }
-
-    public Integer getContentWords() {
-        return contentWords;
-    }
-
-    public void setContentWords(Integer contentWords) {
-        this.contentWords = contentWords;
-    }
 
     // number of images
     private Integer images;
@@ -121,6 +85,35 @@ public class PdfToTextConverter {
     private Float italicCharsCoverage;
     private Integer boldItalicCharacters;
     private Float boldItalicCharsCoverage;
+    final StringBuffer extractedText = new StringBuffer();
+    public PdfToTextConverter() {
+        this.imagesPerPage = new HashMap<>();
+        this.colorsPerPage = new HashMap<>();
+    }
+    public Integer getParagraphs() {
+        return paragraphs;
+    }
+    public void setParagraphs(Integer paragraphs) {
+        this.paragraphs = paragraphs;
+    }
+    public Integer getSentences() {
+        return sentences;
+    }
+    public void setSentences(Integer sentences) {
+        this.sentences = sentences;
+    }
+    public Integer getWords() {
+        return words;
+    }
+    public void setWords(Integer words) {
+        this.words = words;
+    }
+    public Integer getContentWords() {
+        return contentWords;
+    }
+    public void setContentWords(Integer contentWords) {
+        this.contentWords = contentWords;
+    }
 
     public Integer getFontTypes() {
         return fontTypes;
@@ -226,7 +219,6 @@ public class PdfToTextConverter {
         this.colors = colors;
     }
 
-    final StringBuffer extractedText = new StringBuffer();
 
     // Extract text from PDF Document
     public String pdftoText(String fileName, boolean isFile) {
@@ -468,9 +460,9 @@ public class PdfToTextConverter {
 
             if (fontSizes.size() > 0) {
                 Collections.max(fontSizes.keySet());
-                logger.info("MaxFont: " + Collections.max(fontSizes.keySet()));
+                logger.log(Level.INFO, "MaxFont: {0}", Collections.max(fontSizes.keySet()));
                 this.setMaxFontSize(Collections.max(fontSizes.keySet()));
-                logger.info("MinFont: " + Collections.min(fontSizes.keySet()));
+                logger.log(Level.INFO, "MinFont: {0}", Collections.min(fontSizes.keySet()));
                 this.setMinFontSize(Collections.min(fontSizes.keySet()));
             } else {
                 logger.info("MaxFont: " + "N/A");
@@ -600,6 +592,25 @@ public class PdfToTextConverter {
             Exceptions.printStackTrace(ex);
         }
         return socialNetworksLinksFound;
+    }
+    
+    public boolean sectionExists(String textContent, Set<String> sectionTitles) {
+        textContent = textContent.toLowerCase();
+        for (String sectionTitle : sectionTitles) {
+            sectionTitle = sectionTitle.toLowerCase();
+        }
+        try {
+            BufferedReader bufferReader = new BufferedReader(new StringReader(textContent));
+            String line;
+            while ((line = bufferReader.readLine()) != null) {
+                for (String sectionTitle : sectionTitles) {
+                if(line.contains(sectionTitle)) return true;
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return false;
     }
 
     public Integer getPages() {

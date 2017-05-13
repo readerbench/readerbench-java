@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package services.similarity;
+package services.semanticModels;
 
 import data.AbstractDocumentTemplate;
 import data.Lang;
@@ -26,38 +26,18 @@ public class TextSimilarity {
      *
      * @param text1 First text
      * @param text2 Second text
-     * @param language The language of the models
+     * @param lang The language of the models
      * @param models The models
      * @param usePOSTagging use or not POS tagging
      * @return
      */
-    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, String language, List<ISemanticModel> models, boolean usePOSTagging) {
-        if (language == null || language.isEmpty() || models == null || models.isEmpty()) {
+    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, Lang lang, List<ISemanticModel> models, boolean usePOSTagging) {
+        if (text1 == null || text1.isEmpty() || text2 == null || text2.isEmpty() || lang == null || models == null || models.isEmpty()) {
             return null;
         }
-        Lang lang = Lang.getLang(language);
-        if (lang == null) {
-            return null;
-        }
-
-        Document docText1 = new Document(
-                null,
-                AbstractDocumentTemplate.getDocumentModel(text1),
-                models,
-                lang,
-                usePOSTagging
-        );
-
-        Document docText2 = new Document(
-                null,
-                AbstractDocumentTemplate.getDocumentModel(text2),
-                models,
-                lang,
-                usePOSTagging
-        );
-
+        Document docText1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(text1), models, lang, usePOSTagging);
+        Document docText2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(text2), models, lang, usePOSTagging);
         SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
-
         List<SimilarityType> methods = new ArrayList();
         methods.add(SimilarityType.LSA);
         methods.add(SimilarityType.LDA);
@@ -65,12 +45,10 @@ public class TextSimilarity {
         methods.add(SimilarityType.WU_PALMER);
         methods.add(SimilarityType.PATH_SIM);
         methods.add(SimilarityType.WORD2VEC);
-
         Map<SimilarityType, Double> similarityScores = new HashMap<>();
         for (SimilarityType method : methods) {
             similarityScores.put(method, sc.getSemanticSimilarities().get(method));
         }
-
         return similarityScores;
     }
 

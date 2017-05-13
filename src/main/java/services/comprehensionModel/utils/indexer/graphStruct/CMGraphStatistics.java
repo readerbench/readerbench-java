@@ -5,7 +5,7 @@ package services.comprehensionModel.utils.indexer.graphStruct;
  * @author ionutparaschiv
  */
 public class CMGraphStatistics {
-    
+
     private double density;
     private int connectedComponentsCount;
     private double averageClusteringCoefficient;
@@ -51,7 +51,8 @@ public class CMGraphStatistics {
     }
 
     /**
-     * @param averageClusteringCoefficient the averageClusteringCoefficient to set
+     * @param averageClusteringCoefficient the averageClusteringCoefficient to
+     * set
      */
     public void setAverageClusteringCoefficient(double averageClusteringCoefficient) {
         this.averageClusteringCoefficient = averageClusteringCoefficient;
