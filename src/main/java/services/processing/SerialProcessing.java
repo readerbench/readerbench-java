@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.readerbench.solr.entities.cscl.Community;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -155,25 +156,6 @@ public class SerialProcessing {
                 // update checkpoint
                 checkpoint(checkpoint, f, end - start);
                 LOGGER.log(Level.INFO, "Successfully finished processing file {0}", f.getName());
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
-    }
-
-    public static void processCorpusDialogs(List<Dialog> dialogs, String pathToLSA, String pathToLDA, Lang lang,
-                                     boolean usePOSTagging, boolean computeDialogism) {
-
-        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-        modelPaths.put(SimilarityType.LSA, pathToLSA);
-        modelPaths.put(SimilarityType.LDA, pathToLDA);
-        // process all remaining files
-        for (Dialog dialog : dialogs) {
-            try {
-                LOGGER.log(Level.INFO, "Processing dialog {0}", dialog.getId());
-                AbstractDocument.loadGenericDocumentFromDialog(dialog, modelPaths, lang, usePOSTagging,
-                        computeDialogism);
-                LOGGER.log(Level.INFO, "Successfully finished processing dialog {0}", dialog.getId());
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }

@@ -97,14 +97,6 @@ public class Conversation extends AbstractDocument {
         annotatedCollabZones = new ArrayList<>();
     }
 
-    public Conversation(List<ISemanticModel> models, Lang lang, Dialog dialog) {
-        super(dialog, models, lang);
-        participants = new ArrayList<>();
-        intenseCollabZonesSocialKB = new ArrayList<>();
-        intenseCollabZonesVoice = new ArrayList<>();
-        annotatedCollabZones = new ArrayList<>();
-    }
-
     public Conversation(List<ISemanticModel> models, Lang lang) {
         super(models, lang);
         participants = new ArrayList<>();
@@ -121,14 +113,6 @@ public class Conversation extends AbstractDocument {
      */
     public Conversation(String path, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(path, models, lang);
-        this.setText(contents.getText());
-        setDocTmp(contents);
-        Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
-        this.determineParticipantContributions();
-    }
-
-    public Conversation(Dialog dialog, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
-        this(models, lang, dialog);
         this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
@@ -338,7 +322,8 @@ public class Conversation extends AbstractDocument {
      * @param usePOSTagging - use or not POSTagging
      * @return
      */
-    public static Conversation loadConversation(com.readerbench.solr.entities.cscl.Conversation conversation, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+    public Conversation loadConversation(com.readerbench.solr.entities.cscl.Conversation conversation,
+                                                List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         Conversation c = null;
         // determine contents
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
@@ -401,54 +386,6 @@ public class Conversation extends AbstractDocument {
             return "";
         }
 
-    }
-
-    public Conversation loadDialog(Dialog dialog, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
-        Conversation c = null;
-        // determine contents
-        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-        List<BlockTemplate> blocks = new ArrayList<>();
-
-        try {
-            List<Turn> turns = dialog.getBody();
-            if (turns != null && turns.size() > 0) {
-                for (Turn turn : turns) {
-                    services.converters.lifeConverter.Utterance utterance = turn.getUtter();
-                    if (utterance != null) {
-                        BlockTemplate block = contents.new BlockTemplate();
-                        if (turn.getId() != null) {
-                            block.setSpeaker(turn.getId());
-                        } else {
-                            block.setSpeaker("unregistered member");
-                        }
-
-                        if (utterance.getTime() != null) {
-                            block.setTime(utterance.getTime());
-                        }
-
-                        block.setId(utterance.getGenid());
-                        block.setRefId(utterance.getRef());
-                        block.setContent(utterance.getMesg());
-
-                        blocks.add(block);
-                    }
-                }
-            }
-
-            ConversationRestructuringSupport support = new ConversationRestructuringSupport();
-            support.mergeAdjacentContributions(blocks);
-            contents.setBlocks(support.newBlocks);
-            c = new Conversation(dialog, contents, models, lang, usePOSTagging);
-
-            c.setDocumentTitle("reddit", models, lang, usePOSTagging);
-
-            double[] collabEv = new double[c.getBlocks().size()];
-            c.setAnnotatedCollabEvolution(collabEv);
-
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        return c;
     }
 
     /**

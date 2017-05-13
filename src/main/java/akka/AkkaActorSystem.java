@@ -5,8 +5,6 @@ import akka.actor.ActorSystem;
 import akka.actor.Props;
 import akka.actors.CommunityActor;
 import akka.actors.ConversationActor;
-import akka.actors.DialogProcessingActor;
-import akka.actors.SolrDataProcessingActor;
 import akka.routing.RoundRobinPool;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
@@ -22,8 +20,6 @@ public class AkkaActorSystem {
     public static ActorSystem ACTOR_SYSTEM;
 
     public ActorRef communityActor;
-    public ActorRef solrDataProcessingActor;
-    public ActorRef dialogProcessingActor;
     public ActorRef conversationActor;
 
     /**
