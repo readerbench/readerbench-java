@@ -50,6 +50,8 @@ import javax.swing.border.TitledBorder;
 
 import data.AbstractDocument;
 import data.Lang;
+import services.nlp.parsing.Parsing;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -485,6 +487,7 @@ public class ReaderBenchView extends JFrame {
     public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, Lang lang) {
         comboBoxLSA.removeAllItems();
         comboBoxLDA.removeAllItems();
+      
 
         ReaderBenchView.LSA_SPACES.get(lang).stream().forEach((url) -> {
             comboBoxLSA.addItem(url);

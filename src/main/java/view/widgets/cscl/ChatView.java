@@ -201,6 +201,21 @@ public class ChatView extends JFrame {
                 }
             });
         });
+        
+        //sentiment 
+        JButton btnSentiment = new JButton("Sentiment Analysis");
+        btnSentiment.addActionListener((ActionEvent e) -> {
+            if (chat.getSelectedVoices() != null && chat.getSelectedVoices().size() > 0) {
+                EventQueue.invokeLater(() -> {
+                    JFrame frame = new SentimentVoiceView(chat, chat.getSelectedVoices());
+                    
+                    frame.setVisible(true);
+                });
+            } else {
+                JOptionPane.showMessageDialog(ChatView.this, "At least one voice must be selected!", "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
 
         JButton btnCollaborationVoice = new JButton("Collaboration - Voice Overlapping");
         btnCollaborationVoice.addActionListener((ActionEvent arg0) -> {
@@ -225,7 +240,15 @@ public class ChatView extends JFrame {
                                 .addComponent(btnParticipantInvolvement, GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(btnTimeEvolution).addPreferredGap(ComponentPlacement.RELATED)
+                        //.addComponent(btnTimeEvolution).addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+                                .addComponent(btnTimeEvolution, Alignment.TRAILING,
+                                        GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE)
+                                .addComponent(btnSentiment, Alignment.TRAILING,
+                                        GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE))
+                        .addPreferredGap(ComponentPlacement.RELATED)
                         .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
                                 .addComponent(btnCollaborationVoice, Alignment.TRAILING,
                                         GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -256,6 +279,7 @@ public class ChatView extends JFrame {
                                 .addPreferredGap(ComponentPlacement.RELATED)
                                 .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
                                         .addComponent(btnParticipantEvolution)
+                                        .addComponent(btnSentiment)
                                         .addComponent(btnCollaborationVoice)
                                         .addComponent(btnDisplayVoiceInteranimation))
                                 .addContainerGap()));

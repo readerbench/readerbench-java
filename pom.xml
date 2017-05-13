@@ -46,7 +46,6 @@
                                 <version>3</version>
                                 <packaging>jar</packaging>
                                 <file>${project.basedir}/resources/lib/WordnetTools-v3.0.jar</file>
-                                <javadoc>${project.basedir}/resources/lib/WordnetTools-v3.0-javadoc.jar</javadoc>
                                 <pomFile>${project.basedir}/resources/lib/WordnetTools-pom.xml</pomFile>
                             </configuration>
                         </execution>
@@ -474,12 +473,12 @@
             <artifactId>javax.mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
             <version>1.10.0</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>

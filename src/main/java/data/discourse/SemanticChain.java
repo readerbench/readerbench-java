@@ -27,6 +27,7 @@ import data.sentiment.SentimentEntity;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -312,5 +313,10 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     public Map<SimilarityType, double[]> getModelVectors() {
         return modelVectors;
+    }
+    
+    @Override
+    public int hashCode() {
+    	return this.toString().hashCode();
     }
 }

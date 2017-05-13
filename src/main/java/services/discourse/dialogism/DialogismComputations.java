@@ -15,15 +15,12 @@
  */
 package services.discourse.dialogism;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
+import edu.stanford.nlp.ling.IndexedWord;
+import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.Tree;
 import services.commons.VectorAlgebra;
 import data.AbstractDocument;
 import data.AnalysisElement;
@@ -36,6 +33,9 @@ import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticChain;
 import data.lexicalChains.LexicalChain;
+import services.nlp.parsing.Context;
+import services.nlp.parsing.ContextSentiment;
+
 import java.util.logging.Logger;
 
 public class DialogismComputations {
@@ -281,6 +281,58 @@ public class DialogismComputations {
                                 b.getRefBlock().getVoiceDistribution())
                         + "\t" + d.getBlockDistances()[d.getBlocks().indexOf(b)][d.getBlocks().indexOf(b.getRefBlock())]
                         .getCohesion());
+            }
+        }
+    }
+
+    /**
+     * @param d
+     *
+     * Build for every sentence a context map with all the voices and the associated context Tree with its valence
+     */
+    public static void findSentimentUsingContext(AbstractDocument d) {
+        LOGGER.info("Searching context for every voice in every sentence");
+        Context ctx = new Context();
+
+        //for every sentence make a map which has key voice and value a list of pair(Tree, valence)
+        for (Block b: d.getBlocks()) {
+            for (Sentence sentence: b.getSentences()) {
+
+                List<Word> words = sentence.getWords();
+                Map<Word, List<ContextSentiment>> contextMap = new HashMap<>();
+
+                for (SemanticChain chain: d.getVoices()) {
+                    for (Word w: chain.getWords()) {
+                        //the context for this context was computed in the past
+                        if (contextMap.containsKey(w)) {
+                            continue;
+                        }
+                        //for adj. voice it is not determined the context
+                        if (!w.isNoun() && !w.isVerb()) {
+                            continue;
+                        }
+
+                        List<ContextSentiment> contextTrees = new ArrayList<ContextSentiment>();
+                        //check if the word from voice is in sentence
+                        for (Word aux : words) {
+                            if (aux.getText().equals(w.getText())) {
+                                double valence = 0;
+                                Tree tree = sentence.getTree();
+                                List<Tree> subTrees = ctx.findContextTree(tree, w, w.isNoun());
+                                //for every contextSubtree compute the valence
+                                for (Tree subTree:subTrees) {
+                                    valence = RNNCoreAnnotations.getPredictedClass(subTree) - 2;
+                                    contextTrees.add(new ContextSentiment(subTree, valence));
+                                }
+                                contextMap.put(w, contextTrees);
+
+                                break;
+                            }
+                        }
+                    }
+                }
+                //every sentence has a map with voice- (context, valence)
+                sentence.setContextMap(contextMap);
             }
         }
     }

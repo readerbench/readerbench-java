@@ -20,7 +20,11 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.Tree;
+
 import java.util.ArrayList;
+
+import services.nlp.parsing.ContextSentiment;
 import services.semanticModels.ISemanticModel;
 
 /**
@@ -34,6 +38,8 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     private List<Word> words;
     private List<Word> allWords;
     private transient SemanticGraph dependencies;
+    private transient Map<Word, List<ContextSentiment>> contextMap;
+    private transient Tree tree;
     private final Map<Word, Word> pronimialReplacementMap;
 
     public Sentence(Block b, int index, String text, List<ISemanticModel> models, Lang lang) {
@@ -78,6 +84,14 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public void setDependencies(SemanticGraph dependencies) {
         this.dependencies = dependencies;
     }
+    
+    public Tree getTree() {
+    	return tree;
+    }
+    
+    public void setTree(Tree tree) {
+    	this.tree = tree;
+    }
 
     public List<Word> getAllWords() {
         return allWords;
@@ -104,5 +118,13 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     @Override
     public int compareTo(Sentence o) {
         return (int) (Math.signum(o.getScore() - this.getScore()));
+    }
+
+    public void setContextMap(Map<Word, List<ContextSentiment>> contextMap) {
+        this.contextMap = contextMap;
+    }
+
+    public Map<Word, List<ContextSentiment>> getContextMap() {
+        return contextMap;
     }
 }

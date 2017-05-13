@@ -63,8 +63,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public SentenceLevelInterAnimationView(Document d,
-			List<SemanticChain> chains) {
+	public SentenceLevelInterAnimationView(Document d, List<SemanticChain> chains) {
 		super("ReaderBench - Voice Inter-Animation");
 
 		this.setSize(1000, 600);
@@ -84,8 +83,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 		int[][] traceability = new int[d.getBlocks().size()][];
 		for (int i = 0; i < d.getBlocks().size(); i++) {
 			if (d.getBlocks().get(i) != null) {
-				traceability[i] = new int[d.getBlocks().get(i).getSentences()
-						.size()];
+				traceability[i] = new int[d.getBlocks().get(i).getSentences().size()];
 				for (int j = 0; j < d.getBlocks().get(i).getSentences().size(); j++) {
 					traceability[i][j] = noDim++;
 				}
@@ -115,8 +113,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 			}
 
 			for (Integer index : occurrences.keySet()) {
-				Task subT = new Task(occurrences.get(index), new Date(index),
-						new Date(index + 1));
+				Task subT = new Task(occurrences.get(index), new Date(index), new Date(index + 1));
 				t.addSubtask(subT);
 			}
 		}
@@ -125,8 +122,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 		collection.add(s);
 
 		// create the chart...
-		JFreeChart chart = ChartFactory.createGanttChart(
-				"Voice Inter-Animation", // chart
+		JFreeChart chart = ChartFactory.createGanttChart("Voice Inter-Animation", // chart
 				// title
 				"Voice", // domain axis label
 				"Sentence", // range axis label
@@ -134,7 +130,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 				false, // include legend
 				false, // tooltips
 				false // urls
-				);
+		);
 
 		CategoryPlot plot = (CategoryPlot) chart.getPlot();
 		DateAxis range = (DateAxis) plot.getRangeAxis();
@@ -154,8 +150,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						JFrame view = new VoiceSynergyView(document
-								.getSelectedVoices());
+						JFrame view = new VoiceSynergyView(document.getSelectedVoices());
 						view.setVisible(true);
 					}
 				});
@@ -168,61 +163,28 @@ public class SentenceLevelInterAnimationView extends JFrame {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						JFrame view = new ChatVoiceSimpleStatistics(document
-								.getSelectedVoices());
+						JFrame view = new ChatVoiceSimpleStatistics(document.getSelectedVoices());
 						view.setVisible(true);
 					}
 				});
 			}
 		});
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
+		gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(
+				Alignment.TRAILING,
+				gl_contentPane.createSequentialGroup().addContainerGap().addGroup(gl_contentPane
+						.createParallelGroup(Alignment.TRAILING)
+						.addComponent(chartPanel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 678, Short.MAX_VALUE)
+						.addGroup(gl_contentPane.createSequentialGroup().addComponent(btnSimpleStatistics)
+								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCrossCorrelations)))
+						.addContainerGap()));
 		gl_contentPane
-				.setHorizontalGroup(gl_contentPane
-						.createParallelGroup(Alignment.LEADING)
-						.addGroup(
-								Alignment.TRAILING,
-								gl_contentPane
-										.createSequentialGroup()
-										.addContainerGap()
-										.addGroup(
-												gl_contentPane
-														.createParallelGroup(
-																Alignment.TRAILING)
-														.addComponent(
-																chartPanel,
-																Alignment.LEADING,
-																GroupLayout.DEFAULT_SIZE,
-																678,
-																Short.MAX_VALUE)
-														.addGroup(
-																gl_contentPane
-																		.createSequentialGroup()
-																		.addComponent(
-																				btnSimpleStatistics)
-																		.addPreferredGap(
-																				ComponentPlacement.RELATED)
-																		.addComponent(
-																				btnCrossCorrelations)))
-										.addContainerGap()));
-		gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(
-				Alignment.LEADING)
-				.addGroup(
-						Alignment.TRAILING,
-						gl_contentPane
-								.createSequentialGroup()
-								.addContainerGap()
-								.addComponent(chartPanel,
-										GroupLayout.DEFAULT_SIZE, 427,
-										Short.MAX_VALUE)
+				.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING).addGroup(Alignment.TRAILING,
+						gl_contentPane.createSequentialGroup().addContainerGap()
+								.addComponent(chartPanel, GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addGroup(
-										gl_contentPane
-												.createParallelGroup(
-														Alignment.BASELINE)
-												.addComponent(
-														btnCrossCorrelations)
-												.addComponent(
-														btnSimpleStatistics))));
+								.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+										.addComponent(btnCrossCorrelations).addComponent(btnSimpleStatistics))));
 		contentPane.setLayout(gl_contentPane);
 	}
 }

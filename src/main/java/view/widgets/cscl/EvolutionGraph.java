@@ -20,6 +20,8 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.Map;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.ChartUtilities;
@@ -44,8 +46,9 @@ public class EvolutionGraph {
 	private JFreeChart chart;
 	private boolean isSpline;
 	private String XAxes;
+	
 
-	public EvolutionGraph(String title, String XAxes, boolean isSpline,
+	public EvolutionGraph(String title, String XAxes, boolean isSpline,  
 			String[] names, Double[][] values, double[] columns, Color color) {
 		this.title = title;
 		this.isSpline = isSpline;
@@ -90,7 +93,7 @@ public class EvolutionGraph {
 		plot.setRangeGridlinePaint(Color.lightGray);
 		if (color != null)
 			plot.getRenderer().setSeriesPaint(0, color);
-
+	
 		// set the range axis to display integers only...
 		NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 		rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());

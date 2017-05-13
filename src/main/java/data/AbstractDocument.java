@@ -206,6 +206,8 @@ public abstract class AbstractDocument extends AnalysisElement {
             // determine semantic chains / voices
             DialogismComputations.determineVoices(this);
 
+            DialogismComputations.findSentimentUsingContext(this);
+
             // determine voice distributions & importance
             DialogismComputations.determineVoiceDistributions(this);
         }

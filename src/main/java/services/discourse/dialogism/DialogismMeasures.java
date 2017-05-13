@@ -248,10 +248,13 @@ public class DialogismMeasures {
                 for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
                     double[] ditrib1 = c.getParticipantBlockMovingAverage(c
                             .getVoices().get(i), lsPart.get(p1));
+                   
                     double[] ditrib2 = c.getParticipantBlockMovingAverage(c
                             .getVoices().get(i), lsPart.get(p2));
+                  
                     double[] mi = VectorAlgebra.discreteMutualInformation(
                             ditrib1, ditrib2);
+                  
                     for (int j = 0; j < evolution.length; j++) {
                         evolution[j] += mi[j];
                     }

@@ -60,7 +60,7 @@ public class SentimentAnalysis {
             ));
         }
         Collections.sort(localResults);
-
+        
         List<ResultSentiment> blockSentiments = new ArrayList<>();
         for (Block b : queryDoc.getBlocks()) {
             rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();

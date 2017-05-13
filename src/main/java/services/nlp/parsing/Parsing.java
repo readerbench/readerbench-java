@@ -191,6 +191,7 @@ public abstract class Parsing {
         for (CoreMap sentence : sentences) {
             if (sentence.toString().trim().length() > 1) {
                 Sentence s = processSentence(b, utteranceCounter++, sentence);
+                
                 // add utterance to block
                 b.getSentences().add(s);
                 b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
@@ -229,13 +230,14 @@ public abstract class Parsing {
             }
             if (lang.equals(Lang.en)) {
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
+                s.setTree(tree);
                 SentimentEntity se = new SentimentEntity();
                 // TODO: parse Stanford Valence
                 if (tree != null) {
                     int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
                     se.add(new data.sentiment.SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
                     s.setSentimentEntity(se);
-                }
+                }                
             }
         }
 
