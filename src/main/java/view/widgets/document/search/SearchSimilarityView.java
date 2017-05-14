@@ -427,7 +427,7 @@ public class SearchSimilarityView extends JFrame {
      * @param currentLevel
      * @param nodes
      * @param d
-     * @param text
+     * @param isQuery
      */
     private void createGraphNode(UndirectedGraph graph, GraphModel graphModel, int currentLevel,
             Map<AbstractDocument, Node> nodes, AbstractDocument d, boolean isQuery) {

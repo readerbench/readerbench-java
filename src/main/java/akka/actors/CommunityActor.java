@@ -133,7 +133,8 @@ public class CommunityActor extends UntypedActor{
     public void processDocumentCollection(List<AbstractDocument> abstractDocumentList, Lang lang,
                                                  boolean needsAnonymization, boolean useTextualComplexity, Date startDate,
                                                  Date endDate, int monthIncrement, int dayIncrement) {
-        data.cscl.Community community = new data.cscl.Community();
+        data.cscl.Community community = new data.cscl.Community(lang, needsAnonymization, startDate,
+                endDate);
         community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
                 endDate, monthIncrement, dayIncrement);
         community.setPath(PATH);

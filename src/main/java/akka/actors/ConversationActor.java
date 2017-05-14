@@ -78,7 +78,7 @@ public class ConversationActor extends UntypedActor {
     public AbstractDocument loadGenericDocumentFromConversation(ConversationMessage message,
                                                                 List<ISemanticModel> models, Lang lang,
                                                                 boolean usePOSTagging, boolean computeDialogism) {
-        data.cscl.Conversation c = new data.cscl.Conversation().loadConversation(message.getConversation(), models, lang, usePOSTagging);
+        data.cscl.Conversation c = new data.cscl.Conversation(models, lang).loadConversation(message.getConversation(), models, lang, usePOSTagging);
         c.setPath(message.getPath());
         LOGGER.info("Start computeAll ... ");
         c.computeAll(computeDialogism);
