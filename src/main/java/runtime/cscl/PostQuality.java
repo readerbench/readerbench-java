@@ -87,7 +87,7 @@ public class PostQuality {
             return;
         }
         for (File subdir : dir.listFiles((File f) -> f.isDirectory())) {
-            for (File f : subdir.listFiles((File f) -> f.getName().endsWith(".ser"))) {
+            for (File f : subdir.listFiles((File file) -> file.getName().endsWith(".ser"))) {
                 Conversation c;
                 try {
                     c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
