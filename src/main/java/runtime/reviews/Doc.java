@@ -1,4 +1,4 @@
-package runtime.cscl.frenchdata;
+package runtime.reviews;
 
 /**
  * Created by Dorinela on 5/9/2017.

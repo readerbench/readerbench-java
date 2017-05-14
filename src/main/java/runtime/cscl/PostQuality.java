@@ -34,6 +34,8 @@ import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.complexity.DataGathering;
+import webService.ReaderBenchServer;
+
 import static view.widgets.ReaderBenchView.LOGGER;
 
 /**
@@ -85,7 +87,7 @@ public class PostQuality {
             return;
         }
         for (File subdir : dir.listFiles((File f) -> f.isDirectory())) {
-            for (File f : subdir.listFiles((File f) -> f.getName().endsWith(".ser"))) {
+            for (File f : subdir.listFiles((File file) -> file.getName().endsWith(".ser"))) {
                 Conversation c;
                 try {
                     c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
@@ -105,6 +107,9 @@ public class PostQuality {
     }
 
     public static void main(String[] args) {
+        //initialize DB
+        ReaderBenchServer.initializeDB();
+
         PostQuality.processInitialPosts("/dragos-resources", Lang.en);
     }
 }
