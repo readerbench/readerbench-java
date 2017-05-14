@@ -1,6 +1,7 @@
 package akka;
 
 import akka.messages.CommunityMessage;
+import webService.ReaderBenchServer;
 
 /**
  * Created by Dorinela on 5/13/2017.
@@ -8,6 +9,11 @@ import akka.messages.CommunityMessage;
 public class CommunityProcessing {
 
     public static void main(String[] args) {
+        /**
+         * initialize ReaderBench DB
+         */
+        ReaderBenchServer.initializeDB();
+
         /**
          * init akka actor system
          */
