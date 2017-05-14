@@ -564,22 +564,40 @@ public class Community extends AnalysisElement {
         }
     }
 
-    public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
+   public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, 
+            boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
+            boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
         if (dc != null) {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
-            dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
-            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
-            dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
+            
+            if (exportIntoCsv) {
+                dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
+            }
+            
+            if (generateParticipantView) {
+                dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            }
+            
+            if (generateParticipantViewD3) {
+                dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");            
+            }
+            
+            if (generateParticipantViewSubCommunities) {
+                dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
+            }
+            
+            if (generateConceptView) {
+                dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
+            }
         }
     }
 
     public static void processAllFolders(String folder, Lang lang, String prefix, boolean needsAnonymization,
             boolean restartProcessing, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-            boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
+            boolean useTextualComplexity, boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
+            boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
@@ -596,6 +614,7 @@ public class Community extends AnalysisElement {
                     SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
+                            exportIntoCsv, generateParticipantView, generateParticipantViewD3, generateParticipantViewSubCommunities, generateConceptView,
                             startDate, endDate, monthIncrement, dayIncrement);
                 }
             }
