@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,17 @@
  */
 package data.cscl;
 
+import org.openide.util.Exceptions;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -26,6 +34,7 @@ import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import com.readerbench.solr.entities.cscl.Contribution;
 import org.w3c.dom.Element;
@@ -79,10 +88,6 @@ public class Conversation extends AbstractDocument {
     private double[] voicePMIEvolution;
     // determine the distribution of collaboration from annotations throughout the conversation
     private double[] annotatedCollabEvolution;
-
-    public Conversation() {
-
-    }
 
     /**
      * @param path
@@ -512,7 +517,7 @@ public class Conversation extends AbstractDocument {
 
                     //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
                     boolean explicitRefCriterion = true;
-                    if (crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
+                    if (crt.getRefId()!= null && crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
                         explicitRefCriterion = false;
                     }
                     if (crt.getSpeaker().equals(prev.getSpeaker()) && diffMinutes <= 1 && explicitRefCriterion) {

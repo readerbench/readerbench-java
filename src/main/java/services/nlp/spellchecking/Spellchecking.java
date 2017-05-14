@@ -8,7 +8,6 @@ package services.nlp.spellchecking;
 import data.Lang;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,19 +16,13 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.languagetool.JLanguageTool;
-import org.languagetool.language.AmericanEnglish;
-import org.languagetool.language.Dutch;
-import org.languagetool.language.French;
-import org.languagetool.language.Italian;
-import org.languagetool.language.Romanian;
-import org.languagetool.language.Spanish;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
 import org.openide.util.Exceptions;
 
 /**
  *
- * @author mihaidascalu
+ * @author Mihai Dascalu
  */
 public class Spellchecking {
 
@@ -40,6 +33,7 @@ public class Spellchecking {
     public static JLanguageTool spellechecker_it = null;
     public static JLanguageTool spellechecker_en = null;
     public static JLanguageTool spellechecker_es = null;
+    public static JLanguageTool spellechecker_de = null;
     public static JLanguageTool spellechecker_nl = null;
 
     private List<String> messages = new ArrayList<>();
@@ -102,6 +96,8 @@ public class Spellchecking {
                 return getSpellcheckerEs();
             case nl:
                 return getSpellcheckerNl();
+            case de:
+                return getSpellcheckerDe();
             default:
                 return null;
         }
@@ -121,44 +117,79 @@ public class Spellchecking {
 
     public static JLanguageTool getSpellcheckerRo() {
         if (spellechecker_ro == null) {
-            spellechecker_ro = new JLanguageTool(new Romanian());
+            try {
+                spellechecker_ro = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.Romanian").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_ro;
     }
 
     public static JLanguageTool getSpellcheckerFr() {
         if (spellechecker_fr == null) {
-            spellechecker_fr = new JLanguageTool(new French());
+            try {
+                spellechecker_fr = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.French").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_fr;
     }
 
     public static JLanguageTool getSpellcheckerIt() {
         if (spellechecker_it == null) {
-            spellechecker_it = new JLanguageTool(new Italian());
+            try {
+                spellechecker_it = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.Italian").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_it;
     }
 
     public static JLanguageTool getSpellcheckerEn() {
         if (spellechecker_en == null) {
-            spellechecker_en = new JLanguageTool(new AmericanEnglish());
+            try {
+                spellechecker_en = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.AmericanEnglish").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_en;
     }
 
     public static JLanguageTool getSpellcheckerEs() {
         if (spellechecker_es == null) {
-            spellechecker_es = new JLanguageTool(new Spanish());
+            try {
+                spellechecker_es = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.Spanish").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_es;
     }
 
     public static JLanguageTool getSpellcheckerNl() {
         if (spellechecker_nl == null) {
-            spellechecker_nl = new JLanguageTool(new Dutch());
+            try {
+                spellechecker_nl = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.Dutch").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
         return spellechecker_nl;
+    }
+
+    public static JLanguageTool getSpellcheckerDe() {
+        if (spellechecker_de == null) {
+            try {
+                spellechecker_de = new JLanguageTool((org.languagetool.Language) Class.forName("org.languagetool.language.German").newInstance());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+        }
+        return spellechecker_de;
     }
 
     public List<String> getMessages() {

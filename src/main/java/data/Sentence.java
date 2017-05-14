@@ -15,12 +15,19 @@
  */
 package data;
 
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.IndexedWord;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
+import edu.stanford.nlp.util.Pair;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import services.semanticModels.ISemanticModel;
 
 /**
@@ -85,6 +92,38 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
     public void setAllWords(List<Word> allWords) {
         this.allWords = allWords;
+    }
+    
+    private Word getWordByIndex(IndexedWord iw) {
+        int index = iw.get(CoreAnnotations.IndexAnnotation.class) - 1;
+        index = Math.min(index, allWords.size() - 1);
+        while (index >= 0) {
+            Word word = allWords.get(index);
+            if (word.getText().equals(iw.get(CoreAnnotations.TextAnnotation.class))) {
+                return word;
+            }
+            index --;
+        }
+        return null;
+    }
+    
+    @Override
+    public List<NGram> getBiGrams() {
+        return StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+                .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
+                .filter(pair -> pair.first != null && pair.second != null)
+                .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
+                .map(pair -> new NGram(pair.first, pair.second))
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        List<NGram> result = new ArrayList<>();
+        for (int i = 0; i <= words.size() - n; i++) {
+            result.add(new NGram(words.subList(i, i + n)));
+        }
+        return result;
     }
 
     @Override

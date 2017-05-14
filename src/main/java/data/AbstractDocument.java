@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.StringJoiner;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -445,7 +446,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getWord().getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
+                    Integer probClass = LDA.findMaxResemblance(t.getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
@@ -821,5 +822,19 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
+    }
+    
+    @Override
+    public List<NGram> getBiGrams() {
+        return blocks.stream()
+                .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        return blocks.stream()
+                .flatMap(s -> s.getNGrams(n).stream())
+                .collect(Collectors.toList());
     }
 }

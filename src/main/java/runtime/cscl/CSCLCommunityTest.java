@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,14 @@
  */
 package runtime.cscl;
 
-import data.AbstractDocument.SaveType;
+import org.joda.time.DateTime;
+
+import java.io.File;
+
+import data.AbstractDocument;
 import data.Lang;
 import data.cscl.Community;
+import data.cscl.CommunityUtils;
 import services.processing.SerialProcessing;
 import view.widgets.ReaderBenchView;
 import webService.ReaderBenchServer;
@@ -29,15 +34,26 @@ public class CSCLCommunityTest {
         ReaderBenchServer.initializeDB();
 
         ReaderBenchView.adjustToSystemGraphics();
-        // Community.processAllFolders("resources/in/blogs_Nic/diana/new", "", false, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, null, null, 0, 7);
 
-        String path = "resources/in/Barnes_MOOC";
-        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
+//        String path = "resources/in/MOOC/forum_posts&comments";
+        String path = "resources/in/1 year/";
+        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
         Community.processDocumentCollection(path, Lang.en, false, false, null, null, 0, 7);
 
-        // String path = "resources/in/forum_Nic";
-        // SerialCorpusAssessment.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.eng, true, true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
-        // Community.processDocumentCollection(path, false, false, null, null,
-        // 0, 7);
+
+        File dir = new File(path);
+        if (dir.isDirectory()) {
+            File[] communityFolder = dir.listFiles();
+            for(File file: communityFolder){
+                if(file.isDirectory())
+                    computeCommunity(file.getPath());
+            }
+        }
+    }
+
+    public static void computeCommunity(String path){
+        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+        CommunityUtils.processDocumentCollectionForClustering(path, false, false, new DateTime(2012, 8, 1, 0, 0).toDate(),
+                                                              new DateTime(2013, 7, 11, 0, 0).toDate(), 0, 7);
     }
 }

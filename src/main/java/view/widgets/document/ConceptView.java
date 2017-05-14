@@ -47,7 +47,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -68,10 +67,8 @@ import data.Word;
 import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
-import java.util.EnumMap;
+import java.util.logging.Level;
 import services.discourse.keywordMining.KeywordModeling;
-import services.semanticModels.ISemanticModel;
-import services.semanticModels.SimilarityType;
 import view.models.PreviewSketch;
 
 public class ConceptView extends JFrame {
@@ -118,7 +115,7 @@ public class ConceptView extends JFrame {
     }
 
     private void generateLayout() {
-        JLabel lblInferredConcepts = new JLabel("Inferred concepts");
+        JLabel lblInferredConcepts = new JLabel("Concepts");
         lblInferredConcepts.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JLabel lblThreshold = new JLabel("Threshold");
@@ -128,10 +125,8 @@ public class ConceptView extends JFrame {
 
         checkBoxVerb = new JCheckBox("Verbs");
         checkBoxVerb.setBackground(Color.WHITE);
-        checkBoxVerb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                generateGraph();
-            }
+        checkBoxVerb.addActionListener((ActionEvent e) -> {
+            generateGraph();
         });
         checkBoxVerb.setSelected(true);
 
@@ -214,12 +209,12 @@ public class ConceptView extends JFrame {
                         .addComponent(panelGraph, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
                         .addGroup(
                                 Alignment.LEADING, groupLayout.createSequentialGroup().addComponent(lblListOfInferred)
-                                .addPreferredGap(ComponentPlacement.RELATED, 824, Short.MAX_VALUE)
-                                .addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, 74,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(txtInferredConcepts,
-                                GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(ComponentPlacement.RELATED, 824, Short.MAX_VALUE)
+                                        .addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, 74,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(txtInferredConcepts,
+                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
                         .addGroup(Alignment.LEADING, groupLayout
                                 .createSequentialGroup().addGroup(groupLayout.createParallelGroup(
                                         Alignment.LEADING)
@@ -382,7 +377,7 @@ public class ConceptView extends JFrame {
             }
         }
 
-        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        logger.log(Level.INFO, "Generated graph with {0} nodes and {1} edges", new Object[]{graph.getNodeCount(), graph.getEdgeCount()});
     }
 
     private void generateGraph() {

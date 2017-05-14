@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +15,30 @@
  */
 package data.cscl;
 
-import java.awt.EventQueue;
-import java.io.*;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.openide.util.Exceptions;
+
+import java.awt.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import data.AbstractDocument;
 import data.AbstractDocument.SaveType;
@@ -28,13 +47,6 @@ import data.Block;
 import data.Lang;
 import data.Word;
 import data.discourse.Keyword;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
@@ -65,12 +77,6 @@ public class Community extends AnalysisElement {
     private double[][] participantContributions;
     private final Date startDate, endDate;
     private Date fistContributionDate, lastContributionDate;
-
-    public Community() {
-        startDate = null;
-        endDate = null;
-        needsAnonymization = false;
-    }
 
     public Community(String path, Lang lang, boolean needsAnonymization, Date startDate, Date endDate) {
         super(null, 0, null, null, lang);
@@ -114,30 +120,30 @@ public class Community extends AnalysisElement {
     }
 
     private void updateParticipantContributions() {
-        for (Conversation c : this.documents) {
+        for (Conversation c : documents) {
             // update the community correspondingly
             for (Participant p : c.getParticipants()) {
                 if (p.getContributions().getBlocks() != null && !p.getContributions().getBlocks().isEmpty()) {
-                    int index = this.participants.indexOf(p);
+                    int index = participants.indexOf(p);
                     Participant participantToUpdate;
                     if (index >= 0) {
-                        participantToUpdate = this.participants.get(index);
+                        participantToUpdate = participants.get(index);
                     } else {
-                        participantToUpdate = new Participant(p.getName(), p.getAlias(), c);
-                        this.participants.add(participantToUpdate);
+                        participantToUpdate = new Participant(p.getName(), c);
+                        participants.add(participantToUpdate);
                     }
 
                     for (Block b : p.getContributions().getBlocks()) {
                         Utterance u = (Utterance) b;
                         // select contributions in imposed timeframe
-                        if (u != null && u.isEligible(this.startDate, this.endDate)) {
+                        if (u != null && u.isEligible(startDate, endDate)) {
                             // determine first timestamp of considered contributions
-                            if (this.fistContributionDate == null) {
-                                this.fistContributionDate = u.getTime();
+                            if (fistContributionDate == null) {
+                                fistContributionDate = u.getTime();
                                 LOGGER.log(Level.SEVERE, "Please check first contribution");
                             }
-                            if (u.getTime().before(this.fistContributionDate)) {
-                                this.fistContributionDate = u.getTime();
+                            if (u.getTime().before(fistContributionDate)) {
+                                fistContributionDate = u.getTime();
                             }
                             Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
                             if (u.getTime().before(date.getTime())) {
@@ -147,11 +153,11 @@ public class Community extends AnalysisElement {
                                 LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
                             }
 
-                            if (this.lastContributionDate == null) {
-                                this.lastContributionDate = u.getTime();
+                            if (lastContributionDate == null) {
+                                lastContributionDate = u.getTime();
                             }
-                            if (u.getTime().after(this.lastContributionDate)) {
-                                this.lastContributionDate = u.getTime();
+                            if (u.getTime().after(lastContributionDate)) {
+                                lastContributionDate = u.getTime();
                             }
                             b.setIndex(-1);
                             Block.addBlock(participantToUpdate.getContributions(), b);
@@ -182,20 +188,20 @@ public class Community extends AnalysisElement {
             }
         }
 
-        this.participantContributions = new double[this.participants.size()][this.participants.size()];
+        participantContributions = new double[participants.size()][participants.size()];
 
-        for (Conversation d : this.documents) {
+        for (Conversation d : documents) {
             // determine strength of links
             for (int i = 0; i < d.getBlocks().size(); i++) {
                 Utterance u = (Utterance) d.getBlocks().get(i);
                 // select contributions in imposed timeframe
-                if (u != null && u.isEligible(this.startDate, this.endDate)) {
+                if (u != null && u.isEligible(startDate, endDate)) {
                     Participant p1 = u.getParticipant();
-                    int index1 = this.participants.indexOf(p1);
+                    int index1 = participants.indexOf(p1);
                     if (index1 >= 0) {
                         // participantContributions[index1][index1] += d
                         // .getBlocks().get(i).getCombinedScore();
-                        Participant participantToUpdate = this.participants.get(index1);
+                        Participant participantToUpdate = participants.get(index1);
                         participantToUpdate.getIndices().put(CSCLIndices.SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
                         participantToUpdate.getIndices().put(CSCLIndices.PERSONAL_KB,
@@ -206,11 +212,11 @@ public class Community extends AnalysisElement {
                         for (int j = 0; j < i; j++) {
                             if (d.getPrunnedBlockDistances()[i][j] != null) {
                                 Participant p2 = ((Utterance) d.getBlocks().get(j)).getParticipant();
-                                int index2 = this.participants.indexOf(p2);
+                                int index2 = participants.indexOf(p2);
                                 if (index2 >= 0) {
                                     // model knowledge building effect
                                     double addedKB = d.getBlocks().get(i).getScore() * d.getPrunnedBlockDistances()[i][j].getCohesion();
-                                    this.participantContributions[index1][index2] += addedKB;
+                                    participantContributions[index1][index2] += addedKB;
                                 }
                             }
                         }
@@ -218,8 +224,8 @@ public class Community extends AnalysisElement {
                 }
             }
             for (Participant p : d.getParticipants()) {
-                if (this.participants.contains(p)) {
-                    Participant participantToUpdate = this.participants.get(this.participants.indexOf(p));
+                if (participants.contains(p)) {
+                    Participant participantToUpdate = participants.get(participants.indexOf(p));
                     participantToUpdate.getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
                             participantToUpdate.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)
                             + p.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE));
@@ -238,27 +244,26 @@ public class Community extends AnalysisElement {
 
     public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-        if (this.startDate != null && this.endDate != null && this.participants != null && this.participants.size() > 0) {
-            LOGGER.log(Level.INFO, "Processing timeframe between {0} and {1} having {2} participants ...", new Object[]
-                    {dateFormat.format(this.startDate), dateFormat.format(this.endDate), this.participants.size()});
+        if (startDate != null && endDate != null && participants != null && participants.size() > 0) {
+            LOGGER.log(Level.INFO, "Processing timeframe between {0} and {1} having {2} participants ...", new Object[]{dateFormat.format(startDate), dateFormat.format(endDate), participants.size()});
         }
 
         String fileName;
-        if (this.startDate != null && this.endDate != null) {
-            fileName = this.path + "/graph_" + dateFormat.format(this.startDate) + "_" + dateFormat.format(this.endDate);
+        if (startDate != null && endDate != null) {
+            fileName = path + "/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate);
         } else {
-            fileName = this.path + "/graph_" + System.currentTimeMillis();
+            fileName = path + "/graph_" + System.currentTimeMillis();
         }
 
-        ParticipantEvaluation.performSNA(this.participants, this.participantContributions, true, fileName + ".pdf");
+        ParticipantEvaluation.performSNA(participants, participantContributions, true, fileName + ".pdf");
         // update surface statistics
-        for (AbstractDocument d : this.documents) {
+        for (AbstractDocument d : documents) {
             Participant p = null;
             for (int i = 0; i < d.getBlocks().size(); i++) {
                 if (d.getBlocks().get(i) != null) {
                     if (p == null) {
                         p = ((Utterance) d.getBlocks().get(i)).getParticipant();
-                        Participant participantToUpdate = this.participants.get(this.participants.indexOf(p));
+                        Participant participantToUpdate = participants.get(participants.indexOf(p));
                         participantToUpdate.getIndices().put(CSCLIndices.NO_NEW_THREADS,
                                 participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
                         participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
@@ -279,7 +284,7 @@ public class Community extends AnalysisElement {
             }
         }
 
-        this.participants.stream().filter((p) -> (p.getIndices().get(CSCLIndices.NO_NEW_THREADS) != 0)).forEach((p) -> {
+        participants.stream().filter((p) -> (p.getIndices().get(CSCLIndices.NO_NEW_THREADS) != 0)).forEach((p) -> {
             p.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
                     p.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
                     / p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
@@ -290,7 +295,7 @@ public class Community extends AnalysisElement {
         if (useTextualComplexity) {
 
             // determine complexity indices
-            for (Participant p : this.participants) {
+            for (Participant p : participants) {
                 // establish minimum criteria
                 int noContentWords = 0;
                 for (Block b : p.getSignificantContributions().getBlocks()) {
@@ -315,18 +320,18 @@ public class Community extends AnalysisElement {
     }
 
     public void modelEvolution() {
-        LOGGER.log(Level.INFO, "Modeling time evolution for {0} participants ...", this.participants.size());
+        LOGGER.log(Level.INFO, "Modeling time evolution for {0} participants ...", participants.size());
         for (CSCLIndices index : CSCLIndices.values()) {
             if (index.isUsedForTimeModeling()) {
                 LOGGER.log(Level.INFO, "Modeling based on {0}", index.getDescription());
                 int no = 0;
-                for (Participant p : this.participants) {
+                for (Participant p : participants) {
                     // model time evolution of each participant
-                    double[] values = new double[this.timeframeSubCommunities.size()];
-                    for (int i = 0; i < this.timeframeSubCommunities.size(); i++) {
-                        int localParticipantIndex = this.timeframeSubCommunities.get(i).getParticipants().indexOf(p);
+                    double[] values = new double[timeframeSubCommunities.size()];
+                    for (int i = 0; i < timeframeSubCommunities.size(); i++) {
+                        int localParticipantIndex = timeframeSubCommunities.get(i).getParticipants().indexOf(p);
                         if (localParticipantIndex != -1) {
-                            values[i] = this.timeframeSubCommunities.get(i).getParticipants().get(localParticipantIndex)
+                            values[i] = timeframeSubCommunities.get(i).getParticipants().get(localParticipantIndex)
                                     .getIndices().get(index);
                         }
                     }
@@ -443,8 +448,8 @@ public class Community extends AnalysisElement {
 
     public void generateParticipantView(String path) {
         EventQueue.invokeLater(() -> {
-            ParticipantInteractionView view = new ParticipantInteractionView(path, this.participants,
-                    this.participantContributions, true, this.needsAnonymization);
+            ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
+                    participantContributions, true, needsAnonymization);
             view.setVisible(true);
         });
     }
@@ -457,7 +462,7 @@ public class Community extends AnalysisElement {
     public JSONArray generateParticipantViewSubCommunities(String path) {
         int i = 1;
         JSONArray participantsSubCommunities = new JSONArray();
-        for (Community subCommunity : this.timeframeSubCommunities) {
+        for (Community subCommunity : timeframeSubCommunities) {
             JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(path + i + ".json");
 
             JSONObject subCommunityJson = new JSONObject();
@@ -546,7 +551,7 @@ public class Community extends AnalysisElement {
 
     public void generateConceptView(String path) {
         EventQueue.invokeLater(() -> {
-            PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(this.documents), path);
+            PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
             conceptView.setVisible(true);
         });
     }
@@ -556,7 +561,7 @@ public class Community extends AnalysisElement {
         // print participant statistics
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
             // print participant statistics
-            if (this.participants.size() > 0) {
+            if (participants.size() > 0) {
                 out.write("Participant involvement and interaction\n");
                 out.write("Participant name,Anonymized name");
                 for (CSCLIndices CSCLindex : CSCLIndices.values()) {
@@ -577,9 +582,9 @@ public class Community extends AnalysisElement {
                 }
                 out.write("\n");
 
-                for (int index = 0; index < this.participants.size(); index++) {
-                    Participant p = this.participants.get(index);
-                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + p.getAlias());
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
                     for (CSCLIndices CSCLindex : CSCLIndices.values()) {
                         out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
                     }
@@ -604,7 +609,7 @@ public class Community extends AnalysisElement {
                     // print discussed topics
                     out.write("\nDiscussed topics\n");
                     out.write("Concept,Relevance\n");
-                    List<Keyword> topicL = KeywordModeling.getCollectionTopics(this.documents);
+                    List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
                     for (Keyword t : topicL) {
                         out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
                     }
@@ -612,7 +617,7 @@ public class Community extends AnalysisElement {
                     // print general statistic per thread
                     out.write("\nIndividual thread statistics\n");
                     out.write("Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
-                    for (AbstractDocument d : this.documents) {
+                    for (AbstractDocument d : documents) {
                         int noBlocks = 0;
                         noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
 
@@ -629,14 +634,14 @@ public class Community extends AnalysisElement {
 
                 // print interaction matrix
                 out.write("\nInteraction matrix\n");
-                for (Participant p : this.participants) {
+                for (Participant p : participants) {
                     out.write("," + p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
                 }
                 out.write("\n");
-                for (int i = 0; i < this.participants.size(); i++) {
-                    out.write(this.participants.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
-                    for (int j = 0; j < this.participants.size(); j++) {
-                        out.write("," + Formatting.formatNumber(this.participantContributions[i][j]));
+                for (int i = 0; i < participants.size(); i++) {
+                    out.write(participants.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
+                    for (int j = 0; j < participants.size(); j++) {
+                        out.write("," + Formatting.formatNumber(participantContributions[i][j]));
                     }
                     out.write("\n");
                 }
@@ -654,9 +659,9 @@ public class Community extends AnalysisElement {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
             dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
             //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-            dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
+            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
         }
     }

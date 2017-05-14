@@ -87,13 +87,13 @@ public class ConceptMap {
 
             // similarity scores between word and document using each semantic model
             if (lsa != null) {
-                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getWord(), queryDoc));
+                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getElement(), queryDoc));
             }
             if (lda != null) {
-                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getWord(), queryDoc));
+                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getElement(), queryDoc));
             }
             if (word2Vec != null) {
-                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getWord(), queryDoc));
+                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getElement(), queryDoc));
             }
 
             node.setAverageDistanceToHypernymTreeRoot(WordComplexity.getAverageDistanceToHypernymTreeRoot(t.getWord(), lang));
@@ -138,8 +138,7 @@ public class ConceptMap {
         for (Keyword t1 : keywords) {
             for (Keyword t2 : keywords) {
                 if (!t1.equals(t2)) {
-                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getWord(), t2.getWord());
-                    sim = Math.round(sim * 100.0) / 100.0;
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getElement(), t2.getElement());
                     if (sim >= threshold) {
                         links.add(new ResultEdge("", nodeIndexes.get(t1.getWord()), nodeIndexes.get(t2.getWord()), sim));
                     }
