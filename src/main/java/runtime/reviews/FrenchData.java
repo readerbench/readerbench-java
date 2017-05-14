@@ -1,13 +1,8 @@
-package runtime.cscl.frenchdata;
+package runtime.reviews;
 
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
-import data.cscl.CSCLCriteria;
-import data.cscl.CSCLIndices;
-import data.cscl.Conversation;
-import data.cscl.Participant;
-import data.discourse.Keyword;
 import data.document.Document;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,18 +14,19 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.openide.util.Exceptions;
 import org.slf4j.LoggerFactory;
-import services.commons.Formatting;
-import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
-import services.complexity.ComplexityIndices;
-import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.openide.util.Exceptions;
+import services.complexity.ComplexityIndexType;
+import webService.ReaderBenchServer;
 
 /**
  * Created by Dorinela on 5/9/2017.
@@ -44,9 +40,18 @@ public class FrenchData {
     private static String WORD2VEC_PATH = "resources/config/FR/word2vec/Le_Monde";
 
     public static void main(String[] args) {
+        ReaderBenchServer.initializeDB();
 
+        LOGGER.info("Retrieving reviews ... ");
         FrenchData frenchData = new FrenchData();
-        List<Doc> docs =  frenchData.getDocumentsByQuery("*:*");
+        List<Doc> docs = frenchData.getDocumentsByQuery("*:*");
+        LOGGER.info("Finished retrieving " + docs.size() + " documents");
+
+        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
+        modelPaths.put(SimilarityType.LSA, LSA_PATH);
+        modelPaths.put(SimilarityType.LDA, LDA_PATH);
+        //modelPaths.put(SimilarityType.WORD2VEC, WORD2VEC_PATH);
+        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, Lang.fr);
 
         XSSFWorkbook workbook = null;
         try {
@@ -54,14 +59,21 @@ public class FrenchData {
             if (workbook == null) {
                 workbook = new XSSFWorkbook();
                 sheet = workbook.createSheet();
+            } else {
+                sheet = workbook.getSheetAt(0);
             }
-            sheet = workbook.getSheetAt(0);
 
             for (int i = 0; i < docs.size(); i++) {
-                System.out.println("Start doc " + i);
-                AbstractDocument abstractDocument = frenchData.loadDocument(docs.get(i).getContent());
-                abstractDocument.computeAll(true);
-                Map<ComplexityIndex, Double> complexityIndex = abstractDocument.getComplexityIndices();
+                LOGGER.info("Starting the processing of review " + i);
+                AbstractDocument abstractDocument = frenchData.loadDocument(docs.get(i).getContent(), models);
+                LOGGER.info("Finished creating RB internal reprezentation ...");
+
+                Map<ComplexityIndex, Double> complexityIndex = Arrays.stream(ComplexityIndexType.values()).parallel()
+                        .filter(t -> t.equals(ComplexityIndexType.WORD_LISTS))
+                        .map(cat -> cat.getFactory())
+                        .flatMap(f -> f.build(abstractDocument.getLanguage()).stream())
+                        .collect(Collectors.toMap(Function.identity(), f -> f.compute(abstractDocument)));
+
                 Map<String, Double> complexityIndexValue = new HashMap<>();
                 for (Map.Entry<ComplexityIndex, Double> entry : complexityIndex.entrySet()) {
                     complexityIndexValue.put(entry.getKey().getAcronym(), entry.getValue());
@@ -83,8 +95,7 @@ public class FrenchData {
                 cell.setCellValue(docs.get(i).getScore());
 
                 int start = 2;
-                for (Map.Entry<String, Double> entry : sortMap.entrySet())
-                {
+                for (Map.Entry<String, Double> entry : sortMap.entrySet()) {
                     //System.out.print(entry.getKey() + ",");
                     cell = row.createCell(start);
                     cell.setCellValue(entry.getValue());
@@ -92,31 +103,23 @@ public class FrenchData {
                 }
             }
 
-            FileOutputStream outputStream = new FileOutputStream("D:\\Facultate\\MASTER\\french_reviews\\french_reviews.xlsx");
+            FileOutputStream outputStream = new FileOutputStream("resources/french_reviews.xlsx");
             workbook.write(outputStream);
             System.out.println("Finish to write all data in file !!!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Exception: " + e.getMessage());
+        } catch (IOException e) {
+            Exceptions.printStackTrace(e);
+            LOGGER.error("Exception: " + e.getMessage());
         }
-
     }
 
-
-    public AbstractDocument loadDocument(String text) {
-
-        Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-        modelPaths.put(SimilarityType.LSA, LSA_PATH);
-        modelPaths.put(SimilarityType.LDA, LDA_PATH);
-        //modelPaths.put(SimilarityType.WORD2VEC, WORD2VEC_PATH);
-        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, Lang.fr);
-
+    public AbstractDocument loadDocument(String text, List<ISemanticModel> models) {
         AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(text);
         return new Document(contents, models, Lang.fr, true);
     }
 
     /**
      * Get documents from SOLR by a specific query
+     *
      * @param query - query
      * @return - SolrDocumentList
      */
@@ -147,12 +150,10 @@ public class FrenchData {
                 docs.add(doc);
 
             }
-
             return docs;
-
-        } catch (Exception e) {
+        } catch (IOException | NumberFormatException | SolrServerException e) {
             LOGGER.error("Error in getting documents from SOLR: {}", e.getMessage());
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
         return new ArrayList<>();
     }
