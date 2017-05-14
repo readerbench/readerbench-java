@@ -125,7 +125,8 @@ public class FrenchData {
     public void writeReviews(List<Doc> docs) throws IOException {
         PrintWriter pw = new PrintWriter(new FileWriter("resources/french_reviews.txt"));
         for (Doc doc : docs) {
-            pw.write(doc.getContent());
+            pw.write(doc.getContent().replace("\n", "").replace("\r", ""));
+            pw.write("\n");
         }
         pw.close();
 
