@@ -118,6 +118,20 @@ public class FrenchData {
     }
 
     /**
+     * Write all reviews in .txt file
+     * @param docs
+     * @throws IOException
+     */
+    public void writeReviews(List<Doc> docs) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter("resources/french_reviews.txt"));
+        for (Doc doc : docs) {
+            pw.write(doc.getContent());
+        }
+        pw.close();
+
+    }
+
+    /**
      * Get documents from SOLR by a specific query
      *
      * @param query - query
