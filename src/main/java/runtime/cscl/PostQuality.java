@@ -34,6 +34,8 @@ import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.complexity.DataGathering;
+import webService.ReaderBenchServer;
+
 import static view.widgets.ReaderBenchView.LOGGER;
 
 /**
@@ -105,6 +107,9 @@ public class PostQuality {
     }
 
     public static void main(String[] args) {
+        //initialize DB
+        ReaderBenchServer.initializeDB();
+
         PostQuality.processInitialPosts("/dragos-resources", Lang.en);
     }
 }
