@@ -32,15 +32,14 @@ public class CommunityActor extends UntypedActor{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommunityActor.class);
 
-    private static final String START_PROCESSING = "START_PROCESSING";
-
     private static final String SOLR_ADDRESS = "http://141.85.232.56:8983/solr/";
     private static final String SOLR_COLLECTION = "community";
     SolrService solrService = new SolrService(SOLR_ADDRESS, SOLR_COLLECTION, Integer.MAX_VALUE);
 
     List<AbstractDocument> abstractDocuments = new ArrayList<>();
     private static int CONVERSATION_NUMBER = 0;
-    private static String FILENAME;
+    private static String INDIVIDUAL_STATS_FILENAME = "individualStats.csv";
+    private static String INVOCATION_FILENAME = "invocation.csv";
     private static String PATH = "resources/out";
 
     @Override
@@ -49,7 +48,7 @@ public class CommunityActor extends UntypedActor{
         if (message instanceof CommunityMessage) {
             LOGGER.info("Received CommunityMessage ...");
             String communityName = ((CommunityMessage) message).getCommunity();
-            FILENAME = communityName + ".csv";
+            //FILENAME = communityName + ".csv";
 
             /**
              * get conversations for a community
@@ -68,25 +67,25 @@ public class CommunityActor extends UntypedActor{
 
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(0));
-            conv.add(conversations.get(1));
+            //conv.add(conversations.get(1));
             CONVERSATION_NUMBER = conv.size();
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
-                messages.add(new ConversationMessage(m));
+                messages.add(new ConversationMessage(m, PATH));
             });
             LOGGER.info("The number of conversations for community {} are {}", communityName, CONVERSATION_NUMBER);
 
 
             Long start = System.currentTimeMillis();
 
-            for (Conversation conversation : conv) {
-                ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
-                /**
-                 * send ConversationMessage to ConversationActor to process it
-                 */
-                LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
-                AkkaActorSystem.conversationActor.tell(conversationMessage, self());
-            }
+//            for (Conversation conversation : conv) {
+//                ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
+//                /**
+//                 * send ConversationMessage to ConversationActor to process it
+//                 */
+//                LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
+//                AkkaActorSystem.conversationActor.tell(conversationMessage, self());
+//            }
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
@@ -101,15 +100,18 @@ public class CommunityActor extends UntypedActor{
                 @Override
                 public void onSuccess(Iterable<Object> conversationResponseMessages) throws Throwable {
                     conversationResponseMessages.forEach(msg -> {
+                        LOGGER.info("Received ConversationResponseMessage ...");
                         ConversationResponseMessage cm = (ConversationResponseMessage) msg;
                         abstractDocuments.add(cm.getAbstractDocument());
                     });
 
-                    processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
-                    System.out.println("Took " + (System.currentTimeMillis() - start) + " millis");
+                    if (abstractDocuments.size() == CONVERSATION_NUMBER) {
+                        LOGGER.info("Start processing document collection ...");
+                        processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+                        LOGGER.info("End processing collection ...Took {} millis", System.currentTimeMillis() - start);
+                    }
                 }
             }, AkkaActorSystem.ACTOR_SYSTEM.dispatcher());
-
         }
 //       else if (message instanceof ConversationResponseMessage) {
 //            LOGGER.info("Received ConversationResponseMessage ...");
@@ -133,14 +135,19 @@ public class CommunityActor extends UntypedActor{
     public void processDocumentCollection(List<AbstractDocument> abstractDocumentList, Lang lang,
                                                  boolean needsAnonymization, boolean useTextualComplexity, Date startDate,
                                                  Date endDate, int monthIncrement, int dayIncrement) {
+        LOGGER.info("The number of abstract documents to process: {}", abstractDocumentList.size());
         data.cscl.Community community = new data.cscl.Community(lang, needsAnonymization, startDate,
                 endDate);
-        community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
-                endDate, monthIncrement, dayIncrement);
+        community = community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
+                endDate, monthIncrement, dayIncrement, PATH);
         community.setPath(PATH);
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
-            community.export(PATH + "/" + FILENAME, true, true);
+            //community.export(PATH + "/" + FILENAME, true, true);
+
+            community.exportIndividualStatsAndInvocation(PATH + "/" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + INVOCATION_FILENAME);
+
+
             //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
             //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
             //community.generateParticipantViewSubCommunities("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_d3_");

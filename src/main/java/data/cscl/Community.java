@@ -28,15 +28,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,6 +44,7 @@ import data.discourse.Keyword;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 import services.complexity.ComplexityIndex;
+import services.complexity.ComplexityIndexType;
 import services.complexity.ComplexityIndices;
 import services.discourse.CSCL.ParticipantEvaluation;
 import services.discourse.cohesion.CohesionGraph;
@@ -409,7 +404,7 @@ public class Community extends AnalysisElement {
 
     public data.cscl.Community loadMultipleConversations (List<AbstractDocument> abstractDocumentList, Lang lang,
                                                           boolean needsAnonymization, Date startDate, Date endDate,
-                                                          int monthIncrement, int dayIncrement) {
+                                                          int monthIncrement, int dayIncrement, String path) {
 
         data.cscl.Community community = new data.cscl.Community(lang, needsAnonymization, startDate, endDate);
         for (AbstractDocument abstractDocument : abstractDocumentList) {
@@ -647,6 +642,57 @@ public class Community extends AnalysisElement {
                 }
             }
             LOGGER.info("Successfully finished writing document collection export ...");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+    }
+
+    /**
+     * Export Individual Stats and Invocation
+     * @param pathToFileIndividualStats - path to file with Individual State
+     * @param pathToFileInitiation - path to file with Initiation
+     */
+    public void exportIndividualStatsAndInvocation(String pathToFileIndividualStats, String pathToFileInitiation) {
+        LOGGER.info("Writing Individual Stats and Invocation export");
+        // print participant statistics
+        try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileIndividualStats)), "UTF-8"), 32768);
+             BufferedWriter outInitiation = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                     new File(pathToFileInitiation)), "UTF-8"), 32768)) {
+
+            // print participant statistics
+            if (participants.size() > 0) {
+                outIndividualStats.write("Individual stats\n");
+                outIndividualStats.write("Participant name,Anonymized name");
+
+                outInitiation.write("Invocation\n");
+                outInitiation.write("Participant name,Anonymized name");
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    if (CSCLindex.isIndividualStatsIndex()) {
+                        outIndividualStats.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                    } else {
+                        outInitiation.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                    }
+                }
+                outIndividualStats.write("\n");
+                outInitiation.write("\n");
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    outIndividualStats.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    outInitiation.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                        if (CSCLindex.isIndividualStatsIndex()) {
+                            outIndividualStats.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                        } else {
+                            outInitiation.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                        }
+                    }
+                    outIndividualStats.write("\n");
+                    outInitiation.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing Individual Stats and Invocation export ...");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);

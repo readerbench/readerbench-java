@@ -18,32 +18,38 @@ package data.cscl;
 import java.util.ResourceBundle;
 
 public enum CSCLIndices {
-	NO_CONTRIBUTION(true),
-	SCORE(true),
-	PERSONAL_KB(false),
-	SOCIAL_KB(true),
-	INTER_ANIMATION_DEGREE(false),
-	INDEGREE(true),
-	OUTDEGREE(true),
-	BETWEENNESS(true),
-	CLOSENESS(true),
-	ECCENTRICITY(true),
-	NO_NOUNS(false),
-	NO_VERBS(false),
-	NO_NEW_THREADS(false),
-	AVERAGE_LENGTH_NEW_THREADS(false),
-	NEW_THREADS_OVERALL_SCORE(false),
-	NEW_THREADS_INTER_ANIMATION_DEGREE(false),
-	NEW_THREADS_CUMULATIVE_SOCIAL_KB(false);
+	NO_CONTRIBUTION(true, true),
+	SCORE(true, true),
+	PERSONAL_KB(false, true),
+	SOCIAL_KB(true, true),
+	INTER_ANIMATION_DEGREE(false, true),
+	INDEGREE(true, true),
+	OUTDEGREE(true, true),
+	BETWEENNESS(true, true),
+	CLOSENESS(true, true),
+	ECCENTRICITY(true, true),
+	NO_NOUNS(false, true),
+	NO_VERBS(false, true),
+	NO_NEW_THREADS(false, false),
+	AVERAGE_LENGTH_NEW_THREADS(false, false),
+	NEW_THREADS_OVERALL_SCORE(false, false),
+	NEW_THREADS_INTER_ANIMATION_DEGREE(false, false),
+	NEW_THREADS_CUMULATIVE_SOCIAL_KB(false, false);
 
 	private final boolean isUsedForTimeModeling;
+	private final boolean isIndividualStatsIndex;
 
-	private CSCLIndices(boolean isUsedForTimeModeling) {
+	private CSCLIndices(boolean isUsedForTimeModeling, boolean isIndividualStatsIndex) {
 		this.isUsedForTimeModeling = isUsedForTimeModeling;
+		this.isIndividualStatsIndex = isIndividualStatsIndex;
 	}
 
 	public boolean isUsedForTimeModeling() {
 		return isUsedForTimeModeling;
+	}
+
+	public boolean isIndividualStatsIndex() {
+		return isIndividualStatsIndex;
 	}
 
 	public String getDescription() {
