@@ -91,10 +91,10 @@ public class KeywordModeling {
     }
 
     public static List<Keyword> getSublist(List<Keyword> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
-        if (noTopics == 0) return topics;
+        if (noTopics == 0 && !nounsOnly && !verbsOnly) return topics;
         List<Keyword> results = new ArrayList<>();
         for (Keyword t : topics) {
-            if (results.size() >= noTopics || t.getRelevance() < 0) {
+            if ((noTopics > 0 && results.size() >= noTopics) || t.getRelevance() < 0) {
                 break;
             }
             if (t.getElement() instanceof Word) {

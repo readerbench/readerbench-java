@@ -62,13 +62,11 @@ public class QueryHelper {
     }
 
     public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
-        LOGGER.info("Processign query ...");
-        AbstractDocumentTemplate template;
-        template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(text));
+        LOGGER.info("Generating document...");
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(text));
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
-        LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
+        LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
         document.computeAll(computeDialogism);
-        ComplexityIndices.computeComplexityFactors(document);
         return document;
     }
 }

@@ -41,6 +41,8 @@ import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import webService.ReaderBenchServer;
+import webService.result.ResultTopic;
+import webService.services.ConceptMap;
 
 /**
  *
@@ -110,7 +112,7 @@ public class KeywordMining {
         return keywordOccurrences;
     }
 
-    public void processTexts(boolean useSerialized) {
+    public void processTexts(boolean useSerialized, String outputFileName) {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -169,7 +171,7 @@ public class KeywordMining {
             docIndex.put(d, getIndex(d, keywords));
         }*/
         
-        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/keywords.csv", true))) {
+        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/" + outputFileName, false))) {
             StringBuilder csv = new StringBuilder("SEP=;\ntype;keyword;relevance\n");
             for (Keyword keyword : keywords) {
                 if (keyword.getElement() instanceof Word) {
@@ -228,13 +230,13 @@ public class KeywordMining {
         ReaderBenchServer.initializeDB();
 
         LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
+        //LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
-        models.add(lda);
+        //models.add(lda);
 
-        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
-        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, true, false);
-        keywordMining.processTexts(false);
+        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all_10", Lang.en, "UTF-8");
+        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, false, false);
+        keywordMining.processTexts(false, "keywords_lsa_sciref.csv");
     }
 }
