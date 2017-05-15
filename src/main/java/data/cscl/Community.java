@@ -699,6 +699,89 @@ public class Community extends AnalysisElement {
         }
     }
 
+    /**
+     * Export Textual Complexity
+     * @param pathToFileTextualComplexity - path to file
+     */
+    public void exportTextualComplexity (String pathToFileTextualComplexity) {
+        LOGGER.info("Writing Textual Complexity export");
+        try (BufferedWriter outTextualComplexity = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileTextualComplexity)), "UTF-8"), 32768)) {
+
+            // print participant statistics
+            if (participants.size() > 0) {
+                outTextualComplexity.write("Textual Complexity\n");
+                outTextualComplexity.write("Participant name,Anonymized name");
+
+                List<ComplexityIndex> factors = ComplexityIndices.getIndices(getLanguage());
+                for (ComplexityIndex factor : factors) {
+                    outTextualComplexity.write("," + factor.getAcronym());
+                }
+                outTextualComplexity.write("\n");
+
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    outTextualComplexity.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+
+                    for (ComplexityIndex factor : factors) {
+                        if (p.getSignificantContributions().getComplexityIndices() != null) {
+                            outTextualComplexity.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
+                        }
+                    }
+                    outTextualComplexity.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing Textual Complexity export ...");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+    }
+
+    /**
+     * Export Time Analysis
+     * @param pathToFileTimeAnalysis
+     */
+    public void exportTimeAnalysis (String pathToFileTimeAnalysis) {
+        LOGGER.info("Writing Time Analysis export");
+        try (BufferedWriter outTimeAnalysis = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileTimeAnalysis)), "UTF-8"), 32768)) {
+
+            // print participant statistics
+            if (participants.size() > 0) {
+                outTimeAnalysis.write("Time Analysis\n");
+                outTimeAnalysis.write("Participant name,Anonymized name");
+
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    if (CSCLindex.isUsedForTimeModeling()) {
+                        for (CSCLCriteria crit : CSCLCriteria.values()) {
+                            outTimeAnalysis.write("," + crit.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                        }
+                    }
+                }
+                outTimeAnalysis.write("\n");
+
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    outTimeAnalysis.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+
+                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                        if (CSCLindex.isUsedForTimeModeling()) {
+                            for (CSCLCriteria crit : CSCLCriteria.values()) {
+                                outTimeAnalysis.write("," + p.getLongitudinalIndices().get(new AbstractMap.SimpleEntry<>(CSCLindex, crit)));
+                            }
+                        }
+                    }
+                    outTimeAnalysis.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing Time Analysis export ...");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+    }
+
     public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
         if (dc != null) {

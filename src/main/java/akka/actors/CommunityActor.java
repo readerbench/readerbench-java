@@ -40,6 +40,8 @@ public class CommunityActor extends UntypedActor{
     private static int CONVERSATION_NUMBER = 0;
     private static String INDIVIDUAL_STATS_FILENAME = "individualStats.csv";
     private static String INVOCATION_FILENAME = "invocation.csv";
+    private static String TEXTUAL_COMPLEXITY = "textualComplexity.csv";
+    private static String TIME_ANALYSIS = "timeAnalysis.csv";
     private static String PATH = "resources/out";
 
     @Override
@@ -143,10 +145,9 @@ public class CommunityActor extends UntypedActor{
         community.setPath(PATH);
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
-            //community.export(PATH + "/" + FILENAME, true, true);
-
             community.exportIndividualStatsAndInvocation(PATH + "/" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + INVOCATION_FILENAME);
-
+            community.exportTextualComplexity(PATH + "/" + TEXTUAL_COMPLEXITY);
+            community.exportTimeAnalysis(PATH + "/" + TIME_ANALYSIS);
 
             //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
             //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
