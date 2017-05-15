@@ -186,8 +186,9 @@ public class KeywordMining {
                     csv.append(";");
                 }
                 csv.append(keyword.getRelevance()).append("\n");
+                outRelevance.write(csv.toString());
+                csv.setLength(0);
             }
-            outRelevance.write(csv.toString());
             outRelevance.close();
         } catch (IOException ex) {
             LOGGER.severe("Runtime error while analyzing selected folder ...");
