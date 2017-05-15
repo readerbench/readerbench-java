@@ -279,7 +279,7 @@ public class VCoPView extends JFrame {
                 System.out.println("date1=" + date1 + ", date2=" + date2);
 
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                Community.processDocumentCollection(textFieldPath.getText(), ReaderBenchView.RUNTIME_LANGUAGE, true, true, date1, date2, 0, 7);
+                Community.processDocumentCollection(textFieldPath.getText(), ReaderBenchView.RUNTIME_LANGUAGE, true, true, true, true, false, false, true, date1, date2, 0, 7);
                 Toolkit.getDefaultToolkit().beep();
                 setCursor(null); // turn off the wait cursor
             } else {
