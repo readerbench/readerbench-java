@@ -36,7 +36,7 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndexType;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
@@ -313,11 +313,12 @@ public class CVAnalyzer {
     }
 
     public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList,
-            Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, double threshold, PdfToTextConverter pdfConverter) {
-        String cvContent = pdfConverter.pdftoText(filePath, true);
-        AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, double threshold) {
+        PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter(filePath, true);
+        pdfToTxtConverter.process();
+        AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getParsedText(), lang, models, usePosTagging, computeDialogism);
         AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywords, lang, models, usePosTagging, computeDialogism);
-        return CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
+        return CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList,
                 lang, models, usePosTagging, computeDialogism, threshold, CVConstants.FAN_DELTA);
     }
 
@@ -329,7 +330,6 @@ public class CVAnalyzer {
         Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
         Set<String> ignoreList = new HashSet<>(Arrays.asList(ignoreWords.split(",[ ]*")));
 
-        PdfToTextConverter pdfConverter = new PdfToTextConverter();
         StringBuilder sb = new StringBuilder();
         sb.append(csvBuildHeader());
         LOGGER.log(Level.INFO, "Processing path: {0}", path);
@@ -342,7 +342,7 @@ public class CVAnalyzer {
                     String fileName = filePath.getFileName().toString().replaceAll("\\s+", "_");
                     int extensionStart = fileName.lastIndexOf(".");
                     sb.append(csvBuildRow(fileName.substring(0, extensionStart),
-                            processFile(filePath.toString(), keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, threshold, pdfConverter)));
+                            processFile(filePath.toString(), keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, threshold)));
                 }
             });
             FileUtils.writeStringToFile(globalStatsFile, sb.toString(), "UTF-8");
