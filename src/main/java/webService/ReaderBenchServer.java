@@ -375,23 +375,13 @@ public class ReaderBenchServer {
         return new ResultTextSimilarities(similarityScoresToString);
     }
 
-    private ResultAnswerMatching computeBestAnswer(AbstractDocument userInputDocument, List<AbstractDocument> predefinedAnswerDocuments) {
-        List<Double> scores = new ArrayList();
+    private ResultAnswerMatching computeScoresPerAnswer(AbstractDocument userInputDocument, List<AbstractDocument> predefinedAnswerDocuments) {
+        Map<Integer, Double> scoresPerAnswer = new HashMap<>();
         for (AbstractDocument predefinedAnswerDocument : predefinedAnswerDocuments) {
             SemanticCohesion sc = new SemanticCohesion(userInputDocument, predefinedAnswerDocument);
-            scores.add(sc.getCohesion());
+            scoresPerAnswer.put(predefinedAnswerDocuments.indexOf(predefinedAnswerDocument), sc.getCohesion());
         }
-        Double maxScore = Collections.max(scores);
-        Integer indexId = -1;
-        int k = 0;
-        for (Double score : scores) {
-            if (Objects.equals(score, maxScore)) {
-                indexId = k;
-                break;
-            }
-            k++;
-        }
-        return new ResultAnswerMatching(indexId, maxScore);
+        return new ResultAnswerMatching(scoresPerAnswer);
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
@@ -1385,7 +1375,7 @@ public class ReaderBenchServer {
             }
             AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism);
             QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
-            queryResult.setData(computeBestAnswer(userAnswerDocument, predefinedAnswerDocuments));
+            queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
             response.type("application/json");
             return queryResult.convertToJson();
         });
