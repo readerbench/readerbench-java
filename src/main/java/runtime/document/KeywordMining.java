@@ -187,6 +187,7 @@ public class KeywordMining {
                 }
                 csv.append(keyword.getRelevance()).append("\n");
                 outRelevance.write(csv.toString());
+                outRelevance.flush();
                 csv.setLength(0);
             }
             outRelevance.close();
