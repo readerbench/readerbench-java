@@ -177,7 +177,8 @@ public class ParticipantEvaluation {
         performSNA(lsPart, c.getParticipantContributions(), true, null);
     }
 
-    public static void performSNA(List<Participant> participants, double[][] participantContributions, boolean needsAnonymization, String exportPath) {
+    public static void performSNA(List<Participant> participants, double[][] participantContributions,
+                                  boolean needsAnonymization, String exportPath) {
         for (int index1 = 0; index1 < participants.size(); index1++) {
             for (int index2 = 0; index2 < participants.size(); index2++) {
                 if (index1 != index2) {

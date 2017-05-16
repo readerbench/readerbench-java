@@ -31,11 +31,6 @@ public class AkkaActorSystem {
 
         LOGGER.info("Init actors ...");
         communityActor = ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
-//        solrDataProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(SolrDataProcessingActor.class),
-//                "solr-data-processing-actor");
-//        dialogProcessingActor = this.ACTOR_SYSTEM.actorOf(Props.create(DialogProcessingActor.class)
-//                        .withDispatcher("dialog-processing-dispatcher"), "dialog-processing-actor");
-
         conversationActor = ACTOR_SYSTEM.actorOf(new RoundRobinPool(1).props(Props.create(ConversationActor.class)),
                 "conversation-actor");
 

@@ -250,7 +250,9 @@ public class Community extends AnalysisElement {
             fileName = path + "/graph_" + System.currentTimeMillis();
         }
 
-        ParticipantEvaluation.performSNA(participants, participantContributions, true, fileName + ".pdf");
+        //ParticipantEvaluation.performSNA(participants, participantContributions, true, fileName + ".pdf");
+        ParticipantEvaluation.performSNA(participants, participantContributions, true, null);
+
         // update surface statistics
         for (AbstractDocument d : documents) {
             Participant p = null;
@@ -285,7 +287,7 @@ public class Community extends AnalysisElement {
                     / p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
         });
 
-        export(fileName + ".csv", modelTimeEvolution, additionalInfo);
+        //export(fileName + ".csv", modelTimeEvolution, additionalInfo);
 
         if (useTextualComplexity) {
 
@@ -407,6 +409,7 @@ public class Community extends AnalysisElement {
                                                           int monthIncrement, int dayIncrement, String path) {
 
         data.cscl.Community community = new data.cscl.Community(lang, needsAnonymization, startDate, endDate);
+        community.setPath(path);
         for (AbstractDocument abstractDocument : abstractDocumentList) {
             community.getDocuments().add((data.cscl.Conversation) abstractDocument);
         }
@@ -649,12 +652,12 @@ public class Community extends AnalysisElement {
     }
 
     /**
-     * Export Individual Stats and Invocation
+     * Export Individual Stats and Initiation
      * @param pathToFileIndividualStats - path to file with Individual State
      * @param pathToFileInitiation - path to file with Initiation
      */
-    public void exportIndividualStatsAndInvocation(String pathToFileIndividualStats, String pathToFileInitiation) {
-        LOGGER.info("Writing Individual Stats and Invocation export");
+    public void exportIndividualStatsAndInitiation(String pathToFileIndividualStats, String pathToFileInitiation) {
+        LOGGER.info("Writing Individual Stats and Initiation export");
         // print participant statistics
         try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileIndividualStats)), "UTF-8"), 32768);
@@ -692,7 +695,7 @@ public class Community extends AnalysisElement {
                     outInitiation.write("\n");
                 }
             }
-            LOGGER.info("Successfully finished writing Individual Stats and Invocation export ...");
+            LOGGER.info("Successfully finished writing Individual Stats and Initiation export ...");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);
@@ -776,6 +779,68 @@ public class Community extends AnalysisElement {
                 }
             }
             LOGGER.info("Successfully finished writing Time Analysis export ...");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+    }
+
+    /**
+     * Export discussed topics
+     * @param pathToFileDiscussedTopics - path to file
+     */
+    public void exportDiscussedTopics(String pathToFileDiscussedTopics) {
+        LOGGER.info("Writing Discussed Topics export");
+        try (BufferedWriter outDiscussedTopics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileDiscussedTopics)), "UTF-8"), 32768)) {
+
+            if (participants.size() > 0) {
+                // print discussed topics
+                outDiscussedTopics.write("\nDiscussed topics\n");
+                outDiscussedTopics.write("Concept,Relevance\n");
+                List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
+                for (Keyword t : topicL) {
+                    outDiscussedTopics.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
+                }
+            }
+
+            LOGGER.info("Successfully finished writing Discussed Topics export ...");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            Exceptions.printStackTrace(e);
+        }
+    }
+
+    /**
+     * Export individual threads statistics
+     * @param pathToFile - path to file
+     */
+    public void exportIndividualThreadStatistics (String pathToFile) {
+        LOGGER.info("Writing Individual Threads Statistics export");
+        try (BufferedWriter outIndividualThreadsStatistics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFile)), "UTF-8"), 32768)) {
+
+            if (participants.size() > 0) {
+                // print general statistic per thread
+                outIndividualThreadsStatistics.write("\nIndividual thread statistics\n");
+                outIndividualThreadsStatistics.write("Thread path,No. contributions,No. involved paticipants," +
+                        "Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
+                for (AbstractDocument d : documents) {
+                    int noBlocks = 0;
+                    noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
+
+                    outIndividualThreadsStatistics.write(
+                            new File(d.getPath()).getName() + "," + noBlocks + ","
+                                    + ((Conversation) d).getParticipants().size() + ","
+                                    + Formatting.formatNumber(d.getScore()) + ","
+                                    + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                                    + ","
+                                    + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                                    + "\n");
+                }
+            }
+
+            LOGGER.info("Successfully finished writing Individual Threads Statistics export ...");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             Exceptions.printStackTrace(e);

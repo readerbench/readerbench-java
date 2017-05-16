@@ -1,6 +1,7 @@
 package akka.actors;
 
 import akka.AkkaActorSystem;
+import akka.ConversationProcessing;
 import akka.actor.UntypedActor;
 import akka.dispatch.Futures;
 import akka.dispatch.OnSuccess;
@@ -13,14 +14,11 @@ import com.readerbench.solr.entities.cscl.Contribution;
 import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
-import data.AbstractDocumentTemplate;
 import data.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import scala.concurrent.duration.FiniteDuration;
-import services.nlp.parsing.Parsing;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -39,10 +37,15 @@ public class CommunityActor extends UntypedActor{
     List<AbstractDocument> abstractDocuments = new ArrayList<>();
     private static int CONVERSATION_NUMBER = 0;
     private static String INDIVIDUAL_STATS_FILENAME = "individualStats.csv";
-    private static String INVOCATION_FILENAME = "invocation.csv";
+    private static String INITIATION_FILENAME = "initiation.csv";
     private static String TEXTUAL_COMPLEXITY = "textualComplexity.csv";
     private static String TIME_ANALYSIS = "timeAnalysis.csv";
+    private static String DISCUSSED_TOPICS = "discussedTopics.csv";
+    private static String INDIVIDUAL_THREAD_STATISTICS = "individualThreadStatistics.csv";
     private static String PATH = "resources/out";
+    private static String COMMUNITY_NAME;
+
+    private ConversationProcessing CONVERSATION_PROCESSING = new ConversationProcessing();
 
     @Override
     public void onReceive(Object message) throws Exception {
@@ -50,7 +53,7 @@ public class CommunityActor extends UntypedActor{
         if (message instanceof CommunityMessage) {
             LOGGER.info("Received CommunityMessage ...");
             String communityName = ((CommunityMessage) message).getCommunity();
-            //FILENAME = communityName + ".csv";
+            COMMUNITY_NAME = communityName;
 
             /**
              * get conversations for a community
@@ -67,10 +70,20 @@ public class CommunityActor extends UntypedActor{
 
             }
 
+            ConversationMessage cm = new ConversationMessage(conversations.get(0), PATH);
+            LOGGER.info("Start processing first conversation.");
+            AbstractDocument abstractDocument = CONVERSATION_PROCESSING.loadGenericDocumentFromConversation(cm, CONVERSATION_PROCESSING.MODELS,
+                    CONVERSATION_PROCESSING.LANGUAGE,CONVERSATION_PROCESSING.USE_POS_TAGGING, CONVERSATION_PROCESSING.COMPUTE_DIALOGISM);
+            LOGGER.info("End processing first conversation.");
+            abstractDocuments.add(abstractDocument);
+
+
             List<Conversation> conv = new ArrayList<>();
-            conv.add(conversations.get(0));
-            //conv.add(conversations.get(1));
-            CONVERSATION_NUMBER = conv.size();
+            conv.add(conversations.get(1));
+            conv.add(conversations.get(2));
+            conv.add(conversations.get(3));
+            conv.add(conversations.get(4));
+            CONVERSATION_NUMBER = conv.size() + 1;
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
                 messages.add(new ConversationMessage(m, PATH));
@@ -91,7 +104,7 @@ public class CommunityActor extends UntypedActor{
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
-                Timeout timeout = new Timeout(Duration.create(10, TimeUnit.MINUTES));
+                Timeout timeout = new Timeout(Duration.create(30, TimeUnit.SECONDS));
                 Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
                 futures.add(future);
             });
@@ -142,17 +155,14 @@ public class CommunityActor extends UntypedActor{
                 endDate);
         community = community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
                 endDate, monthIncrement, dayIncrement, PATH);
-        community.setPath(PATH);
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
-            community.exportIndividualStatsAndInvocation(PATH + "/" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + INVOCATION_FILENAME);
-            community.exportTextualComplexity(PATH + "/" + TEXTUAL_COMPLEXITY);
-            community.exportTimeAnalysis(PATH + "/" + TIME_ANALYSIS);
-
-            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
-            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-            //community.generateParticipantViewSubCommunities("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_d3_");
-            //community.generateConceptView("D:\\Facultate\\MASTER\\ReaderBench\\ReaderBench\\resources\\out\\" + "CallOfDuty_concepts.pdf");
+            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
+                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
+            community.exportTextualComplexity(PATH + "/" + COMMUNITY_NAME + "_" + TEXTUAL_COMPLEXITY);
+            community.exportTimeAnalysis(PATH + "/" + COMMUNITY_NAME + "_" + TIME_ANALYSIS);
+            community.exportDiscussedTopics(PATH + "/" + COMMUNITY_NAME + "_" + DISCUSSED_TOPICS);
+            community.exportIndividualThreadStatistics(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_THREAD_STATISTICS);
         }
     }
 }
