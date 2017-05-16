@@ -57,14 +57,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import org.apache.log4j.BasicConfigurator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -72,13 +70,13 @@ import org.openide.util.Exceptions;
 import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
-import services.semanticModels.word2vec.Word2VecModel;
 import services.semanticModels.TextSimilarity;
+import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -140,6 +138,108 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
+    /**
+     * Returns an error result if there are any required parameters in the first
+     * set missing in the second set.
+     *
+     * @param requiredParams a set of required key parameters
+     * @param params a set of provided key parameters
+     * @return an error message if there are any required parameters in the
+     * first set missing in the second set or null otherwise
+     */
+    private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
+        Set<String> requiredParamsMissing;
+        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+            // if not return an error showing the missing parameters
+            return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
+        }
+        return null;
+    }
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param request the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(Request request) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : request.queryParams()) {
+            hm.put(paramKey, request.queryParams(paramKey));
+        }
+        return hm;
+    }
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param json the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(JSONObject json) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : (Set<String>) json.keySet()) {
+            hm.put(paramKey, json.get(paramKey).toString());
+        }
+        return hm;
+    }
+    /**
+     * Returns a Set of initial required parameters.
+     *
+     * @return the set of initial required parameters
+     */
+    public static Set<String> setInitialRequiredParams() {
+        Set<String> requiredParams = new HashSet<>();
+        requiredParams.add("language");
+        requiredParams.add("lsa");
+        requiredParams.add("lda");
+        requiredParams.add("pos-tagging");
+        requiredParams.add("dialogism");
+        return requiredParams;
+    }
+    private static List<AbstractDocument> setDocuments(String path) {
+        if (loadedPath != null && loadedPath.equals(path)) {
+            return loadedDocs;
+        }
+        
+        loadedPath = path;
+        loadedDocs = new ArrayList<>();
+        try {
+            File dir = new File("resources/in/" + path);
+            File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
+            
+            for (File file : files) {
+                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                loadedDocs.add(d);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            Exceptions.printStackTrace(e);
+        }
+        
+        return loadedDocs;
+    }
+    public static void initializeDB() {
+        LOGGER.setLevel(Level.INFO); // changing log level
+        org.apache.log4j.BasicConfigurator.configure();
+        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
+        FileHandler fh;
+        try {
+            fh = new FileHandler("ReaderBenchServer.log");
+            LOGGER.addHandler(fh);
+        } catch (IOException | SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        
+        LOGGER.info("Initialize words...");
+        WordDAO.getInstance().loadAll();
+        LOGGER.info("Words initialization finished");
+        
+        SentimentWeights.initialize();
+        LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
+    }
+    public static void main(String[] args) {
+        ReaderBenchServer.initializeDB();
+        ReaderBenchServer server = new ReaderBenchServer();
+        server.start();
+    }
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
         List<ResultCategory> resultCategories = new ArrayList<>();
@@ -295,77 +395,18 @@ public class ReaderBenchServer {
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
-        PdfToTextConverter pdfConverter = new PdfToTextConverter();
+        PdfToTxtConverter pdfToTxtConverter;
         if (localFile) {
-            // return new
-            // ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/"
-            // + uri + ".pdf", true));
-            return new ResultPdfToText(pdfConverter.pdftoText(uri, true));
+            pdfToTxtConverter = new PdfToTxtConverter(uri, true);
+            pdfToTxtConverter.process();
+            return new ResultPdfToText(pdfToTxtConverter.getParsedText());
         } else {
-            return new ResultPdfToText(pdfConverter.pdftoText(uri, false));
+            pdfToTxtConverter = new PdfToTxtConverter(uri, false);
+            pdfToTxtConverter.process();
+            return new ResultPdfToText(pdfToTxtConverter.getParsedText());
         }
     }
 
-    /**
-     * Returns an error result if there are any required parameters in the first
-     * set missing in the second set.
-     *
-     * @param requiredParams a set of required key parameters
-     * @param params a set of provided key parameters
-     * @return an error message if there are any required parameters in the
-     * first set missing in the second set or null otherwise
-     */
-    private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
-        Set<String> requiredParamsMissing;
-        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
-            // if not return an error showing the missing parameters
-            return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
-        }
-        return null;
-    }
-
-    /**
-     * Returns a HashMap containing <key, value> for parameters.
-     *
-     * @param request the request sent to the server
-     * @return the HashMap if there are any parameters or null otherwise
-     */
-    private static Map<String, String> hmParams(Request request) {
-        Map<String, String> hm = new HashMap<>();
-        for (String paramKey : request.queryParams()) {
-            hm.put(paramKey, request.queryParams(paramKey));
-        }
-        return hm;
-    }
-
-    /**
-     * Returns a HashMap containing <key, value> for parameters.
-     *
-     * @param json the request sent to the server
-     * @return the HashMap if there are any parameters or null otherwise
-     */
-    private static Map<String, String> hmParams(JSONObject json) {
-        Map<String, String> hm = new HashMap<>();
-        for (String paramKey : (Set<String>) json.keySet()) {
-            hm.put(paramKey, json.get(paramKey).toString());
-        }
-        return hm;
-    }
-
-    /**
-     * Returns a Set of initial required parameters.
-     *
-     * @return the set of initial required parameters
-     */
-    public static Set<String> setInitialRequiredParams() {
-        Set<String> requiredParams = new HashSet<>();
-        requiredParams.add("language");
-        requiredParams.add("lsa");
-        requiredParams.add("lda");
-        requiredParams.add("pos-tagging");
-        requiredParams.add("dialogism");
-        return requiredParams;
-    }
 
     public void start() {
 
@@ -827,23 +868,23 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-
-            PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
-            // ignore lines containing at least one of the words in the ignoreList list
-            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
-            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
-
-            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
+            PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
+            pdfToTxtConverter.process();
+            // ignore lines containing at least one of the words in the ignoreList list
+            pdfToTxtConverter.removeLines(ignoreLines);
+            pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
+
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            
             QueryResultCv queryResult = new QueryResultCv();
-            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
+            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
-            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+            result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
             boolean keywordWarning = false;
@@ -871,10 +912,10 @@ public class ReaderBenchServer {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_pages"));
             }
 
-            if (socialNetworksLinksFound.get("LinkedIn") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("LinkedIn") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             }
-            if (socialNetworksLinksFound.get("Viadeo") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
             }
 
@@ -932,21 +973,21 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-
-            PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
-            // ignore lines containing at least one of the words in the ignoreList list
-            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
-            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
-
-            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
+            PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
+            pdfToTxtConverter.process();
+            // ignore lines containing at least one of the words in the ignoreList list
+            pdfToTxtConverter.removeLines(ignoreLines);
+            pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
+
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
-            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
-            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
+            result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
             boolean keywordWarning = false;
@@ -970,10 +1011,10 @@ public class ReaderBenchServer {
                 result.getWarnings().add(sb.toString());
             }
 
-            if (socialNetworksLinksFound.get("LinkedIn") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("LinkedIn") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             }
-            if (socialNetworksLinksFound.get("Viadeo") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
             }
 
@@ -989,7 +1030,7 @@ public class ReaderBenchServer {
                 }
             }
 
-            if (!pdfConverter.sectionExists(cvContent, competencesSectionTitles)) {
+            if (!pdfToTxtConverter.sectionExists(competencesSectionTitles)) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("competences_not_found"));
             }
 
@@ -1472,51 +1513,4 @@ public class ReaderBenchServer {
         });
     }
 
-    private static List<AbstractDocument> setDocuments(String path) {
-        if (loadedPath != null && loadedPath.equals(path)) {
-            return loadedDocs;
-        }
-
-        loadedPath = path;
-        loadedDocs = new ArrayList<>();
-        try {
-            File dir = new File("resources/in/" + path);
-            File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
-
-            for (File file : files) {
-                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-                loadedDocs.add(d);
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            Exceptions.printStackTrace(e);
-        }
-
-        return loadedDocs;
-    }
-
-    public static void initializeDB() {
-        LOGGER.setLevel(Level.INFO); // changing log level
-        org.apache.log4j.BasicConfigurator.configure();
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        FileHandler fh;
-        try {
-            fh = new FileHandler("ReaderBenchServer.log");
-            LOGGER.addHandler(fh);
-        } catch (IOException | SecurityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        LOGGER.info("Initialize words...");
-        WordDAO.getInstance().loadAll();
-        LOGGER.info("Words initialization finished");
-
-        SentimentWeights.initialize();
-        LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
-    }
-
-    public static void main(String[] args) {
-        ReaderBenchServer.initializeDB();
-        ReaderBenchServer server = new ReaderBenchServer();
-        server.start();
-    }
 }
