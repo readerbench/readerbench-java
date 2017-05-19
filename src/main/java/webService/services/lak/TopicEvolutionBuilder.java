@@ -89,6 +89,8 @@ public class TopicEvolutionBuilder {
             });
         });
 
+        topicEvolution.normalize();
+
         return topicEvolution;
     }
 }
