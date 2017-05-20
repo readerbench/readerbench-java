@@ -40,8 +40,8 @@ public class ResultJobQuest extends Result {
     private Integer fontTypes; // contains font types with text styles
     private Integer fontTypesSimple; // contains font types withouth text styles
     private Integer fontSizes;
-    private Float minFontSize;
-    private Float maxFontSize;
+    private Double minFontSize;
+    private Double maxFontSize;
     private Integer totalCharacters;
     
     private List<String> veryPositiveWords;
@@ -264,19 +264,19 @@ public class ResultJobQuest extends Result {
         this.fontSizes = fontSizes;
     }
 
-    public Float getMinFontSize() {
+    public Double getMinFontSize() {
         return minFontSize;
     }
 
-    public void setMinFontSize(Float minFontSize) {
+    public void setMinFontSize(Double minFontSize) {
         this.minFontSize = minFontSize;
     }
 
-    public Float getMaxFontSize() {
+    public Double getMaxFontSize() {
         return maxFontSize;
     }
 
-    public void setMaxFontSize(Float maxFontSize) {
+    public void setMaxFontSize(Double maxFontSize) {
         this.maxFontSize = maxFontSize;
     }
 

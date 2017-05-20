@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import services.commons.Formatting;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.keywords.KeywordsHelper;
@@ -43,7 +43,7 @@ public class CVHelper {
     public static ResultCv process(
             AbstractDocument document,
             AbstractDocument keywordsDocument,
-            PdfToTextConverter pdfConverter,
+            PdfToTxtConverter pdfConverter,
             Set<String> keywords,
             Set<String> ignoreWords,
             Lang lang,
@@ -134,25 +134,25 @@ public class CVHelper {
         // textual complexity
         TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
         result.setTextualComplexity(textualComplexity.getComplexityIndices());
-        result.setImages(pdfConverter.getImages());
-        result.setColors(pdfConverter.getColors());
-        result.setPages(pdfConverter.getPages());
+        result.setImages(pdfConverter.getNoImages());
+        result.setColors(pdfConverter.getNoColors());
+        result.setPages(pdfConverter.getNoPages());
         result.setParagraphs(document.getNoBlocks());
         result.setSentences(document.getNoSentences());
         result.setWords(document.getNoWords());
         result.setContentWords(document.getNoContentWords());
-        result.setFontTypes(pdfConverter.getFontTypes());
-        result.setFontTypesSimple(pdfConverter.getFontTypesSimple());
-        result.setFontSizes(pdfConverter.getFontSizes());
+        result.setFontTypes(pdfConverter.getNoFontTypes());
+        result.setFontTypesSimple(pdfConverter.getNoFontTypesSimple());
+        result.setFontSizes(pdfConverter.getNoFontSizes());
         result.setMinFontSize(pdfConverter.getMinFontSize());
         result.setMaxFontSize(pdfConverter.getMaxFontSize());
-        result.setTotalCharacters(pdfConverter.getTotalCharacters());
-        result.setBoldCharacters(pdfConverter.getBoldCharacters());
-        result.setBoldCharsCoverage(pdfConverter.getBoldCharsCoverage());
-        result.setItalicCharacters(pdfConverter.getItalicCharacters());
-        result.setItalicCharsCoverage(pdfConverter.getItalicCharsCoverage());
-        result.setBoldItalicCharacters(pdfConverter.getBoldItalicCharacters());
-        result.setBoldItalicCharsCoverage(pdfConverter.getBoldItalicCharsCoverage());
+        result.setTotalCharacters(pdfConverter.getNoTotalChars());
+        result.setBoldCharacters(pdfConverter.getNoBoldChars());
+        result.setBoldCharsCoverage(pdfConverter.getPctBoldChars());
+        result.setItalicCharacters(pdfConverter.getNoItalicChars());
+        result.setItalicCharsCoverage(pdfConverter.getPctItalicChars());
+        result.setBoldItalicCharacters(pdfConverter.getNoBoldItalicChars());
+        result.setBoldItalicCharsCoverage(pdfConverter.getPctBoldItalicChars());
         result.setPositiveWords(positiveWords);
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);

@@ -72,26 +72,33 @@ public class KeywordModeling {
                 e.getTopics().add(newTopic);
             }
         }
-        Map<NGram, Long> ngrams = e.getBiGrams().stream()
-                .collect(Collectors.groupingBy(
-                        Function.identity(), 
-                        Collectors.counting()));
-        for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
-            Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
-            int index = e.getTopics().indexOf(newTopic);
-            if (index >= 0) {
-                // update frequency for identical lemmas
-                Keyword refTopic = e.getTopics().get(index);
-                refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
-            } else {
-                e.getTopics().add(newTopic);
+        try {
+            Map<NGram, Long> ngrams = e.getBiGrams().stream()
+                    .collect(Collectors.groupingBy(
+                            Function.identity(),
+                            Collectors.counting()));
+
+            for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
+                Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
+                int index = e.getTopics().indexOf(newTopic);
+                if (index >= 0) {
+                    // update frequency for identical lemmas
+                    Keyword refTopic = e.getTopics().get(index);
+                    refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
+                } else {
+                    e.getTopics().add(newTopic);
+                }
             }
+        } catch (Exception x) {
+            x.printStackTrace();
         }
         Collections.sort(e.getTopics());
     }
 
     public static List<Keyword> getSublist(List<Keyword> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
-        if (noTopics == 0 && !nounsOnly && !verbsOnly) return topics;
+        if (noTopics == 0 && !nounsOnly && !verbsOnly) {
+            return topics;
+        }
         List<Keyword> results = new ArrayList<>();
         for (Keyword t : topics) {
             if ((noTopics > 0 && results.size() >= noTopics) || t.getRelevance() < 0) {
@@ -107,8 +114,7 @@ public class KeywordModeling {
                 if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
                     results.add(t);
                 }
-            }
-            else if (t.getElement() instanceof NGram) {
+            } else if (t.getElement() instanceof NGram) {
                 NGram nGram = (NGram) t.getElement();
                 boolean keep = true;
                 for (Word w : nGram.getWords()) {
@@ -124,7 +130,9 @@ public class KeywordModeling {
                         keep = true;
                     }
                 }
-                if (keep) results.add(t);
+                if (keep) {
+                    results.add(t);
+                }
             }
         }
         return results;

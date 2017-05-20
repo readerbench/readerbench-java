@@ -5,18 +5,18 @@
  */
 package webService.result;
 
+import java.util.Map;
+
 /**
  *
  * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
  */
 public class ResultAnswerMatching {
     
-    private final Integer answerId;
-    private final Double similarityScore;
+    private final Map<Integer, Double> scorePerAnswer;
     
-    public ResultAnswerMatching(Integer answerId, Double similarityScore) {
-        this.answerId = answerId;
-        this.similarityScore = similarityScore;
+    public ResultAnswerMatching(Map<Integer, Double> scorePerAnswer) {
+        this.scorePerAnswer = scorePerAnswer;
     }
-    
+
 }
