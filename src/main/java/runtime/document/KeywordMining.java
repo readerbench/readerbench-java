@@ -39,6 +39,7 @@ import services.converters.Txt2XmlConverter;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LSA.LSA;
+import static services.semanticModels.SimilarityType.LDA;
 import webService.ReaderBenchServer;
 
 /**
@@ -149,8 +150,9 @@ public class KeywordMining {
                     } else {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism);
-                    d.save(AbstractDocument.SaveType.NONE);
+                    //d.computeAll(computeDialogism);
+                    //d.save(AbstractDocument.SaveType.NONE);
+                    KeywordModeling.determineKeywords(d);
                     documents.add(d);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
@@ -213,7 +215,7 @@ public class KeywordMining {
         models.add(lsa);
         //models.add(lda);
 
-        Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
+        //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
         KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, false, false);
         keywordMining.processTexts(false, "keywords_lsa_sciref.csv");
     }
