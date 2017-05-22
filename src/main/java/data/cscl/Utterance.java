@@ -18,7 +18,9 @@ package data.cscl;
 import java.util.Date;
 
 import data.Block;
+import java.util.Calendar;
 import java.util.EnumMap;
+import java.util.Objects;
 
 public class Utterance extends Block {
 
@@ -88,7 +90,7 @@ public class Utterance extends Block {
     }
 
     public boolean isEligible(Date startDate, Date endDate) {
-        return ((startDate == null) || (time.after(startDate)))
+        return (time != null) && ((startDate == null) || (time.after(startDate)))
                 && ((endDate == null) || (time.before(endDate)));
     }
 
@@ -109,5 +111,21 @@ public class Utterance extends Block {
         s += "}\n[" + getScore() + "]\n";
         return s;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Utterance u = (Utterance) obj;
+        return this.participant.equals(u.participant) && this.time.equals(u.time);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + Objects.hashCode(this.participant);
+        hash = 71 * hash + Objects.hashCode(this.time);
+        return hash;
+    }
+    
+    
 
 }

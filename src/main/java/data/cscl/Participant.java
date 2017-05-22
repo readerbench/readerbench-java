@@ -119,7 +119,7 @@ public class Participant implements Comparable<Participant>, Serializable {
     @Override
     public String toString() {
         return name + ": { " + indices.get(CSCLIndices.INDEGREE) + ", " + indices.get(CSCLIndices.OUTDEGREE) + ", "
-                + indices.get(CSCLIndices.ECCENTRICITY) + "}\n";
+                + indices.get(CSCLIndices.ECCENTRICITY) + ", " + participantGroup + "}\n";
     }
 
     public boolean equals(Object obj) {
