@@ -76,7 +76,7 @@ public class Community extends AnalysisElement {
     private List<Community> timeframeSubCommunities;
     private double[][] participantContributions;
     private final Date startDate, endDate;
-    private Date fistContributionDate, lastContributionDate;
+    private Date firstContributionDate, lastContributionDate;
 
     public Community(String path, Lang lang, boolean needsAnonymization, Date startDate, Date endDate) {
         super(null, 0, null, null, lang);
@@ -108,12 +108,12 @@ public class Community extends AnalysisElement {
                         // select contributions in imposed timeframe
                         if (u != null && u.isEligible(startDate, endDate)) {
                             // determine first timestamp of considered contributions
-                            if (fistContributionDate == null) {
-                                fistContributionDate = u.getTime();
+                            if (firstContributionDate == null) {
+                                firstContributionDate = u.getTime();
                                 LOGGER.log(Level.SEVERE, "Please check first contribution");
                             }
-                            if (u.getTime().before(fistContributionDate)) {
-                                fistContributionDate = u.getTime();
+                            if (u.getTime().before(firstContributionDate)) {
+                                firstContributionDate = u.getTime();
                             }
                             Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
                             if (u.getTime().before(date.getTime())) {
@@ -169,8 +169,7 @@ public class Community extends AnalysisElement {
                     Participant p1 = u.getParticipant();
                     int index1 = participants.indexOf(p1);
                     if (index1 >= 0) {
-                        // participantContributions[index1][index1] += d
-                        // .getBlocks().get(i).getCombinedScore();
+                        participantContributions[index1][index1] += u.getScore();
                         Participant participantToUpdate = participants.get(index1);
                         participantToUpdate.getIndices().put(CSCLIndices.SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
@@ -352,6 +351,10 @@ public class Community extends AnalysisElement {
         community.updateParticipantContributions();
         // create corresponding sub-communities
         Calendar cal = Calendar.getInstance();
+        if (community.getFistContributionDate() == null) {
+            LOGGER.severe("first contribution date not existing");
+            return null;
+        }
         Date startSubCommunities = community.getFistContributionDate();
         cal.setTime(startSubCommunities);
         cal.add(Calendar.MONTH, monthIncrement);
@@ -657,11 +660,11 @@ public class Community extends AnalysisElement {
     }
 
     public Date getFistContributionDate() {
-        return fistContributionDate;
+        return firstContributionDate;
     }
 
     public void setFistContributionDate(Date fistContributionDate) {
-        this.fistContributionDate = fistContributionDate;
+        this.firstContributionDate = fistContributionDate;
     }
 
     public Date getLastContributionDate() {
