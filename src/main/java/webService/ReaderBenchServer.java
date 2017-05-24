@@ -84,7 +84,6 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;
-import webService.mail.SendMail;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
 import webService.result.ResultAnswerMatching;
@@ -1207,49 +1206,6 @@ public class ReaderBenchServer {
             queryResult.setParticipants(participantsCommunities);
             response.type("application/json");
             return queryResult.convertToJson();
-        });
-        Spark.post("/sendContactEmail", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            String name = (String) json.get("name");
-            String email = (String) json.get("email");
-            String subject = (String) json.get("subject");
-            String message = (String) json.get("message");
-
-            HashMap<Object, Object> hm = new HashMap<>();
-            HashMap<String, String> hmFrom = new HashMap<>();
-            //hmFrom.put("name", name);
-            hmFrom.put("email", "contact@readerbench.com");
-            hm.put("from", hmFrom);
-            HashMap<String, String> hmReplyTo = new HashMap<>();
-            hmReplyTo.put("name", name);
-            hmReplyTo.put("email", email);
-            hm.put("reply-to", hmReplyTo);
-
-            HashMap<String, String> hmSimpleReceiver = new HashMap<>();
-            hmSimpleReceiver.put("email", "contact@readerbench.com");
-            hm.put("to", hmSimpleReceiver);
-            hm.put("subject", subject);
-            hm.put("message", message);
-            ClientResponse mailGunResponse = SendMail.sendSimpleMessage(hm);
-            if (mailGunResponse.getStatus() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : "
-                        + mailGunResponse.getStatus());
-            }
-
-            QueryResultMailgun queryResult = new QueryResultMailgun();
-            String output = mailGunResponse.getEntity(String.class);
-
-            JSONParser parser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) parser.parse(output);
-            queryResult.setMailgunResponse(jsonObject);
-
-            String result = queryResult.convertToJson();
-            LOGGER.log(Level.INFO, "queryResult{0}", result);
-
-            return result;
         });
         Spark.post("/text-similarity", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
