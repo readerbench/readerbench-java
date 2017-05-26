@@ -81,8 +81,6 @@ public class CommunityActor extends UntypedActor{
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(1));
             conv.add(conversations.get(2));
-            conv.add(conversations.get(3));
-            conv.add(conversations.get(4));
             CONVERSATION_NUMBER = conv.size() + 1;
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
@@ -94,7 +92,7 @@ public class CommunityActor extends UntypedActor{
             Long start = System.currentTimeMillis();
 
 //            for (Conversation conversation : conv) {
-//                ConversationMessage conversationMessage = new ConversationMessage(conversation, "resources/out");
+//                ConversationMessage conversationMessage = new ConversationMessage(conversation, PATH);
 //                /**
 //                 * send ConversationMessage to ConversationActor to process it
 //                 */
@@ -104,7 +102,7 @@ public class CommunityActor extends UntypedActor{
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
-                Timeout timeout = new Timeout(Duration.create(30, TimeUnit.SECONDS));
+                Timeout timeout = new Timeout(Duration.create(1, TimeUnit.MINUTES));
                 Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
                 futures.add(future);
             });
@@ -122,7 +120,7 @@ public class CommunityActor extends UntypedActor{
 
                     if (abstractDocuments.size() == CONVERSATION_NUMBER) {
                         LOGGER.info("Start processing document collection ...");
-                        processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+                        processDocumentCollection(abstractDocuments, Lang.en, false, true, null, null, 0, 7);
                         LOGGER.info("End processing collection ...Took {} millis", System.currentTimeMillis() - start);
                     }
                 }
@@ -136,7 +134,7 @@ public class CommunityActor extends UntypedActor{
 //            if (abstractDocuments.size() == CONVERSATION_NUMBER) {
 //                LOGGER.info("End processing all conversations ...");
 //                LOGGER.info("Start processing document collection ...");
-//                processDocumentCollection(abstractDocuments, Lang.en, false, false, null, null, 0, 7);
+//                processDocumentCollection(abstractDocuments, Lang.en, false, true, null, null, 0, 7);
 //                LOGGER.info("------------- End processing document collection --------- ");
 //            }
 //        }

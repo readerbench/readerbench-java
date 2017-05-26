@@ -15,6 +15,7 @@
  */
 package webService;
 
+import com.readerbench.solr.services.SolrService;
 import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
@@ -115,6 +116,7 @@ import webService.services.cimodel.ComprehensionModelService;
 import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
+import webService.services.cscl.result.QueryResultAllCommunities;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -140,6 +142,8 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
+
+    private static SolrService SOLR_SERVICE = new SolrService("http://141.85.232.56:8983/solr/", "community", 100);
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
         List<ResultCategory> resultCategories = new ArrayList<>();
@@ -1469,6 +1473,13 @@ public class ReaderBenchServer {
             QueryResultCM queryResult = new QueryResultCM(result);
             String resultStr = queryResult.convertToJson();
             return resultStr;
+        });
+
+        Spark.get("/community/communities", (request, response) -> {
+            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE.getCommunities();
+            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(communities);
+            response.type("application/json");
+            return queryResult.convertToJson();
         });
     }
 

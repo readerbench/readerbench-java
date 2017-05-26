@@ -31,7 +31,7 @@ public class AkkaActorSystem {
 
         LOGGER.info("Init actors ...");
         communityActor = ACTOR_SYSTEM.actorOf(Props.create(CommunityActor.class), "community-actor");
-        conversationActor = ACTOR_SYSTEM.actorOf(new RoundRobinPool(1).props(Props.create(ConversationActor.class)),
+        conversationActor = ACTOR_SYSTEM.actorOf(new RoundRobinPool(2).props(Props.create(ConversationActor.class)),
                 "conversation-actor");
 
         //TODO - add other actors
