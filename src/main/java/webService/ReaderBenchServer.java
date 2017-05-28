@@ -74,6 +74,7 @@ import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.converters.PdfToTextConverter;
+import services.elasticsearch.ElasticsearchService;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -117,6 +118,7 @@ import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
 import webService.services.cscl.result.QueryResultAllCommunities;
+import webService.services.cscl.result.QueryResultParticipants;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -144,6 +146,7 @@ public class ReaderBenchServer {
     private static String loadedPath;
 
     private static SolrService SOLR_SERVICE = new SolrService("http://141.85.232.56:8983/solr/", "community", 100);
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
         List<ResultCategory> resultCategories = new ArrayList<>();
@@ -1478,6 +1481,18 @@ public class ReaderBenchServer {
         Spark.get("/community/communities", (request, response) -> {
             List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE.getCommunities();
             QueryResultAllCommunities queryResult = new QueryResultAllCommunities(communities);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+            Integer week = Integer.valueOf(hm.get("week"));
+
+            List<Map> participantsStats = elasticsearchService.searchByCommunityAndWeek(communityName, week);
+            QueryResultParticipants queryResult = new QueryResultParticipants(participantsStats);
             response.type("application/json");
             return queryResult.convertToJson();
         });

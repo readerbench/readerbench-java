@@ -15,10 +15,12 @@ import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
 import data.Lang;
+import data.cscl.Community;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import services.elasticsearch.ElasticsearchService;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -42,8 +44,11 @@ public class CommunityActor extends UntypedActor{
     private static String TIME_ANALYSIS = "timeAnalysis.csv";
     private static String DISCUSSED_TOPICS = "discussedTopics.csv";
     private static String INDIVIDUAL_THREAD_STATISTICS = "individualThreadStatistics.csv";
+    private static String PARTICIPANT_VIEW_D3_FILE = "particiantViewD3.json";
     private static String PATH = "resources/out";
     private static String COMMUNITY_NAME;
+
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     private ConversationProcessing CONVERSATION_PROCESSING = new ConversationProcessing();
 
@@ -80,7 +85,14 @@ public class CommunityActor extends UntypedActor{
 
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(1));
-            conv.add(conversations.get(2));
+//            conv.add(conversations.get(2));
+//            conv.add(conversations.get(3));
+//            conv.add(conversations.get(4));
+//            conv.add(conversations.get(5));
+//            conv.add(conversations.get(6));
+//            conv.add(conversations.get(7));
+//            conv.add(conversations.get(8));
+//            conv.add(conversations.get(9));
             CONVERSATION_NUMBER = conv.size() + 1;
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
@@ -102,7 +114,7 @@ public class CommunityActor extends UntypedActor{
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
-                Timeout timeout = new Timeout(Duration.create(1, TimeUnit.MINUTES));
+                Timeout timeout = new Timeout(Duration.create(2, TimeUnit.MINUTES));
                 Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
                 futures.add(future);
             });
@@ -153,14 +165,22 @@ public class CommunityActor extends UntypedActor{
                 endDate);
         community = community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
                 endDate, monthIncrement, dayIncrement, PATH);
-        if (community != null) {
-            community.computeMetrics(useTextualComplexity, true, true);
-            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
-                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
-            community.exportTextualComplexity(PATH + "/" + COMMUNITY_NAME + "_" + TEXTUAL_COMPLEXITY);
-            community.exportTimeAnalysis(PATH + "/" + COMMUNITY_NAME + "_" + TIME_ANALYSIS);
-            community.exportDiscussedTopics(PATH + "/" + COMMUNITY_NAME + "_" + DISCUSSED_TOPICS);
-            community.exportIndividualThreadStatistics(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_THREAD_STATISTICS);
+
+        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+            List<Map<String, Object>> participantsStats = community.getTimeframeSubCommunities().get(i)
+                    .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
+            elasticsearchService.indexParticipantsStats(participantsStats);
         }
+
+//        if (community != null) {
+//            community.computeMetrics(useTextualComplexity, true, true);
+//            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
+//                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
+//            community.exportTextualComplexity(PATH + "/" + COMMUNITY_NAME + "_" + TEXTUAL_COMPLEXITY);
+//            community.exportTimeAnalysis(PATH + "/" + COMMUNITY_NAME + "_" + TIME_ANALYSIS);
+//            community.exportDiscussedTopics(PATH + "/" + COMMUNITY_NAME + "_" + DISCUSSED_TOPICS);
+//            community.exportIndividualThreadStatistics(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_THREAD_STATISTICS);
+//            community.generateParticipantViewD3(PATH + "/" + COMMUNITY_NAME + "_" + PARTICIPANT_VIEW_D3_FILE);
+//        }
     }
 }
