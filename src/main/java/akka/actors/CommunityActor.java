@@ -16,6 +16,7 @@ import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
 import data.Lang;
 import data.cscl.Community;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Future;
@@ -85,7 +86,7 @@ public class CommunityActor extends UntypedActor{
 
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(1));
-//            conv.add(conversations.get(2));
+            conv.add(conversations.get(2));
 //            conv.add(conversations.get(3));
 //            conv.add(conversations.get(4));
 //            conv.add(conversations.get(5));
@@ -170,9 +171,13 @@ public class CommunityActor extends UntypedActor{
             List<Map<String, Object>> participantsStats = community.getTimeframeSubCommunities().get(i)
                     .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
             elasticsearchService.indexParticipantsStats(participantsStats);
+
+            //index participant interaction results
+            JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
+            elasticsearchService.indexParticipantInteraction(participantInteraction);
         }
 
-//        if (community != null) {
+        if (community != null) {
 //            community.computeMetrics(useTextualComplexity, true, true);
 //            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
 //                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
@@ -180,7 +185,7 @@ public class CommunityActor extends UntypedActor{
 //            community.exportTimeAnalysis(PATH + "/" + COMMUNITY_NAME + "_" + TIME_ANALYSIS);
 //            community.exportDiscussedTopics(PATH + "/" + COMMUNITY_NAME + "_" + DISCUSSED_TOPICS);
 //            community.exportIndividualThreadStatistics(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_THREAD_STATISTICS);
-//            community.generateParticipantViewD3(PATH + "/" + COMMUNITY_NAME + "_" + PARTICIPANT_VIEW_D3_FILE);
-//        }
+            //community.generateParticipantViewD3(PATH + "/" + COMMUNITY_NAME + "_" + PARTICIPANT_VIEW_D3_FILE);
+        }
     }
 }

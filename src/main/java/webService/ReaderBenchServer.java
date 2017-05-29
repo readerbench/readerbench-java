@@ -119,6 +119,7 @@ import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
 import webService.services.cscl.result.QueryResultAllCommunities;
 import webService.services.cscl.result.QueryResultParticipants;
+import webService.services.cscl.result.QueryResultParticipantsInteraction;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -1130,60 +1131,60 @@ public class ReaderBenchServer {
             String result = queryResult.convertToJson();
             return result;
         });
-        Spark.post("/vcopD3", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/Reddit/");
-            String communityName = (String) json.get("community");
-            communityFolder.append(communityName);
-            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
-
-            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
-                    0, 7);
-            community.computeMetrics(useTextualComplexity, true, true);
-
-            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
-
-            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
-            queryResult.setParticipants(participantsCommunities);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/vcopD3Week", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/Reddit/");
-            String communityName = (String) json.get("community");
-            Integer weekNumber = Integer.valueOf((String) json.get("week"));
-
-            JSONArray participantsCommunities = new JSONArray();
-            JSONParser parser = new JSONParser();
-            try {
-                String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
-                LOGGER.log(Level.INFO, "Get participants for week {0} from file {1}", new Object[]{weekNumber, fileName});
-                Object obj = parser.parse(new FileReader(fileName));
-                JSONObject participantSubCommunity = (JSONObject) obj;
-                JSONObject subCommunityJson = new JSONObject();
-                subCommunityJson.put("week", weekNumber);
-                subCommunityJson.put("participants", participantSubCommunity);
-                participantsCommunities.add(subCommunityJson);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
-            queryResult.setParticipants(participantsCommunities);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
+//        Spark.post("/vcopD3", (request, response) -> {
+//            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+//
+//            response.type("application/json");
+//
+//            StringBuilder communityFolder = new StringBuilder();
+//            communityFolder.append("resources/in/Reddit/");
+//            String communityName = (String) json.get("community");
+//            communityFolder.append(communityName);
+//            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+//
+//            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
+//                    0, 7);
+//            community.computeMetrics(useTextualComplexity, true, true);
+//
+//            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
+//
+//            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+//            queryResult.setParticipants(participantsCommunities);
+//            response.type("application/json");
+//            return queryResult.convertToJson();
+//        });
+//        Spark.post("/vcopD3Week", (request, response) -> {
+//            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+//
+//            response.type("application/json");
+//
+//            StringBuilder communityFolder = new StringBuilder();
+//            communityFolder.append("resources/in/Reddit/");
+//            String communityName = (String) json.get("community");
+//            Integer weekNumber = Integer.valueOf((String) json.get("week"));
+//
+//            JSONArray participantsCommunities = new JSONArray();
+//            JSONParser parser = new JSONParser();
+//            try {
+//                String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
+//                LOGGER.log(Level.INFO, "Get participants for week {0} from file {1}", new Object[]{weekNumber, fileName});
+//                Object obj = parser.parse(new FileReader(fileName));
+//                JSONObject participantSubCommunity = (JSONObject) obj;
+//                JSONObject subCommunityJson = new JSONObject();
+//                subCommunityJson.put("week", weekNumber);
+//                subCommunityJson.put("participants", participantSubCommunity);
+//                participantsCommunities.add(subCommunityJson);
+//
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+//            queryResult.setParticipants(participantsCommunities);
+//            response.type("application/json");
+//            return queryResult.convertToJson();
+//        });
         Spark.post("/sendContactEmail", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
@@ -1491,8 +1492,20 @@ public class ReaderBenchServer {
             String communityName = hm.get("communityName");
             Integer week = Integer.valueOf(hm.get("week"));
 
-            List<Map> participantsStats = elasticsearchService.searchByCommunityAndWeek(communityName, week);
+            List<Map> participantsStats = elasticsearchService.searchParticipantsByCommunityAndWeek(communityName, week);
             QueryResultParticipants queryResult = new QueryResultParticipants(participantsStats);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/interaction", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsInteractionByCommunityAndWeek(
+                    communityName);
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });

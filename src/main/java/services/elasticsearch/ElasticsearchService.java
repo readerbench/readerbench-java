@@ -9,6 +9,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.json.simple.JSONObject;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -46,7 +47,22 @@ public class ElasticsearchService {
 
     }
 
-    public ArrayList<Map> searchByCommunityAndWeek(String communityName, Integer week) {
+    public void indexParticipantInteraction(JSONObject jsonObject) {
+        try {
+
+            client = new PreBuiltTransportClient(Settings.EMPTY)
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+
+            IndexResponse response = client.prepareIndex("interaction", "d3")
+                    .setSource(jsonObject).execute().get();
+
+            //client.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Map> searchParticipantsByCommunityAndWeek(String communityName, Integer week) {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
@@ -72,6 +88,30 @@ public class ElasticsearchService {
         return result;
     }
 
+    public ArrayList<Map> searchParticipantsInteractionByCommunityAndWeek(String communityName) {
+        ArrayList<Map> result = new ArrayList<Map>();
+        try {
+            client = new PreBuiltTransportClient(Settings.EMPTY)
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+
+            SearchResponse response = client.prepareSearch("interaction")
+                    .setTypes("d3")
+                    .setSize(1000)
+                    .setQuery(QueryBuilders.matchPhraseQuery("communityName", communityName))
+                    .execute()
+                    .actionGet();
+            SearchHit[] searchHits = response.getHits().getHits();
+            for (SearchHit searchHit : searchHits) {
+                Map data = searchHit.getSource();
+                result.add(data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public static void main(String[] args) {
         Map<String, Object> test = new HashMap<>();
         test.put("name", "dorinela");
@@ -82,7 +122,7 @@ public class ElasticsearchService {
 
         ElasticsearchService elasticsearchService = new ElasticsearchService();
         //elasticsearchService.indexParticipantsStats(list);
-        System.out.println(elasticsearchService.searchByCommunityAndWeek("CallOfDuty", 1).size());
+        System.out.println(elasticsearchService.searchParticipantsByCommunityAndWeek("CallOfDuty", 1).size());
 
     }
 }
