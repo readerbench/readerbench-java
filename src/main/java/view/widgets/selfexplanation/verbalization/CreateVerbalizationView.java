@@ -15,8 +15,8 @@
  */
 package view.widgets.selfexplanation.verbalization;
 
+import data.AbstractDocumentTemplate;
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -52,17 +52,16 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-
-
-
 import utils.localization.LocalizationUtils;
 import data.Block;
 import data.document.Document;
 import data.document.Metacognition;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import view.widgets.ReaderBenchView;
 
 public class CreateVerbalizationView extends JFrame {
 
@@ -87,6 +86,7 @@ public class CreateVerbalizationView extends JFrame {
     private JSplitPane[] splitPane;
     private JScrollPane[] scrollPaneDocument;
     private JTextArea[] txtrDocument;
+    private int[] verbalizationBreakpoints;
     private JScrollPane[] scrollPaneVerbalization;
     private JTextArea[] txtrVerbalization;
     private JMenuItem mntmOpenDocument;
@@ -114,9 +114,9 @@ public class CreateVerbalizationView extends JFrame {
 
         mntmOpenDocument = new JMenuItem(LocalizationUtils.getTranslation("Open Document Template"));
         mntmOpenDocument.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = null;
+            JFileChooser fc;
             if (lastDirectory == null) {
-                fc = new JFileChooser(new File("in"));
+                fc = new JFileChooser(new File("resources/in"));
             } else {
                 fc = new JFileChooser(lastDirectory);
             }
@@ -127,73 +127,63 @@ public class CreateVerbalizationView extends JFrame {
                     }
                     return f.getName().endsWith(".xml");
                 }
-                
+
                 public String getDescription() {
                     return "XML files (*.xml)";
                 }
             });
             int returnVal = fc.showOpenDialog(CreateVerbalizationView.this);
-            
+
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
-                loadedDocument = Document.load(file, new ArrayList<>(), null, false);
+                loadedDocument = Document.load(file, new ArrayList<>(), ReaderBenchView.RUNTIME_LANGUAGE, false);
                 if (loadedDocument != null) {
                     mntmOpenDocument.setEnabled(false);
                     mntmOpenVerbalization.setEnabled(true);
                     mntmNewVerbalization.setEnabled(true);
                     mntmSaveVerbalization.setEnabled(true);
-                    noVerbalizations = loadedDocument
-                            .getNoVerbalizationBreakPoints();
-                    
+                    noVerbalizations = loadedDocument.getNoVerbalizationBreakPoints();
+
                     splitPane = new JSplitPane[noVerbalizations];
                     scrollPaneDocument = new JScrollPane[noVerbalizations];
                     txtrDocument = new JTextArea[noVerbalizations];
                     scrollPaneVerbalization = new JScrollPane[noVerbalizations];
                     txtrVerbalization = new JTextArea[noVerbalizations];
-                    
+
                     if (noVerbalizations > 0) {
                         buttonNext.setEnabled(true);
+                        verbalizationBreakpoints = new int[noVerbalizations];
                     }
-                    
-                    updateContent2();
-                    
+
                     for (int i = 0; i < noVerbalizations; i++) {
                         splitPane[i] = new JSplitPane();
-                        splitPane[i]
-                                .setOrientation(JSplitPane.VERTICAL_SPLIT);
+                        splitPane[i].setOrientation(JSplitPane.VERTICAL_SPLIT);
                         splitPane[i].setDividerLocation(200);
                         splitPane[i].setDividerSize(5);
-                        tabbedPane.addTab((i + 1) + "", null, splitPane[i],
-                                null);
-                        
+                        tabbedPane.addTab((i + 1) + "", null, splitPane[i], null);
+
                         scrollPaneDocument[i] = new JScrollPane();
-                        splitPane[i]
-                                .setLeftComponent(scrollPaneDocument[i]);
-                        
-                        scrollPaneDocument[i]
-                                .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        splitPane[i].setLeftComponent(scrollPaneDocument[i]);
+
+                        scrollPaneDocument[i].setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
                         txtrDocument[i] = new JTextArea();
                         txtrDocument[i].setBackground(Color.LIGHT_GRAY);
                         txtrDocument[i].setEditable(false);
                         txtrDocument[i].setWrapStyleWord(true);
                         txtrDocument[i].setLineWrap(true);
-                        scrollPaneDocument[i]
-                                .setViewportView(txtrDocument[i]);
-                        
+                        scrollPaneDocument[i].setViewportView(txtrDocument[i]);
+
                         scrollPaneVerbalization[i] = new JScrollPane();
-                        splitPane[i]
-                                .setRightComponent(scrollPaneVerbalization[i]);
-                        
-                        scrollPaneVerbalization[i]
-                                .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                        splitPane[i].setRightComponent(scrollPaneVerbalization[i]);
+
+                        scrollPaneVerbalization[i].setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
                         txtrVerbalization[i] = new JTextArea();
                         txtrVerbalization[i].setWrapStyleWord(true);
                         txtrVerbalization[i].setLineWrap(true);
-                        scrollPaneVerbalization[i]
-                                .setViewportView(txtrVerbalization[i]);
+                        scrollPaneVerbalization[i].setViewportView(txtrVerbalization[i]);
                     }
-                    
+
                     // update text
                     String text = "";
                     int i = 0;
@@ -202,6 +192,7 @@ public class CreateVerbalizationView extends JFrame {
                             text += b.getText() + " ";
                             if (b.isFollowedByVerbalization()) {
                                 txtrDocument[i].setText(text);
+                                verbalizationBreakpoints[i] = b.getIndex();
                                 i++;
                                 text = "";
                             }
@@ -213,21 +204,18 @@ public class CreateVerbalizationView extends JFrame {
         mnFile.add(mntmOpenDocument);
 
         mntmNewVerbalization = new JMenuItem(LocalizationUtils.getTranslation("New Verbalization"), KeyEvent.VK_N);
-        mntmNewVerbalization
-                .setAccelerator(KeyStroke.getKeyStroke("control N"));
+        mntmNewVerbalization.setAccelerator(KeyStroke.getKeyStroke("control N"));
         mntmNewVerbalization.setEnabled(false);
         mnFile.add(mntmNewVerbalization);
 
-        mntmOpenVerbalization = new JMenuItem(LocalizationUtils.getTranslation("Open Verbalization"),
-                KeyEvent.VK_O);
-        mntmOpenVerbalization.setAccelerator(KeyStroke
-                .getKeyStroke("control O"));
+        mntmOpenVerbalization = new JMenuItem(LocalizationUtils.getTranslation("Open Verbalization"), KeyEvent.VK_O);
+        mntmOpenVerbalization.setAccelerator(KeyStroke.getKeyStroke("control O"));
         mntmOpenVerbalization.setEnabled(false);
         mntmOpenVerbalization.addActionListener((ActionEvent e) -> {
             if (loadedDocument != null) {
                 JFileChooser fc = null;
                 if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("in"));
+                    fc = new JFileChooser(new File("resources/in"));
                 } else {
                     fc = new JFileChooser(lastDirectory);
                 }
@@ -255,20 +243,15 @@ public class CreateVerbalizationView extends JFrame {
 
                     updateContent();
 
-                    if (txtrVerbalization.length != loadedVerbalization
-                            .getBlocks().size()) {
-                        JOptionPane
-                                .showMessageDialog(
-                                        CreateVerbalizationView.this,
-                                        "Incorrect verbalization in terms of the number of contained meta-cognitions!",
-                                        "Information",
-                                        JOptionPane.INFORMATION_MESSAGE);
+                    if (txtrVerbalization.length != loadedVerbalization.getBlocks().size()) {
+                        JOptionPane.showMessageDialog(
+                                CreateVerbalizationView.this,
+                                "Incorrect verbalization in terms of the number of contained meta-cognitions!",
+                                "Information",
+                                JOptionPane.INFORMATION_MESSAGE);
                     } else {
-                        for (int i = 0; i < loadedVerbalization.getBlocks()
-                                .size(); i++) {
-                            txtrVerbalization[i]
-                                    .setText(loadedVerbalization
-                                            .getBlocks().get(i).getText());
+                        for (int i = 0; i < loadedVerbalization.getBlocks().size(); i++) {
+                            txtrVerbalization[i].setText(loadedVerbalization.getBlocks().get(i).getText());
                         }
                     }
                 }
@@ -284,23 +267,55 @@ public class CreateVerbalizationView extends JFrame {
 
         mnFile.add(mntmOpenVerbalization);
 
-        mntmSaveVerbalization = new JMenuItem(LocalizationUtils.getTranslation("Save Verbalization"),
-                KeyEvent.VK_S);
+        mntmSaveVerbalization = new JMenuItem(LocalizationUtils.getTranslation("Save Verbalization"), KeyEvent.VK_S);
         mntmSaveVerbalization.setEnabled(false);
-        mntmSaveVerbalization.setAccelerator(KeyStroke
-                .getKeyStroke("control S"));
+        mntmSaveVerbalization.setAccelerator(KeyStroke.getKeyStroke("control S"));
         mntmSaveVerbalization.addActionListener((ActionEvent e) -> {
-            String verbalizationPath = loadedDocument.getPath().replace(".xml", "_verbalization.xml");
-            Metacognition verbalization = new Metacognition(null, null, null, true);
-            int noVerbalizations = txtrVerbalization.length;
-            List<Block> verbalizationBlocks = new ArrayList<>(noVerbalizations);
-            for (int i = 0; i < noVerbalizations; i++) {
-                Block block = new Block(null, 0, null, new ArrayList<>(), null);
-                block.setText(txtrVerbalization[i].getText());
-                verbalizationBlocks.add(block);
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("resources/in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
             }
-            verbalization.setBlocks(verbalizationBlocks);
-            verbalization.exportXML(verbalizationPath);
+            fc.setFileFilter(new FileFilter() {
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml");
+                }
+
+                public String getDescription() {
+                    return "XML files (*.xml)";
+                }
+            });
+
+            int returnVal = fc.showSaveDialog(CreateVerbalizationView.this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                String path;
+                if (!file.getName().endsWith(".xml")) {
+                    // add xml extension
+                    path = file.getPath() + ".xml";
+                } else {
+                    path = file.getPath();
+                }
+                AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+
+                List<Block> verbalizationBlocks = new ArrayList<>(noVerbalizations);
+                for (int i = 0; i < noVerbalizations; i++) {
+                    AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
+                    block.setId(i);
+                    block.setRefId(verbalizationBreakpoints[i]);
+                    block.setContent(txtrVerbalization[i].getText());
+                    contents.getBlocks().add(block);
+                }
+                Metacognition verbalization = new Metacognition(path, contents, loadedDocument, false);
+
+                verbalization.setDate(new Date());
+                verbalization.exportXML(path);
+            }
+
         });
 
         mnFile.add(mntmSaveVerbalization);
@@ -316,7 +331,7 @@ public class CreateVerbalizationView extends JFrame {
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
         JLabel lblAuthor = new JLabel(LocalizationUtils.getTranslation("Author") + ":");
         lblAuthor.setFont(new Font("Lucida Grande", Font.BOLD, 13));
@@ -362,7 +377,6 @@ public class CreateVerbalizationView extends JFrame {
 
         txtClassroomLevel = new JTextField();
         txtClassroomLevel.setHorizontalAlignment(SwingConstants.CENTER);
-        txtClassroomLevel.setText("CM2\n");
         txtClassroomLevel.setColumns(10);
 
         lblClassroomLevel = new JLabel(LocalizationUtils.getTranslation("Classroom level") + ":");
@@ -420,149 +434,120 @@ public class CreateVerbalizationView extends JFrame {
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane.setHorizontalGroup(
                 gl_contentPane.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_contentPane.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblVerbalization)
-                        .addGap(18)
-                        .addComponent(chckbxIsSummary)
-                        .addContainerGap(455, Short.MAX_VALUE))
-                .addGroup(gl_contentPane.createSequentialGroup()
-                        .addGap(2)
-                        .addComponent(separator, GroupLayout.DEFAULT_SIZE, 670, Short.MAX_VALUE))
-                .addGroup(gl_contentPane.createSequentialGroup()
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-                                .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 670, Short.MAX_VALUE)
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblSource)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(textFieldSource, GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE))
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblDate)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(textFieldDate, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(lblUri)
-                                        .addGap(8)
-                                        .addComponent(textFieldURI, GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE))
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblTeachersComment))
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(buttonPrevious)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(buttonNext))
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblAuthor)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(textFieldAuthor, GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(lblClassroomLevel)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(txtClassroomLevel, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(ComponentPlacement.RELATED))
-                                .addGroup(gl_contentPane.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblTeachers)
-                                        .addPreferredGap(ComponentPlacement.RELATED)
-                                        .addComponent(textFieldTeachers, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)))
-                        .addGap(2))
+                        .addGroup(gl_contentPane.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblVerbalization)
+                                .addGap(18)
+                                .addComponent(chckbxIsSummary)
+                                .addContainerGap(455, Short.MAX_VALUE))
+                        .addGroup(gl_contentPane.createSequentialGroup()
+                                .addGap(2)
+                                .addComponent(separator, GroupLayout.DEFAULT_SIZE, 670, Short.MAX_VALUE))
+                        .addGroup(gl_contentPane.createSequentialGroup()
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 670, Short.MAX_VALUE)
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lblSource)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(textFieldSource, GroupLayout.DEFAULT_SIZE, 609, Short.MAX_VALUE))
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lblDate)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(textFieldDate, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblUri)
+                                                .addGap(8)
+                                                .addComponent(textFieldURI, GroupLayout.DEFAULT_SIZE, 493, Short.MAX_VALUE))
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lblTeachersComment))
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(buttonPrevious)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(buttonNext))
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lblAuthor)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(textFieldAuthor, GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(lblClassroomLevel)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(txtClassroomLevel, GroupLayout.PREFERRED_SIZE, 60, GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(ComponentPlacement.RELATED))
+                                        .addGroup(gl_contentPane.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(lblTeachers)
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(textFieldTeachers, GroupLayout.DEFAULT_SIZE, 586, Short.MAX_VALUE)))
+                                .addGap(2))
         );
         gl_contentPane.setVerticalGroup(
                 gl_contentPane.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_contentPane.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
-                                .addComponent(lblAuthor)
+                        .addGroup(gl_contentPane.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(lblAuthor)
+                                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(textFieldAuthor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(lblClassroomLevel)
+                                                .addComponent(txtClassroomLevel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(textFieldAuthor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(lblClassroomLevel)
-                                        .addComponent(txtClassroomLevel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(lblTeachers)
-                                .addComponent(textFieldTeachers, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(lblTeachersComment)
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(textFieldURI, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(lblDate)
-                                .addComponent(textFieldDate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(lblUri))
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(lblSource)
-                                .addComponent(textFieldSource, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(ComponentPlacement.UNRELATED)
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(lblVerbalization)
-                                .addComponent(chckbxIsSummary))
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(separator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
-                                .addComponent(buttonPrevious)
-                                .addComponent(buttonNext))
-                        .addGap(4))
+                                        .addComponent(lblTeachers)
+                                        .addComponent(textFieldTeachers, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(lblTeachersComment)
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(textFieldURI, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblDate)
+                                        .addComponent(textFieldDate, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblUri))
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblSource)
+                                        .addComponent(textFieldSource, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblVerbalization)
+                                        .addComponent(chckbxIsSummary))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(separator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(buttonPrevious)
+                                        .addComponent(buttonNext))
+                                .addGap(4))
         );
 
         contentPane.setLayout(gl_contentPane);
     }
 
-    private void updateContent2() {
-        if (loadedDocument.getAuthors().size() > 0) {
-            textFieldAuthor
-                    .setText(loadedDocument.getAuthors().get(0));
-        }
-
-        DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-        textFieldDate.setText(df.format(loadedDocument.getDate()));
-        textFieldURI.setText(loadedDocument.getURI());
-        textFieldSource.setText(loadedDocument.getSource());
-    }
-
     private void updateContent() {
-
         if (loadedVerbalization != null
                 && loadedVerbalization.getReferredDoc() != null) {
             if (loadedVerbalization.getAuthors().size() > 0) {
-                textFieldAuthor
-                        .setText(loadedVerbalization.getAuthors().get(0));
+                textFieldAuthor.setText(loadedVerbalization.getAuthors().get(0));
             }
-            String teachers = "";
+            String tutors = "";
 
-            for (String teacher : loadedVerbalization.getTutors()) {
-                teachers += teacher + ", ";
+            for (String tutor : loadedVerbalization.getTutors()) {
+                tutors += tutor + ", ";
             }
-            textFieldTeachers.setText(teachers.length() > 2 ? teachers
-                    .substring(0, teachers.length() - 2) : "");
+            textFieldTeachers.setText(tutors.length() > 2 ? tutors.substring(0, tutors.length() - 2) : "");
 
             DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-            textFieldDate.setText(df.format(loadedVerbalization.getDate()));
+            if (loadedVerbalization.getDate() != null) {
+                textFieldDate.setText(df.format(loadedVerbalization.getDate()));
+            }
             textFieldURI.setText(loadedVerbalization.getURI());
             textFieldSource.setText(loadedVerbalization.getSource());
-        }
-    }
-
-    private static void adjustToSystemGraphics() {
-        for (UIManager.LookAndFeelInfo info : UIManager
-                .getInstalledLookAndFeels()) {
-            if ("Nimbus".equals(info.getName())) {
-                try {
-                    UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException | 
-                        InstantiationException | 
-                        IllegalAccessException | 
-                        UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }
