@@ -38,8 +38,9 @@ import org.openide.util.Exceptions;
 import services.converters.Txt2XmlConverter;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
+import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import static services.semanticModels.SimilarityType.LDA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 /**
@@ -209,14 +210,14 @@ public class KeywordMining {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
-        //LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
-        //models.add(lda);
+        models.add(lda);
 
         //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
         KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, false, false);
-        keywordMining.processTexts(false, "keywords_lsa_sciref.csv");
+        keywordMining.processTexts(false, "keywords_lsa_lda_tasa_local.csv");
     }
 }
