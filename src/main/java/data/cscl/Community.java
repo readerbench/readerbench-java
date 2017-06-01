@@ -881,11 +881,13 @@ public class Community extends AnalysisElement {
             }
             
             if (generateParticipantViewD3) {
-                dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");            
+                //todo - create a method with this parameter
+                //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
             }
             
             if (generateParticipantViewSubCommunities) {
-                dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
+                //todo - create a method with this parameter
+                //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             }
             
             if (generateConceptView) {

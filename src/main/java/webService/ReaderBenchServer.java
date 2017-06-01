@@ -72,6 +72,7 @@ import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.converters.PdfToTxtConverter;
+import services.elasticsearch.ElasticsearchService;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -1160,28 +1161,28 @@ public class ReaderBenchServer {
             String result = queryResult.convertToJson();
             return result;
         });
-        Spark.post("/vcopD3", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/Reddit/");
-            String communityName = (String) json.get("community");
-            communityFolder.append(communityName);
-            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
-
-            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
-                    0, 7);
-            community.computeMetrics(useTextualComplexity, true, true);
-
-            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
-
-            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
-            queryResult.setParticipants(participantsCommunities);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
+//        Spark.post("/vcopD3", (request, response) -> {
+//            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+//
+//            response.type("application/json");
+//
+//            StringBuilder communityFolder = new StringBuilder();
+//            communityFolder.append("resources/in/Reddit/");
+//            String communityName = (String) json.get("community");
+//            communityFolder.append(communityName);
+//            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+//
+//            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
+//                    0, 7);
+//            community.computeMetrics(useTextualComplexity, true, true);
+//
+//            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
+//
+//            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+//            queryResult.setParticipants(participantsCommunities);
+//            response.type("application/json");
+//            return queryResult.convertToJson();
+//        });
         Spark.post("/vcopD3Week", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
