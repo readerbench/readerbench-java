@@ -74,12 +74,10 @@ public class CohesionGraph {
                 .forEach(i -> {
                     Block b = d.getBlocks().get(i);
                     if (b.getRefBlock() != null) {
-                        if (inverseIndex.get(b.getRefBlock()) != null) {
-                            int j = inverseIndex.get(b.getRefBlock());
-                            SemanticCohesion coh = new SemanticCohesion(b.getRefBlock(), b);
-                            d.getBlockDistances()[j][i] = coh;
-                            d.getBlockDistances()[i][j] = coh;
-                        }
+                        int j = inverseIndex.get(b.getRefBlock());
+                        SemanticCohesion coh = new SemanticCohesion(b.getRefBlock(), b);
+                        d.getBlockDistances()[j][i] = coh;
+                        d.getBlockDistances()[i][j] = coh;
                     }
                     int last = Math.min(d.getBlocks().size(), i + SemanticCohesion.WINDOW_SIZE + 1);
                     for (int j = i + 1; j < last; j++) {

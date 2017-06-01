@@ -149,12 +149,14 @@ public class Metacognition extends Document {
                 if (getBlocks().get(i) != null) {
                     Element pEl = dom.createElement("verbalization");
                     pEl.setAttribute("id", i + "");
-                    pEl.setAttribute("after_p", getBlocks().get(i).getRefBlock().getIndex() + "");
-                    pEl.setAttribute("no_metacognition", getAnnotatedRS().get(i).get(ReadingStrategyType.META_COGNITION) + "");
-                    pEl.setAttribute("no_causality", getAnnotatedRS().get(i).get(ReadingStrategyType.CAUSALITY) + "");
-                    pEl.setAttribute("no_paraphrase", getAnnotatedRS().get(i).get(ReadingStrategyType.PARAPHRASE) + "");
-                    pEl.setAttribute("no_inferred", getAnnotatedRS().get(i).get(ReadingStrategyType.INFERRED_KNOWLEDGE) + "");
-                    pEl.setAttribute("no_bridging", getAnnotatedRS().get(i).get(ReadingStrategyType.BRIDGING) + "");
+                    //pEl.setAttribute("after_p", getBlocks().get(i).getRefBlock().getIndex() + "");
+                    if (!getAnnotatedRS().isEmpty() && i < getAnnotatedRS().size()) {
+                        pEl.setAttribute("no_metacognition", getAnnotatedRS().get(i).get(ReadingStrategyType.META_COGNITION) + "");
+                        pEl.setAttribute("no_causality", getAnnotatedRS().get(i).get(ReadingStrategyType.CAUSALITY) + "");
+                        pEl.setAttribute("no_paraphrase", getAnnotatedRS().get(i).get(ReadingStrategyType.PARAPHRASE) + "");
+                        pEl.setAttribute("no_inferred", getAnnotatedRS().get(i).get(ReadingStrategyType.INFERRED_KNOWLEDGE) + "");
+                        pEl.setAttribute("no_bridging", getAnnotatedRS().get(i).get(ReadingStrategyType.BRIDGING) + "");
+                    }
 
                     pEl.setTextContent(getBlocks().get(i).getText());
                     bodyEl.appendChild(pEl);
@@ -238,13 +240,22 @@ public class Metacognition extends Document {
                 if (el.hasAttribute("id")) {
                     try {
                         block.setId(Integer.parseInt(el.getAttribute("id")));
-                    } catch (Exception e) {
+                    } catch (NumberFormatException e) {
                         block.setId(i);
                     }
                 } else {
                     block.setId(i);
                 }
-                block.setRefId(0);
+                if (el.hasAttribute("after_p")) {
+                    try {
+                        block.setRefId(Integer.parseInt(el.getAttribute("after_p")));
+                    } catch (NumberFormatException e) {
+                        block.setRefId(0);
+                    }
+                } else {
+                    block.setRefId(0);
+                }
+
 //                block.setContent(TextPreprocessing.doubleCleanVerbalization(el.getFirstChild().getNodeValue()));
                 block.setContent(el.getFirstChild().getNodeValue());
                 tmp.getBlocks().add(block);
@@ -283,7 +294,7 @@ public class Metacognition extends Document {
                 if (((Element) nl.item(i)).getFirstChild() != null) {
                     meta.getTutors().add(
                             ((Element) nl.item(i)).getFirstChild()
-                            .getNodeValue());
+                                    .getNodeValue());
                 }
             }
         }

@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import services.commons.Formatting;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.keywords.KeywordsHelper;
@@ -43,7 +43,7 @@ public class JobQuestHelper {
     public static ResultJobQuest process(
             AbstractDocument document,
             AbstractDocument keywordsDocument,
-            PdfToTextConverter pdfConverter,
+            PdfToTxtConverter pdfConverter,
             Set<String> keywords,
             Set<String> ignoreWords,
             Lang lang,
@@ -137,16 +137,16 @@ public class JobQuestHelper {
         // textual complexity
         TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
         result.setTextualComplexity(textualComplexity.getComplexityIndices());
-        result.setImages(pdfConverter.getImages());
-        result.setColors(pdfConverter.getColors());
-        result.setPages(pdfConverter.getPages());
+        result.setImages(pdfConverter.getNoImages());
+        result.setColors(pdfConverter.getNoColors());
+        result.setPages(pdfConverter.getNoPages());
         result.setWords(document.getNoWords());
-        result.setFontTypes(pdfConverter.getFontTypes());
-        result.setFontTypesSimple(pdfConverter.getFontTypesSimple());
-        result.setFontSizes(pdfConverter.getFontSizes());
+        result.setFontTypes(pdfConverter.getNoFontTypes());
+        result.setFontTypesSimple(pdfConverter.getNoFontTypesSimple());
+        result.setFontSizes(pdfConverter.getNoFontSizes());
         result.setMinFontSize(pdfConverter.getMinFontSize());
         result.setMaxFontSize(pdfConverter.getMaxFontSize());
-        result.setTotalCharacters(pdfConverter.getTotalCharacters());
+        result.setTotalCharacters(pdfConverter.getNoTotalChars());
         result.setVeryPositiveWords(veryPositiveWords);
         result.setPositiveWords(positiveWords);
         result.setNegativeWords(negativeWords);

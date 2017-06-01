@@ -40,6 +40,7 @@ import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 /**
@@ -110,7 +111,7 @@ public class KeywordMining {
         return keywordOccurrences;
     }
 
-    public void processTexts(boolean useSerialized) {
+    public void processTexts(boolean useSerialized, String outputFileName) {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -150,8 +151,9 @@ public class KeywordMining {
                     } else {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism);
-                    d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+                    //d.computeAll(computeDialogism);
+                    //d.save(AbstractDocument.SaveType.NONE);
+                    KeywordModeling.determineKeywords(d);
                     documents.add(d);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
@@ -162,15 +164,9 @@ public class KeywordMining {
 
         //determing joint keywords
         Set<Keyword> keywords = getTopKeywords(documents, noTopKeyWords);
-        //Map<Document, Map<Word, Double>> docRelevance = new TreeMap<>();
-        //Map<Document, Map<Word, Integer>> docIndex = new TreeMap<>();
-        /*for (Document d : documents) {
-            docRelevance.put(d, getRelevance(d, keywords));
-            docIndex.put(d, getIndex(d, keywords));
-        }*/
         
-        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/keywords.csv", true))) {
-            StringBuilder csv = new StringBuilder("SEP=;\ntype;keyword;relevance\n");
+        try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/" + outputFileName, true))) {
+            StringBuilder csv = new StringBuilder("SEP=;\ntype;keyword;lemma;pos;relevance\n");
             for (Keyword keyword : keywords) {
                 if (keyword.getElement() instanceof Word) {
                     csv.append("word;").append(keyword.getWord().getText()).append(";");
@@ -183,58 +179,45 @@ public class KeywordMining {
                     }
                     csv.append(";");
                 }
-                csv.append(keyword.getRelevance()).append("\n");
+                csv.append(keyword.getWord().getLemma()).append(";");
+                if (keyword.getElement() instanceof Word) {
+                    csv.append(keyword.getWord().getPOS());
+                }
+                else {
+                    NGram nGram = (NGram) keyword.getElement();
+                    StringBuilder sb = new StringBuilder();
+                    for (Word word : nGram.getWords()) {
+                        sb.append(word.getPOS()).append("_");
+                    }
+                    String nGramLemmas = sb.toString();
+                    sb.setLength(0);
+                    csv.append(nGramLemmas.substring(0,nGramLemmas.length()-1));
+                }
+                csv.append(";").append(keyword.getRelevance());
+                outRelevance.write(csv.toString());
+                outRelevance.newLine();
+                outRelevance.flush();
+                csv.setLength(0);
             }
-            outRelevance.write(csv.toString());
             outRelevance.close();
         } catch (IOException ex) {
             LOGGER.severe("Runtime error while analyzing selected folder ...");
             Exceptions.printStackTrace(ex);
         }
-
-        /*try (BufferedWriter outRelevance = new BufferedWriter(new FileWriter(processingPath + "/relevance.csv", true));
-                BufferedWriter outIndex = new BufferedWriter(new FileWriter(processingPath + "/index.csv", true));) {
-            StringBuilder header = new StringBuilder("SEP=,\nFilename");
-            documents.stream().forEach((d) -> {
-                header.append(",").append(FilenameUtils.removeExtension(Paths.get(d.getPath()).getFileName().toString()));
-            });
-            outRelevance.write(header.toString());
-            outIndex.write(header.toString());
-
-            for (Word w : keywords) {
-                StringBuilder lineRelevance = new StringBuilder("\n" + w.getExtendedLemma());
-                StringBuilder lineIndex = new StringBuilder("\n" + w.getExtendedLemma());
-
-                for (Document d : documents) {
-                    lineRelevance.append(",");
-                    lineIndex.append(",");
-                    if (docRelevance.get(d).containsKey(w)) {
-                        lineRelevance.append(Formatting.formatNumber(docRelevance.get(d).get(w)));
-                        lineIndex.append(docIndex.get(d).get(w));
-                    }
-                }
-                outRelevance.write(lineRelevance.toString());
-                outIndex.write(lineIndex.toString());
-            }
-
-        } catch (IOException ex) {
-            LOGGER.severe("Runtime error while analyzing selected folder ...");
-            Exceptions.printStackTrace(ex);
-        }*/
     }
 
     public static void main(String[] args) {
 
         ReaderBenchServer.initializeDB();
 
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/SciRef", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/SciRef", Lang.en);
+        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
 
         //Txt2XmlConverter.parseTxtFiles("", "resources/in/SciCorefCorpus/fulltexts/all", Lang.en, "UTF-8");
-        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, true, false);
-        keywordMining.processTexts(false);
+        KeywordMining keywordMining = new KeywordMining("resources/in/SciCorefCorpus/fulltexts/all", 0, models, Lang.en, true, false, false);
+        keywordMining.processTexts(false, "keywords_lsa_lda_tasa_local.csv");
     }
 }

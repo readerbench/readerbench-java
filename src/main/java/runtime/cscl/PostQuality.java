@@ -64,7 +64,7 @@ public class PostQuality {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/" + new File(path).getName() + "-" + "measurements.csv", true))) {
             StringBuilder concat = new StringBuilder();
             concat.append("\n").append(communityName);
-            concat.append(",").append(FilenameUtils.removeExtension(new File(simplifiedConversation.getPath()).getName().replaceAll(",", "")));
+            concat.append(",").append(FilenameUtils.removeExtension(new File(originalConversation.getPath()).getName().replaceAll(",", "")));
             concat.append(",").append(originalConversation.getBlocks().size() - 1);
             concat.append(",").append(simplifiedConversation.getNoBlocks());
             concat.append(",").append(simplifiedConversation.getNoSentences());
@@ -92,8 +92,11 @@ public class PostQuality {
                 try {
                     c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                     AbstractDocument simplifiedConversation = new Document(null, c.getSemanticModels(), c.getLanguage());
-                    if (c.getBlocks().get(0) != null) {
+                    if (!c.getBlocks().isEmpty() && c.getBlocks().get(0) != null) {
                         Block.addBlock(simplifiedConversation, c.getBlocks().get(0));
+                    }
+                    else {
+                        continue;
                     }
                     simplifiedConversation.determineWordOccurences(simplifiedConversation.getBlocks());
                     simplifiedConversation.determineSemanticDimensions();
@@ -110,6 +113,6 @@ public class PostQuality {
         //initialize DB
         ReaderBenchServer.initializeDB();
 
-        PostQuality.processInitialPosts("/dragos-resources", Lang.en);
+        PostQuality.processInitialPosts("dragos-resources", Lang.en);
     }
 }

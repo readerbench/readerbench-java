@@ -492,6 +492,22 @@ public class Conversation extends AbstractDocument {
             Exceptions.printStackTrace(ex);
         }
     }
+    
+    public List<Utterance> getAllChildrenOfAnUtterance(Utterance u) {
+        List<Utterance> children = new ArrayList<>();
+        
+        for (Participant participant : this.participants) {
+            for (Block b : participant.getContributions().getBlocks()) {
+                Utterance utterance = (Utterance) b;
+                Utterance refUtterance = (Utterance) utterance.getRefBlock();
+                if (refUtterance != null && refUtterance.equals(u)) {
+                    children.add(utterance);
+                }
+            }
+        }
+        
+        return children;
+    }
 
     private static class ConversationRestructuringSupport {
 

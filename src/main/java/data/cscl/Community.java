@@ -71,7 +71,7 @@ public class Community extends AnalysisElement {
     private List<Community> timeframeSubCommunities;
     private double[][] participantContributions;
     private final Date startDate, endDate;
-    private Date fistContributionDate, lastContributionDate;
+    private Date firstContributionDate, lastContributionDate;
 
     public Community(String path, Lang lang, boolean needsAnonymization, Date startDate, Date endDate) {
         super(null, 0, null, null, lang);
@@ -133,32 +133,27 @@ public class Community extends AnalysisElement {
                         // select contributions in imposed timeframe
                         if (u != null && u.getTime() !=  null && u.isEligible(startDate, endDate)) {
                             // determine first timestamp of considered contributions
-                            if (fistContributionDate == null && u.getTime() != null) {
-                                fistContributionDate = u.getTime();
+                            if (firstContributionDate == null) {
+                                firstContributionDate = u.getTime();
                                 LOGGER.log(Level.SEVERE, "Please check first contribution");
                             }
-                            if (u.getTime() != null) {
-                                if (u.getTime().before(fistContributionDate)) {
-                                    fistContributionDate = u.getTime();
-                                }
-                                Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
-                                LOGGER.log(Level.INFO, "Utterance time: " + u.getTime());
-                                LOGGER.log(Level.INFO, "Date time: " + date.getTime());
-                                if (u.getTime().before(date.getTime())) {
-                                    LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
-                                }
-                                if (u.getTime().after(new Date())) {
-                                    LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
-                                }
-
-                                if (lastContributionDate == null) {
-                                    lastContributionDate = u.getTime();
-                                }
-                                if (u.getTime().after(lastContributionDate)) {
-                                    lastContributionDate = u.getTime();
-                                }
+                            if (u.getTime().before(firstContributionDate)) {
+                                firstContributionDate = u.getTime();
+                            }
+                            Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
+                            if (u.getTime().before(date.getTime())) {
+                                LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
+                            }
+                            if (u.getTime().after(new Date())) {
+                                LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
                             }
 
+                            if (lastContributionDate == null) {
+                                lastContributionDate = u.getTime();
+                            }
+                            if (u.getTime().after(lastContributionDate)) {
+                                lastContributionDate = u.getTime();
+                            }
                             b.setIndex(-1);
                             Block.addBlock(participantToUpdate.getContributions(), b);
                             if (b.isSignificant()) {
@@ -199,8 +194,7 @@ public class Community extends AnalysisElement {
                     Participant p1 = u.getParticipant();
                     int index1 = participants.indexOf(p1);
                     if (index1 >= 0) {
-                        // participantContributions[index1][index1] += d
-                        // .getBlocks().get(i).getCombinedScore();
+                        participantContributions[index1][index1] += u.getScore();
                         Participant participantToUpdate = participants.get(index1);
                         participantToUpdate.getIndices().put(CSCLIndices.SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
@@ -384,6 +378,10 @@ public class Community extends AnalysisElement {
         community.updateParticipantContributions();
         // create corresponding sub-communities
         Calendar cal = Calendar.getInstance();
+        if (community.getFistContributionDate() == null) {
+            LOGGER.severe("first contribution date not existing");
+            return null;
+        }
         Date startSubCommunities = community.getFistContributionDate();
         cal.setTime(startSubCommunities);
         cal.add(Calendar.MONTH, monthIncrement);
@@ -866,22 +864,40 @@ public class Community extends AnalysisElement {
     }
 
 
-    public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
+   public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, 
+            boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
+            boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
         if (dc != null) {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
-            dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
-            //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-            //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
-            dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
+            
+            if (exportIntoCsv) {
+                dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
+            }
+            
+            if (generateParticipantView) {
+                dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            }
+            
+            if (generateParticipantViewD3) {
+                dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");            
+            }
+            
+            if (generateParticipantViewSubCommunities) {
+                dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
+            }
+            
+            if (generateConceptView) {
+                dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
+            }
         }
     }
 
     public static void processAllFolders(String folder, Lang lang, String prefix, boolean needsAnonymization,
             boolean restartProcessing, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-            boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
+            boolean useTextualComplexity, boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
+            boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
@@ -898,6 +914,7 @@ public class Community extends AnalysisElement {
                     SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
+                            exportIntoCsv, generateParticipantView, generateParticipantViewD3, generateParticipantViewSubCommunities, generateConceptView,
                             startDate, endDate, monthIncrement, dayIncrement);
                 }
             }
@@ -940,11 +957,11 @@ public class Community extends AnalysisElement {
     }
 
     public Date getFistContributionDate() {
-        return fistContributionDate;
+        return firstContributionDate;
     }
 
     public void setFistContributionDate(Date fistContributionDate) {
-        this.fistContributionDate = fistContributionDate;
+        this.firstContributionDate = fistContributionDate;
     }
 
     public Date getLastContributionDate() {

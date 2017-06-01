@@ -436,7 +436,21 @@ public abstract class AbstractDocument extends AnalysisElement {
             out.write("\nTopics - Relevance\n");
             out.write("Keyword, Relevance,Tf,Average semantic similarity\n");
             for (Keyword t : this.getTopics()) {
-                out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
+                out.write(t.getWord().getLemma() + " (");
+                if (t.getElement() instanceof Word) {
+                    out.write(t.getWord().getPOS());
+                }
+                else {
+                    NGram nGram = (NGram) t.getElement();
+                    StringBuilder sb = new StringBuilder();
+                    for (Word word : nGram.getWords()) {
+                        sb.append(word.getPOS()).append("_");
+                    }
+                    String nGramLemmas = sb.toString();
+                    sb.setLength(0);
+                    out.write(nGramLemmas.substring(0,nGramLemmas.length()-1));
+                }
+                out.write ("),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
@@ -557,7 +571,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
 
             // print semantic chains
-            if (voices.size() > 0) {
+            if (voices != null && voices.size() > 0) {
                 out.write("\nVoices - Semantic chains\n");
                 for (SemanticChain voice : voices) {
                     out.write(voice.toStringAllWords() + "\n");

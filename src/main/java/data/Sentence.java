@@ -109,6 +109,9 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     
     @Override
     public List<NGram> getBiGrams() {
+        if (dependencies == null) {
+            return new ArrayList<>();
+        }
         return StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
                 .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
                 .filter(pair -> pair.first != null && pair.second != null)

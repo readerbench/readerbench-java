@@ -38,7 +38,7 @@ public class CSCLCommunityTest {
 //        String path = "resources/in/MOOC/forum_posts&comments";
         String path = "resources/in/1 year/";
         SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
-        Community.processDocumentCollection(path, Lang.en, false, false, null, null, 0, 7);
+        Community.processDocumentCollection(path, Lang.en, false, false, true, false, false, false, false, null, null, 0, 7);
 
 
         File dir = new File(path);
