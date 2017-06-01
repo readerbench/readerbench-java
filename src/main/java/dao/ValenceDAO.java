@@ -29,15 +29,19 @@ public class ValenceDAO extends AbstractDAO<SentimentValence> {
 
     private static ValenceDAO instance = null;
 
+    private static final Object lock = new Object();
+
     private ValenceDAO() {
 
     }
 
     public static ValenceDAO getInstance() {
-        if (instance == null) {
-            instance = new ValenceDAO();
+        synchronized (lock) {
+            if (instance == null) {
+                instance = new ValenceDAO();
+            }
+            return instance;
         }
-        return instance;
     }
 
     public List<SentimentValence> findByRage(boolean rage) {
