@@ -131,29 +131,34 @@ public class Community extends AnalysisElement {
                     for (Block b : p.getContributions().getBlocks()) {
                         Utterance u = (Utterance) b;
                         // select contributions in imposed timeframe
-                        if (u != null && u.isEligible(startDate, endDate)) {
+                        if (u != null && u.getTime() !=  null && u.isEligible(startDate, endDate)) {
                             // determine first timestamp of considered contributions
-                            if (fistContributionDate == null) {
+                            if (fistContributionDate == null && u.getTime() != null) {
                                 fistContributionDate = u.getTime();
                                 LOGGER.log(Level.SEVERE, "Please check first contribution");
                             }
-                            if (u.getTime().before(fistContributionDate)) {
-                                fistContributionDate = u.getTime();
-                            }
-                            Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
-                            if (u.getTime().before(date.getTime())) {
-                                LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
-                            }
-                            if (u.getTime().after(new Date())) {
-                                LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
+                            if (u.getTime() != null) {
+                                if (u.getTime().before(fistContributionDate)) {
+                                    fistContributionDate = u.getTime();
+                                }
+                                Calendar date = new GregorianCalendar(2010, Calendar.JANUARY, 1);
+                                LOGGER.log(Level.INFO, "Utterance time: " + u.getTime());
+                                LOGGER.log(Level.INFO, "Date time: " + date.getTime());
+                                if (u.getTime().before(date.getTime())) {
+                                    LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
+                                }
+                                if (u.getTime().after(new Date())) {
+                                    LOGGER.log(Level.SEVERE, "Incorrect time! {0} / {1} : {2}", new Object[]{c.getPath(), u.getIndex(), u.getTime()});
+                                }
+
+                                if (lastContributionDate == null) {
+                                    lastContributionDate = u.getTime();
+                                }
+                                if (u.getTime().after(lastContributionDate)) {
+                                    lastContributionDate = u.getTime();
+                                }
                             }
 
-                            if (lastContributionDate == null) {
-                                lastContributionDate = u.getTime();
-                            }
-                            if (u.getTime().after(lastContributionDate)) {
-                                lastContributionDate = u.getTime();
-                            }
                             b.setIndex(-1);
                             Block.addBlock(participantToUpdate.getContributions(), b);
                             if (b.isSignificant()) {
@@ -190,7 +195,7 @@ public class Community extends AnalysisElement {
             for (int i = 0; i < d.getBlocks().size(); i++) {
                 Utterance u = (Utterance) d.getBlocks().get(i);
                 // select contributions in imposed timeframe
-                if (u != null && u.isEligible(startDate, endDate)) {
+                if (u != null && u.getTime() != null && u.isEligible(startDate, endDate)) {
                     Participant p1 = u.getParticipant();
                     int index1 = participants.indexOf(p1);
                     if (index1 >= 0) {
@@ -455,13 +460,15 @@ public class Community extends AnalysisElement {
     /**
      * Generate participants view for communities
      *
-     * @param path - location where .json files will be saved
+     * @param communityName
+     * @param week
+     * @return
      */
-    public JSONArray generateParticipantViewSubCommunities(String path) {
+    public JSONArray generateParticipantViewSubCommunities(String communityName, Integer week) {
         int i = 1;
         JSONArray participantsSubCommunities = new JSONArray();
         for (Community subCommunity : timeframeSubCommunities) {
-            JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(path + i + ".json");
+            JSONObject participantSubCommunity = subCommunity.generateParticipantViewD3(communityName, week);
 
             JSONObject subCommunityJson = new JSONObject();
             subCommunityJson.put("week", i);
@@ -478,22 +485,12 @@ public class Community extends AnalysisElement {
     /**
      * Generate json file with all participants for graph representation (using
      * d3.js)
-     *
-     * @param path - the path where json file will be saved
      */
-    public JSONObject generateParticipantViewD3(String path) {
+    public JSONObject generateParticipantViewD3(String communityName, Integer week) {
 
         JSONObject jsonObject = new JSONObject();
 
         JSONArray nodes = new JSONArray();
-//        for (int i = 0; i < participants.size(); i++) {
-//            JSONObject participant = new JSONObject();
-//            participant.put("name", participants.get(i).getName());
-//            participant.put("id", i);
-//            participant.put("value", participants.get(i).getContributions().getBlocks().size());
-//            nodes.add(participant);
-//        }
-
         JSONArray links = new JSONArray();
         List<String> names = new ArrayList<>();
 
@@ -531,17 +528,8 @@ public class Community extends AnalysisElement {
         jsonObject.put("nodes", nodes);
         jsonObject.put("links", links);
 
-        try {
-
-            FileWriter file = new FileWriter(path);
-            file.write(jsonObject.toJSONString());
-            file.flush();
-            file.close();
-
-        } catch (IOException e) {
-            LOGGER.severe(e.getMessage());
-            Exceptions.printStackTrace(e);
-        }
+        jsonObject.put("communityName", communityName);
+        jsonObject.put("week", week);
 
         return jsonObject;
 
@@ -846,6 +834,37 @@ public class Community extends AnalysisElement {
             Exceptions.printStackTrace(e);
         }
     }
+
+    /**
+     * Write individual stats to Elasticsearch
+     */
+    public List<Map<String, Object>> writeIndividualStatsToElasticsearch(String communityName, Integer week) {
+        LOGGER.info("Writing Individual Stats to Elasticsearch");
+        List<Map<String, Object>> participantsStats = new ArrayList<>();
+
+        // write participant statistics
+        for (int index = 0; index < participants.size(); index++) {
+            Participant p = participants.get(index);
+            Map<String, Object> participantStats = new HashMap<>();
+            for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                if (CSCLindex.isIndividualStatsIndex()) {
+                    participantStats.put(CSCLindex.getAcronym(),Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                }
+            }
+            participantStats.put("participantName", p.getName());
+            participantStats.put("participantNickname", "Member " + index);
+            participantStats.put("startDate", startDate);
+            participantStats.put("endDate", endDate);
+            participantStats.put("communityName", communityName);
+            participantStats.put("week", week);
+
+            participantsStats.add(participantStats);
+        }
+        LOGGER.info("Successfully finished writing Individual Stats in Elasticsearch ...");
+
+        return participantsStats;
+    }
+
 
     public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
