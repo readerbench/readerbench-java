@@ -48,7 +48,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
-
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -68,9 +67,12 @@ import org.openide.util.Lookup;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
+import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
@@ -205,9 +207,11 @@ public class PaperSimilarityView extends JFrame {
         try {
             tableCentrality.setAutoCreateRowSorter(true);
         } catch (Exception continuewithNoSort) {
+            Exceptions.printStackTrace(continuewithNoSort);
         }
         tableCentrality.setFillsViewportHeight(true);
         tableCentrality.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent me) {
                 JTable table = (JTable) me.getSource();
                 Point p = me.getPoint();
@@ -219,7 +223,7 @@ public class PaperSimilarityView extends JFrame {
                         String score = tableCentrality.getValueAt(row, 1).toString();
 
                         JOptionPane.showMessageDialog(PaperSimilarityView.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
-                    } catch (Exception e) {
+                    } catch (HeadlessException e) {
                         // e.printStackTrace();
                     }
                 }
@@ -272,13 +276,13 @@ public class PaperSimilarityView extends JFrame {
                                 .addContainerGap(650, Short.MAX_VALUE))
                         .addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10).addGroup(
                                 groupLayout.createParallelGroup(Alignment.LEADING).addGroup(
-                                groupLayout.createSequentialGroup().addGroup(groupLayout
-                                        .createParallelGroup(Alignment.LEADING)
-                                        .addComponent(lblComboBox).addComponent(docLevelsCombo,
-                                        GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                .addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
-                                .addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
-                                        tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671, Short.MAX_VALUE)))
+                                        groupLayout.createSequentialGroup().addGroup(groupLayout
+                                                .createParallelGroup(Alignment.LEADING)
+                                                .addComponent(lblComboBox).addComponent(docLevelsCombo,
+                                                GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                                                .addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
+                                        .addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
+                                                tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671, Short.MAX_VALUE)))
                                 .addContainerGap()));
         getContentPane().setLayout(groupLayout);
     }
@@ -323,7 +327,7 @@ public class PaperSimilarityView extends JFrame {
                     text += d.getTitleText();
                 }
                 text += "(" + new File(d.getPath()).getName() + ")";
-                text = (text.length() > 40) ? (text.substring(0, 40) + "..") : text;
+                text = (text.length() > 40) ? (text.substring(0, 40) + "...") : text;
                 if (nodes.get(d) == null) {
                     Node n = graphModel.factory().newNode(text);
                     n.setLabel(text);
@@ -345,7 +349,7 @@ public class PaperSimilarityView extends JFrame {
                 if (visibleDocs.get(d)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                     if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 1 - sim, false);
                         e.setLabel(sim + "");
                         graph.addEdge(e);
                     }
@@ -353,7 +357,7 @@ public class PaperSimilarityView extends JFrame {
             }
         }
 
-        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        logger.log(Level.INFO, "Generated graph with {0} nodes and {1} edges", new Object[]{graph.getNodeCount(), graph.getEdgeCount()});
 
         for (AbstractDocument d : docs) {
             if (visibleDocs.get(d) == true) {
@@ -384,7 +388,7 @@ public class PaperSimilarityView extends JFrame {
         while (docIt.hasNext()) {
             AbstractDocument d = docIt.next();
             if (!this.referenceDoc.equals(d)) {
-                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(this.referenceDoc, d);;
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(this.referenceDoc, d);
                 similarities.add(new CompareDocsSim(d, sim));
             }
         }
@@ -437,11 +441,11 @@ public class PaperSimilarityView extends JFrame {
         try {
             ec.exportFile(new File("out/graph_doc_centered_view.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();
-        logger.info("Finished building the graph " + this.graphDepthLevel);
+        logger.log(Level.INFO, "Finished building the graph {0}", this.graphDepthLevel);
     }
 
     @Override

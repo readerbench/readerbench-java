@@ -22,7 +22,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -68,6 +67,7 @@ import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import java.util.logging.Level;
+import org.openide.util.Exceptions;
 import services.discourse.keywordMining.KeywordModeling;
 import view.models.PreviewSketch;
 
@@ -167,10 +167,8 @@ public class ConceptView extends JFrame {
         labelTableThreshold.put(new Integer(5), new JLabel("50%"));
         labelTableThreshold.put(new Integer(0), new JLabel("0"));
         sliderThreshold.setLabelTable(labelTableThreshold);
-        sliderThreshold.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                generateGraph();
-            }
+        sliderThreshold.addChangeListener((ChangeEvent e) -> {
+            generateGraph();
         });
 
         panelGraph = new JPanel();
@@ -423,7 +421,7 @@ public class ConceptView extends JFrame {
         try {
             ec.exportFile(new File("out/graph.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();

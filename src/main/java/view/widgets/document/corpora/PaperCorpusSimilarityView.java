@@ -49,7 +49,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.DefaultTableModel;
 
-
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
 import org.gephi.appearance.api.Function;
@@ -76,7 +75,9 @@ import org.openide.util.Lookup;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
@@ -411,7 +412,7 @@ public class PaperCorpusSimilarityView extends JFrame {
                 if (visibleDocs.get(d1) && visibleDocs.get(d2)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(d1, d2);
                     if (sim >= threshold) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(d1), nodes.get(d2), 0, sim, false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(d1), nodes.get(d2), 0, 1 - sim, false);
                         e.setLabel(sim + "");
                         graph.addEdge(e);
                         similarities.add(new CompareDocsSim(d1, d2, sim));
@@ -439,7 +440,7 @@ public class PaperCorpusSimilarityView extends JFrame {
         }
         tableSimilarityModel.fireTableDataChanged();
 
-        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        logger.log(Level.INFO, "Generated graph with {0} nodes and {1} edges", new Object[]{graph.getNodeCount(), graph.getEdgeCount()});
         return outMap;
     }
 
@@ -483,7 +484,7 @@ public class PaperCorpusSimilarityView extends JFrame {
             Double centrality = (Double) n.getAttribute(betweennessColumn);
             if (centrality > maxCentrality) {
                 maxCentrality = centrality;
-                centralDocument = nodeMap.get(n.getId());
+                centralDocument = nodeMap.get(n);
             }
         }
         centralDocumentToCompare = centralDocument;
@@ -559,7 +560,7 @@ public class PaperCorpusSimilarityView extends JFrame {
         try {
             ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();
