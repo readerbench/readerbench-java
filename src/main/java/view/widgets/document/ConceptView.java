@@ -359,7 +359,7 @@ public class ConceptView extends JFrame {
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 1 - sim, false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 10 * Math.max(sim, 0.1), false);
                         e.setLabel(sim + "");
                         graph.addEdge(e);
                     }

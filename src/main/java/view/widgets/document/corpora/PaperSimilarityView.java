@@ -59,7 +59,6 @@ import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
 import org.gephi.preview.api.RenderTarget;
-import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
@@ -351,7 +350,7 @@ public class PaperSimilarityView extends JFrame {
                 if (visibleDocs.get(d)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                     if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 10 * Math.max(1 - sim, 0.1), false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 10 * Math.max(sim, 0.1), false);
                         e.setLabel(Formatting.formatNumber(sim) + "");
                         graph.addEdge(e);
                     }
