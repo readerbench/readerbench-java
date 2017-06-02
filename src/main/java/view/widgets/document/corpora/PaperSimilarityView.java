@@ -72,6 +72,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
@@ -175,7 +177,7 @@ public class PaperSimilarityView extends JFrame {
         sliderThreshold.setPaintLabels(true);
         sliderThreshold.setMinorTickSpacing(10);
         sliderThreshold.setMajorTickSpacing(50);
-        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
+        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<>();
         labelTableThreshold.put(80, new JLabel("80%"));
         labelTableThreshold.put(60, new JLabel("60%"));
         labelTableThreshold.put(40, new JLabel("40%"));
@@ -349,8 +351,8 @@ public class PaperSimilarityView extends JFrame {
                 if (visibleDocs.get(d)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                     if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 1 - sim, false);
-                        e.setLabel(sim + "");
+                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 10 * Math.max(1 - sim, 0.1), false);
+                        e.setLabel(Formatting.formatNumber(sim) + "");
                         graph.addEdge(e);
                     }
                 }
@@ -408,22 +410,29 @@ public class PaperSimilarityView extends JFrame {
         tableCentralityModel.fireTableDataChanged();
         /* end similarity to central article */
 
+        // Run YifanHuLayout for 100 passes
+        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+        layout.setGraphModel(graphModel);
+        layout.resetPropertiesValues();
+        layout.setOptimalDistance(500f);
+        layout.initAlgo();
+        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+            layout.goAlgo();
+        }
+        layout.endAlgo();
+
         // Get Centrality
         GraphDistance distance = new GraphDistance();
         distance.setDirected(false);
         distance.execute(graphModel);
 
-        logger.info("Generating preview ...");
         // Preview configuration
         PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
         PreviewModel previewModel = previewController.getModel();
         previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-                new DependantOriginalColor(Color.BLACK));
-        previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
         previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
-        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewController.refreshPreview();
 
         // New Processing target, get the PApplet
         G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
