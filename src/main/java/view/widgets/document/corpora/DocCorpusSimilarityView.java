@@ -81,9 +81,9 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
-public class PaperCorpusSimilarityView extends JFrame {
+public class DocCorpusSimilarityView extends JFrame {
 
-    static PaperCorpusSimilarityView corpusView;
+    static DocCorpusSimilarityView corpusView;
     private static final long serialVersionUID = -8582615231233815258L;
     static Logger logger = Logger.getLogger("");
     public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
@@ -170,7 +170,7 @@ public class PaperCorpusSimilarityView extends JFrame {
         }
     }
 
-    public PaperCorpusSimilarityView(List<Document> docs) {
+    public DocCorpusSimilarityView(List<Document> docs) {
         centralDocumentToCompare = null;
         corpusView = this;
         setTitle("Article Similarity View");

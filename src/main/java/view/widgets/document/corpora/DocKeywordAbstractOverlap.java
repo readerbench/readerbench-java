@@ -45,7 +45,7 @@ import data.discourse.WordOverlap;
 import data.document.Document;
 import java.util.logging.Logger;
 
-public class PaperKeywordAbstractOverlap extends JFrame {
+public class DocKeywordAbstractOverlap extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
     static Logger logger = Logger.getLogger("");
@@ -57,7 +57,7 @@ public class PaperKeywordAbstractOverlap extends JFrame {
     DefaultTableModel tableModel;
     WordOverlap wo;
 
-    public PaperKeywordAbstractOverlap(List<Document> docs) {
+    public DocKeywordAbstractOverlap(List<Document> docs) {
         wo = new WordOverlap(docs);
         this.docs = wo.computeWordOverlaps();
 

@@ -77,12 +77,12 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
-public class PaperSimilarityView extends JFrame {
+public class DocCentralityGraph extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
     static Logger logger = Logger.getLogger("");
-    public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
-
+    public static final Color CONCEPT_COLOR = new Color(204, 204, 204); // silver
+    public static final Color EDGE_COLOR = new Color(255, 255, 255);//black
     private final List<Document> docs;
     private final AbstractDocument referenceDoc;
     private JSlider sliderThreshold;
@@ -148,7 +148,7 @@ public class PaperSimilarityView extends JFrame {
         }
     }
 
-    public PaperSimilarityView(List<Document> docs, Document referenceDoc) {
+    public DocCentralityGraph(List<Document> docs, Document referenceDoc) {
         this.graphDepthLevel = 1;
         super.setTitle("Document Centrality Graph");
         super.getContentPane().setBackground(Color.WHITE);
@@ -223,7 +223,7 @@ public class PaperSimilarityView extends JFrame {
                         String doc2 = tableCentrality.getValueAt(row, 0).toString();
                         String score = tableCentrality.getValueAt(row, 1).toString();
 
-                        JOptionPane.showMessageDialog(PaperSimilarityView.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
+                        JOptionPane.showMessageDialog(DocCentralityGraph.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
                     } catch (HeadlessException e) {
                         // e.printStackTrace();
                     }
@@ -248,7 +248,7 @@ public class PaperSimilarityView extends JFrame {
             JComboBox<?> cb = (JComboBox<?>) e.getSource();
             String selectedItem = (String) cb.getSelectedItem();
             int levelSelected = Integer.parseInt(selectedItem);
-            PaperSimilarityView.this.setGraphDepthLevel(levelSelected);
+            DocCentralityGraph.this.setGraphDepthLevel(levelSelected);
             generateGraph();
         });
 
@@ -333,9 +333,9 @@ public class PaperSimilarityView extends JFrame {
                     Node n = graphModel.factory().newNode(text);
                     n.setLabel(text);
                     n.setSize(10);
-                    n.setColor(new Color(1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * currentLevel)),
-                            1.0f - ((float) (COLOR_CONCEPT.getGreen()) / (256 * currentLevel)),
-                            1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * currentLevel))));
+                    n.setColor(new Color(1.0f - ((float) (CONCEPT_COLOR.getRed()) / (256 * currentLevel)),
+                            1.0f - ((float) (CONCEPT_COLOR.getGreen()) / (256 * currentLevel)),
+                            1.0f - ((float) (CONCEPT_COLOR.getBlue()) / (256 * currentLevel))));
                     n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
                     n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
                     graph.addNode(n);
@@ -350,8 +350,9 @@ public class PaperSimilarityView extends JFrame {
                 if (visibleDocs.get(d)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                     if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, 10 * Math.max(sim, 0.1), false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, Math.max(sim, 0.1), false);
                         e.setLabel(Formatting.formatNumber(sim) + "");
+                        e.setColor(EDGE_COLOR);
                         graph.addEdge(e);
                     }
                 }
@@ -431,6 +432,8 @@ public class PaperSimilarityView extends JFrame {
         previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
         previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
         previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT, new Font("Arial", Font.PLAIN, 20));
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_LABEL_FONT, new Font("Arial", Font.PLAIN, 30));
         previewController.refreshPreview();
 
         // New Processing target, get the PApplet
