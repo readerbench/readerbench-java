@@ -34,7 +34,7 @@ public class ElasticsearchService {
         try {
 
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
             for (Map p : participantsStats) {
                 IndexResponse response = client.prepareIndex("participants", "stats")
@@ -51,7 +51,7 @@ public class ElasticsearchService {
         try {
 
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
             IndexResponse response = client.prepareIndex("interaction", "d3")
                     .setSource(jsonObject).execute().get();
@@ -66,7 +66,7 @@ public class ElasticsearchService {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
             SearchResponse response = client.prepareSearch("participants")
                     .setTypes("stats")
@@ -92,7 +92,7 @@ public class ElasticsearchService {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("192.168.100.3"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
             SearchResponse response = client.prepareSearch("interaction")
                     .setTypes("d3")

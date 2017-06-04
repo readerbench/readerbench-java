@@ -528,9 +528,52 @@ public class Community extends AnalysisElement {
 
         jsonObject.put("communityName", communityName);
         jsonObject.put("week", week);
+        jsonObject.put("startDate", this.startDate);
+        jsonObject.put("endDate", this.endDate);
 
         return jsonObject;
 
+    }
+
+    /**
+     * Create json object for hierarchical edge bundling
+     * @param communityName - community name
+     * @param week - week
+     * @return
+     */
+    public JSONObject generateHierarchicalEdgeBundling(String communityName, Integer week) {
+        JSONObject finalResult = new JSONObject();
+        JSONArray edgeBundling = new JSONArray();
+
+        try {
+            for (int row = 0; row < this.participantContributions.length; row++) {
+                JSONObject participantObject = new JSONObject();
+                participantObject.put("name", this.participants.get(row).getName());
+                participantObject.put("size", this.participants.get(row).getContributions().getBlocks().size());
+                JSONArray participantJsonArray = new JSONArray();
+
+                for (int col = 0; col < this.participantContributions[row].length; col++) {
+                    if (this.participantContributions[row][col] > 0) {
+                        participantJsonArray.add(this.participants.get(col).getName());
+                    }
+                }
+
+                participantObject.put("imports", participantJsonArray);
+
+                edgeBundling.add(participantObject);
+            }
+
+            finalResult.put("data", edgeBundling);
+            finalResult.put("communityName", communityName);
+            finalResult.put("week", week);
+            finalResult.put("startDate", this.startDate);
+            finalResult.put("endDate", this.endDate);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Cannot create json array ...");
+            throw  new RuntimeException(e);
+        }
+        return finalResult;
     }
 
     public void generateConceptView(String path) {
