@@ -528,8 +528,8 @@ public class Community extends AnalysisElement {
 
         jsonObject.put("communityName", communityName);
         jsonObject.put("week", week);
-        jsonObject.put("startDate", this.startDate);
-        jsonObject.put("endDate", this.endDate);
+        jsonObject.put("startDate", getStartDate());
+        jsonObject.put("endDate", getEndDate());
 
         return jsonObject;
 
@@ -566,8 +566,8 @@ public class Community extends AnalysisElement {
             finalResult.put("data", edgeBundling);
             finalResult.put("communityName", communityName);
             finalResult.put("week", week);
-            finalResult.put("startDate", this.startDate);
-            finalResult.put("endDate", this.endDate);
+            finalResult.put("startDate", getStartDate());
+            finalResult.put("endDate", getEndDate());
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Cannot create json array ...");

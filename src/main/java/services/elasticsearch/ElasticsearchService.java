@@ -120,6 +120,9 @@ public class ElasticsearchService {
         list.add(test);
 
         ElasticsearchService elasticsearchService = new ElasticsearchService();
+        List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                "participants", "edgeBundling", "CallOfDuty");
+        System.out.println(participantsInteraction.size());
 
     }
 }

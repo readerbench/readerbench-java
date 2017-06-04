@@ -15,6 +15,7 @@ import com.readerbench.solr.entities.cscl.Conversation;
 import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
 import data.Lang;
+import data.cscl.Community;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,8 +86,8 @@ public class CommunityActor extends UntypedActor{
 
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(1));
-            conv.add(conversations.get(2));
-            conv.add(conversations.get(3));
+            //conv.add(conversations.get(2));
+            //conv.add(conversations.get(3));
 //            conv.add(conversations.get(4));
 //            conv.add(conversations.get(5));
 //            conv.add(conversations.get(6));
@@ -170,17 +171,21 @@ public class CommunityActor extends UntypedActor{
             community.computeMetrics(useTextualComplexity, true, true);
 
             for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
-                List<Map<String, Object>> participantsStats = community.getTimeframeSubCommunities().get(i)
+                Community subCommunity = community.getTimeframeSubCommunities().get(i);
+                System.out.println(subCommunity.getStartDate());
+                System.out.println(subCommunity.getEndDate());
+
+                List<Map<String, Object>> participantsStats = subCommunity
                         .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
                 elasticsearchService.indexParticipantsStats(participantsStats);
 
                 /**
                  * index participant interaction results
                  */
-                JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
+                JSONObject participantInteraction = subCommunity.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
                 elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
 
-                JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
+                JSONObject hierarchicalEdgeBundling = subCommunity.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
                 elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
             }
 
