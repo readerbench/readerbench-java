@@ -47,13 +47,12 @@ public class ElasticsearchService {
 
     }
 
-    public void indexParticipantInteraction(JSONObject jsonObject) {
+    public void indexParticipantGraphRepresentation(String index, String type, JSONObject jsonObject) {
         try {
-
             client = new PreBuiltTransportClient(Settings.EMPTY)
                     .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
-            IndexResponse response = client.prepareIndex("interaction", "d3")
+            IndexResponse response = client.prepareIndex(index, type)
                     .setSource(jsonObject).execute().get();
 
             //client.close();
@@ -62,7 +61,7 @@ public class ElasticsearchService {
         }
     }
 
-    public ArrayList<Map> searchParticipantsByCommunityAndWeek(String communityName, Integer week) {
+    public ArrayList<Map> searchParticipantsStatsPerWeek(String communityName, Integer week) {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
@@ -88,15 +87,15 @@ public class ElasticsearchService {
         return result;
     }
 
-    public ArrayList<Map> searchParticipantsInteractionByCommunityAndWeek(String communityName) {
+    public ArrayList<Map> searchParticipantsGraphRepresentation(String index, String type, String communityName) {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
                     .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
-            SearchResponse response = client.prepareSearch("interaction")
-                    .setTypes("d3")
-                    .setSize(1000)
+            SearchResponse response = client.prepareSearch(index)
+                    .setTypes(type)
+                    .setSize(500)
                     .setQuery(QueryBuilders.matchPhraseQuery("communityName", communityName))
                     .execute()
                     .actionGet();
@@ -121,8 +120,6 @@ public class ElasticsearchService {
         list.add(test);
 
         ElasticsearchService elasticsearchService = new ElasticsearchService();
-        //elasticsearchService.indexParticipantsStats(list);
-        System.out.println(elasticsearchService.searchParticipantsByCommunityAndWeek("CallOfDuty", 1).size());
 
     }
 }

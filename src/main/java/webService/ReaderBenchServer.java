@@ -1479,19 +1479,31 @@ public class ReaderBenchServer {
             String communityName = hm.get("communityName");
             Integer week = Integer.valueOf(hm.get("week"));
 
-            List<Map> participantsStats = elasticsearchService.searchParticipantsByCommunityAndWeek(communityName, week);
+            List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
             QueryResultParticipants queryResult = new QueryResultParticipants(participantsStats);
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.post("/community/participants/interaction", (request, response) -> {
+        Spark.post("/community/participants/directedGraph", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
             String communityName = hm.get("communityName");
 
-            List<Map> participantsInteraction = elasticsearchService.searchParticipantsInteractionByCommunityAndWeek(
-                    communityName);
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "directedGraph", communityName);
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/edgeBundling", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "edgeBundling", communityName);
             QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();

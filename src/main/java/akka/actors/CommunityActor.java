@@ -85,8 +85,8 @@ public class CommunityActor extends UntypedActor{
 
             List<Conversation> conv = new ArrayList<>();
             conv.add(conversations.get(1));
-            //conv.add(conversations.get(2));
-//            conv.add(conversations.get(3));
+            conv.add(conversations.get(2));
+            conv.add(conversations.get(3));
 //            conv.add(conversations.get(4));
 //            conv.add(conversations.get(5));
 //            conv.add(conversations.get(6));
@@ -166,28 +166,28 @@ public class CommunityActor extends UntypedActor{
         community = community.loadMultipleConversations(abstractDocumentList, lang, needsAnonymization, startDate,
                 endDate, monthIncrement, dayIncrement, PATH);
 
-//        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
-//            List<Map<String, Object>> participantsStats = community.getTimeframeSubCommunities().get(i)
-//                    .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
-//            elasticsearchService.indexParticipantsStats(participantsStats);
-//
-//            /**
-//             * index participant interaction results
-//             */
-//            JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
-//            elasticsearchService.indexParticipantInteraction(participantInteraction);
-//        }
-
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
+
+            for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+                List<Map<String, Object>> participantsStats = community.getTimeframeSubCommunities().get(i)
+                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantsStats(participantsStats);
+
+                /**
+                 * index participant interaction results
+                 */
+                JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+
+                JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
+            }
 
 //            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results.csv", PATH);
 //            for (Participant p : community.getParticipants()) {
 //                System.out.println(p.getName() + " - " + p.getParticipantGroup().name());
 //            }
-
-            JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling("CallOfDuty", 1);
-            System.out.println(hierarchicalEdgeBundling.toString());
 
 //            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
 //                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
