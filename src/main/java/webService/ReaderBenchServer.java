@@ -1115,19 +1115,16 @@ public class ReaderBenchServer {
         });
         Spark.get("/file-download", (request, response) -> {
             String file = request.queryParams("file");
-            String test = request.queryParams("test");
-            
-            String path = "true".equals(test) ? "resources/test/cv-analysis/" : "tmp/";
-            
+
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
             }
-            File f = new File(path + file);
+            File f = new File("tmp/" + file);
 
             HttpServletResponse raw = response.raw();
             if (f.exists() && !f.isDirectory()) {
-                byte[] bytes = Files.readAllBytes(Paths.get(path + file));
+                byte[] bytes = Files.readAllBytes(Paths.get("tmp/" + file));
                 raw.getOutputStream().write(bytes);
             } else {
                 raw.getOutputStream().write(null);
@@ -1136,45 +1133,6 @@ public class ReaderBenchServer {
             raw.getOutputStream().close();
 
             return response.raw();
-        });
-        Spark.get("/file-download-by-path", (request, response) -> {
-            String file = request.queryParams("file");
-            String path = request.queryParams("path");
-            
-            int indexOfLastSlash = file.lastIndexOf('/');
-            if (indexOfLastSlash != -1) {
-                file = file.substring(indexOfLastSlash);
-            }
-            File f = new File(path + file);
-
-            HttpServletResponse raw = response.raw();
-            if (f.exists() && !f.isDirectory()) {
-                byte[] bytes = Files.readAllBytes(Paths.get(path + file));
-                raw.getOutputStream().write(bytes);
-            } else {
-                raw.getOutputStream().write(null);
-            }
-            raw.getOutputStream().flush();
-            raw.getOutputStream().close();
-
-            return response.raw();
-        });
-        Spark.get("/cv-test-file-names", (request, response) -> {
-            String fileList = "[";
-            String fileName ;
-            File[] testFilesFolder = new File("resources/test/cv-analysis").listFiles();
-
-            for (File file : testFilesFolder) {
-                if (file.isFile()) {
-                    fileName = "\"" + file.getName() +"\""; 
-                    fileList += fileName;
-                    fileList += ',';
-                }
-            }
-
-            fileList = fileList.substring(0, fileList.length() - 1) + "]";
-
-            return fileList;
         });
         Spark.post("/folderUpload", (request, response) -> {
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
