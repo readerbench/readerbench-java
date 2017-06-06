@@ -204,7 +204,7 @@ public class ReaderBenchServer {
         try {
             File dir = new File("resources/in/" + path);
             File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
-            
+
             for (File file : files) {
                 Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
                 loadedDocs.add(d);
@@ -416,7 +416,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -451,8 +454,11 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
-            errorIfParamsMissing(requiredParams, json.keySet());
-
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -483,8 +489,11 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
-            errorIfParamsMissing(requiredParams, json.keySet());
-
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -517,7 +526,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = new HashSet<>();
             requiredParams.add("text");
             requiredParams.add("path");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             int maxContentSize = Integer.MAX_VALUE;
@@ -534,7 +546,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            QueryResult error = errorIfParamsMissing(requiredParams, request.queryParams());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(request);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -570,7 +585,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -615,7 +633,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -655,7 +676,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text");
             requiredParams.add("explanation");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -685,7 +709,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cscl-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -722,7 +749,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -766,7 +796,10 @@ public class ReaderBenchServer {
             requiredParams.add("cv-file");
             requiredParams.add("cover-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -831,7 +864,10 @@ public class ReaderBenchServer {
             requiredParams.add("cv-file");
             requiredParams.add("threshold");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -935,7 +971,10 @@ public class ReaderBenchServer {
             requiredParams.add("experience"); // junior or senior
             requiredParams.add("cv-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -1076,16 +1115,19 @@ public class ReaderBenchServer {
         });
         Spark.get("/file-download", (request, response) -> {
             String file = request.queryParams("file");
-
+            String test = request.queryParams("test");
+            
+            String path = "true".equals(test) ? "resources/test/cv-analysis/" : "tmp/";
+            
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
             }
-            File f = new File("tmp/" + file);
+            File f = new File(path + file);
 
             HttpServletResponse raw = response.raw();
             if (f.exists() && !f.isDirectory()) {
-                byte[] bytes = Files.readAllBytes(Paths.get("tmp/" + file));
+                byte[] bytes = Files.readAllBytes(Paths.get(path + file));
                 raw.getOutputStream().write(bytes);
             } else {
                 raw.getOutputStream().write(null);
@@ -1094,6 +1136,45 @@ public class ReaderBenchServer {
             raw.getOutputStream().close();
 
             return response.raw();
+        });
+        Spark.get("/file-download-by-path", (request, response) -> {
+            String file = request.queryParams("file");
+            String path = request.queryParams("path");
+            
+            int indexOfLastSlash = file.lastIndexOf('/');
+            if (indexOfLastSlash != -1) {
+                file = file.substring(indexOfLastSlash);
+            }
+            File f = new File(path + file);
+
+            HttpServletResponse raw = response.raw();
+            if (f.exists() && !f.isDirectory()) {
+                byte[] bytes = Files.readAllBytes(Paths.get(path + file));
+                raw.getOutputStream().write(bytes);
+            } else {
+                raw.getOutputStream().write(null);
+            }
+            raw.getOutputStream().flush();
+            raw.getOutputStream().close();
+
+            return response.raw();
+        });
+        Spark.get("/cv-test-file-names", (request, response) -> {
+            String fileList = "[";
+            String fileName ;
+            File[] testFilesFolder = new File("resources/test/cv-analysis").listFiles();
+
+            for (File file : testFilesFolder) {
+                if (file.isFile()) {
+                    fileName = "\"" + file.getName() +"\""; 
+                    fileList += fileName;
+                    fileList += ',';
+                }
+            }
+
+            fileList = fileList.substring(0, fileList.length() - 1) + "]";
+
+            return fileList;
         });
         Spark.post("/folderUpload", (request, response) -> {
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
@@ -1270,7 +1351,10 @@ public class ReaderBenchServer {
             requiredParams.add("lda");
             requiredParams.add("word2vec");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             String text1 = hm.get("text1");
@@ -1306,7 +1390,10 @@ public class ReaderBenchServer {
             requiredParams.add("w2v");
             requiredParams.add("user-answer");
             requiredParams.add("predefined-answers");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
