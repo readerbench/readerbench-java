@@ -97,6 +97,7 @@ public class ElasticsearchService {
                     .setTypes(type)
                     .setSize(500)
                     .setQuery(QueryBuilders.matchPhraseQuery("communityName", communityName))
+                    .addSort("week", SortOrder.ASC)
                     .execute()
                     .actionGet();
             SearchHit[] searchHits = response.getHits().getHits();

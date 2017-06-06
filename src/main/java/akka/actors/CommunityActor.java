@@ -16,6 +16,8 @@ import com.readerbench.solr.services.SolrService;
 import data.AbstractDocument;
 import data.Lang;
 import data.cscl.Community;
+import data.cscl.CommunityUtils;
+import data.cscl.Participant;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,15 +87,9 @@ public class CommunityActor extends UntypedActor{
 
 
             List<Conversation> conv = new ArrayList<>();
-            conv.add(conversations.get(1));
-            //conv.add(conversations.get(2));
-            //conv.add(conversations.get(3));
-//            conv.add(conversations.get(4));
-//            conv.add(conversations.get(5));
-//            conv.add(conversations.get(6));
-//            conv.add(conversations.get(7));
-//            conv.add(conversations.get(8));
-//            conv.add(conversations.get(9));
+            for (int j = 1; j < 10; j++) {
+                conv.add(conversations.get(j));
+            }
             CONVERSATION_NUMBER = conv.size() + 1;
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
@@ -115,7 +111,7 @@ public class CommunityActor extends UntypedActor{
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
-                Timeout timeout = new Timeout(Duration.create(2, TimeUnit.MINUTES));
+                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.MINUTES));
                 Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
                 futures.add(future);
             });
@@ -170,29 +166,43 @@ public class CommunityActor extends UntypedActor{
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
 
+            System.out.println("\n----------- Subcommunities stats -------- \n");
+//            for (Community c : community.getTimeframeSubCommunities()) {
+//                CommunityUtils.hierarchicalClustering(c, PATH + "/clustered_results.csv", PATH);
+//                System.out.println(c.getStartDate() + " - " + c.getEndDate());
+//                System.out.println(c.getParticipants().size());
+//                for (Participant p : c.getParticipants()) {
+//                    if (p.getParticipantGroup() != null) {
+//                        System.out.println(p.getName() + " - " + p.getParticipantGroup().name());
+//                    }
+//                }
+//                System.out.println("\n\n");
+//            }
+
+
             for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
                 Community subCommunity = community.getTimeframeSubCommunities().get(i);
-                System.out.println(subCommunity.getStartDate());
-                System.out.println(subCommunity.getEndDate());
-
-                List<Map<String, Object>> participantsStats = subCommunity
-                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantsStats(participantsStats);
+//                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/clustered_results_week_" + i + ".csv", PATH);
+//                System.out.println(subCommunity.getStartDate());
+//                System.out.println(subCommunity.getEndDate());
+//
+//                List<Map<String, Object>> participantsStats = subCommunity
+//                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
+//                System.out.println(participantsStats);
+//                elasticsearchService.indexParticipantsStats(participantsStats);
 
                 /**
                  * index participant interaction results
                  */
                 JSONObject participantInteraction = subCommunity.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
                 elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+                System.out.println(participantInteraction);
 
                 JSONObject hierarchicalEdgeBundling = subCommunity.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
                 elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
+                System.out.println(hierarchicalEdgeBundling);
             }
 
-//            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results.csv", PATH);
-//            for (Participant p : community.getParticipants()) {
-//                System.out.println(p.getName() + " - " + p.getParticipantGroup().name());
-//            }
 
 //            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
 //                    PATH + "/" + COMMUNITY_NAME + "_" + INITIATION_FILENAME);
