@@ -56,7 +56,7 @@ import services.discourse.cohesion.CohesionGraph;
 import services.discourse.keywordMining.KeywordModeling;
 import services.processing.SerialProcessing;
 import view.widgets.cscl.ParticipantInteractionView;
-import view.widgets.document.corpora.PaperConceptView;
+import view.widgets.document.corpora.DocConceptView;
 import webService.result.ResultvCoP;
 import webService.services.vCoP.CommunityInteraction;
 
@@ -465,7 +465,7 @@ public class Community extends AnalysisElement {
 
     public void generateConceptView(String path) {
         EventQueue.invokeLater(() -> {
-            PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
+            DocConceptView conceptView = new DocConceptView(KeywordModeling.getCollectionTopics(documents), path);
             conceptView.setVisible(true);
         });
     }

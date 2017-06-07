@@ -24,7 +24,7 @@ public class ParamsValidator {
      */
     public static Set<String> checkRequiredParams(Set<String> requiredParams, Set<String> params) {
         requiredParams.removeAll(params);
-        if (requiredParams.size() > 1) {
+        if (requiredParams.size() >= 1) {
             return requiredParams;
         }
         return null;

@@ -15,11 +15,9 @@
  */
 package view.widgets.article;
 
-import com.itextpdf.text.log.SysoLogger;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
@@ -45,8 +43,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-
 
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -77,377 +73,353 @@ import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import view.models.PreviewSketch;
 import view.widgets.article.utils.ArticleContainer;
 import view.widgets.article.utils.ArticleAuthorParameterLogger;
-import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
 import view.widgets.article.utils.GraphMeasure;
 import view.widgets.article.utils.GraphNodeItem;
 import view.widgets.article.utils.SingleAuthorContainer;
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
 import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
 
 public class ArticleAuthorSimilarityView extends JFrame {
-	static ArticleAuthorSimilarityView corpusView;
-	private static final long serialVersionUID = -8582615231233815258L;
-	static Logger logger = Logger.getLogger("");
-	public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
-	public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
-	public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);
 
-	private IAuthorDistanceStrategy[] distanceStrategyList;
-	private String graphCenterUri;
-	private ArticleContainer authorContainer;
-	private ArticleAuthorParameterLogger paramLogger;
+    static ArticleAuthorSimilarityView corpusView;
+    private static final long serialVersionUID = -8582615231233815258L;
+    static Logger logger = Logger.getLogger("");
+    public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
+    public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
+    public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);
 
-	private JSlider sliderThreshold;
-	private JPanel panelGraph;
+    private IAuthorDistanceStrategy[] distanceStrategyList;
+    private String graphCenterUri;
+    private ArticleContainer authorContainer;
+    private ArticleAuthorParameterLogger paramLogger;
 
-	public ArticleAuthorSimilarityView(ArticleContainer authorContainer, IAuthorDistanceStrategy[] distanceStrategyList,
-			ArticleAuthorParameterLogger paramLogger, String graphCenterUri) {
-		this.authorContainer = authorContainer;
-		this.distanceStrategyList = distanceStrategyList;
-		this.paramLogger = paramLogger;
-		this.graphCenterUri = graphCenterUri;
+    private JSlider sliderThreshold;
+    private JPanel panelGraph;
 
-		corpusView = this;
-		setTitle("Author & Document View");
-		getContentPane().setBackground(Color.WHITE);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    public ArticleAuthorSimilarityView(ArticleContainer authorContainer, IAuthorDistanceStrategy[] distanceStrategyList,
+            ArticleAuthorParameterLogger paramLogger, String graphCenterUri) {
+        this.authorContainer = authorContainer;
+        this.distanceStrategyList = distanceStrategyList;
+        this.paramLogger = paramLogger;
+        this.graphCenterUri = graphCenterUri;
 
-		// adjust view to desktop size
-		int margin = 50;
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
+        corpusView = this;
+        setTitle("Author & Document View");
+        getContentPane().setBackground(Color.WHITE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-		generateLayout();
-		generateGraph();
-	}
+        // adjust view to desktop size
+        int margin = 50;
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
 
-	private void generateLayout() {
+        generateLayout();
+        generateGraph();
+    }
 
-		JLabel lblThreshold = new JLabel("Threshold");
-		lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
+    private void generateLayout() {
+        JLabel lblThreshold = new JLabel("Threshold");
+        lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-		sliderThreshold = new JSlider(0, 100, 90);
-		sliderThreshold.setBackground(Color.WHITE);
-		sliderThreshold.setPaintTicks(true);
-		sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
-		sliderThreshold.setPaintLabels(true);
-		sliderThreshold.setMinorTickSpacing(10);
-		sliderThreshold.setMajorTickSpacing(50);
-		java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
-		labelTableThreshold.put(new Integer(100), new JLabel("100%"));
-		labelTableThreshold.put(new Integer(50), new JLabel("50%"));
-		labelTableThreshold.put(new Integer(0), new JLabel("0"));
-		sliderThreshold.setLabelTable(labelTableThreshold);
-		sliderThreshold.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				generateGraph();
-			}
-		});
+        sliderThreshold = new JSlider(0, 100, 90);
+        sliderThreshold.setBackground(Color.WHITE);
+        sliderThreshold.setPaintTicks(true);
+        sliderThreshold.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        sliderThreshold.setPaintLabels(true);
+        sliderThreshold.setMinorTickSpacing(10);
+        sliderThreshold.setMajorTickSpacing(50);
+        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
+        labelTableThreshold.put(new Integer(100), new JLabel("100%"));
+        labelTableThreshold.put(new Integer(50), new JLabel("50%"));
+        labelTableThreshold.put(new Integer(0), new JLabel("0"));
+        sliderThreshold.setLabelTable(labelTableThreshold);
+        sliderThreshold.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                generateGraph();
+            }
+        });
 
-		panelGraph = new JPanel();
-		panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
-		panelGraph.setBackground(Color.WHITE);
-		panelGraph.setLayout(new BorderLayout());
+        panelGraph = new JPanel();
+        panelGraph.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+        panelGraph.setBackground(Color.WHITE);
+        panelGraph.setLayout(new BorderLayout());
 
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout
-				.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup()
-												.addContainerGap())
-						.addGroup(groupLayout.createSequentialGroup()
-								.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-										.addGroup(groupLayout.createSequentialGroup()
-												.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-														.addComponent(lblThreshold).addComponent(sliderThreshold,
-																GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-																GroupLayout.PREFERRED_SIZE))
-												.addGap(10))
-										.addGroup(groupLayout.createSequentialGroup()
-												.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE,
-														Short.MAX_VALUE)
-												.addPreferredGap(ComponentPlacement.RELATED)))
-								))
-						));
-		groupLayout
-				.setVerticalGroup(
-						groupLayout.createParallelGroup(Alignment.LEADING)
-								.addGroup(groupLayout.createSequentialGroup().addContainerGap()
-										.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
-												.addComponent(lblThreshold))
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 52,
-										GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addPreferredGap(ComponentPlacement.RELATED)));
-		getContentPane().setLayout(groupLayout);
-	}
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout
+                .setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                                .addContainerGap())
+                                        .addGroup(groupLayout.createSequentialGroup()
+                                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                                        .addGroup(groupLayout.createSequentialGroup()
+                                                                .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                                                        .addComponent(lblThreshold).addComponent(sliderThreshold,
+                                                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                                                        GroupLayout.PREFERRED_SIZE))
+                                                                .addGap(10))
+                                                        .addGroup(groupLayout.createSequentialGroup()
+                                                                .addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE,
+                                                                        Short.MAX_VALUE)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)))
+                                        ))
+                        ));
+        groupLayout
+                .setVerticalGroup(
+                        groupLayout.createParallelGroup(Alignment.LEADING)
+                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                        .addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(lblThreshold))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(sliderThreshold, GroupLayout.PREFERRED_SIZE, 52,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+                                                .addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 581, Short.MAX_VALUE))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addPreferredGap(ComponentPlacement.RELATED)));
+        getContentPane().setLayout(groupLayout);
+    }
 
-	public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
-		HashMap<Node, GraphNodeItem> outMap = new HashMap<Node, GraphNodeItem>();
-		logger.info("Starting to build the author graph");
-		// build connected graph
-		Map<GraphNodeItem, Boolean> visibleDocs = new TreeMap<GraphNodeItem, Boolean>();
-		// build nodes
-		Map<GraphNodeItem, Node> nodes = new TreeMap<GraphNodeItem, Node>();
-		
-		List<GraphNodeItem> nodeItemList = new ArrayList<GraphNodeItem>();
-		
-		for (SingleAuthorContainer author : this.authorContainer.getAuthorContainers()) {
-			GraphNodeItem nodeItem = new GraphNodeItem(author);
-			visibleDocs.put(nodeItem, false);
-			nodeItemList.add(nodeItem);
-		}
-		for (ResearchArticle article : this.authorContainer.getArticles()) {
-			GraphNodeItem nodeItem = new GraphNodeItem(article);
-			visibleDocs.put(nodeItem, false);
-			nodeItemList.add(nodeItem);
-		}
-		
-		for(IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
-			int distanceLbl = graphModel.addEdgeType(distanceStrategy.getStrategyKey());
-			double threshold = distanceStrategy.getThreshold();
-			// determine similarities in order to determine eligible candidates for vizualization
-			for (int i = 0; i < nodeItemList.size() - 1; i++) {
-				for (int j = i + 1; j < nodeItemList.size(); j++) {
-					GraphNodeItem firstNodeItem = nodeItemList.get(i);
-					GraphNodeItem secondNodeItem = nodeItemList.get(j);
-					
-					if(this.graphCenterUri != null) {
-						if(!firstNodeItem.getURI().equals(this.graphCenterUri) && !secondNodeItem.getURI().equals(this.graphCenterUri)) {
-							continue;
-						}
-					}
-					
-					double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
-					if (sim >= threshold) {
-						visibleDocs.put(firstNodeItem, true);
-						visibleDocs.put(secondNodeItem, true);
-					}
-				}
-			}
-			for (GraphNodeItem o : nodeItemList) {
-				if (visibleDocs.get(o) && ! nodes.containsKey(o)) {
-					String text = o.getName();
-					Color c = null;
-					
-					Node n = graphModel.factory().newNode(o.getURI());
-					n.setLabel(text);
-					
-					if(o.isArticle()) {
-						c = new Color((float) (COLOR_ARTICLE.getRed()) / 256, (float) (COLOR_ARTICLE.getGreen()) / 256,
-								(float) (COLOR_ARTICLE.getBlue()) / 256);
-					}
-					else {
-						c = new Color((float) (COLOR_AUTHOR.getRed()) / 256, (float) (COLOR_AUTHOR.getGreen()) / 256,
-								(float) (COLOR_AUTHOR.getBlue()) / 256);
-					}
-					if(this.graphCenterUri != null) {
-						if(o.getURI().equals(this.graphCenterUri)) {
-							c = new Color((float) (COLOR_CENTER_NODE.getRed()) / 256, (float) (COLOR_CENTER_NODE.getGreen()) / 256,
-									(float) (COLOR_CENTER_NODE.getBlue()) / 256);
-							n.setSize(10);
-						}
-					}
-					
-					text = (text.length() > 25) ? (text.substring(0, 25) + "..") : text;
-					
-					n.setColor(c);
-					n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
-					n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
-					
-					graph.addNode(n);
-					nodes.put(o, n);
-					outMap.put(n, o);
-					
-				}
-			}
-			// determine similarities
-			for (int i = 0; i < nodeItemList.size() - 1; i++) {
-				for (int j = i + 1; j < nodeItemList.size(); j++) {
-					GraphNodeItem firstNodeItem = nodeItemList.get(i);
-					GraphNodeItem secondNodeItem = nodeItemList.get(j);
-					if (visibleDocs.get(firstNodeItem) && visibleDocs.get(secondNodeItem)) {
-						double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
-						if (sim >= threshold) {
-							Edge e = graphModel.factory().newEdge(nodes.get(firstNodeItem), nodes.get(secondNodeItem), distanceLbl, sim, false);
-							e.setLabel("");
-							graph.addEdge(e);
-						}
-					}
-				}
-			}
-		}
-		
-		return outMap;
-	}
-	
-	private void generateGraph() {
-		ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
-		pc.newProject();
+    public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
+        HashMap<Node, GraphNodeItem> outMap = new HashMap<>();
+        logger.info("Starting to build the author graph");
+        // build connected graph
+        Map<GraphNodeItem, Boolean> visibleDocs = new TreeMap<>();
+        // build nodes
+        Map<GraphNodeItem, Node> nodes = new TreeMap<>();
 
-		// get models
-		GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
-		UndirectedGraph graph = graphModel.getUndirectedGraph();
-		AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
-		AppearanceModel appearanceModel = appearanceController.getModel();
-                
-                HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel);
-                
-                YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
-		layout.setGraphModel(graphModel);
-		layout.initAlgo();
-		layout.resetPropertiesValues();
-		layout.setOptimalDistance(100f);
+        List<GraphNodeItem> nodeItemList = new ArrayList<>();
 
-		for (int i = 0; i < 100 && layout.canAlgo(); i++) {
-			layout.goAlgo();
-		}
-		layout.endAlgo();
+        for (SingleAuthorContainer author : this.authorContainer.getAuthorContainers()) {
+            GraphNodeItem nodeItem = new GraphNodeItem(author);
+            visibleDocs.put(nodeItem, false);
+            nodeItemList.add(nodeItem);
+        }
+        for (ResearchArticle article : this.authorContainer.getArticles()) {
+            GraphNodeItem nodeItem = new GraphNodeItem(article);
+            visibleDocs.put(nodeItem, false);
+            nodeItemList.add(nodeItem);
+        }
 
-		layout.setGraphModel(graphModel);
-		// Get Centrality
-		GraphDistance distance = new GraphDistance();
-		distance.setDirected(true);
-		distance.execute(graphModel);
+        for (IAuthorDistanceStrategy distanceStrategy : this.distanceStrategyList) {
+            int distanceLbl = graphModel.addEdgeType(distanceStrategy.getStrategyKey());
+            double threshold = distanceStrategy.getThreshold();
+            // determine similarities in order to determine eligible candidates for vizualization
+            for (int i = 0; i < nodeItemList.size() - 1; i++) {
+                for (int j = i + 1; j < nodeItemList.size(); j++) {
+                    GraphNodeItem firstNodeItem = nodeItemList.get(i);
+                    GraphNodeItem secondNodeItem = nodeItemList.get(j);
 
-		double maxCentrality = Double.NEGATIVE_INFINITY;
-		Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
-		Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
-		List<GraphMeasure> graphMeasures = new ArrayList<GraphMeasure>();
-		for (Node n : graph.getNodes()) {
-			Double betwenness = (Double) n.getAttribute(betweeennessColumn);
-			Double eccentricity = (Double) n.getAttribute(eccentricityColumn);
-			Double closeness = (Double) n.getAttribute(closenessColumn);
+                    if (this.graphCenterUri != null) {
+                        if (!firstNodeItem.getURI().equals(this.graphCenterUri) && !secondNodeItem.getURI().equals(this.graphCenterUri)) {
+                            continue;
+                        }
+                    }
 
-			GraphNodeItem currentDoc = nodeMap.get(n);
-			int degree = graph.getDegree(n);
+                    double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
+                    if (sim >= threshold) {
+                        visibleDocs.put(firstNodeItem, true);
+                        visibleDocs.put(secondNodeItem, true);
+                    }
+                }
+            }
+            for (GraphNodeItem o : nodeItemList) {
+                if (visibleDocs.get(o) && !nodes.containsKey(o)) {
+                    String text = o.getName();
+                    Color c = null;
 
-			GraphMeasure graphMeasure = new GraphMeasure();
-			graphMeasure.setUri(currentDoc.getURI());
-			graphMeasure.setNodeType(currentDoc.getNodeType());
-			graphMeasure.setBetwenness(betwenness);
-			graphMeasure.setCloseness(closeness);
-			graphMeasure.setDegree(new Double(degree));
-			graphMeasure.setEccentricity(eccentricity);
-			graphMeasure.setName(currentDoc.getName());
-			graphMeasure.setNoOfReferences(currentDoc.getNoOfReferences());
-			graphMeasures.add(graphMeasure);
+                    Node n = graphModel.factory().newNode(o.getURI());
+                    text = (text.length() > 25) ? (text.substring(0, 25) + "..") : text;
+                    n.setLabel(text);
 
-			if (betwenness > maxCentrality) {
-				maxCentrality = betwenness;
-			}
-		}
-		paramLogger.logGraphMeasures(graphMeasures);
-                Collections.sort(graphMeasures);
-                GraphMeasure.saveSerializedObject(graphMeasures);
-                
-                System.out.println(graphMeasures);
-                
-                // Rank size by centrality
-		Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
-		Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
-				RankingNodeSizeTransformer.class);
-		RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
-				.getTransformer();
-		centralityTransformer.setMinSize(3);
-		centralityTransformer.setMaxSize(10);
-		appearanceController.transform(centralityRanking);
+                    if (o.isArticle()) {
+                        c = new Color((float) (COLOR_ARTICLE.getRed()) / 256, (float) (COLOR_ARTICLE.getGreen()) / 256,
+                                (float) (COLOR_ARTICLE.getBlue()) / 256);
+                    } else {
+                        c = new Color((float) (COLOR_AUTHOR.getRed()) / 256, (float) (COLOR_AUTHOR.getGreen()) / 256,
+                                (float) (COLOR_AUTHOR.getBlue()) / 256);
+                    }
+                    if (this.graphCenterUri != null) {
+                        if (o.getURI().equals(this.graphCenterUri)) {
+                            c = new Color((float) (COLOR_CENTER_NODE.getRed()) / 256, (float) (COLOR_CENTER_NODE.getGreen()) / 256,
+                                    (float) (COLOR_CENTER_NODE.getBlue()) / 256);
+                            n.setSize(10);
+                        }
+                    }
 
-		// Preview configuration
-		PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
-		PreviewModel previewModel = previewController.getModel();
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-				new DependantOriginalColor(Mode.ORIGINAL));
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 50);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
-		previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
-		previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-		previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+                    n.setColor(c);
+                    n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
+                    n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
 
-		// New Processing target, get the PApplet
-		G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
-		PreviewSketch previewSketch = new PreviewSketch(target);
-		previewController.refreshPreview();
-		previewSketch.resetZoom();
-                if (panelGraph.getComponents().length > 0) {
-			panelGraph.removeAll();
-			panelGraph.revalidate();
-		}
-		panelGraph.add(previewSketch, BorderLayout.CENTER);
+                    graph.addNode(n);
+                    nodes.put(o, n);
+                    outMap.put(n, o);
+                }
+            }
+            // determine similarities
+            for (int i = 0; i < nodeItemList.size() - 1; i++) {
+                for (int j = i + 1; j < nodeItemList.size(); j++) {
+                    GraphNodeItem firstNodeItem = nodeItemList.get(i);
+                    GraphNodeItem secondNodeItem = nodeItemList.get(j);
+                    if (visibleDocs.get(firstNodeItem) && visibleDocs.get(secondNodeItem)) {
+                        double sim = firstNodeItem.computeScore(secondNodeItem, distanceStrategy);
+                        if (sim >= threshold) {
+                            Edge e = graphModel.factory().newEdge(nodes.get(firstNodeItem), nodes.get(secondNodeItem), distanceLbl, sim, false);
+                            e.setLabel("");
+                            graph.addEdge(e);
+                        }
+                    }
+                }
+            }
+        }
 
-		logger.info("Saving export...");
-		ExportController ec = Lookup.getDefault().lookup(ExportController.class);
-		try {
-			ec.exportFile(new File("resources/out/graph_doc_corpus_view.pdf"));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-			return;
-		}
-		this.pack();
-		logger.info("Finished building the graph");
-	}
+        return outMap;
+    }
 
-	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
-		revalidate();
-	}
+    private void generateGraph() {
+        ProjectController pc = Lookup.getDefault().lookup(ProjectController.class);
+        pc.newProject();
 
-	private static void adjustToSystemGraphics() {
-		for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-			if ("Nimbus".equals(info.getName())) {
-				try {
-					UIManager.setLookAndFeel(info.getClassName());
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (UnsupportedLookAndFeelException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-        
-	private static void computeMetrics(ArticleContainer container) {
-		List<SingleAuthorContainer> list = container.getAuthorContainers();
-		List<String> authorPaperList = new ArrayList<String>();
-		HashSet<String> uniquePaperList = new HashSet<String>();
-		for(SingleAuthorContainer authContainer: list) {
-			String[] authList = {"http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker",
-				"http://data.linkededucation.org/resource/lak/person/neil-t-heffernan",
-					"http://data.linkededucation.org/resource/lak/person/joseph-e-beck",
-					"http://data.linkededucation.org/resource/lak/person/kenneth-r-koedinger",
-					"http://data.linkededucation.org/resource/lak/person/jack-mostow"//,
-					//"http://data.linkededucation.org/resource/lak/person/arthur-c-graesser",
-					//"http://data.linkededucation.org/resource/lak/person/zachary-a-pardos",
-					//"http://data.linkededucation.org/resource/lak/person/jose-p-gonzalez-brenes",
-					//"http://data.linkededucation.org/resource/lak/person/s-ventura",
-					//"http://data.linkededucation.org/resource/lak/person/c-romero"
-				};
-			for(String authUri : authList) {
-				if(authUri.equals(authContainer.getAuthor().getAuthorUri())) {
-					for(ResearchArticle article : authContainer.getAuthorArticles()) {
-						authorPaperList.add(article.getURI());
-						uniquePaperList.add(article.getURI());
-					}
-					
-					break;
-				}
-			}
-		}
-		System.out.println("Total paper count = " + authorPaperList.size());
-		System.out.println("Unique paper count = " + uniquePaperList.size());
-	}
+        // get models
+        GraphModel graphModel = Lookup.getDefault().lookup(GraphController.class).getGraphModel();
+        UndirectedGraph graph = graphModel.getUndirectedGraph();
+        AppearanceController appearanceController = Lookup.getDefault().lookup(AppearanceController.class);
+        AppearanceModel appearanceModel = appearanceController.getModel();
+
+        HashMap<Node, GraphNodeItem> nodeMap = buildConceptGraph(graph, graphModel);
+
+        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+        layout.setGraphModel(graphModel);
+        layout.initAlgo();
+        layout.resetPropertiesValues();
+        layout.setOptimalDistance(100f);
+
+        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+            layout.goAlgo();
+        }
+        layout.endAlgo();
+
+        layout.setGraphModel(graphModel);
+        // Get Centrality
+        GraphDistance distance = new GraphDistance();
+        distance.setDirected(true);
+        distance.execute(graphModel);
+
+        double maxCentrality = Double.NEGATIVE_INFINITY;
+        Column betweeennessColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Column closenessColumn = graphModel.getNodeTable().getColumn(GraphDistance.CLOSENESS);
+        Column eccentricityColumn = graphModel.getNodeTable().getColumn(GraphDistance.ECCENTRICITY);
+        List<GraphMeasure> graphMeasures = new ArrayList<>();
+        for (Node n : graph.getNodes()) {
+            Double betwenness = (Double) n.getAttribute(betweeennessColumn);
+            Double eccentricity = (Double) n.getAttribute(eccentricityColumn);
+            Double closeness = (Double) n.getAttribute(closenessColumn);
+
+            GraphNodeItem currentDoc = nodeMap.get(n);
+            int degree = graph.getDegree(n);
+
+            GraphMeasure graphMeasure = new GraphMeasure();
+            graphMeasure.setUri(currentDoc.getURI());
+            graphMeasure.setNodeType(currentDoc.getNodeType());
+            graphMeasure.setBetwenness(betwenness);
+            graphMeasure.setCloseness(closeness);
+            graphMeasure.setDegree(new Double(degree));
+            graphMeasure.setEccentricity(eccentricity);
+            graphMeasure.setName(currentDoc.getName());
+            graphMeasure.setNoOfReferences(currentDoc.getNoOfReferences());
+            graphMeasures.add(graphMeasure);
+
+            if (betwenness > maxCentrality) {
+                maxCentrality = betwenness;
+            }
+        }
+        paramLogger.logGraphMeasures(graphMeasures);
+        Collections.sort(graphMeasures);
+        GraphMeasure.saveSerializedObject(graphMeasures);
+
+        System.out.println(graphMeasures);
+
+        // Rank size by centrality
+        Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
+        Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
+                RankingNodeSizeTransformer.class);
+        RankingNodeSizeTransformer centralityTransformer = (RankingNodeSizeTransformer) centralityRanking
+                .getTransformer();
+        centralityTransformer.setMinSize(3);
+        centralityTransformer.setMaxSize(10);
+        appearanceController.transform(centralityRanking);
+
+        // Preview configuration
+        PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
+        PreviewModel previewModel = previewController.getModel();
+        previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
+                new DependantOriginalColor(Mode.ORIGINAL));
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_OPACITY, 50);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
+        previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+
+        // New Processing target, get the PApplet
+        G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
+        PreviewSketch previewSketch = new PreviewSketch(target);
+        previewController.refreshPreview();
+        previewSketch.resetZoom();
+        if (panelGraph.getComponents().length > 0) {
+            panelGraph.removeAll();
+            panelGraph.revalidate();
+        }
+        panelGraph.add(previewSketch, BorderLayout.CENTER);
+
+        logger.info("Saving export...");
+        ExportController ec = Lookup.getDefault().lookup(ExportController.class);
+        try {
+            ec.exportFile(new File("resources/out/graph_doc_corpus_view.pdf"));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return;
+        }
+        this.pack();
+        logger.info("Finished building the graph");
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        revalidate();
+    }
+
+    private static void computeMetrics(ArticleContainer container) {
+        List<SingleAuthorContainer> list = container.getAuthorContainers();
+        List<String> authorPaperList = new ArrayList<>();
+        HashSet<String> uniquePaperList = new HashSet<>();
+        for (SingleAuthorContainer authContainer : list) {
+            String[] authList = {"http://data.linkededucation.org/resource/lak/person/ryan-sjd-baker",
+                "http://data.linkededucation.org/resource/lak/person/neil-t-heffernan",
+                "http://data.linkededucation.org/resource/lak/person/joseph-e-beck",
+                "http://data.linkededucation.org/resource/lak/person/kenneth-r-koedinger",
+                "http://data.linkededucation.org/resource/lak/person/jack-mostow"//,
+            //"http://data.linkededucation.org/resource/lak/person/arthur-c-graesser",
+            //"http://data.linkededucation.org/resource/lak/person/zachary-a-pardos",
+            //"http://data.linkededucation.org/resource/lak/person/jose-p-gonzalez-brenes",
+            //"http://data.linkededucation.org/resource/lak/person/s-ventura",
+            //"http://data.linkededucation.org/resource/lak/person/c-romero"
+            };
+            for (String authUri : authList) {
+                if (authUri.equals(authContainer.getAuthor().getAuthorUri())) {
+                    for (ResearchArticle article : authContainer.getAuthorArticles()) {
+                        authorPaperList.add(article.getURI());
+                        uniquePaperList.add(article.getURI());
+                    }
+
+                    break;
+                }
+            }
+        }
+        System.out.println("Total paper count = " + authorPaperList.size());
+        System.out.println("Unique paper count = " + uniquePaperList.size());
+    }
 }
