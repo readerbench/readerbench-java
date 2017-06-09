@@ -53,7 +53,7 @@ public class KeywordsClassification {
     private Map<String, String> categories;
     private Map<String, String> articlesAnnotations; // manually annotated
     private Map<String, String> articlesClassifications; // file name, category
-    private Map<String, String> abstractsTexts; // file name, content
+    private Map<String, String> articlesTexts; // file name, content
 
     private final List<String> acceptedKeywords;
 
@@ -98,7 +98,7 @@ public class KeywordsClassification {
     private void extractArticles(boolean ignoreArticlesFirstLine) {
         articlesAnnotations = new HashMap<>();
         articlesClassifications = new HashMap<>();
-        abstractsTexts = new HashMap<>();
+        articlesTexts = new HashMap<>();
         try {
             Files.walk(Paths.get(abstractsPath)).forEach((Path filePath) -> {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
@@ -118,7 +118,7 @@ public class KeywordsClassification {
                         String categoryLetter = fileName.substring(0, 1);
                         articlesAnnotations.put(filePath.getFileName().toString(), categoryLetter);
                         articlesClassifications.put(filePath.getFileName().toString(), "Z");
-                        abstractsTexts.put(filePath.getFileName().toString(), sb.toString());
+                        articlesTexts.put(filePath.getFileName().toString(), sb.toString());
                     } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -167,8 +167,8 @@ public class KeywordsClassification {
         int index = 0;
         for (String abstractFile : articlesClassifications.keySet()) {
             percentage = index++ * 1.0 / articlesClassifications.size() * 100;
-            LOGGER.log(Level.INFO, "Building document for abstract {0} (" + percentage + "%" + ")", abstractFile);
-            AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(abstractsTexts.get(abstractFile));
+            LOGGER.log(Level.INFO, "Building document for article {0} (" + percentage + "%" + ")", abstractFile);
+            AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(articlesTexts.get(abstractFile));
             AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
             //documentAbstract.computeAll(false);
             KeywordModeling.determineKeywords(documentAbstract);
