@@ -95,7 +95,7 @@ public class KeywordsClassification {
         }
     }
 
-    private void extractAbstracts(boolean ignoreAbstractsFirstLine) {
+    private void extractArticles(boolean ignoreArticlesFirstLine) {
         articlesAnnotations = new HashMap<>();
         articlesClassifications = new HashMap<>();
         abstractsTexts = new HashMap<>();
@@ -109,7 +109,7 @@ public class KeywordsClassification {
                         StringBuilder sb = new StringBuilder();
                         for (String line : lines) {
                             k++;
-                            if (ignoreAbstractsFirstLine && k == 1) {
+                            if (ignoreArticlesFirstLine && k == 1) {
                                 continue;
                             }
                             sb.append(line).append("\n");
@@ -166,7 +166,7 @@ public class KeywordsClassification {
         double percentage;
         int index = 0;
         for (String abstractFile : articlesClassifications.keySet()) {
-            percentage = index++ / articlesClassifications.size() * 100;
+            percentage = index++ * 1.0 / articlesClassifications.size() * 100;
             LOGGER.log(Level.INFO, "Building document for abstract {0} (" + percentage + "%" + ")", abstractFile);
             AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(abstractsTexts.get(abstractFile));
             AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
@@ -294,7 +294,7 @@ public class KeywordsClassification {
         try {
             // generate output files - one for each semantic model
             LOGGER.info("Generating output files...");
-            List<AbstractDocument> docs = new ArrayList<>(documentsArticlesClassifications.values());
+            List<AbstractDocument> docs = new ArrayList<>(documentKeywordsArticlesClassifications.values());
             LOGGER.log(Level.INFO, "{0} docs available", docs.size());
             LOGGER.log(Level.INFO, "{0} semantic models", semanticModels.size());
             for (ISemanticModel model : semanticModels) {
@@ -373,7 +373,7 @@ public class KeywordsClassification {
 //        methods.add(SimilarityType.PATH_SIM);
         //methods.add(SimilarityType.WORD2VEC);
 
-        boolean ignoreAbstractsFirstLine = false;
+        boolean ignoreArticlesFirstLine = false;
 
         String keywordsString = "supply, reserve, clean, hybrid, clickthrough, miss, browse, regard, insert, multicast, shift, relax, overload, stream, quantify, delete, primitive, facilitate, degrade, leverage, virtual, conflict, attack, click, middleware, finish, appeal, secure, multiagent, preserve, forward, unify, substitute, ignore, stop, subject, switch, embed, keyword, wireless, span, academic, remark, sound, randomise, testbed, transmit, hash, waste, judge, decentralize, cache, break, fall, digital, dataset, queue, reverse, encounter, fine, shape, electronic, reward, project, collaborative, spend, american, sensor, impose, operate, combinatorial, bear, advertise, remote, hide, discount, trigger, economic, boolean, client, deep, augment, square, encourage, copy, adopt, complicate, double, correlate, analyse, automate, face, concentrate, contract, generalize, tune, engineer, retrieve, artificial, incentive, spread, enhance, intelligent, display, disjoint, default, guide, host, benchmark, delay, carry, favor, bias, representative, mobile, physical, retrieval, chain, encode, scalable, risk, refine, plot, equilibrium, block, national, survey, communicate, mix, trust, buy, middle, promise, cooperative, evidence, force, slow, briefly, peer, auction, verify, gather, discrete, concern, novel, center, outline, split, hope, comment, route, normalise, empty, neighbor, polynomial, surprise, monitor, coordinate, reflect, centralize, strategic, autonomous, simplify, intuitively, sample, flow, year, overhead, schedule, half, advance, max, statistical, characteristic, motivate, personal, score, filter, root, drive, sell, cluster, integrate, experience, probabilistic, transfer, overlap, wish, parallel, particularly, intend, sort, execute, speed, semantic, modify, adaptive, bring, abstract, exhibit, claim, wait, meet, exchange, demand, care, clearly, optimize, simulate, adjust, attribute, increment, extract, arise, simultaneously, realistic, balance, popular, seem, essentially, namely, player, consideration, record, fundamental, keep, presence, attention, social, potentially, public, past, complement, initially, submit, possibility, aggregate, internet, discover, notice, straightforward, theoretical, perspective, effectively, perfect, variant, pass, think, grow, exponential, live, obvious, conduct, bid, upper, distinguish, basis, specifically, factor, human, review, suppose, extreme, challenge, proceed, automatic, drop, robust, characterize, market, post, empirical, incorporate, interval, logical, arbitrary, request, author, label, document, answer, practical, early, minimize, possibly, distinct, quite, continue, message, output, completely, topic, target, recently, influence, literature, protocol, previously, online, objective, manner, underlie, nature, little, press, fast, connect, whole, kind, store, slightly, rank, meaning, relatively, efficiently, reveal, detect, free, understand, explain, establish, investigate, generally, content, theorem, explicitly, examine, number, load, reasonable, draw, especially, handle, highly, practice, check, explore, treat, procedure, impact, minimum, course, uniform, threshold, repeat, desire, equivalent, lack, calculate, technical, necessarily, yield, discussion, exploit, proof, accurate, relationship, bound, recall, enable, locate, proceeding, capture, international, setting, track, write, aspect, employ, game, major, index, typically, central, believe, currently, manage, similarly, access, accept, purpose, mention, comparison, vary, price, guarantee, sense, service, entire, exactly, account, requirement, separate, rule, illustrate, trade, file, theory, fail, combine, actually, layer, link"; // add keywords string here
         List<String> keywords = Arrays.asList(keywordsString.split("\\s*,\\s*"));
@@ -390,7 +390,7 @@ public class KeywordsClassification {
         
         // build articles documents
         LOGGER.info("Extracting articles...");
-        ac.extractAbstracts(ignoreAbstractsFirstLine);
+        ac.extractArticles(ignoreArticlesFirstLine);
         LOGGER.info("Building articles documents...");
         ac.buildArticlesDocuments();
         LOGGER.info(ac.articlesToString());
