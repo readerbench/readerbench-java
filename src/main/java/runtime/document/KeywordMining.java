@@ -170,17 +170,19 @@ public class KeywordMining {
                 StringBuilder sbKeywordsBigrams = new StringBuilder();
                 StringBuilder sbKeywordsAccepted = new StringBuilder();
                 StringBuilder sbKeywordsBigramsAccepted = new StringBuilder();
+                StringBuilder sbKeywordsAcceptedAndBigrams = new StringBuilder();
                 for (Keyword keyword : keywords) {
-                    sbKeywordsBigrams.append(keyword.getElement().toString()).append(" ");
                     if (keyword.getElement() instanceof Word) {
                         sbKeywordsBigrams.append(keyword.getWord().getLemma()).append(" ");
                         sbKeywords.append(keyword.getWord().getLemma()).append(" ");
                         if (acceptedKeywords.contains(keyword.getWord().getLemma())) {
                             sbKeywordsBigramsAccepted.append(keyword.getWord().getLemma()).append(" ");
                             sbKeywordsAccepted.append(keyword.getWord().getLemma()).append(" ");
+                            sbKeywordsAcceptedAndBigrams.append(keyword.getWord().getLemma()).append(" ");
                         }
                     } else {
                         sbKeywordsBigrams.append(keyword.getElement().toString()).append(" ");
+                        sbKeywordsAcceptedAndBigrams.append(keyword.getElement().toString()).append(" ");
                         if (acceptedBigrams.contains(keyword.getElement().toString())) {
                             sbKeywordsBigramsAccepted.append(keyword.getElement().toString()).append(" ");
                         }
@@ -192,7 +194,7 @@ public class KeywordMining {
                 fw = new FileWriter(file.getPath().replace(".ser", "_keywords.txt"));
                 bw = new BufferedWriter(fw);
                 bw.write(sbKeywords.toString());
-                sbKeywordsBigrams.setLength(0);
+                sbKeywords.setLength(0);
                 bw.close();
                 fw.close();
                 
@@ -206,14 +208,21 @@ public class KeywordMining {
                 fw = new FileWriter(file.getPath().replace(".ser", "_keywords_accepted.txt"));
                 bw = new BufferedWriter(fw);
                 bw.write(sbKeywordsAccepted.toString());
-                sbKeywordsBigrams.setLength(0);
+                sbKeywordsAccepted.setLength(0);
                 bw.close();
                 fw.close();
                 
                 fw = new FileWriter(file.getPath().replace(".ser", "_keywords_bigrams_accepted.txt"));
                 bw = new BufferedWriter(fw);
                 bw.write(sbKeywordsBigramsAccepted.toString());
-                sbKeywordsBigrams.setLength(0);
+                sbKeywordsBigramsAccepted.setLength(0);
+                bw.close();
+                fw.close();
+                
+                fw = new FileWriter(file.getPath().replace(".ser", "_keywords_accepted_and_bigrams.txt"));
+                bw = new BufferedWriter(fw);
+                bw.write(sbKeywordsAcceptedAndBigrams.toString());
+                sbKeywordsAcceptedAndBigrams.setLength(0);
                 bw.close();
                 fw.close();
                 
