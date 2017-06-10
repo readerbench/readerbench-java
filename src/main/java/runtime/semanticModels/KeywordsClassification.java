@@ -8,8 +8,6 @@ package runtime.semanticModels;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
-import data.Word;
-import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
 import java.io.File;
@@ -19,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -29,10 +26,8 @@ import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
-import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.DocumentClustering;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
@@ -55,17 +50,14 @@ public class KeywordsClassification {
     private Map<String, String> articlesClassifications; // file name, category
     private Map<String, String> articlesTexts; // file name, content
 
-    private final List<String> acceptedKeywords;
-
     private Map<String, AbstractDocument> documentsCategories;
     private Map<String, AbstractDocument> documentsArticlesClassifications;
 
     private final List<SimilarityType> methods;
 
-    public KeywordsClassification(String abstractsPath, String categoriesPath, List<String> acceptedKeywords, List<ISemanticModel> semanticModels, Lang lang, boolean usePosTagging, List<SimilarityType> methods) {
+    public KeywordsClassification(String abstractsPath, String categoriesPath, List<ISemanticModel> semanticModels, Lang lang, boolean usePosTagging, List<SimilarityType> methods) {
         this.abstractsPath = abstractsPath;
         this.categoriesPath = categoriesPath;
-        this.acceptedKeywords = acceptedKeywords;
         this.semanticModels = semanticModels;
         this.lang = lang;
         this.usePosTagging = usePosTagging;
@@ -159,7 +151,7 @@ public class KeywordsClassification {
         }
     }
 
-    private void buildArticlesDocuments(boolean keywordsOnly, boolean keepOnlyAcceptedKeywords) {
+    private void buildArticlesDocuments() {
         LOGGER.info("Building documents of abstracts");
         documentsArticlesClassifications = new HashMap<>();
         double percentage;
@@ -169,29 +161,7 @@ public class KeywordsClassification {
             LOGGER.log(Level.INFO, "Building document for article {0} (" + percentage + "%" + ")", abstractFile);
             AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(articlesTexts.get(abstractFile));
             AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
-            //documentAbstract.computeAll(false);
-            if (keywordsOnly) {
-                KeywordModeling.determineKeywords(documentAbstract);
-                List<Keyword> keywords = documentAbstract.getTopics();
-                StringBuilder sb = new StringBuilder();
-                for (Keyword keyword : keywords) {
-                    if (keyword.getElement() instanceof Word) {
-                        if (keepOnlyAcceptedKeywords) {
-                            if (this.acceptedKeywords.contains(keyword.getWord().getLemma())) {
-                                sb.append(keyword.getWord().toString()).append(" ");
-                            }
-                        } else {
-                            sb.append(keyword.getWord().toString()).append(" ");
-                        }
-                    }
-
-                }
-                AbstractDocumentTemplate templateKeywords = AbstractDocumentTemplate.getDocumentModel(sb.toString());
-                AbstractDocument documentKeywords = new Document(abstractFile, templateKeywords, semanticModels, lang, usePosTagging);
-                documentsArticlesClassifications.put(abstractFile, documentKeywords);
-            } else {
-                documentsArticlesClassifications.put(abstractFile, documentAbstract);
-            }
+            documentsArticlesClassifications.put(abstractFile, documentAbstract);
         }
     }
 
@@ -284,7 +254,7 @@ public class KeywordsClassification {
             LOGGER.log(Level.INFO, "{0} semantic models", semanticModels.size());
             for (ISemanticModel model : semanticModels) {
                 LOGGER.log(Level.INFO, "Creating file for {0}", model.getType().getAcronym());
-                clusterFiles.put(model, new FileWriter(abstractsPath + "/" + model.getType().getAcronym() + "_keywords.cluster"));
+                clusterFiles.put(model, new FileWriter(abstractsPath + "/" + model.getType().getAcronym() + ".cluster"));
                 dc.put(model, new DocumentClustering(model));
                 LOGGER.log(Level.INFO, "Performing clustering for {0}", model.getType().getAcronym());
                 dc.get(model).performKMeansClustering(docs, noCats);
@@ -360,10 +330,7 @@ public class KeywordsClassification {
 
         boolean ignoreArticlesFirstLine = false;
 
-        String keywordsString = "supply, reserve, clean, hybrid, clickthrough, miss, browse, regard, insert, multicast, shift, relax, overload, stream, quantify, delete, primitive, facilitate, degrade, leverage, virtual, conflict, attack, click, middleware, finish, appeal, secure, multiagent, preserve, forward, unify, substitute, ignore, stop, subject, switch, embed, keyword, wireless, span, academic, remark, sound, randomise, testbed, transmit, hash, waste, judge, decentralize, cache, break, fall, digital, dataset, queue, reverse, encounter, fine, shape, electronic, reward, project, collaborative, spend, american, sensor, impose, operate, combinatorial, bear, advertise, remote, hide, discount, trigger, economic, boolean, client, deep, augment, square, encourage, copy, adopt, complicate, double, correlate, analyse, automate, face, concentrate, contract, generalize, tune, engineer, retrieve, artificial, incentive, spread, enhance, intelligent, display, disjoint, default, guide, host, benchmark, delay, carry, favor, bias, representative, mobile, physical, retrieval, chain, encode, scalable, risk, refine, plot, equilibrium, block, national, survey, communicate, mix, trust, buy, middle, promise, cooperative, evidence, force, slow, briefly, peer, auction, verify, gather, discrete, concern, novel, center, outline, split, hope, comment, route, normalise, empty, neighbor, polynomial, surprise, monitor, coordinate, reflect, centralize, strategic, autonomous, simplify, intuitively, sample, flow, year, overhead, schedule, half, advance, max, statistical, characteristic, motivate, personal, score, filter, root, drive, sell, cluster, integrate, experience, probabilistic, transfer, overlap, wish, parallel, particularly, intend, sort, execute, speed, semantic, modify, adaptive, bring, abstract, exhibit, claim, wait, meet, exchange, demand, care, clearly, optimize, simulate, adjust, attribute, increment, extract, arise, simultaneously, realistic, balance, popular, seem, essentially, namely, player, consideration, record, fundamental, keep, presence, attention, social, potentially, public, past, complement, initially, submit, possibility, aggregate, internet, discover, notice, straightforward, theoretical, perspective, effectively, perfect, variant, pass, think, grow, exponential, live, obvious, conduct, bid, upper, distinguish, basis, specifically, factor, human, review, suppose, extreme, challenge, proceed, automatic, drop, robust, characterize, market, post, empirical, incorporate, interval, logical, arbitrary, request, author, label, document, answer, practical, early, minimize, possibly, distinct, quite, continue, message, output, completely, topic, target, recently, influence, literature, protocol, previously, online, objective, manner, underlie, nature, little, press, fast, connect, whole, kind, store, slightly, rank, meaning, relatively, efficiently, reveal, detect, free, understand, explain, establish, investigate, generally, content, theorem, explicitly, examine, number, load, reasonable, draw, especially, handle, highly, practice, check, explore, treat, procedure, impact, minimum, course, uniform, threshold, repeat, desire, equivalent, lack, calculate, technical, necessarily, yield, discussion, exploit, proof, accurate, relationship, bound, recall, enable, locate, proceeding, capture, international, setting, track, write, aspect, employ, game, major, index, typically, central, believe, currently, manage, similarly, access, accept, purpose, mention, comparison, vary, price, guarantee, sense, service, entire, exactly, account, requirement, separate, rule, illustrate, trade, file, theory, fail, combine, actually, layer, link"; // add keywords string here
-        List<String> keywords = Arrays.asList(keywordsString.split("\\s*,\\s*"));
-
-        KeywordsClassification ac = new KeywordsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", keywords, semanticModels, lang, true, methods);
+        KeywordsClassification ac = new KeywordsClassification("resources/in/SciCorefCorpus/keywords", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
 
         // build categories documents
         LOGGER.info("Extracting categories...");
@@ -377,7 +344,7 @@ public class KeywordsClassification {
         LOGGER.info("Extracting articles...");
         ac.extractArticles(ignoreArticlesFirstLine);
         LOGGER.info("Building articles documents...");
-        ac.buildArticlesDocuments(true, false);
+        ac.buildArticlesDocuments();
         LOGGER.info(ac.articlesToString());
         LOGGER.log(Level.INFO, "Number of articles: {0}", ac.articlesAnnotations.size());
 
