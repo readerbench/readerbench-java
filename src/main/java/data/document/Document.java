@@ -63,7 +63,7 @@ import org.w3c.dom.DOMException;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
-public class Document extends AbstractDocument implements Comparable<Document> {
+public class   Document extends AbstractDocument implements Comparable<Document> {
 
     private static final long serialVersionUID = 9219491499980439567L;
 

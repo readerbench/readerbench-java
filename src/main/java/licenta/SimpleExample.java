@@ -80,14 +80,28 @@ public class SimpleExample {
 
             Context ctx = new Context();
 
-            Word w =  Word.getWordFromConcept("guys", Lang.en);
+//            String[] sentenceWords = sentence.split("[\\s\\.,]+");
+            String[] sentenceWords = text.split("[\\p{Punct}\\s]+");
+            Word w =  Word.getWordFromConcept("wants", Lang.en);
             System.out.println(w.toString());
             List<Tree> subTrees = ctx.findContextTree(tree,w, false);
+            String sentenceOrContext = "";
             for (Tree t: subTrees) {
                 t.pennPrint();
                 valence = RNNCoreAnnotations.getPredictedClass(t) - 2;
                 System.out.println(valence);
+                for (int wordIndex = 0; wordIndex < sentenceWords.length; wordIndex++) {
+                    String wordInSentence = sentenceWords[wordIndex];
+                    System.out.println(wordInSentence);
+                    //the word is the label of a node in the tree
+                    if (ctx.findNodeInTree(t, wordInSentence).size() > 0) {
+                        sentenceOrContext += wordInSentence + " ";
+                    }
+                }
             }
+
+            System.out.println(sentenceOrContext);
+
         }
 
 

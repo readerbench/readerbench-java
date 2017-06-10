@@ -58,6 +58,11 @@ public class Collaboration {
 
         if (noCollaboration != 0) {
             avgCollaboration = sumCollaboration / noCollaboration;
+
+            //it is considered collaboration only when the mean value is positive
+            if (avgCollaboration < 0) {
+                avgCollaboration = 0;
+            }
         }
 
         List<CollaborationZone> zones = new ArrayList<>();

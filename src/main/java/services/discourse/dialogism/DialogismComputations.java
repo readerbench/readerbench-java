@@ -17,6 +17,7 @@ package services.discourse.dialogism;
 
 import java.util.*;
 
+import data.sentiment.SentimentEntity;
 import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.semgraph.SemanticGraph;
@@ -159,6 +160,11 @@ public class DialogismComputations {
 
         // determine spread
         if (d.getVoices() != null) {
+            d.setNoNouns(0);
+            d.setNoVerbs(0);
+
+            Map<String, Integer> auxiliaryVoices = new HashMap<String, Integer>();
+
             for (SemanticChain chain : d.getVoices()) {
                 chain.setSentenceDistribution(new double[noSentences]);
                 chain.setBlockDistribution(new double[d.getBlocks().size()]);
@@ -166,14 +172,43 @@ public class DialogismComputations {
                 for (Word w : chain.getWords()) {
                     int blockIndex = w.getBlockIndex();
                     int sentenceIndex = w.getUtteranceIndex();
+
+                    //find the valence for the context of this voice in the sentence
+                    Sentence sentence = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
+                    double valence = 0;
+                    if (w.isVerb() || w.isNoun()) {
+
+                        //count voices which are nouns or verbs
+                        if (!auxiliaryVoices.containsKey(w.getText())) {
+                            auxiliaryVoices.put(w.getText(), 1);
+                            if (w.isNoun()) {
+                                int noNouns = d.getNoNouns();
+                                d.setNoNouns(noNouns + 1);
+                            }
+                            else if (w.isVerb()) {
+                                int noVerbs = d.getNoVerbs();
+                                d.setNoVerbs(noVerbs + 1);
+                            }
+                        }
+                        List<ContextSentiment> ctxTrees = sentence.getContextMap().get(w);
+                        int noCtxTrees = ctxTrees.size();
+                        double valenceForContext = 0;
+                        //compute the average valence for contextTrees
+                        for (ContextSentiment ctxTree : ctxTrees) {
+                            valenceForContext += ctxTree.getValence();
+
+                        }
+                        valence = Math.round(valenceForContext / noCtxTrees);
+                    }
+
                     // determine spread as 1+log(no_occurences) per sentence
                     try {
-                        chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
+                        chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += valence;
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         System.out.println(ex);
                     }
 
-                    chain.getBlockDistribution()[blockIndex] += 1;
+                    chain.getBlockDistribution()[blockIndex] += valence;
 
                     // build cumulative importance in terms of sentences in which occurrences have been spotted
                     if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
@@ -200,22 +235,24 @@ public class DialogismComputations {
                 }
 
                 // normalize occurrences at sentence level
-                for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
-                    if (chain.getSentenceDistribution()[i] > 0) {
-                        chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
-                    }
-                }
-                // at block level
-                for (int i = 0; i < chain.getBlockDistribution().length; i++) {
-                    if (chain.getBlockDistribution()[i] > 0) {
-                        chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
-                    }
-                }
+//                for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
+//                    if (chain.getSentenceDistribution()[i] > 0) {
+//                        chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
+//                    }
+//                }
+//                // at block level
+//                for (int i = 0; i < chain.getBlockDistribution().length; i++) {
+//                    if (chain.getBlockDistribution()[i] > 0) {
+//                        chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
+//                    }
+//                }
                 // define moving average at block level, relevant for chat conversations
                 chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
                         d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
             }
 
+            System.out.println("-------Number of nouns: " + d.getNoNouns());
+            System.out.println("-------Number of verbs: " + d.getNoVerbs());
             // sort semantic chains (voices) by importance
             Collections.sort(d.getVoices());
 
@@ -269,7 +306,7 @@ public class DialogismComputations {
 
                 for (SemanticChain chain: d.getVoices()) {
                     for (Word w: chain.getWords()) {
-                        //the context for this context was computed in the past
+                        //the context for this voice was computed in the past
                         if (contextMap.containsKey(w)) {
                             continue;
                         }

@@ -390,6 +390,10 @@ public class ChatVoiceInterAnimationView extends JFrame {
 									noSentences++;
 									sumValences += valence;
 									sentenceOrContext = w.getText();
+									//when the context is analyzed, the valence is concatenated
+									if (chckbxContext.isSelected()) {
+										sentenceOrContext += " " + valence;
+									}
 									break;
 								}
 
@@ -413,7 +417,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 
 
 									//display the context: only the words which are in the subTree
-									String[] sentenceWords = sentence.getAlternateText().split("[\\s\\.,]+");
+									String[] sentenceWords = sentence.getAlternateText().split("[\\p{Punct}\\s]+");
 									for (ContextSentiment ctxTree:ctxTrees) {
 										Tree subTree = ctxTree.getContextTree();
 										for (int wordIndex = 0; wordIndex < sentenceWords.length; wordIndex++) {
@@ -423,10 +427,10 @@ public class ChatVoiceInterAnimationView extends JFrame {
 												sentenceOrContext += wordInSentence + " ";
 											}
 										}
-										sentenceOrContext += ctxTree.getValence() +"\n";
+										sentenceOrContext += ctxTree.getValence() +" \n ";
 									}
-								}
 
+								}
 								// sentiment analysis using sentence
 								else {
 									noSentences++;
@@ -436,7 +440,6 @@ public class ChatVoiceInterAnimationView extends JFrame {
 									sentenceOrContext += sentence.getText();
 								}
 								break;
-
 							}
 						}
 					}

@@ -56,6 +56,7 @@ import services.discourse.dialogism.DialogismComputations;
 import services.discourse.dialogism.DialogismMeasures;
 import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
+import services.nlp.spellchecking.Spellchecking;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
@@ -66,8 +67,11 @@ import services.semanticModels.SimilarityType;
 public class Conversation extends AbstractDocument {
 
     private static final long serialVersionUID = 2096182930189552475L;
+    private static Spellchecking spellChecker = new Spellchecking();
 
     private List<Participant> participants;
+    private transient List<Participant> selectedParticipants;
+
     private double[][] participantContributions;
     private List<CollaborationZone> intenseCollabZonesSocialKB;
     private List<CollaborationZone> intenseCollabZonesVoice;
@@ -183,7 +187,9 @@ public class Conversation extends AbstractDocument {
                                         }
                                     }
                                 }
+
                                 String text = el.getFirstChild().getNodeValue();
+                                text = spellChecker.checkText(text, lang, "");
                                 block.setContent(text);
                                 if (text.length() > 0
                                         && !el.getFirstChild().getNodeValue().trim().equals("joins the room")
@@ -343,7 +349,6 @@ public class Conversation extends AbstractDocument {
      */
     public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getParticipantBlockDistribution(voice, p);
-
         return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
     }
 
@@ -645,4 +650,13 @@ public class Conversation extends AbstractDocument {
     public void setAnnotatedCollabEvolution(double[] annotatedCollabEvolution) {
         this.annotatedCollabEvolution = annotatedCollabEvolution;
     }
+
+    public List<Participant> getSelectedParticipants() {
+        return selectedParticipants;
+    }
+
+    public void setSelectedParticipants(List<Participant> selectedParticipants) {
+        this.selectedParticipants = selectedParticipants;
+    }
+
 }

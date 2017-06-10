@@ -122,6 +122,10 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     private List<SemanticChain> voices;
     private transient List<SemanticChain> selectedVoices;
+    private int noNouns;
+    private int noVerbs;
+    private int noConvergentPoints;
+    private int noDivergentPoints;
 
     protected Map<SimilarityType, String> modelPaths;
 
@@ -741,6 +745,38 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public void setBlockOccurrencePattern(long[] blockOccurrencePattern) {
         this.blockOccurrencePattern = blockOccurrencePattern;
+    }
+
+    public void setNoNouns(int no) {
+        this.noNouns = no;
+    }
+
+    public int getNoNouns() {
+        return noNouns;
+    }
+
+    public void setNoVerbs(int no) {
+        this.noVerbs = no;
+    }
+
+    public int getNoVerbs() {
+        return noVerbs;
+    }
+
+    public void setNoConvergentPoints(int no) {
+        this.noConvergentPoints = no;
+    }
+
+    public int getNoConvergentPoints() {
+        return noConvergentPoints;
+    }
+
+    public void setNoDivergentPoints(int no) {
+        this.noDivergentPoints = no;
+    }
+
+    public int getNoDivergentPoints() {
+        return noDivergentPoints;
     }
 
     public String getDescription() {

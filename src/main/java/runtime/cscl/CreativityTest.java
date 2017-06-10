@@ -135,7 +135,7 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), Voices, Avg voices, Avg voice span, Max voice span");
+            out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), Voices, Avg voices, Avg voice span, Max voice span, Number of noun voices, Number of verb voices, Number of noun and verb voices, Number of convergent points, Number of divergent points");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -151,6 +151,11 @@ public class CreativityTest {
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
                             + "," + Formatting.formatNumber(new VoicesMaxSpan().compute(c))
+                            + "," + c.getNoNouns()
+                            + "," + c.getNoVerbs()
+                            + "," + (c.getNoNouns() + c.getNoVerbs())
+                            + "," + c.getNoConvergentPoints()
+                            + "," + c.getNoDivergentPoints()
                     );
                 }
             }

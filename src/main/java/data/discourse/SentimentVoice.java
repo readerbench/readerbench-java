@@ -53,7 +53,7 @@ public class SentimentVoice {
 	}
 
 	public String toString() {
-		String s = "(" + keyword + ", " + valence + ", " + participant.toString() + "), " + sentenceOrContext;
+		String s = "(" + keyword + ", " + valence + ", " + participant.getName() + "): " + sentenceOrContext;
 		return s;
 	}
 }

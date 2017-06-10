@@ -229,20 +229,43 @@ public class DialogismMeasures {
             lsPart.add(part);
         }
 
+        c.setNoConvergentPoints(0);
+        c.setNoDivergentPoints(0);
+
         // take all voices
         for (int i = 0; i < c.getVoices().size(); i++) {
             // for different participants build collaboration based on inter-twined voices
             for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
                 for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
-                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p1));
-                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p2));
-                    double[] mi = VectorAlgebra.discreteMutualInformation(ditrib1, ditrib2);
+                    double[] distribution1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p1));
+                    double[] distribution2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p2));
+
+                    double[][] mi = VectorAlgebra.recurrencePlot(distribution1, distribution2);
                     for (int j = 0; j < evolution.length; j++) {
-                        evolution[j] += mi[j];
+                        evolution[j] += mi[j][j];
                     }
+
+                    //count number of convergent or divergent points
+                    int miConvergentPoints = 0;
+                    int miDivergentPoints = 0;
+                    for (int row = 0; row < mi.length; row++) {
+                        for (int col = 0; col < mi.length; col++) {
+                            if (mi[row][col] > 0) {
+                                miConvergentPoints++;
+                            }
+                            else if (mi[row][col] < 0) {
+                                miDivergentPoints++;
+                            }
+                        }
+                    }
+                    c.setNoConvergentPoints(c.getNoConvergentPoints() + miConvergentPoints);
+                    c.setNoDivergentPoints(c.getNoDivergentPoints() + miDivergentPoints);
                 }
             }
         }
+
+        System.out.println("----Number of convergent points: " + c.getNoConvergentPoints());
+        System.out.println("----Number of divergent points: " + c.getNoDivergentPoints());
         c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
 
         return evolution;

@@ -173,6 +173,14 @@ public class ChatView extends JFrame {
             });
         });
 
+        JButton btnSelectParticipants = new JButton("Select participants");
+        btnSelectParticipants.addActionListener((ActionEvent e) -> {
+            EventQueue.invokeLater(() -> {
+                JFrame frame = new ParticipantSelectionView(chat);
+                frame.setVisible(true);
+            });
+        });
+
         JButton btnDisplayVoiceInteranimation = new JButton("Display voice inter-animation");
         btnDisplayVoiceInteranimation.addActionListener((ActionEvent e) -> {
             if (chat.getSelectedVoices() != null && chat.getSelectedVoices().size() > 0) {
@@ -194,18 +202,24 @@ public class ChatView extends JFrame {
             });
         });
         
-        //sentiment 
-        JButton btnSentiment = new JButton("Sentiment Analysis");
-        btnSentiment.addActionListener((ActionEvent e) -> {
-            if (chat.getSelectedVoices() != null && chat.getSelectedVoices().size() > 0) {
+
+        JButton btnConvOrDiv = new JButton("Convergent/Divergent points");
+        btnConvOrDiv.addActionListener((ActionEvent e) -> {
+            if (chat.getSelectedVoices() != null && chat.getSelectedVoices().size() == 1 &&
+                    chat.getSelectedParticipants() != null && chat.getSelectedParticipants().size() == 2) {
                 EventQueue.invokeLater(() -> {
-                    JFrame frame = new SentimentVoiceView(chat, chat.getSelectedVoices());
-                    
+                    JFrame frame = new ConvergentOrDivergentView(chat, chat.getSelectedVoices(), chat.getSelectedParticipants());
                     frame.setVisible(true);
                 });
-            } else {
-                JOptionPane.showMessageDialog(ChatView.this, "At least one voice must be selected!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+            } else if (chat.getSelectedParticipants() == null && chat.getSelectedVoices() == null) {
+                JOptionPane.showMessageDialog(ChatView.this, "Two participants and only one voice must " +
+                        "be selected!", "Information", JOptionPane.INFORMATION_MESSAGE);
+            } else if (chat.getSelectedVoices() == null || chat.getSelectedVoices().size() != 1){
+                JOptionPane.showMessageDialog(ChatView.this, "Only one voice must be selected!",
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
+            } else if (chat.getSelectedParticipants() == null || chat.getSelectedParticipants().size() != 2){
+                JOptionPane.showMessageDialog(ChatView.this, "Two participants must be selected!",
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -245,7 +259,13 @@ public class ChatView extends JFrame {
                                         .addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE,
                                                 GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(ComponentPlacement.RELATED))
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING, false)
+                                        .addComponent(btnSelectParticipants, GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(btnConvOrDiv, GroupLayout.DEFAULT_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addContainerGap()));
         gl_panelContents
                 .setVerticalGroup(
@@ -259,12 +279,14 @@ public class ChatView extends JFrame {
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
                                                 .addComponent(btnParticipantInvolvement).addComponent(btnTimeEvolution)
-                                                .addComponent(btnCollaborationSocialKB).addComponent(btnSelectVoices))
+                                                .addComponent(btnCollaborationSocialKB).addComponent(btnSelectVoices)
+                                                .addComponent(btnSelectParticipants))
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
                                                 .addComponent(btnParticipantEvolution)
                                                 .addComponent(btnCollaborationVoice)
-                                                .addComponent(btnDisplayVoiceInteranimation))
+                                                .addComponent(btnDisplayVoiceInteranimation)
+                                                .addComponent(btnConvOrDiv))
                                         .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
         JLabel lblTitle = new JLabel("Discussion topic:");
