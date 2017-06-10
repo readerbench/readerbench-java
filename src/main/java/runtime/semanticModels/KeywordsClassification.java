@@ -60,7 +60,6 @@ public class KeywordsClassification {
     private Map<String, AbstractDocument> documentsCategories;
     private Map<String, AbstractDocument> documentsArticlesClassifications;
 
-    private Map<String, AbstractDocument> documentKeywordsArticlesClassifications;
     private final List<SimilarityType> methods;
 
     public KeywordsClassification(String abstractsPath, String categoriesPath, List<String> acceptedKeywords, List<ISemanticModel> semanticModels, Lang lang, boolean usePosTagging, List<SimilarityType> methods) {
@@ -159,8 +158,8 @@ public class KeywordsClassification {
             }
         }
     }
-    
-    private void buildArticlesDocuments() {
+
+    private void buildArticlesDocuments(boolean keywordsOnly, boolean keepOnlyAcceptedKeywords) {
         LOGGER.info("Building documents of abstracts");
         documentsArticlesClassifications = new HashMap<>();
         double percentage;
@@ -171,42 +170,28 @@ public class KeywordsClassification {
             AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(articlesTexts.get(abstractFile));
             AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
             //documentAbstract.computeAll(false);
-            KeywordModeling.determineKeywords(documentAbstract);
-            documentsArticlesClassifications.put(abstractFile, documentAbstract);
-        }
-    }
-
-    private void buildKeywordsDocuments(boolean keepOnlyAcceptedKeywords) {
-        LOGGER.info("Building documents of keywords");
-        documentKeywordsArticlesClassifications = new HashMap<>();
-        double percentage;
-        int index = 0;
-        for (String abstractFile : articlesClassifications.keySet()) {
-            percentage = index++ * 1.0 / articlesClassifications.size() * 100;
-            LOGGER.log(Level.INFO, "Building keywords document for article {0} (" + percentage + "%" + ")", abstractFile);
-            StringBuilder sb = new StringBuilder();
-            List<Keyword> keywords = documentsArticlesClassifications.get(abstractFile).getTopics();
-
-            for (Keyword keyword : keywords) {
-                // add here condition to include if only in relevant keywords list
-                if (keyword.getElement() instanceof Word) {
-                    if (keepOnlyAcceptedKeywords) {
-                        if (this.acceptedKeywords.contains(keyword.getWord().getLemma())) {
+            if (keywordsOnly) {
+                KeywordModeling.determineKeywords(documentAbstract);
+                List<Keyword> keywords = documentAbstract.getTopics();
+                StringBuilder sb = new StringBuilder();
+                for (Keyword keyword : keywords) {
+                    if (keyword.getElement() instanceof Word) {
+                        if (keepOnlyAcceptedKeywords) {
+                            if (this.acceptedKeywords.contains(keyword.getWord().getLemma())) {
+                                sb.append(keyword.getWord().toString()).append(" ");
+                            }
+                        } else {
                             sb.append(keyword.getWord().toString()).append(" ");
                         }
-                    } else {
-                        sb.append(keyword.getWord().toString()).append(" ");
                     }
+
                 }
-
+                AbstractDocumentTemplate templateKeywords = AbstractDocumentTemplate.getDocumentModel(sb.toString());
+                AbstractDocument documentKeywords = new Document(abstractFile, templateKeywords, semanticModels, lang, usePosTagging);
+                documentsArticlesClassifications.put(abstractFile, documentKeywords);
+            } else {
+                documentsArticlesClassifications.put(abstractFile, documentAbstract);
             }
-
-            AbstractDocumentTemplate templateKeywords = AbstractDocumentTemplate.getDocumentModel(sb.toString());
-            AbstractDocument documentKeywords = new Document(abstractFile, templateKeywords, semanticModels, lang, usePosTagging);
-            documentKeywordsArticlesClassifications.put(abstractFile, documentKeywords);
-        }
-        for (String abstractFile : articlesClassifications.keySet()) {
-            LOGGER.log(Level.INFO, "Keywords for {0}:{1}", new Object[]{abstractFile, documentKeywordsArticlesClassifications.get(abstractFile).getText()});
         }
     }
 
@@ -243,7 +228,7 @@ public class KeywordsClassification {
             int k = 0;
             for (String abstractFile : articlesClassifications.keySet()) {
                 k++;
-                AbstractDocument documentKeywords = documentKeywordsArticlesClassifications.get(abstractFile);
+                AbstractDocument documentKeywords = documentsArticlesClassifications.get(abstractFile);
                 for (SimilarityType method : methods) {
                     for (Map.Entry<String, String> category : categories.entrySet()) {
                         AbstractDocument documentCategory = documentsCategories.get(category.getKey());
@@ -294,7 +279,7 @@ public class KeywordsClassification {
         try {
             // generate output files - one for each semantic model
             LOGGER.info("Generating output files...");
-            List<AbstractDocument> docs = new ArrayList<>(documentKeywordsArticlesClassifications.values());
+            List<AbstractDocument> docs = new ArrayList<>(documentsArticlesClassifications.values());
             LOGGER.log(Level.INFO, "{0} docs available", docs.size());
             LOGGER.log(Level.INFO, "{0} semantic models", semanticModels.size());
             for (ISemanticModel model : semanticModels) {
@@ -344,13 +329,13 @@ public class KeywordsClassification {
         }
         return sb.toString();
     }
-    
+
     private String keywordsToString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Abstracts:").append("\n");
         for (Map.Entry<String, String> entry : articlesClassifications.entrySet()) {
             sb.append(entry.getKey()).append(": ")
-                    .append(documentKeywordsArticlesClassifications.get(entry.getKey()).getText())
+                    .append(documentsArticlesClassifications.get(entry.getKey()).getText())
                     .append("\n");
         }
         return sb.toString();
@@ -379,7 +364,7 @@ public class KeywordsClassification {
         List<String> keywords = Arrays.asList(keywordsString.split("\\s*,\\s*"));
 
         KeywordsClassification ac = new KeywordsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", keywords, semanticModels, lang, true, methods);
-        
+
         // build categories documents
         LOGGER.info("Extracting categories...");
         ac.extractCategories();
@@ -387,21 +372,15 @@ public class KeywordsClassification {
         ac.buildCategoriesDocuments(false);
         LOGGER.info(ac.categoriesToString());
         LOGGER.log(Level.INFO, "Number of categories: {0}", ac.categories.size());
-        
+
         // build articles documents
         LOGGER.info("Extracting articles...");
         ac.extractArticles(ignoreArticlesFirstLine);
         LOGGER.info("Building articles documents...");
-        ac.buildArticlesDocuments();
+        ac.buildArticlesDocuments(true, false);
         LOGGER.info(ac.articlesToString());
         LOGGER.log(Level.INFO, "Number of articles: {0}", ac.articlesAnnotations.size());
-        
-        // build keywords documents
-        LOGGER.info("Determining keywords...");
-        ac.buildKeywordsDocuments(false);
-        LOGGER.info(ac.keywordsToString());
-        LOGGER.log(Level.INFO, "Number of keywords articles: {0}", ac.documentKeywordsArticlesClassifications.size());
-        
+
 //        LOGGER.info("Categorizing abstracts...");
 //        ac.categorizeArticles();
         ac.clusterizeArticles(4);
