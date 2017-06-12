@@ -24,6 +24,7 @@ import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Objects;
 import java.util.logging.Logger;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -371,5 +372,36 @@ public abstract class AnalysisElement implements Serializable {
     public List<NGram> getNGrams(int n) {
         return new ArrayList<>();
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + this.index;
+        hash = 71 * hash + Objects.hashCode(this.text);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AnalysisElement other = (AnalysisElement) obj;
+        if (this.index != other.index) {
+            return false;
+        }
+        if (!Objects.equals(this.text, other.text)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
     
 }
