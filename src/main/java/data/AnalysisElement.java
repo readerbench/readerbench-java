@@ -364,11 +364,11 @@ public abstract class AnalysisElement implements Serializable {
     public ISemanticModel getSemanticModel(SimilarityType type) {
         return semanticModels.get(type);
     }
-    
+
     public List<NGram> getBiGrams() {
         return new ArrayList<>();
     }
-    
+
     public List<NGram> getNGrams(int n) {
         return new ArrayList<>();
     }
@@ -401,7 +401,5 @@ public abstract class AnalysisElement implements Serializable {
         }
         return true;
     }
-    
-    
-    
+
 }
