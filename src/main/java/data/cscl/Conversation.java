@@ -75,6 +75,8 @@ public class Conversation extends AbstractDocument {
     private double[][] participantContributions;
     private List<CollaborationZone> intenseCollabZonesSocialKB;
     private List<CollaborationZone> intenseCollabZonesVoice;
+    private List<CollaborationZone> intenseConvergentZonesVoice;
+    private List<CollaborationZone> intenseDivergentZonesVoice;
     private List<CollaborationZone> annotatedCollabZones;
     private double quantCollabPercentage;
     private double socialKBPercentage;
@@ -402,6 +404,22 @@ public class Conversation extends AbstractDocument {
         }
     }
 
+    public List<Utterance> getAllChildrenOfAnUtterance(Utterance u) {
+        List<Utterance> children = new ArrayList<>();
+
+        for (Participant participant : this.participants) {
+            for (Block b : participant.getContributions().getBlocks()) {
+                Utterance utterance = (Utterance) b;
+                Utterance refUtterance = (Utterance) utterance.getRefBlock();
+                if (refUtterance != null && refUtterance.equals(u)) {
+                    children.add(utterance);
+                }
+            }
+        }
+
+        return children;
+    }
+
     private static class ConversationRestructuringSupport {
 
         private Map<Integer, Integer> initialMapping;
@@ -551,6 +569,22 @@ public class Conversation extends AbstractDocument {
      */
     public void setIntenseCollabZonesVoice(List<CollaborationZone> intenseCollabZonesVoice) {
         this.intenseCollabZonesVoice = intenseCollabZonesVoice;
+    }
+
+    public List<CollaborationZone> getIntenseConvergentZonesVoice() {
+        return intenseConvergentZonesVoice;
+    }
+
+    public void setIntenseConvergentZonesVoice(List<CollaborationZone> intenseConvergentZonesVoice) {
+        this.intenseConvergentZonesVoice = intenseConvergentZonesVoice;
+    }
+
+    public List<CollaborationZone> getIntenseDivergentZonesVoice() {
+        return intenseDivergentZonesVoice;
+    }
+
+    public void setIntenseDivergentZonesVoice(List<CollaborationZone> intenseDivergentZonesVoice) {
+        this.intenseDivergentZonesVoice = intenseDivergentZonesVoice;
     }
 
     /**

@@ -31,9 +31,12 @@ import java.util.List;
 import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
+import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.complexity.DataGathering;
+import webService.ReaderBenchServer;
+
 import static view.widgets.ReaderBenchView.LOGGER;
 
 /**
@@ -62,14 +65,14 @@ public class PostQuality {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/" + new File(path).getName() + "-" + "measurements.csv", true))) {
             StringBuilder concat = new StringBuilder();
             concat.append("\n").append(communityName);
-            concat.append(",").append(FilenameUtils.removeExtension(new File(simplifiedConversation.getPath()).getName().replaceAll(",", "")));
+            concat.append(",").append(FilenameUtils.removeExtension(new File(originalConversation.getPath()).getName().replaceAll(",", "")));
             concat.append(",").append(originalConversation.getBlocks().size() - 1);
             concat.append(",").append(simplifiedConversation.getNoBlocks());
             concat.append(",").append(simplifiedConversation.getNoSentences());
             concat.append(",").append(simplifiedConversation.getNoWords());
             concat.append(",").append(simplifiedConversation.getNoContentWords());
             for (ComplexityIndex factor : ComplexityIndices.getIndices(simplifiedConversation.getLanguage())) {
-                concat.append(",").append(simplifiedConversation.getComplexityIndices().get(factor));
+                concat.append(",").append(Formatting.formatNumber(simplifiedConversation.getComplexityIndices().get(factor)));
             }
             out.write(concat.toString());
         } catch (IOException ex) {
@@ -85,13 +88,16 @@ public class PostQuality {
             return;
         }
         for (File subdir : dir.listFiles((File f) -> f.isDirectory())) {
-            for (File f : subdir.listFiles((File f) -> f.getName().endsWith(".ser"))) {
+            for (File f : subdir.listFiles((File file) -> file.getName().endsWith(".ser"))) {
                 Conversation c;
                 try {
                     c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                     AbstractDocument simplifiedConversation = new Document(null, c.getSemanticModels(), c.getLanguage());
-                    if (c.getBlocks().get(0) != null) {
+                    if (!c.getBlocks().isEmpty() && c.getBlocks().get(0) != null) {
                         Block.addBlock(simplifiedConversation, c.getBlocks().get(0));
+                    }
+                    else {
+                        continue;
                     }
                     simplifiedConversation.determineWordOccurences(simplifiedConversation.getBlocks());
                     simplifiedConversation.determineSemanticDimensions();
@@ -105,6 +111,9 @@ public class PostQuality {
     }
 
     public static void main(String[] args) {
-        PostQuality.processInitialPosts("/dragos-resources", Lang.en);
+        //initialize DB
+        ReaderBenchServer.initializeDB();
+
+        PostQuality.processInitialPosts("dragos-resources", Lang.en);
     }
 }

@@ -58,14 +58,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-
-
 import data.Block;
 import data.document.Document;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.converters.Txt2XmlConverter;
-import services.semanticModels.ISemanticModel;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
@@ -138,13 +135,13 @@ public class DocumentManagementView extends JFrame {
                     }
                     return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
                 }
-                
+
                 public String getDescription() {
                     return "XML files (*.xml) or simple text files (*.txt) in UTF-8 format";
                 }
             });
             int returnVal = fc.showOpenDialog(DocumentManagementView.this);
-            
+
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 lastDirectory = file.getParentFile();
@@ -153,7 +150,7 @@ public class DocumentManagementView extends JFrame {
                     loadDocument();
                 } else if (file.getName().endsWith(".txt")) {
                     textFieldTitle.setText(file.getName().replace(".txt", ""));
-                    
+
                     // read txt content
                     try {
                         FileInputStream inputFile = new FileInputStream(file);
@@ -410,7 +407,7 @@ public class DocumentManagementView extends JFrame {
             Block b = null;
             for (String block : blocks.split("(\n)+")) {
                 if (block.trim().length() > 0) {
-                    b = new Block(loadedDocument, index++, block.trim(), 
+                    b = new Block(loadedDocument, index++, block.trim(),
                             loadedDocument.getSemanticModels(), loadedDocument.getLanguage());
                     loadedDocument.getBlocks().add(b);
                 }
@@ -426,7 +423,7 @@ public class DocumentManagementView extends JFrame {
     public void saveDocumentDialogue() {
         JFileChooser fc = null;
         if (lastDirectory == null) {
-            fc = new JFileChooser(new File("in"));
+            fc = new JFileChooser(new File("resources/in"));
         } else {
             fc = new JFileChooser(lastDirectory);
         }
@@ -446,14 +443,15 @@ public class DocumentManagementView extends JFrame {
         int returnVal = fc.showSaveDialog(DocumentManagementView.this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
+            String path;
             if (!file.getName().endsWith(".xml")) {
                 // add xml extension
-                loadedDocument.setPath(file.getPath() + ".xml");
-                loadedDocument.exportXML(loadedDocument.getPath());
+                path = file.getPath() + ".xml";
             } else {
-                loadedDocument.setPath(file.getPath());
-                loadedDocument.exportXML(loadedDocument.getPath());
+                path = file.getPath();
             }
+            loadedDocument.setPath(path);
+            loadedDocument.exportXML(path);
         }
     }
 

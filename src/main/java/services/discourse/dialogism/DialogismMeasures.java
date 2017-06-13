@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -221,7 +221,6 @@ public class DialogismMeasures {
             return null;
         }
         double[] evolution = new double[c.getVoices().get(0).getBlockMovingAverage().length];
-
         Iterator<Participant> it = c.getParticipants().iterator();
         List<Participant> lsPart = new ArrayList<>();
         while (it.hasNext()) {
@@ -244,29 +243,25 @@ public class DialogismMeasures {
                     for (int j = 0; j < evolution.length; j++) {
                         evolution[j] += mi[j][j];
                     }
-
-                    //count number of convergent or divergent points
-                    int miConvergentPoints = 0;
-                    int miDivergentPoints = 0;
-                    for (int row = 0; row < mi.length; row++) {
-                        for (int col = 0; col < mi.length; col++) {
-                            if (mi[row][col] > 0) {
-                                miConvergentPoints++;
-                            }
-                            else if (mi[row][col] < 0) {
-                                miDivergentPoints++;
-                            }
-                        }
-                    }
-                    c.setNoConvergentPoints(c.getNoConvergentPoints() + miConvergentPoints);
-                    c.setNoDivergentPoints(c.getNoDivergentPoints() + miDivergentPoints);
                 }
+            }
+        }
+
+        for (int j = 0; j < evolution.length; j++) {
+            if (evolution[j] > 0) {
+                c.setNoConvergentPoints(c.getNoConvergentPoints() + 1);
+            }
+            else if (evolution[j] < 0) {
+                c.setNoDivergentPoints(c.getNoDivergentPoints() + 1);
             }
         }
 
         System.out.println("----Number of convergent points: " + c.getNoConvergentPoints());
         System.out.println("----Number of divergent points: " + c.getNoDivergentPoints());
         c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
+        c.setIntenseConvergentZonesVoice(Collaboration.getConvergentZones(evolution));
+        c.setIntenseDivergentZonesVoice(Collaboration.getDivergentZones(evolution));
+
 
         return evolution;
     }

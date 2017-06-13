@@ -44,11 +44,18 @@ import java.util.stream.Collectors;
 import javax.swing.*;
 
 import data.Lang;
+import data.Block;
+import java.util.logging.Logger;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import services.commons.Formatting;
 import services.commons.VectorAlgebra;
 
 public class CommunityUtils {
-
+    protected static Logger LOGGER = Logger.getLogger("");
+    
     public static List<Participant> filterParticipants(Community community){
         return community.getParticipants()
                 .parallelStream()
@@ -63,10 +70,42 @@ public class CommunityUtils {
         if (dc != null) {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
-            exportCNAOnlyData(dc, rootPath+ "/clusterdata_" + f.getName() + ".csv",
-                    Arrays.asList(CSCLIndices.INDEGREE, CSCLIndices.OUTDEGREE));
-            hierarchicalClustering(dc, rootPath + "/clustered_results_" + f.getName() + ".csv");
-//            dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+            //exportCNAOnlyData(dc, rootPath+ "/clusterdata_" + f.getName() + ".csv",
+            //        Arrays.asList(CSCLIndices.INDEGREE, CSCLIndices.OUTDEGREE));
+            hierarchicalClustering(dc, rootPath + "/clustered_results_" + f.getName() + ".csv", rootPath);
+            //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
+        }
+    }
+    
+    public static void exportPeriphericParticipantsIntegrationToXls(String path, List<String> header, List<List<String>> content) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("SE Analysis");
+        int columnCount = 0;
+        int rowNo = 0;
+        Row rowOut = sheet.createRow(rowNo++);
+        
+        for (String s : header) {
+            Cell cell = rowOut.createCell(columnCount++);
+            cell.setCellValue(s);
+        }
+        
+        for (List<String> interaction : content) {
+            columnCount = 0;
+            rowOut = sheet.createRow(rowNo++);
+            
+            for (String elem : interaction) {
+                Cell cell = rowOut.createCell(columnCount++);
+                cell.setCellValue(elem);
+            }
+        }
+
+        // TODO check if path/file exists
+        File f = new File(path);
+        try (FileOutputStream outputStream = new FileOutputStream(path + "/peripherical_interactions_" + f.getName() + ".xlsx")) {
+            workbook.write(outputStream);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -101,13 +140,69 @@ public class CommunityUtils {
         }
 
     }
+    
+    private static String trimStringTo1024(String str) {
+        return str.length() > 1025 ? str.substring(0, 1024) : str;
+    }
+    
+    private static List<String> buildInteractionList(String title, String beggingText, String comment, String refComment, String nameOfParticipant) {
+        List<String> l = new ArrayList<>(5);
+        l.add(trimStringTo1024(title));
+        l.add(trimStringTo1024(beggingText));
+        l.add(trimStringTo1024(comment));
+        l.add(trimStringTo1024(refComment));
+        l.add(nameOfParticipant);
+        
+        return l;
+    }
+    
+    public static void extractPeriphericalUsersInteractions(List<Participant> groupedParticipants, Community community, String path) {
+        List<String> header = Arrays.asList(new String[]{"BlogPostTitle", "BeginningText", "CommentOfPOI", "CommentOfMemberOfCommunity", "PeriphericalParticipant"});
+        List<List<String>> content = new ArrayList<>();
+        LOGGER.info(groupedParticipants.toString());
+        LOGGER.info(community.getParticipants().toString());
+        for (Conversation conversation : community.getDocuments()) {
+            boolean flag = false;
+            for (Participant participantInConversation : conversation.getParticipants()) {
+                if (groupedParticipants.contains(participantInConversation)
+                        && groupedParticipants.get(groupedParticipants.indexOf(participantInConversation)).getParticipantGroup().equals(ParticipantGroup.PERIPHERAL)) {
+                    for (Block block : participantInConversation.getContributions().getBlocks()) {
+                        Utterance u = (Utterance) block;
+                        // add the parent comment along with the comment of POI
+                        if (u.getRefBlock() != null) {
+                            Participant participantOfParentComment = ((Utterance)u.getRefBlock()).getParticipant();
+                            if (groupedParticipants.contains(participantOfParentComment)
+                                && !groupedParticipants.get(groupedParticipants.indexOf(participantOfParentComment)).getParticipantGroup().equals(ParticipantGroup.PERIPHERAL)) {
+                                List<String> refComment = buildInteractionList(conversation.getTitleText(), conversation.getText(), u.getText(), u.getRefBlock().getText(), participantInConversation.getName());
+                                content.add(refComment);
+                            }
+                        }
+                        
+                        // add all the children
+                        for (Utterance childUtterance : conversation.getAllChildrenOfAnUtterance(u)) {
+                            Participant childOfParentComment = childUtterance.getParticipant();
+                            if (groupedParticipants.contains(childOfParentComment)
+                                && !groupedParticipants.get(groupedParticipants.indexOf(childOfParentComment)).getParticipantGroup().equals(ParticipantGroup.PERIPHERAL)) {
+                                List<String> childComment = buildInteractionList(conversation.getTitleText(), conversation.getText(), u.getText(), childUtterance.getText(), participantInConversation.getName());
+                                content.add(childComment);
+                            }
+                        }
+                    } 
+                }
+            }
+        }
+        
+        CommunityUtils.exportPeriphericParticipantsIntegrationToXls(path, header, content);
+    }
 
-    public static void hierarchicalClustering(Community community, String pathToFile){
+    public static void hierarchicalClustering(Community community, String pathToFile, String rootPath){
         List<Participant> filteredParticipants = CommunityUtils.filterParticipants(community);
         System.out.println(filteredParticipants.size());
         System.out.println(filteredParticipants.toString());
 
         ClusterCommunity.performAglomerativeClusteringForCSCL(filteredParticipants, pathToFile);
+        LOGGER.info("Finished Clustering");
+        extractPeriphericalUsersInteractions(filteredParticipants, community, rootPath);
     }
 
 

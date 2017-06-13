@@ -44,15 +44,15 @@ public class ResultCv extends Result {
     private Integer fontTypes; // contains font types with text styles
     private Integer fontTypesSimple; // contains font types withouth text styles
     private Integer fontSizes;
-    private Float minFontSize;
-    private Float maxFontSize;
+    private Double minFontSize;
+    private Double maxFontSize;
     private Integer totalCharacters;
     private Integer boldCharacters;
-    private Float boldCharsCoverage;
+    private Double boldCharsCoverage;
     private Integer italicCharacters;
-    private Float italicCharsCoverage;
+    private Double italicCharsCoverage;
     private Integer boldItalicCharacters;
-    private Float boldItalicCharsCoverage;
+    private Double boldItalicCharsCoverage;
 
     private List<String> positiveWords;
     private List<String> negativeWords;
@@ -334,19 +334,19 @@ public class ResultCv extends Result {
         this.fontSizes = fontSizes;
     }
 
-    public Float getMinFontSize() {
+    public Double getMinFontSize() {
         return minFontSize;
     }
 
-    public void setMinFontSize(Float minFontSize) {
+    public void setMinFontSize(Double minFontSize) {
         this.minFontSize = minFontSize;
     }
 
-    public Float getMaxFontSize() {
+    public Double getMaxFontSize() {
         return maxFontSize;
     }
 
-    public void setMaxFontSize(Float maxFontSize) {
+    public void setMaxFontSize(Double maxFontSize) {
         this.maxFontSize = maxFontSize;
     }
 
@@ -366,11 +366,11 @@ public class ResultCv extends Result {
         this.boldCharacters = boldCharacters;
     }
 
-    public Float getBoldCharsCoverage() {
+    public Double getBoldCharsCoverage() {
         return boldCharsCoverage;
     }
 
-    public void setBoldCharsCoverage(Float boldCharsCoverage) {
+    public void setBoldCharsCoverage(Double boldCharsCoverage) {
         this.boldCharsCoverage = boldCharsCoverage;
     }
 
@@ -382,11 +382,11 @@ public class ResultCv extends Result {
         this.italicCharacters = italicCharacters;
     }
     
-    public Float getItalicCharsCoverage() {
+    public Double getItalicCharsCoverage() {
         return italicCharsCoverage;
     }
     
-    public void setItalicCharsCoverage(Float italicCharsCoverage) {
+    public void setItalicCharsCoverage(Double italicCharsCoverage) {
         this.italicCharsCoverage = italicCharsCoverage;
     }
 
@@ -398,11 +398,11 @@ public class ResultCv extends Result {
         this.boldItalicCharacters = boldItalicCharacters;
     }
     
-    public Float getBoldItalicCharsCoverage() {
+    public Double getBoldItalicCharsCoverage() {
         return boldItalicCharsCoverage;
     }
     
-    public void setBoldItalicCharsCoverage(Float boldItalicCharsCoverage) {
+    public void setBoldItalicCharsCoverage(Double boldItalicCharsCoverage) {
         this.boldItalicCharsCoverage = boldItalicCharsCoverage;
     }
 

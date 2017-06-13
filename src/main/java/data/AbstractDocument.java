@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,6 +126,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     private int noVerbs;
     private int noConvergentPoints;
     private int noDivergentPoints;
+    private int noPerspectives;
+    private int noNounsInPerspectives;
+    private int noVerbsInPerspectives;
 
     protected Map<SimilarityType, String> modelPaths;
 
@@ -258,9 +261,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(String pathToDoc,
-            Map<SimilarityType, String> modelPaths, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
-            int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
+                                                       Map<SimilarityType, String> modelPaths, Lang lang,
+                                                       boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
+                                                       int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
@@ -292,9 +295,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
-            Lang lang, boolean usePOSTagging, boolean computeDialogism,
-            String pathToComplexityModel, int[] selectedComplexityFactors,
-            boolean cleanInput, SaveType saveOutput) {
+                                                       Lang lang, boolean usePOSTagging, boolean computeDialogism,
+                                                       String pathToComplexityModel, int[] selectedComplexityFactors,
+                                                       boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
         LOGGER.log(Level.INFO, "Loading {0} file for processing", docFile.getPath());
         boolean isDocument = checkTagsDocument(docFile, "p");
@@ -425,7 +428,21 @@ public abstract class AbstractDocument extends AnalysisElement {
             out.write("\nTopics - Relevance\n");
             out.write("Keyword, Relevance,Tf,Average semantic similarity\n");
             for (Keyword t : this.getTopics()) {
-                out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
+                out.write(t.getWord().getLemma() + " (");
+                if (t.getElement() instanceof Word) {
+                    out.write(t.getWord().getPOS());
+                }
+                else {
+                    NGram nGram = (NGram) t.getElement();
+                    StringBuilder sb = new StringBuilder();
+                    for (Word word : nGram.getWords()) {
+                        sb.append(word.getPOS()).append("_");
+                    }
+                    String nGramLemmas = sb.toString();
+                    sb.setLength(0);
+                    out.write(nGramLemmas.substring(0,nGramLemmas.length()-1));
+                }
+                out.write ("),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
@@ -530,13 +547,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
@@ -546,7 +563,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
 
             // print semantic chains
-            if (voices.size() > 0) {
+            if (voices != null && voices.size() > 0) {
                 out.write("\nVoices - Semantic chains\n");
                 for (SemanticChain voice : voices) {
                     out.write(voice.toStringAllWords() + "\n");
@@ -779,6 +796,30 @@ public abstract class AbstractDocument extends AnalysisElement {
         return noDivergentPoints;
     }
 
+    public void setNoPerspectives(int noPerspectives) {
+        this.noPerspectives = noPerspectives;
+    }
+
+    public int getNoPerspectives() {
+        return noPerspectives;
+    }
+
+    public int getNoNounsInPerspectives() {
+        return noNounsInPerspectives;
+    }
+
+    public void setNoNounsInPerspectives(int noNounsInPerspectives) {
+        this.noNounsInPerspectives = noNounsInPerspectives;
+    }
+
+    public int getNoVerbsInPerspectives() {
+        return noVerbsInPerspectives;
+    }
+
+    public void setNoVerbsInPerspectives(int noVerbsInPerspectives) {
+        this.noVerbsInPerspectives = noVerbsInPerspectives;
+    }
+
     public String getDescription() {
         String s = this.getTitleText();
 
@@ -844,11 +885,18 @@ public abstract class AbstractDocument extends AnalysisElement {
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
     }
-    
+
     @Override
     public List<NGram> getBiGrams() {
         return blocks.stream()
                 .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<NGram> getNGrams(int n) {
+        return blocks.stream()
+                .flatMap(s -> s.getNGrams(n).stream())
                 .collect(Collectors.toList());
     }
 }

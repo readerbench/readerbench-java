@@ -48,7 +48,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
-
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -60,7 +59,6 @@ import org.gephi.preview.api.PreviewController;
 import org.gephi.preview.api.PreviewModel;
 import org.gephi.preview.api.PreviewProperty;
 import org.gephi.preview.api.RenderTarget;
-import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
@@ -68,18 +66,23 @@ import org.openide.util.Lookup;
 import data.AbstractDocument;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
+import java.awt.HeadlessException;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.gephi.layout.plugin.force.StepDisplacement;
+import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
-public class PaperSimilarityView extends JFrame {
+public class DocCentralityGraph extends JFrame {
 
     private static final long serialVersionUID = -8582615231233815258L;
     static Logger logger = Logger.getLogger("");
-    public static final Color COLOR_CONCEPT = new Color(204, 204, 204); // silver
-
+    public static final Color CONCEPT_COLOR = new Color(204, 204, 204); // silver
+    public static final Color EDGE_COLOR = new Color(255, 255, 255);//black
     private final List<Document> docs;
     private final AbstractDocument referenceDoc;
     private JSlider sliderThreshold;
@@ -145,7 +148,7 @@ public class PaperSimilarityView extends JFrame {
         }
     }
 
-    public PaperSimilarityView(List<Document> docs, Document referenceDoc) {
+    public DocCentralityGraph(List<Document> docs, Document referenceDoc) {
         this.graphDepthLevel = 1;
         super.setTitle("Document Centrality Graph");
         super.getContentPane().setBackground(Color.WHITE);
@@ -173,7 +176,7 @@ public class PaperSimilarityView extends JFrame {
         sliderThreshold.setPaintLabels(true);
         sliderThreshold.setMinorTickSpacing(10);
         sliderThreshold.setMajorTickSpacing(50);
-        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
+        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<>();
         labelTableThreshold.put(80, new JLabel("80%"));
         labelTableThreshold.put(60, new JLabel("60%"));
         labelTableThreshold.put(40, new JLabel("40%"));
@@ -205,9 +208,11 @@ public class PaperSimilarityView extends JFrame {
         try {
             tableCentrality.setAutoCreateRowSorter(true);
         } catch (Exception continuewithNoSort) {
+            Exceptions.printStackTrace(continuewithNoSort);
         }
         tableCentrality.setFillsViewportHeight(true);
         tableCentrality.addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent me) {
                 JTable table = (JTable) me.getSource();
                 Point p = me.getPoint();
@@ -218,8 +223,8 @@ public class PaperSimilarityView extends JFrame {
                         String doc2 = tableCentrality.getValueAt(row, 0).toString();
                         String score = tableCentrality.getValueAt(row, 1).toString();
 
-                        JOptionPane.showMessageDialog(PaperSimilarityView.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
-                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(DocCentralityGraph.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
+                    } catch (HeadlessException e) {
                         // e.printStackTrace();
                     }
                 }
@@ -243,7 +248,7 @@ public class PaperSimilarityView extends JFrame {
             JComboBox<?> cb = (JComboBox<?>) e.getSource();
             String selectedItem = (String) cb.getSelectedItem();
             int levelSelected = Integer.parseInt(selectedItem);
-            PaperSimilarityView.this.setGraphDepthLevel(levelSelected);
+            DocCentralityGraph.this.setGraphDepthLevel(levelSelected);
             generateGraph();
         });
 
@@ -272,13 +277,13 @@ public class PaperSimilarityView extends JFrame {
                                 .addContainerGap(650, Short.MAX_VALUE))
                         .addGroup(groupLayout.createSequentialGroup().addComponent(lblCentrality).addGap(10).addGroup(
                                 groupLayout.createParallelGroup(Alignment.LEADING).addGroup(
-                                groupLayout.createSequentialGroup().addGroup(groupLayout
-                                        .createParallelGroup(Alignment.LEADING)
-                                        .addComponent(lblComboBox).addComponent(docLevelsCombo,
-                                        GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
-                                .addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
-                                .addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
-                                        tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671, Short.MAX_VALUE)))
+                                        groupLayout.createSequentialGroup().addGroup(groupLayout
+                                                .createParallelGroup(Alignment.LEADING)
+                                                .addComponent(lblComboBox).addComponent(docLevelsCombo,
+                                                GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
+                                                .addGap(27).addComponent(panelGraph, GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
+                                        .addGroup(groupLayout.createSequentialGroup().addGap(13).addComponent(
+                                                tableScrollCentrality, GroupLayout.DEFAULT_SIZE, 671, Short.MAX_VALUE)))
                                 .addContainerGap()));
         getContentPane().setLayout(groupLayout);
     }
@@ -323,14 +328,14 @@ public class PaperSimilarityView extends JFrame {
                     text += d.getTitleText();
                 }
                 text += "(" + new File(d.getPath()).getName() + ")";
-                text = (text.length() > 40) ? (text.substring(0, 40) + "..") : text;
+                text = (text.length() > 40) ? (text.substring(0, 40) + "...") : text;
                 if (nodes.get(d) == null) {
                     Node n = graphModel.factory().newNode(text);
                     n.setLabel(text);
                     n.setSize(10);
-                    n.setColor(new Color(1.0f - ((float) (COLOR_CONCEPT.getRed()) / (256 * currentLevel)),
-                            1.0f - ((float) (COLOR_CONCEPT.getGreen()) / (256 * currentLevel)),
-                            1.0f - ((float) (COLOR_CONCEPT.getBlue()) / (256 * currentLevel))));
+                    n.setColor(new Color(1.0f - ((float) (CONCEPT_COLOR.getRed()) / (256 * currentLevel)),
+                            1.0f - ((float) (CONCEPT_COLOR.getGreen()) / (256 * currentLevel)),
+                            1.0f - ((float) (CONCEPT_COLOR.getBlue()) / (256 * currentLevel))));
                     n.setX((float) ((0.01 + Math.random()) * 1000) - 500);
                     n.setY((float) ((0.01 + Math.random()) * 1000) - 500);
                     graph.addNode(n);
@@ -345,15 +350,16 @@ public class PaperSimilarityView extends JFrame {
                 if (visibleDocs.get(d)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(refDoc, d);
                     if (sim >= threshold && !refDoc.getProcessedText().equals(d.getProcessedText())) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, sim, false);
-                        e.setLabel(sim + "");
+                        Edge e = graphModel.factory().newEdge(nodes.get(refDoc), nodes.get(d), 0, Math.max(sim, 0.1), false);
+                        e.setLabel(Formatting.formatNumber(sim) + "");
+                        e.setColor(EDGE_COLOR);
                         graph.addEdge(e);
                     }
                 }
             }
         }
 
-        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        logger.log(Level.INFO, "Generated graph with {0} nodes and {1} edges", new Object[]{graph.getNodeCount(), graph.getEdgeCount()});
 
         for (AbstractDocument d : docs) {
             if (visibleDocs.get(d) == true) {
@@ -384,7 +390,7 @@ public class PaperSimilarityView extends JFrame {
         while (docIt.hasNext()) {
             AbstractDocument d = docIt.next();
             if (!this.referenceDoc.equals(d)) {
-                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(this.referenceDoc, d);;
+                double sim = SemanticCohesion.getAverageSemanticModelSimilarity(this.referenceDoc, d);
                 similarities.add(new CompareDocsSim(d, sim));
             }
         }
@@ -404,22 +410,31 @@ public class PaperSimilarityView extends JFrame {
         tableCentralityModel.fireTableDataChanged();
         /* end similarity to central article */
 
+        // Run YifanHuLayout for 100 passes
+        YifanHuLayout layout = new YifanHuLayout(null, new StepDisplacement(1f));
+        layout.setGraphModel(graphModel);
+        layout.resetPropertiesValues();
+        layout.setOptimalDistance(500f);
+        layout.initAlgo();
+        for (int i = 0; i < 100 && layout.canAlgo(); i++) {
+            layout.goAlgo();
+        }
+        layout.endAlgo();
+
         // Get Centrality
         GraphDistance distance = new GraphDistance();
         distance.setDirected(false);
         distance.execute(graphModel);
 
-        logger.info("Generating preview ...");
         // Preview configuration
         PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
         PreviewModel previewModel = previewController.getModel();
         previewModel.getProperties().putValue(PreviewProperty.SHOW_NODE_LABELS, Boolean.TRUE);
-        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_COLOR,
-                new DependantOriginalColor(Color.BLACK));
-        previewModel.getProperties().putValue(PreviewProperty.EDGE_RADIUS, 10f);
         previewModel.getProperties().putValue(PreviewProperty.SHOW_EDGE_LABELS, Boolean.TRUE);
-        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_PROPORTIONAL_SIZE, Boolean.FALSE);
-        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.TRUE);
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_CURVED, Boolean.FALSE);
+        previewModel.getProperties().putValue(PreviewProperty.NODE_LABEL_FONT, new Font("Arial", Font.PLAIN, 20));
+        previewModel.getProperties().putValue(PreviewProperty.EDGE_LABEL_FONT, new Font("Arial", Font.PLAIN, 30));
+        previewController.refreshPreview();
 
         // New Processing target, get the PApplet
         G2DTarget target = (G2DTarget) previewController.getRenderTarget(RenderTarget.G2D_TARGET);
@@ -437,11 +452,11 @@ public class PaperSimilarityView extends JFrame {
         try {
             ec.exportFile(new File("out/graph_doc_centered_view.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();
-        logger.info("Finished building the graph " + this.graphDepthLevel);
+        logger.log(Level.INFO, "Finished building the graph {0}", this.graphDepthLevel);
     }
 
     @Override

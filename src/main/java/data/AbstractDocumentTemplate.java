@@ -37,8 +37,12 @@ public class AbstractDocumentTemplate implements Serializable {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
         new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
         new SimpleDateFormat("HH:mm:ss"),
-        new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
+        new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH),
+            new SimpleDateFormat("hh:mm a", Locale.ENGLISH)
     };
+
+    private static Date lastDate;
+    private static int lastDateOffset;
 
     private String genre;
     private List<BlockTemplate> blocks = new ArrayList<>();
@@ -87,13 +91,27 @@ public class AbstractDocumentTemplate implements Serializable {
                 } catch (ParseException e) {
                 }
             }
-            if (time == null) {
+            if (aux == null) {
                 try {
                     Long longTime = Long.parseLong(time);
-                    aux = new Date(longTime * 1000);
+                    aux = new Date(longTime);
                 } catch (NumberFormatException e) {
                     LOGGER.log(Level.SEVERE, "Unparsable date: {0}", time);
                 }
+            }
+            // Adds a millisecond between utterances with the same timestamp
+            if (lastDate == null) { // first utterance
+                lastDate = aux;
+            } else {
+                long tLast = lastDate.getTime(); // time of last utterance in the file + lastDateOffset
+                long crtDate = aux.getTime() + lastDateOffset;
+                if (tLast == crtDate) {
+                    lastDateOffset += 1; // time in file + lastDateOffset + 1
+                    aux = new Date(aux.getTime() + lastDateOffset);
+                } else {
+                    lastDateOffset = 0; // reset offset if there is a new hour:minute time
+                }
+                lastDate = aux; // the current becomes the last
             }
             this.time = aux;
         }

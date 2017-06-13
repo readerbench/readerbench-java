@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com</groupId>
     <artifactId>ReaderBench</artifactId>
-    <version>2.3.1</version>
+    <version>2.3.2</version>
     <packaging>jar</packaging>
     <repositories>
         <repository>
@@ -165,6 +165,7 @@
         <javax.mail.version>1.5.5</javax.mail.version>
         <javax.servlet.version>4.0.0-b01</javax.servlet.version>
         <languagetool.version>3.7</languagetool.version>
+        <svm.version>3.22</svm.version>
     </properties>
     <profiles>
         <profile>
@@ -366,7 +367,7 @@
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-dev</artifactId>
-            <version>3.9.0</version>
+            <version>3.9.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -424,6 +425,11 @@
             <groupId>org.gephi</groupId>
             <artifactId>gephi-toolkit</artifactId>
             <version>${gephi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.datumbox</groupId>
+            <artifactId>libsvm</artifactId>
+            <version>${svm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -574,6 +580,27 @@
             <groupId>org.apache.opennlp</groupId>
             <artifactId>opennlp-tools</artifactId>
             <version>1.8.0</version>
+		</dependency>
+        <dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>multiLayerPerceptrons</artifactId>
+            <version>1.0.10</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>native_system-java</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>native_ref-java</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.fommil.netlib</groupId>
+            <artifactId>netlib-native_ref-osx-x86_64</artifactId>
+            <version>1.1</version>
+            <classifier>natives</classifier>
         </dependency>
     </dependencies>
 </project>

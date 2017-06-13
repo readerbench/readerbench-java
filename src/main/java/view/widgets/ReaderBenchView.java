@@ -71,7 +71,6 @@ import view.widgets.document.DocumentManagementView;
 import view.widgets.document.DocumentProcessingView;
 import view.widgets.document.DocumentSemanticSearchView;
 import view.widgets.selfexplanation.summary.SummaryProcessingView;
-import view.widgets.selfexplanation.verbalization.AnnotateVerbalizationView;
 import view.widgets.selfexplanation.verbalization.CreateVerbalizationView;
 import view.widgets.selfexplanation.verbalization.VerbalizationProcessingView;
 import view.widgets.semanticModels.SemanticModelsTraining;
@@ -100,7 +99,6 @@ public class ReaderBenchView extends JFrame {
     private final JPanel panelDataInput;
     private final JButton btnCreateDocument;
     private final JButton btnCreateVerbalization;
-    private final JButton btnAnnotateVerbalization;
 
     // pre-processing
     private final JButton btnPreprocessingTrainSemanticModels;
@@ -195,12 +193,6 @@ public class ReaderBenchView extends JFrame {
             view.setVisible(true);
         });
 
-        btnAnnotateVerbalization = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ReaderBenchView.btnAnnotateVerbalization.text"));
-        btnAnnotateVerbalization.addActionListener((ActionEvent e) -> {
-            AnnotateVerbalizationView view = new AnnotateVerbalizationView();
-            view.setVisible(true);
-        });
         GroupLayout gl_panelDataInput = new GroupLayout(panelDataInput);
         gl_panelDataInput
                 .setHorizontalGroup(gl_panelDataInput.createParallelGroup(Alignment.LEADING)
@@ -210,14 +202,11 @@ public class ReaderBenchView extends JFrame {
                                 .addPreferredGap(ComponentPlacement.UNRELATED)
                                 .addComponent(btnCreateVerbalization, GroupLayout.PREFERRED_SIZE, 220,
                                         GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.UNRELATED).addComponent(btnAnnotateVerbalization,
-                                GroupLayout.PREFERRED_SIZE, 220, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(690, Short.MAX_VALUE)));
+                                .addPreferredGap(ComponentPlacement.UNRELATED)));
         gl_panelDataInput.setVerticalGroup(gl_panelDataInput.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_panelDataInput.createSequentialGroup().addContainerGap()
                         .addGroup(gl_panelDataInput.createParallelGroup(Alignment.BASELINE)
-                                .addComponent(btnCreateDocument).addComponent(btnAnnotateVerbalization)
-                                .addComponent(btnCreateVerbalization))
+                                .addComponent(btnCreateDocument).addComponent(btnCreateVerbalization))
                         .addContainerGap(53, Short.MAX_VALUE)));
         panelDataInput.setLayout(gl_panelDataInput);
 
@@ -386,11 +375,11 @@ public class ReaderBenchView extends JFrame {
         gl_desktopPane
                 .setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(Alignment.TRAILING,
                         gl_desktopPane.createSequentialGroup().addContainerGap()
-                        .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
-                                .addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 256,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE))
-                        .addContainerGap()));
+                                .addGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING)
+                                        .addComponent(lblReaderbench, GroupLayout.PREFERRED_SIZE, 256,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE))
+                                .addContainerGap()));
         gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
                         .addComponent(tabbedPane, GroupLayout.PREFERRED_SIZE, 125, GroupLayout.PREFERRED_SIZE)

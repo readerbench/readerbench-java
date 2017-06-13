@@ -57,14 +57,12 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import org.apache.log4j.BasicConfigurator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -72,13 +70,13 @@ import org.openide.util.Exceptions;
 import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
-import services.semanticModels.word2vec.Word2VecModel;
 import services.semanticModels.TextSimilarity;
+import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -86,7 +84,6 @@ import view.widgets.article.utils.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;
-import webService.mail.SendMail;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
 import webService.result.ResultAnswerMatching;
@@ -140,6 +137,108 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
+    /**
+     * Returns an error result if there are any required parameters in the first
+     * set missing in the second set.
+     *
+     * @param requiredParams a set of required key parameters
+     * @param params a set of provided key parameters
+     * @return an error message if there are any required parameters in the
+     * first set missing in the second set or null otherwise
+     */
+    private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
+        Set<String> requiredParamsMissing;
+        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+            // if not return an error showing the missing parameters
+            return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
+        }
+        return null;
+    }
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param request the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(Request request) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : request.queryParams()) {
+            hm.put(paramKey, request.queryParams(paramKey));
+        }
+        return hm;
+    }
+    /**
+     * Returns a HashMap containing <key, value> for parameters.
+     *
+     * @param json the request sent to the server
+     * @return the HashMap if there are any parameters or null otherwise
+     */
+    private static Map<String, String> hmParams(JSONObject json) {
+        Map<String, String> hm = new HashMap<>();
+        for (String paramKey : (Set<String>) json.keySet()) {
+            hm.put(paramKey, json.get(paramKey).toString());
+        }
+        return hm;
+    }
+    /**
+     * Returns a Set of initial required parameters.
+     *
+     * @return the set of initial required parameters
+     */
+    public static Set<String> setInitialRequiredParams() {
+        Set<String> requiredParams = new HashSet<>();
+        requiredParams.add("language");
+        requiredParams.add("lsa");
+        requiredParams.add("lda");
+        requiredParams.add("pos-tagging");
+        requiredParams.add("dialogism");
+        return requiredParams;
+    }
+    private static List<AbstractDocument> setDocuments(String path) {
+        if (loadedPath != null && loadedPath.equals(path)) {
+            return loadedDocs;
+        }
+        
+        loadedPath = path;
+        loadedDocs = new ArrayList<>();
+        try {
+            File dir = new File("resources/in/" + path);
+            File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
+
+            for (File file : files) {
+                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                loadedDocs.add(d);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            Exceptions.printStackTrace(e);
+        }
+        
+        return loadedDocs;
+    }
+    public static void initializeDB() {
+        LOGGER.setLevel(Level.INFO); // changing log level
+        org.apache.log4j.BasicConfigurator.configure();
+        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
+        FileHandler fh;
+        try {
+            fh = new FileHandler("ReaderBenchServer.log");
+            LOGGER.addHandler(fh);
+        } catch (IOException | SecurityException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        
+        LOGGER.info("Initialize words...");
+        WordDAO.getInstance().loadAll();
+        LOGGER.info("Words initialization finished");
+        
+        SentimentWeights.initialize();
+        LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
+    }
+    public static void main(String[] args) {
+        ReaderBenchServer.initializeDB();
+        ReaderBenchServer server = new ReaderBenchServer();
+        server.start();
+    }
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
         List<ResultCategory> resultCategories = new ArrayList<>();
@@ -275,97 +374,28 @@ public class ReaderBenchServer {
         return new ResultTextSimilarities(similarityScoresToString);
     }
 
-    private ResultAnswerMatching computeBestAnswer(AbstractDocument userInputDocument, List<AbstractDocument> predefinedAnswerDocuments) {
-        List<Double> scores = new ArrayList();
+    private ResultAnswerMatching computeScoresPerAnswer(AbstractDocument userInputDocument, List<AbstractDocument> predefinedAnswerDocuments) {
+        Map<Integer, Double> scoresPerAnswer = new HashMap<>();
         for (AbstractDocument predefinedAnswerDocument : predefinedAnswerDocuments) {
             SemanticCohesion sc = new SemanticCohesion(userInputDocument, predefinedAnswerDocument);
-            scores.add(sc.getCohesion());
+            scoresPerAnswer.put(predefinedAnswerDocuments.indexOf(predefinedAnswerDocument), sc.getCohesion());
         }
-        Double maxScore = Collections.max(scores);
-        Integer indexId = -1;
-        int k = 0;
-        for (Double score : scores) {
-            if (Objects.equals(score, maxScore)) {
-                indexId = k;
-                break;
-            }
-            k++;
-        }
-        return new ResultAnswerMatching(indexId, maxScore);
+        return new ResultAnswerMatching(scoresPerAnswer);
     }
 
     private ResultPdfToText getTextFromPdf(String uri, boolean localFile) {
-        PdfToTextConverter pdfConverter = new PdfToTextConverter();
+        PdfToTxtConverter pdfToTxtConverter;
         if (localFile) {
-            // return new
-            // ResultPdfToText(PdfToTextConverter.pdftoText("resources/papers/"
-            // + uri + ".pdf", true));
-            return new ResultPdfToText(pdfConverter.pdftoText(uri, true));
+            pdfToTxtConverter = new PdfToTxtConverter(uri, true);
+            pdfToTxtConverter.process();
+            return new ResultPdfToText(pdfToTxtConverter.getParsedText());
         } else {
-            return new ResultPdfToText(pdfConverter.pdftoText(uri, false));
+            pdfToTxtConverter = new PdfToTxtConverter(uri, false);
+            pdfToTxtConverter.process();
+            return new ResultPdfToText(pdfToTxtConverter.getParsedText());
         }
     }
 
-    /**
-     * Returns an error result if there are any required parameters in the first
-     * set missing in the second set.
-     *
-     * @param requiredParams a set of required key parameters
-     * @param params a set of provided key parameters
-     * @return an error message if there are any required parameters in the
-     * first set missing in the second set or null otherwise
-     */
-    private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
-        Set<String> requiredParamsMissing;
-        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
-            // if not return an error showing the missing parameters
-            return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
-        }
-        return null;
-    }
-
-    /**
-     * Returns a HashMap containing <key, value> for parameters.
-     *
-     * @param request the request sent to the server
-     * @return the HashMap if there are any parameters or null otherwise
-     */
-    private static Map<String, String> hmParams(Request request) {
-        Map<String, String> hm = new HashMap<>();
-        for (String paramKey : request.queryParams()) {
-            hm.put(paramKey, request.queryParams(paramKey));
-        }
-        return hm;
-    }
-
-    /**
-     * Returns a HashMap containing <key, value> for parameters.
-     *
-     * @param json the request sent to the server
-     * @return the HashMap if there are any parameters or null otherwise
-     */
-    private static Map<String, String> hmParams(JSONObject json) {
-        Map<String, String> hm = new HashMap<>();
-        for (String paramKey : (Set<String>) json.keySet()) {
-            hm.put(paramKey, json.get(paramKey).toString());
-        }
-        return hm;
-    }
-
-    /**
-     * Returns a Set of initial required parameters.
-     *
-     * @return the set of initial required parameters
-     */
-    public static Set<String> setInitialRequiredParams() {
-        Set<String> requiredParams = new HashSet<>();
-        requiredParams.add("language");
-        requiredParams.add("lsa");
-        requiredParams.add("lda");
-        requiredParams.add("pos-tagging");
-        requiredParams.add("dialogism");
-        return requiredParams;
-    }
 
     public void start() {
 
@@ -386,7 +416,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -421,8 +454,11 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
-            errorIfParamsMissing(requiredParams, json.keySet());
-
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -453,8 +489,11 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
-            errorIfParamsMissing(requiredParams, json.keySet());
-
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -487,7 +526,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = new HashSet<>();
             requiredParams.add("text");
             requiredParams.add("path");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             int maxContentSize = Integer.MAX_VALUE;
@@ -504,7 +546,10 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, request.queryParams());
+            QueryResult error = errorIfParamsMissing(requiredParams, request.queryParams());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(request);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -540,7 +585,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -585,7 +633,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -625,7 +676,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text");
             requiredParams.add("explanation");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -655,7 +709,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cscl-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -692,7 +749,10 @@ public class ReaderBenchServer {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -736,7 +796,10 @@ public class ReaderBenchServer {
             requiredParams.add("cv-file");
             requiredParams.add("cover-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -801,7 +864,10 @@ public class ReaderBenchServer {
             requiredParams.add("cv-file");
             requiredParams.add("threshold");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -827,23 +893,23 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-
-            PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
-            // ignore lines containing at least one of the words in the ignoreList list
-            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
-            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
-
-            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
+            PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
+            pdfToTxtConverter.process();
+            // ignore lines containing at least one of the words in the ignoreList list
+            pdfToTxtConverter.removeLines(ignoreLines);
+            pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
+
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            
             QueryResultCv queryResult = new QueryResultCv();
-            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
+            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
-            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+            result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
             boolean keywordWarning = false;
@@ -871,10 +937,10 @@ public class ReaderBenchServer {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("too_many_pages"));
             }
 
-            if (socialNetworksLinksFound.get("LinkedIn") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("LinkedIn") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             }
-            if (socialNetworksLinksFound.get("Viadeo") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
             }
 
@@ -905,7 +971,10 @@ public class ReaderBenchServer {
             requiredParams.add("experience"); // junior or senior
             requiredParams.add("cv-file");
             requiredParams.add("threshold");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -932,21 +1001,21 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-
-            PdfToTextConverter pdfConverter = new PdfToTextConverter();
-            String cvContent = pdfConverter.pdftoText("tmp/" + hm.get("cv-file"), true);
-            // ignore lines containing at least one of the words in the ignoreList list
-            cvContent = pdfConverter.removeLines(cvContent, ignoreLines);
-            Map<String, String> socialNetworksLinksFound = pdfConverter.extractSocialLinks(cvContent, socialNetworksLinks);
-
-            LOGGER.log(Level.INFO, "Text CV: {0}", cvContent);
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
+            PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
+            pdfToTxtConverter.process();
+            // ignore lines containing at least one of the words in the ignoreList list
+            pdfToTxtConverter.removeLines(ignoreLines);
+            pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
+
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
-            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
-            result.setSocialNetworksLinksFound(socialNetworksLinksFound);
+            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
+            result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
             boolean keywordWarning = false;
@@ -970,10 +1039,10 @@ public class ReaderBenchServer {
                 result.getWarnings().add(sb.toString());
             }
 
-            if (socialNetworksLinksFound.get("LinkedIn") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("LinkedIn") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_linkedin_not_found"));
             }
-            if (socialNetworksLinksFound.get("Viadeo") == null) {
+            if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
             }
 
@@ -989,7 +1058,7 @@ public class ReaderBenchServer {
                 }
             }
 
-            if (!pdfConverter.sectionExists(cvContent, competencesSectionTitles)) {
+            if (!pdfToTxtConverter.sectionExists(competencesSectionTitles)) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("competences_not_found"));
             }
 
@@ -1177,49 +1246,6 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        Spark.post("/sendContactEmail", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-
-            response.type("application/json");
-
-            String name = (String) json.get("name");
-            String email = (String) json.get("email");
-            String subject = (String) json.get("subject");
-            String message = (String) json.get("message");
-
-            HashMap<Object, Object> hm = new HashMap<>();
-            HashMap<String, String> hmFrom = new HashMap<>();
-            //hmFrom.put("name", name);
-            hmFrom.put("email", "contact@readerbench.com");
-            hm.put("from", hmFrom);
-            HashMap<String, String> hmReplyTo = new HashMap<>();
-            hmReplyTo.put("name", name);
-            hmReplyTo.put("email", email);
-            hm.put("reply-to", hmReplyTo);
-
-            HashMap<String, String> hmSimpleReceiver = new HashMap<>();
-            hmSimpleReceiver.put("email", "contact@readerbench.com");
-            hm.put("to", hmSimpleReceiver);
-            hm.put("subject", subject);
-            hm.put("message", message);
-            ClientResponse mailGunResponse = SendMail.sendSimpleMessage(hm);
-            if (mailGunResponse.getStatus() != 200) {
-                throw new RuntimeException("Failed : HTTP error code : "
-                        + mailGunResponse.getStatus());
-            }
-
-            QueryResultMailgun queryResult = new QueryResultMailgun();
-            String output = mailGunResponse.getEntity(String.class);
-
-            JSONParser parser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) parser.parse(output);
-            queryResult.setMailgunResponse(jsonObject);
-
-            String result = queryResult.convertToJson();
-            LOGGER.log(Level.INFO, "queryResult{0}", result);
-
-            return result;
-        });
         Spark.post("/text-similarity", (request, response) -> {
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -1283,7 +1309,10 @@ public class ReaderBenchServer {
             requiredParams.add("lda");
             requiredParams.add("word2vec");
             // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             String text1 = hm.get("text1");
@@ -1319,7 +1348,10 @@ public class ReaderBenchServer {
             requiredParams.add("w2v");
             requiredParams.add("user-answer");
             requiredParams.add("predefined-answers");
-            errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
@@ -1344,7 +1376,7 @@ public class ReaderBenchServer {
             }
             AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism);
             QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
-            queryResult.setData(computeBestAnswer(userAnswerDocument, predefinedAnswerDocuments));
+            queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -1472,51 +1504,4 @@ public class ReaderBenchServer {
         });
     }
 
-    private static List<AbstractDocument> setDocuments(String path) {
-        if (loadedPath != null && loadedPath.equals(path)) {
-            return loadedDocs;
-        }
-
-        loadedPath = path;
-        loadedDocs = new ArrayList<>();
-        try {
-            File dir = new File("resources/in/" + path);
-            File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
-
-            for (File file : files) {
-                Document d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
-                loadedDocs.add(d);
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            Exceptions.printStackTrace(e);
-        }
-
-        return loadedDocs;
-    }
-
-    public static void initializeDB() {
-        LOGGER.setLevel(Level.INFO); // changing log level
-        org.apache.log4j.BasicConfigurator.configure();
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        FileHandler fh;
-        try {
-            fh = new FileHandler("ReaderBenchServer.log");
-            LOGGER.addHandler(fh);
-        } catch (IOException | SecurityException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        LOGGER.info("Initialize words...");
-        WordDAO.getInstance().loadAll();
-        LOGGER.info("Words initialization finished");
-
-        SentimentWeights.initialize();
-        LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
-    }
-
-    public static void main(String[] args) {
-        ReaderBenchServer.initializeDB();
-        ReaderBenchServer server = new ReaderBenchServer();
-        server.start();
-    }
 }

@@ -31,7 +31,7 @@ public class QueryResultAnswerMatching extends QueryResult {
 
     public QueryResultAnswerMatching() {
         super();
-        data = new ResultAnswerMatching(0, 0.0);
+        data = new ResultAnswerMatching(null);
     }
     
 }

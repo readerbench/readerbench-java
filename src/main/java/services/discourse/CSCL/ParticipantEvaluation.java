@@ -124,6 +124,7 @@ public class ParticipantEvaluation {
                 if (c.getBlocks().get(i) != null) {
                     Participant p1 = ((Utterance) c.getBlocks().get(i)).getParticipant();
                     int index1 = c.getParticipants().indexOf(p1);
+                    c.getParticipantContributions()[index1][index1] += c.getBlocks().get(i).getScore();
                     for (int j = 0; j < i; j++) {
                         if (c.getPrunnedBlockDistances()[i][j] != null) {
                             Participant p2 = ((Utterance) c.getBlocks().get(j)).getParticipant();
@@ -187,6 +188,11 @@ public class ParticipantEvaluation {
                     participants.get(index2).getIndices().put(CSCLIndices.INDEGREE,
                             participants.get(index2).getIndices().get(CSCLIndices.INDEGREE)
                             + participantContributions[index1][index2]);
+                }
+                else {
+                    participants.get(index1).getIndices().put(CSCLIndices.OUTDEGREE,
+                            participants.get(index1).getIndices().get(CSCLIndices.OUTDEGREE)
+                            + participantContributions[index1][index1]);
                 }
             }
         }

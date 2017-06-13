@@ -42,17 +42,16 @@ public class StanfordCoreNlpDemo {
     //   StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 
     // Add in sentiment
+    String text = "I hate my brother";
+
     Properties props = new Properties();
     props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner, parse, dcoref, sentiment");
-    
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-
-    // Initialize an Annotation with some text to be annotated. The text is the argument to the constructor.
     Annotation annotation;
     if (args.length > 0) {
       annotation = new Annotation(IOUtils.slurpFileNoExceptions(args[0]));
     } else {
-      annotation = new Annotation("I hate my brother's friends.");
+      annotation = new Annotation(text);
     }
 
 
