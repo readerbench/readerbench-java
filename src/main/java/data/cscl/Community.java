@@ -492,6 +492,8 @@ public class Community extends AnalysisElement {
         JSONArray links = new JSONArray();
         List<String> names = new ArrayList<>();
 
+        System.out.println("participantContributions generateParticipantViewD3: ");
+
         for (int row = 0; row < this.participantContributions.length; row++) {
             for (int col = 0; col < this.participantContributions[row].length; col++) {
                 if (this.participantContributions[row][col] > 0) {
@@ -544,20 +546,20 @@ public class Community extends AnalysisElement {
     public JSONObject generateHierarchicalEdgeBundling(String communityName, Integer week) {
         JSONObject finalResult = new JSONObject();
         JSONArray edgeBundling = new JSONArray();
+        System.out.println("participantContributions generateHierarchicalEdgeBundling: ");
 
         try {
             for (int row = 0; row < this.participantContributions.length; row++) {
                 JSONObject participantObject = new JSONObject();
-                participantObject.put("name", this.participants.get(row).getName());
-                participantObject.put("size", this.participants.get(row).getContributions().getBlocks().size());
                 JSONArray participantJsonArray = new JSONArray();
-
                 for (int col = 0; col < this.participantContributions[row].length; col++) {
                     if (this.participantContributions[row][col] > 0) {
+                        participantObject.put("name", this.participants.get(row).getName());
+                        participantObject.put("size", this.participants.get(row).getContributions().getBlocks().size());
+
                         participantJsonArray.add(this.participants.get(col).getName());
                     }
                 }
-
                 participantObject.put("imports", participantJsonArray);
 
                 edgeBundling.add(participantObject);
@@ -894,8 +896,8 @@ public class Community extends AnalysisElement {
             }
             participantStats.put("participantName", p.getName());
             participantStats.put("participantNickname", "Member " + index);
-            participantStats.put("startDate", startDate);
-            participantStats.put("endDate", endDate);
+            participantStats.put("startDate", getStartDate().getTime());
+            participantStats.put("endDate", getEndDate().getTime());
             participantStats.put("communityName", communityName);
             participantStats.put("week", week);
             participantStats.put("group", p.getParticipantGroup() != null ? p.getParticipantGroup().name() : "");

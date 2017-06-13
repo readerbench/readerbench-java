@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -1480,7 +1481,12 @@ public class ReaderBenchServer {
             Integer week = Integer.valueOf(hm.get("week"));
 
             List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
-            QueryResultParticipants queryResult = new QueryResultParticipants(participantsStats);
+
+            List<Map> filteredParticipants = participantsStats.stream()
+                    .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
+                    .collect(Collectors.toList());
+
+            QueryResultParticipants queryResult = new QueryResultParticipants(filteredParticipants);
             response.type("application/json");
             return queryResult.convertToJson();
         });

@@ -18,6 +18,8 @@ public class ConversationActor extends UntypedActor {
 
     private ConversationProcessing CONVERSATION_PROCESSING = new ConversationProcessing();
 
+    private static Integer CONTOR = 0;
+
     public void onReceive(Object message) throws Exception {
 
         if (message instanceof ConversationMessage) {
@@ -27,8 +29,7 @@ public class ConversationActor extends UntypedActor {
             /**
              * Process conversation
              */
-            LOGGER.info("Start processing conversation.");
-            //ConversationProcessing conversationProcessing = new ConversationProcessing();
+            LOGGER.info("Start processing conversation." + CONTOR ++);
             AbstractDocument abstractDocument = CONVERSATION_PROCESSING.loadGenericDocumentFromConversation(conversationMessage,
                     CONVERSATION_PROCESSING.MODELS, CONVERSATION_PROCESSING.LANGUAGE, CONVERSATION_PROCESSING.USE_POS_TAGGING,
                     CONVERSATION_PROCESSING.COMPUTE_DIALOGISM);

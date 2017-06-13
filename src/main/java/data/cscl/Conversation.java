@@ -518,7 +518,9 @@ public class Conversation extends AbstractDocument {
             //initialization: create mapping between block IDs and initial index positions in array
             initialMapping = new TreeMap<>();
             for (int i = 0; i < blocks.size(); i++) {
-                initialMapping.put(blocks.get(i).getId(), i);
+                if(blocks.get(i) != null && blocks.get(i).getId() != null) {
+                    initialMapping.put(blocks.get(i).getId(), i);
+                }
             }
 
             //first iteration: merge contributions which have same speaker and timeframe <= 1 minute and no explicit ref other than previous contribution

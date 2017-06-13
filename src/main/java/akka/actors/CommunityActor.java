@@ -25,6 +25,9 @@ import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
 import services.elasticsearch.ElasticsearchService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -67,8 +70,9 @@ public class CommunityActor extends UntypedActor{
              * get conversations for a community
              */
             List<Conversation> conversations = solrService.getConversationsForCommunity(communityName);
+            LOGGER.info("Number of conversations for community {} are {}", communityName, conversations.size());
 
-            //todo - delete this because the participantAliasName should be in SOLR.
+//            //todo - delete this because the participantAliasName should be in SOLR.
             int i = 1;
             for (Conversation conversation : conversations) {
                 i = 1;
@@ -87,9 +91,10 @@ public class CommunityActor extends UntypedActor{
 
 
             List<Conversation> conv = new ArrayList<>();
-            for (int j = 1; j < 10; j++) {
+            for (int j = 1; j < 100; j++) {
                 conv.add(conversations.get(j));
             }
+
             CONVERSATION_NUMBER = conv.size() + 1;
             List<ConversationMessage> messages = new ArrayList<>();
             conv.forEach(m -> {
@@ -97,21 +102,11 @@ public class CommunityActor extends UntypedActor{
             });
             LOGGER.info("The number of conversations for community {} are {}", communityName, CONVERSATION_NUMBER);
 
-
             Long start = System.currentTimeMillis();
-
-//            for (Conversation conversation : conv) {
-//                ConversationMessage conversationMessage = new ConversationMessage(conversation, PATH);
-//                /**
-//                 * send ConversationMessage to ConversationActor to process it
-//                 */
-//                LOGGER.info("Send ConversationMessage to ConversationActor to process it ... ");
-//                AkkaActorSystem.conversationActor.tell(conversationMessage, self());
-//            }
 
             List<Future<Object>> futures = new LinkedList<>();
             messages.forEach(msg -> {
-                Timeout timeout = new Timeout(Duration.create(5, TimeUnit.MINUTES));
+                Timeout timeout = new Timeout(Duration.create(60, TimeUnit.MINUTES));
                 Future<Object> future = Patterns.ask(AkkaActorSystem.conversationActor, msg, timeout);
                 futures.add(future);
             });
@@ -122,32 +117,28 @@ public class CommunityActor extends UntypedActor{
                 @Override
                 public void onSuccess(Iterable<Object> conversationResponseMessages) throws Throwable {
                     conversationResponseMessages.forEach(msg -> {
-                        LOGGER.info("Received ConversationResponseMessage ...");
                         ConversationResponseMessage cm = (ConversationResponseMessage) msg;
                         abstractDocuments.add(cm.getAbstractDocument());
+                        LOGGER.info("Abstract documents size: " + abstractDocuments.size());
                     });
 
-                    if (abstractDocuments.size() == CONVERSATION_NUMBER) {
+                    //if (abstractDocuments.size() == CONVERSATION_NUMBER) {
                         LOGGER.info("Start processing document collection ...");
+                        DateFormat formatter = new SimpleDateFormat("MM/dd/yy");
+                        Date startDate = null;
+                        Date endDate = null;
+                        try {
+                            startDate = formatter.parse("01/01/17");
+                            endDate = formatter.parse("06/13/17");
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
                         processDocumentCollection(abstractDocuments, Lang.en, false, true, null, null, 0, 7);
                         LOGGER.info("End processing collection ...Took {} millis", System.currentTimeMillis() - start);
-                    }
+                    //}
                 }
             }, AkkaActorSystem.ACTOR_SYSTEM.dispatcher());
-        }
-//       else if (message instanceof ConversationResponseMessage) {
-//            LOGGER.info("Received ConversationResponseMessage ...");
-//            ConversationResponseMessage conversationResponseMessage = (ConversationResponseMessage) message;
-//
-//            abstractDocuments.add(conversationResponseMessage.getAbstractDocument());
-//            if (abstractDocuments.size() == CONVERSATION_NUMBER) {
-//                LOGGER.info("End processing all conversations ...");
-//                LOGGER.info("Start processing document collection ...");
-//                processDocumentCollection(abstractDocuments, Lang.en, false, true, null, null, 0, 7);
-//                LOGGER.info("------------- End processing document collection --------- ");
-//            }
-//        }
-        else {
+        } else {
             LOGGER.warn("Unhandled message.");
             unhandled(message);
         }
@@ -166,41 +157,44 @@ public class CommunityActor extends UntypedActor{
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
 
-            System.out.println("\n----------- Subcommunities stats -------- \n");
-//            for (Community c : community.getTimeframeSubCommunities()) {
-//                CommunityUtils.hierarchicalClustering(c, PATH + "/clustered_results.csv", PATH);
-//                System.out.println(c.getStartDate() + " - " + c.getEndDate());
-//                System.out.println(c.getParticipants().size());
-//                for (Participant p : c.getParticipants()) {
-//                    if (p.getParticipantGroup() != null) {
-//                        System.out.println(p.getName() + " - " + p.getParticipantGroup().name());
-//                    }
-//                }
-//                System.out.println("\n\n");
-//            }
+//            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + COMMUNITY_NAME + "_week_" + 0 + ".csv", PATH);
+//            List<Map<String, Object>> participantsStats = community
+//                    .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, 0);
+//            //System.out.println(participantsStats);
+//            elasticsearchService.indexParticipantsStats(participantsStats);
+//
+//            /**
+//              * index participant interaction results
+//              */
+//            LOGGER.info("Start generating participants directed graph representation.");
+//            JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, 0);
+//            elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+//
+//            LOGGER.info("Start generating hierarchical edge bundling.");
+//            JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling(COMMUNITY_NAME, 0);
+//            elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
 
-
+            LOGGER.info("\n----------- Subcommunities stats -------- \n");
             for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
                 Community subCommunity = community.getTimeframeSubCommunities().get(i);
-//                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/clustered_results_week_" + i + ".csv", PATH);
-//                System.out.println(subCommunity.getStartDate());
-//                System.out.println(subCommunity.getEndDate());
+//                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/clustered_results_week_" + (i + 1) + ".csv", PATH);
 //
-//                List<Map<String, Object>> participantsStats = subCommunity
+//                List<Map<String, Object>> participantsStatsSubCommunity = subCommunity
 //                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
-//                System.out.println(participantsStats);
-//                elasticsearchService.indexParticipantsStats(participantsStats);
+//                //System.out.println(participantsStatsSubCommunity);
+//                elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
 
                 /**
                  * index participant interaction results
                  */
-                JSONObject participantInteraction = subCommunity.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
-                System.out.println(participantInteraction);
+                LOGGER.info("Start generating participants directed graph representation.");
+                JSONObject participantInteractionSubcommunity = subCommunity.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteractionSubcommunity);
 
-                JSONObject hierarchicalEdgeBundling = subCommunity.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
-                System.out.println(hierarchicalEdgeBundling);
+                LOGGER.info("Start generating hierarchical edge bundling.");
+                JSONObject hierarchicalEdgeBundlingSubcommunity = subCommunity.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundlingSubcommunity);
+
             }
 
 

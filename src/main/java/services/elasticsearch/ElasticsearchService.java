@@ -69,10 +69,11 @@ public class ElasticsearchService {
 
             SearchResponse response = client.prepareSearch("participants")
                     .setTypes("stats")
-                    .setSize(500)
+                    .setSize(10000)
                     .setQuery(QueryBuilders.matchPhraseQuery("communityName", communityName))
                     .setQuery(QueryBuilders.matchPhraseQuery("week", week))
                     .addSort("Contrib", SortOrder.DESC)
+                    .addSort("Scr", SortOrder.DESC)
                     .execute()
                     .actionGet();
             SearchHit[] searchHits = response.getHits().getHits();
@@ -113,16 +114,9 @@ public class ElasticsearchService {
     }
 
     public static void main(String[] args) {
-        Map<String, Object> test = new HashMap<>();
-        test.put("name", "dorinela");
-        test.put("age", 24);
-
-        List<Map<String, Object>> list = new ArrayList<>();
-        list.add(test);
 
         ElasticsearchService elasticsearchService = new ElasticsearchService();
-        List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
-                "participants", "edgeBundling", "CallOfDuty");
+        List<Map> participantsInteraction = elasticsearchService.searchParticipantsStatsPerWeek("mathequalslove.blogspot.ro", 1);
         System.out.println(participantsInteraction.size());
 
     }
