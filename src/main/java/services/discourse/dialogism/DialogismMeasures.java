@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import data.cscl.Participant;
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.Conversation;
-import data.cscl.Participant;
 import data.discourse.SemanticChain;
 import java.util.logging.Logger;
 

@@ -33,25 +33,26 @@ public class SentimentAnalysis {
 
 	static Logger logger = Logger.getLogger("");
 
-	public static void weightSemanticValences(Sentence s) {
-		if (s.getAllWords().isEmpty()) {
-			return;
-		}
-		for (SentimentValence daoSe : SentimentValence.getAllValences()) {
-			double value = s.getAllWords().stream().mapToDouble(w -> {
-				SentimentEntity e = w.getSentiment();
-				if (e == null) {
-					return 0.;
-				}
-				Double v = e.get(daoSe);
-				return (v == null ? 0. : v);
-			}).sum() / s.getAllWords().size();
-			// if the map contains the key, it should not be overriden
-			if (s.getSentimentEntity().contains(daoSe))
-				continue;
-			s.getSentimentEntity().add(daoSe, value);
-		}
-	}
+
+    public static void weightSemanticValences(Sentence s) {
+        if (s.getAllWords().isEmpty()) {
+            return;
+        }
+        for (SentimentValence daoSe : SentimentValence.getAllValences()) {
+            double value = s.getAllWords().stream().mapToDouble(w -> {
+                SentimentEntity e = w.getSentiment();
+                if (e == null) {
+                    return 0.;
+                }
+                Double v = e.get(daoSe);
+                return (v == null ? 0. : v);
+            }).sum() / s.getAllWords().size();
+            if (s.getSentimentEntity().getAll().containsKey(daoSe)) {
+                continue;
+            }
+            s.getSentimentEntity().add(daoSe, value);
+        }
+    }
 
 	public static void weightSemanticValences(Block b) {
 		SentimentEntity se = new SentimentEntity();
