@@ -230,7 +230,7 @@ public class DialogismMeasures {
 
         c.setNoConvergentPoints(0);
         c.setNoDivergentPoints(0);
-
+        double[][] recurrencePlot = new double[c.getBlocks().size()][c.getBlocks().size()];
         // take all voices
         for (int i = 0; i < c.getVoices().size(); i++) {
             // for different participants build collaboration based on inter-twined voices
@@ -243,9 +243,64 @@ public class DialogismMeasures {
                     for (int j = 0; j < evolution.length; j++) {
                         evolution[j] += mi[j][j];
                     }
+
+                    //build a cumulated recurrence plot
+                    for (int row = 0; row < c.getBlocks().size(); row++) {
+                        for (int col = 0; col < c.getBlocks().size(); col++) {
+                            if (recurrencePlot[row][col] == 0)
+                                recurrencePlot[row][col] += mi[row][col];
+                        }
+                    }
                 }
             }
         }
+
+        //determine the rqa indexes
+        int noRecurrencePoints = 0;
+        int noRecurrencePointsOnDiagonal = 0;
+        int[] lengthDiagonalLines = new int[c.getBlocks().size()];
+        int index = 0;
+        int lengthDiagonal = 0;
+        for (int row = 0; row < c.getBlocks().size(); row++) {
+            for (int col = 0; col < c.getBlocks().size(); col++) {
+                if (recurrencePlot[row][col] != 0) {
+                    noRecurrencePoints++;
+                    if (col == row) {
+                        noRecurrencePointsOnDiagonal++;
+                        //start or part of a diagonal line
+                        lengthDiagonal++;
+                    }
+                } else {
+                    //reset the length  of diagonal line because met a nul point
+                    if (col == row) {
+                        if (lengthDiagonal >= 2) {
+                            lengthDiagonalLines[index++] = lengthDiagonal;
+                        }
+                        lengthDiagonal = 0;
+                    }
+                }
+            }
+        }
+
+        int maxLine = -1;
+        int sumLines = 0;
+        double averageLine = 0;
+        int noDiagonalLines = 0;
+        for (int i = 0; i < lengthDiagonalLines.length; i++) {
+            //find the max line
+            if (lengthDiagonalLines[i] > maxLine) {
+                maxLine = lengthDiagonalLines[i];
+            }
+            if (lengthDiagonalLines[i] > 0) {
+                sumLines += lengthDiagonalLines[i];
+                noDiagonalLines++;
+            }
+        }
+        if (noDiagonalLines != 0 )
+            averageLine = sumLines * 1.0 / noDiagonalLines;
+        else averageLine = 0;
+
+
 
         for (int j = 0; j < evolution.length; j++) {
             if (evolution[j] > 0) {
@@ -256,12 +311,30 @@ public class DialogismMeasures {
             }
         }
 
+        c.setRecurrenceRate(noRecurrencePoints * 1.0/ (c.getBlocks().size() * c.getBlocks().size()));
+        if (noRecurrencePoints != 0)
+            c.setDeterminism(noRecurrencePointsOnDiagonal * 1.0 / noRecurrencePoints);
+        else c.setDeterminism(0);
+        c.setConvergenceRate(c.getNoConvergentPoints() * 1.0 / c.getBlocks().size());
+        c.setDivergenceRate(c.getNoDivergentPoints() * 1.0 / c.getBlocks().size());
+        c.setConvergenceOrDivergenceRate((c.getNoConvergentPoints() + c.getNoDivergentPoints()) * 1.0 / c.getBlocks().size());
+        c.setMaxLine(maxLine);
+        c.setAverageLine(averageLine);
+
+        System.out.println("------Recurrence rate: " + c.getRecurrenceRate());
+        System.out.println("------Determinism: " + c.getDeterminism());
+        System.out.println("------Convergent or divergent points/ Total number of utterances: " + c.getConvergenceOrDivergenceRate());
+        System.out.println("------Convergent points/Total number of utterances: " + c.getConvergenceRate());
+        System.out.println("------Divergent points/Total number of utterances: " + c.getDivergenceRate());
+        System.out.println("------Max line: "+ maxLine);
+        System.out.println("------Average line: " + averageLine);
         System.out.println("----Number of convergent points: " + c.getNoConvergentPoints());
         System.out.println("----Number of divergent points: " + c.getNoDivergentPoints());
+
+
         c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
         c.setIntenseConvergentZonesVoice(Collaboration.getConvergentZones(evolution));
         c.setIntenseDivergentZonesVoice(Collaboration.getDivergentZones(evolution));
-
 
         return evolution;
     }

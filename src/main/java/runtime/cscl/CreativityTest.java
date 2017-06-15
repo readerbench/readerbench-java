@@ -135,7 +135,7 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("Filename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), Voices, Avg voices, Avg voice span, Max voice span, Number of nouns, Number of verbs, Number of nouns and verbs, Number of perspectives, Nouns/Perspectives, Verbs/Perspectives, (Nouns + Verbs)/Perspectives, Number of convergent points, Number of divergent points");
+            out.write("SEP=,\nFilename,AVG(Social KB),ABS(Social KB),AVG(Dialogism),Voices,Avg voices,Avg voice span,Max voice span,Number of nouns in perspectives,Number of verbs in perspectives,Number of nouns and verbs in perspectives,Number of perspectives,Nouns/Perspectives,Verbs/Perspectives,(Nouns + Verbs)/Perspectives,Number of convergent points,Number of divergent points,Recurrence rate,Determinism,Convergent points/Total number of utterances,Divergent points/Total number of utterances,Convergent or divergent points/Total number of utterances,Max Line,Average Line");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -145,21 +145,30 @@ public class CreativityTest {
                     Participant p2 = c.getParticipants().get(1);
                     out.write("\n" + f.getName().replace(".ser", "")
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.SOCIAL_KB) + p2.getIndices().get(CSCLIndices.SOCIAL_KB)) / 2)
+                            + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.SOCIAL_KB) + p2.getIndices().get(CSCLIndices.SOCIAL_KB)) / c.getNoBlocks())
                             + "," + Formatting.formatNumber(Math.abs(p1.getIndices().get(CSCLIndices.SOCIAL_KB) - p2.getIndices().get(CSCLIndices.SOCIAL_KB)))
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)) / 2)
+                            + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)) / c.getNoBlocks())
                             + "," + c.getVoices().size()
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
                             + "," + Formatting.formatNumber(new VoicesMaxSpan().compute(c))
-                            + "," + c.getNoNouns()
-                            + "," + c.getNoVerbs()
-                            + "," + (c.getNoNouns() + c.getNoVerbs())
+                            + "," + c.getNoNounsInPerspectives()
+                            + "," + c.getNoVerbsInPerspectives()
+                            + "," + (c.getNoNounsInPerspectives() + c.getNoVerbsInPerspectives())
                             + "," + c.getNoPerspectives()
                             + "," + Formatting.formatNumber(c.getNoNounsInPerspectives() * 1.0 / c.getNoPerspectives())
                             + "," + Formatting.formatNumber(c.getNoVerbsInPerspectives() * 1.0 / c.getNoPerspectives())
                             + "," + Formatting.formatNumber((c.getNoNounsInPerspectives() + c.getNoVerbsInPerspectives()) * 1.0 / c.getNoPerspectives())
                             + "," + c.getNoConvergentPoints()
                             + "," + c.getNoDivergentPoints()
+                            + "," + Formatting.formatNumber(c.getRecurrenceRate())
+                            + "," + Formatting.formatNumber(c.getDeterminism())
+                            + "," + Formatting.formatNumber(c.getConvergenceRate())
+                            + "," + Formatting.formatNumber(c.getDivergenceRate())
+                            + "," + Formatting.formatNumber(c.getConvergenceOrDivergenceRate())
+                            + "," + c.getMaxLine()
+                            + "," + Formatting.formatNumber(c.getAverageLine())
                     );
                 }
             }

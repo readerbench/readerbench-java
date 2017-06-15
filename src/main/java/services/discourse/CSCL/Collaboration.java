@@ -36,8 +36,8 @@ import services.commons.Formatting;
 public class Collaboration {
 
     static Logger logger = Logger.getLogger("");
-    public static final double COLLABORATION_ZONE_SLACK = 0.025;
-    public static final int COLLABORATION_ZONE_MIN_SPREAD = 5;
+    public static final double COLLABORATION_ZONE_SLACK = 0.01;
+    public static final int COLLABORATION_ZONE_MIN_SPREAD = 3;
     public static double BETA_FSCORE = 1;
     public static double COLLABORATION_SENTIMENT_SLACK = 0.5;
     public static int INVALID_SENTIMENT_VALUE = -100;
@@ -232,6 +232,7 @@ public class Collaboration {
         // evaluate precision and recall for identified collaboration zones
         double precision = 0, recall = 0, fscore = 0;
         if (l1 != null && l2 != null && l1.size() > 0 && l2.size() > 0) {
+
             // initialization
             int[] zones = new int[c.getBlocks().size()];
             for (int i = 0; i < zones.length; i++) {
@@ -385,7 +386,7 @@ public class Collaboration {
                 if (noBlocks != 0) {
                     sumValueUtterances /= noBlocks;
                 }
-                if (noBlocks >= 3) {
+                if (noBlocks >= COLLABORATION_ZONE_MIN_SPREAD) {
                     CollaborationZone zone = new CollaborationZone(left, right, sumValueUtterances, noBlocks, 1);
                     zones.add(zone);
                 }
@@ -487,7 +488,7 @@ public class Collaboration {
                 if (noBlocks != 0) {
                     sumValueUtterances /= noBlocks;
                 }
-                if (noBlocks >= 3) {
+                if (noBlocks >= COLLABORATION_ZONE_MIN_SPREAD) {
                     CollaborationZone zone = new CollaborationZone(left, right, sumValueUtterances, noBlocks, -1);
                     zones.add(zone);
                 }

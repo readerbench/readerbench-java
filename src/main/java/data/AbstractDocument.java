@@ -129,6 +129,13 @@ public abstract class AbstractDocument extends AnalysisElement {
     private int noPerspectives;
     private int noNounsInPerspectives;
     private int noVerbsInPerspectives;
+    private double recurrenceRate;
+    private double determinism;
+    private double convergenceRate;
+    private double divergenceRate;
+    private double convergenceOrDivergenceRate;
+    private int maxLine;
+    private double averageLine;
 
     protected Map<SimilarityType, String> modelPaths;
 
@@ -818,6 +825,62 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public void setNoVerbsInPerspectives(int noVerbsInPerspectives) {
         this.noVerbsInPerspectives = noVerbsInPerspectives;
+    }
+
+    public double getRecurrenceRate() {
+        return recurrenceRate;
+    }
+
+    public void setRecurrenceRate(double recurrenceRate) {
+        this.recurrenceRate = recurrenceRate;
+    }
+
+    public double getDeterminism() {
+        return determinism;
+    }
+
+    public void setDeterminism(double determinism) {
+        this.determinism = determinism;
+    }
+
+    public double getConvergenceOrDivergenceRate() {
+        return convergenceOrDivergenceRate;
+    }
+
+    public void setConvergenceOrDivergenceRate(double convergenceOrDivergenceRate) {
+        this.convergenceOrDivergenceRate = convergenceOrDivergenceRate;
+    }
+
+    public double getConvergenceRate() {
+        return convergenceRate;
+    }
+
+    public void setConvergenceRate(double convergenceRate) {
+        this.convergenceRate = convergenceRate;
+    }
+
+    public double getDivergenceRate() {
+        return divergenceRate;
+    }
+
+    public void setDivergenceRate(double divergenceRate) {
+        this.divergenceRate = divergenceRate;
+    }
+
+    public int getMaxLine() {
+        return maxLine;
+    }
+
+    public void setMaxLine(int maxLine) {
+        this.maxLine = maxLine;
+    }
+
+    public double getAverageLine() {
+        return averageLine;
+    }
+
+    public void setAverageLine(double averageLine) {
+        this.averageLine = averageLine;
     }
 
     public String getDescription() {

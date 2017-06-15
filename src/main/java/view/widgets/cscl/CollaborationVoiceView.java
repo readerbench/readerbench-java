@@ -18,6 +18,8 @@ package view.widgets.cscl;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -172,9 +174,17 @@ public class CollaborationVoiceView extends JFrame {
                     + "\n");
         }
         textPane.setText(textPane.getText().trim());
+
+        List<CollaborationZone> collaborationZones = new ArrayList<>();
+        for (CollaborationZone zone: chat.getIntenseConvergentZonesVoice()){
+            collaborationZones.add(zone);
+        }
+        for (CollaborationZone zone: chat.getIntenseDivergentZonesVoice()){
+            collaborationZones.add(zone);
+        }
         double[] results = Collaboration.overlapCollaborationZones(chat,
                 chat.getIntenseCollabZonesSocialKB(),
-                chat.getIntenseCollabZonesVoice());
+                collaborationZones);
 
         txtOverlap.setText("P = "
                 + results[0]

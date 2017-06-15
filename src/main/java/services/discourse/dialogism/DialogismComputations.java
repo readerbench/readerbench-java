@@ -252,7 +252,7 @@ public class DialogismComputations {
                 chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
                         d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
             }
-            System.out.println("--------Number of voices: " + d.getVoices().size());
+            System.out.println("-------Number of voices: " + d.getVoices().size());
             System.out.println("-------Number of perspectives: " + d.getNoPerspectives());
             System.out.println("-------Number of nouns in perspectives: " + d.getNoNounsInPerspectives());
             System.out.println("-------Number of verbs in perspectives: " + d.getNoVerbsInPerspectives());
