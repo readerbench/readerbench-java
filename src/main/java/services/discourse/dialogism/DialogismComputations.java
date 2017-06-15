@@ -42,7 +42,7 @@ public class DialogismComputations {
 
     public static final int WINDOW_SIZE = 5; // no contributions
     public static final int MAXIMUM_INTERVAL = 60; // seconds
-    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 5; //no words per voice
+    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 7; //no words per voice
 
     public static void determineVoices(AbstractDocument d) {
         // merge chains based on LSA / LDA in order to generate semantic chains

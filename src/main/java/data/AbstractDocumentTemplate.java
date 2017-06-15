@@ -37,6 +37,7 @@ public class AbstractDocumentTemplate implements Serializable {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
         new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
         new SimpleDateFormat("HH:mm:ss"),
+        new SimpleDateFormat("hh:mm a", Locale.ENGLISH),
         new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
     };
 
