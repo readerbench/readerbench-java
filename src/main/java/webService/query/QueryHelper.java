@@ -70,8 +70,8 @@ public class QueryHelper {
     }
 
     public static String replaceSpecialChars(String text) {
-        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
-        text = text.replaceAll("\\+", "%2B");
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "");
+        text = text.replaceAll("\\+", "");
         return text;
     }
 }
