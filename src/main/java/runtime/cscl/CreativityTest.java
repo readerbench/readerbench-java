@@ -135,7 +135,8 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("SEP=,\nFilename,AVG(Social KB), ABS(Social KB), AVG(Dialogism), Voices, Avg voices, Avg voice span, Max voice span");
+            out.write("SEP=,\nFilename,AVG(Social KB per participant), Normalized Social KB (per contribution), ABS(Social KB between participants), AVG(Dialogism per participant), Normalized Dialogism (per contribution),"
+                    + "# Voices, Avg voices, Avg voice length (# words), Max voice length (# words)");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -145,8 +146,10 @@ public class CreativityTest {
                     Participant p2 = c.getParticipants().get(1);
                     out.write("\n" + f.getName().replace(".ser", "")
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.SOCIAL_KB) + p2.getIndices().get(CSCLIndices.SOCIAL_KB)) / 2)
+                            + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.SOCIAL_KB) + p2.getIndices().get(CSCLIndices.SOCIAL_KB)) / c.getNoBlocks())
                             + "," + Formatting.formatNumber(Math.abs(p1.getIndices().get(CSCLIndices.SOCIAL_KB) - p2.getIndices().get(CSCLIndices.SOCIAL_KB)))
                             + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)) / 2)
+                            + "," + Formatting.formatNumber((p1.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + p2.getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE)) / c.getNoBlocks())
                             + "," + c.getVoices().size()
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
