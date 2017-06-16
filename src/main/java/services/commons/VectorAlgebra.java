@@ -15,7 +15,6 @@
  */
 package services.commons;
 
-import cc.mallet.util.Maths;
 import org.apache.commons.math3.filter.*;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -24,7 +23,6 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import cc.mallet.util.Maths;
 import java.util.Arrays;

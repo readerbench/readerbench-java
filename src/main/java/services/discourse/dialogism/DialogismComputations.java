@@ -239,7 +239,8 @@ public class DialogismComputations {
                     // for different participants build collaboration based on inter-twined voices
                     double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p1));
                     double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p2));
-                    double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+                    //double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+                    double addedInterAnimationDegree = VectorAlgebra.sumElements(VectorAlgebra.and(ditrib1, ditrib2));
 
                     c.getParticipants().get(p1).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
                             c.getParticipants().get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
