@@ -123,13 +123,13 @@ public class CVHelper {
         }
 
         // remove any LIWC category that does not contain words
-        for (SentimentValence svLiwc : sentimentValences) {
-            if (svLiwc.getName().contains("LIWC")) {
-                if (liwcEmotions.get(svLiwc.getName()).isEmpty()) {
-                    liwcEmotions.remove(svLiwc.getName());
-                }
-            }
-        }
+//        for (SentimentValence svLiwc : sentimentValences) {
+//            if (svLiwc.getName().contains("LIWC")) {
+//                if (liwcEmotions.get(svLiwc.getName()).isEmpty()) {
+//                    liwcEmotions.remove(svLiwc.getName());
+//                }
+//            }
+//        }
 
         // textual complexity
         TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
