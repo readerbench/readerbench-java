@@ -33,55 +33,48 @@ public class RegressionScoring {
     private static final Random random = new Random();
     
     public static void checkInterval(Classifier model, Instances instances, double min, double max) throws Exception {
-        int fail_tp = 0;
-        int fail_fp = 0;
-        int fail_fn = 0;
-        int pass_tp = 0;
-        int pass_tn = 0;
-        int pass_fp = 0;
-        int pass_fn = 0;
+        int correct = 0;
+        int partially = 0;
+        int responses = 0;
         int total = 0;
         for (Instance inst : instances) {
             double predicted = model.classifyInstance(inst);
             double real = inst.classValue();
             if (predicted <= min) {
+                responses ++;
                 if (real < PASS) {
-                    fail_tp ++;
+                    partially ++;
                 }
-                else {
-                    fail_fp ++;
-                }
-            }
-            else {
                 if (real <= min) {
-                    fail_fn ++;
+                    correct ++;
                 }
             }
             if (predicted >= max) {
+                responses ++;
                 if (real >= PASS) {
-                    pass_tp ++;
+                    partially ++;
                 }
-                else {
-                    pass_fp ++;
+                if (real >= max) {
+                    correct ++;
                 }
             }
-            else {
-                if (real >= max) {
-                    pass_fn ++;
-                }
+            if (real >= max || real <= min) {
+                total ++;
             }
         }
         System.out.println(min + " - " + max + ": ");
-        double precision = 1. * (fail_tp + pass_tp) / (fail_tp + fail_fp + pass_tp + pass_fp);
-        double recall = 1. * (fail_tp + pass_tp) / (fail_tp + fail_fn + pass_tp + pass_fn);
-        if (fail_tp + fail_fp + pass_tp + pass_fp == 0) {
-            precision = 1;
+        double precision = 100. * partially / responses;
+        double recall = 100. * correct / total;
+        double coverage = 100. * responses / instances.size();
+        if (responses == 0) {
+            precision = 100;
         }
-        if (fail_tp + fail_fn + pass_tp + pass_fn == 0) {
-            recall = 1;
+        if (total == 0) {
+            recall = 100;
         }
         double f1 = 2 * precision * recall / (precision + recall);
-        System.out.println("precision: " + precision + ", recall: " + recall + ", f1: " + f1);
+        System.out.println("precision: " + precision + ", recall: " + recall + 
+                ", f1: " + f1 + ", coverage: " + coverage);
     }
     
     public static Instances filterInstances() throws Exception {
@@ -140,7 +133,7 @@ public class RegressionScoring {
         test.setClassIndex(test.numAttributes() - 1);
         MLPRegressor model = new MLPRegressor();
         model.setActivationFunction(new Sigmoid());
-        model.setNumFunctions(1);
+        model.setNumFunctions(2);
         model.buildClassifier(train);
         for (double i = 2; i < PASS; i += 0.5) {
             for (double j = PASS + 0.5; j < 9.5; j += 0.5) {
