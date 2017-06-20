@@ -109,12 +109,24 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     
     @Override
     public List<NGram> getBiGrams() {
+        if (dependencies == null) {
+            return new ArrayList<>();
+        }
         return StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
                 .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
                 .filter(pair -> pair.first != null && pair.second != null)
                 .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        List<NGram> result = new ArrayList<>();
+        for (int i = 0; i <= words.size() - n; i++) {
+            result.add(new NGram(words.subList(i, i + n)));
+        }
+        return result;
     }
 
     @Override

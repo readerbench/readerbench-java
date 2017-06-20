@@ -325,6 +325,13 @@ public class Block extends AnalysisElement implements Serializable {
     }
     
     @Override
+    public List<NGram> getNGrams(int n) {
+        return sentences.stream()
+                .flatMap(s -> s.getNGrams(n).stream())
+                .collect(Collectors.toList());
+    }
+    
+    @Override
     public String toString() {
         String s = "";
         s += "{\n";

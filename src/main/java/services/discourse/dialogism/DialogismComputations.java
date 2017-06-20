@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,7 +31,6 @@ import data.Sentence;
 import data.Word;
 import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
-import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticChain;
 import data.lexicalChains.LexicalChain;
@@ -44,7 +42,7 @@ public class DialogismComputations {
 
     public static final int WINDOW_SIZE = 5; // no contributions
     public static final int MAXIMUM_INTERVAL = 60; // seconds
-    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 5; //no words per voice
+    public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 7; //no words per voice
 
     public static void determineVoices(AbstractDocument d) {
         // merge chains based on LSA / LDA in order to generate semantic chains
@@ -234,26 +232,20 @@ public class DialogismComputations {
             return;
         }
 
-        Iterator<Participant> it = c.getParticipants().iterator();
-        List<Participant> lsPart = new ArrayList<>();
-        while (it.hasNext()) {
-            Participant part = it.next();
-            lsPart.add(part);
-        }
         // take all voices
         for (int i = 0; i < c.getVoices().size(); i++) {
-            for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
-                for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
-                    // for different participants build collaboration based
-                    // on inter-twined voices
-                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p1));
-                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p2));
-                    double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+            for (int p1 = 0; p1 < c.getParticipants().size() - 1; p1++) {
+                for (int p2 = p1 + 1; p2 < c.getParticipants().size(); p2++) {
+                    // for different participants build collaboration based on inter-twined voices
+                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p1));
+                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p2));
+                    //double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+                    double addedInterAnimationDegree = VectorAlgebra.sumElements(VectorAlgebra.and(ditrib1, ditrib2));
 
-                    lsPart.get(p1).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
-                            lsPart.get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
-                    lsPart.get(p2).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
-                            lsPart.get(p2).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
+                    c.getParticipants().get(p1).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
+                            c.getParticipants().get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
+                    c.getParticipants().get(p2).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
+                            c.getParticipants().get(p2).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
                 }
             }
         }

@@ -22,7 +22,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -47,7 +46,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphController;
 import org.gephi.graph.api.GraphModel;
@@ -68,10 +66,9 @@ import data.Word;
 import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
-import java.util.EnumMap;
+import java.util.logging.Level;
+import org.openide.util.Exceptions;
 import services.discourse.keywordMining.KeywordModeling;
-import services.semanticModels.ISemanticModel;
-import services.semanticModels.SimilarityType;
 import view.models.PreviewSketch;
 
 public class ConceptView extends JFrame {
@@ -118,7 +115,7 @@ public class ConceptView extends JFrame {
     }
 
     private void generateLayout() {
-        JLabel lblInferredConcepts = new JLabel("Inferred concepts");
+        JLabel lblInferredConcepts = new JLabel("Concepts");
         lblInferredConcepts.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JLabel lblThreshold = new JLabel("Threshold");
@@ -128,10 +125,8 @@ public class ConceptView extends JFrame {
 
         checkBoxVerb = new JCheckBox("Verbs");
         checkBoxVerb.setBackground(Color.WHITE);
-        checkBoxVerb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                generateGraph();
-            }
+        checkBoxVerb.addActionListener((ActionEvent e) -> {
+            generateGraph();
         });
         checkBoxVerb.setSelected(true);
 
@@ -172,10 +167,8 @@ public class ConceptView extends JFrame {
         labelTableThreshold.put(new Integer(5), new JLabel("50%"));
         labelTableThreshold.put(new Integer(0), new JLabel("0"));
         sliderThreshold.setLabelTable(labelTableThreshold);
-        sliderThreshold.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                generateGraph();
-            }
+        sliderThreshold.addChangeListener((ChangeEvent e) -> {
+            generateGraph();
         });
 
         panelGraph = new JPanel();
@@ -214,12 +207,12 @@ public class ConceptView extends JFrame {
                         .addComponent(panelGraph, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1168, Short.MAX_VALUE)
                         .addGroup(
                                 Alignment.LEADING, groupLayout.createSequentialGroup().addComponent(lblListOfInferred)
-                                .addPreferredGap(ComponentPlacement.RELATED, 824, Short.MAX_VALUE)
-                                .addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, 74,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(txtInferredConcepts,
-                                GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-                                GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(ComponentPlacement.RELATED, 824, Short.MAX_VALUE)
+                                        .addComponent(txtTopics, GroupLayout.PREFERRED_SIZE, 74,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(txtInferredConcepts,
+                                        GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
                         .addGroup(Alignment.LEADING, groupLayout
                                 .createSequentialGroup().addGroup(groupLayout.createParallelGroup(
                                         Alignment.LEADING)
@@ -366,7 +359,7 @@ public class ConceptView extends JFrame {
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 1 - sim, false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 10 * Math.max(sim, 0.1), false);
                         e.setLabel(sim + "");
                         graph.addEdge(e);
                     }
@@ -382,7 +375,7 @@ public class ConceptView extends JFrame {
             }
         }
 
-        logger.info("Generated graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        logger.log(Level.INFO, "Generated graph with {0} nodes and {1} edges", new Object[]{graph.getNodeCount(), graph.getEdgeCount()});
     }
 
     private void generateGraph() {
@@ -428,7 +421,7 @@ public class ConceptView extends JFrame {
         try {
             ec.exportFile(new File("out/graph.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();

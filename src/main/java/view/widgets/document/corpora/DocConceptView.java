@@ -75,9 +75,9 @@ import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
 import view.models.PreviewSketch;
 
-public class PaperConceptView extends JFrame {
+public class DocConceptView extends JFrame {
 
-    private static PaperConceptView paperConceptView;
+    private static DocConceptView paperConceptView;
     private static final long serialVersionUID = -8582615231233815258L;
     static Logger logger = Logger.getLogger("");
     public static final Color COLOR_TOPIC = new Color(204, 204, 204); // silver
@@ -103,7 +103,7 @@ public class PaperConceptView extends JFrame {
         }
     }
 
-    public PaperConceptView(List<Keyword> keywords, String path) {
+    public DocConceptView(List<Keyword> keywords, String path) {
         paperConceptView = this;
         super.setTitle("Network of Concepts Visualization");
         super.getContentPane().setBackground(Color.WHITE);

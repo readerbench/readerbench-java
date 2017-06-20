@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
-import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -62,13 +61,18 @@ public class QueryHelper {
     }
 
     public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
-        LOGGER.info("Processign query ...");
-        AbstractDocumentTemplate template;
-        template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(text));
+        LOGGER.info("Generating document...");
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(QueryHelper.replaceSpecialChars(text)));
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
-        LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
+        LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
         document.computeAll(computeDialogism);
-        ComplexityIndices.computeComplexityFactors(document);
         return document;
+    }
+
+    public static String replaceSpecialChars(String text) {
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "");
+        text = text.replaceAll("\\+", "");
+        text = text.replaceAll("%", "");
+        return text;
     }
 }

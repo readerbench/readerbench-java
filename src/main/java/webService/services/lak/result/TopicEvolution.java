@@ -46,4 +46,17 @@ public class TopicEvolution {
         return null;
     }
 
+    public void normalize() {
+        for (int yearIndex = 0; yearIndex < this.yearList.size(); yearIndex++) {
+            double maxScore = 0.0;
+            for (ArticleKeyword word : this.wordList) {
+                maxScore = Math.max(maxScore, word.scoreList.get(yearIndex));
+            }
+            if (maxScore > 0) {
+                for (ArticleKeyword word : this.wordList) {
+                    word.scoreList.set(yearIndex, word.scoreList.get(yearIndex) / maxScore);
+                }
+            }
+        }
+    }
 }

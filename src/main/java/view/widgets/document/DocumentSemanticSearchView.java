@@ -55,9 +55,9 @@ import javax.swing.table.TableRowSorter;
 import services.discourse.keywordMining.KeywordModeling;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
-import view.widgets.document.corpora.PaperConceptView;
-import view.widgets.document.corpora.PaperCorpusSimilarityView;
-import view.widgets.document.corpora.PaperKeywordAbstractOverlap;
+import view.widgets.document.corpora.DocConceptView;
+import view.widgets.document.corpora.DocCorpusSimilarityView;
+import view.widgets.document.corpora.DocKeywordAbstractOverlap;
 import view.widgets.document.search.SearchSimilarityView;
 
 public class DocumentSemanticSearchView extends JInternalFrame {
@@ -266,7 +266,7 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 					return;
 				}
 
-				PaperCorpusSimilarityView view = new PaperCorpusSimilarityView(
+				DocCorpusSimilarityView view = new DocCorpusSimilarityView(
 						DocumentProcessingView.getLoadedDocuments());
 				view.setVisible(true);
 			}
@@ -287,7 +287,7 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 							JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				PaperConceptView conceptView = new PaperConceptView(
+				DocConceptView conceptView = new DocConceptView(
 						KeywordModeling.getCollectionTopics(DocumentProcessingView.getLoadedDocuments()),
 						"out/concepts_" + new Timestamp(new Date().getTime()) + ".pdf");
 				conceptView.setVisible(true);
@@ -304,7 +304,7 @@ public class DocumentSemanticSearchView extends JInternalFrame {
 							JOptionPane.WARNING_MESSAGE);
 					return;
 				}
-				PaperKeywordAbstractOverlap view = new PaperKeywordAbstractOverlap(
+				DocKeywordAbstractOverlap view = new DocKeywordAbstractOverlap(
 						DocumentProcessingView.getLoadedDocuments());
 				view.setVisible(true);
 			}

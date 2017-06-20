@@ -15,14 +15,11 @@
  */
 package services.discourse.dialogism;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.Conversation;
-import data.cscl.Participant;
 import data.discourse.SemanticChain;
 import java.util.logging.Logger;
 
@@ -222,23 +219,19 @@ public class DialogismMeasures {
         }
         double[] evolution = new double[c.getVoices().get(0).getBlockMovingAverage().length];
 
-        Iterator<Participant> it = c.getParticipants().iterator();
-        List<Participant> lsPart = new ArrayList<>();
-        while (it.hasNext()) {
-            Participant part = it.next();
-            lsPart.add(part);
-        }
-
         // take all voices
         for (int i = 0; i < c.getVoices().size(); i++) {
             // for different participants build collaboration based on inter-twined voices
-            for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
-                for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
-                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p1));
-                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p2));
-                    double[] mi = VectorAlgebra.discreteMutualInformation(ditrib1, ditrib2);
+            for (int p1 = 0; p1 < c.getParticipants().size() - 1; p1++) {
+                for (int p2 = p1 + 1; p2 < c.getParticipants().size(); p2++) {
+                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p1));
+                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p2));
+//                    double[] mi = VectorAlgebra.discreteMutualInformation(ditrib1, ditrib2);
                     for (int j = 0; j < evolution.length; j++) {
-                        evolution[j] += mi[j];
+                        if (ditrib1[j] != 0 && ditrib2[j] != 0) {
+//                            evolution[j] += mi[j];
+                            evolution[j] += ditrib1[j] + ditrib2[j];
+                        }
                     }
                 }
             }

@@ -88,7 +88,7 @@ public class Utterance extends Block {
     }
 
     public boolean isEligible(Date startDate, Date endDate) {
-        return ((startDate == null) || (time.after(startDate)))
+        return (time != null) && ((startDate == null) || (time.after(startDate)))
                 && ((endDate == null) || (time.before(endDate)));
     }
 
@@ -109,5 +109,4 @@ public class Utterance extends Block {
         s += "}\n[" + getScore() + "]\n";
         return s;
     }
-
 }

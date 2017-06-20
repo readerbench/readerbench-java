@@ -65,7 +65,7 @@ import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
-import view.widgets.document.corpora.PaperSimilarityView;
+import view.widgets.document.corpora.DocCentralityGraph;
 
 public class DocumentProcessingView extends JInternalFrame {
 
@@ -519,7 +519,7 @@ public class DocumentProcessingView extends JInternalFrame {
         btnViewSimilarDocs.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
                 Document d = LOADED_DOCUMENTS.get(docTable.getSelectedRow());
-                PaperSimilarityView view = new PaperSimilarityView(LOADED_DOCUMENTS, (Document) d);
+                DocCentralityGraph view = new DocCentralityGraph(LOADED_DOCUMENTS, (Document) d);
                 view.setVisible(true);
             }
         });

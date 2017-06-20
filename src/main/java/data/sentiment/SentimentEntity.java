@@ -15,7 +15,6 @@
  */
 package data.sentiment;
 
-import edu.stanford.nlp.math.SloppyMath;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 
 
 
-import services.discourse.cohesion.CohesionGraph;
 
 /**
  * Holds a HashMap containing different sentiments and their scores. Sentiments
