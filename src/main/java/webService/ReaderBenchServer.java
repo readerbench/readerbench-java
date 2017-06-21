@@ -1469,6 +1469,24 @@ public class ReaderBenchServer {
 
         Spark.get("/community/communities", (request, response) -> {
             List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE.getCommunities();
+            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
+                    new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
+            for (com.readerbench.solr.entities.cscl.Community community : communities) {
+                if (results.get(community.getCategoryName()) != null) {
+                    results.get(community.getCategoryName()).add(community);
+                } else {
+                    results.put(community.getCategoryName(), Arrays.asList(community));
+                }
+            }
+
+            com.readerbench.solr.entities.cscl.Community c = new com.readerbench.solr.entities.cscl.Community();
+            c.setCommunityName("mathequalslove.blogspot.ro");
+            communities.add(c);
+
+            com.readerbench.solr.entities.cscl.Community c1 = new com.readerbench.solr.entities.cscl.Community();
+            c1.setCommunityName("leagueoflegends");
+            communities.add(c1);
+
             QueryResultAllCommunities queryResult = new QueryResultAllCommunities(communities);
             response.type("application/json");
             return queryResult.convertToJson();
@@ -1480,13 +1498,22 @@ public class ReaderBenchServer {
             String communityName = hm.get("communityName");
             Integer week = Integer.valueOf(hm.get("week"));
 
+            System.out.println(communityName);
+            System.out.println(week);
             List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
 
             List<Map> filteredParticipants = participantsStats.stream()
                     .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
                     .collect(Collectors.toList());
 
-            QueryResultParticipants queryResult = new QueryResultParticipants(filteredParticipants);
+            List<Map> unique = new ArrayList<Map>();
+            for (Map map : filteredParticipants) {
+                if (!elasticsearchService.isDuplicate(map, unique)) {
+                    unique.add(map);
+                }
+            }
+
+            QueryResultParticipants queryResult = new QueryResultParticipants(unique);
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -1498,7 +1525,12 @@ public class ReaderBenchServer {
 
             List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
                     "participants", "directedGraph", communityName);
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+
+            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
+                    .collect(Collectors.toList());
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(filteredParticipantInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -1510,7 +1542,17 @@ public class ReaderBenchServer {
 
             List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
                     "participants", "edgeBundling", communityName);
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+                    .filter(p -> ((List) p.get("data")).size() > 0)
+                    .collect(Collectors.toList());
+
+//            List<Map> test = filteredParticipantInteraction.stream()
+//                    .filter(p -> Integer.valueOf(p.get("week").toString()) == 1)
+//                    .collect(Collectors.toList());
+//
+//            System.out.println(test.size());
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(filteredParticipantInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });

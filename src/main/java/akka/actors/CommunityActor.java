@@ -91,7 +91,7 @@ public class CommunityActor extends UntypedActor{
 
 
             List<Conversation> conv = new ArrayList<>();
-            for (int j = 1; j < 100; j++) {
+            for (int j = 1; j < conversations.size(); j++) {
                 conv.add(conversations.get(j));
             }
 
@@ -158,11 +158,10 @@ public class CommunityActor extends UntypedActor{
             community.computeMetrics(useTextualComplexity, true, true);
 
 //            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + COMMUNITY_NAME + "_week_" + 0 + ".csv", PATH);
+//
 //            List<Map<String, Object>> participantsStats = community
 //                    .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, 0);
-//            //System.out.println(participantsStats);
 //            elasticsearchService.indexParticipantsStats(participantsStats);
-//
 //            /**
 //              * index participant interaction results
 //              */
@@ -177,12 +176,11 @@ public class CommunityActor extends UntypedActor{
             LOGGER.info("\n----------- Subcommunities stats -------- \n");
             for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
                 Community subCommunity = community.getTimeframeSubCommunities().get(i);
-//                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/clustered_results_week_" + (i + 1) + ".csv", PATH);
-//
-//                List<Map<String, Object>> participantsStatsSubCommunity = subCommunity
-//                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
-//                //System.out.println(participantsStatsSubCommunity);
-//                elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
+                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + COMMUNITY_NAME + "_clustered_results_week_" + (i + 1) + ".csv", PATH);
+
+                List<Map<String, Object>> participantsStatsSubCommunity = subCommunity
+                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
+                elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
 
                 /**
                  * index participant interaction results

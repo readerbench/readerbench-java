@@ -88,6 +88,16 @@ public class ElasticsearchService {
         return result;
     }
 
+    public boolean isDuplicate(Map map, List<Map> list) {
+        for (Map m : list) {
+            if (m.get("participantName").toString().equals(map.get("participantName").toString())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public ArrayList<Map> searchParticipantsGraphRepresentation(String index, String type, String communityName) {
         ArrayList<Map> result = new ArrayList<Map>();
         try {

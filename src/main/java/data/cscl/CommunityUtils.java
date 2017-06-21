@@ -165,7 +165,11 @@ public class CommunityUtils {
             boolean flag = false;
             for (Participant participantInConversation : conversation.getParticipants()) {
                 if (groupedParticipants.contains(participantInConversation)
-                        && groupedParticipants.get(groupedParticipants.indexOf(participantInConversation)).getParticipantGroup().equals(ParticipantGroup.PERIPHERAL)) {
+                        && groupedParticipants.get(groupedParticipants.indexOf(participantInConversation)) != null
+                        && groupedParticipants.get(groupedParticipants.indexOf(participantInConversation))
+                        .getParticipantGroup() != null
+                        && groupedParticipants.get(groupedParticipants.indexOf(participantInConversation))
+                        .getParticipantGroup().equals(ParticipantGroup.PERIPHERAL)) {
                     for (Block block : participantInConversation.getContributions().getBlocks()) {
                         Utterance u = (Utterance) block;
                         // add the parent comment along with the comment of POI

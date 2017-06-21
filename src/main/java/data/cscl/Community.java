@@ -508,16 +508,26 @@ public class Community extends AnalysisElement {
                         JSONObject rowP = new JSONObject();
                         rowP.put("name", this.participants.get(row).getName());
                         rowP.put("id", row);
-                        rowP.put("value", this.participants.get(row).getContributions().getBlocks().size());
+
+
+                        rowP.put("value", (this.participants.get(row).getIndices().get(CSCLIndices.INDEGREE) +
+                                this.participants.get(row).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
+                        rowP.put("group", this.participants.get(row).getParticipantGroup() != null ?
+                                this.participants.get(row).getParticipantGroup().getClusterNo() : 0);
                         nodes.add(rowP);
                     }
 
                     if (!names.contains(this.participants.get(col).getName())) {
+
+
                         names.add( this.participants.get(col).getName());
                         JSONObject colP = new JSONObject();
                         colP.put("name", this.participants.get(col).getName());
                         colP.put("id", col);
-                        colP.put("value", this.participants.get(col).getContributions().getBlocks().size());
+                        colP.put("value", (this.participants.get(col).getIndices().get(CSCLIndices.INDEGREE) +
+                                this.participants.get(col).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
+                        colP.put("group", this.participants.get(col).getParticipantGroup() != null ?
+                                this.participants.get(col).getParticipantGroup().getClusterNo() : 0);
                         nodes.add(colP);
 
                     }
@@ -554,15 +564,25 @@ public class Community extends AnalysisElement {
                 JSONArray participantJsonArray = new JSONArray();
                 for (int col = 0; col < this.participantContributions[row].length; col++) {
                     if (this.participantContributions[row][col] > 0) {
-                        participantObject.put("name", this.participants.get(row).getName());
+                        String cluster = this.participants.get(row).getParticipantGroup() != null ?
+                                this.participants.get(row).getParticipantGroup().name() : "NOCLUSTER";
+                        participantObject.put("name", cluster + "/" + this.participants.get(row).getName());
                         participantObject.put("size", this.participants.get(row).getContributions().getBlocks().size());
+                        participantObject.put("group", cluster);
 
-                        participantJsonArray.add(this.participants.get(col).getName());
+                        String cluster1= this.participants.get(col).getParticipantGroup() != null ?
+                                this.participants.get(col).getParticipantGroup().name() : "NOCLUSTER";
+                        participantJsonArray.add(cluster1 + "/" + this.participants.get(col).getName());
                     }
                 }
-                participantObject.put("imports", participantJsonArray);
+                if (participantJsonArray.size() != 0) {
+                    participantObject.put("imports", participantJsonArray);
+                }
 
-                edgeBundling.add(participantObject);
+                if (!participantObject.isEmpty()) {
+                    edgeBundling.add(participantObject);
+                }
+
             }
 
             finalResult.put("data", edgeBundling);
