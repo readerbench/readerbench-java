@@ -247,6 +247,7 @@ public class ReaderBenchServer {
     }
 
     private static SolrService SOLR_SERVICE = new SolrService("http://141.85.232.56:8983/solr/", "community", 100);
+    private static SolrService SOLR_SERVICE_COMMUNITY = new SolrService("http://141.85.232.56:8983/solr/", "online_community", 100);
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
@@ -1468,7 +1469,8 @@ public class ReaderBenchServer {
         });
 
         Spark.get("/community/communities", (request, response) -> {
-            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE.getCommunities();
+            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
+
             Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
                     new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
             for (com.readerbench.solr.entities.cscl.Community community : communities) {
@@ -1479,15 +1481,7 @@ public class ReaderBenchServer {
                 }
             }
 
-            com.readerbench.solr.entities.cscl.Community c = new com.readerbench.solr.entities.cscl.Community();
-            c.setCommunityName("mathequalslove.blogspot.ro");
-            communities.add(c);
-
-            com.readerbench.solr.entities.cscl.Community c1 = new com.readerbench.solr.entities.cscl.Community();
-            c1.setCommunityName("leagueoflegends");
-            communities.add(c1);
-
-            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(communities);
+            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(results);
             response.type("application/json");
             return queryResult.convertToJson();
         });
