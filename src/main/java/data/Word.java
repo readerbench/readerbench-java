@@ -25,6 +25,7 @@ import data.discourse.SemanticChain;
 import data.document.ReadingStrategyType;
 import data.lexicalChains.LexicalChain;
 import data.lexicalChains.LexicalChainLink;
+import data.pojo.EntityXValence;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
 import java.util.EnumSet;
@@ -78,10 +79,13 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         if (se == null) {
             return;
         }
-        sentiment = new SentimentEntity();
-        se.getEntityXValenceList().stream().forEach((exv) -> {
-            sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
-        });
+        synchronized (se){
+            sentiment = new SentimentEntity();
+            List<EntityXValence> exvList = se.getEntityXValenceList();
+            exvList.stream().forEach((exv) -> {
+                sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
+            });
+        }
     }
 
     public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {

@@ -14,12 +14,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.util.Exceptions;
+import services.complexity.AbstractComplexityIndex;
 import services.complexity.ComplexityIndex;
 import services.complexity.wordLists.WordListsIndicesFactory;
 import services.semanticModels.ISemanticModel;
+import utils.IndexLevel;
 import webService.ReaderBenchServer;
 
 /**
@@ -30,49 +34,39 @@ public class ComputeWordLists {
 
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
-        List<Document> reviews = new ArrayList<>();
-        List<String[]> dataset = new ArrayList<>();
-        try (BufferedReader in = new BufferedReader(new FileReader("reviews.csv"))) {
+        try (BufferedReader in = new BufferedReader(new FileReader("reviews.csv"));
+                PrintWriter out = new PrintWriter("reviews-new.csv")) {
             String line = in.readLine();
+            out.println(line);
+            List<ComplexityIndex> indices = new WordListsIndicesFactory().build(Lang.en)
+                    .stream()
+                    .filter(index -> ((AbstractComplexityIndex)index).getLevel() == IndexLevel.DOC)
+                    .collect(Collectors.toList());
+            System.out.println(indices.size() + " word lists");
+            out.println("game,review,grade," + 
+                    StringUtils.join(
+                            indices.stream().map(ComplexityIndex::getAcronym).collect(Collectors.toList()), 
+                            ","));
             while ((line = in.readLine()) != null) {
                 String[] row = line.split("\t");
                 AbstractDocumentTemplate adt = AbstractDocumentTemplate.getDocumentModel(row[1]);
-                reviews.add(new Document(adt, new ArrayList<>(), Lang.en, false));
-                dataset.add(row);
+                Document review = new Document(adt, new ArrayList<>(), Lang.en, false);
+                review.setComplexityIndices(new HashMap<>());
+                for (ComplexityIndex index : indices) {
+                    double value = index.compute(review);
+                    review.getComplexityIndices().put(index, value);
+                }    
+                out.println(StringUtils.join(row, ",") + "," + 
+                        StringUtils.join(
+                            indices.stream()
+                                    .map(index -> review.getComplexityIndices().get(index))
+                                    .collect(Collectors.toList()), 
+                            ","));
             }
         } catch (FileNotFoundException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
-        List<ComplexityIndex> indices = new WordListsIndicesFactory().build(Lang.en);
-        reviews.parallelStream()
-                .forEach(review -> {
-                    for (ComplexityIndex index : indices) {
-                        double value = index.compute(review);
-                        review.getComplexityIndices().put(index, value);
-                    }
-                });
-        try (PrintWriter out = new PrintWriter("reviews-new.csv")) {
-            out.println("sep=\t");
-            out.println("game,review,grade," + 
-                    StringUtils.join(
-                            indices.stream().map(ComplexityIndex::getAcronym), 
-                            ","));
-            for (int i = 0; i < dataset.size(); i++) {
-                String[] row = dataset.get(i);
-                Document review = reviews.get(i);
-                out.println(StringUtils.join(row, ",") + "," + 
-                        StringUtils.join(
-                            indices.stream()
-                                    .map(ComplexityIndex::getAcronym)
-                                    .map(index -> review.getComplexityIndices().get(index)), 
-                            ","));
-            }
-        } catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
-        } 
-        
-
     }
 }
