@@ -503,7 +503,8 @@ public class Community extends AnalysisElement {
                     link.put("score", this.participantContributions[row][col]);
                     links.add(link);
 
-                    if (!names.contains(this.participants.get(row).getName())) {
+                    if (!names.contains(this.participants.get(row).getName()) &&
+                            this.participants.get(row).getParticipantGroup() != null) {
                         names.add( this.participants.get(row).getName());
                         JSONObject rowP = new JSONObject();
                         rowP.put("name", this.participants.get(row).getName());
@@ -512,24 +513,20 @@ public class Community extends AnalysisElement {
 
                         rowP.put("value", (this.participants.get(row).getIndices().get(CSCLIndices.INDEGREE) +
                                 this.participants.get(row).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
-                        rowP.put("group", this.participants.get(row).getParticipantGroup() != null ?
-                                this.participants.get(row).getParticipantGroup().getClusterNo() : 0);
+                        rowP.put("group", this.participants.get(row).getParticipantGroup().getClusterNo());
                         nodes.add(rowP);
                     }
 
-                    if (!names.contains(this.participants.get(col).getName())) {
-
-
+                    if (!names.contains(this.participants.get(col).getName()) &&
+                            this.participants.get(col).getParticipantGroup() != null) {
                         names.add( this.participants.get(col).getName());
                         JSONObject colP = new JSONObject();
                         colP.put("name", this.participants.get(col).getName());
                         colP.put("id", col);
                         colP.put("value", (this.participants.get(col).getIndices().get(CSCLIndices.INDEGREE) +
                                 this.participants.get(col).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
-                        colP.put("group", this.participants.get(col).getParticipantGroup() != null ?
-                                this.participants.get(col).getParticipantGroup().getClusterNo() : 0);
+                        colP.put("group", this.participants.get(col).getParticipantGroup().getClusterNo());
                         nodes.add(colP);
-
                     }
                 }
             }
@@ -563,16 +560,17 @@ public class Community extends AnalysisElement {
                 JSONObject participantObject = new JSONObject();
                 JSONArray participantJsonArray = new JSONArray();
                 for (int col = 0; col < this.participantContributions[row].length; col++) {
-                    if (this.participantContributions[row][col] > 0) {
-                        String cluster = this.participants.get(row).getParticipantGroup() != null ?
-                                this.participants.get(row).getParticipantGroup().name() : "NOCLUSTER";
+                    if (this.participantContributions[row][col] > 0 && this.participants.get(row).getParticipantGroup() != null) {
+                        String cluster = this.participants.get(row).getParticipantGroup().name();
                         participantObject.put("name", cluster + "/" + this.participants.get(row).getName());
                         participantObject.put("size", this.participants.get(row).getContributions().getBlocks().size());
                         participantObject.put("group", cluster);
 
-                        String cluster1= this.participants.get(col).getParticipantGroup() != null ?
-                                this.participants.get(col).getParticipantGroup().name() : "NOCLUSTER";
-                        participantJsonArray.add(cluster1 + "/" + this.participants.get(col).getName());
+                        if (this.participants.get(col).getParticipantGroup() != null) {
+                            String cluster1 = this.participants.get(col).getParticipantGroup().name();
+                            participantJsonArray.add(cluster1 + "/" + this.participants.get(col).getName());
+                        }
+
                     }
                 }
                 if (participantJsonArray.size() != 0) {
@@ -908,22 +906,25 @@ public class Community extends AnalysisElement {
         // write participant statistics
         for (int index = 0; index < participants.size(); index++) {
             Participant p = participants.get(index);
-            Map<String, Object> participantStats = new HashMap<>();
-            for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-                if (CSCLindex.isIndividualStatsIndex()) {
-                    participantStats.put(CSCLindex.getAcronym(),Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+            if (p.getParticipantGroup() != null) {
+                Map<String, Object> participantStats = new HashMap<>();
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    if (CSCLindex.isIndividualStatsIndex()) {
+                        participantStats.put(CSCLindex.getAcronym(),Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                    }
                 }
-            }
-            participantStats.put("participantName", p.getName());
-            participantStats.put("participantNickname", "Member " + index);
-            participantStats.put("startDate", getStartDate().getTime());
-            participantStats.put("endDate", getEndDate().getTime());
-            participantStats.put("communityName", communityName);
-            participantStats.put("week", week);
-            participantStats.put("group", p.getParticipantGroup() != null ? p.getParticipantGroup().name() : "");
+                participantStats.put("participantName", p.getName());
+                participantStats.put("participantNickname", "Member " + index);
+                participantStats.put("startDate", getStartDate().getTime());
+                participantStats.put("endDate", getEndDate().getTime());
+                participantStats.put("communityName", communityName);
+                participantStats.put("week", week);
+                participantStats.put("group", p.getParticipantGroup().name());
 
-            participantsStats.add(participantStats);
+                participantsStats.add(participantStats);
+            }
         }
+
         LOGGER.info("Successfully finished writing Individual Stats in Elasticsearch ...");
 
         return participantsStats;
