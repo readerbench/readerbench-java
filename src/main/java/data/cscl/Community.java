@@ -496,15 +496,15 @@ public class Community extends AnalysisElement {
 
         for (int row = 0; row < this.participantContributions.length; row++) {
             for (int col = 0; col < this.participantContributions[row].length; col++) {
-                if (this.participantContributions[row][col] > 0) {
+                if (this.participantContributions[row][col] > 0 && this.participants.get(row).getParticipantGroup() != null &&
+                        this.participants.get(col).getParticipantGroup() != null ) {
                     JSONObject link = new JSONObject();
                     link.put("source", row);
                     link.put("target", col);
                     link.put("score", this.participantContributions[row][col]);
                     links.add(link);
 
-                    if (!names.contains(this.participants.get(row).getName()) &&
-                            this.participants.get(row).getParticipantGroup() != null) {
+                    if (!names.contains(this.participants.get(row).getName())) {
                         names.add( this.participants.get(row).getName());
                         JSONObject rowP = new JSONObject();
                         rowP.put("name", this.participants.get(row).getName());
@@ -517,8 +517,7 @@ public class Community extends AnalysisElement {
                         nodes.add(rowP);
                     }
 
-                    if (!names.contains(this.participants.get(col).getName()) &&
-                            this.participants.get(col).getParticipantGroup() != null) {
+                    if (!names.contains(this.participants.get(col).getName())) {
                         names.add( this.participants.get(col).getName());
                         JSONObject colP = new JSONObject();
                         colP.put("name", this.participants.get(col).getName());

@@ -36,6 +36,7 @@ public class ElasticsearchService {
             client = new PreBuiltTransportClient(Settings.EMPTY)
                     .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
 
+            //141.85.232.57
             for (Map p : participantsStats) {
                 IndexResponse response = client.prepareIndex("participants", "stats")
                         .setSource(p).execute().get();
