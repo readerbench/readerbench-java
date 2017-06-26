@@ -58,7 +58,7 @@ public class TrainAoEModels {
         org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         try {
 //            Word2VecModel.trainModel("resources/in/AoE w2v/grade2/alltexts[1-3].txt");
-            Word2VecModel.trainModel("resources/config/EN/word2vec/TASA/tasa_out.txt");
+            Word2VecModel.trainModel("resources/config/EN/word2vec/COCA_newspaper/coca_newspaper.txt");
 //            TrainAoEModels.trainW2VModels("resources/in/AoE w2v");
 //            TrainAoEModels.trainLSAModels("resources/in/AoE LSA");
         } catch (IOException ex) {

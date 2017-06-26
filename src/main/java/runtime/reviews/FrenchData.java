@@ -37,7 +37,7 @@ public class FrenchData {
 
     private static String LSA_PATH = "resources/config/FR/LSA/Le_Monde";
     private static String LDA_PATH = "resources/config/FR/LDA/Le_Monde";
-//    private static String WORD2VEC_PATH = "resources/config/FR/word2vec/Le_Monde";
+    private static String WORD2VEC_PATH = "resources/config/FR/word2vec/Le_Monde";
 
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
@@ -130,7 +130,6 @@ public class FrenchData {
         pw.close();
 
     }
-
 
     /**
      * Get documents from SOLR by a specific query
