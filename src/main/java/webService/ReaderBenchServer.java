@@ -1469,21 +1469,41 @@ public class ReaderBenchServer {
         });
 
         Spark.get("/community/communities", (request, response) -> {
-            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
+//            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
+//
+//            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
+//                    new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
+//            for (com.readerbench.solr.entities.cscl.Community community : communities) {
+//                if (results.get(community.getCategoryName()) != null) {
+//                    results.get(community.getCategoryName()).add(community);
+//                } else {
+//                    results.put(community.getCategoryName(), Arrays.asList(community));
+//                }
+//            }
+            webService.services.cscl.result.dto.Community community1 =
+                    new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
+            webService.services.cscl.result.dto.Community community2 =
+                    new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
 
-            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
-                    new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
-            for (com.readerbench.solr.entities.cscl.Community community : communities) {
-                if (results.get(community.getCategoryName()) != null) {
-                    results.get(community.getCategoryName()).add(community);
-                } else {
-                    results.put(community.getCategoryName(), Arrays.asList(community));
-                }
-            }
+            webService.services.cscl.result.dto.Community community3 =
+                    new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
+            webService.services.cscl.result.dto.Community community4 =
+                    new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
 
-            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(results);
+            webService.services.cscl.result.dto.Category category1 =
+                    new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
+                            Arrays.asList(community1, community2));
+            webService.services.cscl.result.dto.Category category2 =
+                    new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
+                            Arrays.asList(community3));
+            webService.services.cscl.result.dto.Category category3 =
+                    new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
+                            Arrays.asList(community4));
+            List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
+            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
             response.type("application/json");
             return queryResult.convertToJson();
+
         });
         Spark.post("/community/participants", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
@@ -1492,8 +1512,6 @@ public class ReaderBenchServer {
             String communityName = hm.get("communityName");
             Integer week = Integer.valueOf(hm.get("week"));
 
-            System.out.println(communityName);
-            System.out.println(week);
             List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
 
             List<Map> filteredParticipants = participantsStats.stream()
@@ -1520,11 +1538,11 @@ public class ReaderBenchServer {
             List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
                     "participants", "directedGraph", communityName);
 
-            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
-                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
-                    .collect(Collectors.toList());
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
+//                    .collect(Collectors.toList());
 
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(filteredParticipantInteraction);
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -1536,17 +1554,12 @@ public class ReaderBenchServer {
 
             List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
                     "participants", "edgeBundling", communityName);
-            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
-                    .filter(p -> ((List) p.get("data")).size() > 0)
-                    .collect(Collectors.toList());
-
-//            List<Map> test = filteredParticipantInteraction.stream()
-//                    .filter(p -> Integer.valueOf(p.get("week").toString()) == 1)
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p -> ((List) p.get("data")).size() > 0)
 //                    .collect(Collectors.toList());
-//
-//            System.out.println(test.size());
 
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(filteredParticipantInteraction);
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });

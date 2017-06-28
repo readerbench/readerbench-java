@@ -5,7 +5,10 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.search.MultiMatchQuery;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -23,6 +26,7 @@ import java.util.Map;
 public class ElasticsearchService {
 
     public TransportClient client;
+    private static final String ELASTICSEARCH_HOST_ADDRESS = "141.85.232.57";
 
     /**
      * Index participants stats for subcommunities
@@ -34,7 +38,7 @@ public class ElasticsearchService {
         try {
 
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), 9300));
 
             //141.85.232.57
             for (Map p : participantsStats) {
@@ -51,7 +55,7 @@ public class ElasticsearchService {
     public void indexParticipantGraphRepresentation(String index, String type, JSONObject jsonObject) {
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), 9300));
 
             IndexResponse response = client.prepareIndex(index, type)
                     .setSource(jsonObject).execute().get();
@@ -66,13 +70,17 @@ public class ElasticsearchService {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), 9300));
+
+            QueryBuilder queryBuilder = QueryBuilders
+                    .boolQuery()
+                    .must(QueryBuilders.matchPhraseQuery("communityName", communityName))
+                    .must(QueryBuilders.matchPhraseQuery("week", week));
 
             SearchResponse response = client.prepareSearch("participants")
                     .setTypes("stats")
                     .setSize(10000)
-                    .setQuery(QueryBuilders.matchPhraseQuery("communityName", communityName))
-                    .setQuery(QueryBuilders.matchPhraseQuery("week", week))
+                    .setQuery(queryBuilder)
                     .addSort("Contrib", SortOrder.DESC)
                     .addSort("Scr", SortOrder.DESC)
                     .execute()
@@ -103,7 +111,7 @@ public class ElasticsearchService {
         ArrayList<Map> result = new ArrayList<Map>();
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
-                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), 9300));
 
             SearchResponse response = client.prepareSearch(index)
                     .setTypes(type)
@@ -127,8 +135,11 @@ public class ElasticsearchService {
     public static void main(String[] args) {
 
         ElasticsearchService elasticsearchService = new ElasticsearchService();
-        List<Map> participantsInteraction = elasticsearchService.searchParticipantsStatsPerWeek("mathequalslove.blogspot.ro", 1);
+        List<Map> participantsInteraction = elasticsearchService.searchParticipantsStatsPerWeek("prisonarchitect", 1);
         System.out.println(participantsInteraction.size());
+        for (Map m : participantsInteraction) {
+            System.out.println(m.get("participantName"));
+        }
 
     }
 }
