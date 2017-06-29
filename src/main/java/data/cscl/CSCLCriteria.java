@@ -20,7 +20,7 @@ import java.util.ResourceBundle;
 import services.commons.VectorAlgebra;
 
 public enum CSCLCriteria {
-	AVERAGE, STDEV, SLOPE, ENTROPY, UNIFORMITY, LOCAL_EXTREME, RECURRENCE_AVERAGE, RECURRENCE_STDEV;
+	AVERAGE, STDEV, SLOPE, ENTROPY, UNIFORMITY, PEAK_CHAT_FRAME, LOCAL_EXTREME, RECURRENCE_AVERAGE, RECURRENCE_STDEV, ;
 
 	public String getDescription() {
 		return ResourceBundle.getBundle("utils.localization.CSCL_criteria").getString(this.name());
@@ -51,6 +51,8 @@ public enum CSCLCriteria {
 			return VectorAlgebra.avg(VectorAlgebra.getRecurrence(v));
 		case RECURRENCE_STDEV:
 			return VectorAlgebra.stdev(VectorAlgebra.getRecurrence(v));
+                case PEAK_CHAT_FRAME:
+                    return VectorAlgebra.peakOnChatFrame(v);
 		default:
 			return -1;
 		}
