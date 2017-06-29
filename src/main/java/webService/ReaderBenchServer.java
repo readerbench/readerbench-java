@@ -137,6 +137,11 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
+
+    private static QueryResult errorEmptyBody() {
+        return new QueryResult(false, ParamsValidator.errorNoParams());
+    }
+
     /**
      * Returns an error result if there are any required parameters in the first
      * set missing in the second set.
@@ -154,6 +159,16 @@ public class ReaderBenchServer {
         }
         return null;
     }
+    
+    private static QueryResult errorIfParamsEmpty(Set<String> params) {
+        Set<String> emptyParams;
+        if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
+            // if not return an error showing the missing parameters
+            return new QueryResult(false, ParamsValidator.errorParamsMissing(emptyParams));
+        }
+        return null;
+    }
+
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -167,6 +182,7 @@ public class ReaderBenchServer {
         }
         return hm;
     }
+
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -180,6 +196,7 @@ public class ReaderBenchServer {
         }
         return hm;
     }
+
     /**
      * Returns a Set of initial required parameters.
      *
@@ -194,11 +211,12 @@ public class ReaderBenchServer {
         requiredParams.add("dialogism");
         return requiredParams;
     }
+
     private static List<AbstractDocument> setDocuments(String path) {
         if (loadedPath != null && loadedPath.equals(path)) {
             return loadedDocs;
         }
-        
+
         loadedPath = path;
         loadedDocs = new ArrayList<>();
         try {
@@ -212,9 +230,10 @@ public class ReaderBenchServer {
         } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
         }
-        
+
         return loadedDocs;
     }
+
     public static void initializeDB() {
         LOGGER.setLevel(Level.INFO); // changing log level
         org.apache.log4j.BasicConfigurator.configure();
@@ -226,14 +245,15 @@ public class ReaderBenchServer {
         } catch (IOException | SecurityException ex) {
             Exceptions.printStackTrace(ex);
         }
-        
+
         LOGGER.info("Initialize words...");
         WordDAO.getInstance().loadAll();
         LOGGER.info("Words initialization finished");
-        
+
         SentimentWeights.initialize();
         LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
     }
+
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
         ReaderBenchServer server = new ReaderBenchServer();
@@ -396,7 +416,6 @@ public class ReaderBenchServer {
         }
     }
 
-
     public void start() {
 
         Spark.port(PORT);
@@ -451,14 +470,21 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/sentiment-analysis", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Set<String> requiredParams = setInitialRequiredParams();
-            requiredParams.add("text");
-            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error;
+            JSONObject json = null;
+            if (request.body().isEmpty()) {
+                error = errorEmptyBody();
+            }
+            else {
+                json = (JSONObject) new JSONParser().parse(request.body());
+                Set<String> requiredParams = setInitialRequiredParams();
+                requiredParams.add("text");
+                error = errorIfParamsMissing(requiredParams, json.keySet());
+            }
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -493,7 +519,7 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -711,6 +737,7 @@ public class ReaderBenchServer {
             requiredParams.add("threshold");
             QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
             if (error != null) {
+                response.type("application/json");
                 return error.convertToJson();
             }
 
@@ -893,7 +920,7 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-            
+
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
@@ -904,7 +931,7 @@ public class ReaderBenchServer {
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
             AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
-            
+
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
@@ -1001,7 +1028,7 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-            
+
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
@@ -1012,7 +1039,7 @@ public class ReaderBenchServer {
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
             AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
-            
+
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
             ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
@@ -1114,8 +1141,25 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.get("/file-download", (request, response) -> {
-            String file = request.queryParams("file");
+            QueryResult error;
+            if (request.queryParams().isEmpty()) {
+                error = errorEmptyBody();
+            } else {
+                Set<String> requiredParams = new HashSet<>();
+                requiredParams.add("file");
+                error = errorIfParamsMissing(requiredParams, request.queryParams());
+            }
+            if (error != null) {
+                return error.convertToJson();
+            }
 
+            Set<String> notEmptyParams = new HashSet<>();
+            notEmptyParams.add("file");
+            error = errorIfParamsEmpty(notEmptyParams);
+            if (error != null) {
+                return error.convertToJson();
+            }
+            String file = request.queryParams("file");
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
@@ -1477,7 +1521,6 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
 
-
         Spark.post("/ciModel", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
@@ -1492,7 +1535,7 @@ public class ReaderBenchServer {
             int maxSemanticExpand;
             try {
                 maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 maxSemanticExpand = 5;
             }
 
