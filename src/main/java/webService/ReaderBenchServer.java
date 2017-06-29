@@ -148,6 +148,9 @@ public class ReaderBenchServer {
     }
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
+
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
+
     /**
      * Returns an error result if there are any required parameters in the first
      * set missing in the second set.
