@@ -142,14 +142,11 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
-
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
+    
     private static QueryResult errorEmptyBody() {
         return new QueryResult(false, ParamsValidator.errorNoParams());
     }
-    private ElasticsearchService elasticsearchService = new ElasticsearchService();
-
-
-    private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     /**
      * Returns an error result if there are any required parameters in the first
