@@ -181,7 +181,7 @@ public class Word2VecModel implements ISemanticModel {
             Word2Vec word2Vec = new Word2Vec.Builder()
                     .batchSize(100)
                     .minWordFrequency(5)
-                    .epochs(9)
+                    .epochs(6)
                     .layerSize(300)
                     .seed(42)
                     .windowSize(5)

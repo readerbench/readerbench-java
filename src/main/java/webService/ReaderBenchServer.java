@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -71,6 +72,7 @@ import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.converters.PdfToTxtConverter;
+import services.elasticsearch.ElasticsearchService;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -112,6 +114,9 @@ import webService.services.cimodel.ComprehensionModelService;
 import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
+import webService.services.cscl.result.QueryResultAllCommunities;
+import webService.services.cscl.result.QueryResultParticipants;
+import webService.services.cscl.result.QueryResultParticipantsInteraction;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -141,6 +146,7 @@ public class ReaderBenchServer {
     private static QueryResult errorEmptyBody() {
         return new QueryResult(false, ParamsValidator.errorNoParams());
     }
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     /**
      * Returns an error result if there are any required parameters in the first
@@ -1545,6 +1551,102 @@ public class ReaderBenchServer {
             String resultStr = queryResult.convertToJson();
             return resultStr;
         });
+        Spark.get("/community/communities", (request, response) -> {
+//            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
+//
+//            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
+//                    new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
+//            for (com.readerbench.solr.entities.cscl.Community community : communities) {
+//                if (results.get(community.getCategoryName()) != null) {
+//                    results.get(community.getCategoryName()).add(community);
+//                } else {
+//                    results.put(community.getCategoryName(), Arrays.asList(community));
+//                }
+//            }
+            webService.services.cscl.result.dto.Community community1 =
+                    new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
+            webService.services.cscl.result.dto.Community community2 =
+                    new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
+
+            webService.services.cscl.result.dto.Community community3 =
+                    new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
+            webService.services.cscl.result.dto.Community community4 =
+                    new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+
+            webService.services.cscl.result.dto.Category category1 =
+                    new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
+                            Arrays.asList(community1, community2));
+            webService.services.cscl.result.dto.Category category2 =
+                    new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
+                            Arrays.asList(community3));
+            webService.services.cscl.result.dto.Category category3 =
+                    new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
+                            Arrays.asList(community4));
+            List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
+            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
+            response.type("application/json");
+            return queryResult.convertToJson();
+
+        });
+        Spark.post("/community/participants", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+            Integer week = Integer.valueOf(hm.get("week"));
+
+            List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
+
+            List<Map> filteredParticipants = participantsStats.stream()
+                    .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
+                    .collect(Collectors.toList());
+
+            List<Map> unique = new ArrayList<Map>();
+            for (Map map : filteredParticipants) {
+                if (!elasticsearchService.isDuplicate(map, unique)) {
+                    unique.add(map);
+                }
+            }
+
+            QueryResultParticipants queryResult = new QueryResultParticipants(unique);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/directedGraph", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "directedGraph", communityName);
+
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
+//                    .collect(Collectors.toList());
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/edgeBundling", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "edgeBundling", communityName);
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p -> ((List) p.get("data")).size() > 0)
+//                    .collect(Collectors.toList());
+
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+
     }
 
 }

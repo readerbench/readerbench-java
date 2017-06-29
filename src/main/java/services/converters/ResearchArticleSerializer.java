@@ -46,8 +46,8 @@ public class ResearchArticleSerializer {
         List<String> ldsSpaces = ReaderBenchView.LDA_SPACES.get(Lang.en);
 
         Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
-        modelPaths.put(SimilarityType.LSA, lsaSpaces.get(0));
-        modelPaths.put(SimilarityType.LDA, ldsSpaces.get(0));
+        modelPaths.put(SimilarityType.LSA, "resources/config/EN/LSA/TASA");
+        //modelPaths.put(SimilarityType.LDA, ldsSpaces.get(0));
 
         ResearchArticle d = ResearchArticle.load(filePath, modelPaths, Lang.en, false, true);
         d.computeAll(false);

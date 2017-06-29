@@ -29,6 +29,7 @@ public enum SemanticCorpora implements Serializable {
     tasa_en_word2vec("TASA", Lang.en, SimilarityType.WORD2VEC),
     tasa_lak_en_lsa("TASA_LAK", Lang.en, SimilarityType.LSA),
     tasa_lak_en_lda("TASA_LAK", Lang.en, SimilarityType.LDA),
+    sciref_en_lsa("SciRef", Lang.en, SimilarityType.LSA),
     
     le_monde_fr_lsa("Le_Monde", Lang.fr, SimilarityType.LSA),
     le_monde_fr_lda("Le_Monde", Lang.fr, SimilarityType.LDA),

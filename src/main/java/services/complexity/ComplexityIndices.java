@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +37,7 @@ public class ComplexityIndices {
     public static final int IDENTITY = -1;
 
     public static void computeComplexityFactors(AbstractDocument d) {
+        LOGGER.log(Level.INFO, d.getPath() + " " +d.getText());
         d.setComplexityIndices(
                 Arrays.stream(ComplexityIndexType.values()).parallel()
                 .filter(t -> t.getFactory() != null)

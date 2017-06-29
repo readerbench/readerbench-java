@@ -263,8 +263,12 @@ public class Community extends AnalysisElement {
 
         if (useTextualComplexity) {
 
+            LOGGER.log(Level.INFO, participants.toString());
             // determine complexity indices
             for (Participant p : participants) {
+                LOGGER.log(Level.INFO, p.toString());
+                LOGGER.log(Level.INFO, p.getSignificantContributions().toString());
+
                 // establish minimum criteria
                 int noContentWords = 0;
                 for (Block b : p.getSignificantContributions().getBlocks()) {
