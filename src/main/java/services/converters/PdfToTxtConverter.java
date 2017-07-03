@@ -294,7 +294,7 @@ public class PdfToTxtConverter {
                 noColors = stripper.getCharsPerColor().size();
                 parsedText = pdfStripper.getText(pdDoc);
                 noParagraphs = cvStructure.getParagraphs();
-                cvStructure.getWords(parsedText);
+                cvStructure.getSentences(parsedText);
                 txtWriter.write(parsedText);
             }
 
