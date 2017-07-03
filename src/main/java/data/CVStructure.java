@@ -240,7 +240,7 @@ public class CVStructure {
     }
 
 
-    public int getWords (String parsedText) {
+    public int getSentences (String parsedText) {
         int sentencesNo = 0;
         String[] lines = parsedText.split("[\\r\\n]+");
         for(int i = 0; i < lines.length; i++) {
