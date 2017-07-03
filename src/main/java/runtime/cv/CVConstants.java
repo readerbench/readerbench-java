@@ -14,6 +14,7 @@ public class CVConstants {
     public static final String LSA_PATH_FR = "resources/config/FR/LSA/Le_Monde";
     public static final String LDA_PATH_FR = "resources/config/FR/LDA/Le_Monde";
     public static final String WOR2VEC_PATH_FR = "resources/config/FR/word2vec/Le_Monde";
+    public static final String FR_NAME = "Le_Monde";
     public static final String LANG_FR = "French";
     public static final Boolean POS_TAGGING = true;
     public static final Boolean DIALOGISM = true;

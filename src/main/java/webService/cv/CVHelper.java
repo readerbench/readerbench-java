@@ -16,6 +16,7 @@
 package webService.cv;
 
 import data.AbstractDocument;
+import data.CVStructure;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
@@ -137,7 +138,7 @@ public class CVHelper {
         result.setImages(pdfConverter.getNoImages());
         result.setColors(pdfConverter.getNoColors());
         result.setPages(pdfConverter.getNoPages());
-        result.setParagraphs(document.getNoBlocks());
+        result.setParagraphs(pdfConverter.getNoParagraphs());
         result.setSentences(document.getNoSentences());
         result.setWords(document.getNoWords());
         result.setContentWords(document.getNoContentWords());

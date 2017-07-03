@@ -314,6 +314,7 @@ public class CVAnalyzer {
 
     public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList,
             Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, double threshold) {
+
         PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter(filePath, true);
         pdfToTxtConverter.process();
         AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getParsedText(), lang, models, usePosTagging, computeDialogism);
@@ -361,9 +362,11 @@ public class CVAnalyzer {
         Boolean computeDialogism = CVConstants.DIALOGISM;
         String lsaCorpora = CVConstants.LSA_PATH_FR;
         String ldaCorpora = CVConstants.LDA_PATH_FR;
-        String w2vCorpora = CVConstants.WOR2VEC_PATH_FR;
+        String w2vCorpora = null;//CVConstants.WOR2VEC_PATH_FR;
         Double minThreshold = CVConstants.THRESHOLD;
-        List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+        String lsaCorporaName = CVConstants.FR_NAME;
+        String ldaCorporaName = CVConstants.FR_NAME;
+        List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorporaName, ldaCorporaName, w2vCorpora);
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
@@ -381,6 +384,7 @@ public class CVAnalyzer {
         String ldaCorpora = CVConstants.LDA_PATH_FR;
         String w2vCorpora = CVConstants.WOR2VEC_PATH_FR;
         Double minThreshold = CVConstants.THRESHOLD;
+
         List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);

@@ -53,6 +53,7 @@ public class QueryHelper {
 
     public static String textToUTF8(String text) {
         try {
+            text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
             return URLDecoder.decode(text, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             Exceptions.printStackTrace(ex);
