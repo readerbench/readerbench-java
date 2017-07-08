@@ -229,9 +229,14 @@ public class ClusterCommunity {
             }
 
             // merge groups 1 & 2 that have the minimum distance
-            groups.get(group1).addAll(groups.get(group2));
+            try {
+                groups.get(group1).addAll(groups.get(group2));
 
-            groups.remove(group2);
+                groups.remove(group2);
+            } catch(Exception e) {
+                System.out.println("Clustering error: " + e.getMessage());
+            }
+            
 
             noInterations++;
 

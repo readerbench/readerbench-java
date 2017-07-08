@@ -536,8 +536,8 @@ public class Community extends AnalysisElement {
 
         jsonObject.put("communityName", communityName);
         jsonObject.put("week", week);
-        jsonObject.put("startDate", getStartDate().getTime());
-        jsonObject.put("endDate", getEndDate().getTime());
+        jsonObject.put("startDate", getFistContributionDate().getTime());
+        jsonObject.put("endDate", getLastContributionDate().getTime());
 
         return jsonObject;
 
@@ -585,8 +585,8 @@ public class Community extends AnalysisElement {
             finalResult.put("data", edgeBundling);
             finalResult.put("communityName", communityName);
             finalResult.put("week", week);
-            finalResult.put("startDate", getStartDate().getTime());
-            finalResult.put("endDate", getEndDate().getTime());
+            finalResult.put("startDate", getFistContributionDate().getTime());
+            finalResult.put("endDate", getLastContributionDate().getTime());
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Cannot create json array ...");
@@ -914,8 +914,8 @@ public class Community extends AnalysisElement {
                 }
                 participantStats.put("participantName", p.getName());
                 participantStats.put("participantNickname", "Member " + index);
-                participantStats.put("startDate", getStartDate().getTime());
-                participantStats.put("endDate", getEndDate().getTime());
+                participantStats.put("startDate", getFistContributionDate().getTime());
+                participantStats.put("endDate", getLastContributionDate().getTime());
                 participantStats.put("communityName", communityName);
                 participantStats.put("week", week);
                 participantStats.put("group", p.getParticipantGroup().name());

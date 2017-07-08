@@ -157,43 +157,43 @@ public class CommunityActor extends UntypedActor{
         if (community != null) {
             community.computeMetrics(useTextualComplexity, true, true);
 
-//            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + COMMUNITY_NAME + "_week_" + 0 + ".csv", PATH);
+            CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + "ThisWarofMine_2014" + "_week_" + 0 + ".csv", PATH);
+
+            List<Map<String, Object>> participantsStats = community
+                    .writeIndividualStatsToElasticsearch("ThisWarofMine_2014", 0);
+            elasticsearchService.indexParticipantsStats(participantsStats);
+            /**
+              * index participant interaction results
+              */
+            LOGGER.info("Start generating participants directed graph representation.");
+            JSONObject participantInteraction = community.generateParticipantViewD3("ThisWarofMine_2014", 0);
+            elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+
+            LOGGER.info("Start generating hierarchical edge bundling.");
+            JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling("ThisWarofMine_2014", 0);
+            elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
 //
-//            List<Map<String, Object>> participantsStats = community
-//                    .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, 0);
-//            elasticsearchService.indexParticipantsStats(participantsStats);
-//            /**
-//              * index participant interaction results
-//              */
-//            LOGGER.info("Start generating participants directed graph representation.");
-//            JSONObject participantInteraction = community.generateParticipantViewD3(COMMUNITY_NAME, 0);
-//            elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+//            LOGGER.info("\n----------- Subcommunities stats -------- \n");
+//            for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+//                Community subCommunity = community.getTimeframeSubCommunities().get(i);
+//                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + "ThisWarofMine_2014" + "_clustered_results_week_" + (i + 1) + ".csv", PATH);
 //
-//            LOGGER.info("Start generating hierarchical edge bundling.");
-//            JSONObject hierarchicalEdgeBundling = community.generateHierarchicalEdgeBundling(COMMUNITY_NAME, 0);
-//            elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
+//                List<Map<String, Object>> participantsStatsSubCommunity = subCommunity
+//                        .writeIndividualStatsToElasticsearch("ThisWarofMine_2014", i + 1);
+//                elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
+//
+//                /**
+//                 * index participant interaction results
+//                 */
+//                LOGGER.info("Start generating participants directed graph representation.");
+//                JSONObject participantInteractionSubcommunity = subCommunity.generateParticipantViewD3("ThisWarofMine_2014", i + 1);
+//                elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteractionSubcommunity);
+//
+//                LOGGER.info("Start generating hierarchical edge bundling.");
+//                JSONObject hierarchicalEdgeBundlingSubcommunity = subCommunity.generateHierarchicalEdgeBundling("ThisWarofMine_2014", i + 1);
+//                elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundlingSubcommunity);
+//            }
 
-            LOGGER.info("\n----------- Subcommunities stats -------- \n");
-            for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
-                Community subCommunity = community.getTimeframeSubCommunities().get(i);
-                CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + COMMUNITY_NAME + "_clustered_results_week_" + (i + 1) + ".csv", PATH);
-
-                List<Map<String, Object>> participantsStatsSubCommunity = subCommunity
-                        .writeIndividualStatsToElasticsearch(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
-
-                /**
-                 * index participant interaction results
-                 */
-                LOGGER.info("Start generating participants directed graph representation.");
-                JSONObject participantInteractionSubcommunity = subCommunity.generateParticipantViewD3(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteractionSubcommunity);
-
-                LOGGER.info("Start generating hierarchical edge bundling.");
-                JSONObject hierarchicalEdgeBundlingSubcommunity = subCommunity.generateHierarchicalEdgeBundling(COMMUNITY_NAME, i + 1);
-                elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundlingSubcommunity);
-
-            }
 
 
 //            community.exportIndividualStatsAndInitiation(PATH + "/" + COMMUNITY_NAME + "_" + INDIVIDUAL_STATS_FILENAME,
