@@ -142,7 +142,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
                 } else {
                     block.setId(i);
                 }
-                block.setRefId(0);
+                block.setRefId(-1);
                 if (el.hasAttribute("verbalization_after")) {
                     block.setVerbId(noBreakPoints);
                     noBreakPoints++;
