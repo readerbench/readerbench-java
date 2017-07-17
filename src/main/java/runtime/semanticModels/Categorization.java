@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
@@ -39,7 +40,7 @@ public class Categorization {
 
     private static final Logger LOGGER = Logger.getLogger("");
 
-    public static void performCategorization(String description, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
+    public static void performCategorization(String description, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
         AbstractDocument queryDoc = QueryHelper.generateDocument(description, lang, models, usePosTagging, computeDialogism);
 
         LOGGER.log(Level.INFO, "Built document has {0} blocks.", queryDoc.getBlocks().size());
@@ -68,9 +69,14 @@ public class Categorization {
                 sb.append(" ");
             });
 
-            AbstractDocument queryCategory = QueryHelper.generateDocument(sb.toString(), lang, models, usePosTagging, computeDialogism);
-            SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
-            resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
+            AbstractDocument queryCategory;
+            try {
+                queryCategory = QueryHelper.generateDocument(sb.toString(), lang, models, usePosTagging, computeDialogism);
+                SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
+                resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         });
 
         Collections.sort(resultCategories, ResultCategory.ResultCategoryRelevanceComparator);
@@ -89,6 +95,10 @@ public class Categorization {
         String ldaCorpora = "TASA_LAK";
         String w2vCorpora = "";
         List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-        performCategorization(description, lang, models, usePosTagging, computeDialogism);
+        try {
+            performCategorization(description, lang, models, usePosTagging, computeDialogism);
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }

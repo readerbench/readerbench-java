@@ -143,7 +143,7 @@ public class ReaderBenchServer {
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
-    
+
     private static QueryResult errorEmptyBody() {
         return new QueryResult(false, ParamsValidator.errorNoParams());
     }
@@ -165,7 +165,7 @@ public class ReaderBenchServer {
         }
         return null;
     }
-    
+
     private static QueryResult errorIfParamsEmpty(Set<String> params) {
         Set<String> emptyParams;
         if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
@@ -266,7 +266,7 @@ public class ReaderBenchServer {
         server.start();
     }
 
-    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
+    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
         List<ResultCategory> resultCategories = new ArrayList<>();
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
         for (Category cat : dbCategories) {
@@ -286,7 +286,7 @@ public class ReaderBenchServer {
 
     private ResultSemanticAnnotation getSemanticAnnotation(
             AbstractDocument abstractDocument, AbstractDocument keywordsDocument, AbstractDocument document,
-            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) {
+            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) throws Exception {
         ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
         List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold);
         List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
@@ -480,8 +480,7 @@ public class ReaderBenchServer {
             JSONObject json = null;
             if (request.body().isEmpty()) {
                 error = errorEmptyBody();
-            }
-            else {
+            } else {
                 json = (JSONObject) new JSONParser().parse(request.body());
                 Set<String> requiredParams = setInitialRequiredParams();
                 requiredParams.add("text");
@@ -693,15 +692,20 @@ public class ReaderBenchServer {
                 minThreshold = 0.3;
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
-            String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
-            String abstractText = hm.get("abstract");
-            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
-            QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
-            response.type("application/json");
-            return queryResult.convertToJson();
+            try {
+                AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+                String keywordsText = hm.get("keywords");
+                AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+                String abstractText = hm.get("abstract");
+                AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
+                QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+                queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
+                response.type("application/json");
+                return queryResult.convertToJson();
+            } catch (Exception e) {
+                error = new QueryResult(false, e.getMessage());
+                return error.convertToJson();
+            }
         });
         Spark.post("/self-explanation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -1563,24 +1567,24 @@ public class ReaderBenchServer {
 //                    results.put(community.getCategoryName(), Arrays.asList(community));
 //                }
 //            }
-            webService.services.cscl.result.dto.Community community1 =
-                    new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
-            webService.services.cscl.result.dto.Community community2 =
-                    new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
+            webService.services.cscl.result.dto.Community community1
+                    = new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
+            webService.services.cscl.result.dto.Community community2
+                    = new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
 
-            webService.services.cscl.result.dto.Community community3 =
-                    new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
-            webService.services.cscl.result.dto.Community community4 =
-                    new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+            webService.services.cscl.result.dto.Community community3
+                    = new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
+            webService.services.cscl.result.dto.Community community4
+                    = new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
 
-            webService.services.cscl.result.dto.Category category1 =
-                    new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
+            webService.services.cscl.result.dto.Category category1
+                    = new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
                             Arrays.asList(community1, community2));
-            webService.services.cscl.result.dto.Category category2 =
-                    new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
+            webService.services.cscl.result.dto.Category category2
+                    = new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
                             Arrays.asList(community3));
-            webService.services.cscl.result.dto.Category category3 =
-                    new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
+            webService.services.cscl.result.dto.Category category3
+                    = new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
                             Arrays.asList(community4));
             List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
             QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
@@ -1624,7 +1628,6 @@ public class ReaderBenchServer {
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
 //                    .collect(Collectors.toList());
-
             QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
@@ -1640,7 +1643,6 @@ public class ReaderBenchServer {
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p -> ((List) p.get("data")).size() > 0)
 //                    .collect(Collectors.toList());
-
 
             QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
