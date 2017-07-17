@@ -118,9 +118,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
                 .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
-        if(collect.contains(new NGram(new Word("use", "use", null, null, null, Lang.en), new Word("use", "use", null, null, null, Lang.en)))) {
-            System.out.println("are: " + getText());
-        }
         return collect;
     }
     
