@@ -32,6 +32,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import services.semanticModels.word2vec.Word2VecModel;
+import services.commons.TextPreprocessing;
 
 public class QueryHelper {
 
@@ -57,7 +58,7 @@ public class QueryHelper {
 
     public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
         LOGGER.info("Generating document...");
-        text = QueryHelper.replaceSpecialChars(textToUTF8(text));
+        text = QueryHelper.replaceSpecialChars(textToUTF8(TextPreprocessing.cleanText(text, lang)));
         AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(text);
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
         LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
