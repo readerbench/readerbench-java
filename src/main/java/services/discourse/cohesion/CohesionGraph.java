@@ -112,7 +112,7 @@ public class CohesionGraph {
                 Block b1 = d.getBlocks().get(i);
                 Block b2 = d.getBlocks().get(j);
                 // if the semantic cohesion is set for the pair of blocks (i, j)
-                if (d.getBlockDistances()[j][i] != null && ((d.getBlockDistances()[j][i].getCohesion() >= Math.min(0.3, (avg + stdev)))
+                if (d.getBlockDistances()[j][i] != null && ((d.getBlockDistances()[j][i].getCohesion() >= Math.max(0.3, (avg + stdev)))
                         // if j is the next block after i and there is not an explicit link set for j
                         || (b2.getRefBlock() == null && j == i + 1)
                         // if there is an explicit link set for j and it is i 
@@ -195,7 +195,7 @@ public class CohesionGraph {
                 for (int i = 0; i < b.getSentences().size() - 1; i++) {
                     for (int j = i + 1; j < b.getSentences().size(); j++) {
                         // if the semantic cohesion is greater than sum of mean and standard deviation and j is the next sentence after i
-                        if ((b.getSentenceDistances()[i][j].getCohesion() >= Math.min(0.3, (avg + stdev))) || (j == i + 1)) {
+                        if ((b.getSentenceDistances()[i][j].getCohesion() >= Math.max(0.3, (avg + stdev))) || (j == i + 1)) {
                             // keep this semantic cohesion
                             b.getPrunnedSentenceDistances()[i][j] = b.getSentenceDistances()[i][j];
                             b.getPrunnedSentenceDistances()[j][i] = b.getPrunnedSentenceDistances()[i][j];
