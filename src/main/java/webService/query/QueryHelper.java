@@ -58,7 +58,8 @@ public class QueryHelper {
 
     public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
         LOGGER.info("Generating document...");
-        text = QueryHelper.replaceSpecialChars(textToUTF8(TextPreprocessing.cleanText(text, lang)));
+        //text = QueryHelper.replaceSpecialChars(TextPreprocessing.cleanText(textToUTF8(text), lang));
+        text = QueryHelper.replaceSpecialChars(textToUTF8(text));
         AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(text);
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
         LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());

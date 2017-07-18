@@ -506,10 +506,14 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
+            Integer granularity = null;
+            if (hm.get("granularity") != null && (hm.get("granularity").compareTo("") != 0)) {
+                granularity = Integer.parseInt(hm.get("granularity"));
+            }
             AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
             QueryResultSentiment queryResult = new QueryResultSentiment();
             try {
-                queryResult.setData(SentimentAnalysis.computeSentiments(document));
+                queryResult.setData(SentimentAnalysis.computeSentiments(document, granularity));
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
@@ -866,13 +870,13 @@ public class ReaderBenchServer {
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
             resultCv.setConcepts(ConceptMap.getKeywords(cvDocument, minThreshold, null));
-            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument));
+            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument, SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCv(resultCv);
             String coverContent = getTextFromPdf("tmp/" + hm.get("cover-file"), true).getContent();
             AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism);
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument,  SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCover(resultCover);
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
             Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
