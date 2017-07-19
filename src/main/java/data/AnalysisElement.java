@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,6 +54,7 @@ public abstract class AnalysisElement implements Serializable {
     private Map<Word, Integer> wordOccurences;
     private double score;
     private double[] voiceDistribution;
+    private double[] extendedVoiceDistribution;
     // specificity score computed for a specific class of topics
 
     private List<Keyword> topics;
@@ -324,6 +325,15 @@ public abstract class AnalysisElement implements Serializable {
         this.voiceDistribution = voiceDistribution;
     }
 
+
+    public double[] getExtendedVoiceDistribution() {
+        return extendedVoiceDistribution;
+    }
+
+    public void setExtendedVoiceDistribution(double[] extendedVoiceDistribution) {
+        this.extendedVoiceDistribution = extendedVoiceDistribution;
+    }
+
     /**
      * @return
      */
@@ -401,5 +411,6 @@ public abstract class AnalysisElement implements Serializable {
         }
         return true;
     }
+
 
 }

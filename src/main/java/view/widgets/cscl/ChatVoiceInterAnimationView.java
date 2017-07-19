@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -377,15 +377,18 @@ public class ChatVoiceInterAnimationView extends JFrame {
 								if (!w.isNoun() && !w.isVerb()) {
 									valence = 0;
 									SentimentEntity sentiments = w.getSentiment();
-									// this adj is in LIWC list with positive words
-									if (sentiments.contains(new data.sentiment.SentimentValence(
-											310, "Posemo_LIWC", "Posemo_LIWC", false))) {
-										valence = 1.0;
-									}
-									// this adj is in LIWC list with negative words
-									else if (sentiments.contains(new data.sentiment.SentimentValence(
-											311, "Negemo_LIWC", "Negemo_LIWC", false))) {
-										valence = -1.0;
+									//check if the LIWC lists exists
+									if (sentiments != null) {
+										// this adj is in LIWC list with positive words
+										if (sentiments.contains(new data.sentiment.SentimentValence(
+												310, "Posemo_LIWC", "Posemo_LIWC", false))) {
+											valence = 1.0;
+										}
+										// this adj is in LIWC list with negative words
+										else if (sentiments.contains(new data.sentiment.SentimentValence(
+												311, "Negemo_LIWC", "Negemo_LIWC", false))) {
+											valence = -1.0;
+										}
 									}
 									noSentences++;
 									sumValences += valence;
@@ -416,15 +419,26 @@ public class ChatVoiceInterAnimationView extends JFrame {
 									sumValences += valence;
 
 
+
 									//display the context: only the words which are in the subTree
 									String[] sentenceWords = sentence.getAlternateText().split("[\\p{Punct}\\s]+");
 									for (ContextSentiment ctxTree:ctxTrees) {
 										Tree subTree = ctxTree.getContextTree();
+										Map<String, Integer> charactersOccurences = new HashMap<>();
+
 										for (int wordIndex = 0; wordIndex < sentenceWords.length; wordIndex++) {
 											String wordInSentence = sentenceWords[wordIndex];
 											//the word is the label of a node in the tree
 											if (ctx.findNodeInTree(subTree, wordInSentence).size() > 0) {
-												sentenceOrContext += wordInSentence + " ";
+												if (!charactersOccurences.containsKey(wordInSentence)) {
+													charactersOccurences.put(wordInSentence, ctx.findNodeInTree(subTree, wordInSentence).size() - 1);
+													sentenceOrContext += wordInSentence + " ";
+												}
+												//the word from context should be in the sentenceOrContext string in equal number
+												else if (charactersOccurences.get(wordInSentence) > 0) {
+													charactersOccurences.put(wordInSentence, charactersOccurences.get(wordInSentence) - 1);
+													sentenceOrContext += wordInSentence + " ";
+												}
 											}
 										}
 										sentenceOrContext += ctxTree.getValence() +" \n ";
@@ -489,7 +503,10 @@ public class ChatVoiceInterAnimationView extends JFrame {
 				index = 0;
 			}
 			int clutIndex = index++ / PASS;
-			return taskColors.get(col).get(clutIndex);
+			if (clutIndex < taskColors.get(col).size())
+				return taskColors.get(col).get(clutIndex);
+			else
+				return taskColors.get(col).get(clutIndex % taskColors.get(col).size());
 		}
 	}
 }

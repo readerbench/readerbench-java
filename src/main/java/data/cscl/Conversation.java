@@ -85,6 +85,7 @@ public class Conversation extends AbstractDocument {
     private double[] socialKBEvolution;
     // determine the distribution throughout the conversation of voice PMI
     private double[] voicePMIEvolution;
+    private double[] voiceExtendedEvolution;
     // determine the distribution of collaboration from annotations throughout the conversation
     private double[] annotatedCollabEvolution;
 
@@ -349,8 +350,32 @@ public class Conversation extends AbstractDocument {
      * @param p
      * @return
      */
+    public double[] getExtendedParticipantBlockDistribution(SemanticChain voice, Participant p) {
+        double[] distribution = new double[voice.getExtendedBlockDistribution().length];
+        for (int i = 0; i < getBlocks().size(); i++) {
+            if (getBlocks().get(i) != null && ((Utterance) getBlocks().get(i)).getParticipant().equals(p)) {
+                distribution[i] = voice.getExtendedBlockDistribution()[i];
+            }
+        }
+        return distribution;
+    }
+    /**
+     * @param voice
+     * @param p
+     * @return
+     */
     public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getParticipantBlockDistribution(voice, p);
+        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
+    }
+
+    /**
+     * @param voice
+     * @param p
+     * @return
+     */
+    public double[] getExtendedParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
+        double[] distribution = getExtendedParticipantBlockDistribution(voice, p);
         return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
     }
 
@@ -367,6 +392,7 @@ public class Conversation extends AbstractDocument {
 
         Collaboration.evaluateSocialKB(this);
         setVoicePMIEvolution(DialogismMeasures.getCollaborationEvolution(this));
+        setVoiceExtendedEvolution(DialogismMeasures.getExtendedCollaborationEvolution(this));
         // Collaboration.printIntenseCollabZones(this);
 
         DialogismComputations.determineParticipantInterAnimation(this);
@@ -669,6 +695,14 @@ public class Conversation extends AbstractDocument {
      */
     public void setVoicePMIEvolution(double[] voicePMIEvolution) {
         this.voicePMIEvolution = voicePMIEvolution;
+    }
+
+    public double[] getVoiceExtendedEvolution() {
+        return voiceExtendedEvolution;
+    }
+
+    public void setVoiceExtendedEvolution(double[] voiceExtendedEvolution) {
+        this.voiceExtendedEvolution = voiceExtendedEvolution;
     }
 
     /**

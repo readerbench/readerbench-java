@@ -221,6 +221,32 @@ public class DialogismMeasures {
             return null;
         }
         double[] evolution = new double[c.getVoices().get(0).getBlockMovingAverage().length];
+        // take all voices
+        for (int i = 0; i < c.getVoices().size(); i++) {
+            // for different participants build collaboration based on inter-twined voices
+            for (int p1 = 0; p1 < c.getParticipants().size() - 1; p1++) {
+                for (int p2 = p1 + 1; p2 < c.getParticipants().size(); p2++) {
+                    double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p1));
+                    double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p2));
+//                    double[] mi = VectorAlgebra.discreteMutualInformation(ditrib1, ditrib2);
+                    for (int j = 0; j < evolution.length; j++) {
+                        if (ditrib1[j] != 0 && ditrib2[j] != 0) {
+//                            evolution[j] += mi[j];
+                            evolution[j] += ditrib1[j] + ditrib2[j];
+                        }
+                    }
+                }
+            }
+        }
+        c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
+        return evolution;
+    }
+
+    public static double[] getExtendedCollaborationEvolution(Conversation c) {
+        if (c.getExtendedVoices() == null || c.getExtendedVoices().isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[c.getExtendedVoices().get(0).getBlockMovingAverage().length];
         Iterator<Participant> it = c.getParticipants().iterator();
         List<Participant> lsPart = new ArrayList<>();
         while (it.hasNext()) {
@@ -232,12 +258,12 @@ public class DialogismMeasures {
         c.setNoDivergentPoints(0);
         double[][] recurrencePlot = new double[c.getBlocks().size()][c.getBlocks().size()];
         // take all voices
-        for (int i = 0; i < c.getVoices().size(); i++) {
+        for (int i = 0; i < c.getExtendedVoices().size(); i++) {
             // for different participants build collaboration based on inter-twined voices
             for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
                 for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
-                    double[] distribution1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p1));
-                    double[] distribution2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), lsPart.get(p2));
+                    double[] distribution1 = c.getExtendedParticipantBlockMovingAverage(c.getExtendedVoices().get(i), lsPart.get(p1));
+                    double[] distribution2 = c.getExtendedParticipantBlockMovingAverage(c.getExtendedVoices().get(i), lsPart.get(p2));
 
                     double[][] mi = VectorAlgebra.recurrencePlot(distribution1, distribution2);
                     for (int j = 0; j < evolution.length; j++) {
@@ -328,11 +354,10 @@ public class DialogismMeasures {
         System.out.println("------Divergent points/Total number of utterances: " + c.getDivergenceRate());
         System.out.println("------Max line: "+ maxLine);
         System.out.println("------Average line: " + averageLine);
-        System.out.println("----Number of convergent points: " + c.getNoConvergentPoints());
-        System.out.println("----Number of divergent points: " + c.getNoDivergentPoints());
+        System.out.println("------Number of convergent points: " + c.getNoConvergentPoints());
+        System.out.println("------Number of divergent points: " + c.getNoDivergentPoints());
 
 
-        c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
         c.setIntenseConvergentZonesVoice(Collaboration.getConvergentZones(evolution));
         c.setIntenseDivergentZonesVoice(Collaboration.getDivergentZones(evolution));
 

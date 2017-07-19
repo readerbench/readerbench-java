@@ -3,13 +3,11 @@ package licenta;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+
+//import com.google.common.io.Files;
 
 import com.google.common.io.Files;
-
 import data.Lang;
 import data.Word;
 import edu.stanford.nlp.dcoref.CorefChain;
@@ -73,6 +71,7 @@ public class SimpleExample {
             Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
             double valence = RNNCoreAnnotations.getPredictedClass(tree) - 2;
             tree.pennPrint();
+            System.out.println(valence);
 
             // this is the Stanford dependency graph of the current sentence
             SemanticGraph dependencies = sentence.get(SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation.class);
@@ -82,25 +81,33 @@ public class SimpleExample {
 
 //            String[] sentenceWords = sentence.split("[\\s\\.,]+");
             String[] sentenceWords = text.split("[\\p{Punct}\\s]+");
-            Word w =  Word.getWordFromConcept("wants", Lang.en);
+            Word w =  Word.getWordFromConcept("friend", Lang.en);
             System.out.println(w.toString());
-            List<Tree> subTrees = ctx.findContextTree(tree,w, false);
+            List<Tree> subTrees = ctx.findContextTree(tree,w, true);
             String sentenceOrContext = "";
             for (Tree t: subTrees) {
                 t.pennPrint();
                 valence = RNNCoreAnnotations.getPredictedClass(t) - 2;
                 System.out.println(valence);
+                Map<String, Integer> noDigits = new HashMap<>();
                 for (int wordIndex = 0; wordIndex < sentenceWords.length; wordIndex++) {
                     String wordInSentence = sentenceWords[wordIndex];
-                    System.out.println(wordInSentence);
                     //the word is the label of a node in the tree
                     if (ctx.findNodeInTree(t, wordInSentence).size() > 0) {
-                        sentenceOrContext += wordInSentence + " ";
+                        if (!noDigits.containsKey(wordInSentence)) {
+                            noDigits.put(wordInSentence, ctx.findNodeInTree(t, wordInSentence).size() - 1);
+                            sentenceOrContext += wordInSentence + " ";
+                        }
+                        else if (noDigits.get(wordInSentence) > 0) {
+                            noDigits.put(wordInSentence, noDigits.get(wordInSentence) - 1);
+                            sentenceOrContext += wordInSentence + " ";
+                        }
                     }
                 }
             }
 
             System.out.println(sentenceOrContext);
+            System.out.println(valence);
 
         }
 

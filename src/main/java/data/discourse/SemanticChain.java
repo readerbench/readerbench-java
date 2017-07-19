@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,6 +47,8 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     private Map<SimilarityType, double[]> modelVectors;
     private double[] sentenceDistribution;
     private double[] blockDistribution;
+    private double[] extendedSentenceDistribution;
+    private double[] extendedBlockDistribution;
     private double[] blockMovingAverage;
     private double averageImportanceScore;
 
@@ -79,7 +81,8 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
         for (SimilarityType st : chain1.getSemanticModels().keySet()) {
             ISemanticModel model = chain1.getSemanticModels().get(st);
-            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st), chain2.getModelVectors().get(st)));
+            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st),
+                    chain2.getModelVectors().get(st)));
         }
 
         double dist = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
@@ -100,6 +103,20 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         return chain1;
     }
 
+    /**
+     * @param chain1
+     * @param chain2
+     * @return true if chain1 is included in chain2
+     */
+    public static boolean includedIn(SemanticChain chain1, SemanticChain chain2) {
+        for (Word w : chain1.getWords()) {
+            if (!chain2.getWords().contains(w)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void updateSemanticRepresentation() {
         if (modelVectors == null) {
             modelVectors = new EnumMap<>(SimilarityType.class);
@@ -108,13 +125,13 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         for (Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
             double[] vec = new double[e.getValue().getNoDimensions()];
             words.stream()
-                .map(word -> word.getModelRepresentation(e.getKey()))
-                .filter(Objects::nonNull)
-                .forEach(v -> {
-                for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
-                    vec[i] += v[i];
-                }
-            });
+                    .map(word -> word.getModelRepresentation(e.getKey()))
+                    .filter(Objects::nonNull)
+                    .forEach(v -> {
+                        for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                            vec[i] += v[i];
+                        }
+                    });
             modelVectors.put(e.getKey(), vec);
         }
 
@@ -257,6 +274,22 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         this.blockDistribution = blockDistribution;
     }
 
+    public double[] getExtendedSentenceDistribution() {
+        return extendedSentenceDistribution;
+    }
+
+    public void setExtendedSentenceDistribution(double[] extendedSentenceDistribution) {
+        this.extendedSentenceDistribution = extendedSentenceDistribution;
+    }
+
+    public double[] getExtendedBlockDistribution() {
+        return extendedBlockDistribution;
+    }
+
+    public void setExtendedBlockDistribution(double[] extendedBlockDistribution) {
+        this.extendedBlockDistribution = extendedBlockDistribution;
+    }
+
     public double[] getBlockMovingAverage() {
         return blockMovingAverage;
     }
@@ -314,9 +347,11 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     public Map<SimilarityType, double[]> getModelVectors() {
         return modelVectors;
     }
-    
+
     @Override
     public int hashCode() {
-    	return this.toString().hashCode();
+        return this.toString().hashCode();
     }
+
+
 }

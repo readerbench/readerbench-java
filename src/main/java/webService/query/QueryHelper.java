@@ -62,10 +62,17 @@ public class QueryHelper {
 
     public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
         LOGGER.info("Generating document...");
-        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(text));
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(textToUTF8(QueryHelper.replaceSpecialChars(text)));
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
         LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
         document.computeAll(computeDialogism);
         return document;
+    }
+
+    public static String replaceSpecialChars(String text) {
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "");
+        text = text.replaceAll("\\+", "");
+        text = text.replaceAll("%", "");
+        return text;
     }
 }

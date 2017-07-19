@@ -121,6 +121,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     protected Map<ComplexityIndex, Double> complexityIndices;
 
     private List<SemanticChain> voices;
+    private List<SemanticChain> extendedVoices;
     private transient List<SemanticChain> selectedVoices;
     private int noNouns;
     private int noVerbs;
@@ -220,11 +221,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
             // determine semantic chains / voices
             DialogismComputations.determineVoices(this);
+            DialogismComputations.determineExtendedVoices(this);
 
             DialogismComputations.findSentimentUsingContext(this);
 
             // determine voice distributions & importance
             DialogismComputations.determineVoiceDistributions(this);
+            DialogismComputations.determineExtendedVoiceDistributions(this);
         }
 
         // build coherence graph
@@ -753,6 +756,14 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public void setVoices(List<SemanticChain> voices) {
         this.voices = voices;
+    }
+
+    public List<SemanticChain> getExtendedVoices() {
+        return extendedVoices;
+    }
+
+    public void setExtendedVoices(List<SemanticChain> extendedVoices) {
+        this.extendedVoices = extendedVoices;
     }
 
     public List<SemanticChain> getSelectedVoices() {

@@ -36,7 +36,7 @@ import services.commons.Formatting;
 public class Collaboration {
 
     static Logger logger = Logger.getLogger("");
-    public static final double COLLABORATION_ZONE_SLACK = 0.01;
+    public static final double COLLABORATION_ZONE_SLACK = 0.1;
     public static final int COLLABORATION_ZONE_MIN_SPREAD = 3;
     public static double BETA_FSCORE = 1;
     public static double COLLABORATION_SENTIMENT_SLACK = 0.5;

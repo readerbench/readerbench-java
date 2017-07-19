@@ -135,7 +135,8 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("SEP=,\nFilename,AVG(Social KB),ABS(Social KB),AVG(Dialogism),Voices,Avg voices,Avg voice span,Max voice span,Number of nouns in perspectives,Number of verbs in perspectives,Number of nouns and verbs in perspectives,Number of perspectives,Nouns/Perspectives,Verbs/Perspectives,(Nouns + Verbs)/Perspectives,Number of convergent points,Number of divergent points,Recurrence rate,Determinism,Convergent points/Total number of utterances,Divergent points/Total number of utterances,Convergent or divergent points/Total number of utterances,Max Line,Average Line");
+            out.write("SEP=,\nFilename,AVG(Social KB per participant), Normalized Social KB (per contribution), ABS(Social KB between participants), AVG(Dialogism per participant), Normalized Dialogism (per contribution),"
+                    + "# Voices, Avg voices, Avg voice length (# words), Max voice length (# words)");
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {

@@ -39,7 +39,7 @@ public class Context {
 	/**
 	 * @param tree
 	 * @param w
-	 * @return context trees for the word which is a noun
+	 * @return context trees for the word which is a verb
 	 */
 	private List<Tree> findContextForVerb(Tree tree, Word w) {
 		List<Tree> contextForVerb = new ArrayList<Tree>();

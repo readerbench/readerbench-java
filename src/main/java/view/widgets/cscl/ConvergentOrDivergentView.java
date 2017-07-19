@@ -33,17 +33,17 @@ public class ConvergentOrDivergentView extends JFrame {
     private Participant p1;
     private Participant p2;
 
-    public ConvergentOrDivergentView(Conversation chat, List<SemanticChain> selectedVoices, List<Participant>
+    public ConvergentOrDivergentView(Conversation chat, SemanticChain selectedVoice, List<Participant>
             selectedParticipants) {
 
         this.chat = chat;
-        this.voice = selectedVoices.get(0);
+        this.voice = selectedVoice;
         this.participants = selectedParticipants;
         this.p1 = this.participants.get(0);
         this.p2 = this.participants.get(1);
 
-        double[] distribution1 = this.chat.getParticipantBlockMovingAverage(this.voice, this.p1);
-        double[] distribution2 = this.chat.getParticipantBlockMovingAverage(this.voice, this.p2);
+        double[] distribution1 = this.chat.getExtendedParticipantBlockMovingAverage(this.voice, this.p1);
+        double[] distribution2 = this.chat.getExtendedParticipantBlockMovingAverage(this.voice, this.p2);
 
         double[][] data = VectorAlgebra.recurrencePlot(distribution1, distribution2);
 
@@ -59,25 +59,25 @@ public class ConvergentOrDivergentView extends JFrame {
 
     private ChartPanel createDemoPanel(double[][] data) {
         JFreeChart jfreechart = ChartFactory.createScatterPlot("Convergent or Divergent Points", p1.getName(), p2.getName(),
-            createSampleData(data), PlotOrientation.VERTICAL, true, true, false);
-            XYPlot xyPlot = (XYPlot) jfreechart.getPlot();
-            xyPlot.setDomainCrosshairVisible(true);
-            xyPlot.setRangeCrosshairVisible(true);
-            XYItemRenderer renderer = xyPlot.getRenderer();
+                createSampleData(data), PlotOrientation.VERTICAL, true, true, false);
+        XYPlot xyPlot = (XYPlot) jfreechart.getPlot();
+        xyPlot.setDomainCrosshairVisible(true);
+        xyPlot.setRangeCrosshairVisible(true);
+        XYItemRenderer renderer = xyPlot.getRenderer();
 
-            //divergent points are represented with red color, while convergent points are represented with green color,
-            //for consistency with sentiment valence view
-            renderer.setSeriesPaint(0, Color.red);
-            renderer.setSeriesPaint(1, Color.green);
+        //divergent points are represented with red color, while convergent points are represented with green color,
+        //for consistency with sentiment valence view
+        renderer.setSeriesPaint(0, Color.red);
+        renderer.setSeriesPaint(1, Color.green);
 
-            adjustAxis((NumberAxis) xyPlot.getDomainAxis(), true, data);
-            adjustAxis((NumberAxis) xyPlot.getRangeAxis(), false, data);
+        adjustAxis((NumberAxis) xyPlot.getDomainAxis(), true, data);
+        adjustAxis((NumberAxis) xyPlot.getRangeAxis(), false, data);
 
-            xyPlot.setBackgroundPaint(Color.black);
-            xyPlot.setDomainGridlinesVisible(true);
-            xyPlot.setRangeGridlinesVisible(true);
+        xyPlot.setBackgroundPaint(Color.black);
+        xyPlot.setDomainGridlinesVisible(true);
+        xyPlot.setRangeGridlinesVisible(true);
 
-            return new ChartPanel(jfreechart);
+        return new ChartPanel(jfreechart);
     }
 
     private void adjustAxis(NumberAxis axis, boolean vertical, double[][] data) {

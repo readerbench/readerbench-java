@@ -111,6 +111,49 @@ public class DialogismComputations {
         d.setVoices(semanticChains);
     }
 
+    /**
+     * @param d
+     *
+     * Filter only nouns and verbs, build new voices with these words
+     */
+    public static void determineExtendedVoices(AbstractDocument d) {
+        List<SemanticChain> extendedVoices = new ArrayList<>();
+
+        Map<String, Integer> auxiliaryVoices = new HashMap<String, Integer>();
+        System.out.println("-------Number of voices: " + d.getVoices().size());
+        for (SemanticChain chain : d.getVoices()) {
+            int noNouns = 0;
+            int noVerbs = 0;
+
+            LexicalChain lexicalChain = new LexicalChain();
+            SemanticChain extendedChain = new SemanticChain(lexicalChain, d.getSemanticModels());
+            for (Word w : chain.getWords()) {
+                if (w.isVerb() || w.isNoun()) {
+                    extendedChain.getWords().add(w);
+                    if (!auxiliaryVoices.containsKey(w.getText())) {
+                        auxiliaryVoices.put(w.getText(), 1);
+                        if (w.isNoun()) noNouns++;
+                        else if (w.isVerb()) noVerbs++;
+                    }
+                }
+            }
+            //is perspective if the voice contains only nouns and verbs
+            if (extendedChain.getWords().size() == chain.getWords().size()) {
+                d.setNoPerspectives(d.getNoPerspectives() + 1);
+                d.setNoNounsInPerspectives(d.getNoNounsInPerspectives() + noNouns);
+                d.setNoVerbsInPerspectives(d.getNoVerbsInPerspectives() + noVerbs);
+            }
+            extendedVoices.add(extendedChain);
+        }
+
+        d.setExtendedVoices(extendedVoices);
+
+        System.out.println("-------Number of voices: " + d.getVoices().size());
+        System.out.println("-------Number of perspectives: " + d.getNoPerspectives());
+        System.out.println("-------Number of nouns in perspectives: " + d.getNoNounsInPerspectives());
+        System.out.println("-------Number of verbs in perspectives: " + d.getNoVerbsInPerspectives());
+    }
+
     public static void determineVoiceDistribution(AnalysisElement e, AbstractDocument d) {
         if (d.getVoices() != null && d.getVoices().size() > 0) {
             e.setVoiceDistribution(new double[d.getVoices().size()]);
@@ -120,6 +163,20 @@ public class DialogismComputations {
                 int index = d.getVoices().indexOf(w.getSemanticChain());
                 if (index >= 0) {
                     e.getVoiceDistribution()[index] += no;
+                }
+            }
+        }
+    }
+
+    public static void determineExtendedVoiceDistribution(AnalysisElement e, AbstractDocument d) {
+        if (d.getExtendedVoices() != null && d.getExtendedVoices().size() > 0) {
+            e.setExtendedVoiceDistribution(new double[d.getExtendedVoices().size()]);
+
+            for (Word w : e.getWordOccurences().keySet()) {
+                double no = 1 + Math.log(e.getWordOccurences().get(w));
+                int index = d.getExtendedVoices().indexOf(w.getSemanticChain());
+                if (index >= 0) {
+                    e.getExtendedVoiceDistribution()[index] += no;
                 }
             }
         }
@@ -138,7 +195,6 @@ public class DialogismComputations {
                 }
             }
         }
-
         // build time intervals
         d.setBlockOccurrencePattern(new long[d.getBlocks().size()]);
         if (d instanceof Conversation) {
@@ -157,21 +213,93 @@ public class DialogismComputations {
                 }
             }
         }
-
         // determine spread
         if (d.getVoices() != null) {
-            d.setNoNouns(0);
-            d.setNoVerbs(0);
-
-            Map<String, Integer> auxiliarVoices = new HashMap<String, Integer>();
-
             for (SemanticChain chain : d.getVoices()) {
                 chain.setSentenceDistribution(new double[noSentences]);
                 chain.setBlockDistribution(new double[d.getBlocks().size()]);
                 Map<String, Integer> voiceOccurrences = new TreeMap<>();
-                boolean isPerspective = true;
-                int noNouns = 0;
-                int noVerbs = 0;
+                for (Word w : chain.getWords()) {
+                    int blockIndex = w.getBlockIndex();
+                    int sentenceIndex = w.getUtteranceIndex();
+                    // determine spread as 1+log(no_occurences) per sentence
+                    try {
+                        chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += 1;
+                    } catch (ArrayIndexOutOfBoundsException ex) {
+                        System.out.println(ex);
+                    }
+                    chain.getBlockDistribution()[blockIndex] += 1;
+                    // build cumulative importance in terms of sentences in which occurrences have been spotted
+                    if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
+                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
+                                voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
+                    } else {
+                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
+                    }
+                }
+                for (String key : voiceOccurrences.keySet()) {
+                    Integer blockIndex = Integer.valueOf(key.substring(0, key.indexOf("_")));
+                    Integer sentenceIndex = Integer.valueOf(key.substring(key.indexOf("_") + 1));
+                    Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
+                    if (s.getWords().size() > 0) {
+                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore());
+                    }
+                }
+                // normalize
+                if (voiceOccurrences.size() > 0) {
+                    chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
+                }
+                // normalize occurrences at sentence level
+                for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
+                    if (chain.getSentenceDistribution()[i] > 0) {
+                        chain.getSentenceDistribution()[i] = 1 + Math.log(chain.getSentenceDistribution()[i]);
+                    }
+                }
+                // at block level
+                for (int i = 0; i < chain.getBlockDistribution().length; i++) {
+                    if (chain.getBlockDistribution()[i] > 0) {
+                        chain.getBlockDistribution()[i] = 1 + Math.log(chain.getBlockDistribution()[i]);
+                    }
+                }
+                // define moving average at block level, relevant for chat conversations
+                chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
+                        d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
+            }
+            // sort semantic chains (voices) by importance
+            Collections.sort(d.getVoices());
+            // build voice distribution vectors for each block
+            for (Block b : d.getBlocks()) {
+                if (b != null) {
+                    determineVoiceDistribution(b, d);
+                }
+            }
+        }
+    }
+
+
+
+    public static void determineExtendedVoiceDistributions(AbstractDocument d) {
+        LOGGER.info("Identifying extended voice distributions...");
+        // determine distribution of each lexical chain
+        int noSentences = 0;
+        int[][] traceability = new int[d.getBlocks().size()][];
+        for (int i = 0; i < d.getBlocks().size(); i++) {
+            if (d.getBlocks().get(i) != null) {
+                traceability[i] = new int[d.getBlocks().get(i).getSentences().size()];
+                for (int j = 0; j < d.getBlocks().get(i).getSentences().size(); j++) {
+                    traceability[i][j] = noSentences++;
+                }
+            }
+        }
+
+
+        // determine spread
+        if (d.getExtendedVoices() != null) {
+
+            for (SemanticChain chain : d.getExtendedVoices()) {
+                chain.setExtendedSentenceDistribution(new double[noSentences]);
+                chain.setExtendedBlockDistribution(new double[d.getBlocks().size()]);
+                Map<String, Integer> voiceOccurrences = new TreeMap<>();
 
                 for (Word w : chain.getWords()) {
                     int blockIndex = w.getBlockIndex();
@@ -180,42 +308,23 @@ public class DialogismComputations {
                     //find the valence for the context of this voice in the sentence
                     Sentence sentence = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
                     double valence = 0;
-                    if (w.isVerb() || w.isNoun()) {
 
-                        //count voices which are nouns or verbs
-                        if (!auxiliarVoices.containsKey(w.getText())) {
-                            auxiliarVoices.put(w.getText(), 1);
-                            if (w.isNoun()) {
-                                d.setNoNouns(d.getNoNouns() + 1);
-                                noNouns++;
-                            }
-                            if (w.isVerb()) {
-                                d.setNoVerbs(d.getNoVerbs() + 1);
-                                noVerbs++;
-                            }
-                        }
-
-                        List<ContextSentiment> ctxTrees = sentence.getContextMap().get(w);
-                        int noCtxTrees = ctxTrees.size();
-                        double valenceForContext = 0;
-                        //compute the average valence for contextTrees
-                        for (ContextSentiment ctxTree : ctxTrees) {
-                            valenceForContext += ctxTree.getValence();
-                        }
-                        valence = Math.round(valenceForContext / noCtxTrees);
+                    List<ContextSentiment> ctxTrees = sentence.getContextMap().get(w);
+                    int noCtxTrees = ctxTrees.size();
+                    double valenceForContext = 0;
+                    //compute the average valence for contextTrees
+                    for (ContextSentiment ctxTree : ctxTrees) {
+                        valenceForContext += ctxTree.getValence();
                     }
-                    else {
-                        isPerspective = false;
-                    }
-
-                    // determine spread as 1+log(no_occurences) per sentence
+                    valence = Math.round(valenceForContext / noCtxTrees);
                     try {
-                        chain.getSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += valence;
+                        chain.getExtendedSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += valence;
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         System.out.println(ex);
                     }
 
-                    chain.getBlockDistribution()[blockIndex] += valence;
+                    chain.getExtendedBlockDistribution()[blockIndex] += valence;
+
 
                     // build cumulative importance in terms of sentences in which occurrences have been spotted
                     if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
@@ -227,44 +336,17 @@ public class DialogismComputations {
 
                 }
 
-                //this voice contains only nouns and verbs
-                if (isPerspective) {
-                    d.setNoPerspectives(d.getNoPerspectives() + 1);
-                    d.setNoNounsInPerspectives(d.getNoNounsInPerspectives() + noNouns);
-                    d.setNoVerbsInPerspectives(d.getNoVerbsInPerspectives() + noVerbs);
-                }
-
-                for (String key : voiceOccurrences.keySet()) {
-                    Integer blockIndex = Integer.valueOf(key.substring(0, key.indexOf("_")));
-                    Integer sentenceIndex = Integer.valueOf(key.substring(key.indexOf("_") + 1));
-                    Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
-
-                    if (s.getWords().size() > 0) {
-                        chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore());
-                    }
-                }
-                // normalize
-                if (voiceOccurrences.size() > 0) {
-                    chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
-                }
-
                 // define moving average at block level, relevant for chat conversations
-                chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getBlockDistribution(), WINDOW_SIZE,
+                chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getExtendedBlockDistribution(), WINDOW_SIZE,
                         d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
             }
-            System.out.println("-------Number of voices: " + d.getVoices().size());
-            System.out.println("-------Number of perspectives: " + d.getNoPerspectives());
-            System.out.println("-------Number of nouns in perspectives: " + d.getNoNounsInPerspectives());
-            System.out.println("-------Number of verbs in perspectives: " + d.getNoVerbsInPerspectives());
-            System.out.println("-------Number of nouns: " + d.getNoNouns());
-            System.out.println("-------Number of verbs: " + d.getNoVerbs());
             // sort semantic chains (voices) by importance
-            Collections.sort(d.getVoices());
+            Collections.sort(d.getExtendedVoices());
 
             // build voice distribution vectors for each block
             for (Block b : d.getBlocks()) {
                 if (b != null) {
-                    determineVoiceDistribution(b, d);
+                    determineExtendedVoiceDistribution(b, d);
                 }
             }
         }
@@ -282,7 +364,8 @@ public class DialogismComputations {
                     // for different participants build collaboration based on inter-twined voices
                     double[] ditrib1 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p1));
                     double[] ditrib2 = c.getParticipantBlockMovingAverage(c.getVoices().get(i), c.getParticipants().get(p2));
-                    double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+                    //double addedInterAnimationDegree = VectorAlgebra.mutualInformation(ditrib1, ditrib2);
+                    double addedInterAnimationDegree = VectorAlgebra.sumElements(VectorAlgebra.and(ditrib1, ditrib2));
 
                     c.getParticipants().get(p1).getIndices().put(CSCLIndices.INTER_ANIMATION_DEGREE,
                             c.getParticipants().get(p1).getIndices().get(CSCLIndices.INTER_ANIMATION_DEGREE) + addedInterAnimationDegree);
@@ -292,6 +375,7 @@ public class DialogismComputations {
             }
         }
     }
+
 
     /**
      * @param d
