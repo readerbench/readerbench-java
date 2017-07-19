@@ -154,7 +154,7 @@ public abstract class Parsing {
                     b.setFollowedByVerbalization(followedByVerbalization);
                     Block.addBlock(d, b);
                     // add explicit reference, if the case
-                    if (ref != null) {
+                    if (ref != null && ref != -1) {
                         for (Block refB : d.getBlocks()) {
                             if (refB != null && refB.getIndex() == ref) {
                                 b.setRefBlock(refB);

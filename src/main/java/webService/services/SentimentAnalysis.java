@@ -15,102 +15,119 @@
  */
 package webService.services;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
 import data.Word;
 import data.sentiment.SentimentEntity;
 import data.sentiment.SentimentValence;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import services.commons.Formatting;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
 import webService.result.ResultSentiment;
 import webService.result.ResultValence;
 
 public class SentimentAnalysis {
 
-    private static Logger logger = Logger.getLogger("");
+    private static final Logger LOGGER = Logger.getLogger("");
+
+    public static final Integer GRANULARITY_DOCUMENT = 1;
+    public static final Integer GRANULARITY_PARAGRAPH = 2;
+    public static final Integer GRANULARITY_SENTENCE = 3;
+    public static final Integer GRANULARITY_WORD = 4;
 
     /**
      * Get sentiment values for the entire document and for each paragraph
      *
-     * @param queryDoc The document to be analyzed
+     * @param doc The document to be analyzed
+     * @param granularity Granularity of the sentiment analysis process
+     *
      * @return List of sentiment values per entity
      * @throws java.lang.Exception
      */
-    public static ResultSentiment computeSentiments(AbstractDocument queryDoc) throws Exception {
-        ResultSentiment resultsSentiment;
-
-        logger.info("Starting building sentiments...");
-        Map<SentimentValence, Double> rageSentimentsValues = queryDoc.getSentimentEntity().getAggregatedValue();
-        Iterator<Map.Entry<SentimentValence, Double>> it = rageSentimentsValues.entrySet().iterator();
-        List<ResultValence> localResults = new ArrayList<>();
-        while (it.hasNext()) {
-            Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-            SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-            Double sentimentValue = pair.getValue();
-            localResults.add(new ResultValence(
-                    sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                    sentimentValue
-            ));
+    public static List<ResultSentiment> computeSentiments(AbstractDocument doc, Integer granularity) throws Exception {
+        if (granularity == null || !Arrays.asList(GRANULARITY_DOCUMENT, GRANULARITY_PARAGRAPH, GRANULARITY_SENTENCE, GRANULARITY_WORD).contains(granularity)) {
+            granularity = GRANULARITY_DOCUMENT;
         }
-        Collections.sort(localResults);
-        
-        List<ResultSentiment> blockSentiments = new ArrayList<>();
-        for (Block b : queryDoc.getBlocks()) {
-            rageSentimentsValues = b.getSentimentEntity().getAggregatedValue();
-            it = rageSentimentsValues.entrySet().iterator();
+        Map<SentimentValence, Double> semtiments;
+        Iterator<Map.Entry<SentimentValence, Double>> it;
+        List<ResultValence> localResults;
+
+        LOGGER.info("Starting building sentiments...");
+        List<ResultSentiment> sentiments = new ArrayList<>();
+        if (Objects.equals(granularity, GRANULARITY_DOCUMENT)) {
+            semtiments = doc.getSentimentEntity().getAggregatedValue();
+            it = semtiments.entrySet().iterator();
             localResults = new ArrayList<>();
             while (it.hasNext()) {
                 Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
                 SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-                localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                        pair.getValue()));
+                localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""), pair.getValue()));
             }
-            Collections.sort(localResults);
-
-            List<ResultSentiment> sentencesSentiments = new ArrayList<>();
-            for (Sentence s : b.getSentences()) {
-                rageSentimentsValues = s.getSentimentEntity().getAggregatedValue();
-                it = rageSentimentsValues.entrySet().iterator();
-                localResults = new ArrayList<>();
-                while (it.hasNext()) {
-                    Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
-                    SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-                    localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                            pair.getValue()));
-                }
+            if (!localResults.isEmpty()) {
                 Collections.sort(localResults);
-
-                List<ResultSentiment> wordsSentiments = new ArrayList<>();
-                for (Word w : s.getAllWords()) {
-                    SentimentEntity se = w.getSentiment();
-                    if (se == null) continue;
-                    rageSentimentsValues = se.getAggregatedValue();
-                    it = rageSentimentsValues.entrySet().iterator();
+                sentiments.add(new ResultSentiment(doc.getText(), localResults));
+            }
+        } else {
+            for (Block b : doc.getBlocks()) {
+                if (Objects.equals(granularity, GRANULARITY_PARAGRAPH)) {
+                    semtiments = b.getSentimentEntity().getAggregatedValue();
+                    it = semtiments.entrySet().iterator();
                     localResults = new ArrayList<>();
                     while (it.hasNext()) {
                         Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
                         SentimentValence sentimentValence = (SentimentValence) pair.getKey();
-                        localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""),
-                                pair.getValue()));
+                        localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""), pair.getValue()));
                     }
                     if (!localResults.isEmpty()) {
                         Collections.sort(localResults);
-                        wordsSentiments.add(new ResultSentiment("Word " + w.getText(), localResults, null, w.getText()));
+                        sentiments.add(new ResultSentiment(b.getText() + "\n", localResults));
+                    }
+                } else {
+                    for (Sentence s : b.getSentences()) {
+                        if (Objects.equals(granularity, GRANULARITY_SENTENCE)) {
+                            semtiments = s.getSentimentEntity().getAggregatedValue();
+                            it = semtiments.entrySet().iterator();
+                            localResults = new ArrayList<>();
+                            while (it.hasNext()) {
+                                Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+                                SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+                                localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""), pair.getValue()));
+                            }
+                            if (!localResults.isEmpty()) {
+                                Collections.sort(localResults);
+                                sentiments.add(new ResultSentiment(s.getText() + ((s.getIndex() == b.getSentences().size() - 1) ? "\n" : ""), localResults));
+                            }
+                        } else {
+                            for (Word w : s.getAllWords()) {
+                                SentimentEntity se = w.getSentiment();
+                                if (se == null) {
+                                    continue;
+                                }
+                                semtiments = se.getAggregatedValue();
+                                it = semtiments.entrySet().iterator();
+                                localResults = new ArrayList<>();
+                                while (it.hasNext()) {
+                                    Map.Entry<SentimentValence, Double> pair = (Map.Entry<SentimentValence, Double>) it.next();
+                                    SentimentValence sentimentValence = (SentimentValence) pair.getKey();
+                                    localResults.add(new ResultValence(sentimentValence.getIndexLabel().replace("_RAGE", ""), pair.getValue()));
+                                }
+                                if (!localResults.isEmpty()) {
+                                    Collections.sort(localResults);
+                                    sentiments.add(new ResultSentiment(w.getText() + (((w.getIndex() == s.getWords().size() - 1) && (s.getIndex() == b.getSentences().size() - 1)) ? "\n" : ""), localResults));
+                                }
+                            }
+                        }
                     }
                 }
-                sentencesSentiments.add(new ResultSentiment("Sentence " + s.getIndex(), localResults, wordsSentiments, s.getText()));
             }
-            blockSentiments.add(new ResultSentiment("Paragraph " + b.getIndex(), localResults, sentencesSentiments, b.getText()));
         }
-        resultsSentiment = new ResultSentiment("Document", localResults, blockSentiments, queryDoc.getText());
 
-        return resultsSentiment;
+        return sentiments;
     }
 }

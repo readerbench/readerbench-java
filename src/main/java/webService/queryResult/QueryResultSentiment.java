@@ -15,6 +15,7 @@
  */
 package webService.queryResult;
 
+import java.util.List;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
 import org.simpleframework.xml.Root;
@@ -25,13 +26,13 @@ public class QueryResultSentiment extends QueryResult {
 	
 	@Path("data")
 	@ElementList(inline = true, entry = "result")
-	private ResultSentiment data; // list of result sentiments
+	private List<ResultSentiment> data;
 
-	public ResultSentiment getData() {
+	public List<ResultSentiment> getData() {
 		return data;
 	}
 
-	public void setData(ResultSentiment data) {
+	public void setData(List<ResultSentiment> data) {
 		this.data = data;
 	}
 

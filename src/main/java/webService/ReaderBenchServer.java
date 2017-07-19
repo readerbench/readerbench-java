@@ -60,6 +60,7 @@ import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -71,6 +72,7 @@ import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.converters.PdfToTxtConverter;
+import services.elasticsearch.ElasticsearchService;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
@@ -112,6 +114,9 @@ import webService.services.cimodel.ComprehensionModelService;
 import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.QueryResultCM;
 import webService.services.cscl.CSCL;
+import webService.services.cscl.result.QueryResultAllCommunities;
+import webService.services.cscl.result.QueryResultParticipants;
+import webService.services.cscl.result.QueryResultParticipantsInteraction;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -137,6 +142,12 @@ public class ReaderBenchServer {
 
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
+    private ElasticsearchService elasticsearchService = new ElasticsearchService();
+
+    private static QueryResult errorEmptyBody() {
+        return new QueryResult(false, ParamsValidator.errorNoParams());
+    }
+
     /**
      * Returns an error result if there are any required parameters in the first
      * set missing in the second set.
@@ -154,6 +165,16 @@ public class ReaderBenchServer {
         }
         return null;
     }
+
+    private static QueryResult errorIfParamsEmpty(Set<String> params) {
+        Set<String> emptyParams;
+        if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
+            // if not return an error showing the missing parameters
+            return new QueryResult(false, ParamsValidator.errorParamsMissing(emptyParams));
+        }
+        return null;
+    }
+
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -167,6 +188,7 @@ public class ReaderBenchServer {
         }
         return hm;
     }
+
     /**
      * Returns a HashMap containing <key, value> for parameters.
      *
@@ -180,6 +202,7 @@ public class ReaderBenchServer {
         }
         return hm;
     }
+
     /**
      * Returns a Set of initial required parameters.
      *
@@ -194,11 +217,12 @@ public class ReaderBenchServer {
         requiredParams.add("dialogism");
         return requiredParams;
     }
+
     private static List<AbstractDocument> setDocuments(String path) {
         if (loadedPath != null && loadedPath.equals(path)) {
             return loadedDocs;
         }
-        
+
         loadedPath = path;
         loadedDocs = new ArrayList<>();
         try {
@@ -212,9 +236,10 @@ public class ReaderBenchServer {
         } catch (IOException | ClassNotFoundException e) {
             Exceptions.printStackTrace(e);
         }
-        
+
         return loadedDocs;
     }
+
     public static void initializeDB() {
         LOGGER.setLevel(Level.INFO); // changing log level
         org.apache.log4j.BasicConfigurator.configure();
@@ -226,21 +251,22 @@ public class ReaderBenchServer {
         } catch (IOException | SecurityException ex) {
             Exceptions.printStackTrace(ex);
         }
-        
+
         LOGGER.info("Initialize words...");
         WordDAO.getInstance().loadAll();
         LOGGER.info("Words initialization finished");
-        
+
         SentimentWeights.initialize();
         LOGGER.log(Level.INFO, "Valence map has {0} sentiments after initialization.", data.sentiment.SentimentValence.getValenceMap().size());
     }
+
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
         ReaderBenchServer server = new ReaderBenchServer();
         server.start();
     }
 
-    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
+    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
         List<ResultCategory> resultCategories = new ArrayList<>();
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
         for (Category cat : dbCategories) {
@@ -260,7 +286,7 @@ public class ReaderBenchServer {
 
     private ResultSemanticAnnotation getSemanticAnnotation(
             AbstractDocument abstractDocument, AbstractDocument keywordsDocument, AbstractDocument document,
-            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) {
+            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) throws Exception {
         ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
         List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold);
         List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
@@ -396,7 +422,6 @@ public class ReaderBenchServer {
         }
     }
 
-
     public void start() {
 
         Spark.port(PORT);
@@ -451,14 +476,20 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/sentiment-analysis", (request, response) -> {
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Set<String> requiredParams = setInitialRequiredParams();
-            requiredParams.add("text");
-            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+            QueryResult error;
+            JSONObject json = null;
+            if (request.body().isEmpty()) {
+                error = errorEmptyBody();
+            } else {
+                json = (JSONObject) new JSONParser().parse(request.body());
+                Set<String> requiredParams = setInitialRequiredParams();
+                requiredParams.add("text");
+                error = errorIfParamsMissing(requiredParams, json.keySet());
+            }
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -475,10 +506,14 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
+            Integer granularity = null;
+            if (hm.get("granularity") != null && (hm.get("granularity").compareTo("") != 0)) {
+                granularity = Integer.parseInt(hm.get("granularity"));
+            }
             AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
             QueryResultSentiment queryResult = new QueryResultSentiment();
             try {
-                queryResult.setData(SentimentAnalysis.computeSentiments(document));
+                queryResult.setData(SentimentAnalysis.computeSentiments(document, granularity));
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
@@ -493,7 +528,7 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
@@ -661,15 +696,20 @@ public class ReaderBenchServer {
                 minThreshold = 0.3;
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
-            String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
-            String abstractText = hm.get("abstract");
-            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
-            QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
-            response.type("application/json");
-            return queryResult.convertToJson();
+            try {
+                AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+                String keywordsText = hm.get("keywords");
+                AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+                String abstractText = hm.get("abstract");
+                AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
+                QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+                queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
+                response.type("application/json");
+                return queryResult.convertToJson();
+            } catch (Exception e) {
+                error = new QueryResult(false, e.getMessage());
+                return error.convertToJson();
+            }
         });
         Spark.post("/self-explanation", (request, response) -> {
             Set<String> requiredParams = setInitialRequiredParams();
@@ -711,6 +751,7 @@ public class ReaderBenchServer {
             requiredParams.add("threshold");
             QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
             if (error != null) {
+                response.type("application/json");
                 return error.convertToJson();
             }
 
@@ -829,13 +870,13 @@ public class ReaderBenchServer {
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
             resultCv.setConcepts(ConceptMap.getKeywords(cvDocument, minThreshold, null));
-            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument));
+            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument, SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCv(resultCv);
             String coverContent = getTextFromPdf("tmp/" + hm.get("cover-file"), true).getContent();
             AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism);
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument,  SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCover(resultCover);
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
             Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
@@ -893,7 +934,7 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-            
+
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
@@ -904,7 +945,7 @@ public class ReaderBenchServer {
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
             AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
-            
+
             QueryResultCv queryResult = new QueryResultCv();
             ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
@@ -1001,7 +1042,7 @@ public class ReaderBenchServer {
             Set<String> keywordsList = new HashSet<>(Arrays.asList(hm.get("keywords").split(",")));
             Set<String> ignoreList = new HashSet<>(Arrays.asList(hm.get("ignore").split(",")));
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
-            
+
             String keywordsText = hm.get("keywords");
             AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
 
@@ -1012,7 +1053,7 @@ public class ReaderBenchServer {
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
             AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
-            
+
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
             ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
@@ -1114,8 +1155,25 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.get("/file-download", (request, response) -> {
-            String file = request.queryParams("file");
+            QueryResult error;
+            if (request.queryParams().isEmpty()) {
+                error = errorEmptyBody();
+            } else {
+                Set<String> requiredParams = new HashSet<>();
+                requiredParams.add("file");
+                error = errorIfParamsMissing(requiredParams, request.queryParams());
+            }
+            if (error != null) {
+                return error.convertToJson();
+            }
 
+            Set<String> notEmptyParams = new HashSet<>();
+            notEmptyParams.add("file");
+            error = errorIfParamsEmpty(notEmptyParams);
+            if (error != null) {
+                return error.convertToJson();
+            }
+            String file = request.queryParams("file");
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
@@ -1477,7 +1535,6 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
 
-
         Spark.post("/ciModel", (request, response) -> {
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
@@ -1492,7 +1549,7 @@ public class ReaderBenchServer {
             int maxSemanticExpand;
             try {
                 maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 maxSemanticExpand = 5;
             }
 
@@ -1502,6 +1559,100 @@ public class ReaderBenchServer {
             String resultStr = queryResult.convertToJson();
             return resultStr;
         });
+        Spark.get("/community/communities", (request, response) -> {
+//            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
+//
+//            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
+//                    new HashMap<String, List<com.readerbench.solr.entities.cscl.Community>>();
+//            for (com.readerbench.solr.entities.cscl.Community community : communities) {
+//                if (results.get(community.getCategoryName()) != null) {
+//                    results.get(community.getCategoryName()).add(community);
+//                } else {
+//                    results.put(community.getCategoryName(), Arrays.asList(community));
+//                }
+//            }
+            webService.services.cscl.result.dto.Community community1
+                    = new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
+            webService.services.cscl.result.dto.Community community2
+                    = new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
+
+            webService.services.cscl.result.dto.Community community3
+                    = new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
+            webService.services.cscl.result.dto.Community community4
+                    = new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+
+            webService.services.cscl.result.dto.Category category1
+                    = new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
+                            Arrays.asList(community1, community2));
+            webService.services.cscl.result.dto.Category category2
+                    = new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
+                            Arrays.asList(community3));
+            webService.services.cscl.result.dto.Category category3
+                    = new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
+                            Arrays.asList(community4));
+            List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
+            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
+            response.type("application/json");
+            return queryResult.convertToJson();
+
+        });
+        Spark.post("/community/participants", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+            Integer week = Integer.valueOf(hm.get("week"));
+
+            List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
+
+            List<Map> filteredParticipants = participantsStats.stream()
+                    .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
+                    .collect(Collectors.toList());
+
+            List<Map> unique = new ArrayList<Map>();
+            for (Map map : filteredParticipants) {
+                if (!elasticsearchService.isDuplicate(map, unique)) {
+                    unique.add(map);
+                }
+            }
+
+            QueryResultParticipants queryResult = new QueryResultParticipants(unique);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/directedGraph", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "directedGraph", communityName);
+
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
+//                    .collect(Collectors.toList());
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        Spark.post("/community/participants/edgeBundling", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            String communityName = hm.get("communityName");
+
+            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                    "participants", "edgeBundling", communityName);
+//            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
+//                    .filter(p -> ((List) p.get("data")).size() > 0)
+//                    .collect(Collectors.toList());
+
+            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+
     }
 
 }

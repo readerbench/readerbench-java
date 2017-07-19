@@ -124,12 +124,16 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
         if (dependencies == null) {
             return new ArrayList<>();
         }
-        return StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+        List<NGram> collect = StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+                .filter(edge -> 
+                        !edge.getSource().get(CoreAnnotations.IndexAnnotation.class).equals( 
+                        edge.getTarget().get(CoreAnnotations.IndexAnnotation.class)))
                 .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
                 .filter(pair -> pair.first != null && pair.second != null)
                 .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
+        return collect;
     }
     
     @Override

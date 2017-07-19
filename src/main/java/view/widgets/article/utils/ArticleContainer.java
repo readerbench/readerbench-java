@@ -24,6 +24,9 @@ import data.AbstractDocument;
 import data.article.ArticleAuthor;
 import data.article.ResearchArticle;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.openide.util.Exceptions;
 
 public class ArticleContainer {
@@ -71,23 +74,20 @@ public class ArticleContainer {
     }
 
     public static ArticleContainer buildAuthorContainerFromDirectory(String dirName) {
-        List<ResearchArticle> articles = new ArrayList<>();
-
         File dir = new File(dirName);
         File[] files = dir.listFiles((File dir1, String name) -> name.endsWith(".ser"));
-        for (File file : files) {
-            ResearchArticle d;
-            try {
-                d = (ResearchArticle) AbstractDocument.loadSerializedDocument(file.getPath());
-                if (d.getBlocks().isEmpty()) {
-                    System.out.println("Omitting article " + d.getTitleText() + " because it has no abstract");
-                    continue;
-                }
-                articles.add(d);
-            } catch (IOException | ClassNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
-            }
-        }
+        List<ResearchArticle> articles = Stream.of(files)
+                .parallel()
+                .map(file -> {
+                    try {
+                        return (ResearchArticle) AbstractDocument.loadSerializedDocument(file.getPath());
+                    } catch (IOException | ClassNotFoundException ex) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .filter(d -> !d.getBlocks().isEmpty())
+                .collect(Collectors.toList());
         return new ArticleContainer(articles);
     }
 

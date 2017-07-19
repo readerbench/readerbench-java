@@ -13,7 +13,7 @@ public class CVConstants {
     /* Training data */
     public static final String LSA_CORPORA = "Le_Monde";
     public static final String LDA_CORPORA = "Le_Monde";
-    public static final String WOR2VEC_CORPORA = "Le_Monde";
+    public static final String WOR2VEC_CORPORA = "";
     public static final String LANG_FR = "French";
     public static final Boolean POS_TAGGING = true;
     public static final Boolean DIALOGISM = true;

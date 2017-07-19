@@ -53,17 +53,22 @@ public class KeywordsHelper {
         ListOfWords usedList = new ListOfWords();
         usedList.setWords(keywords);
         usedList.getWords().stream().forEach((pattern) -> {
-            AbstractDocument patterDocument = QueryHelper.generateDocument(pattern, lang, models, usePosTagging, computeDialogism);
-            int occ = 0;
-            Pattern javaPattern = Pattern.compile(" " + pattern + " ");
-            Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");
-            SemanticCohesion sc = new SemanticCohesion(patterDocument, document);
-            double cohesion = sc.getCohesion();
-            while (matcher.find()) {
-                occ++;
-            }
-            if (occ > 0 && cohesion >= minThreshold) {
-                resultKeywords.add(new ResultKeyword(pattern, occ, cohesion));
+            AbstractDocument patterDocument;
+            try {
+                patterDocument = QueryHelper.generateDocument(pattern, lang, models, usePosTagging, computeDialogism);
+                int occ = 0;
+                Pattern javaPattern = Pattern.compile(" " + pattern + " ");
+                Matcher matcher = javaPattern.matcher(" " + document.getText().trim() + " ");
+                SemanticCohesion sc = new SemanticCohesion(patterDocument, document);
+                double cohesion = sc.getCohesion();
+                while (matcher.find()) {
+                    occ++;
+                }
+                if (occ > 0 && cohesion >= minThreshold) {
+                    resultKeywords.add(new ResultKeyword(pattern, occ, cohesion));
+                }
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         });
 

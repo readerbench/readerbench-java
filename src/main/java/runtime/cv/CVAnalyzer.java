@@ -312,7 +312,7 @@ public class CVAnalyzer {
     }
 
     public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList,
-            Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, double threshold) {
+            Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, double threshold) throws Exception {
         PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter(filePath, true);
         pdfToTxtConverter.process();
         AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getParsedText(), lang, models, usePosTagging, computeDialogism);
@@ -340,8 +340,12 @@ public class CVAnalyzer {
                 if (filePath.toString().contains(".pdf")) {
                     String fileName = filePath.getFileName().toString().replaceAll("\\s+", "_");
                     int extensionStart = fileName.lastIndexOf(".");
-                    sb.append(csvBuildRow(fileName.substring(0, extensionStart),
-                            processFile(filePath.toString(), keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, threshold)));
+                    try {
+                        sb.append(csvBuildRow(fileName.substring(0, extensionStart),
+                                processFile(filePath.toString(), keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, threshold)));
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                 }
             });
             FileUtils.writeStringToFile(globalStatsFile, sb.toString(), "UTF-8");
@@ -366,7 +370,7 @@ public class CVAnalyzer {
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
-        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH);
         frenchCVAnalyzer.processPath();
     }
 

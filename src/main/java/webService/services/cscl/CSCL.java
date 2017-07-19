@@ -126,19 +126,26 @@ public class CSCL {
 
     public static ResultCscl getAll(AbstractDocument conversationDocument, Conversation c, double threshold) {
 
+        List<CSCLIndices> ignoreIndices = new ArrayList<>();
+        ignoreIndices.add(CSCLIndices.NO_NEW_THREADS);
+        ignoreIndices.add(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS);
+        ignoreIndices.add(CSCLIndices.NEW_THREADS_OVERALL_SCORE);
+        ignoreIndices.add(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE);
+        ignoreIndices.add(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB);
+        
         return new ResultCscl(
                 ConceptMap.getKeywords(conversationDocument, threshold, null),
                 ParticipantInteraction.buildParticipantGraph(c),
                 ParticipantEvolution.buildParticipantEvolutionData(c),
                 Collaboration.buildSocialKBGraph(c),
                 Collaboration.buildVoiceOverlapGraph(c),
-                CSCL.getCsclIndices(c),
-                CSCL.getCsclIndicesDescription(c)
+                CSCL.getCsclIndices(c, ignoreIndices),
+                CSCL.getCsclIndicesDescription(c, ignoreIndices)
         );
 
     }
 
-    public static HashMap<String, HashMap<String, Double>> getCsclIndices(Conversation c) {
+    public static HashMap<String, HashMap<String, Double>> getCsclIndices(Conversation c, List<CSCLIndices> ignoreIndices) {
 
         HashMap<String, HashMap<String, Double>> indices = new HashMap<>();
 
@@ -153,7 +160,7 @@ public class CSCL {
                 //out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
                 for (CSCLIndices index : CSCLIndices.values()) {
                     //out.write("," + p.getIndices().get(index));
-                    hm.put(index.toString(), Formatting.formatNumber(p.getIndices().get(index)));
+                    if (!ignoreIndices.contains(index)) hm.put(index.toString(), Formatting.formatNumber(p.getIndices().get(index)));
                 }
                 indices.put(p.getName(), hm);
             }
@@ -179,12 +186,12 @@ public class CSCL {
 
     }
 
-    public static HashMap<String, String> getCsclIndicesDescription(Conversation c) {
+    public static HashMap<String, String> getCsclIndicesDescription(Conversation c, List<CSCLIndices> ignoreIndices) {
 
         HashMap<String, String> hm = new HashMap<>();
 
         for (CSCLIndices index : CSCLIndices.values()) {
-            hm.put(index.toString(), index.getDescription());
+            if (!ignoreIndices.contains(index))  hm.put(index.toString(), index.getDescription());
         }
 
         return hm;

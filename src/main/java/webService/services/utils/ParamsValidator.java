@@ -5,6 +5,7 @@
  */
 package webService.services.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -29,6 +30,14 @@ public class ParamsValidator {
         }
         return null;
     }
+    
+    public static Set<String> checkEmptyParams(Set<String> params) {
+        Set<String> emptyParams = new HashSet<>();
+        for(String param : params) {
+            if (param.isEmpty()) emptyParams.add(param);
+        }
+        return emptyParams;
+    }
 
     /**
      * Returns a string describing the required key parameters that are missing
@@ -43,6 +52,12 @@ public class ParamsValidator {
         StringBuilder sb = new StringBuilder();
         sb.append("Missing required parameters: ");
         sb.append(String.join(", ", requiredParamsMissing));
+        return sb.toString();
+    }
+    
+    public static String errorNoParams() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("No parameters set.");
         return sb.toString();
     }
 
