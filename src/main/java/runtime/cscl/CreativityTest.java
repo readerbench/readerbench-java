@@ -48,6 +48,7 @@ import services.converters.lifeConverter.Dialog;
 import services.converters.lifeConverter.Person;
 import services.converters.lifeConverter.Turn;
 import services.converters.lifeConverter.Utterance;
+import services.discourse.dialogism.DialogismComputations;
 import services.processing.SerialProcessing;
 import webService.ReaderBenchServer;
 
@@ -135,8 +136,19 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("SEP=,\nFilename,AVG(Social KB per participant), Normalized Social KB (per contribution), ABS(Social KB between participants), AVG(Dialogism per participant), Normalized Dialogism (per contribution),"
-                    + "# Voices, Avg voices, Avg voice length (# words), Max voice length (# words)");
+            out.write("SEP=,\n"
+                    + "Filename,"
+                    + "AVG(Social KB per participant),"
+                    + "Normalized Social KB (per contribution),"
+                    + "ABS(Social KB between participants),"
+                    + "AVG(Dialogism per participant),"
+                    + "Normalized Dialogism (per contribution),"
+                    + "# Voices,"
+                    + "Avg voices,"
+                    + "Avg voice length (# words),"
+                    + "Max voice length (# words),"
+                    + "Average inter-voice similarity");
+
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -154,6 +166,7 @@ public class CreativityTest {
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
                             + "," + Formatting.formatNumber(new VoicesMaxSpan().compute(c))
+                            + "," + Formatting.formatNumber(DialogismComputations.determineAverageInterVoiceSimilarity(c))
                     );
                 }
             }
