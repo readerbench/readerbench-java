@@ -17,6 +17,7 @@ public class CVConstants {
     public static final String LANG_FR = "French";
     public static final Boolean POS_TAGGING = true;
     public static final Boolean DIALOGISM = true;
+    public static final Boolean USE_BIGRAMS = false;
     public static final Double THRESHOLD = 0.3;
     
     public static final int FILESIZE_MAX        = 25 * 1024 * 1024; // 25MB

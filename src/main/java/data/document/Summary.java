@@ -113,8 +113,8 @@ public class Summary extends Metacognition {
     }
 
     @Override
-    public void computeAll(boolean computeDialogism) {
-        computeDiscourseAnalysis(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        computeDiscourseAnalysis(computeDialogism, useBigrams);
         ReadingStrategies.detReadingStrategies(this);
         ComplexityIndices.computeComplexityFactors(this);
         LOGGER.info("Finished processing summary ...");

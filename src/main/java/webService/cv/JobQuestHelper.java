@@ -50,6 +50,7 @@ public class JobQuestHelper {
             List<ISemanticModel> models,
             Boolean usePosTagging,
             Boolean computeDialogism,
+            Boolean useBigrams,
             Double threshold,
             Double deltaFAN,
             Double deltaVeryFAN
@@ -152,7 +153,7 @@ public class JobQuestHelper {
         result.setNegativeWords(negativeWords);
         result.setVeryNegativeWords(veryNegativeWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, threshold));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, useBigrams, threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

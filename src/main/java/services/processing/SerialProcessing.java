@@ -148,7 +148,7 @@ public class SerialProcessing {
                 LOGGER.log(Level.INFO, "Processing file {0}", f.getName());
                 Long start = System.currentTimeMillis();
                 AbstractDocument.loadGenericDocument(f.getAbsolutePath(), modelPaths, lang, usePOSTagging,
-                        computeDialogism, null, null, cleanInput, saveOutput);
+                        computeDialogism, false, null, null, cleanInput, saveOutput);
                 Long end = System.currentTimeMillis();
 
                 // update checkpoint

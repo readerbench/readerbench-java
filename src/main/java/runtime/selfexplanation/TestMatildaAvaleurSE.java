@@ -51,7 +51,7 @@ public class TestMatildaAvaleurSE {
             Metacognition v = Metacognition.loadVerbalization(f.getAbsolutePath(), doc, true);
             // Metacognition v = (Metacognition)
             // Metacognition.loadSerializedDocument(f.getAbsolutePath());
-            v.computeAll(true);
+            v.computeAll(true, false);
             v.save(AbstractDocument.SaveType.SERIALIZED);
             verbalizations.add(v);
         }
@@ -65,7 +65,7 @@ public class TestMatildaAvaleurSE {
             Metacognition v;
             try {
                 v = (Metacognition) Metacognition.loadSerializedDocument(f.getAbsolutePath());
-                v.computeAll(true);
+                v.computeAll(true, false);
                 verbalizations.add(v);
             } catch (IOException | ClassNotFoundException ex) {
                 Exceptions.printStackTrace(ex);

@@ -434,11 +434,11 @@ public class Metacognition extends Document {
     }
 
     @Override
-    public void computeAll(boolean computeDialogism) {
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
         VerbalizationAssessment.detRefBlockSimilarities(this);
         ReadingStrategies.detReadingStrategies(this);
 
-        computeDiscourseAnalysis(computeDialogism);
+        computeDiscourseAnalysis(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(this);
         determineCohesion();
         LOGGER.info("Finished processing self-explanations ...");

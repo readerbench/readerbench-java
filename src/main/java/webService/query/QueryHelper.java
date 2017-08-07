@@ -56,14 +56,14 @@ public class QueryHelper {
         return URLDecoder.decode(text, "UTF-8");
     }
 
-    public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
+    public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
         LOGGER.info("Generating document...");
         //text = QueryHelper.replaceSpecialChars(TextPreprocessing.cleanText(textToUTF8(text), lang));
         text = QueryHelper.replaceSpecialChars(textToUTF8(text));
         AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(text);
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
         LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
-        document.computeAll(computeDialogism);
+        document.computeAll(computeDialogism, useBigrams);
         return document;
     }
 

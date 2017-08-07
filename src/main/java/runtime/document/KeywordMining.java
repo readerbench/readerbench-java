@@ -164,7 +164,7 @@ public class KeywordMining {
             try {
                 d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
 
-                KeywordModeling.determineKeywords(d);
+                KeywordModeling.determineKeywords(d, false);
                 List<Keyword> keywords = d.getTopics();
                 StringBuilder sbKeywords = new StringBuilder();
                 StringBuilder sbKeywordsBigrams = new StringBuilder();
@@ -235,7 +235,7 @@ public class KeywordMining {
         }
     }
 
-    public void processTexts(boolean useSerialized, String outputFileName) {
+    public void processTexts(boolean useSerialized, boolean useBigrams, String outputFileName) {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -277,7 +277,7 @@ public class KeywordMining {
                     }
                     //d.computeAll(computeDialogism);
                     //d.save(AbstractDocument.SaveType.NONE);
-                    KeywordModeling.determineKeywords(d);
+                    KeywordModeling.determineKeywords(d, useBigrams);
                     documents.add(d);
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1} ...", new Object[]{file.getName(), e.getMessage()});
@@ -350,6 +350,6 @@ public class KeywordMining {
 //        List<String> bigrams = Arrays.asList(bigramsString.split("\\s*,\\s*"));
 //
 //        keywordMining.generateKeywordsSers(keywords, bigrams);
-        keywordMining.processTexts(false, "keywords_lsa_sciref_test.csv");
+        keywordMining.processTexts(false, false, "keywords_lsa_sciref_test.csv");
     }
 }

@@ -97,23 +97,25 @@ public class DocumentProcessingView extends JInternalFrame {
         private final String pathToLDA;
         private final boolean computeDialogism;
         private final boolean usePOSTagging;
+        private final boolean useBigrams;
         private final boolean isSerialized;
         private final boolean checkSer;
 
         public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-                boolean computeDialogism, boolean isSerialized, boolean checkSer) {
+                boolean computeDialogism, boolean useBigrams, boolean isSerialized, boolean checkSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
             this.usePOSTagging = usePOSTagging;
             this.computeDialogism = computeDialogism;
+            this.useBigrams = useBigrams;
             this.isSerialized = isSerialized;
             this.checkSer = checkSer;
         }
 
         public DocumentProcessingTask(String pathToDoc) {
-            this(pathToDoc, null, null, false, false, true, false);
+            this(pathToDoc, null, null, false, false, false, true, false);
         }
 
         public AbstractDocument processDocument(String pathToIndividualFile) {
@@ -125,7 +127,7 @@ public class DocumentProcessingView extends JInternalFrame {
                 modelPaths.put(SimilarityType.LDA, pathToLDA);
             }
             return AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
-                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, null, null, true,
+                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, useBigrams, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);
         }
 

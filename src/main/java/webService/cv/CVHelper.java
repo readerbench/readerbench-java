@@ -50,6 +50,7 @@ public class CVHelper {
             List<ISemanticModel> models,
             Boolean usePosTagging,
             Boolean computeDialogism,
+            Boolean useBigrams,
             Double threshold,
             Double deltaFAN
     ) {
@@ -157,7 +158,7 @@ public class CVHelper {
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, threshold));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, useBigrams, threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

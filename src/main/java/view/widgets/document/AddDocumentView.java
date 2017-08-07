@@ -150,7 +150,7 @@ public class AddDocumentView extends JInternalFrame {
                 DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
                         textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
                         (String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(),
-                        chckbxUsePosTagging.isSelected(), false, chckbxSer.isSelected());
+                        chckbxUsePosTagging.isSelected(), false, false, chckbxSer.isSelected());
 
                 task.execute();
 

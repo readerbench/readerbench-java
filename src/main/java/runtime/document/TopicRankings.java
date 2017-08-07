@@ -60,15 +60,17 @@ public class TopicRankings {
     private final Lang lang;
     private final boolean usePOSTagging;
     private final boolean computeDialogism;
+    private final boolean useBigrams;
     private final boolean meta;
 
-    public TopicRankings(String processingPath, int noTopKeyWords, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean meta) {
+    public TopicRankings(String processingPath, int noTopKeyWords, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, boolean meta) {
         this.processingPath = processingPath;
         this.noTopKeyWords = noTopKeyWords;
         this.models = models;
         this.lang = lang;
         this.usePOSTagging = usePOSTagging;
         this.computeDialogism = computeDialogism;
+        this.useBigrams = useBigrams;
         this.meta = meta;
     }
 
@@ -154,7 +156,7 @@ public class TopicRankings {
                     } else {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism);
+                    d.computeAll(computeDialogism, useBigrams);
                     d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
@@ -214,7 +216,7 @@ public class TopicRankings {
         models.add(lsa);
         models.add(lda);
         Txt2XmlConverter.parseTxtFiles("", "resources/in/ENEA copy/responses per profession", Lang.en, "UTF-8");
-        TopicRankings tr = new TopicRankings("resources/in/ENEA copy/responses per profession", 50, models, Lang.en, true, true, false);
+        TopicRankings tr = new TopicRankings("resources/in/ENEA copy/responses per profession", 50, models, Lang.en, true, true, false, false);
         tr.processTexts(false);
     }
 }

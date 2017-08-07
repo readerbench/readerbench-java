@@ -198,7 +198,7 @@ public class Millington {
 
             Document refDoc = new Document(null, AbstractDocumentTemplate.getDocumentModel(seRefText), models, lang, true);
             Summary se = new Summary(studentSE, refDoc, true);
-            se.computeAll(true);
+            se.computeAll(true, false);
             List<SemanticCohesion> cohesionScores = new ArrayList<>();
 
             String prevText = content.substring(0, content.indexOf(targetText));

@@ -15,7 +15,6 @@
  */
 package webService;
 
-import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
 import data.AbstractDocument;
@@ -266,7 +265,7 @@ public class ReaderBenchServer {
         server.start();
     }
 
-    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
+    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
         List<ResultCategory> resultCategories = new ArrayList<>();
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
         for (Category cat : dbCategories) {
@@ -276,7 +275,7 @@ public class ReaderBenchServer {
                 sb.append(categoryPhrase.getLabel()).append(' ');
             }
             String text = sb.toString();
-            AbstractDocument queryCategory = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument queryCategory = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, document);
             resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion(), cat.getType()));
         }
@@ -286,10 +285,10 @@ public class ReaderBenchServer {
 
     private ResultSemanticAnnotation getSemanticAnnotation(
             AbstractDocument abstractDocument, AbstractDocument keywordsDocument, AbstractDocument document,
-            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) throws Exception {
+            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams, Double minThreshold) throws Exception {
         ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
-        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold);
-        List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
+        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
+        List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism, useBigrams);
         SemanticCohesion scAbstractDocument = new SemanticCohesion(abstractDocument, document);
         SemanticCohesion scKeywordsAbstract = new SemanticCohesion(abstractDocument, keywordsDocument);
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);
@@ -302,7 +301,7 @@ public class ReaderBenchServer {
 
     private ResultSelfExplanation generateSelfExplanation(AbstractDocument document, String selfExplanation, boolean computeDialogism) {
         Summary s = new Summary(selfExplanation, (Document) document, true);
-        s.computeAll(computeDialogism);
+        s.computeAll(computeDialogism, false);
 
         List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
         for (ReadingStrategyType rs : ReadingStrategyType.values()) {
@@ -441,6 +440,7 @@ public class ReaderBenchServer {
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
             requiredParams.add("threshold");
+            requiredParams.add("bigrams");
             QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
             if (error != null) {
                 return error.convertToJson();
@@ -457,6 +457,7 @@ public class ReaderBenchServer {
             } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
+            Boolean useBigrams = Boolean.parseBoolean(hm.get("bigrams"));
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -468,7 +469,7 @@ public class ReaderBenchServer {
                 w2vCorpora = hm.get("w2v");
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
             QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
             queryResult.setData(resultTopic);
@@ -494,6 +495,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -510,7 +512,7 @@ public class ReaderBenchServer {
             if (hm.get("granularity") != null && (hm.get("granularity").compareTo("") != 0)) {
                 granularity = Integer.parseInt(hm.get("granularity"));
             }
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSentiment queryResult = new QueryResultSentiment();
             try {
                 queryResult.setData(SentimentAnalysis.computeSentiments(document, granularity));
@@ -533,6 +535,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -545,7 +548,7 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
             try {
                 TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
@@ -590,6 +593,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -609,7 +613,7 @@ public class ReaderBenchServer {
             } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultTopic queryResult = new QueryResultTopic();
             queryResult.setData(ConceptMap.getKeywords(document, minThreshold, null));
             response.type("application/json");
@@ -629,6 +633,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -653,13 +658,13 @@ public class ReaderBenchServer {
                 minThreshold = 0.3;
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
             String abstractText = hm.get("abstract");
-            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
+            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold));
             response.type("application/json");
             return queryResult.convertToJson();
         });
@@ -677,6 +682,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -697,13 +703,13 @@ public class ReaderBenchServer {
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
             try {
-                AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+                AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
                 String keywordsText = hm.get("keywords");
-                AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+                AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
                 String abstractText = hm.get("abstract");
-                AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
+                AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism, useBigrams);
                 QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-                queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
+                queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold));
                 response.type("application/json");
                 return queryResult.convertToJson();
             } catch (Exception e) {
@@ -725,6 +731,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -737,7 +744,7 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
             String explanation = hm.get("explanation");
             queryResult.setData(generateSelfExplanation(document, explanation, usePosTagging));
@@ -759,6 +766,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -778,8 +786,8 @@ public class ReaderBenchServer {
             }
             String csclFile = json.get("cscl-file").toString();
             Conversation conversation = Conversation.load(new File("tmp/" + csclFile), models, lang, usePosTagging);
-            conversation.computeAll(computeDialogism);
-            AbstractDocument conversationDocument = QueryHelper.generateDocument(conversation.getText(), lang, models, usePosTagging, computeDialogism);
+            conversation.computeAll(computeDialogism, useBigrams);
+            AbstractDocument conversationDocument = QueryHelper.generateDocument(conversation.getText(), lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultCscl queryResult = new QueryResultCscl();
             queryResult.setData(CSCL.getAll(conversationDocument, conversation, minThreshold));
             response.type("application/json");
@@ -799,6 +807,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -822,9 +831,9 @@ public class ReaderBenchServer {
             } else {
                 documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
             }
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
-            List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
+            List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
             queryResult.setData(new ResultTextCategorization(resultTopic, resultCategories));
@@ -846,6 +855,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -865,7 +875,7 @@ public class ReaderBenchServer {
             }
             Map<String, Integer> commonWords = new HashMap<>();
             String cvContent = getTextFromPdf("tmp/" + hm.get("cv-file"), true).getContent();
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
@@ -873,7 +883,7 @@ public class ReaderBenchServer {
             resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument, SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCv(resultCv);
             String coverContent = getTextFromPdf("tmp/" + hm.get("cover-file"), true).getContent();
-            AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
             resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument,  SentimentAnalysis.GRANULARITY_DOCUMENT));
@@ -914,6 +924,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -936,7 +947,7 @@ public class ReaderBenchServer {
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
             pdfToTxtConverter.process();
@@ -944,10 +955,10 @@ public class ReaderBenchServer {
             pdfToTxtConverter.removeLines(ignoreLines);
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
-            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultCv queryResult = new QueryResultCv();
-            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
+            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
@@ -1021,6 +1032,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -1044,7 +1056,7 @@ public class ReaderBenchServer {
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
             pdfToTxtConverter.process();
@@ -1052,10 +1064,10 @@ public class ReaderBenchServer {
             pdfToTxtConverter.removeLines(ignoreLines);
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
-            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
-            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
+            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
@@ -1415,6 +1427,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -1430,9 +1443,9 @@ public class ReaderBenchServer {
             List<String> predefinedAnswers = (ArrayList<String>) json.get("predefined-answers");
             List<AbstractDocument> predefinedAnswerDocuments = new ArrayList<>();
             for (String answer : predefinedAnswers) {
-                predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism));
+                predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism, useBigrams));
             }
-            AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
             queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
             response.type("application/json");
