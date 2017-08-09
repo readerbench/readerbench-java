@@ -369,7 +369,7 @@ public class ReaderBenchServer {
         if (model.toLowerCase().compareTo("lsa") == 0) {
             semanticModel = LSA.loadLSA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LSA).getFullPath(), lang);
         } else if (model.toLowerCase().compareTo("lda") == 0) {
-            semanticModel = LDA.loadLDA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LSA).getFullPath(), lang);
+            semanticModel = LDA.loadLDA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LDA).getFullPath(), lang);
         } else if (model.toLowerCase().compareTo("w2v") == 0) {
             semanticModel = Word2VecModel.loadWord2Vec(corpus, lang);
         }
@@ -377,7 +377,7 @@ public class ReaderBenchServer {
             return null;
         }
         models.add(semanticModel);
-        Document seedDocument = new Document(null, AbstractDocumentTemplate.getDocumentModel(seed), models, lang, true);
+        Document seedDocument = new Document(null, AbstractDocumentTemplate.getDocumentModel(seed), models, lang, false);
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(seedDocument, minThreshold));
     }
 
