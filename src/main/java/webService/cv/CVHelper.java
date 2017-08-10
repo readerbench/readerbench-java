@@ -139,7 +139,7 @@ public class CVHelper {
         result.setImages(pdfConverter.getNoImages());
         result.setColors(pdfConverter.getNoColors());
         result.setPages(pdfConverter.getNoPages());
-        result.setParagraphs(document.getNoBlocks());
+        result.setParagraphs(pdfConverter.getNoParagraphs());
         result.setSentences(document.getNoSentences());
         result.setWords(document.getNoWords());
         result.setContentWords(document.getNoContentWords());

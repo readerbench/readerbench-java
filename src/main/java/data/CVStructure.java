@@ -1,13 +1,10 @@
 package data;
 
-import javafx.util.Pair;
-import org.apache.pdfbox.text.TextPosition;
-import org.datavec.api.berkeley.Triple;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
+import org.datavec.api.berkeley.Triple;
 
 /**
  * Created by Gabriel Cristian on 6/14/2017.
