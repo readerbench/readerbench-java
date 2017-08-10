@@ -23,17 +23,19 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
+
+import data.CVStructure;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.pdfbox.cos.COSDictionary;
 import org.apache.pdfbox.cos.COSDocument;
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessBufferedFileInputStream;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -41,6 +43,7 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import org.datavec.api.berkeley.Triple;
 import org.openide.util.Exceptions;
 
 public class PdfToTxtConverter {
@@ -223,11 +226,37 @@ public class PdfToTxtConverter {
                 charsPerFont = new HashMap<>();
                 pdfParser.parse();
                 cosDoc = pdfParser.getDocument();
-                
+                CVStructure cvStructure = new CVStructure();
                 pdfStripper = new PDFTextStripper() {
+
                     @Override
                     protected void processTextPosition(TextPosition text) {
+
                         String fontName = text.getFont().getName();
+
+//                        if(text.getUnicode().hashCode() != 32) {
+//                            String toWrite = text.getUnicode() + " (" + text.getUnicode().hashCode() + "), x=" +
+//                                    text.getX() + ", y=" + text.getY() + ", Height=" + text.getHeight() +
+//                                    ", width=" + text.getWidth() + ", font=" + text.getFontSizeInPt() + ", font=" + text.getFont().toString()
+//                                    + "\n";
+//                            try {
+//                                Files.write(Paths.get("./fileName.txt"), toWrite.getBytes(), StandardOpenOption.APPEND);
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+                        if(text.getUnicode().hashCode() != 32 && !fontName.contains("Wingdings")) {
+                            if (text.getY() != cvStructure.getLastYCoord()) {
+                                int start = 0;
+                                for( int i = 0; i < fontName.length(); i++) {
+                                    if(fontName.charAt(i) == '+') {
+                                        start = i + 1;
+                                    }
+                                }
+                                cvStructure.addYCoord(new Triple(text.getY(), text.getFontSizeInPt(), fontName.substring(start)));
+                            }
+                        }
+
                         if (!charsPerFont.containsKey(fontName)) {
                             charsPerFont.put(fontName, 1);
                         } else {
@@ -264,6 +293,8 @@ public class PdfToTxtConverter {
                 ColorTextStripper stripper = new ColorTextStripper(txtWriter);
                 noColors = stripper.getCharsPerColor().size();
                 parsedText = pdfStripper.getText(pdDoc);
+                noParagraphs = cvStructure.getParagraphs();
+                cvStructure.getSentences(parsedText);
                 txtWriter.write(parsedText);
             }
 

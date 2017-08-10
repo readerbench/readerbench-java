@@ -16,6 +16,7 @@
 package webService.cv;
 
 import data.AbstractDocument;
+import data.CVStructure;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
