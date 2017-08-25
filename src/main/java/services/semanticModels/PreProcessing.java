@@ -180,6 +180,7 @@ public class PreProcessing {
                 LOGGER.log(Level.INFO, "Finished pre-processing {0}", f.getName());
             }
             printNewConcepts();
+            out.close();
         }
         LOGGER.info("Finished all pre-processing");
     }
@@ -248,7 +249,9 @@ public class PreProcessing {
                     printNewConcepts();
                 }
             }
+            out.close();
         }
+        
         LOGGER.info("Finished all pre-processing");
     }
 

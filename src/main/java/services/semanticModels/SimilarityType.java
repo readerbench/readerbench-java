@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.WordNet.OntologySupport;
+import services.semanticModels.paragraphVectors.ParagraphVectorsModel;
 import services.semanticModels.word2vec.Word2VecModel;
 
 /**
@@ -37,7 +37,8 @@ public enum SimilarityType {
     PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages, false),
     LSA("LSA", "Cosine similarity in LSA vector space", services.semanticModels.LSA.LSA::getAvailableLanguages, true),
     LDA("LDA", "Inverse JSH in LDA probability distribution", services.semanticModels.LDA.LDA::getAvailableLanguages, true),
-    WORD2VEC("word2vec", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
+    WORD2VEC("word2vec", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true),
+    PARAGRAPHVECTORS("ParagraphVectors", "Cosine similarity in ParagraphVectors space", ParagraphVectorsModel::getAvailableLanguages, true);
 
     private final String acronym;
     private final String name;
@@ -84,6 +85,10 @@ public enum SimilarityType {
                     case WORD2VEC:
                         Word2VecModel w2v = services.semanticModels.word2vec.Word2VecModel.loadWord2Vec(e.getValue(), lang);
                         models.add(w2v);
+                        break;
+                    case PARAGRAPHVECTORS:
+                        ParagraphVectorsModel pv = services.semanticModels.paragraphVectors.ParagraphVectorsModel.loadParagraphVectors(e.getValue(), lang);
+                        models.add(pv);
                         break;
                 }
             }

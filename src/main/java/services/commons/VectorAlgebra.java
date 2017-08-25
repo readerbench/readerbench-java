@@ -513,13 +513,33 @@ public class VectorAlgebra {
         return Math.sqrt(sum);
     }
 
+    public static double theta(double[] v1, double[] v2) {
+            double V = cosineSimilarity(v1, v2);
+            return Math.acos(V) + 10;
+    }
+    
+    public static double triangle(double[] v1, double[] v2) {
+        double th = Math.toRadians(theta(v1, v2));
+        return (norm2(v1) * norm2(v2) * Math.sin(th)) / 2;
+    }
+
+    public static double sector(double[] v1, double[] v2) {
+        double magnitudeDifference = Math.abs(norm2(v1) - norm2(v2));
+        return Math.PI * (Math.pow((euclidianDistance(v1, v2) + magnitudeDifference), 2)) * (theta(v1, v2) / 360);
+    }
+
+    public static double TS_SS(double[] v1, double[] v2) {
+        return triangle(v1, v2) * sector(v1, v2);
+    }
+        
     public static void main(String[] args) {
         double[] v = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         double[] v1 = {1, 3, 1, 3, 1, 7, 1, 5};
-        double[] v2 = {3, 3, 3, 3, 3, 3, 3, 3};
+        double[] v2 = {9, 9, 9, 9, 9, 9, 9, 3};
         double[] v3 = {7, 6, 5, 4, 1};
 
-        System.out.println(cosineSimilarity(v1, v2));
+        System.out.println("C:"+cosineSimilarity(v1, v2));
+        System.out.println("T:"+TS_SS(v1, v2));
         long[] t = {2, 2, 2, 2, 2, 1, 2, 2};
         for (double d : VectorAlgebra.movingAverage(v, 2, t, 2)) {
             System.out.print(d + " ");

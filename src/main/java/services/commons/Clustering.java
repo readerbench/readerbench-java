@@ -169,11 +169,19 @@ public abstract class Clustering {
         for (int i = 0; i < clustroids.size(); i++) {
             System.out.print(">>" + (i + 1) + ": ");
             for (AbstractDocument d : clusters.get(i)) {
-                if (clustroids.contains(d)) {
+                if (clustroids.contains(d)) 
                     LOGGER.log(Level.INFO, "({0}); ", d.getTitleText());
-                } else {
-                    LOGGER.log(Level.INFO, "{0}; ", d.getTitleText());
-                }
+//                } else {
+//                    ;//LOGGER.log(Level.INFO, "{0}; ", d.getTitleText());
+//                }
+            }
+        }
+        
+        for (int i = 0; i < clusters.size(); i++) {
+            System.out.println("\nCluster " + i + ":");
+            List<AbstractDocument> ad = clusters.get(i);
+            for (int j = 0; j < ad.size(); j++) {
+                System.out.print(ad.get(j).getTitleText() + "; ");
             }
         }
 
@@ -194,6 +202,7 @@ public abstract class Clustering {
         if (output.exists()) {
             output.delete();
         }
+        File testSim = new File(output.getParent() + "/simil.txt");
 
         while (noInterations < docs.size() - 1) {
             // determine max similarity
@@ -219,8 +228,9 @@ public abstract class Clustering {
 
             // display groups
             try (BufferedWriter out = new BufferedWriter(new FileWriter(output, true), 32768)) {
+                BufferedWriter outIt = new BufferedWriter(new FileWriter(testSim, true), 32768);
+                outIt.write(Formatting.formatNumber(maxSim, 3)+"\n");
                 out.write("\n\n" + noInterations + " iteration (max similarity = " + Formatting.formatNumber(maxSim, 3) + "):\n");
-//                out.write(noInterations + "\t" + Formatting.formatNumber(maxSim, 5)+"\n");
                 for (int i = 0; i < groups.size(); i++) {
                     List<AbstractDocument> groupDocs = new ArrayList<>();
                     StringBuilder groupText = new StringBuilder(">>" + (i + 1) + "<<\t" + groups.get(i).size() + ((groups.get(i).size() == 1) ? " response\t" : " responses\t"));
@@ -238,6 +248,7 @@ public abstract class Clustering {
 
                     out.write(groupText.toString());
                 }
+                outIt.close();
             } catch (Exception ex) {
                 LOGGER.severe(ex.getMessage());
                 Exceptions.printStackTrace(ex);
