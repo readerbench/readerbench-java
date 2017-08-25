@@ -38,7 +38,6 @@ import data.document.Document;
 import data.Lang;
 import java.util.ArrayList;
 import java.util.logging.Logger;
-import services.semanticModels.ISemanticModel;
 
 public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 

@@ -16,7 +16,6 @@
 package services.semanticModels.word2vec;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ import java.util.logging.Logger;
 
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
@@ -45,11 +43,7 @@ import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Level;
-import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.fit.factory.AnalysisEngineFactory;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.deeplearning4j.text.annotator.SentenceAnnotator;
-import org.deeplearning4j.text.annotator.TokenizerAnnotator;
 import org.deeplearning4j.text.sentenceiterator.UimaSentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.UimaTokenizerFactory;
 import org.deeplearning4j.text.uima.UimaResource;
