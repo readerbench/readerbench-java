@@ -159,16 +159,18 @@ public class ReaderBenchServer {
      */
     private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
         Set<String> requiredParamsMissing;
-        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+        requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params);
+        if (null != requiredParamsMissing && requiredParamsMissing.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
         }
         return null;
     }
 
-    private static QueryResult errorIfParamsEmpty(Set<String> params) {
+    private static QueryResult errorIfParamsEmpty(Map<String, String> params) {
         Set<String> emptyParams;
-        if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
+        emptyParams = ParamsValidator.checkEmptyParams(params);
+        if (null != emptyParams && emptyParams.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(emptyParams));
         }
@@ -934,14 +936,15 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
             
-            Set<String> notEmptyParams = new HashSet<>();
-            notEmptyParams.add("cv-file");
+            Map<String, String> hm = hmParams(json);
+            
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("cv-file", hm.get("cv-file"));
             error = errorIfParamsEmpty(notEmptyParams);
             if (error != null) {
                 return error.convertToJson();
             }
-
-            Map<String, String> hm = hmParams(json);
+            
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
@@ -1165,7 +1168,7 @@ public class ReaderBenchServer {
         });
         // File Upload - send file as multipart form-data to be accepted
         Spark.post("/file-upload", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
+            //SlackClient.logMessage(LoggerHelper.requestToString(request));
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
@@ -1203,13 +1206,13 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
 
-            Set<String> notEmptyParams = new HashSet<>();
-            notEmptyParams.add("file");
+            String file = request.queryParams("file");
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("file", file);
             error = errorIfParamsEmpty(notEmptyParams);
             if (error != null) {
                 return error.convertToJson();
             }
-            String file = request.queryParams("file");
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);

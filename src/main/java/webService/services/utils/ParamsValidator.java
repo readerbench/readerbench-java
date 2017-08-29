@@ -6,6 +6,8 @@
 package webService.services.utils;
 
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -31,10 +33,13 @@ public class ParamsValidator {
         return null;
     }
     
-    public static Set<String> checkEmptyParams(Set<String> params) {
+    public static Set<String> checkEmptyParams(Map<String, String> params) {
         Set<String> emptyParams = new HashSet<>();
-        for(String param : params) {
-            if (param.isEmpty()) emptyParams.add(param);
+        Iterator it = params.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            if (pair.getValue().toString().isEmpty()) emptyParams.add(pair.getKey().toString());
         }
         return emptyParams;
     }
