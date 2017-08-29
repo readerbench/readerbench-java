@@ -933,6 +933,13 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
+            
+            Set<String> notEmptyParams = new HashSet<>();
+            notEmptyParams.add("cv-file");
+            error = errorIfParamsEmpty(notEmptyParams);
+            if (error != null) {
+                return error.convertToJson();
+            }
 
             Map<String, String> hm = hmParams(json);
             Lang lang = Lang.getLang(hm.get("language"));
