@@ -14,11 +14,21 @@ import org.openide.util.Exceptions;
 import spark.Request;
 
 /**
- *
+ * This class is meant for helping with displaying requests in human-readable
+ * format.
+ * 
  * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
  */
 public class LoggerHelper {
     
+    /**
+     * Parses a request and builds a string that contains necessary information 
+     * for identification of request URI, datetime, IP address and request body.
+     * 
+     * @param request The request to be parsed.
+     * @return A human-readable format of the message containing important 
+     *      information.
+     */
     public static String requestToString(Request request) {
         StringBuilder sb = new StringBuilder();
         sb.append("Server request received:\n");
@@ -47,6 +57,12 @@ public class LoggerHelper {
         return sb.toString();
     }
     
+    /**
+     * Parses a JSON object and displays its fields in a human-readable format.
+     * 
+     * @param jsonObj The JSON object to be parsed.
+     * @return The JSON object fields displayed in a human-readable format.
+     */
     public static String printJsonObject(JSONObject jsonObj) {
         StringBuilder sb = new StringBuilder();
         for (Object key : jsonObj.keySet()) {
