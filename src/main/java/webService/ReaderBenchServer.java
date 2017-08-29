@@ -130,6 +130,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
+import webService.slack.SlackClient;
 
 public class ReaderBenchServer {
 
@@ -477,6 +478,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/sentiment-analysis", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
             JSONObject json = null;
             if (request.body().isEmpty()) {
