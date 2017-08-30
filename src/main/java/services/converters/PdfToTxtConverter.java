@@ -471,8 +471,9 @@ public class PdfToTxtConverter {
             BufferedReader bufferReader = new BufferedReader(new StringReader(lowerParsedText));
             String line;
             while ((line = bufferReader.readLine()) != null) {
+                line.trim();
                 for (String sectionTitle : lowerSectionTitles) {
-                    if(line.contains(sectionTitle)) return true;
+                    if(line.equals(sectionTitle)) return true;
                 }
             }
         } catch (IOException ex) {
