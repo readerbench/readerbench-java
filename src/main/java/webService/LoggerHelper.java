@@ -21,6 +21,8 @@ import spark.Request;
  */
 public class LoggerHelper {
     
+    private static final String LOCALHOST_IP = "0:0:0:0:0:0:0:1";
+    
     /**
      * Parses a request and builds a string that contains necessary information 
      * for identification of request URI, datetime, IP address and request body.
@@ -30,15 +32,16 @@ public class LoggerHelper {
      *      information.
      */
     public static String requestToString(Request request) {
+        String ipAddress = request.headers("X-FORWARDED-FOR");  
+        if (ipAddress == null || ipAddress.isEmpty()) {  
+           ipAddress = request.ip();
+        }
+        if (ipAddress.compareTo(LOCALHOST_IP) == 0) return null;
         StringBuilder sb = new StringBuilder();
         sb.append("Server request received:\n");
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM YYYY HH:mm:ss.S");
         String formattedDate = dateFormat.format(date);
-        String ipAddress = request.headers("X-FORWARDED-FOR");  
-        if (ipAddress == null || ipAddress.isEmpty()) {  
-           ipAddress = request.ip();
-        }
         sb.append("Datetime: `").append(formattedDate).append("`\n");
         sb.append("IP address: `").append(ipAddress).append("`\n");
         sb.append("URI: `").append(request.uri()).append("`\n");

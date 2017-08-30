@@ -48,6 +48,7 @@ public class SlackClient {
      * @param message The message to be displayed within the channel.
      */
     public static void logMessage(String message) {
+        if (message == null) return;
         HttpClient httpClient = HttpClientBuilder.create().build(); //Use this instead 
         try {
             HttpPost request = new HttpPost(URL);
