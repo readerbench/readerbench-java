@@ -602,7 +602,7 @@ public class Community extends AnalysisElement {
     }
 
     public static void processAllFolders(String folder, Lang lang, String prefix, boolean needsAnonymization,
-            boolean restartProcessing, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+            boolean restartProcessing, String pathToLSA, String pathToLDA, String pathToWord2Vec, boolean usePOSTagging,
             boolean useTextualComplexity, boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
             boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         File dir = new File(folder);
@@ -618,7 +618,7 @@ public class Community extends AnalysisElement {
                             checkpoint.delete();
                         }
                     }
-                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, pathToWord2Vec, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
                             exportIntoCsv, generateParticipantView, generateParticipantViewD3, generateParticipantViewSubCommunities, generateConceptView,
