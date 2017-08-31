@@ -28,6 +28,7 @@ public class DocumentManagementTableModel extends DefaultTableModel {
 			String.class, // Author
 			String.class, // LSA space
 			String.class, // LDA model
+			String.class, // WORD2VEC model
 	};
 
 	public DocumentManagementTableModel() {
@@ -37,7 +38,8 @@ public class DocumentManagementTableModel extends DefaultTableModel {
                 .getString("TableModel.Author.text"),
 				ResourceBundle.getBundle("utils.localization.messages")
                 .getString("TableModel.LSAspace.text"), ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LDAvector.text") });
+                .getString("TableModel.LDAvector.text"), ResourceBundle.getBundle("utils.localization.messages")
+		.getString("TableModel.Word2Vec.text")});
 	}
 
 	@Override

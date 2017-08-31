@@ -89,23 +89,25 @@ public class ConversationProcessingView extends JInternalFrame {
         private final String pathToDoc;
         private final String pathToLSA;
         private final String pathToLDA;
+	private final String pathToWORD2VEC;
         private final boolean usePOSTagging;
         private boolean isSerialized;
         private final boolean chckSer;
 
-        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, String pathToWORD2VEC, boolean usePOSTagging,
                 boolean isSerialized, boolean chckSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
+	    this.pathToWORD2VEC = pathToWORD2VEC;
             this.usePOSTagging = usePOSTagging;
             this.isSerialized = isSerialized;
             this.chckSer = chckSer;
         }
 
         public DocumentProcessingTask(String pathToDoc) {
-            this(pathToDoc, null, null, false, true, false);
+            this(pathToDoc, null, null, null, false, true, false);
         }
 
         public AbstractDocument processDocument(String pathToIndividualFile) {
@@ -115,6 +117,9 @@ public class ConversationProcessingView extends JInternalFrame {
             }
             if (pathToLDA != null & pathToLDA.length() > 0) {
                 modelPaths.put(SimilarityType.LDA, pathToLDA);
+            }
+	    if (pathToWORD2VEC != null & pathToWORD2VEC.length() > 0) {
+                modelPaths.put(SimilarityType.WORD2VEC, pathToWORD2VEC);
             }
             return Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
                     ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, null, null, true,
@@ -511,7 +516,9 @@ public class ConversationProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_CONVERSATIONS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
-                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())) {
+                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath()) 
+			    && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())
+			    && toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(c.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                         LOADED_CONVERSATIONS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -529,6 +536,11 @@ public class ConversationProcessingView extends JInternalFrame {
                 }
                 if (c.getSemanticModel(SimilarityType.LDA) != null) {
                     dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+		if (c.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.WORD2VEC).getPath());
                 } else {
                     dataRow.add("");
                 }
@@ -569,6 +581,11 @@ public class ConversationProcessingView extends JInternalFrame {
                         }
                         if (c.getSemanticModel(SimilarityType.LDA) != null) {
                             dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
+                        } else {
+                            dataRow.add("");
+                        }
+			if (c.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                            dataRow.add(c.getSemanticModel(SimilarityType.WORD2VEC).getPath());
                         } else {
                             dataRow.add("");
                         }

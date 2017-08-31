@@ -371,7 +371,9 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     for (int i = 0; i < LOADED_VERBALIZATIONS.size(); i++) {
                         int modelRow = verbalizationsTable.convertRowIndexToModel(i);
                         Metacognition toRemove = LOADED_VERBALIZATIONS.get(modelRow);
-                        if (toRemove.getPath().equals(v.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(v.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(v.getSemanticModel(SimilarityType.LDA).getPath())) {
+                        if (toRemove.getPath().equals(v.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(v.getSemanticModel(SimilarityType.LSA).getPath()) 
+				&& toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(v.getSemanticModel(SimilarityType.LDA).getPath())
+				&& toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(v.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                             LOADED_VERBALIZATIONS.remove(toRemove);
                             verbalizationsTableModel.removeRow(modelRow);
                         }
@@ -389,6 +391,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                     dataRow.add(v.getReferredDoc().getTitleText());
                     dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                     dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
+		    dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.WORD2VEC).getPath());
                     verbalizationsTableModel.addRow(dataRow.toArray());
                     LOADED_VERBALIZATIONS.add(v);
                 }
@@ -424,6 +427,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                         dataRow.add(v.getReferredDoc().getTitleText());
                         dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                         dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
+			dataRow.add(v.getReferredDoc().getSemanticModel(SimilarityType.WORD2VEC).getPath());
                         verbalizationsTableModel.addRow(dataRow.toArray());
                     }
 

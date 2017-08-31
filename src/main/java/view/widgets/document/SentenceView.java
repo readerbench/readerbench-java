@@ -105,6 +105,7 @@ public class SentenceView extends JFrame {
                         SemanticCohesion coh = b.getSentenceDistances()[index - 1][index];
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LSA)));
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LDA)));
+			dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.WORD2VEC)));
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.LEACOCK_CHODOROW)));
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.WU_PALMER)));
                         dataRow.add(Formatting.formatNumber(coh.getSemanticSimilarities().get(SimilarityType.PATH_SIM)));
@@ -114,6 +115,7 @@ public class SentenceView extends JFrame {
                         dataRow.add(0.0d);
                         dataRow.add(0.0d);
                         dataRow.add(0.0d);
+			dataRow.add(0.0d);
                         dataRow.add(0.0d);
                         dataRow.add(0.0d);
                         dataRow.add(0.0d);

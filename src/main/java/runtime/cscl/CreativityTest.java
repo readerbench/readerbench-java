@@ -103,7 +103,7 @@ public class CreativityTest {
         }
     }
 
-    public static void processFolder(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
+    public static void processFolder(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, String pathToWord2Vec, Lang lang, boolean usePOSTagging) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
@@ -119,7 +119,7 @@ public class CreativityTest {
                     checkpoint.delete();
                 }
             }
-            SerialProcessing.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+            SerialProcessing.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, pathToWord2Vec, lang, usePOSTagging,
                     true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
             processConversations(dir.getAbsolutePath());
         }
@@ -166,6 +166,6 @@ public class CreativityTest {
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
 
-        CreativityTest.processFolder("resources/in/creativity/separated tasks", true, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true);
+        CreativityTest.processFolder("resources/in/creativity/separated tasks", true, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/word2vec/TASA_LAK", Lang.en, true);
     }
 }

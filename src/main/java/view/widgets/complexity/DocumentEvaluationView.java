@@ -123,12 +123,14 @@ public class DocumentEvaluationView extends JFrame {
                             : documents.get(i).getTitleText())
                             + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath()
                             + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath()
+			    + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath()
                             + "</html>";
                     out.write(","
                             + documents.get(i).getTitleText()
                                     .replaceAll(",", "") + "("
                             + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath() + "/"
-                            + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath() + ")");
+                            + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath() + "/"
+			    + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath() + ")");
                 }
                 out.write("\n");
 
