@@ -45,6 +45,7 @@ import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 import data.Lang;
 import data.AbstractDocument.SaveType;
+import java.util.ResourceBundle;
 import services.processing.SerialProcessing;
 
 public class VCoPEvaluationView extends JFrame {
@@ -56,6 +57,7 @@ public class VCoPEvaluationView extends JFrame {
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
+    private JComboBox<String> comboBoxWORD2VEC;
     private JCheckBox chckbxUsePosTagging;
 
     private static Lang lang = null;
@@ -65,14 +67,14 @@ public class VCoPEvaluationView extends JFrame {
      * Create the frame.
      */
     public VCoPEvaluationView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Evaluate virtual Communities of Practice"));
-        setResizable(false);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 675, 275);
+        super.setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages").getString("VCoPEvaluationView.Title.text"));
+        super.setResizable(false);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(100, 100, 675, 275);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
         JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
 
@@ -81,29 +83,28 @@ public class VCoPEvaluationView extends JFrame {
         textFieldPath.setColumns(10);
 
         JButton btnSearch = new JButton("...");
-        btnSearch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("resources/in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
-                }
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int returnVal = fc.showOpenDialog(VCoPEvaluationView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    textFieldPath.setText(file.getPath());
-                }
-            }
-        });
+        btnSearch.addActionListener((ActionEvent e) -> {
+	    JFileChooser fc = null;
+	    if (lastDirectory == null) {
+		fc = new JFileChooser(new File("resources/in"));
+	    } else {
+		fc = new JFileChooser(lastDirectory);
+	    }
+	    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    int returnVal = fc.showOpenDialog(VCoPEvaluationView.this);
+	    
+	    if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File file = fc.getSelectedFile();
+		lastDirectory = file.getParentFile();
+		textFieldPath.setText(file.getPath());
+	    }
+	});
 
         JPanel panelEvaluate = new JPanel();
         panelEvaluate.setBackground(Color.WHITE);
         panelEvaluate.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-                LocalizationUtils.getTranslation("Evaluate"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+                ResourceBundle.getBundle("utils.localization.messages").getString("VCoPEvaluationView.Evaluate.text"), 
+		TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
@@ -135,25 +136,34 @@ public class VCoPEvaluationView extends JFrame {
 
         lang = ReaderBenchView.RUNTIME_LANGUAGE;
 
-        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getTranslation("LSA vector space") + ":");
+        JLabel lblLsaVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LSAspace.text") + ":");
         comboBoxLSA = new JComboBox<>();
-        comboBoxLSA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
 
-        JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation("LDA model") + ":");
+        JLabel lblLdaModel = new JLabel(LocalizationUtils.getTranslation(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.LDAvector.text")) + ":");
         comboBoxLDA = new JComboBox<String>();
-        comboBoxLDA.addItem(LocalizationUtils.getTranslation("A Processing language needs to be previously selected"));
+	
+	JLabel lblWord2VecModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.Word2Vec.text") + ":");
+	comboBoxWORD2VEC = new JComboBox<String>();
 
-        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
+	ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, comboBoxWORD2VEC, lang);
+
+        chckbxUsePosTagging = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("VCopEvaluationView.boxUsePOSTagging.text"));
         chckbxUsePosTagging.setSelected(true);
 
-        JButton btnEvaluateCorpus = new JButton(LocalizationUtils.getTranslation("Evaluate all corpus documents"));
+        JButton btnEvaluateCorpus = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("VCoPEvaluationView.btnEvaluateCorpus.text"));
         btnEvaluateCorpus.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!textFieldPath.getText().equals("")) {
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
                     SerialProcessing.processCorpus(textFieldPath.getText(),
-                            (String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(), lang,
+                            (String) comboBoxLSA.getSelectedItem(), (String) comboBoxLDA.getSelectedItem(),
+			    (String) comboBoxWORD2VEC.getSelectedItem(), lang,
                             chckbxUsePosTagging.isSelected(), true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
 
                     Toolkit.getDefaultToolkit().beep();
@@ -174,7 +184,8 @@ public class VCoPEvaluationView extends JFrame {
                         .createSequentialGroup()
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
                                 .addComponent(lblLsaVectorSpace)
-                                .addComponent(lblLdaModel))
+                                .addComponent(lblLdaModel)
+				.addComponent(lblWord2VecModel))
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.LEADING)
                                 .addGroup(gl_panelEvaluate.createSequentialGroup()
@@ -184,6 +195,9 @@ public class VCoPEvaluationView extends JFrame {
                                         .addGap(7))
                                 .addGroup(gl_panelEvaluate.createSequentialGroup()
                                         .addComponent(comboBoxLDA, 0, 496, Short.MAX_VALUE)
+                                        .addContainerGap())
+				.addGroup(gl_panelEvaluate.createSequentialGroup()
+                                        .addComponent(comboBoxWORD2VEC, 0, 496, Short.MAX_VALUE)
                                         .addContainerGap())))
                         .addGroup(gl_panelEvaluate.createSequentialGroup().addComponent(chckbxUsePosTagging)
                                 .addPreferredGap(ComponentPlacement.RELATED, 247, Short.MAX_VALUE)
@@ -198,6 +212,10 @@ public class VCoPEvaluationView extends JFrame {
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE).addComponent(lblLdaModel)
                                 .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+			.addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecModel)
+                                .addComponent(comboBoxWORD2VEC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(ComponentPlacement.UNRELATED)
                         .addGroup(gl_panelEvaluate.createParallelGroup(Alignment.BASELINE)

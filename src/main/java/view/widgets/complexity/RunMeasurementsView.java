@@ -44,12 +44,14 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.openide.util.Exceptions;
 import services.complexity.DataGathering;
 import services.converters.Txt2XmlConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import view.widgets.ReaderBenchView;
 
 public class RunMeasurementsView extends JFrame {
@@ -64,6 +66,7 @@ public class RunMeasurementsView extends JFrame {
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
+    private JComboBox<String> comboBoxWORD2VEC;
     private JButton btnRun;
     private JCheckBox chckbxUsePosTagging;
     private JCheckBox chckbxUseTxtFiles;
@@ -74,16 +77,18 @@ public class RunMeasurementsView extends JFrame {
         private final String path;
         private final String pathToLSA;
         private final String pathToLDA;
+	private final String pathToWORD2VEC;
         private final Lang lang;
         private final boolean usePOSTagging;
         private final boolean useTxtFiles;
         private final boolean useDeepSearch;
 
-        public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging, boolean useTxtFiles, boolean useDeepSearch) {
+        public Task(String path, String pathToLSA, String pathToLDA, String pathToWORD2VEC, Lang lang, boolean usePOSTagging, boolean useTxtFiles, boolean useDeepSearch) {
             super();
             this.path = path;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
+	    this.pathToWORD2VEC = pathToWORD2VEC;
             this.lang = lang;
             this.usePOSTagging = usePOSTagging;
             this.useTxtFiles = useTxtFiles;
@@ -96,10 +101,11 @@ public class RunMeasurementsView extends JFrame {
                 LOGGER.log(Level.INFO, "Processing all documents found in {0}", path);
                 LSA lsa = LSA.loadLSA(pathToLSA, lang);
                 LDA lda = LDA.loadLDA(pathToLDA, lang);
+		Word2VecModel word2vec = Word2VecModel.loadWord2Vec(pathToWORD2VEC, lang);
                 List<ISemanticModel> models = new ArrayList<>();
                 models.add(lsa);
                 models.add(lda);
-
+		models.add(word2vec);
                 Timing totalTiming = new Timing();
                 totalTiming.start();
 
@@ -148,7 +154,7 @@ public class RunMeasurementsView extends JFrame {
                 .getString("RunMeasurementsView.panelRunMeasurements.title"));
         super.setResizable(false);
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        super.setBounds(100, 100, 560, 160);
+        super.setBounds(100, 100, 600, 300);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -161,12 +167,16 @@ public class RunMeasurementsView extends JFrame {
 
         JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
                 .getString("RunMeasurementsView.lblLDAvector.text") + ":");
+	JLabel lblWord2VecVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("TableModel.Word2Vec.text"));
 
         comboBoxLSA = new JComboBox<>();
         comboBoxLSA.setEnabled(false);
         comboBoxLDA = new JComboBox<>();
         comboBoxLDA.setEnabled(false);
-
+	comboBoxWORD2VEC = new JComboBox<>();
+	comboBoxWORD2VEC.setEnabled(false);
+	
         textFieldPath = new JTextField();
         textFieldPath.setText("");
         textFieldPath.setColumns(10);
@@ -189,8 +199,8 @@ public class RunMeasurementsView extends JFrame {
         btnRun.addActionListener((ActionEvent e) -> {
             if (!textFieldPath.getText().equals("")) {
                 Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-                        (String) comboBoxLDA.getSelectedItem(), ReaderBenchView.RUNTIME_LANGUAGE,
-                        chckbxUsePosTagging.isSelected(), chckbxUseTxtFiles.isSelected(),
+                        (String) comboBoxLDA.getSelectedItem(), (String) comboBoxWORD2VEC.getSelectedItem(),
+			ReaderBenchView.RUNTIME_LANGUAGE, chckbxUsePosTagging.isSelected(), chckbxUseTxtFiles.isSelected(),
                         chckbxUseDeepSearch.isSelected());
                 btnRun.setEnabled(false);
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -216,7 +226,7 @@ public class RunMeasurementsView extends JFrame {
                 .getString("RunMeasurementsView.boxDeepSearch.text"));
         chckbxUseDeepSearch.setSelected(false);
 
-        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, ReaderBenchView.RUNTIME_LANGUAGE);
+        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, comboBoxWORD2VEC, ReaderBenchView.RUNTIME_LANGUAGE);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
@@ -226,7 +236,7 @@ public class RunMeasurementsView extends JFrame {
                                 .addGroup(gl_contentPane.createSequentialGroup()
                                         .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
                                                 .addComponent(lblPath).addComponent(lblLsaVectorSpace).addComponent(
-                                                lblLdaModel))
+                                                lblLdaModel).addComponent(lblWord2VecVectorSpace))
                                         .addGap(13)
                                         .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
                                                 .addComponent(comboBoxLDA, 0, 404, Short.MAX_VALUE)
@@ -236,7 +246,8 @@ public class RunMeasurementsView extends JFrame {
                                                         .addPreferredGap(ComponentPlacement.RELATED)
                                                         .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                                 GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE))
+                                                .addComponent(comboBoxLSA, 0, 404, Short.MAX_VALUE)
+						.addComponent(comboBoxWORD2VEC, 0, 404, Short.MAX_VALUE))
                                         .addGap(6))
                                 .addGroup(Alignment.LEADING,
                                         gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
@@ -263,6 +274,10 @@ public class RunMeasurementsView extends JFrame {
                         .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                 GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblLdaModel))
+		.addPreferredGap(ComponentPlacement.RELATED)
+		.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecVectorSpace)
+                        .addComponent(comboBoxWORD2VEC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
                 .createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(chckbxUseTxtFiles)
                 .addComponent(chckbxUseDeepSearch).addComponent(btnRun))

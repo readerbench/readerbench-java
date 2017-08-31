@@ -32,7 +32,7 @@ public class TrainAoEModels {
         for (int i = 0; i < noGrades; i++) {
             String gradePath = path + "/grade" + i;
 
-            Word2VecModel.trainModel(gradePath + "/alltexts[1-" + (i + 1) + "].txt");
+            Word2VecModel.trainModel(gradePath + "/alltexts[1-" + (i + 1) + "].txt", 6, 300);
         }
     }
 
@@ -58,7 +58,7 @@ public class TrainAoEModels {
         org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         try {
 //            Word2VecModel.trainModel("resources/in/AoE w2v/grade2/alltexts[1-3].txt");
-            Word2VecModel.trainModel("resources/config/EN/word2vec/COCA_newspaper/coca_newspaper.txt");
+            Word2VecModel.trainModel("resources/config/EN/word2vec/COCA_newspaper/coca_newspaper.txt", 6, 300);
 //            TrainAoEModels.trainW2VModels("resources/in/AoE w2v");
 //            TrainAoEModels.trainLSAModels("resources/in/AoE LSA");
         } catch (IOException ex) {

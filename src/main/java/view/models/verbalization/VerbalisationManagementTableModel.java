@@ -27,7 +27,8 @@ public class VerbalisationManagementTableModel extends DefaultTableModel {
 	private Class<?>[] columnTypes = new Class[] { String.class, // author
 			String.class, // document name
 			String.class, // LSA space
-			String.class // LDA model
+			String.class, // LDA model
+			String.class // Word2Vec space
 	};
 
 	public VerbalisationManagementTableModel() {
@@ -38,7 +39,9 @@ public class VerbalisationManagementTableModel extends DefaultTableModel {
 				ResourceBundle.getBundle("utils.localization.messages")
                 .getString("TableModel.LSAspace.text"), 
 				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LDAvector.text") });
+                .getString("TableModel.LDAvector.text"),
+				ResourceBundle.getBundle("utils.localization.messages")
+		.getString("TableModel.Word2Vec.text")});
 	}
 
 	@Override

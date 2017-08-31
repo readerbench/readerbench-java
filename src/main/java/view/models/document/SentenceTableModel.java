@@ -26,6 +26,7 @@ public class SentenceTableModel extends DefaultTableModel {
 			String.class, // text
 			Double.class, // Coh LSA Cosine Sim
 			Double.class, // Coh LDA Divergence
+			Double.class, // Coh Word2Vec Cosine Sim
 			Double.class, // Leacok Chodorow similarity
 			Double.class, // Wu Palmer similarity
 			Double.class, // Path similarity
@@ -35,7 +36,7 @@ public class SentenceTableModel extends DefaultTableModel {
 
 	public SentenceTableModel() {
 		super(new Object[][] {}, new String[] { "Sentence ID", "Block ID",
-				"Text", "Cosine Sim LSA", "JSH Sim LDA", "Leacok Chodorow",
+				"Text", "Cosine Sim LSA", "JSH Sim LDA", "Cosine Sim Word2Vec", "Leacok Chodorow",
 				"Wu Palmer", "Path Sim", "Cohesion", "Cohesion Bar" });
 	}
 

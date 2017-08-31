@@ -42,12 +42,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import data.Lang;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.CreateInputMatrix;
 import services.semanticModels.LSA.RunSVD;
+import services.semanticModels.word2vec.Word2VecModel;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
@@ -71,10 +73,14 @@ public class SemanticModelsTraining extends JFrame {
     private JTextField textFieldLSAFile;
     private JTextField textFieldLSARank;
     private JTextField textFieldLSAPowerIterations;
+    private JTextField textFieldWord2VecFile;
+    private JTextField textFieldWord2VecEpochs;
+    private JTextField textFieldWord2VecLayerSize;
     private JButton btnPreProcess;
     private JButton btnLSATrain;
     private JButton btnLDATrain;
-
+    private JButton btnWord2VecTrain;
+    
     private class PreProcessingTask extends SwingWorker<Void, Void> {
 
         private final String input;
@@ -100,7 +106,7 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(false);
             btnLSATrain.setEnabled(false);
             btnLDATrain.setEnabled(false);
-
+	    btnWord2VecTrain.setEnabled(false);
             try {
                 PreProcessing preprocess = new PreProcessing();
                 switch (selectedCase) {
@@ -126,6 +132,7 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(true);
             btnLSATrain.setEnabled(true);
             btnLDATrain.setEnabled(true);
+	    btnWord2VecTrain.setEnabled(true);
         }
     }
 
@@ -149,6 +156,7 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(false);
             btnLSATrain.setEnabled(false);
             btnLDATrain.setEnabled(false);
+	    btnWord2VecTrain.setEnabled(false);
 
             try {
                 // create initial matrix
@@ -174,6 +182,7 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(true);
             btnLSATrain.setEnabled(true);
             btnLDATrain.setEnabled(true);
+	    btnWord2VecTrain.setEnabled(true);
         }
     }
 
@@ -199,6 +208,7 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(false);
             btnLSATrain.setEnabled(false);
             btnLDATrain.setEnabled(false);
+	    btnWord2VecTrain.setEnabled(false);
 
             try {
                 LDA lda = new LDA(lang);
@@ -216,15 +226,59 @@ public class SemanticModelsTraining extends JFrame {
             btnPreProcess.setEnabled(true);
             btnLSATrain.setEnabled(true);
             btnLDATrain.setEnabled(true);
+	    btnWord2VecTrain.setEnabled(true);
         }
     }
+    private class Word2VecTrainingTask extends SwingWorker<Void, Void> {
+
+        private final String input;
+        private final Lang lang;
+        private final int noEpochs;
+        private final int layerSize;
+ 
+
+        public Word2VecTrainingTask(String input, Lang lang, int noEpochs, int layerSize) {
+            super();
+            this.input = input;
+            this.lang = lang;
+            this.noEpochs = noEpochs;
+            this.layerSize = layerSize;
+        }
+
+        @Override
+        public Void doInBackground() {
+            btnPreProcess.setEnabled(false);
+            btnLSATrain.setEnabled(false);
+            btnLDATrain.setEnabled(false);
+	    btnWord2VecTrain.setEnabled(false);
+
+            try {
+                Word2VecModel.trainModel(input, Integer.valueOf(noEpochs), Integer.valueOf(layerSize));
+            } catch (Exception exc) {
+                LOGGER.log(Level.SEVERE, "Error procesing {0} directory: {1}", new Object[]{input, exc.getMessage()});
+                Exceptions.printStackTrace(exc);
+            }
+            return null;
+        }
+
+        @Override
+        public void done() {
+            Toolkit.getDefaultToolkit().beep();
+            btnPreProcess.setEnabled(true);
+            btnLSATrain.setEnabled(true);
+            btnLDATrain.setEnabled(true);
+	    btnWord2VecTrain.setEnabled(true);
+        }
+    }
+    
 
     /**
      * Create the frame.
      */
     public SemanticModelsTraining() {
         setResizable(false);
-        setTitle(LocalizationUtils.getTranslation("Semantic Models Training"));
+        setTitle(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.Title.title"));
 
         setBounds(100, 100, 540, 280);
         contentPane = new JPanel();
@@ -239,20 +293,26 @@ public class SemanticModelsTraining extends JFrame {
 
         JPanel panelPreProcessing = new JPanel();
         panelPreProcessing.setBackground(Color.WHITE);
-        tabbedPane.addTab(LocalizationUtils.getTranslation("Preprocessing"), null, panelPreProcessing, null);
+        tabbedPane.addTab(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.tabPreprocessing.text"), null, panelPreProcessing, null);
 
-        JLabel lblSelectInput = new JLabel(LocalizationUtils.getTranslation("Select input folder") + ":");
+        JLabel lblSelectInput = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblSelectInputFolder.text") + ":");
 
         textFieldInput = new JTextField();
         textFieldInput.setText("resources/config");
         textFieldInput.setColumns(10);
 
-        JLabel lblFormat = new JLabel(LocalizationUtils.getTranslation("Format") + ":");
+        JLabel lblFormat = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblFormat.text") + ":");
 
         comboBoxFormat = new JComboBox<>();
-        comboBoxFormat.addItem(LocalizationUtils.getTranslation("One document per line"));
-        comboBoxFormat.addItem(LocalizationUtils.getTranslation("TASA specific format id tags"));
-        comboBoxFormat.addItem(LocalizationUtils.getTranslation("COCA specific format"));
+        comboBoxFormat.addItem(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnOneDocPerLine.text"));
+        comboBoxFormat.addItem(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnTasaSpecificFormat.text"));
+        comboBoxFormat.addItem(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnCocaSpecificFormat.text"));
 
         JButton btnBrowse = new JButton("...");
         btnBrowse.addActionListener((ActionEvent e) -> {
@@ -267,15 +327,18 @@ public class SemanticModelsTraining extends JFrame {
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getTranslation("Use POS tagging"));
+        chckbxUsePosTagging = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.boxUsePOSTagging.text"));
 
-        JLabel lblOutputFileName = new JLabel(LocalizationUtils.getTranslation("Output file name") + ":");
+        JLabel lblOutputFileName = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblOutputFileName.text") + ":");
 
         textFieldOutput = new JTextField();
         textFieldOutput.setText("out.txt");
         textFieldOutput.setColumns(10);
 
-        btnPreProcess = new JButton(LocalizationUtils.getTranslation("Process"));
+        btnPreProcess = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnPreProcess.text"));
         btnPreProcess.addActionListener((ActionEvent e) -> {
             if (textFieldInput.getText().equals("")) {
                 JOptionPane.showMessageDialog(SemanticModelsTraining.this,
@@ -306,7 +369,8 @@ public class SemanticModelsTraining extends JFrame {
             task.execute();
         });
 
-        JLabel lblMinWords = new JLabel(LocalizationUtils.getTranslation("Min no words") + ":");
+        JLabel lblMinWords = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblMinWords.text") + ":");
 
         textFieldMinWords = new JTextField();
         textFieldMinWords.setText("20");
@@ -369,18 +433,20 @@ public class SemanticModelsTraining extends JFrame {
         panelPreProcessing.setLayout(gl_panelPreProcessing);
 
         JPanel panelLSATraining = new JPanel();
-        panelLSATraining.setToolTipText(LocalizationUtils.getTranslation("LSA Training"));
+        panelLSATraining.setToolTipText(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.pnlLSATraining.text"));
         panelLSATraining.setBackground(Color.WHITE);
         tabbedPane.addTab("LSA Training", null, panelLSATraining, null);
 
-        JLabel lblLSAInputFile = new JLabel(LocalizationUtils.getTranslation("Input file") + "*:");
+        JLabel lblLSAInputFile = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.inputFile.text") + "*:");
 
         textFieldLSAFile = new JTextField();
         textFieldLSAFile.setText("resources/config");
         textFieldLSAFile.setColumns(10);
 
-        JLabel lblTxtOnly = new JLabel("* "
-                + LocalizationUtils.getTranslation("Only a single TXT file is used for building the TermDoc matrix"));
+        JLabel lblTxtOnly = new JLabel("* " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblTextOnly1.text"));
         lblTxtOnly.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
         JButton btnLSAFile = new JButton("...");
@@ -409,21 +475,24 @@ public class SemanticModelsTraining extends JFrame {
             }
         });
 
-        JLabel lblLSARank = new JLabel(LocalizationUtils.getTranslation("LSA rank") + ":");
+        JLabel lblLSARank = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblLSARank.text") + ":");
 
         textFieldLSARank = new JTextField();
         textFieldLSARank.setText("300");
         textFieldLSARank.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSARank.setColumns(10);
 
-        JLabel lblLSAPowerInterations = new JLabel(LocalizationUtils.getTranslation("No power interations") + ":");
+        JLabel lblLSAPowerInterations = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblLSAPowerIterations.text") + ":");
 
         textFieldLSAPowerIterations = new JTextField();
         textFieldLSAPowerIterations.setText("1");
         textFieldLSAPowerIterations.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLSAPowerIterations.setColumns(10);
 
-        btnLSATrain = new JButton("Train LSA model");
+        btnLSATrain = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnLSATrain.text"));
         btnLSATrain.addActionListener((ActionEvent e) -> {
             int k;
             int noPowerIterations;
@@ -540,11 +609,13 @@ public class SemanticModelsTraining extends JFrame {
         panelLSATraining.setLayout(gl_panelLSATraining);
 
         JPanel panelLDATraining = new JPanel();
-        panelLDATraining.setToolTipText(LocalizationUtils.getTranslation("LDA Training") + "\n");
+        panelLDATraining.setToolTipText(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.pnlLDATraining.text") + "\n");
         panelLDATraining.setBackground(Color.WHITE);
         tabbedPane.addTab("LDA Training", null, panelLDATraining, null);
 
-        JLabel lblLDAInputDirectory = new JLabel(LocalizationUtils.getTranslation("Input directory") + "*:");
+        JLabel lblLDAInputDirectory = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.inputDirectory.text") + "*:");
 
         JButton btnLDADirectory = new JButton("...");
         btnLDADirectory.addActionListener((ActionEvent e) -> {
@@ -562,32 +633,36 @@ public class SemanticModelsTraining extends JFrame {
         textFieldLDADirectory.setText("resources/config");
         textFieldLDADirectory.setColumns(10);
 
-        JLabel lblAllTxt = new JLabel("* " + LocalizationUtils
-                .getTranslation("All TXT files within the provided directory will be taken into consideration"));
+        JLabel lblAllTxt = new JLabel("* " + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblAllTxt.text"));
         lblAllTxt.setFont(new Font("SansSerif", Font.ITALIC, 10));
 
-        JLabel lblLDANoTopics = new JLabel(LocalizationUtils.getTranslation("No topics") + ":");
+        JLabel lblLDANoTopics = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblLDANoTopics.text") + ":");
 
         textFieldLDANoTopics = new JTextField();
         textFieldLDANoTopics.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLDANoTopics.setText("100");
         textFieldLDANoTopics.setColumns(10);
 
-        JLabel lblLDANoIterations = new JLabel(LocalizationUtils.getTranslation("No iterations") + ":");
+        JLabel lblLDANoIterations = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblLDANoIterations.text") + ":");
 
         textFieldLDANoIterations = new JTextField();
         textFieldLDANoIterations.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLDANoIterations.setText("10000");
         textFieldLDANoIterations.setColumns(10);
 
-        JLabel lblLDANoThreads = new JLabel(LocalizationUtils.getTranslation("No threads") + ":");
+        JLabel lblLDANoThreads = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblLDANoThreads.text") + ":");
 
         textFieldLDANoThreads = new JTextField();
         textFieldLDANoThreads.setHorizontalAlignment(SwingConstants.RIGHT);
         textFieldLDANoThreads.setText("2");
         textFieldLDANoThreads.setColumns(10);
 
-        btnLDATrain = new JButton(LocalizationUtils.getTranslation("Train LDA model"));
+        btnLDATrain = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnLDATrain.text"));
         btnLDATrain.addActionListener((ActionEvent e) -> {
             int noTopics;
             int noIterations;
@@ -684,5 +759,184 @@ public class SemanticModelsTraining extends JFrame {
                                         .addComponent(lblLDANoThreads).addComponent(btnLDATrain))
                                 .addContainerGap(40, Short.MAX_VALUE)));
         panelLDATraining.setLayout(gl_panelLDATraining);
+	
+	JPanel panelWord2VecTraining = new JPanel();
+        panelWord2VecTraining.setToolTipText(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblWord2VecTraining.text"));
+        panelWord2VecTraining.setBackground(Color.WHITE);
+        tabbedPane.addTab("Word2Vec Training", null, panelWord2VecTraining, null);
+
+        JLabel lblWord2VecInputFile = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.inputFile.text") + "*:");
+
+        textFieldWord2VecFile = new JTextField();
+        textFieldWord2VecFile.setText("resources/config");
+        textFieldWord2VecFile.setColumns(10);
+
+        JLabel lblTxtOnly2 = new JLabel("* "
+                + ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblTextOnly2.text"));
+        lblTxtOnly2.setFont(new Font("SansSerif", Font.ITALIC, 10));
+
+        JButton btnWord2VecFile = new JButton("...");
+        btnWord2VecFile.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = new JFileChooser("resources/config");
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".txt");
+                }
+
+                @Override
+                public String getDescription() {
+                    return "Text documents (*.txt)";
+                }
+            });
+            int returnVal = fc.showOpenDialog(SemanticModelsTraining.this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                textFieldWord2VecFile.setText(file.getPath());
+            }
+        });
+
+        JLabel lblWord2VecEpochs = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblWord2VecEpochs.text") + ":");
+
+        textFieldWord2VecEpochs = new JTextField();
+        textFieldWord2VecEpochs.setText("6");
+        textFieldWord2VecEpochs.setHorizontalAlignment(SwingConstants.RIGHT);
+        textFieldWord2VecEpochs.setColumns(10);
+
+        JLabel lblWord2VecLayerSize = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.lblWord2VecLayerSize.text") + ":");
+
+        textFieldWord2VecLayerSize = new JTextField();
+        textFieldWord2VecLayerSize.setText("300");
+        textFieldWord2VecLayerSize.setHorizontalAlignment(SwingConstants.RIGHT);
+        textFieldWord2VecLayerSize.setColumns(10);
+
+        btnWord2VecTrain = new JButton(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("SemanticModelsTraining.btnWord2VecTrain.text"));
+        btnWord2VecTrain.addActionListener((ActionEvent e) -> {
+            int layerSize;
+            int noEpochs;
+            Lang lang;
+            if (textFieldWord2VecFile.getText().equals("") || !textFieldWord2VecFile.getText().endsWith(".txt")
+                    || !new File(textFieldWord2VecFile.getText()).exists()) {
+                JOptionPane.showMessageDialog(SemanticModelsTraining.this,
+                        "Please select an appropriate text file as input for the Word2Vec model!", "Error",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            try {
+                noEpochs = Integer.parseInt(textFieldWord2VecEpochs.getText());
+            } catch (Exception exc) {
+                noEpochs = 6;
+            }
+            try {
+                layerSize = Integer.parseInt(textFieldWord2VecLayerSize.getText());
+            } catch (Exception exc) {
+                layerSize = 300;
+            }
+            lang = ReaderBenchView.RUNTIME_LANGUAGE;
+
+            Word2VecTrainingTask task = new Word2VecTrainingTask(textFieldWord2VecFile.getText(), lang, noEpochs, layerSize);
+            task.execute();
+        });
+
+        GroupLayout gl_panelWord2VecTraining = new GroupLayout(panelWord2VecTraining);
+        gl_panelWord2VecTraining
+                .setHorizontalGroup(
+                        gl_panelWord2VecTraining.createParallelGroup(Alignment.LEADING)
+                        .addGroup(
+                                gl_panelWord2VecTraining.createSequentialGroup()
+                                .addContainerGap().addGroup(gl_panelWord2VecTraining
+                                        .createParallelGroup(Alignment.LEADING).addGroup(
+                                        Alignment.TRAILING, gl_panelWord2VecTraining
+                                        .createSequentialGroup()
+                                        .addGroup(gl_panelWord2VecTraining
+                                                .createParallelGroup(Alignment.LEADING)
+                                                .addGroup(gl_panelWord2VecTraining
+                                                        .createSequentialGroup()
+                                                        .addComponent(lblWord2VecInputFile)
+                                                        .addPreferredGap(
+                                                                ComponentPlacement.RELATED)
+                                                        .addComponent(textFieldWord2VecFile,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                316, Short.MAX_VALUE))
+                                                .addComponent(lblTxtOnly2))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(btnWord2VecFile))
+                                        .addGroup(Alignment.TRAILING, gl_panelWord2VecTraining
+                                                .createSequentialGroup()
+                                                .addGroup(gl_panelWord2VecTraining
+                                                        .createParallelGroup(Alignment.LEADING)
+                                                        .addComponent(lblWord2VecEpochs))
+                                                .addGap(29)
+                                                .addGroup(gl_panelWord2VecTraining
+                                                        .createParallelGroup(Alignment.LEADING)
+                                                        .addGroup(gl_panelWord2VecTraining
+                                                                .createSequentialGroup()
+                                                                .addGroup(gl_panelWord2VecTraining
+                                                                        .createParallelGroup(
+                                                                                Alignment.LEADING)
+                                                                        .addComponent(textFieldWord2VecEpochs,
+                                                                                Alignment.TRAILING,
+                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                66, Short.MAX_VALUE))
+                                                                .addPreferredGap(
+                                                                        ComponentPlacement.RELATED)
+                                                                .addGroup(gl_panelWord2VecTraining
+                                                                        .createParallelGroup(
+                                                                                Alignment.TRAILING)
+                                                                        .addGroup(gl_panelWord2VecTraining
+                                                                                .createSequentialGroup()
+                                                                                .addComponent(
+                                                                                        lblWord2VecLayerSize)
+                                                                                .addPreferredGap(
+                                                                                        ComponentPlacement.RELATED)
+                                                                                .addComponent(
+                                                                                        textFieldWord2VecLayerSize,
+                                                                                        GroupLayout.PREFERRED_SIZE,
+                                                                                        91,
+                                                                                        GroupLayout.PREFERRED_SIZE))
+                                                                        .addComponent(btnWord2VecTrain))))))
+                                .addContainerGap()));
+        gl_panelWord2VecTraining
+                .setVerticalGroup(
+                        gl_panelWord2VecTraining.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_panelWord2VecTraining.createSequentialGroup().addContainerGap()
+                                .addGroup(gl_panelWord2VecTraining.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblWord2VecInputFile).addComponent(btnWord2VecFile)
+                                        .addComponent(textFieldWord2VecFile, GroupLayout.PREFERRED_SIZE,
+                                                GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTxtOnly2)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelWord2VecTraining.createParallelGroup(Alignment.BASELINE))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelWord2VecTraining.createParallelGroup(Alignment.BASELINE)
+                                        .addComponent(lblWord2VecEpochs).addComponent(
+                                        textFieldWord2VecLayerSize, GroupLayout.PREFERRED_SIZE,
+                                        GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lblWord2VecLayerSize).addComponent(textFieldWord2VecEpochs,
+                                        GroupLayout.PREFERRED_SIZE,
+                                        GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addGroup(gl_panelWord2VecTraining.createParallelGroup(Alignment.TRAILING).addGroup(
+                                        gl_panelWord2VecTraining.createSequentialGroup().addGroup(gl_panelWord2VecTraining
+                                                .createParallelGroup(Alignment.BASELINE))
+                                        .addPreferredGap(ComponentPlacement.RELATED))
+                                        .addComponent(btnWord2VecTrain))
+                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+        panelWord2VecTraining.setLayout(gl_panelWord2VecTraining);
+	
+
+	
     }
 }

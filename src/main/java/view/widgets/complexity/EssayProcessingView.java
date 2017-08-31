@@ -48,6 +48,7 @@ import services.complexity.DataGathering;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.word2vec.Word2VecModel;
 import utils.localization.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
@@ -63,6 +64,7 @@ public class EssayProcessingView extends JFrame {
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
+    private JComboBox<String> comboBoxWord2Vec;
     private JButton btnRun;
     private JCheckBox chckbxUsePosTagging;
     private Lang lang = null;
@@ -72,16 +74,18 @@ public class EssayProcessingView extends JFrame {
         private String path;
         private String pathToLSA;
         private String pathToLDA;
+	private String pathToWord2Vec;
         private Lang lang;
         private boolean usePOSTagging;
         private boolean computeDialogism;
 
-        public Task(String path, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging,
+        public Task(String path, String pathToLSA, String pathToLDA, String pathToWord2Vec, Lang lang, boolean usePOSTagging,
                 boolean computeDialogism) {
             super();
             this.path = path;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
+	    this.pathToWord2Vec = pathToWord2Vec;
             this.lang = lang;
             this.usePOSTagging = usePOSTagging;
             this.computeDialogism = computeDialogism;
@@ -93,9 +97,11 @@ public class EssayProcessingView extends JFrame {
                 try {
                     LSA lsa = LSA.loadLSA(pathToLSA, lang);
                     LDA lda = LDA.loadLDA(pathToLDA, lang);
+		    Word2VecModel word2vec = Word2VecModel.loadWord2Vec(pathToWord2Vec, lang);
                     List<ISemanticModel> models = new ArrayList<>();
                     models.add(lsa);
                     models.add(lda);
+		    models.add(word2vec);
                     DataGathering.processTexts(path, "", true, models, lang, usePOSTagging, computeDialogism);
                 } catch (Exception e) {
                     System.err.println("Error: " + e.getMessage());
@@ -136,29 +142,31 @@ public class EssayProcessingView extends JFrame {
 
         JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
                 .getString("EssayProcessingView.lblLDAvector.text") + ":");
+	JLabel lblWord2VecModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
+                .getString("EssayProcessingView.lblWord2Vecspace.text") + ":");
 
         comboBoxLSA = new JComboBox<String>();
         comboBoxLSA.setEnabled(false);
         comboBoxLDA = new JComboBox<String>();
         comboBoxLDA.setEnabled(false);
-
+	comboBoxWord2Vec = new JComboBox<String>();
+	comboBoxWord2Vec.setEnabled(false);
+	
         textFieldPath = new JTextField();
         textFieldPath.setText("");
         textFieldPath.setColumns(10);
 
         JButton btnSearch = new JButton("...");
-        btnSearch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = new JFileChooser(new File("in"));
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int returnVal = fc.showOpenDialog(EssayProcessingView.this);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    textFieldPath.setText(file.getPath());
-                }
-            }
-        });
+        btnSearch.addActionListener((ActionEvent e) -> {
+	    JFileChooser fc = new JFileChooser(new File("in"));
+	    fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    int returnVal = fc.showOpenDialog(EssayProcessingView.this);
+	    
+	    if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File file = fc.getSelectedFile();
+		textFieldPath.setText(file.getPath());
+	    }
+	});
 
         btnRun = new JButton(ResourceBundle.getBundle("utils.localization.messages")
                 .getString("EssayProcessingView.btnGenerateMeasurementsFile.text"));
@@ -167,8 +175,9 @@ public class EssayProcessingView extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (!textFieldPath.getText().equals("")) {
                     Task task = new Task(textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-                            (String) comboBoxLDA.getSelectedItem(), EssayProcessingView.this.lang,
-                            chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected());
+                            (String) comboBoxLDA.getSelectedItem(), (String) comboBoxWord2Vec.getSelectedItem(),
+			    EssayProcessingView.this.lang, chckbxUsePosTagging.isSelected(), 
+			    chckbxUsePosTagging.isSelected());
                     btnRun.setEnabled(false);
                     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     task.execute();
@@ -196,7 +205,7 @@ public class EssayProcessingView extends JFrame {
                                 .addGroup(gl_contentPane.createSequentialGroup()
                                         .addGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
                                                 .addComponent(lblPath).addComponent(lblLsaVectorSpace).addComponent(
-                                                lblLdaModel))
+                                                lblLdaModel).addComponent(lblWord2VecModel))
                                         .addGap(13)
                                         .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
                                                 .addComponent(comboBoxLDA, 0, 420, Short.MAX_VALUE)
@@ -206,7 +215,8 @@ public class EssayProcessingView extends JFrame {
                                                         .addPreferredGap(ComponentPlacement.RELATED)
                                                         .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                                 GroupLayout.PREFERRED_SIZE))
-                                                .addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE))
+                                                .addComponent(comboBoxLSA, 0, 420, Short.MAX_VALUE)
+						.addComponent(comboBoxWord2Vec, 0, 420, Short.MAX_VALUE))
                                         .addGap(6))
                                 .addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
                                         .addPreferredGap(ComponentPlacement.RELATED, 165, Short.MAX_VALUE)
@@ -231,7 +241,12 @@ public class EssayProcessingView extends JFrame {
                         .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                 GroupLayout.PREFERRED_SIZE)
                         .addComponent(lblLdaModel))
-                .addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_contentPane
+                .addPreferredGap(ComponentPlacement.RELATED)
+		.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecModel)
+                        .addComponent(comboBoxWord2Vec, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(ComponentPlacement.RELATED)
+		.addGroup(gl_contentPane
                 .createParallelGroup(Alignment.BASELINE).addComponent(chckbxUsePosTagging).addComponent(btnRun))
                 .addContainerGap(38, Short.MAX_VALUE)));
         contentPane.setLayout(gl_contentPane);

@@ -312,7 +312,9 @@ public class SummaryProcessingView extends JInternalFrame {
                     for (int i = 0; i < LOADED_SUMMARIES.size(); i++) {
                         int modelRow = summariesTable.convertRowIndexToModel(i);
                         Summary toRemove = LOADED_SUMMARIES.get(modelRow);
-                        if (toRemove.getPath().equals(e.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(e.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(e.getSemanticModel(SimilarityType.LDA).getPath())) {
+                        if (toRemove.getPath().equals(e.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(e.getSemanticModel(SimilarityType.LSA).getPath()) 
+				&& toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(e.getSemanticModel(SimilarityType.LDA).getPath())
+				&& toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(e.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                             LOADED_SUMMARIES.remove(toRemove);
                             summariesTableModel.removeRow(modelRow);
                         }
@@ -332,6 +334,7 @@ public class SummaryProcessingView extends JInternalFrame {
                     dataRow.add(e.getReferredDoc().getTitleText());
                     dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                     dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
+		    dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.WORD2VEC).getPath());
                     summariesTableModel.addRow(dataRow.toArray());
                     LOADED_SUMMARIES.add(e);
                 }
@@ -369,6 +372,7 @@ public class SummaryProcessingView extends JInternalFrame {
                         dataRow.add(e.getReferredDoc().getTitleText());
                         dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LSA).getPath());
                         dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.LDA).getPath());
+			dataRow.add(e.getReferredDoc().getSemanticModel(SimilarityType.WORD2VEC).getPath());
                         summariesTableModel.addRow(dataRow.toArray());
                     }
 

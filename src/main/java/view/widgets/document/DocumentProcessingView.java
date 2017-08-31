@@ -59,6 +59,7 @@ import data.AbstractDocument.SaveType;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
@@ -95,18 +96,20 @@ public class DocumentProcessingView extends JInternalFrame {
         private final String pathToDoc;
         private final String pathToLSA;
         private final String pathToLDA;
+	private final String pathToWord2Vec;
         private final boolean computeDialogism;
         private final boolean usePOSTagging;
         private final boolean useBigrams;
         private final boolean isSerialized;
         private final boolean checkSer;
 
-        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
-                boolean computeDialogism, boolean useBigrams, boolean isSerialized, boolean checkSer) {
+        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, String pathToWord2Vec, 
+		boolean usePOSTagging,  boolean computeDialogism, boolean useBigrams, boolean isSerialized, boolean checkSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
+	    this.pathToWord2Vec = pathToWord2Vec;
             this.usePOSTagging = usePOSTagging;
             this.computeDialogism = computeDialogism;
             this.useBigrams = useBigrams;
@@ -115,7 +118,7 @@ public class DocumentProcessingView extends JInternalFrame {
         }
 
         public DocumentProcessingTask(String pathToDoc) {
-            this(pathToDoc, null, null, false, false, false, true, false);
+            this(pathToDoc, null, null, null, false, false, false, true, false);
         }
 
         public AbstractDocument processDocument(String pathToIndividualFile) {
@@ -126,6 +129,9 @@ public class DocumentProcessingView extends JInternalFrame {
             if (pathToLDA != null & pathToLDA.length() > 0) {
                 modelPaths.put(SimilarityType.LDA, pathToLDA);
             }
+	    if (pathToWord2Vec != null && pathToWord2Vec.length() > 0) {
+		modelPaths.put(SimilarityType.WORD2VEC, pathToWord2Vec);
+	    }
             return AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
                     ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, useBigrams, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);
@@ -308,7 +314,8 @@ public class DocumentProcessingView extends JInternalFrame {
      * Create the frame.
      */
     public DocumentProcessingView() {
-        super.setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Document Processing"));
+        super.setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
+				    .getString("ReaderBenchView.panelDocument.title"));
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         super.setResizable(true);
         super.setClosable(true);
@@ -583,7 +590,9 @@ public class DocumentProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_DOCUMENTS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Document toRemove = LOADED_DOCUMENTS.get(modelRow);
-                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())) {
+                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath()) 
+			    && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())
+			    && toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(d.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                         LOADED_DOCUMENTS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -604,6 +613,12 @@ public class DocumentProcessingView extends JInternalFrame {
                 } else {
                     dataRow.add("");
                 }
+		if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.WORD2VEC).getPath());
+                } else {
+                    dataRow.add("");
+                }
+		
 
                 docTableModel.addRow(dataRow.toArray());
                 LOADED_DOCUMENTS.add(d);
@@ -667,6 +682,12 @@ public class DocumentProcessingView extends JInternalFrame {
                         } else {
                             dataRow.add("");
                         }
+			if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                            dataRow.add(d.getSemanticModel(SimilarityType.WORD2VEC).getPath());
+                        } else {
+                            dataRow.add("");
+                        }
+			
                         if (d instanceof Conversation) {
                             dataRow.add(true);
                         } else {

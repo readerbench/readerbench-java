@@ -90,7 +90,7 @@ public class SerialProcessing {
         }
     }
 
-    public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, Lang lang,
+    public static void processCorpus(String rootPath, String pathToLSA, String pathToLDA, String pathToWord2Vec, Lang lang,
             boolean usePOSTagging, boolean computeDialogism, boolean cleanInput, SaveType saveOutput) {
         LOGGER.log(Level.INFO, "Analysing all files in \"{0}\"", rootPath);
         List<File> files = new LinkedList<>();
@@ -142,6 +142,7 @@ public class SerialProcessing {
         Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
         modelPaths.put(SimilarityType.LSA, pathToLSA);
         modelPaths.put(SimilarityType.LDA, pathToLDA);
+	modelPaths.put(SimilarityType.WORD2VEC, pathToWord2Vec);
         // process all remaining files
         for (File f : files) {
             try {

@@ -81,10 +81,12 @@ public class ReaderBenchView extends JFrame {
 
     public static final Map<Lang, List<String>> LSA_SPACES = new HashMap();
     public static final Map<Lang, List<String>> LDA_SPACES = new HashMap();
+    public static final Map<Lang, List<String>> WORD2VEC_SPACES = new HashMap();
 
     static {
         identifyModels(LSA_SPACES, "LSA");
         identifyModels(LDA_SPACES, "LDA");
+	identifyModels(WORD2VEC_SPACES, "word2vec");
     }
 
     public static Lang RUNTIME_LANGUAGE;
@@ -471,19 +473,24 @@ public class ReaderBenchView extends JFrame {
 
     }
 
-    public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, Lang lang) {
+    public static void updateComboLanguage(JComboBox<String> comboBoxLSA, JComboBox<String> comboBoxLDA, JComboBox<String> comboBoxWORD2VEC, Lang lang) {
         comboBoxLSA.removeAllItems();
         comboBoxLDA.removeAllItems();
-
+	comboBoxWORD2VEC.removeAllItems();
+	
         ReaderBenchView.LSA_SPACES.get(lang).stream().forEach((url) -> {
             comboBoxLSA.addItem(url);
         });
         ReaderBenchView.LDA_SPACES.get(lang).stream().forEach((url) -> {
             comboBoxLDA.addItem(url);
         });
+	ReaderBenchView.WORD2VEC_SPACES.get(lang).stream().forEach((url) -> {
+	    comboBoxWORD2VEC.addItem(url);
+	});
 
         comboBoxLSA.setEnabled(true);
         comboBoxLDA.setEnabled(true);
+	comboBoxWORD2VEC.setEnabled(true);
     }
 
     public static void setRuntimeLang(String text) {
