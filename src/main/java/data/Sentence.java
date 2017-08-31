@@ -113,14 +113,14 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
             return new ArrayList<>();
         }
         List<NGram> collect = StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+                .filter(edge -> 
+                        !edge.getSource().get(CoreAnnotations.IndexAnnotation.class).equals( 
+                        edge.getTarget().get(CoreAnnotations.IndexAnnotation.class)))
                 .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
                 .filter(pair -> pair.first != null && pair.second != null)
                 .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
-        if(collect.contains(new NGram(new Word("use", "use", null, null, null, Lang.en), new Word("use", "use", null, null, null, Lang.en)))) {
-            System.out.println("are: " + getText());
-        }
         return collect;
     }
     

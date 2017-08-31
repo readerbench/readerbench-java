@@ -15,7 +15,6 @@
  */
 package webService;
 
-import com.sun.jersey.api.client.ClientResponse;
 import dao.CategoryDAO;
 import dao.WordDAO;
 import data.AbstractDocument;
@@ -131,6 +130,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
+import webService.slack.SlackClient;
 
 public class ReaderBenchServer {
 
@@ -143,7 +143,7 @@ public class ReaderBenchServer {
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
-    
+
     private static QueryResult errorEmptyBody() {
         return new QueryResult(false, ParamsValidator.errorNoParams());
     }
@@ -159,16 +159,18 @@ public class ReaderBenchServer {
      */
     private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
         Set<String> requiredParamsMissing;
-        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+        requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params);
+        if (null != requiredParamsMissing && requiredParamsMissing.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
         }
         return null;
     }
-    
-    private static QueryResult errorIfParamsEmpty(Set<String> params) {
+
+    private static QueryResult errorIfParamsEmpty(Map<String, String> params) {
         Set<String> emptyParams;
-        if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
+        emptyParams = ParamsValidator.checkEmptyParams(params);
+        if (null != emptyParams && emptyParams.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(emptyParams));
         }
@@ -266,7 +268,7 @@ public class ReaderBenchServer {
         server.start();
     }
 
-    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
+    public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
         List<ResultCategory> resultCategories = new ArrayList<>();
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
         for (Category cat : dbCategories) {
@@ -276,7 +278,7 @@ public class ReaderBenchServer {
                 sb.append(categoryPhrase.getLabel()).append(' ');
             }
             String text = sb.toString();
-            AbstractDocument queryCategory = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument queryCategory = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             SemanticCohesion sc = new SemanticCohesion(queryCategory, document);
             resultCategories.add(new ResultCategory(cat.getLabel(), sc.getCohesion(), cat.getType()));
         }
@@ -286,10 +288,10 @@ public class ReaderBenchServer {
 
     private ResultSemanticAnnotation getSemanticAnnotation(
             AbstractDocument abstractDocument, AbstractDocument keywordsDocument, AbstractDocument document,
-            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Double minThreshold) {
+            Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams, Double minThreshold) throws Exception {
         ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
-        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold);
-        List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
+        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
+        List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism, useBigrams);
         SemanticCohesion scAbstractDocument = new SemanticCohesion(abstractDocument, document);
         SemanticCohesion scKeywordsAbstract = new SemanticCohesion(abstractDocument, keywordsDocument);
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);
@@ -302,7 +304,7 @@ public class ReaderBenchServer {
 
     private ResultSelfExplanation generateSelfExplanation(AbstractDocument document, String selfExplanation, boolean computeDialogism) {
         Summary s = new Summary(selfExplanation, (Document) document, true);
-        s.computeAll(computeDialogism);
+        s.computeAll(computeDialogism, false);
 
         List<ResultReadingStrategy> readingStrategies = new ArrayList<>();
         for (ReadingStrategyType rs : ReadingStrategyType.values()) {
@@ -370,7 +372,7 @@ public class ReaderBenchServer {
         if (model.toLowerCase().compareTo("lsa") == 0) {
             semanticModel = LSA.loadLSA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LSA).getFullPath(), lang);
         } else if (model.toLowerCase().compareTo("lda") == 0) {
-            semanticModel = LDA.loadLDA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LSA).getFullPath(), lang);
+            semanticModel = LDA.loadLDA(SemanticCorpora.getSemanticCorpora(corpus, lang, SimilarityType.LDA).getFullPath(), lang);
         } else if (model.toLowerCase().compareTo("w2v") == 0) {
             semanticModel = Word2VecModel.loadWord2Vec(corpus, lang);
         }
@@ -378,7 +380,7 @@ public class ReaderBenchServer {
             return null;
         }
         models.add(semanticModel);
-        Document seedDocument = new Document(null, AbstractDocumentTemplate.getDocumentModel(seed), models, lang, true);
+        Document seedDocument = new Document(null, AbstractDocumentTemplate.getDocumentModel(seed), models, lang, false);
         return new ResultSimilarConcepts(semanticModel.getSimilarConcepts(seedDocument, minThreshold));
     }
 
@@ -429,6 +431,7 @@ public class ReaderBenchServer {
         Spark.staticFileLocation("/public");
 
         Spark.get("/", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             return "OK";
         });
         Spark.before((request, response) -> {
@@ -437,10 +440,12 @@ public class ReaderBenchServer {
             response.header("Access-Control-Allow-Headers", "*");
         });
         Spark.post("/keywords", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
             requiredParams.add("threshold");
+            requiredParams.add("bigrams");
             QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
             if (error != null) {
                 return error.convertToJson();
@@ -457,6 +462,7 @@ public class ReaderBenchServer {
             } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
+            Boolean useBigrams = Boolean.parseBoolean(hm.get("bigrams"));
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -468,7 +474,7 @@ public class ReaderBenchServer {
                 w2vCorpora = hm.get("w2v");
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
             QueryResultTopicAdvanced queryResult = new QueryResultTopicAdvanced();
             queryResult.setData(resultTopic);
@@ -476,12 +482,12 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/sentiment-analysis", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
             JSONObject json = null;
             if (request.body().isEmpty()) {
                 error = errorEmptyBody();
-            }
-            else {
+            } else {
                 json = (JSONObject) new JSONParser().parse(request.body());
                 Set<String> requiredParams = setInitialRequiredParams();
                 requiredParams.add("text");
@@ -495,6 +501,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -507,10 +514,14 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            Integer granularity = null;
+            if (hm.get("granularity") != null && (hm.get("granularity").compareTo("") != 0)) {
+                granularity = Integer.parseInt(hm.get("granularity"));
+            }
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSentiment queryResult = new QueryResultSentiment();
             try {
-                queryResult.setData(SentimentAnalysis.computeSentiments(document));
+                queryResult.setData(SentimentAnalysis.computeSentiments(document, granularity));
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
@@ -518,6 +529,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/textual-complexity", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
@@ -530,6 +542,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -542,7 +555,7 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultTextualComplexity queryResult = new QueryResultTextualComplexity();
             try {
                 TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
@@ -554,6 +567,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-search", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = new HashSet<>();
             requiredParams.add("text");
@@ -575,6 +589,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("uri");
             requiredParams.add("threshold");
@@ -587,6 +602,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -606,13 +622,14 @@ public class ReaderBenchServer {
             } catch (NullPointerException e) {
                 minThreshold = 0.3;
             }
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultTopic queryResult = new QueryResultTopic();
             queryResult.setData(ConceptMap.getKeywords(document, minThreshold, null));
             response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-annotation-uri", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
@@ -626,6 +643,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -650,17 +668,18 @@ public class ReaderBenchServer {
                 minThreshold = 0.3;
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
             String abstractText = hm.get("abstract");
-            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
+            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold));
             response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-annotation", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("file");
@@ -674,6 +693,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -693,17 +713,23 @@ public class ReaderBenchServer {
                 minThreshold = 0.3;
             }
             Set<String> keywordsList = new HashSet<>(Arrays.asList(((String) json.get("keywords")).split(",")));
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
-            String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
-            String abstractText = hm.get("abstract");
-            AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism);
-            QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
-            queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, minThreshold));
-            response.type("application/json");
-            return queryResult.convertToJson();
+            try {
+                AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
+                String keywordsText = hm.get("keywords");
+                AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
+                String abstractText = hm.get("abstract");
+                AbstractDocument abstractDocument = QueryHelper.generateDocument(abstractText, lang, models, usePosTagging, computeDialogism, useBigrams);
+                QueryResultSemanticAnnotation queryResult = new QueryResultSemanticAnnotation();
+                queryResult.setData(getSemanticAnnotation(abstractDocument, keywordsDocument, document, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold));
+                response.type("application/json");
+                return queryResult.convertToJson();
+            } catch (Exception e) {
+                error = new QueryResult(false, e.getMessage());
+                return error.convertToJson();
+            }
         });
         Spark.post("/self-explanation", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text");
@@ -717,6 +743,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -729,7 +756,7 @@ public class ReaderBenchServer {
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             String text = hm.get("text");
-            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultSelfExplanation queryResult = new QueryResultSelfExplanation();
             String explanation = hm.get("explanation");
             queryResult.setData(generateSelfExplanation(document, explanation, usePosTagging));
@@ -737,6 +764,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cscl-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cscl-file");
@@ -751,6 +779,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -770,14 +799,15 @@ public class ReaderBenchServer {
             }
             String csclFile = json.get("cscl-file").toString();
             Conversation conversation = Conversation.load(new File("tmp/" + csclFile), models, lang, usePosTagging);
-            conversation.computeAll(computeDialogism);
-            AbstractDocument conversationDocument = QueryHelper.generateDocument(conversation.getText(), lang, models, usePosTagging, computeDialogism);
+            conversation.computeAll(computeDialogism, useBigrams);
+            AbstractDocument conversationDocument = QueryHelper.generateDocument(conversation.getText(), lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultCscl queryResult = new QueryResultCscl();
             queryResult.setData(CSCL.getAll(conversationDocument, conversation, minThreshold));
             response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.post("/textCategorization", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
@@ -791,6 +821,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -814,9 +845,9 @@ public class ReaderBenchServer {
             } else {
                 documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
             }
-            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument document = QueryHelper.generateDocument(documentContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
-            List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism);
+            List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultTextCategorization queryResult = new QueryResultTextCategorization();
             queryResult.setData(new ResultTextCategorization(resultTopic, resultCategories));
@@ -824,6 +855,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cv-cover-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cv-file");
@@ -838,6 +870,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -857,18 +890,18 @@ public class ReaderBenchServer {
             }
             Map<String, Integer> commonWords = new HashMap<>();
             String cvContent = getTextFromPdf("tmp/" + hm.get("cv-file"), true).getContent();
-            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(cvContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             Map<Word, Integer> cvWords = cvDocument.getWordOccurences();
             ResultCvCover result = new ResultCvCover(null, null);
             ResultCvOrCover resultCv = new ResultCvOrCover(null, null);
             resultCv.setConcepts(ConceptMap.getKeywords(cvDocument, minThreshold, null));
-            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument));
+            resultCv.setSentiments(webService.services.SentimentAnalysis.computeSentiments(cvDocument, SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCv(resultCv);
             String coverContent = getTextFromPdf("tmp/" + hm.get("cover-file"), true).getContent();
-            AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument,  SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCover(resultCover);
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
             Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
@@ -887,6 +920,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cv-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> socialNetworksLinks = new HashSet<>();
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
@@ -901,11 +935,20 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
-
+            
             Map<String, String> hm = hmParams(json);
+            
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("cv-file", hm.get("cv-file"));
+            error = errorIfParamsEmpty(notEmptyParams);
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -928,7 +971,7 @@ public class ReaderBenchServer {
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
             pdfToTxtConverter.process();
@@ -936,10 +979,10 @@ public class ReaderBenchServer {
             pdfToTxtConverter.removeLines(ignoreLines);
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
-            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultCv queryResult = new QueryResultCv();
-            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA);
+            ResultCv result = CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold, CVConstants.FAN_DELTA);
             result.setText(cvDocument.getText());
             result.setProcessedText(cvDocument.getProcessedText());
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
@@ -983,6 +1026,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/job-quest", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Double notEnoughWords = .5;
             Double tooManyWords = 1.5;
 
@@ -1013,6 +1057,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -1036,7 +1081,7 @@ public class ReaderBenchServer {
             Set<String> ignoreLines = new HashSet<>(Arrays.asList(CVConstants.IGNORE_LINES.split(",")));
 
             String keywordsText = hm.get("keywords");
-            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywordsText, lang, models, usePosTagging, computeDialogism, useBigrams);
 
             PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter("tmp/" + hm.get("cv-file"), true);
             pdfToTxtConverter.process();
@@ -1044,10 +1089,10 @@ public class ReaderBenchServer {
             pdfToTxtConverter.removeLines(ignoreLines);
             pdfToTxtConverter.extractSocialLinks(socialNetworksLinks);
 
-            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism);
+            AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getCleanedText(), lang, models, usePosTagging, computeDialogism, useBigrams);
 
             QueryResultJobQuest queryResult = new QueryResultJobQuest();
-            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
+            ResultJobQuest result = JobQuestHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold, CVConstants.FAN_DELTA, CVConstants.FAN_DELTA_VERY);
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
@@ -1123,6 +1168,7 @@ public class ReaderBenchServer {
         });
         // File Upload - send file as multipart form-data to be accepted
         Spark.post("/file-upload", (request, response) -> {
+            //SlackClient.logMessage(LoggerHelper.requestToString(request));
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
@@ -1147,6 +1193,7 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.get("/file-download", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
             if (request.queryParams().isEmpty()) {
                 error = errorEmptyBody();
@@ -1159,13 +1206,13 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
 
-            Set<String> notEmptyParams = new HashSet<>();
-            notEmptyParams.add("file");
+            String file = request.queryParams("file");
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("file", file);
             error = errorIfParamsEmpty(notEmptyParams);
             if (error != null) {
                 return error.convertToJson();
             }
-            String file = request.queryParams("file");
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
@@ -1185,6 +1232,7 @@ public class ReaderBenchServer {
             return response.raw();
         });
         Spark.post("/folderUpload", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
@@ -1198,6 +1246,7 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.post("/vcop", (Request request, Response response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1243,6 +1292,7 @@ public class ReaderBenchServer {
             return result;
         });
         Spark.post("/vcopD3", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1265,6 +1315,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/vcopD3Week", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1297,6 +1348,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/text-similarity", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
@@ -1319,6 +1371,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/similar-concepts", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("seed");
@@ -1349,6 +1402,7 @@ public class ReaderBenchServer {
         // In contrast to textSimilarity, this endpoint returns similarity
         // scores of two texts using every similarity method available
         Spark.post("/text-similarities", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
@@ -1388,6 +1442,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/answer-matching", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("language");
@@ -1407,6 +1462,7 @@ public class ReaderBenchServer {
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+            Boolean useBigrams = false;
             String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
             if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
                 lsaCorpora = hm.get("lsa");
@@ -1422,9 +1478,9 @@ public class ReaderBenchServer {
             List<String> predefinedAnswers = (ArrayList<String>) json.get("predefined-answers");
             List<AbstractDocument> predefinedAnswerDocuments = new ArrayList<>();
             for (String answer : predefinedAnswers) {
-                predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism));
+                predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism, useBigrams));
             }
-            AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism);
+            AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism, useBigrams);
             QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
             queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
             response.type("application/json");
@@ -1432,6 +1488,7 @@ public class ReaderBenchServer {
         });
 
         Spark.get("/lak/nodes", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             response.type("application/json");
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<TwoModeGraphNode> authorNodes = graphBuilder.getNodes();
@@ -1440,6 +1497,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/lak/graph", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
@@ -1466,12 +1524,14 @@ public class ReaderBenchServer {
             return result;
         });
         Spark.get("/lak/measures", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             response.type("application/json");
             List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
             QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
             return qResult.convertToJson();
         });
         Spark.get("/lak/years", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             Set<Integer> yearSet = new HashSet();
@@ -1490,6 +1550,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/lak/topicEvolution", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             TopicEvolutionBuilder builder = new TopicEvolutionBuilder(articles);
@@ -1500,6 +1561,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/lak/topics", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             final List<ResearchArticle> filteredArticles = new ArrayList();
@@ -1528,6 +1590,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/ciModel", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1552,6 +1615,7 @@ public class ReaderBenchServer {
             return resultStr;
         });
         Spark.get("/community/communities", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
 //            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
 //
 //            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
@@ -1563,24 +1627,24 @@ public class ReaderBenchServer {
 //                    results.put(community.getCategoryName(), Arrays.asList(community));
 //                }
 //            }
-            webService.services.cscl.result.dto.Community community1 =
-                    new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
-            webService.services.cscl.result.dto.Community community2 =
-                    new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
+            webService.services.cscl.result.dto.Community community1
+                    = new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
+            webService.services.cscl.result.dto.Community community2
+                    = new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
 
-            webService.services.cscl.result.dto.Community community3 =
-                    new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
-            webService.services.cscl.result.dto.Community community4 =
-                    new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+            webService.services.cscl.result.dto.Community community3
+                    = new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
+            webService.services.cscl.result.dto.Community community4
+                    = new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
 
-            webService.services.cscl.result.dto.Category category1 =
-                    new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
+            webService.services.cscl.result.dto.Category category1
+                    = new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
                             Arrays.asList(community1, community2));
-            webService.services.cscl.result.dto.Category category2 =
-                    new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
+            webService.services.cscl.result.dto.Category category2
+                    = new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
                             Arrays.asList(community3));
-            webService.services.cscl.result.dto.Category category3 =
-                    new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
+            webService.services.cscl.result.dto.Category category3
+                    = new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
                             Arrays.asList(community4));
             List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
             QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
@@ -1589,6 +1653,7 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/community/participants", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1613,6 +1678,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/community/participants/directedGraph", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1624,12 +1690,12 @@ public class ReaderBenchServer {
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
 //                    .collect(Collectors.toList());
-
             QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");
             return queryResult.convertToJson();
         });
         Spark.post("/community/participants/edgeBundling", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1640,7 +1706,6 @@ public class ReaderBenchServer {
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p -> ((List) p.get("data")).size() > 0)
 //                    .collect(Collectors.toList());
-
 
             QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
             response.type("application/json");

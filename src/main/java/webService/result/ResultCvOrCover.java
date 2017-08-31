@@ -15,10 +15,12 @@
  */
 package webService.result;
 
+import java.util.List;
+
 public class ResultCvOrCover {
     
     private ResultTopic concepts;
-	private ResultSentiment sentiments;
+	private List<ResultSentiment> sentiments;
 
 	public ResultTopic getConcepts() {
 		return concepts;
@@ -26,13 +28,13 @@ public class ResultCvOrCover {
 	public void setConcepts(ResultTopic concepts) {
 		this.concepts = concepts;
 	}
-	public ResultSentiment getSentiments() {
+	public List<ResultSentiment> getSentiments() {
 		return sentiments;
 	}
-	public void setSentiments(ResultSentiment sentiments) {
+	public void setSentiments(List<ResultSentiment> sentiments) {
 		this.sentiments = sentiments;
 	}
-	public ResultCvOrCover(ResultTopic concepts, ResultSentiment sentiments) {
+	public ResultCvOrCover(ResultTopic concepts, List<ResultSentiment> sentiments) {
 		super();
 		this.concepts = concepts;
 		this.sentiments = sentiments;

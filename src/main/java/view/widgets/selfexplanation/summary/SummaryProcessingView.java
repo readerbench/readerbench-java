@@ -94,7 +94,7 @@ public class SummaryProcessingView extends JInternalFrame {
             } else {
                 e = Summary.loadSummary(pathToIndividualFile, referredDoc, usePOSTagging);
                 if (e != null) {
-                    e.computeAll(usePOSTagging);
+                    e.computeAll(usePOSTagging, false);
                     e.save(AbstractDocument.SaveType.SERIALIZED);
                 }
             }

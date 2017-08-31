@@ -32,6 +32,7 @@ import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 import services.semanticModels.word2vec.Word2VecModel;
+import services.commons.TextPreprocessing;
 
 public class QueryHelper {
 
@@ -51,21 +52,19 @@ public class QueryHelper {
         return models;
     }
 
-    public static String textToUTF8(String text) {
-        try {
-            return URLDecoder.decode(text, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-        return null;
+    public static String textToUTF8(String text) throws Exception {
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+        return URLDecoder.decode(text, "UTF-8");
     }
 
-    public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) {
+    public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
         LOGGER.info("Generating document...");
-        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(QueryHelper.replaceSpecialChars(textToUTF8(text)));
+        //text = QueryHelper.replaceSpecialChars(TextPreprocessing.cleanText(textToUTF8(text), lang));
+        text = QueryHelper.replaceSpecialChars(textToUTF8(text));
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(text);
         AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
         LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
-        document.computeAll(computeDialogism);
+        document.computeAll(computeDialogism, useBigrams);
         return document;
     }
 

@@ -78,29 +78,12 @@ public class ConceptMap {
             if (t.getElement() instanceof Word) {
                 node.setLemma(t.getWord().getLemma());
                 node.setPos(t.getWord().getPOS());
-                //t.updateRelevance(queryDoc, t.getWord());
-                node.setNoOcc(wordOcc.get(t.getWord()));
+                node.setNoOcc(t.getCount());
             } else {
                 NGram nGram = (NGram) t.getElement();
-                StringBuilder sb = new StringBuilder();
-                for (Word w : nGram.getWords()) {
-                    sb.append(w.getLemma()).append(" ");
-                }
-                node.setLemma(sb.toString());
-                sb.setLength(0);
-                for (Word w : nGram.getWords()) {
-                    sb.append(w.getPOS()).append(" ");
-                }
-                node.setPos(sb.toString().trim());
-                // TODO: update lemma relevance
-                //t.updateRelevance(queryDoc, t.getElement());
-                int noOcc = 0;
-                Map<Word, Integer> nGramWordOccurences = nGram.getWordOccurences();
-                for (Word w : nGram.getWords()) {
-                    // nGram.getWordOccurences()
-                    noOcc += nGramWordOccurences.get(w);   
-                }
-                node.setNoOcc(noOcc / nGram.getWords().size());
+                node.setLemma(nGram.getWords().stream().map(w -> w.getLemma()).collect(Collectors.joining(" ")));
+                node.setPos(nGram.getWords().stream().map(w -> w.getPOS()).collect(Collectors.joining(" ")));
+                node.setNoOcc(t.getCount());
             }
             
             node.setTf(t.getTermFrequency());
@@ -111,14 +94,7 @@ public class ConceptMap {
                     node.setIdf(-1);
                 }
             } else {
-                NGram nGram = (NGram) t.getElement();
-                for (Word w : nGram.getWords()) {
-                    if (mapIdf != null && mapIdf.containsKey(w)) {
-                        node.setIdf(mapIdf.get(w));
-                    } else {
-                        node.setIdf(-1);
-                    }
-                }
+                node.setIdf(-1);
             }
 
             // similarity scores between word and document using each semantic model

@@ -115,12 +115,6 @@ public class Block extends AnalysisElement implements Serializable {
         d.getBlocks().add(b);
 //        }
         d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
-        if (d.getText() == null) {
-            d.setText(d.getText() + "\n");
-        }
-        else {
-            d.setText(d.getText() + b.getText() + "\n");
-        }
     }
 
     public List<Sentence> getSentences() {

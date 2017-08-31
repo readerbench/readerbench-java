@@ -122,7 +122,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 modelPaths.put(SimilarityType.WORD2VEC, pathToWORD2VEC);
             }
             return Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
-                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, null, null, true,
+                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, false, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);
         }
 

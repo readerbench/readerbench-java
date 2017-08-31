@@ -57,7 +57,7 @@ public class FrenchSummaryProcessing {
         for (File f : folder.listFiles((File dir, String name) -> name.endsWith(".xml"))) {
             LOGGER.log(Level.INFO, "Processing file {0} ...", f.getAbsolutePath());
             Summary summary = Summary.loadSummary(f.getAbsolutePath(), refDoc, true);
-            summary.computeAll(true);
+            summary.computeAll(true, false);
             summary.save(SaveType.SERIALIZED);
             loadedSummaries.add(summary);
         }

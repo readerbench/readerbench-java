@@ -127,6 +127,7 @@ public class CSCL {
     public static ResultCscl getAll(AbstractDocument conversationDocument, Conversation c, double threshold) {
 
         List<CSCLIndices> ignoreIndices = new ArrayList<>();
+        ignoreIndices.add(CSCLIndices.PERSONAL_KB);
         ignoreIndices.add(CSCLIndices.NO_NEW_THREADS);
         ignoreIndices.add(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS);
         ignoreIndices.add(CSCLIndices.NEW_THREADS_OVERALL_SCORE);

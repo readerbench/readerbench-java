@@ -98,7 +98,7 @@ public class VerbalizationProcessingView extends JInternalFrame {
                 }
             } else {
                 v = Metacognition.loadVerbalization(pathToIndividualFile, referredDoc, usePOSTagging);
-                v.computeAll(true);
+                v.computeAll(true, false);
                 v.save(AbstractDocument.SaveType.SERIALIZED);
             }
 

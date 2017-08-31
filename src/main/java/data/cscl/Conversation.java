@@ -351,11 +351,11 @@ public class Conversation extends AbstractDocument {
      * @param computeDialogism
      */
     @Override
-    public void computeAll(boolean computeDialogism) {
-        super.computeAll(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        super.computeAll(computeDialogism, useBigrams);
 
         this.getParticipants().stream().forEach((p) -> {
-            KeywordModeling.determineKeywords(p.getContributions());
+            KeywordModeling.determineKeywords(p.getContributions(), useBigrams);
         });
 
         Collaboration.evaluateSocialKB(this);

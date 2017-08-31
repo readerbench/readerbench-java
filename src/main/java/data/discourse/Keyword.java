@@ -36,6 +36,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
     private double relevance;
     private double termFrequency;
     private double semanticSimilarity;
+    private int count = 0;
     
     public Keyword(Word word, AnalysisElement e) {
         this.word = word;
@@ -65,31 +66,32 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         if (newCount > e.getWordOccurences().get(word)) {
             word = newWord;
         }
-        double tf = 1 + Math.log(newCount);
-        // do not consider Idf in order to limit corpus specificity
-        // double inverseDocumentFrequency = word.getIdf();
-        this.termFrequency += tf;
+        count += newCount;
+        termFrequency = 1 + Math.log(count);
         if (e.getSemanticModels().isEmpty()) {
-            this.relevance += tf;
+            this.relevance = termFrequency;
             return;
         }
         double semSim = SemanticCohesion.getAverageSemanticModelSimilarity(newWord, e);
-        this.relevance += tf * semSim;
-        this.semanticSimilarity = Math.max(this.semanticSimilarity, semSim);
+        this.relevance = termFrequency * semSim;
+        this.semanticSimilarity = semSim;
     }
     
-    public final void updateRelevance(AnalysisElement e, NGram newWord, int count) {
-        double tf = 1 + Math.log(count);
+    public final void updateRelevance(AnalysisElement e, NGram newWord, int newCount) {
+        if (newCount > count) {
+            ngram = newWord;
+        }
+        count += newCount;
+        termFrequency = 1 + Math.log(count);
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
-        this.termFrequency += tf;
         if (e.getSemanticModels().isEmpty()) {
-            this.relevance += tf;
+            this.relevance = termFrequency;
             return;
         }
         double semSim = SemanticCohesion.getAverageSemanticModelSimilarity(newWord, e);
-        this.relevance += tf * semSim;
-        this.semanticSimilarity = Math.max(this.semanticSimilarity, semSim);
+        this.relevance = termFrequency * semSim;
+        this.semanticSimilarity = semSim;
     }
     
     public double getTermFrequency() {
@@ -114,6 +116,10 @@ public class Keyword implements Comparable<Keyword>, Serializable {
 
     public void setRelevance(double relevance) {
         this.relevance = relevance;
+    }
+
+    public int getCount() {
+        return count;
     }
 
     @Override
