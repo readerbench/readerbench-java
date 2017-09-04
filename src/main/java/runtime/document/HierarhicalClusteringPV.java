@@ -22,7 +22,6 @@ import org.openide.util.Exceptions;
 import static runtime.document.ENEAClustering.LOGGER;
 import services.commons.Clustering;
 import services.discourse.cohesion.CohesionGraph;
-import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.PreProcessing;
 import services.semanticModels.paragraphVectors.ParagraphVectorsModel;
@@ -75,7 +74,7 @@ public class HierarhicalClusteringPV extends Clustering {
         }
 
         LOGGER.info("Performing clustering ...");
-        //performAglomerativeClustering(responses, new File(path).getParent() + "/agglomerative_clustering.txt");
+        //performAglomerativeClustering(responses, new File(path).getParent() + "/aglomerative_clustering.txt");
         performKMeansClustering(responses, 3);
 
         LOGGER.info("Finished processing all files ...");
@@ -84,8 +83,8 @@ public class HierarhicalClusteringPV extends Clustering {
     public static void main(String[] args) {
 
         HierarhicalClusteringPV hcPV = new HierarhicalClusteringPV();
-        hcPV.parseTxtFilesAndConcatenate("resources/config/EN/TasaHClustering/train", "train.txt");
-        LOGGER.info("Computed train.txt file for training model...");
+//        hcPV.parseTxtFilesAndConcatenate("resources/config/EN/TasaHClustering/train", "train.txt");
+//        LOGGER.info("Computed train.txt file for training model...");
 
         try {
             ParagraphVectorsModel.trainModel("resources/config/EN/TasaHClustering/train.txt");
@@ -93,14 +92,15 @@ public class HierarhicalClusteringPV extends Clustering {
             Exceptions.printStackTrace(ex);
         }
         LOGGER.info("Finished training model ...");
+
         
         String modelPath = new File("resources/config/EN/TasaHClustering").getAbsolutePath();
         models = new ArrayList<>();
         models.add(ParagraphVectorsModel.loadParagraphVectors(modelPath, Lang.en));
         LOGGER.info("Finished loading all files ...");
         
-        hcPV.parseTxtFilesAndConcatenate("resources/config/EN/TasaHClustering/test", "test.txt");
-        LOGGER.info("Computed test.txt file for testing model...");
+//        hcPV.parseTxtFilesAndConcatenate("resources/config/EN/TasaHClustering/test", "test.txt");
+//        LOGGER.info("Computed test.txt file for testing model...");
 
         hcPV.callHierarchicalClustering("resources/config/EN/TasaHClustering/test.txt", "UTF-8");
     }
@@ -113,7 +113,5 @@ public class HierarhicalClusteringPV extends Clustering {
             avg += model.getSimilarity(d1, d2);
         }
         return avg / models.size();
-        
-        //return model.getSimilarity(d1, d2);
     }
 }
