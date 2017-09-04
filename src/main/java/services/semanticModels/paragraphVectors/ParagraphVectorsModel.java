@@ -52,8 +52,6 @@ public class ParagraphVectorsModel implements ISemanticModel {
     private final String path;
     private final int noDimensions;
     private final Map<Word, double[]> wordVectors;
-    //private final Map<AbstractDocument, double[]> paragraphVectors;
-    
     public static WeightLookupTable weightLookupTable;
 
     private ParagraphVectorsModel(String path, Lang language, ParagraphVectors paragraphVectors) {
@@ -66,7 +64,6 @@ public class ParagraphVectorsModel implements ISemanticModel {
                         Function.identity(),
                         w -> paragraphVectors.getWordVector(w.getLemma())));
         this.noDimensions = paragraphVectors.getLayerSize();
-        //this.paragraphVectors = null;
         weightLookupTable = paragraphVectors.getLookupTable();
 
     }
@@ -112,12 +109,12 @@ public class ParagraphVectorsModel implements ISemanticModel {
             LOGGER.info("Building paragraph vectors model ...");
             ParagraphVectors paragraphVectors = new ParagraphVectors.Builder()
                     .learningRate(0.025)
-                    .minLearningRate(0.001)
-                    .batchSize(900)
+                    .minLearningRate(0.0001)
+                    .batchSize(1000)
                     .minWordFrequency(5)
-                    .epochs(10)
+                    .epochs(30)
                     .iterate(iterator)
-                    .layerSize(100)
+                    .layerSize(200)
                     .seed(42)
                     .windowSize(5)
                     .negativeSample(10)

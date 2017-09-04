@@ -167,13 +167,13 @@ public abstract class Clustering {
 
         LOGGER.log(Level.INFO, "{0} clusters after {1} iterations with {2} compactness and {3} isolation", new Object[]{K, noIterations, Formatting.formatNumber(compactness), Formatting.formatNumber(isolation)});
         for (int i = 0; i < clustroids.size(); i++) {
-            System.out.print(">>" + (i + 1) + ": ");
+            System.out.println(">>" + (i + 1) + ": ");
             for (AbstractDocument d : clusters.get(i)) {
-                if (clustroids.contains(d)) 
+                if (clustroids.contains(d)) {
                     LOGGER.log(Level.INFO, "({0}); ", d.getTitleText());
-//                } else {
-//                    ;//LOGGER.log(Level.INFO, "{0}; ", d.getTitleText());
-//                }
+                } else {
+                    LOGGER.log(Level.INFO, "{0}; ", d.getTitleText());
+                }
             }
         }
         
@@ -184,7 +184,6 @@ public abstract class Clustering {
                 System.out.print(ad.get(j).getTitleText() + "; ");
             }
         }
-
     }
 
     public void performAglomerativeClustering(List<AbstractDocument> docs, String outputPath) {
@@ -229,7 +228,7 @@ public abstract class Clustering {
             // display groups
             try (BufferedWriter out = new BufferedWriter(new FileWriter(output, true), 32768)) {
                 BufferedWriter outIt = new BufferedWriter(new FileWriter(testSim, true), 32768);
-                outIt.write(Formatting.formatNumber(maxSim, 3)+"\n");
+                outIt.write(Formatting.formatNumber(maxSim, 3)+" : " + group1 + " & " +group2 + "\n");
                 out.write("\n\n" + noInterations + " iteration (max similarity = " + Formatting.formatNumber(maxSim, 3) + "):\n");
                 for (int i = 0; i < groups.size(); i++) {
                     List<AbstractDocument> groupDocs = new ArrayList<>();
