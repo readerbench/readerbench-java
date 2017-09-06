@@ -137,11 +137,12 @@ public class TwoModeGraphBuilder {
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {
         String LAK_CORPUS_FOLDER = "resources/in/LAK_corpus/parsed-documents";
-        if (LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER)) {
-            return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER);
+        String LAK_CORPUS_FOLDER_SAMPLE = "resources/in/LAK_corpus/parsed-documents-sample";
+        if (LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER_SAMPLE)) {
+            return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER_SAMPLE);
         }
-        TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER);
-        LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER, gaphBuilder);
+        TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER_SAMPLE);
+        LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER_SAMPLE, gaphBuilder);
         return gaphBuilder;
     }
     
