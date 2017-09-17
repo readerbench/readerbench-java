@@ -36,8 +36,6 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import data.AbstractDocument;
 import data.Block;
 import data.Word;
@@ -169,27 +167,27 @@ public class DocKeywordAbstractOverlap extends JFrame {
         groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(
                 Alignment.LEADING).addGroup(
                         groupLayout
-                        .createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(
-                                groupLayout
-                                .createParallelGroup(Alignment.LEADING)
-                                .addComponent(tableScroll,
-                                        Alignment.TRAILING,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        Short.MAX_VALUE)
-                                .addComponent(lblTopSimilarArticles))
-                        .addContainerGap()));
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(
+                                        groupLayout
+                                                .createParallelGroup(Alignment.LEADING)
+                                                .addComponent(tableScroll,
+                                                        Alignment.TRAILING,
+                                                        GroupLayout.DEFAULT_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE,
+                                                        Short.MAX_VALUE)
+                                                .addComponent(lblTopSimilarArticles))
+                                .addContainerGap()));
         groupLayout.setVerticalGroup(groupLayout.createParallelGroup(
                 Alignment.LEADING).addGroup(
                         groupLayout
-                        .createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblTopSimilarArticles)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(tableScroll, GroupLayout.DEFAULT_SIZE,
-                                614, Short.MAX_VALUE).addContainerGap()));
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblTopSimilarArticles)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(tableScroll, GroupLayout.DEFAULT_SIZE,
+                                        614, Short.MAX_VALUE).addContainerGap()));
         // groupLayout.createParallelGroup().addComponent(tableScrollCentrality);
         // .addComponent(tableScrollCentrality)
         getContentPane().setLayout(groupLayout);

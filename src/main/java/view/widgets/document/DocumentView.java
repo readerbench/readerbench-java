@@ -115,15 +115,15 @@ public class DocumentView extends JFrame {
         groupLayout
                 .setVerticalGroup(
                         groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
-                                .addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                        .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
-                                                Short.MAX_VALUE)
-                                        .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
-                                .addContainerGap()));
+                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                        .addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                                .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
+                                                        Short.MAX_VALUE)
+                                                .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
+                                        .addContainerGap()));
 
         JLabel lblContents = new JLabel("Contents");
         lblContents.setFont(new Font("SansSerif", Font.BOLD, 13));
@@ -133,74 +133,50 @@ public class DocumentView extends JFrame {
         JScrollPane scrollPaneContent = new JScrollPane();
         scrollPaneContent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton btnAdvancedView = new JButton("Advanced View");
-        btnAdvancedView.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        SentenceView view = new SentenceView(document);
-                        view.setVisible(true);
-                    }
-                });
-            }
-        });
-
         JButton btnVisualizeCohesionGraph = new JButton("Multi-Layered Cohesion Graph");
-        btnVisualizeCohesionGraph.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        CohesionGraphView view = new CohesionGraphView(document);
-                        view.setVisible(true);
-                    }
-                });
-            }
+        btnVisualizeCohesionGraph.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    CohesionGraphView view = new CohesionGraphView(document);
+                    view.setVisible(true);
+                }
+            });
         });
 
         JButton btnSelectVoices = new JButton("Select Voices");
-        btnSelectVoices.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        JFrame frame = new VoiceSelectionView(document);
-                        frame.setVisible(true);
-                    }
-                });
-            }
+        btnSelectVoices.addActionListener((ActionEvent e) -> {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JFrame frame = new VoiceSelectionView(document);
+                    frame.setVisible(true);
+                }
+            });
         });
 
         JButton btnDisplayVoiceInteranimation = new JButton("Voice Inter-animation");
-        btnDisplayVoiceInteranimation.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
-                            frame.setVisible(true);
-                        }
-                    });
-                } else {
-                    JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
-                            "Information", JOptionPane.INFORMATION_MESSAGE);
-                }
+        btnDisplayVoiceInteranimation.addActionListener((ActionEvent e) -> {
+            if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
+                        frame.setVisible(true);
+                    }
+                });
+            } else {
+                JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
+                        "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
         JButton btnVisualizeDocumentFlow = new JButton("Document Flow");
-        btnVisualizeDocumentFlow.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        JFrame view = new DocumentFlowView(document);
-                        view.setVisible(true);
-                    }
-                });
-            }
+        btnVisualizeDocumentFlow.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(() -> {
+                JFrame view = new DocumentFlowView(document);
+                view.setVisible(true);
+            });
         });
         GroupLayout gl_panelContents = new GroupLayout(panelContents);
         gl_panelContents
@@ -212,8 +188,7 @@ public class DocumentView extends JFrame {
                                         .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
                                         .addComponent(separator, GroupLayout.DEFAULT_SIZE, 856,
                                                 Short.MAX_VALUE)
-                                        .addGroup(gl_panelContents.createSequentialGroup().addComponent(btnAdvancedView)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeCohesionGraph)
+                                        .addGroup(gl_panelContents.createSequentialGroup().addComponent(btnVisualizeCohesionGraph)
                                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeDocumentFlow)
                                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSelectVoices)
                                                 .addPreferredGap(ComponentPlacement.RELATED)
@@ -222,19 +197,19 @@ public class DocumentView extends JFrame {
         gl_panelContents
                 .setVerticalGroup(
                         gl_panelContents.createParallelGroup(Alignment.LEADING)
-                        .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-                                .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(btnAdvancedView).addComponent(btnVisualizeCohesionGraph)
-                                        .addComponent(btnSelectVoices)
-                                        .addComponent(btnDisplayVoiceInteranimation)
-                                        .addComponent(btnVisualizeDocumentFlow))
-                                .addContainerGap()));
+                                .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+                                        .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(btnVisualizeCohesionGraph)
+                                                .addComponent(btnSelectVoices)
+                                                .addComponent(btnDisplayVoiceInteranimation)
+                                                .addComponent(btnVisualizeDocumentFlow))
+                                        .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
         JLabel lblTitle = new JLabel("Title:\n");
         lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
@@ -265,45 +240,45 @@ public class DocumentView extends JFrame {
         gl_panelHeader
                 .setHorizontalGroup(
                         gl_panelHeader.createParallelGroup(Alignment.LEADING)
-                        .addGroup(
-                                gl_panelHeader.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelHeader
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
-                                        .addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
-                                                Short.MAX_VALUE)
-                                        .addGroup(gl_panelHeader.createSequentialGroup()
-                                                .addComponent(lblSource)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblSourceDescription).addGap(18)
-                                                .addComponent(lblURI)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblURIDescription)
-                                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                                .addComponent(lblSubj)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblSubjectivityDescription))
-                                        .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
-                                                GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
+                                .addGroup(
+                                        gl_panelHeader.createSequentialGroup().addContainerGap()
+                                                .addGroup(gl_panelHeader
+                                                        .createParallelGroup(
+                                                                Alignment.LEADING)
+                                                        .addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
+                                                                Short.MAX_VALUE)
+                                                        .addGroup(gl_panelHeader.createSequentialGroup()
+                                                                .addComponent(lblSource)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblSourceDescription).addGap(18)
+                                                                .addComponent(lblURI)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblURIDescription)
+                                                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                                                .addComponent(lblSubj)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblSubjectivityDescription))
+                                                        .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
+                                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
+                                                                GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
         gl_panelHeader
                 .setVerticalGroup(
                         gl_panelHeader
-                        .createParallelGroup(
-                                Alignment.LEADING)
-                        .addGroup(
-                                gl_panelHeader.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblTitle).addComponent(
-                                        lblTitleDescription))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblSource).addComponent(lblSourceDescription)
-                                        .addComponent(lblURIDescription).addComponent(lblURI)
-                                        .addComponent(lblSubj).addComponent(lblSubjectivityDescription))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+                                .createParallelGroup(
+                                        Alignment.LEADING)
+                                .addGroup(
+                                        gl_panelHeader.createSequentialGroup().addContainerGap()
+                                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                                        .addComponent(lblTitle).addComponent(
+                                                        lblTitleDescription))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                                        .addComponent(lblSource).addComponent(lblSourceDescription)
+                                                        .addComponent(lblURIDescription).addComponent(lblURI)
+                                                        .addComponent(lblSubj).addComponent(lblSubjectivityDescription))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+                                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         panelHeader.setLayout(gl_panelHeader);
 
         JLabel lblTopics = new JLabel("Topics");
@@ -347,36 +322,29 @@ public class DocumentView extends JFrame {
         sliderTopics.setMajorTickSpacing(5);
         sliderTopics.setPaintLabels(true);
         sliderTopics.setMinorTickSpacing(1);
-        java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
+        java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<>();
         if (noMaxTopics == 20) {
-            labelTable.put(new Integer(20), new JLabel("100"));
+            labelTable.put(20, new JLabel("100"));
         }
         if (noMaxTopics >= 15) {
-            labelTable.put(new Integer(15), new JLabel("75"));
+            labelTable.put(15, new JLabel("75"));
         }
-        labelTable.put(new Integer(10), new JLabel("50"));
-        labelTable.put(new Integer(5), new JLabel("25"));
-        labelTable.put(new Integer(0), new JLabel("0"));
+        labelTable.put(10, new JLabel("50"));
+        labelTable.put(5, new JLabel("25"));
+        labelTable.put(0, new JLabel("0"));
         sliderTopics.setLabelTable(labelTable);
-        sliderTopics.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateTopics();
-            }
+        sliderTopics.addChangeListener((ChangeEvent e) -> {
+            updateTopics();
         });
 
         JButton btnGenerateNetwork = new JButton("Generate network of concepts");
-        btnGenerateNetwork.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        ConceptView view = new ConceptView(null, document,
-                                KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
-                                        chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
-                        view.setVisible(true);
-                    }
-                });
-            }
+        btnGenerateNetwork.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(() -> {
+                ConceptView view = new ConceptView(null, document,
+                        KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+                                chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
+                view.setVisible(true);
+            });
         });
 
         JScrollPane scrollPaneTopics = new JScrollPane();
@@ -455,8 +423,7 @@ public class DocumentView extends JFrame {
         List<Keyword> topTopics = KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
                 chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
         for (Keyword topic : topTopics) {
-            Object[] row = {topic.getWord().getLemma(),
-                Double.valueOf(Formatting.formatNumber(topic.getRelevance()))};
+            Object[] row = {topic.getWord().getLemma(), Formatting.formatNumber(topic.getRelevance())};
             modelTopics.addRow(row);
         }
     }

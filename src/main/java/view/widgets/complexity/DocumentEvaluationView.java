@@ -26,7 +26,6 @@ import java.io.FileWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -47,19 +46,25 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
-import services.commons.Clustering;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
 import data.AbstractDocument;
 import data.complexity.Measurement;
+import java.awt.HeadlessException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import org.openide.util.Exceptions;
 import services.complexity.ComplexityClustering;
 import services.complexity.ComplexityIndex;
 import services.semanticModels.SimilarityType;
+import utils.LocalizationUtils;
 
 public class DocumentEvaluationView extends JFrame {
 
     private static final long serialVersionUID = -4518616508590444786L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     private List<AbstractDocument> documents;
 
     private JPanel contentPane;
@@ -73,7 +78,7 @@ public class DocumentEvaluationView extends JFrame {
 
     private class Task extends SwingWorker<Void, Void> {
 
-        private String path;
+        private final String path;
         private int noClasses;
 
         public Task(String path) {
@@ -108,8 +113,7 @@ public class DocumentEvaluationView extends JFrame {
                     return null;
                 }
 
-                logger.info("Started to train the SVM model on " + noClasses
-                        + " classes");
+                LOGGER.log(Level.INFO, "Started to train the SVM model on {0} classes", noClasses);
 
                 // build the table
                 String[] names = new String[documents.size() + 1];
@@ -123,14 +127,14 @@ public class DocumentEvaluationView extends JFrame {
                             : documents.get(i).getTitleText())
                             + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath()
                             + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath()
-			    + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath()
+                            + "<br/>" + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath()
                             + "</html>";
                     out.write(","
                             + documents.get(i).getTitleText()
                                     .replaceAll(",", "") + "("
                             + documents.get(i).getSemanticModel(SimilarityType.LSA).getPath() + "/"
                             + documents.get(i).getSemanticModel(SimilarityType.LDA).getPath() + "/"
-			    + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath() + ")");
+                            + documents.get(i).getSemanticModel(SimilarityType.WORD2VEC).getPath() + ")");
                 }
                 out.write("\n");
 
@@ -181,20 +185,20 @@ public class DocumentEvaluationView extends JFrame {
 
                 // display results
                 // first line = SVM predictions
-                Vector<Object> dataRow = new Vector<>();
+                List<Object> dataRow = new ArrayList<>();
                 dataRow.add("Complexity prediction");
                 out.write("Complexity prediction");
                 for (int i = 0; i < documents.size(); i++) {
                     dataRow.add(predictions[i]);
                     out.write("," + predictions[i]);
                 }
-                tableModel.addRow(dataRow);
+                tableModel.addRow(dataRow.toArray());
                 out.write("\n");
 
                 // display comparative information for all documents based on
                 // the selected evaluation factors
                 for (int i : ComplexityIndicesView.getSelectedMeasurements()) {
-                    dataRow = new Vector<>();
+                    dataRow = new ArrayList<>();
                     ComplexityIndex index = ComplexityIndicesView.getAllIndices()[i];
                     dataRow.add(index.getAcronym());
                     out.write(index.getAcronym());
@@ -202,7 +206,7 @@ public class DocumentEvaluationView extends JFrame {
                         dataRow.add(d.getComplexityIndices().get(index));
                         out.write("," + d.getComplexityIndices().get(index));
                     }
-                    tableModel.addRow(dataRow);
+                    tableModel.addRow(dataRow.toArray());
                     out.write("\n");
                 }
 
@@ -213,8 +217,8 @@ public class DocumentEvaluationView extends JFrame {
                 cc.performKMeansClustering(documents,
                         Math.min(6, (documents.size() + 1) / 2));
                 cc.performAglomerativeClustering(documents, "out/aglomerative_clustering.txt");
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (HeadlessException | IOException e) {
+                Exceptions.printStackTrace(e);
             }
             return null;
         }
@@ -231,27 +235,27 @@ public class DocumentEvaluationView extends JFrame {
     }
 
     public DocumentEvaluationView(List<AbstractDocument> documents) {
-        setTitle("ReaderBench - Document Complexity Evaluation");
-        setBackground(Color.WHITE);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(50, 50, 1000, 600);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setBackground(Color.WHITE);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(50, 50, 1000, 600);
         this.documents = documents;
 
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel("Path:");
+        JLabel lblPath = new JLabel(LocalizationUtils.getGeneric("path") + ":");
         lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldDirectory = new JTextField();
-        textFieldDirectory.setText("in/corpus_complexity_tasa_en");
+        textFieldDirectory.setText("resources/in/corpus_complexity_tasa_en");
         textFieldDirectory.setColumns(10);
 
         JButton btnPath = new JButton("...");
         btnPath.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = new JFileChooser(new File("in"));
+            JFileChooser fc = new JFileChooser(new File("resources/in"));
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(DocumentEvaluationView.this);
 
@@ -261,31 +265,25 @@ public class DocumentEvaluationView extends JFrame {
             }
         });
 
-        lblResults = new JLabel("Results");
+        lblResults = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblResults"));
         lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        btnSelectComplexityFactors = new JButton("Select complexity factors");
+        btnSelectComplexityFactors = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSelectComplexityFactors"));
         btnSelectComplexityFactors.addActionListener((ActionEvent e) -> {
             ComplexityIndicesView view = new ComplexityIndicesView();
             view.setVisible(true);
         });
 
-        btnTrainSVM = new JButton("Train SVM Model");
+        btnTrainSVM = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnTrainSVM"));
         btnTrainSVM.addActionListener((ActionEvent e) -> {
             String path = textFieldDirectory.getText();
             if (!new File(path).isDirectory()) {
-                JOptionPane.showMessageDialog(contentPane,
-                        "Specified path should be a directory!", "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane, LocalizationUtils.getGeneric("msgSelectInputFolder") + "!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (!new File(path + "/measurements.csv").exists()) {
-                JOptionPane
-                        .showMessageDialog(
-                                contentPane,
-                                "Specified path should contain a precomputed \"measurements.csv\" file!",
-                                "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane, LocalizationUtils.getGeneric("msgNoMeasurementsFile") + "!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 

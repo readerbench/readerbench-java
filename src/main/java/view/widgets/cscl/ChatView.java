@@ -349,8 +349,7 @@ public class ChatView extends JFrame {
             });
         });
 
-        JButton btnCorrelatedConcepts = new JButton(
-                "    View correlated concepts    ");
+        JButton btnCorrelatedConcepts = new JButton("View correlated concepts");
         btnCorrelatedConcepts.addActionListener((ActionEvent e) -> {
             ArrayList<Keyword> selectedTopics = getSelectedTopics();
             if (selectedTopics.size() > 0) {
@@ -560,5 +559,4 @@ public class ChatView extends JFrame {
             }
         }
     }
-
 }

@@ -50,10 +50,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
-
-
 import services.discourse.keywordMining.KeywordModeling;
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.document.corpora.DocConceptView;
 import view.widgets.document.corpora.DocCorpusSimilarityView;
@@ -61,315 +59,313 @@ import view.widgets.document.corpora.DocKeywordAbstractOverlap;
 import view.widgets.document.search.SearchSimilarityView;
 
 public class DocumentSemanticSearchView extends JInternalFrame {
-	private static final long serialVersionUID = -8772215709851320157L;
-	static Logger logger = Logger.getLogger("");
 
-	private TableRowSorter<DocumentManagementTableModel> docSorter;
-	private JDesktopPane desktopPane;
+    private static final long serialVersionUID = -8772215709851320157L;
+    static final Logger LOGGER = Logger.getLogger("");
 
-	private JButton btnKeywordsOverlap;
-	private JButton btnConceptView;
-	private JButton btnSimilarityView;
-	private JButton btnSearch;
-	private CustomTextField articleTextField;
-	private String queryArticleName;
-	private String queryAuthorName;
-	private JLabel lblSearchQuery;
-	private JTextField textFieldQuery;
+    private TableRowSorter<DocumentManagementTableModel> docSorter;
+    private JDesktopPane desktopPane;
 
-	private class CustomTextField extends JTextField {
-		private static final long serialVersionUID = 1L;
+    private JButton btnKeywordsOverlap;
+    private JButton btnConceptView;
+    private JButton btnSimilarityView;
+    private JButton btnSearch;
+    private CustomTextField articleTextField;
+    private String queryArticleName;
+    private String queryAuthorName;
+    private JLabel lblSearchQuery;
+    private JTextField textFieldQuery;
 
-		private Font originalFont;
-		private Color originalForeground;
-		/**
-		 * Grey by default*
-		 */
-		private Color placeholderForeground = new Color(160, 160, 160);
-		private boolean textWrittenIn;
+    private class CustomTextField extends JTextField {
 
-		public CustomTextField(int columns) {
-			super(columns);
-		}
+        private static final long serialVersionUID = 1L;
 
-		@Override
-		public void setFont(Font f) {
-			super.setFont(f);
-			if (!isTextWrittenIn()) {
-				originalFont = f;
-			}
-		}
+        private Font originalFont;
+        private Color originalForeground;
+        /**
+         * Grey by default*
+         */
+        private Color placeholderForeground = new Color(160, 160, 160);
+        private boolean textWrittenIn;
 
-		@Override
-		public void setForeground(Color fg) {
-			super.setForeground(fg);
-			if (!isTextWrittenIn()) {
-				originalForeground = fg;
-			}
-		}
+        public CustomTextField(int columns) {
+            super(columns);
+        }
 
-		public Color getPlaceholderForeground() {
-			return placeholderForeground;
-		}
+        @Override
+        public void setFont(Font f) {
+            super.setFont(f);
+            if (!isTextWrittenIn()) {
+                originalFont = f;
+            }
+        }
 
-		public void setPlaceholderForeground(Color placeholderForeground) {
-			this.placeholderForeground = placeholderForeground;
-		}
+        @Override
+        public void setForeground(Color fg) {
+            super.setForeground(fg);
+            if (!isTextWrittenIn()) {
+                originalForeground = fg;
+            }
+        }
 
-		public boolean isTextWrittenIn() {
-			return textWrittenIn;
-		}
+        public Color getPlaceholderForeground() {
+            return placeholderForeground;
+        }
 
-		public void setTextWrittenIn(boolean textWrittenIn) {
-			this.textWrittenIn = textWrittenIn;
-		}
+        public void setPlaceholderForeground(Color placeholderForeground) {
+            this.placeholderForeground = placeholderForeground;
+        }
 
-		public void setPlaceholder(final String text) {
-			this.customizeText(text);
-			this.getDocument().addDocumentListener(new DocumentListener() {
-				@Override
-				public void insertUpdate(DocumentEvent e) {
-					warn();
-				}
+        public boolean isTextWrittenIn() {
+            return textWrittenIn;
+        }
 
-				@Override
-				public void removeUpdate(DocumentEvent e) {
-					warn();
-				}
+        public void setTextWrittenIn(boolean textWrittenIn) {
+            this.textWrittenIn = textWrittenIn;
+        }
 
-				@Override
-				public void changedUpdate(DocumentEvent e) {
-					warn();
-				}
+        public void setPlaceholder(final String text) {
+            this.customizeText(text);
+            this.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-				public void warn() {
-					if (getText().trim().length() != 0) {
-						setFont(originalFont);
-						setForeground(originalForeground);
-						setTextWrittenIn(true);
-					}
-				}
-			});
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-			this.addFocusListener(new FocusListener() {
-				@Override
-				public void focusGained(FocusEvent e) {
-					if (!isTextWrittenIn()) {
-						setText("");
-					}
-				}
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    warn();
+                }
 
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (getText().trim().length() == 0) {
-						customizeText(text);
-					}
-				}
-			});
-		}
+                public void warn() {
+                    if (getText().trim().length() != 0) {
+                        setFont(originalFont);
+                        setForeground(originalForeground);
+                        setTextWrittenIn(true);
+                    }
+                }
+            });
 
-		private void customizeText(String text) {
-			setText(text);
-			setFont(new Font(getFont().getFamily(), getFont().getStyle(), getFont().getSize()));
-			setForeground(getPlaceholderForeground());
-			setTextWrittenIn(false);
-		}
-	}
+            this.addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent e) {
+                    if (!isTextWrittenIn()) {
+                        setText("");
+                    }
+                }
 
-	/**
-	 * Create the frame.
-	 */
-	public DocumentSemanticSearchView() {
-		setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Semantic Search"));
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setClosable(true);
-		setMaximizable(true);
-		setIconifiable(true);
-		setBounds(20, 20, 830, 132);
-		queryAuthorName = "";
-		queryArticleName = "";
+                @Override
+                public void focusLost(FocusEvent e) {
+                    if (getText().trim().length() == 0) {
+                        customizeText(text);
+                    }
+                }
+            });
+        }
 
-		desktopPane = new JDesktopPane() {
-			private static final long serialVersionUID = 8453433109734630086L;
+        private void customizeText(String text) {
+            setText(text);
+            setFont(new Font(getFont().getFamily(), getFont().getStyle(), getFont().getSize()));
+            setForeground(getPlaceholderForeground());
+            setTextWrittenIn(false);
+        }
+    }
 
-			@Override
-			public void updateUI() {
-				if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
-					UIDefaults map = new UIDefaults();
-					Painter<JComponent> painter = new Painter<JComponent>() {
-						@Override
-						public void paint(Graphics2D g, JComponent c, int w, int h) {
-							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, w, h);
-						}
-					};
-					map.put("DesktopPane[Enabled].backgroundPainter", painter);
-					putClientProperty("Nimbus.Overrides", map);
-				}
-				super.updateUI();
-			}
-		};
-		desktopPane.setBackground(Color.WHITE);
+    /**
+     * Create the frame.
+     */
+    public DocumentSemanticSearchView() {
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setClosable(true);
+        super.setMaximizable(true);
+        super.setIconifiable(true);
+        super.setBounds(20, 20, 830, 132);
+        queryAuthorName = "";
+        queryArticleName = "";
 
-		JPanel panelAllDocs = new JPanel();
-		panelAllDocs.setBackground(Color.WHITE);
-		panelAllDocs.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-				LocalizationUtils.getLocalizedString(this.getClass(), LocalizationUtils.TEXT, "panelSearchDocs"),
-				TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        desktopPane = new JDesktopPane() {
+            private static final long serialVersionUID = 8453433109734630086L;
 
-		GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
-		gl_desktopPane
-				.setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
-						gl_desktopPane.createSequentialGroup().addContainerGap()
-								.addComponent(panelAllDocs, GroupLayout.DEFAULT_SIZE, 806, Short.MAX_VALUE)
-								.addContainerGap()));
-		gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
-						.addComponent(panelAllDocs, GroupLayout.PREFERRED_SIZE, 89, Short.MAX_VALUE)
-						.addContainerGap()));
+            @Override
+            public void updateUI() {
+                if ("Nimbus".equals(UIManager.getLookAndFeel().getName())) {
+                    UIDefaults map = new UIDefaults();
+                    Painter<JComponent> painter = (Graphics2D g, JComponent c, int w, int h) -> {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(0, 0, w, h);
+                    };
+                    map.put("DesktopPane[Enabled].backgroundPainter", painter);
+                    putClientProperty("Nimbus.Overrides", map);
+                }
+                super.updateUI();
+            }
+        };
+        desktopPane.setBackground(Color.WHITE);
 
-		articleTextField = new CustomTextField(1);
-		articleTextField.setPlaceholder(LocalizationUtils.getTranslation("Insert Article Name"));
-		articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
-		articleTextField.setPlaceholderForeground(Color.gray);
-		articleTextField.getDocument().addDocumentListener(new DocumentListener() {
-			public void changedUpdate(DocumentEvent e) {
-				warn();
-			}
+        JPanel panelAllDocs = new JPanel();
+        panelAllDocs.setBackground(Color.WHITE);
+        panelAllDocs.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
+                LocalizationUtils.getLocalizedString(this.getClass(), "panelSearchDocs"),
+                TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
-			public void removeUpdate(DocumentEvent e) {
-				warn();
-			}
+        GroupLayout gl_desktopPane = new GroupLayout(desktopPane);
+        gl_desktopPane
+                .setHorizontalGroup(gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
+                        gl_desktopPane.createSequentialGroup().addContainerGap()
+                                .addComponent(panelAllDocs, GroupLayout.DEFAULT_SIZE, 806, Short.MAX_VALUE)
+                                .addContainerGap()));
+        gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_desktopPane.createSequentialGroup().addContainerGap()
+                        .addComponent(panelAllDocs, GroupLayout.PREFERRED_SIZE, 89, Short.MAX_VALUE)
+                        .addContainerGap()));
 
-			public void insertUpdate(DocumentEvent e) {
-				warn();
-			}
+        articleTextField = new CustomTextField(1);
+        articleTextField.setPlaceholder(LocalizationUtils.getLocalizedString(this.getClass(), "articlePlaceholder"));
+        articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
+        articleTextField.setPlaceholderForeground(Color.gray);
+        articleTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                warn();
+            }
 
-			public void warn() {
-				queryArticleName = articleTextField.getText();
-				if (queryArticleName.equalsIgnoreCase("Insert Article Name"))
-					queryArticleName = "";
-				newFilter();
-			}
-		});
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                warn();
+            }
 
-		articleTextField.setColumns(25);
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                warn();
+            }
 
-		btnSimilarityView = new JButton(LocalizationUtils.getTranslation("Similarity View"));
-		btnSimilarityView.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if (DocumentProcessingView.getLoadedDocuments() == null
-						|| DocumentProcessingView.getLoadedDocuments().size() == 0) {
-					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
-							"Please load appropriate documents from the Document Processing view!", "Error",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
+            public void warn() {
+                queryArticleName = articleTextField.getText();
+                if (queryArticleName.equalsIgnoreCase(LocalizationUtils.getLocalizedString(this.getClass(), "articlePlaceholder"))) {
+                    queryArticleName = "";
+                }
+                newFilter();
+            }
+        });
 
-				DocCorpusSimilarityView view = new DocCorpusSimilarityView(
-						DocumentProcessingView.getLoadedDocuments());
-				view.setVisible(true);
-			}
-		});
+        articleTextField.setColumns(25);
 
-		lblSearchQuery = new JLabel(LocalizationUtils.getTranslation("Find semantically related docs to query") + ":");
+        btnSimilarityView = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSimilarityView"));
+        btnSimilarityView.addActionListener((ActionEvent arg0) -> {
+            if (DocumentProcessingView.getLoadedDocuments() == null
+                    || DocumentProcessingView.getLoadedDocuments().isEmpty()) {
+                JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
+                        LocalizationUtils.getGeneric("msgSelectInputFile") + "!", "Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-		textFieldQuery = new JTextField();
-		textFieldQuery.setColumns(10);
+            DocCorpusSimilarityView view = new DocCorpusSimilarityView(
+                    DocumentProcessingView.getLoadedDocuments());
+            view.setVisible(true);
+        });
 
-		btnConceptView = new JButton(LocalizationUtils.getTranslation("Concept View"));
-		btnConceptView.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getLoadedDocuments() == null
-						|| DocumentProcessingView.getLoadedDocuments().size() == 0) {
-					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
-							"Please load appropriate documents from the Document Processing view!", "Error",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				DocConceptView conceptView = new DocConceptView(
-						KeywordModeling.getCollectionTopics(DocumentProcessingView.getLoadedDocuments()),
-						"out/concepts_" + new Timestamp(new Date().getTime()) + ".pdf");
-				conceptView.setVisible(true);
-			}
-		});
+        lblSearchQuery = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSearchQuery") + ":");
 
-		btnKeywordsOverlap = new JButton(LocalizationUtils.getTranslation("Keyword-Abstract overlaps"));
-		btnKeywordsOverlap.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getLoadedDocuments() == null
-						|| DocumentProcessingView.getLoadedDocuments().size() == 0) {
-					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
-							"Please load appropriate documents from the Document Processing view!", "Error",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				DocKeywordAbstractOverlap view = new DocKeywordAbstractOverlap(
-						DocumentProcessingView.getLoadedDocuments());
-				view.setVisible(true);
-			}
-		});
+        textFieldQuery = new JTextField();
+        textFieldQuery.setColumns(10);
 
-		btnSearch = new JButton(LocalizationUtils.getTranslation("Search"));
-		btnSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (DocumentProcessingView.getLoadedDocuments() == null
-						|| DocumentProcessingView.getLoadedDocuments().size() == 0) {
-					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
-							"Please load appropriate documents from the Document Processing view!", "Error",
-							JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				if (textFieldQuery.getText().length() == 0) {
-					JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, "Please input a query string!",
-							"Error", JOptionPane.WARNING_MESSAGE);
-					return;
-				}
-				SearchSimilarityView view = new SearchSimilarityView(DocumentProcessingView.getLoadedDocuments(),
-						textFieldQuery.getText());
-				view.setVisible(true);
-			}
-		});
-		GroupLayout gl_panelAllDocs = new GroupLayout(panelAllDocs);
-		gl_panelAllDocs.setHorizontalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelAllDocs.createSequentialGroup()
-						.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panelAllDocs.createSequentialGroup().addContainerGap()
-										.addComponent(lblSearchQuery).addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(textFieldQuery, GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE))
-						.addGroup(gl_panelAllDocs.createSequentialGroup().addComponent(btnSimilarityView)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnConceptView)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnKeywordsOverlap)))
-						.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch).addContainerGap()));
-		gl_panelAllDocs.setVerticalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panelAllDocs.createSequentialGroup().addGap(5)
-						.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(lblSearchQuery)
-								.addComponent(textFieldQuery, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnSearch))
-				.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-				.addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(btnSimilarityView)
-						.addComponent(btnConceptView).addComponent(btnKeywordsOverlap)).addContainerGap()));
-		panelAllDocs.setLayout(gl_panelAllDocs);
-		desktopPane.setLayout(gl_desktopPane);
+        btnConceptView = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnConceptView"));
+        btnConceptView.addActionListener((ActionEvent e) -> {
+            if (DocumentProcessingView.getLoadedDocuments() == null
+                    || DocumentProcessingView.getLoadedDocuments().isEmpty()) {
+                JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
+                        LocalizationUtils.getLocalizedString(this.getClass(), "msgLoadDocs") + "!", "Error",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            DocConceptView conceptView = new DocConceptView(
+                    KeywordModeling.getCollectionTopics(DocumentProcessingView.getLoadedDocuments()),
+                    "out/concepts_" + new Timestamp(new Date().getTime()) + ".pdf");
+            conceptView.setVisible(true);
+        });
 
-		setContentPane(desktopPane);
-	}
+        btnKeywordsOverlap = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnKeywordsOverlap"));
+        btnKeywordsOverlap.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (DocumentProcessingView.getLoadedDocuments() == null
+                        || DocumentProcessingView.getLoadedDocuments().isEmpty()) {
+                    JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
+                            LocalizationUtils.getLocalizedString(this.getClass(), "msgLoadDocs") + "!", "Error",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                DocKeywordAbstractOverlap view = new DocKeywordAbstractOverlap(
+                        DocumentProcessingView.getLoadedDocuments());
+                view.setVisible(true);
+            }
+        });
 
-	private void newFilter() {
-		List<RowFilter<DocumentManagementTableModel, Object>> rfs = new ArrayList<RowFilter<DocumentManagementTableModel, Object>>(
-				2);
-		RowFilter<DocumentManagementTableModel, Object> rf = null;
-		// If current expression doesn't parse, don't update.
-		try {
-			rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);
-			rfs.add(rf);
-			rf = RowFilter.regexFilter("(?i)" + queryAuthorName, 1);
-			rfs.add(rf);
-		} catch (java.util.regex.PatternSyntaxException e) {
-			return;
-		}
-		rf = RowFilter.andFilter(rfs);
-		docSorter.setRowFilter(rf);
-	}
+        btnSearch = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSearch"));
+        btnSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (DocumentProcessingView.getLoadedDocuments() == null
+                        || DocumentProcessingView.getLoadedDocuments().isEmpty()) {
+                    JOptionPane.showMessageDialog(DocumentSemanticSearchView.this,
+                            LocalizationUtils.getLocalizedString(this.getClass(), "msgLoadDocs") + "!", "Error",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                if (textFieldQuery.getText().length() == 0) {
+                    JOptionPane.showMessageDialog(DocumentSemanticSearchView.this, LocalizationUtils.getLocalizedString(this.getClass(), "msgQuery") + "!", "Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                SearchSimilarityView view = new SearchSimilarityView(DocumentProcessingView.getLoadedDocuments(),
+                        textFieldQuery.getText());
+                view.setVisible(true);
+            }
+        });
+        GroupLayout gl_panelAllDocs = new GroupLayout(panelAllDocs);
+        gl_panelAllDocs.setHorizontalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelAllDocs.createSequentialGroup()
+                        .addGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+                                .addGroup(gl_panelAllDocs.createSequentialGroup().addContainerGap()
+                                        .addComponent(lblSearchQuery).addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(textFieldQuery, GroupLayout.DEFAULT_SIZE, 575, Short.MAX_VALUE))
+                                .addGroup(gl_panelAllDocs.createSequentialGroup().addComponent(btnSimilarityView)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnConceptView)
+                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnKeywordsOverlap)))
+                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSearch).addContainerGap()));
+        gl_panelAllDocs.setVerticalGroup(gl_panelAllDocs.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panelAllDocs.createSequentialGroup().addGap(5)
+                        .addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(lblSearchQuery)
+                                .addComponent(textFieldQuery, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnSearch))
+                        .addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(gl_panelAllDocs.createParallelGroup(Alignment.BASELINE).addComponent(btnSimilarityView)
+                                .addComponent(btnConceptView).addComponent(btnKeywordsOverlap)).addContainerGap()));
+        panelAllDocs.setLayout(gl_panelAllDocs);
+        desktopPane.setLayout(gl_desktopPane);
+
+        super.setContentPane(desktopPane);
+    }
+
+    private void newFilter() {
+        List<RowFilter<DocumentManagementTableModel, Object>> rfs = new ArrayList<>(2);
+        RowFilter<DocumentManagementTableModel, Object> rf;
+        // If current expression doesn't parse, don't update.
+        try {
+            rf = RowFilter.regexFilter("(?i)" + queryArticleName, 0);
+            rfs.add(rf);
+            rf = RowFilter.regexFilter("(?i)" + queryAuthorName, 1);
+            rfs.add(rf);
+        } catch (java.util.regex.PatternSyntaxException e) {
+            return;
+        }
+        rf = RowFilter.andFilter(rfs);
+        docSorter.setRowFilter(rf);
+    }
 }

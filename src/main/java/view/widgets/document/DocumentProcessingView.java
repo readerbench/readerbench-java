@@ -56,14 +56,14 @@ import data.AbstractDocument;
 import data.cscl.Conversation;
 import data.document.Document;
 import data.AbstractDocument.SaveType;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
 import view.widgets.ReaderBenchView;
 import view.widgets.document.corpora.DocCentralityGraph;
@@ -96,20 +96,20 @@ public class DocumentProcessingView extends JInternalFrame {
         private final String pathToDoc;
         private final String pathToLSA;
         private final String pathToLDA;
-	private final String pathToWord2Vec;
+        private final String pathToWord2Vec;
         private final boolean computeDialogism;
         private final boolean usePOSTagging;
         private final boolean useBigrams;
         private final boolean isSerialized;
         private final boolean checkSer;
 
-        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, String pathToWord2Vec, 
-		boolean usePOSTagging,  boolean computeDialogism, boolean useBigrams, boolean isSerialized, boolean checkSer) {
+        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, String pathToWord2Vec,
+                boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, boolean isSerialized, boolean checkSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
-	    this.pathToWord2Vec = pathToWord2Vec;
+            this.pathToWord2Vec = pathToWord2Vec;
             this.usePOSTagging = usePOSTagging;
             this.computeDialogism = computeDialogism;
             this.useBigrams = useBigrams;
@@ -129,9 +129,9 @@ public class DocumentProcessingView extends JInternalFrame {
             if (pathToLDA != null & pathToLDA.length() > 0) {
                 modelPaths.put(SimilarityType.LDA, pathToLDA);
             }
-	    if (pathToWord2Vec != null && pathToWord2Vec.length() > 0) {
-		modelPaths.put(SimilarityType.WORD2VEC, pathToWord2Vec);
-	    }
+            if (pathToWord2Vec != null && pathToWord2Vec.length() > 0) {
+                modelPaths.put(SimilarityType.WORD2VEC, pathToWord2Vec);
+            }
             return AbstractDocument.loadGenericDocument(pathToIndividualFile, modelPaths,
                     ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, computeDialogism, useBigrams, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);
@@ -314,8 +314,7 @@ public class DocumentProcessingView extends JInternalFrame {
      * Create the frame.
      */
     public DocumentProcessingView() {
-        super.setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
-				    .getString("ReaderBenchView.panelDocument.title"));
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         super.setResizable(true);
         super.setClosable(true);
@@ -328,19 +327,19 @@ public class DocumentProcessingView extends JInternalFrame {
         queryAuthorName = "";
         queryArticleName = "";
 
-        btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add document(s)"));
+        btnAddDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnAddDocument"));
         btnAddDocument.addActionListener((ActionEvent e) -> {
             try {
                 JInternalFrame frame = new AddDocumentView(ReaderBenchView.RUNTIME_LANGUAGE, DocumentProcessingView.this);
                 frame.setVisible(true);
                 desktopPane.add(frame);
                 frame.setSelected(true);
-            } catch (Exception ex) {
+            } catch (PropertyVetoException ex) {
                 Exceptions.printStackTrace(ex);
             }
         });
 
-        btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed document(s)"));
+        btnAddSerializedDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnAddSerializedDocument"));
         btnAddSerializedDocument.addActionListener((ActionEvent e) -> {
             JFileChooser fc;
             if (lastDirectory == null) {
@@ -360,7 +359,7 @@ public class DocumentProcessingView extends JInternalFrame {
 
                 @Override
                 public String getDescription() {
-                    return "Serialized documents (*.ser) or directory";
+                    return LocalizationUtils.getGeneric("msgSerFile");
                 }
             });
             int returnVal = fc.showOpenDialog(DocumentProcessingView.this);
@@ -404,8 +403,7 @@ public class DocumentProcessingView extends JInternalFrame {
         JPanel panelSingleDoc = new JPanel();
         panelSingleDoc.setBackground(Color.WHITE);
         panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-                LocalizationUtils.getTranslation("Specific document operations"), TitledBorder.LEFT, TitledBorder.TOP,
-                null, null));
+                LocalizationUtils.getLocalizedString(this.getClass(), "panelSingleDoc"), TitledBorder.LEFT, TitledBorder.TOP, null, null));
 
         JPanel panelSearch = new JPanel();
         panelSearch.setBackground(Color.WHITE);
@@ -416,20 +414,20 @@ public class DocumentProcessingView extends JInternalFrame {
         gl_desktopPane
                 .setHorizontalGroup(
                         gl_desktopPane.createParallelGroup(Alignment.TRAILING).addGroup(Alignment.LEADING,
-                        gl_desktopPane.createSequentialGroup().addContainerGap()
-                        .addGroup(gl_desktopPane
-                                .createParallelGroup(Alignment.LEADING).addComponent(scrollPane,
-                                GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
-                                .addGroup(gl_desktopPane.createSequentialGroup().addGroup(gl_desktopPane
-                                        .createParallelGroup(Alignment.LEADING)
-                                        .addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801,
-                                                Short.MAX_VALUE)
-                                        .addGroup(gl_desktopPane.createSequentialGroup()))
-                                        .addContainerGap())
-                                .addGroup(gl_desktopPane.createSequentialGroup()
-                                        .addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(11)))));
+                                gl_desktopPane.createSequentialGroup().addContainerGap()
+                                        .addGroup(gl_desktopPane
+                                                .createParallelGroup(Alignment.LEADING).addComponent(scrollPane,
+                                                GroupLayout.DEFAULT_SIZE, 801, Short.MAX_VALUE)
+                                                .addGroup(gl_desktopPane.createSequentialGroup().addGroup(gl_desktopPane
+                                                        .createParallelGroup(Alignment.LEADING)
+                                                        .addComponent(panelSearch, GroupLayout.DEFAULT_SIZE, 801,
+                                                                Short.MAX_VALUE)
+                                                        .addGroup(gl_desktopPane.createSequentialGroup()))
+                                                        .addContainerGap())
+                                                .addGroup(gl_desktopPane.createSequentialGroup()
+                                                        .addComponent(panelSingleDoc, GroupLayout.DEFAULT_SIZE,
+                                                                GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addGap(11)))));
         gl_desktopPane.setVerticalGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING).addGroup(gl_desktopPane
                 .createSequentialGroup().addContainerGap()
                 .addGroup(gl_desktopPane.createParallelGroup(Alignment.LEADING, false))
@@ -446,7 +444,7 @@ public class DocumentProcessingView extends JInternalFrame {
         panelSearch.add(splitPane);
 
         articleTextField = new CustomTextField(1);
-        articleTextField.setPlaceholder("Insert Article Name");
+        articleTextField.setPlaceholder(LocalizationUtils.getLocalizedString(this.getClass(), "articlePlaceholder"));
         articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
         articleTextField.setPlaceholderForeground(Color.gray);
         articleTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -467,7 +465,7 @@ public class DocumentProcessingView extends JInternalFrame {
 
             public void warn() {
                 queryArticleName = articleTextField.getText();
-                if (queryArticleName.equalsIgnoreCase("Insert Article Name")) {
+                if (queryArticleName.equalsIgnoreCase(LocalizationUtils.getLocalizedString(this.getClass(), "articlePlaceholder"))) {
                     queryArticleName = "";
                 }
                 newFilter();
@@ -475,7 +473,7 @@ public class DocumentProcessingView extends JInternalFrame {
         });
 
         authorsTextField = new CustomTextField(1);
-        authorsTextField.setPlaceholder("Insert Author Name");
+        authorsTextField.setPlaceholder(LocalizationUtils.getLocalizedString(this.getClass(), "authorPlaceholder"));
         authorsTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
         authorsTextField.setPlaceholderForeground(Color.gray);
         authorsTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -496,7 +494,7 @@ public class DocumentProcessingView extends JInternalFrame {
 
             public void warn() {
                 queryAuthorName = authorsTextField.getText();
-                if (queryAuthorName.equalsIgnoreCase("Insert Author Name")) {
+                if (queryAuthorName.equalsIgnoreCase(LocalizationUtils.getLocalizedString(this.getClass(), "authorPlaceholder"))) {
                     queryAuthorName = "";
                 }
                 newFilter();
@@ -508,7 +506,7 @@ public class DocumentProcessingView extends JInternalFrame {
         splitPane.setRightComponent(authorsTextField);
         authorsTextField.setColumns(25);
 
-        btnViewDocument = new JButton(LocalizationUtils.getTranslation("View document"));
+        btnViewDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnViewDocument"));
         btnViewDocument.setEnabled(false);
         btnViewDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
@@ -519,12 +517,11 @@ public class DocumentProcessingView extends JInternalFrame {
                     view.setVisible(true);
                 }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getLocalizedString(this.getClass(), "msgViewDoc") + "!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        btnViewSimilarDocs = new JButton(LocalizationUtils.getTranslation("View similar docs"));
+        btnViewSimilarDocs = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnViewSimilarDocs"));
         btnViewSimilarDocs.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
                 Document d = LOADED_DOCUMENTS.get(docTable.getSelectedRow());
@@ -534,7 +531,7 @@ public class DocumentProcessingView extends JInternalFrame {
         });
         btnViewSimilarDocs.setEnabled(false);
 
-        btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove document"));
+        btnRemoveDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnRemoveDocument"));
         btnRemoveDocument.setEnabled(false);
         GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
         gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
@@ -561,7 +558,7 @@ public class DocumentProcessingView extends JInternalFrame {
                     docTableModel.removeRow(modelRow);
                 }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Please load at least an appropriate document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getGeneric("msgSelectInputFile") + "!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         desktopPane.setLayout(gl_desktopPane);
@@ -590,9 +587,9 @@ public class DocumentProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_DOCUMENTS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Document toRemove = LOADED_DOCUMENTS.get(modelRow);
-                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath()) 
-			    && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())
-			    && toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(d.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
+                    if (toRemove.getPath().equals(d.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(d.getSemanticModel(SimilarityType.LSA).getPath())
+                            && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(d.getSemanticModel(SimilarityType.LDA).getPath())
+                            && toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(d.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                         LOADED_DOCUMENTS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -613,12 +610,11 @@ public class DocumentProcessingView extends JInternalFrame {
                 } else {
                     dataRow.add("");
                 }
-		if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
                     dataRow.add(d.getSemanticModel(SimilarityType.WORD2VEC).getPath());
                 } else {
                     dataRow.add("");
                 }
-		
 
                 docTableModel.addRow(dataRow.toArray());
                 LOADED_DOCUMENTS.add(d);
@@ -641,74 +637,70 @@ public class DocumentProcessingView extends JInternalFrame {
 
     private void updateContents() {
         if (docTableModel != null) {
-            synchronized (docTableModel) {
-                // clean table
-                while (docTableModel.getRowCount() > 0) {
-                    docTableModel.removeRow(0);
-                }
-
-                synchronized (LOADED_DOCUMENTS) {
-                    for (AbstractDocument d : LOADED_DOCUMENTS) {
-                        // add rows as loaded documents
-                        List<Object> dataRow = new ArrayList<>();
-
-                        if (d instanceof Document) {
-                            String docTitle = d.getTitleText();
-                            String authors = getStringFromList(((Document) d).getAuthors());
-
-                            if (!docTitle.toLowerCase().contains(queryArticleName.toLowerCase())) {
-                                continue;
-                            }
-                            if (!authors.toLowerCase().contains(queryAuthorName.toLowerCase())) {
-                                continue;
-                            }
-                        } else {
-                            continue;
-                        }
-
-                        dataRow.add(d.getTitleText());
-                        if (d instanceof Document) {
-                            dataRow.add(getStringFromList(((Document) d).getAuthors()));
-                        } else {
-                            dataRow.add("");
-                        }
-                        if (d.getSemanticModel(SimilarityType.LSA) != null) {
-                            dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
-                        } else {
-                            dataRow.add("");
-                        }
-                        if (d.getSemanticModel(SimilarityType.LDA) != null) {
-                            dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
-                        } else {
-                            dataRow.add("");
-                        }
-			if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
-                            dataRow.add(d.getSemanticModel(SimilarityType.WORD2VEC).getPath());
-                        } else {
-                            dataRow.add("");
-                        }
-			
-                        if (d instanceof Conversation) {
-                            dataRow.add(true);
-                        } else {
-                            dataRow.add(false);
-                        }
-                        docTableModel.addRow(dataRow.toArray());
-                    }
-
-                    if (LOADED_DOCUMENTS.size() > 0) {
-                        btnRemoveDocument.setEnabled(true);
-                        btnViewDocument.setEnabled(true);
-                        btnViewSimilarDocs.setEnabled(true);
-                    } else {
-                        btnRemoveDocument.setEnabled(false);
-                        btnViewDocument.setEnabled(false);
-                        btnViewSimilarDocs.setEnabled(false);
-                    }
-
-                    docTableModel.fireTableDataChanged();
-                }
+            // clean table
+            while (docTableModel.getRowCount() > 0) {
+                docTableModel.removeRow(0);
             }
+
+            for (AbstractDocument d : LOADED_DOCUMENTS) {
+                // add rows as loaded documents
+                List<Object> dataRow = new ArrayList<>();
+
+                if (d instanceof Document) {
+                    String docTitle = d.getTitleText();
+                    String authors = getStringFromList(((Document) d).getAuthors());
+
+                    if (!docTitle.toLowerCase().contains(queryArticleName.toLowerCase())) {
+                        continue;
+                    }
+                    if (!authors.toLowerCase().contains(queryAuthorName.toLowerCase())) {
+                        continue;
+                    }
+                } else {
+                    continue;
+                }
+
+                dataRow.add(d.getTitleText());
+                if (d instanceof Document) {
+                    dataRow.add(getStringFromList(((Document) d).getAuthors()));
+                } else {
+                    dataRow.add("");
+                }
+                if (d.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LSA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (d.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.LDA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (d.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                    dataRow.add(d.getSemanticModel(SimilarityType.WORD2VEC).getPath());
+                } else {
+                    dataRow.add("");
+                }
+
+                if (d instanceof Conversation) {
+                    dataRow.add(true);
+                } else {
+                    dataRow.add(false);
+                }
+                docTableModel.addRow(dataRow.toArray());
+            }
+
+            if (LOADED_DOCUMENTS.size() > 0) {
+                btnRemoveDocument.setEnabled(true);
+                btnViewDocument.setEnabled(true);
+                btnViewSimilarDocs.setEnabled(true);
+            } else {
+                btnRemoveDocument.setEnabled(false);
+                btnViewDocument.setEnabled(false);
+                btnViewSimilarDocs.setEnabled(false);
+            }
+
+            docTableModel.fireTableDataChanged();
         }
     }
 

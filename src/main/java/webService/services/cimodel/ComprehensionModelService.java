@@ -19,7 +19,7 @@ import services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO;
 import services.comprehensionModel.utils.indexer.graphStruct.CMNodeType;
 import services.semanticModels.LSA.LSA;
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
+import services.extendedCNA.distanceStrategies.AuthorDistanceStrategyType;
 import webService.services.cimodel.result.CMResult;
 import webService.services.cimodel.result.CMSentence;
 import webService.services.cimodel.result.CMWordActivationResult;

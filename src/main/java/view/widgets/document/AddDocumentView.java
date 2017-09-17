@@ -37,7 +37,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
 import data.Lang;
-import java.util.ResourceBundle;
+import utils.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
 public class AddDocumentView extends JInternalFrame {
@@ -84,7 +84,7 @@ public class AddDocumentView extends JInternalFrame {
     }
 
     public AddDocumentView(Lang lang, DocumentProcessingView view) {
-        super.setTitle("ReaderBench - Add a new document");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         this.view = view;
         super.setResizable(false);
         super.setClosable(true);
@@ -95,20 +95,15 @@ public class AddDocumentView extends JInternalFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         super.setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel("Path:");
+        JLabel lblPath = new JLabel(LocalizationUtils.getGeneric("path") + ":");
 
-        JLabel lblLsaVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LSAspace.text"));
+        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getGeneric("LSA") + ":");
+        JLabel lblLdaModel = new JLabel(LocalizationUtils.getGeneric("LDA") + ":");
+        JLabel lblWord2VecVectorSpace = new JLabel(LocalizationUtils.getGeneric("word2vec") + ":");
 
-        JLabel lblLdaModel = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LDAvector.text"));
-	
-	JLabel lblWord2VecVectorSpace = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.Word2Vec.text"));
-	
         comboBoxLSA = new JComboBox<>();
         comboBoxLDA = new JComboBox<>();
-	comboBoxWORD2VEC = new JComboBox<>();
+        comboBoxWORD2VEC = new JComboBox<>();
 
         ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, comboBoxWORD2VEC, lang);
 
@@ -136,7 +131,7 @@ public class AddDocumentView extends JInternalFrame {
 
                 @Override
                 public String getDescription() {
-                    return "XML file (*.xml) or directory";
+                    return LocalizationUtils.getGeneric("msgXMLFile");
                 }
             });
             int returnVal = fc.showOpenDialog(AddDocumentView.this);
@@ -148,37 +143,33 @@ public class AddDocumentView extends JInternalFrame {
             }
         });
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(LocalizationUtils.getGeneric("cancel"));
         btnCancel.addActionListener((ActionEvent e) -> {
             AddDocumentView.this.dispose();
         });
 
-        JButton btnOk = new JButton("Ok");
+        JButton btnOk = new JButton(LocalizationUtils.getGeneric("ok"));
         btnOk.addActionListener((ActionEvent e) -> {
             if (!textFieldPath.getText().equals("")) {
                 DocumentProcessingView.DocumentProcessingTask task = AddDocumentView.this.view.new DocumentProcessingTask(
                         textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-
                         (String) comboBoxLDA.getSelectedItem(), (String) comboBoxWORD2VEC.getSelectedItem(),
-			chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected(), false, false, chckbxSer.isSelected());
+                        chckbxUsePosTagging.isSelected(), chckbxUsePosTagging.isSelected(), false, false, chckbxSer.isSelected());
 
                 task.execute();
 
                 AddDocumentView.this.dispose();
             } else {
                 JOptionPane.showMessageDialog(AddDocumentView.this,
-                        ResourceBundle.getBundle("utils.localization.messages")
-			.getString("RunMeasurementsView.msgSelectAnotherFile.text"), "Error",
+                        LocalizationUtils.getGeneric("msgSelectInputFile"), "Error",
                         JOptionPane.WARNING_MESSAGE);
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
-					    .getString("RunMeasurementsView.boxUsePOSTagging.text"));
+        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getGeneric("usePOStagging"));
         chckbxUsePosTagging.setSelected(true);
 
-        chckbxSer = new JCheckBox(ResourceBundle.getBundle("utils.localization.messages")
-				    .getString("RunMeasurementsView.boxConsiderPreProcessedFiles"));
+        chckbxSer = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxSer"));
         chckbxSer.setSelected(true);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
@@ -188,10 +179,10 @@ public class AddDocumentView extends JInternalFrame {
                                 .createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
                                 .createSequentialGroup().addGroup(
                                         gl_contentPane.createParallelGroup(Alignment.LEADING)
-                                        .addComponent(lblPath).addComponent(
-                                        lblLsaVectorSpace)
-                                        .addComponent(lblLdaModel)
-					.addComponent(lblWord2VecVectorSpace))
+                                                .addComponent(lblPath).addComponent(
+                                                lblLsaVectorSpace)
+                                                .addComponent(lblLdaModel)
+                                                .addComponent(lblWord2VecVectorSpace))
                                 .addGap(13)
                                 .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(comboBoxLDA, 0, 401, Short.MAX_VALUE)
@@ -202,8 +193,7 @@ public class AddDocumentView extends JInternalFrame {
                                                 .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                         GroupLayout.PREFERRED_SIZE))
                                         .addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE)
-					.addComponent(comboBoxWORD2VEC, 0, 401, Short.MAX_VALUE))
-					
+                                        .addComponent(comboBoxWORD2VEC, 0, 401, Short.MAX_VALUE))
                                 .addGap(6))
                                 .addGroup(gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging).addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE).addComponent(chckbxSer)
                                         .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
@@ -226,8 +216,8 @@ public class AddDocumentView extends JInternalFrame {
                                 .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.PREFERRED_SIZE)
                                 .addComponent(lblLdaModel))
-			.addPreferredGap(ComponentPlacement.RELATED)
-			.addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecVectorSpace)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecVectorSpace)
                                 .addComponent(comboBoxWORD2VEC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(ComponentPlacement.RELATED)

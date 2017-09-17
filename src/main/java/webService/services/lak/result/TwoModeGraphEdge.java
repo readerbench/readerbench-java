@@ -1,6 +1,6 @@
 package webService.services.lak.result;
 
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
+import services.extendedCNA.distanceStrategies.AuthorDistanceStrategyType;
 
 /**
  *

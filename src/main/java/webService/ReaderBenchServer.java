@@ -81,7 +81,7 @@ import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
-import view.widgets.article.utils.GraphMeasure;
+import services.extendedCNA.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;

@@ -15,40 +15,35 @@
  */
 package view.models.document;
 
-import java.util.ResourceBundle;
 import javax.swing.table.DefaultTableModel;
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 
 public class ConversationManagementTableModel extends DefaultTableModel {
 
-	private static final long serialVersionUID = 1730686324860907760L;
+    private static final long serialVersionUID = 1730686324860907760L;
 
-	private Class<?>[] columnTypes = new Class[] { String.class, // name
-			String.class, // LSA space
-			String.class, // LDA model
-			String.class //Word2Vec model
-	};
+    private final Class<?>[] columnTypes = new Class[]{String.class, // name
+        String.class, // LSA space
+        String.class, // LDA model
+        String.class //Word2Vec model
+};
 
-	public ConversationManagementTableModel() {
-		super(new Object[][] {}, new String[] { 
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.Title.title"),
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LSAspace.text"), 
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LDAvector.text"),
-				ResourceBundle.getBundle("utils.localization.messages")
-		.getString("TableModel.Word2Vec.text")});
-	}
+    public ConversationManagementTableModel() {
+        super(new Object[][]{}, new String[]{
+            LocalizationUtils.getGeneric("title"),
+            LocalizationUtils.getGeneric("LSAspace"),
+            LocalizationUtils.getGeneric("LDAvector"),
+            LocalizationUtils.getGeneric("Word2Vec")});
+    }
 
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return false;
-	}
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
 
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		return columnTypes[columnIndex];
-	}
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnTypes[columnIndex];
+    }
 
 }
