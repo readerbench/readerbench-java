@@ -373,7 +373,7 @@ public class CVAnalyzer {
         CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
-        frenchCVAnalyzer.setPath(CVConstants.CV_PATH);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
         frenchCVAnalyzer.processPath();
     }
 
