@@ -47,6 +47,7 @@ import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
 import services.discourse.keywordMining.KeywordModeling;
+import utils.LocalizationUtils;
 import view.events.LinkMouseListener;
 import view.models.document.DocumentTable;
 import view.models.document.DocumentTableModel;
@@ -78,7 +79,7 @@ public class DocumentView extends JFrame {
     private JLabel lblSubjectivityDescription;
 
     public DocumentView(Document documentToDisplay) {
-        super("ReaderBench - Document Visualization");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.WHITE);
         this.document = documentToDisplay;
@@ -125,7 +126,7 @@ public class DocumentView extends JFrame {
                                                 .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
                                         .addContainerGap()));
 
-        JLabel lblContents = new JLabel("Contents");
+        JLabel lblContents = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblContents"));
         lblContents.setFont(new Font("SansSerif", Font.BOLD, 13));
 
         JSeparator separator = new JSeparator();
@@ -133,7 +134,7 @@ public class DocumentView extends JFrame {
         JScrollPane scrollPaneContent = new JScrollPane();
         scrollPaneContent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton btnVisualizeCohesionGraph = new JButton("Multi-Layered Cohesion Graph");
+        JButton btnVisualizeCohesionGraph = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVisualizeCohesionGraph"));
         btnVisualizeCohesionGraph.addActionListener((ActionEvent arg0) -> {
             EventQueue.invokeLater(new Runnable() {
                 @Override
@@ -144,7 +145,7 @@ public class DocumentView extends JFrame {
             });
         });
 
-        JButton btnSelectVoices = new JButton("Select Voices");
+        JButton btnSelectVoices = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSelectVoices"));
         btnSelectVoices.addActionListener((ActionEvent e) -> {
             EventQueue.invokeLater(new Runnable() {
                 @Override
@@ -155,7 +156,7 @@ public class DocumentView extends JFrame {
             });
         });
 
-        JButton btnDisplayVoiceInteranimation = new JButton("Voice Inter-animation");
+        JButton btnDisplayVoiceInteranimation = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnDisplayVoiceInteranimation"));
         btnDisplayVoiceInteranimation.addActionListener((ActionEvent e) -> {
             if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
                 EventQueue.invokeLater(new Runnable() {
@@ -166,12 +167,12 @@ public class DocumentView extends JFrame {
                     }
                 });
             } else {
-                JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
-                        "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(DocumentView.this, LocalizationUtils.getLocalizedString(this.getClass(), "msgSelectVoice"),
+                        LocalizationUtils.getLocalizedString(this.getClass(), "msgInformation"), JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        JButton btnVisualizeDocumentFlow = new JButton("Document Flow");
+        JButton btnVisualizeDocumentFlow = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVisualizeDocumentFlow"));
         btnVisualizeDocumentFlow.addActionListener((ActionEvent arg0) -> {
             EventQueue.invokeLater(() -> {
                 JFrame view = new DocumentFlowView(document);
@@ -211,11 +212,11 @@ public class DocumentView extends JFrame {
                                                 .addComponent(btnVisualizeDocumentFlow))
                                         .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
-        JLabel lblTitle = new JLabel("Title:\n");
+        JLabel lblTitle = new JLabel(LocalizationUtils.getGeneric("title") + ":\n");
         lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-        JLabel lblSource = new JLabel("Source:");
-        JLabel lblURI = new JLabel("URI:");
-        JLabel lblSubj = new JLabel("Sentiment polarity:");
+        JLabel lblSource = new JLabel(LocalizationUtils.getGeneric("source") + ":");
+        JLabel lblURI = new JLabel(LocalizationUtils.getGeneric("URI") + ":");
+        JLabel lblSubj = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSubj") + ":");
 
         lblURIDescription = new JLabel("");
         lblSourceDescription = new JLabel("");
@@ -281,14 +282,14 @@ public class DocumentView extends JFrame {
                                                 .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         panelHeader.setLayout(gl_panelHeader);
 
-        JLabel lblTopics = new JLabel("Topics");
+        JLabel lblTopics = new JLabel(LocalizationUtils.getGeneric("topics"));
         lblTopics.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JSeparator separatorTopics = new JSeparator();
 
-        JLabel lblFilterOnly = new JLabel("Filter only:");
+        JLabel lblFilterOnly = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblFilterOnly") + ":");
 
-        chckbxVerbTopics = new JCheckBox("Verbs");
+        chckbxVerbTopics = new JCheckBox(LocalizationUtils.getGeneric("verbs"));
         chckbxVerbTopics.setBackground(Color.WHITE);
         chckbxVerbTopics.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -297,7 +298,7 @@ public class DocumentView extends JFrame {
         });
         chckbxVerbTopics.setSelected(true);
 
-        chckbxNounTopics = new JCheckBox("Nouns");
+        chckbxNounTopics = new JCheckBox(LocalizationUtils.getGeneric("nouns"));
         chckbxNounTopics.setBackground(Color.WHITE);
         chckbxNounTopics.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -337,7 +338,7 @@ public class DocumentView extends JFrame {
             updateTopics();
         });
 
-        JButton btnGenerateNetwork = new JButton("Generate network of concepts");
+        JButton btnGenerateNetwork = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnGenerateNetwork"));
         btnGenerateNetwork.addActionListener((ActionEvent arg0) -> {
             EventQueue.invokeLater(() -> {
                 ConceptView view = new ConceptView(null, document,

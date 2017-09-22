@@ -54,6 +54,8 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticChain;
+import org.apache.commons.math3.exception.util.LocalizedFormats;
+import utils.LocalizationUtils;
 
 public class ChatVoiceInterAnimationView extends JFrame {
 
@@ -85,7 +87,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 	 */
 	public ChatVoiceInterAnimationView(Conversation chat, List<SemanticChain> chains) {
 		super();
-		setTitle("ReaderBench - Inter-animation of participants' voices and of implicit (alien) voices");
+		setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 
 		this.setSize(1000, 600);
 		this.setLocation(50, 50);
@@ -153,10 +155,10 @@ public class ChatVoiceInterAnimationView extends JFrame {
 
 		// create the chart...
 		JFreeChart chart = ChartFactory.createGanttChart(
-				"Inter-animation of participants' voices and of implicit (alien) voices", // chart
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartTitle"), // chart
 				// title
-				"Voice", // domain axis label
-				"Utterance", // range axis label
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartDomainAxis"), // domain axis label
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartRangeAxis"), // range axis label
 				collection, // data
 				false, // include legend
 				false, // tooltips
@@ -175,7 +177,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 		// add the chart to a panel...
 		ChartPanel chartPanel = new ChartPanel(chart);
 
-		JButton btnCrossCorrelations = new JButton("Cross-Correlations");
+		JButton btnCrossCorrelations = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnCrossCorrelations"));
 		btnCrossCorrelations.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -188,7 +190,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 			}
 		});
 
-		JButton btnSimpleStatistics = new JButton("Simple Statistics");
+		JButton btnSimpleStatistics = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSimpleStatistics"));
 		btnSimpleStatistics.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {
@@ -201,7 +203,7 @@ public class ChatVoiceInterAnimationView extends JFrame {
 			}
 		});
 
-		JButton btnParticipantVoiceCoverage = new JButton("Visualize implicit (alien) voices");
+		JButton btnParticipantVoiceCoverage = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnParticipantVoiceCoverage"));
 		btnParticipantVoiceCoverage.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				EventQueue.invokeLater(new Runnable() {

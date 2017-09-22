@@ -124,10 +124,10 @@ public class ChatTimeEvolution extends JFrame {
         collection.add(s);
 
         // create the chart...
-        JFreeChart chart = ChartFactory.createGanttChart("Chat Evolution", // chart
+        JFreeChart chart = ChartFactory.createGanttChart(LocalizationUtils.getLocalizedString(this.getClass(), "chartTitle"), // chart
                 // title
-                "Participant", // domain axis label
-                "Time", // range axis label
+                LocalizationUtils.getLocalizedString(this.getClass(), "chartDomainAxis"), // domain axis label
+                LocalizationUtils.getLocalizedString(this.getClass(), "chartRangeAxis"), // range axis label
                 collection, // data
                 true, // include legend
                 true, // tooltips

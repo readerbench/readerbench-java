@@ -77,8 +77,10 @@ import data.discourse.SemanticCohesion;
 import data.document.Document;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class DocCorpusSimilarityView extends JFrame {
@@ -173,7 +175,7 @@ public class DocCorpusSimilarityView extends JFrame {
     public DocCorpusSimilarityView(List<Document> docs) {
         centralDocumentToCompare = null;
         corpusView = this;
-        setTitle("Article Similarity View");
+        setTitle(LocalizationUtils.getTitle(this.getClass()));
         getContentPane().setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.docs = docs;
@@ -189,7 +191,7 @@ public class DocCorpusSimilarityView extends JFrame {
 
     private void generateLayout() {
 
-        JLabel lblThreshold = new JLabel("Threshold");
+        JLabel lblThreshold = new JLabel(LocalizationUtils.getGeneric("threshold"));
         lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         sliderThreshold = new JSlider(0, 100, 40);
@@ -213,9 +215,11 @@ public class DocCorpusSimilarityView extends JFrame {
         panelGraph.setBackground(Color.WHITE);
         panelGraph.setLayout(new BorderLayout());
 
-        JLabel lblTopSimilarArticles = new JLabel("Top Similar Articles");
+        JLabel lblTopSimilarArticles = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblTopSimilarArticles"));
         lblTopSimilarArticles.setFont(new Font("SansSerif", Font.BOLD, 14));
-        String[] header = {"Article 1", "Article 2", "Semantic Similarity Score"};
+        String[] header = {LocalizationUtils.getLocalizedString(this.getClass(), "header1"),
+			   LocalizationUtils.getLocalizedString(this.getClass(), "header2"),
+			   LocalizationUtils.getLocalizedString(this.getClass(), "header3")};
         String[][] data = new String[0][3];
 
         tableSimilarityModel = new DefaultTableModel(data, header);
@@ -244,8 +248,11 @@ public class DocCorpusSimilarityView extends JFrame {
                     String doc1 = tableSimilarity.getValueAt(row, 0).toString();
                     String doc2 = tableSimilarity.getValueAt(row, 1).toString();
                     String score = tableSimilarity.getValueAt(row, 2).toString();
-                    JOptionPane.showMessageDialog(corpusView, "<html><b>Article 1:</b> " + doc1
-                            + "<br> <b>Article 2:</b> " + doc2 + "<br> <b>Score:  </b> " + score + "</html>");
+                    JOptionPane.showMessageDialog(corpusView, "<html><b>"
+			    + LocalizationUtils.getLocalizedString(this.getClass(), "msg1") + ":</b> " + doc1
+                            + "<br> <b>" 
+			    + LocalizationUtils.getLocalizedString(this.getClass(), "msg2") + ":</b> " + doc2 + "<br> <b>"
+			    + LocalizationUtils.getLocalizedString(this.getClass(), "msg3") + ":  </b> " + score + "</html>");
                 }
             }
         });
@@ -260,9 +267,10 @@ public class DocCorpusSimilarityView extends JFrame {
         Dimension tablePreferred = tableScroll.getPreferredSize();
         tableScroll.setPreferredSize(new Dimension(tablePreferred.width, tablePreferred.height / 3));
 
-        JLabel lblCentrality = new JLabel("Distance to Central Document");
+        JLabel lblCentrality = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(),"lblCentrality"));
         lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
-        String[] header2 = {"Document", "Distance"};
+        String[] header2 = {LocalizationUtils.getLocalizedString(this.getClass(), "header21"),
+			    LocalizationUtils.getLocalizedString(this.getClass(), "header22")};
 
         String[][] data2 = new String[0][2];
         tableCentralityModel = new DefaultTableModel(data2, header2);
@@ -289,8 +297,9 @@ public class DocCorpusSimilarityView extends JFrame {
                     String score = tableCentrality.getValueAt(row, 1).toString();
 
                     JOptionPane.showMessageDialog(corpusView,
-                            "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2
-                            + "<br> <b>Semantic Distance:</b> " + score + "</html>");
+                            "<html><b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgCentralAricle") + ":</b> " + docC
+				+ "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgCurrentAricle") + ":</b> " + doc2 
+				+ "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgSemanticDistance") + ":</b> " + score + "</html>");
                 }
             }
         });
