@@ -26,6 +26,7 @@ import services.complexity.cohesion.flow.DocFlowCriteria;
 import services.complexity.cohesion.flow.DocFlowIndex;
 import services.complexity.cohesion.flow.DocumentFlow;
 import services.semanticModels.SimilarityType;
+import utils.LocalizationUtils;
 import view.models.document.DocumentFlowTable;
 import view.models.document.DocumentTableModel;
 
@@ -48,7 +49,7 @@ public class DocumentFlowView extends JFrame {
      * @param doc
      */
     public DocumentFlowView(Document doc) {
-        super.setTitle("ReaderBench - Document Flow");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         super.setBounds(100, 100, 800, 600);
         this.doc = doc;
@@ -57,14 +58,14 @@ public class DocumentFlowView extends JFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         super.setContentPane(contentPane);
 
-        JLabel lblSemanticDistance = new JLabel("Semantic distance:");
+        JLabel lblSemanticDistance = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSemanticDistance") + ":");
 
         comboBoxSemDistance = new JComboBox<>();
         for (SimilarityType st : doc.getModelVectors().keySet()) {
             comboBoxSemDistance.addItem(st);
         }
 
-        JLabel lblCriteria = new JLabel("Criteria:");
+        JLabel lblCriteria = new JLabel(LocalizationUtils.getGeneric("criteria") + ":");
         comboBoxCriteria = new JComboBox<>();
         for (DocFlowCriteria crit : DocFlowCriteria.values()) {
             comboBoxCriteria.addItem(crit);
@@ -86,7 +87,7 @@ public class DocumentFlowView extends JFrame {
         JScrollPane scrollPaneStats = new JScrollPane();
         scrollPaneStats.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton btnViewDocumentFlow = new JButton("View Document Flow");
+        JButton btnViewDocumentFlow = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnViewDocumentFlow"));
         btnViewDocumentFlow.addActionListener((ActionEvent e) -> {
             JFrame view = new DocumentFlowGraphView(DocumentFlowView.this.doc, df);
             view.setVisible(true);
@@ -161,7 +162,7 @@ public class DocumentFlowView extends JFrame {
                 modelContent.addRow(row);
             }
 
-            textAreaStats.setText("Edges in the cohesion graph:\n");
+            textAreaStats.setText(LocalizationUtils.getLocalizedString(this.getClass(), "textAreaStats") + ":\n");
             for (int i = 0; i < df.getGraph().length - 1; i++) {
                 for (int j = i + 1; j < df.getGraph().length; j++) {
                     if (df.getGraph()[i][j] > 0) {
@@ -170,7 +171,7 @@ public class DocumentFlowView extends JFrame {
                     }
                 }
             }
-            textAreaStats.append("\nCohesion flow specific indices:\n");
+            textAreaStats.append("\n" + LocalizationUtils.getLocalizedString(this.getClass(), "textAreaStatsAppend")+ ":\n");
             textAreaStats.append(Formatting.formatNumber(df.getAbsolutePositionAccuracy()) + "\t"
                     + new DocFlowIndex(ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY, crit, simType, null).getDescription()
                     + "\n");

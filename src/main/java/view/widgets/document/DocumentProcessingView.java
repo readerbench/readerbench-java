@@ -143,7 +143,8 @@ public class DocumentProcessingView extends JInternalFrame {
                 try {
                     d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
                 } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getLocalizedString(this.getClass(), "msgErr1") 
+			    + pathToIndividualFile + ". " + LocalizationUtils.getLocalizedString(this.getClass(), "msgErr2"), "Error", JOptionPane.ERROR_MESSAGE);
                     Exceptions.printStackTrace(ex);
                 }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "p")) {
@@ -164,10 +165,13 @@ public class DocumentProcessingView extends JInternalFrame {
                     d = processDocument(pathToIndividualFile);
                 }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate document XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getGeneric("file") + " " + pathToIndividualFile + 
+			" " + LocalizationUtils.getLocalizedString(this.getClass(), "msgErrXML") + "!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
             if (d != null && d.getLanguage() != ReaderBenchView.RUNTIME_LANGUAGE) {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getGeneric("file") + " " 
+			+ pathToIndividualFile + LocalizationUtils.getLocalizedString(this.getClass(), "msgErrLang") + "!", 
+			"Information", JOptionPane.INFORMATION_MESSAGE);
                 d = null;
             }
             if (d != null) {

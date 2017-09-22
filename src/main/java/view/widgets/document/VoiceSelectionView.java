@@ -46,6 +46,7 @@ import view.models.complexity.Status;
 import data.AbstractDocument;
 import data.discourse.SemanticChain;
 import java.util.ArrayList;
+import utils.LocalizationUtils;
 
 public class VoiceSelectionView extends JFrame {
 
@@ -66,7 +67,7 @@ public class VoiceSelectionView extends JFrame {
      * @param d
      */
     public VoiceSelectionView(AbstractDocument d) {
-        super.setTitle("ReaderBench - Voices Selection");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         super.setBounds(100, 100, 700, 500);
         contentPane = new JPanel();
@@ -98,12 +99,12 @@ public class VoiceSelectionView extends JFrame {
         scrollPaneDetails
                 .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(LocalizationUtils.getGeneric("cancel"));
         btnCancel.addActionListener((ActionEvent e) -> {
             VoiceSelectionView.this.dispose();
         });
 
-        JButton btnOk = new JButton("OK");
+        JButton btnOk = new JButton(LocalizationUtils.getGeneric("ok"));
         btnOk.addActionListener((ActionEvent e) -> {
             document.setSelectedVoices(new LinkedList<>());
             for (int index = 0; index < displayedVoices.size(); index++) {

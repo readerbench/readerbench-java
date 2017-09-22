@@ -52,6 +52,7 @@ import data.Block;
 import data.Word;
 import data.discourse.SemanticChain;
 import data.document.Document;
+import utils.LocalizationUtils;
 
 public class SentenceLevelInterAnimationView extends JFrame {
 
@@ -65,7 +66,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
      */
     public SentenceLevelInterAnimationView(Document d,
             List<SemanticChain> chains) {
-        super("ReaderBench - Voice Inter-Animation");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 
         this.setSize(1000, 600);
         this.setLocation(50, 50);
@@ -127,10 +128,10 @@ public class SentenceLevelInterAnimationView extends JFrame {
 
         // create the chart...
         JFreeChart chart = ChartFactory.createGanttChart(
-                "Voice Inter-Animation", // chart
+                LocalizationUtils.getLocalizedString(this.getClass(), "chartTitle"), // chart
                 // title
-                "Voice", // domain axis label
-                "Sentence", // range axis label
+                LocalizationUtils.getLocalizedString(this.getClass(), "chartDomainAxis"), // domain axis label
+                LocalizationUtils.getLocalizedString(this.getClass(), "chartRangeAxis"), // range axis label
                 collection, // data
                 false, // include legend
                 false, // tooltips
@@ -149,7 +150,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
         // add the chart to a panel...
         ChartPanel chartPanel = new ChartPanel(chart);
 
-        JButton btnCrossCorrelations = new JButton("Cross-Correlations");
+        JButton btnCrossCorrelations = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnCrossCorrelations"));
         btnCrossCorrelations.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 EventQueue.invokeLater(new Runnable() {
@@ -163,7 +164,7 @@ public class SentenceLevelInterAnimationView extends JFrame {
             }
         });
 
-        JButton btnSimpleStatistics = new JButton("Simple Statistics");
+        JButton btnSimpleStatistics = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSimpleStatistics"));
         btnSimpleStatistics.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 EventQueue.invokeLater(new Runnable() {

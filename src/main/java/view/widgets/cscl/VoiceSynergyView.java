@@ -39,6 +39,7 @@ import javax.swing.table.DefaultTableModel;
 import data.discourse.SemanticChain;
 import services.commons.Formatting;
 import services.discourse.dialogism.DialogismMeasures;
+import utils.LocalizationUtils;
 
 public class VoiceSynergyView extends JFrame {
 
@@ -58,21 +59,21 @@ public class VoiceSynergyView extends JFrame {
      * Create the frame.
      */
     public VoiceSynergyView(List<SemanticChain> chains) {
-        setTitle("ReaderBench - Voice Synergy and Correlation Visualization");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.displayedVoices = chains;
-        setBounds(100, 100, 650, 600);
+        super.setBounds(100, 100, 650, 600);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        JLabel lblCorrelationType = new JLabel("Correlation type:");
+        JLabel lblCorrelationType = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblCorrelationType") + ":");
 
         comboBox = new JComboBox<String>();
-        comboBox.addItem("Utterance occurence correlation");
-        comboBox.addItem("Utterance moving average correlation");
-        comboBox.addItem("Mutual information");
+        comboBox.addItem(LocalizationUtils.getLocalizedString(this.getClass(), "addItem1"));
+        comboBox.addItem(LocalizationUtils.getLocalizedString(this.getClass(), "addItem2"));
+        comboBox.addItem(LocalizationUtils.getLocalizedString(this.getClass(), "addItem3"));
         comboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (comboBox.getSelectedIndex() >= 0) {
@@ -98,10 +99,10 @@ public class VoiceSynergyView extends JFrame {
 
         JScrollPane scrollPaneCorrelationMatrix = new JScrollPane();
 
-        JLabel lblCorrelationMatrix = new JLabel("Correlation Matrix");
+        JLabel lblCorrelationMatrix = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblCorrelationMatrix"));
         lblCorrelationMatrix.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
-        JLabel lblVoiceConvergence = new JLabel("Voice Synergy");
+        JLabel lblVoiceConvergence = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblVoiceConvergence"));
         lblVoiceConvergence.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
         panelMutualInformation = new JPanel();
@@ -199,9 +200,9 @@ public class VoiceSynergyView extends JFrame {
         Double[][] values3 = new Double[1][evolution3.length];
         double[] columns = new double[evolution1.length];
 
-        String[] name1 = {"Co-occurrence"};
-        String[] name2 = {"Cumulative moving average"};
-        String[] name3 = {"Average Pointwise Mutual Information"};
+        String[] name1 = {LocalizationUtils.getLocalizedString(this.getClass(), "name1")};
+        String[] name2 = {LocalizationUtils.getLocalizedString(this.getClass(), "name2")};
+        String[] name3 = {LocalizationUtils.getLocalizedString(this.getClass(), "name3")};
         for (int i = 0; i < evolution1.length; i++) {
             values1[0][i] = evolution1[i];
             values2[0][i] = evolution2[i];
@@ -209,11 +210,11 @@ public class VoiceSynergyView extends JFrame {
             columns[i] = i;
         }
 
-        EvolutionGraph evolutionGraph1 = new EvolutionGraph("", "Utterance/Paragraph", false, name1, values1, columns,
+        EvolutionGraph evolutionGraph1 = new EvolutionGraph("", LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph"), false, name1, values1, columns,
                 Color.DARK_GRAY);
-        EvolutionGraph evolutionGraph2 = new EvolutionGraph("", "Utterance/Paragraph", false, name2, values2, columns,
+        EvolutionGraph evolutionGraph2 = new EvolutionGraph("", LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph"), false, name2, values2, columns,
                 Color.DARK_GRAY);
-        EvolutionGraph evolutionGraph3 = new EvolutionGraph("", "Utterance/Paragraph", false, name3, values3, columns,
+        EvolutionGraph evolutionGraph3 = new EvolutionGraph("", LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph"), false, name3, values3, columns,
                 Color.DARK_GRAY);
 
         panelCoOccurrence.add(evolutionGraph1.evolution());
