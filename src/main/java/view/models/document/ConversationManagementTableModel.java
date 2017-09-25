@@ -31,9 +31,9 @@ public class ConversationManagementTableModel extends DefaultTableModel {
     public ConversationManagementTableModel() {
         super(new Object[][]{}, new String[]{
             LocalizationUtils.getGeneric("title"),
-            LocalizationUtils.getGeneric("LSAspace"),
-            LocalizationUtils.getGeneric("LDAvector"),
-            LocalizationUtils.getGeneric("Word2Vec")});
+            LocalizationUtils.getGeneric("LSA"),
+            LocalizationUtils.getGeneric("LDA"),
+            LocalizationUtils.getGeneric("word2vec")});
     }
 
     @Override

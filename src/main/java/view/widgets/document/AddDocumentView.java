@@ -169,7 +169,7 @@ public class AddDocumentView extends JInternalFrame {
         chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getGeneric("usePOStagging"));
         chckbxUsePosTagging.setSelected(true);
 
-        chckbxSer = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxSer"));
+        chckbxSer = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxCheckSer"));
         chckbxSer.setSelected(true);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
