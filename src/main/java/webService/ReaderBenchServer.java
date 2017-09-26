@@ -81,7 +81,7 @@ import services.semanticModels.word2vec.Word2VecModel;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
-import view.widgets.article.utils.GraphMeasure;
+import services.extendedCNA.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
 import webService.keywords.KeywordsHelper;
@@ -130,6 +130,7 @@ import webService.services.lak.result.TwoModeGraphNode;
 import webService.services.utils.FileProcessor;
 import webService.services.utils.ParamsValidator;
 import webService.services.vCoP.CommunityInteraction;
+import webService.slack.SlackClient;
 
 public class ReaderBenchServer {
 
@@ -158,16 +159,18 @@ public class ReaderBenchServer {
      */
     private static QueryResult errorIfParamsMissing(Set<String> requiredParams, Set<String> params) {
         Set<String> requiredParamsMissing;
-        if (null != (requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params))) {
+        requiredParamsMissing = ParamsValidator.checkRequiredParams(requiredParams, params);
+        if (null != requiredParamsMissing && requiredParamsMissing.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(requiredParamsMissing));
         }
         return null;
     }
 
-    private static QueryResult errorIfParamsEmpty(Set<String> params) {
+    private static QueryResult errorIfParamsEmpty(Map<String, String> params) {
         Set<String> emptyParams;
-        if (null != (emptyParams = ParamsValidator.checkEmptyParams(params))) {
+        emptyParams = ParamsValidator.checkEmptyParams(params);
+        if (null != emptyParams && emptyParams.size() > 0) {
             // if not return an error showing the missing parameters
             return new QueryResult(false, ParamsValidator.errorParamsMissing(emptyParams));
         }
@@ -428,6 +431,7 @@ public class ReaderBenchServer {
         Spark.staticFileLocation("/public");
 
         Spark.get("/", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             return "OK";
         });
         Spark.before((request, response) -> {
@@ -436,6 +440,7 @@ public class ReaderBenchServer {
             response.header("Access-Control-Allow-Headers", "*");
         });
         Spark.post("/keywords", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
@@ -477,6 +482,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/sentiment-analysis", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
             JSONObject json = null;
             if (request.body().isEmpty()) {
@@ -523,6 +529,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/textual-complexity", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("text");
@@ -560,6 +567,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-search", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Set<String> requiredParams = new HashSet<>();
             requiredParams.add("text");
@@ -581,6 +589,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/getTopicsFromPdf", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             requiredParams.add("uri");
             requiredParams.add("threshold");
@@ -620,6 +629,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-annotation-uri", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
@@ -669,6 +679,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/semantic-annotation", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("file");
@@ -718,6 +729,7 @@ public class ReaderBenchServer {
             }
         });
         Spark.post("/self-explanation", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text");
@@ -752,6 +764,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cscl-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cscl-file");
@@ -794,6 +807,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/textCategorization", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("uri");
@@ -841,6 +855,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cv-cover-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("cv-file");
@@ -905,6 +920,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/cv-processing", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> socialNetworksLinks = new HashSet<>();
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
@@ -919,8 +935,16 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
-
+            
             Map<String, String> hm = hmParams(json);
+            
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("cv-file", hm.get("cv-file"));
+            error = errorIfParamsEmpty(notEmptyParams);
+            if (error != null) {
+                return error.convertToJson();
+            }
+            
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
@@ -1002,6 +1026,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/job-quest", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Double notEnoughWords = .5;
             Double tooManyWords = 1.5;
 
@@ -1143,6 +1168,7 @@ public class ReaderBenchServer {
         });
         // File Upload - send file as multipart form-data to be accepted
         Spark.post("/file-upload", (request, response) -> {
+            //SlackClient.logMessage(LoggerHelper.requestToString(request));
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/tmp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             Part file = request.raw().getPart("file"); // file is name of the
@@ -1167,6 +1193,7 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.get("/file-download", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
             if (request.queryParams().isEmpty()) {
                 error = errorEmptyBody();
@@ -1179,13 +1206,13 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
 
-            Set<String> notEmptyParams = new HashSet<>();
-            notEmptyParams.add("file");
+            String file = request.queryParams("file");
+            Map<String, String> notEmptyParams = new HashMap<>();
+            notEmptyParams.put("file", file);
             error = errorIfParamsEmpty(notEmptyParams);
             if (error != null) {
                 return error.convertToJson();
             }
-            String file = request.queryParams("file");
             int indexOfLastSlash = file.lastIndexOf('/');
             if (indexOfLastSlash != -1) {
                 file = file.substring(indexOfLastSlash);
@@ -1205,6 +1232,7 @@ public class ReaderBenchServer {
             return response.raw();
         });
         Spark.post("/folderUpload", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
@@ -1218,6 +1246,7 @@ public class ReaderBenchServer {
             return "";
         });
         Spark.post("/vcop", (Request request, Response response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1263,6 +1292,7 @@ public class ReaderBenchServer {
             return result;
         });
         Spark.post("/vcopD3", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1285,6 +1315,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/vcopD3Week", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
             response.type("application/json");
@@ -1317,6 +1348,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/text-similarity", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
@@ -1339,6 +1371,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/similar-concepts", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("seed");
@@ -1369,6 +1402,7 @@ public class ReaderBenchServer {
         // In contrast to textSimilarity, this endpoint returns similarity
         // scores of two texts using every similarity method available
         Spark.post("/text-similarities", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("text1");
@@ -1408,6 +1442,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/answer-matching", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             Set<String> requiredParams = new HashSet<>();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             requiredParams.add("language");
@@ -1453,6 +1488,7 @@ public class ReaderBenchServer {
         });
 
         Spark.get("/lak/nodes", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             response.type("application/json");
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<TwoModeGraphNode> authorNodes = graphBuilder.getNodes();
@@ -1461,6 +1497,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/lak/graph", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             response.type("application/json");
             String centerUri = (String) json.get("centerUri");
@@ -1487,12 +1524,14 @@ public class ReaderBenchServer {
             return result;
         });
         Spark.get("/lak/measures", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             response.type("application/json");
             List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
             QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
             return qResult.convertToJson();
         });
         Spark.get("/lak/years", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             Set<Integer> yearSet = new HashSet();
@@ -1511,6 +1550,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.get("/lak/topicEvolution", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             TopicEvolutionBuilder builder = new TopicEvolutionBuilder(articles);
@@ -1521,6 +1561,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/lak/topics", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
             List<ResearchArticle> articles = graphBuilder.getArticles();
             final List<ResearchArticle> filteredArticles = new ArrayList();
@@ -1549,6 +1590,7 @@ public class ReaderBenchServer {
         });
 
         Spark.post("/ciModel", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1573,6 +1615,7 @@ public class ReaderBenchServer {
             return resultStr;
         });
         Spark.get("/community/communities", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
 //            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
 //
 //            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
@@ -1610,6 +1653,7 @@ public class ReaderBenchServer {
 
         });
         Spark.post("/community/participants", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1634,6 +1678,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/community/participants/directedGraph", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 
@@ -1650,6 +1695,7 @@ public class ReaderBenchServer {
             return queryResult.convertToJson();
         });
         Spark.post("/community/participants/edgeBundling", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             Map<String, String> hm = hmParams(json);
 

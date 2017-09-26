@@ -36,14 +36,13 @@ import javax.swing.JTable;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.table.DefaultTableModel;
 
-
-
 import data.AbstractDocument;
 import data.Block;
 import data.Word;
 import data.discourse.WordOverlap;
 import data.document.Document;
 import java.util.logging.Logger;
+import utils.LocalizationUtils;
 
 public class DocKeywordAbstractOverlap extends JFrame {
 
@@ -61,7 +60,7 @@ public class DocKeywordAbstractOverlap extends JFrame {
         wo = new WordOverlap(docs);
         this.docs = wo.computeWordOverlaps();
 
-        setTitle("Best Articles - Keyword&Abstract Overlap");
+        setTitle(LocalizationUtils.getTitle(this.getClass()));
         getContentPane().setBackground(Color.WHITE);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -77,10 +76,12 @@ public class DocKeywordAbstractOverlap extends JFrame {
     private void generateLayout() {
         setBounds(50, 50, 1180, 700);
         JLabel lblTopSimilarArticles = new JLabel(
-                "Keyword-Abstract overlap score");
+                LocalizationUtils.getLocalizedString(this.getClass(), "lblTopSimilarArticles"));
         lblTopSimilarArticles.setFont(new Font("SansSerif", Font.BOLD, 14));
-        String[] header = {"Article", "Overlap Score", "Semantic Score",
-            "Aggregated Score"};
+        String[] header = {LocalizationUtils.getLocalizedString(this.getClass(), "header1"), 
+			   LocalizationUtils.getLocalizedString(this.getClass(), "header2"),
+			   LocalizationUtils.getLocalizedString(this.getClass(), "header3"),
+			   LocalizationUtils.getLocalizedString(this.getClass(), "header4")};
         String[][] data = new String[docs.size()][4];
         NumberFormat formatter = new DecimalFormat("#0.00");
         for (int i = 0; i < docs.size(); i++) {
@@ -157,9 +158,9 @@ public class DocKeywordAbstractOverlap extends JFrame {
                                 abstractDoc.length());
                     }
                     JOptionPane.showMessageDialog(table,
-                            "<html><b>Article:</b> " + doc.getTitleText()
-                            + "<br><br> <b>Keywords:</b> "
-                            + keywordsText + "<br> <b>Abstract:</b> "
+                            "<html><b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msg1") + ":</b> " + doc.getTitleText()
+                            + "<br><br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msg2") + ":</b> "
+                            + keywordsText + "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msg3") + ":</b> "
                             + fullText + "</html>");
                 }
             }
@@ -169,27 +170,27 @@ public class DocKeywordAbstractOverlap extends JFrame {
         groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(
                 Alignment.LEADING).addGroup(
                         groupLayout
-                        .createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(
-                                groupLayout
-                                .createParallelGroup(Alignment.LEADING)
-                                .addComponent(tableScroll,
-                                        Alignment.TRAILING,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        Short.MAX_VALUE)
-                                .addComponent(lblTopSimilarArticles))
-                        .addContainerGap()));
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(
+                                        groupLayout
+                                                .createParallelGroup(Alignment.LEADING)
+                                                .addComponent(tableScroll,
+                                                        Alignment.TRAILING,
+                                                        GroupLayout.DEFAULT_SIZE,
+                                                        GroupLayout.DEFAULT_SIZE,
+                                                        Short.MAX_VALUE)
+                                                .addComponent(lblTopSimilarArticles))
+                                .addContainerGap()));
         groupLayout.setVerticalGroup(groupLayout.createParallelGroup(
                 Alignment.LEADING).addGroup(
                         groupLayout
-                        .createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(lblTopSimilarArticles)
-                        .addPreferredGap(ComponentPlacement.RELATED)
-                        .addComponent(tableScroll, GroupLayout.DEFAULT_SIZE,
-                                614, Short.MAX_VALUE).addContainerGap()));
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblTopSimilarArticles)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(tableScroll, GroupLayout.DEFAULT_SIZE,
+                                        614, Short.MAX_VALUE).addContainerGap()));
         // groupLayout.createParallelGroup().addComponent(tableScrollCentrality);
         // .addComponent(tableScrollCentrality)
         getContentPane().setLayout(groupLayout);

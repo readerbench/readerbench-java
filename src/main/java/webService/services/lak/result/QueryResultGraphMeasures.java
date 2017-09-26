@@ -8,7 +8,7 @@ package webService.services.lak.result;
 import java.util.List;
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
-import view.widgets.article.utils.GraphMeasure;
+import services.extendedCNA.GraphMeasure;
 import webService.queryResult.QueryResult;
 
 /**

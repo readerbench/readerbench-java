@@ -170,7 +170,7 @@ public class Word2VecModel implements ISemanticModel {
         return language;
     }
 
-    public static void trainModel(String inputFile) throws FileNotFoundException {
+    public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
         try {
             SentenceIterator iter = new UimaSentenceIterator(inputFile,
                     new UimaResource(UimaTokenizerFactory.defaultAnalysisEngine()));
@@ -181,8 +181,8 @@ public class Word2VecModel implements ISemanticModel {
             Word2Vec word2Vec = new Word2Vec.Builder()
                     .batchSize(100)
                     .minWordFrequency(5)
-                    .epochs(6)
-                    .layerSize(300)
+                    .epochs(noEpochs)
+                    .layerSize(layerSize)
                     .seed(42)
                     .windowSize(5)
                     .negativeSample(10)

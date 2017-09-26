@@ -37,6 +37,7 @@ import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
 
 import javax.swing.JTextField;
+import utils.LocalizationUtils;
 
 public class CollaborationVoiceView extends JFrame {
 
@@ -50,7 +51,7 @@ public class CollaborationVoiceView extends JFrame {
      * Create the frame.
      */
     public CollaborationVoiceView(Conversation chat) {
-        setTitle("ReaderBench - Collaboration as Voice Overlapping");
+        setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 650, 550);
         contentPane = new JPanel();
@@ -65,7 +66,7 @@ public class CollaborationVoiceView extends JFrame {
         panelMutualInformation.setLayout(new BorderLayout());
 
         JLabel label = new JLabel(
-                "Automatically identified intense collaboration zones");
+                LocalizationUtils.getLocalizedString(this.getClass(), "label"));
         label.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JScrollPane scrollPane = new JScrollPane();
@@ -73,7 +74,7 @@ public class CollaborationVoiceView extends JFrame {
                 .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         JLabel lblOverlap = new JLabel(
-                "Overlap with intense collaboration zones identified through social KB:");
+                LocalizationUtils.getLocalizedString(this.getClass(), "lblOverlap") + ":");
         lblOverlap.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
         txtOverlap = new JTextField();
@@ -150,7 +151,7 @@ public class CollaborationVoiceView extends JFrame {
         Double[][] values = new Double[1][evolution.length];
         double[] columns = new double[evolution.length];
 
-        String[] names = {"Cumulated Contextual Voice Co-Occurrences"};
+        String[] names = {LocalizationUtils.getLocalizedString(this.getClass(), "names")};
 
         for (int i = 0; i < evolution.length; i++) {
             values[0][i] = evolution[i];
@@ -158,8 +159,8 @@ public class CollaborationVoiceView extends JFrame {
         }
 
         EvolutionGraph evolutionGraph = new EvolutionGraph(
-                "Cumulated Contextual Voice Co-Occurrences",
-                "utterance", false, names, values, columns, Color.DARK_GRAY);
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph1"),
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph2"), false, names, values, columns, Color.DARK_GRAY);
 
         panelMutualInformation.add(evolutionGraph.evolution());
 

@@ -186,17 +186,20 @@ public abstract class Parsing {
 
         // set Stanford sentences
         b.setStanfordSentences(sentences);
-        int utteranceCounter = 0;
-
-        for (CoreMap sentence : sentences) {
-            if (sentence.toString().trim().length() > 1) {
-                Sentence s = processSentence(b, utteranceCounter++, sentence);
-                // add utterance to block
-                b.getSentences().add(s);
-                b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
-            }
+        
+        List<Sentence> finalSentences = sentences.parallelStream()
+                .filter(s -> s.toString().trim().length() > 1)
+                .map(s -> processSentence(b, 0, s))
+                .collect(Collectors.toList());
+        //Set sentence index
+        for (int i = 0; i < finalSentences.size(); i++) {
+            finalSentences.get(i).setIndex(i);
         }
-
+        b.setSentences(finalSentences);
+        b.setProcessedText(finalSentences.stream()
+                .map(s -> s.getProcessedText() + ". ")
+                .collect(Collectors.joining()));
+        
         b.finalProcessing();
         return b;
     }
