@@ -290,7 +290,7 @@ public class ReaderBenchServer {
             AbstractDocument abstractDocument, AbstractDocument keywordsDocument, AbstractDocument document,
             Set<String> keywordsList, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams, Double minThreshold) throws Exception {
         ResultTopic resultTopic = ConceptMap.getKeywords(document, minThreshold, null);
-        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument, keywordsList, lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
+        List<ResultKeyword> resultKeywords = KeywordsHelper.getKeywords(document, keywordsDocument.getWordOccurences().keySet(), minThreshold);
         List<ResultCategory> resultCategories = generateCategories(document, lang, models, usePosTagging, computeDialogism, useBigrams);
         SemanticCohesion scAbstractDocument = new SemanticCohesion(abstractDocument, document);
         SemanticCohesion scKeywordsAbstract = new SemanticCohesion(abstractDocument, keywordsDocument);
