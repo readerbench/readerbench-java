@@ -92,6 +92,8 @@ import webService.result.ResultCategory;
 import webService.result.ResultCv;
 import webService.result.ResultCvCover;
 import webService.result.ResultCvOrCover;
+import webService.result.ResultEneaCustomisation;
+import webService.result.ResultEneaLesson;
 import webService.result.ResultFile;
 import webService.result.ResultJobQuest;
 import webService.result.ResultKeyword;
@@ -1256,6 +1258,101 @@ public class ReaderBenchServer {
 
             return response.raw();
         });
+        
+        Spark.post("/enea-customisation", (request, response) -> {
+            SlackClient.logMessage(LoggerHelper.requestToString(request));
+            QueryResult error;
+            JSONObject json = null;
+            if (request.body().isEmpty()) {
+                error = errorEmptyBody();
+            } else {
+                json = (JSONObject) new JSONParser().parse(request.body());
+                Set<String> requiredParams = new HashSet<>();
+                requiredParams.add("expertise");
+                requiredParams.add("keyword1");
+                requiredParams.add("keyword2");
+                requiredParams.add("text");
+                requiredParams.add("themes");
+                requiredParams.add("cme");
+                error = errorIfParamsMissing(requiredParams, json.keySet());
+            }
+            if (error != null) {
+                return error.convertToJson();
+            }
+
+            // default parameters
+            Lang lang = Lang.en;
+            Boolean usePosTagging = true;
+            Boolean computeDialogism = false;
+            Boolean useBigrams = false;
+            String lsaCorpora = "ENEA_TASA", ldaCorpora = "ENEA_TASA", w2vCorpora = "";
+            List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+            double threshold = 0.3;
+            
+            Map<String, String> hm = hmParams(json);
+            Integer expertise = Integer.parseInt(hm.get("expertise"));
+            String keyword1 = hm.get("keyword1");
+            String keyword2 = hm.get("keyword2");
+            String text = hm.get("text");
+            Integer themes = Integer.parseInt(hm.get("themes"));
+            Boolean cme = Boolean.parseBoolean(hm.get("cme"));
+            
+            // Step 1: Filter lessons by expertise, keyword1 and keyword2 & themes
+            // TODO: Insert code here
+            
+            // Step 2: If cme is true, sum up credits of the remaining lessons (1 credit = 60 mins);
+            if (cme == true) {
+                double sumCredits = 0.0;
+                // sum here credits for filtered lessons
+                if (sumCredits < 5) {
+                    // Return error message response: The selected fields are too restrictive!
+                }
+            }
+            
+            // Step 3: Compute semantic similarity between the free text and the remaining lessons
+            Map<ResultEneaLesson, Double> eligibleLessons = new HashMap<>();
+            AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
+            // iterate through all lessons
+            for (; ;) {
+                AbstractDocument lessonDocument = QueryHelper.generateDocument("text here", lang, models, usePosTagging, computeDialogism, useBigrams);
+                SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
+                double simScore = sc.getCohesion();
+                ResultEneaLesson lesson = new ResultEneaLesson("title", "link", simScore, null, null);
+                if (simScore >= threshold) {
+                    eligibleLessons.put(lesson, simScore);
+                }
+                break; // delete this after writing for statement
+            }
+            
+            // Step 4: Check again whether the sum up of credits make it enough for scoring
+            if (cme == true) {
+                double sumCredits = 0.0;
+                // sum here credits for remaining lessons
+                if (sumCredits < 5) {
+                    // Return error message response: The selected fields are too restrictive!
+                }
+            }
+            
+            // Step 5: Return lessons in descending order by similarity score
+            Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
+            List<ResultEneaLesson> lessonsList = new ArrayList();
+            eligibleLessonsSorted.keySet().addAll(lessonsList);
+            
+            // Step 6: Perform DFS in prerequisites and append them to the response
+            
+            // Step 7: Perform DFS in postrequisites and append them to the response
+            
+            ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList);
+            QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
+            try {
+                queryResult.setData(result);
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
+            }
+            response.type("application/json");
+            return queryResult.convertToJson();
+        });
+        
         Spark.post("/folderUpload", (request, response) -> {
             SlackClient.logMessage(LoggerHelper.requestToString(request));
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
