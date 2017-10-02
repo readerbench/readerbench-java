@@ -1096,6 +1096,31 @@ public class ReaderBenchServer {
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
+            
+            // CV global positive or negative warning
+            if (result.getScoreGlobal() == 1) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_global"));
+            }
+            else {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_global"));
+            }
+            
+            // CV visual positive or negative warning
+            if (result.getScoreVisual()== 1) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_visual"));
+            }
+            else {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_visual"));
+            }
+            
+            // CV content positive or negative warning
+            if (result.getScoreContent()== 1) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_content"));
+            }
+            else {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_content"));
+            }
+            
             boolean keywordWarning = false;
             sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
             for (String keyword : keywordsList) {
