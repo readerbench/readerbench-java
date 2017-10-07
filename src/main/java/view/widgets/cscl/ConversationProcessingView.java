@@ -477,7 +477,7 @@ public class ConversationProcessingView extends JInternalFrame {
             }
         });
 
-        btnRemoveDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "ConversationProcessingView.btnRemoveDocument"));
+        btnRemoveDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnRemoveDocument"));
         btnRemoveDocument.setEnabled(false);
         GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
         gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
