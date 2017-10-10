@@ -20,14 +20,16 @@ import java.util.List;
 public class ResultEneaLesson {
 
     private final String title;
-    private final String link;
+    private final String uri;
+    private final Integer time;
     private final Double similarityScore;
 	private final List<ResultEneaLesson> prerequisites;
     private final List<ResultEneaLesson> postrequisites;
 
-	public ResultEneaLesson(String text, String link, Double similarityScore, List<ResultEneaLesson> prerequisites, List<ResultEneaLesson> postrequisites) {
+	public ResultEneaLesson(String text, String uri, Integer time, Double similarityScore, List<ResultEneaLesson> prerequisites, List<ResultEneaLesson> postrequisites) {
         this.title = text;
-		this.link = link;
+		this.uri = uri;
+        this.time = time;
         this.similarityScore = similarityScore;
         this.prerequisites = prerequisites;
         this.postrequisites = postrequisites;
@@ -37,10 +39,14 @@ public class ResultEneaLesson {
         return title;
     }
 
-    public String getLink() {
-        return link;
+    public String getUri() {
+        return uri;
     }
 
+    public Integer getTime() {
+        return time;
+    }
+    
     public Double getSimilarityScore() {
         return similarityScore;
     }

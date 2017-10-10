@@ -1268,12 +1268,11 @@ public class ReaderBenchServer {
             } else {
                 json = (JSONObject) new JSONParser().parse(request.body());
                 Set<String> requiredParams = new HashSet<>();
+                requiredParams.add("cme");
                 requiredParams.add("expertise");
-                requiredParams.add("keyword1");
-                requiredParams.add("keyword2");
+                requiredParams.add("topics");
                 requiredParams.add("text");
                 requiredParams.add("themes");
-                requiredParams.add("cme");
                 error = errorIfParamsMissing(requiredParams, json.keySet());
             }
             if (error != null) {
@@ -1290,14 +1289,15 @@ public class ReaderBenchServer {
             double threshold = 0.3;
             
             Map<String, String> hm = hmParams(json);
-            Integer expertise = Integer.parseInt(hm.get("expertise"));
-            String keyword1 = hm.get("keyword1");
-            String keyword2 = hm.get("keyword2");
-            String text = hm.get("text");
-            Integer themes = Integer.parseInt(hm.get("themes"));
             Boolean cme = Boolean.parseBoolean(hm.get("cme"));
+            JSONObject expertise = (JSONObject) new JSONParser().parse(hm.get("expertise"));
+            // TODO: parse expertise (array of array of strings)
+            String topics = hm.get("topics");
+            String text = hm.get("text");
+            JSONObject themes = (JSONObject) new JSONParser().parse(hm.get("themes"));
+            // TODO: parse themes (array of strings)
             
-            // Step 1: Filter lessons by expertise, keyword1 and keyword2 & themes
+            // Step 1: Filter lessons by expertise, topics and themes
             // TODO: Insert code here
             
             // Step 2: If cme is true, sum up credits of the remaining lessons (1 credit = 60 mins);
@@ -1317,7 +1317,7 @@ public class ReaderBenchServer {
                 AbstractDocument lessonDocument = QueryHelper.generateDocument("text here", lang, models, usePosTagging, computeDialogism, useBigrams);
                 SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
                 double simScore = sc.getCohesion();
-                ResultEneaLesson lesson = new ResultEneaLesson("title", "link", simScore, null, null);
+                ResultEneaLesson lesson = new ResultEneaLesson("title", "uri", 3600, simScore, null, null);
                 if (simScore >= threshold) {
                     eligibleLessons.put(lesson, simScore);
                 }
