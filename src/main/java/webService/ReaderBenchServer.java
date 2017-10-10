@@ -1259,6 +1259,9 @@ public class ReaderBenchServer {
             return response.raw();
         });
         
+        Spark.options("/enea-customisation", (request, response) -> {
+            return "";
+        });
         Spark.post("/enea-customisation", (request, response) -> {
             SlackClient.logMessage(LoggerHelper.requestToString(request));
             QueryResult error;
