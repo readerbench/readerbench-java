@@ -23,7 +23,8 @@ import org.apache.pdfbox.contentstream.operator.color.SetStrokingDeviceGrayColor
 import org.apache.pdfbox.contentstream.operator.color.SetStrokingDeviceRGBColor;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import org.datavec.api.berkeley.Triple;
+import org.nd4j.linalg.primitives.Triple;
+//import org.datavec.api.berkeley.Triple;
 
 /**
  *
