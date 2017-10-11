@@ -1287,7 +1287,7 @@ public class ReaderBenchServer {
             Boolean usePosTagging = true;
             Boolean computeDialogism = false;
             Boolean useBigrams = false;
-            String lsaCorpora = "ENEA_TASA", ldaCorpora = "ENEA_TASA", w2vCorpora = "";
+            String lsaCorpora = "ENEA_TASA", ldaCorpora = "ENEA_TASA", w2vCorpora = "ENEA_TASA";
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             double threshold = 0.3;
             
