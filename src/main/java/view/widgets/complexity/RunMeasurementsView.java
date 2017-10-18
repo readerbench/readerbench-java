@@ -207,13 +207,13 @@ public class RunMeasurementsView extends JFrame {
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getGeneric("boxUsePOSTagging"));
+        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getGeneric("usePOSTagging"));
         chckbxUsePosTagging.setSelected(true);
 
-        chckbxUseTxtFiles = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxUseTxtFile"));
+        chckbxUseTxtFiles = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxUseTxtFiles"));
         chckbxUseTxtFiles.setSelected(true);
 
-        chckbxUseDeepSearch = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxDeepSearch"));
+        chckbxUseDeepSearch = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxUseDeepSearch"));
         chckbxUseDeepSearch.setSelected(false);
 
         ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, comboBoxWORD2VEC, ReaderBenchView.RUNTIME_LANGUAGE);
