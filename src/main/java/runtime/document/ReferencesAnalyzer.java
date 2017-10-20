@@ -723,17 +723,17 @@ public class ReferencesAnalyzer {
     
     public static void main(String args[]){
 	try {
-	    ReferencesAnalyzer rscanalyzer1 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\5 Excellent Student DianaF");
+	    ReferencesAnalyzer rscanalyzer1 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\5 Excellent Student DianaF");
 	    rscanalyzer1.process();
-	    ReferencesAnalyzer rscanalyzer2 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\4 Very Good Student JoanB");
+	    ReferencesAnalyzer rscanalyzer2 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\4 Very Good Student JoanB");
 	    rscanalyzer2.process();
-	    ReferencesAnalyzer rscanalyzer3 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\3 Good Student MarciaC");
+	    ReferencesAnalyzer rscanalyzer3 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\3 Good Student MarciaC");
 	    rscanalyzer3.process();
-	    ReferencesAnalyzer rscanalyzer4 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\2 Acceptable Student MeikeM");
+	    ReferencesAnalyzer rscanalyzer4 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\2 Acceptable Student MeikeM");
 	    rscanalyzer4.process();
-	    ReferencesAnalyzer rscanalyzer5 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\1 Weak Student JulieF");
+	    ReferencesAnalyzer rscanalyzer5 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\1 Weak Student JulieF");
 	    rscanalyzer5.process();
-	    ReferencesAnalyzer rscanalyzer6 = new ReferencesAnalyzer("A:\\Facultate\\TestDocuments3\\0 ADHD Student ChantellM");
+	    ReferencesAnalyzer rscanalyzer6 = new ReferencesAnalyzer("resources\\in\\ReferencesTestDocs\\0 ADHD Student ChantellM");
 	    rscanalyzer6.process();
 	} catch (Exception e) {
 	    Exceptions.printStackTrace(e);
