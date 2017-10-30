@@ -178,7 +178,7 @@ public class ReaderBenchServer {
         }
         return null;
     }
-    
+
     private static QueryResult errorCustomMessage(String message) {
         return new QueryResult(false, message);
     }
@@ -665,7 +665,14 @@ public class ReaderBenchServer {
             if (hm.get("uri").contains("http") || hm.get("uri").contains("https") || hm.get("uri").contains("ftp")) {
                 documentContent = getTextFromPdf(hm.get("uri"), false).getContent();
             } else {
-                documentContent = getTextFromPdf(hm.get("uri"), true).getContent();
+                File f = new File("tmp/" + hm.get("uri"));
+                if (!f.exists() || f.isDirectory()) {
+                    error = errorCustomMessage("File " + f.getPath() + " does not exist!");
+                    if (error != null) {
+                        return error.convertToJson();
+                    }
+                }
+                documentContent = getTextFromPdf(f.getPath(), true).getContent();
             }
             double minThreshold;
             try {
@@ -914,7 +921,7 @@ public class ReaderBenchServer {
             AbstractDocument coverDocument = QueryHelper.generateDocument(coverContent, lang, models, usePosTagging, computeDialogism, useBigrams);
             ResultCvOrCover resultCover = new ResultCvOrCover(null, null);
             resultCover.setConcepts(ConceptMap.getKeywords(coverDocument, Double.parseDouble(hm.get("threshold")), null));
-            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument,  SentimentAnalysis.GRANULARITY_DOCUMENT));
+            resultCover.setSentiments(webService.services.SentimentAnalysis.computeSentiments(coverDocument, SentimentAnalysis.GRANULARITY_DOCUMENT));
             result.setCover(resultCover);
             Map<Word, Integer> coverWords = coverDocument.getWordOccurences();
             Iterator<Entry<Word, Integer>> itCvWords = cvWords.entrySet().iterator();
@@ -948,16 +955,16 @@ public class ReaderBenchServer {
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Map<String, String> hm = hmParams(json);
-            
+
             Map<String, String> notEmptyParams = new HashMap<>();
             notEmptyParams.put("cv-file", hm.get("cv-file"));
             error = errorIfParamsEmpty(notEmptyParams);
             if (error != null) {
                 return error.convertToJson();
             }
-            
+
             Lang lang = Lang.getLang(hm.get("language"));
             Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
             Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
@@ -1109,31 +1116,28 @@ public class ReaderBenchServer {
             result.setSocialNetworksLinksFound(pdfToTxtConverter.getSocialNetworkLinks());
 
             StringBuilder sb = new StringBuilder();
-            
+
             // CV global positive or negative warning
             if (result.getScoreGlobal() == 1) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_global"));
-            }
-            else {
+            } else {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_global"));
             }
-            
+
             // CV visual positive or negative warning
-            if (result.getScoreVisual()== 1) {
+            if (result.getScoreVisual() == 1) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_visual"));
-            }
-            else {
+            } else {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_visual"));
             }
-            
+
             // CV content positive or negative warning
-            if (result.getScoreContent()== 1) {
+            if (result.getScoreContent() == 1) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("positive_content"));
-            }
-            else {
+            } else {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("negative_content"));
             }
-            
+
             boolean keywordWarning = false;
             sb.append(ResourceBundle.getBundle("utils.localization.cv_errors").getString("keyword_recommendation"));
             for (String keyword : keywordsList) {
@@ -1269,7 +1273,7 @@ public class ReaderBenchServer {
 
             return response.raw();
         });
-        
+
         Spark.options("/enea-customisation", (request, response) -> {
             return "";
         });
@@ -1301,7 +1305,7 @@ public class ReaderBenchServer {
             String lsaCorpora = "ENEA_TASA", ldaCorpora = "ENEA_TASA", w2vCorpora = "ENEA_TASA";
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             double threshold = 0.3;
-            
+
             Map<String, String> hm = hmParams(json);
             Boolean cme = Boolean.parseBoolean(hm.get("cme"));
             JSONObject expertise = (JSONObject) new JSONParser().parse(hm.get("expertise"));
@@ -1310,10 +1314,9 @@ public class ReaderBenchServer {
             String text = hm.get("text");
             JSONObject themes = (JSONObject) new JSONParser().parse(hm.get("themes"));
             // TODO: parse themes (array of strings)
-            
+
             // Step 1: Filter lessons by expertise, topics and themes
             // TODO: Insert code here
-            
             // Step 2: If cme is true, sum up credits of the remaining lessons (1 credit = 60 mins);
             if (cme == true) {
                 double sumCredits = 0.0;
@@ -1322,12 +1325,12 @@ public class ReaderBenchServer {
                     // Return error message response: The selected fields are too restrictive!
                 }
             }
-            
+
             // Step 3: Compute semantic similarity between the free text and the remaining lessons
             Map<ResultEneaLesson, Double> eligibleLessons = new HashMap<>();
             AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             // iterate through all lessons
-            for (; ;) {
+            for (;;) {
                 AbstractDocument lessonDocument = QueryHelper.generateDocument("text here", lang, models, usePosTagging, computeDialogism, useBigrams);
                 SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
                 double simScore = sc.getCohesion();
@@ -1337,7 +1340,7 @@ public class ReaderBenchServer {
                 }
                 break; // delete this after writing for statement
             }
-            
+
             // Step 4: Check again whether the sum up of credits make it enough for scoring
             if (cme == true) {
                 double sumCredits = 0.0;
@@ -1346,16 +1349,14 @@ public class ReaderBenchServer {
                     // Return error message response: The selected fields are too restrictive!
                 }
             }
-            
+
             // Step 5: Return lessons in descending order by similarity score
             Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
             List<ResultEneaLesson> lessonsList = new ArrayList();
             eligibleLessonsSorted.keySet().addAll(lessonsList);
-            
+
             // Step 6: Perform DFS in prerequisites and append them to the response
-            
             // Step 7: Perform DFS in postrequisites and append them to the response
-            
             ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList);
             QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
             try {
@@ -1366,7 +1367,7 @@ public class ReaderBenchServer {
             response.type("application/json");
             return queryResult.convertToJson();
         });
-        
+
         Spark.post("/folderUpload", (request, response) -> {
             SlackClient.logMessage(LoggerHelper.requestToString(request));
             File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
