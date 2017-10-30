@@ -178,6 +178,10 @@ public class ReaderBenchServer {
         }
         return null;
     }
+    
+    private static QueryResult errorCustomMessage(String message) {
+        return new QueryResult(false, message);
+    }
 
     /**
      * Returns a HashMap containing <key, value> for parameters.
@@ -707,7 +711,14 @@ public class ReaderBenchServer {
                 w2vCorpora = hm.get("w2v");
             }
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-            String documentContent = getTextFromPdf("tmp/" + hm.get("file"), true).getContent();
+            File f = new File("tmp/" + hm.get("file"));
+            if (!f.exists() || f.isDirectory()) {
+                error = errorCustomMessage("File " + f.getPath() + " does not exist!");
+                if (error != null) {
+                    return error.convertToJson();
+                }
+            }
+            String documentContent = getTextFromPdf(f.getPath(), true).getContent();
             double minThreshold;
             try {
                 minThreshold = Double.parseDouble(hm.get("threshold"));
