@@ -114,6 +114,7 @@ public abstract class Parsing {
 
     public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
         Map<BlockTemplate, Annotation> annotations;
+        usePOSTagging = usePOSTagging && hasAnnotators();
         try {
             if (!adt.getBlocks().isEmpty()) {
                 annotations = adt.getBlocks().stream()
@@ -244,5 +245,9 @@ public abstract class Parsing {
 
         s.finalProcessing();
         return s;
+    }
+    
+    public boolean hasAnnotators() {
+        return !getPipeline().getProperties().getProperty("annotators").isEmpty();
     }
 }
