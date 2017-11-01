@@ -36,7 +36,11 @@ public enum SemanticCorpora implements Serializable {
     le_monde_fr_word2vec("Le_Monde", Lang.fr, SimilarityType.WORD2VEC),
     
     euro_parlamentean_nl_lda("Euro_Parlamentean", Lang.nl, SimilarityType.LDA),
-    inl_nl_lda("INL", Lang.nl, SimilarityType.LDA);
+    inl_nl_lda("INL", Lang.nl, SimilarityType.LDA),
+    
+    jose_antonio_es_lsa("Jose_Antonio", Lang.es, SimilarityType.LSA),
+    jose_antonio_es_lda("Jose_Antonio", Lang.es, SimilarityType.LDA),
+    jose_antonio_es_word2vec("Jose_Antonio", Lang.es, SimilarityType.WORD2VEC);
     
     private final static String SEMANTIC_CORPORA_ROOT = "resources/config/";
     private final String corpora;
