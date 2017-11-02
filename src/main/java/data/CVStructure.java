@@ -1,10 +1,10 @@
 package data;
 
+import edu.stanford.nlp.util.Triple;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.util.Pair;
-import org.nd4j.linalg.primitives.Triple;
 //import org.datavec.api.berkeley.Triple;
 
 /**
@@ -21,7 +21,7 @@ public class CVStructure {
     private ArrayList<Triple<Float, Float, String>> yCoords = new ArrayList<>();
 
     public CVStructure () {
-        yCoords.add(new Triple<>(new Float(0),new Float(0), " "));
+        yCoords.add(new Triple<>(0f, 0f, " "));
     }
 
     public CVStructure (AbstractDocument document) {
@@ -29,10 +29,10 @@ public class CVStructure {
     }
 
     public float getLastYCoord() {
-        return  yCoords.get(yCoords.size() - 1).getFirst();
+        return  yCoords.get(yCoords.size() - 1).first;
     }
 
-    public void addYCoord(Triple y) {
+    public void addYCoord(Triple<Float, Float, String> y) {
         yCoords.add(y);
     }
 
@@ -41,15 +41,15 @@ public class CVStructure {
     }
 
     public float getCoord (Triple<Float, Float, String> info) {
-        return info.getFirst();
+        return info.first;
     }
 
     public float getFontSize (Triple<Float, Float, String> info) {
-        return info.getSecond();
+        return info.second;
     }
 
     public String getFontName (Triple<Float, Float, String> info) {
-        return info.getThird();
+        return info.third;
     }
 
 
@@ -86,15 +86,15 @@ public class CVStructure {
 
                         for(int j = 0; j < p && sndIterator + j < yCoords.size(); j++) {
 
-                            while(chain.get((p + j -1) % p).getKey().getSecond().equals(yCoords.get(sndIterator + j).getSecond())
-                                    && chain.get((p + j -1) % p).getKey().getThird().equals(yCoords.get(sndIterator + j).getThird())
+                            while(chain.get((p + j -1) % p).getKey().second.equals(yCoords.get(sndIterator + j).second)
+                                    && chain.get((p + j -1) % p).getKey().third.equals(yCoords.get(sndIterator + j).third)
                                     && sndIterator + j + 1< yCoords.size()) {
                                 sameLines++;
                                 sndIterator++;
                             }
 
-                            if(!chain.get(j).getKey().getSecond().equals(yCoords.get(sndIterator+j).getSecond()) ||
-                                    !chain.get(j).getKey().getThird().equals(yCoords.get(sndIterator+j).getThird())) {
+                            if(!chain.get(j).getKey().second.equals(yCoords.get(sndIterator+j).second) ||
+                                    !chain.get(j).getKey().third.equals(yCoords.get(sndIterator+j).third)) {
 
                                 stop = 1;
                                 break;
@@ -121,8 +121,8 @@ public class CVStructure {
 
 
                         while(  sndIterator < yCoords.size() &&
-                                chain.get(chain.size() - 1).getKey().getSecond().equals(yCoords.get(sndIterator).getSecond())
-                                && chain.get(chain.size() -1 ).getKey().getThird().equals(yCoords.get(sndIterator).getThird())
+                                chain.get(chain.size() - 1).getKey().second.equals(yCoords.get(sndIterator).second)
+                                && chain.get(chain.size() -1 ).getKey().third.equals(yCoords.get(sndIterator).third)
                                 ) {
 
                             sndIterator++;
@@ -140,8 +140,8 @@ public class CVStructure {
                         for(int j = 0; j < p -1 ; j++) {
                             chain.set(j,chain.get(j+1));
                         }
-                        while (chain.get(p-1).getKey().getSecond().equals(yCoords.get(i).getSecond())
-                                && chain.get(p-1).getKey().getThird().equals(yCoords.get(i).getThird())) {
+                        while (chain.get(p-1).getKey().second.equals(yCoords.get(i).second)
+                                && chain.get(p-1).getKey().third.equals(yCoords.get(i).third)) {
                             if(i + 1 < yCoords.size()) {
                                 i++;
                             }
@@ -169,7 +169,7 @@ public class CVStructure {
         Float[] diffs = new Float[yCoords.size() - 1];
 
         for (int i = 0 ; i < yCoords.size() - 1; i++) {
-            diffs[i] = yCoords.get(i + 1).getFirst() - yCoords.get(i).getFirst();
+            diffs[i] = yCoords.get(i + 1).first - yCoords.get(i).first;
         }
 
         for( int i = 0; i < diffs.length; i++) {
@@ -200,7 +200,7 @@ public class CVStructure {
         maxdiff += 1;
 
         for (int i = 1 ; i < yCoords.size() - 1; i++) {
-            float diff = yCoords.get(i + 1).getFirst() - yCoords.get(i).getFirst();
+            float diff = yCoords.get(i + 1).first - yCoords.get(i).first;
             if (diff > maxdiff) {
 
                 if(i + 2 < yCoords.size()) {

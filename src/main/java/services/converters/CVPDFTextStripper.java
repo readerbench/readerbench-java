@@ -6,6 +6,7 @@
 package services.converters;
 
 import data.CVStructure;
+import edu.stanford.nlp.util.Triple;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,6 @@ import org.apache.pdfbox.contentstream.operator.color.SetStrokingDeviceGrayColor
 import org.apache.pdfbox.contentstream.operator.color.SetStrokingDeviceRGBColor;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import org.nd4j.linalg.primitives.Triple;
-//import org.datavec.api.berkeley.Triple;
 
 /**
  *
@@ -80,7 +79,7 @@ public class CVPDFTextStripper extends PDFTextStripper {
                         start = i + 1;
                     }
                 }
-                cvStructure.addYCoord(new Triple(text.getY(), text.getFontSizeInPt(), fontName.substring(start)));
+                cvStructure.addYCoord(new Triple<>(text.getY(), text.getFontSizeInPt(), fontName.substring(start)));
             }
         }
 

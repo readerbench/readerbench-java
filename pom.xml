@@ -123,7 +123,6 @@
 
         <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
-        <dl4j.version>0.9.1</dl4j.version>
         <apache.mahout.version>0.12.2</apache.mahout.version>
         <wordnet.extjwnl.version>1.9.2</wordnet.extjwnl.version>
         <languagetool.version>3.9</languagetool.version>
@@ -467,22 +466,6 @@
             <version>${sqlite.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-nlp</artifactId>
-            <version>${dl4j.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-nlp-uima</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.extjwnl</groupId>
             <artifactId>extjwnl</artifactId>
             <version>${wordnet.extjwnl.version}</version>
@@ -558,6 +541,11 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
             <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.10.0</version>
         </dependency>
     </dependencies>
 </project>

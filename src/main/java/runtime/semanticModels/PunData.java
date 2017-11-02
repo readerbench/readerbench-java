@@ -171,6 +171,5 @@ public class PunData {
 
         comp.comparePuns(pathToFile, Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en));
 //        comp.comparePuns(pathToFile, Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA_epoch3_iter3", Lang.en));
-        comp.comparePuns(pathToFile, Word2VecModel.loadGoogleNewsModel());
     }
 }
