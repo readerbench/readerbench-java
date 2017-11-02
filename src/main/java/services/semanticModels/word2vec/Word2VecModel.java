@@ -188,8 +188,17 @@ public class Word2VecModel implements ISemanticModel {
     
     
     public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
+        if (!inputFile.startsWith("resources")) {
+            if (inputFile.contains("resources/")) {
+                inputFile = inputFile.replaceAll(".*resources", "resources");
+            }
+            else {
+                inputFile = inputFile.replaceAll(".*ReaderBench\\/", "resources/");
+            }
+        }
         try {
             getClient().trainModel(inputFile, noEpochs, layerSize);
+            client = null;
             LOGGER.info("Input file sent for training");
         } catch (TException ex) {
             Exceptions.printStackTrace(ex);
@@ -226,9 +235,10 @@ public class Word2VecModel implements ISemanticModel {
     }
     
     public static void main(String[] args) throws FileNotFoundException {
-//        trainModel("resources/config/EN/word2vec/ENEA/enea_out.txt");
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA", Lang.en);
-        System.out.println(w2v.getNoDimensions());
-        System.out.println(w2v.getWordSet().size());
+        
+        trainModel("/Users/stefan/NetBeansProjects/ReaderBench/resources/corpora/EN/preprocessing/tasa_out.txt");
+//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA", Lang.en);
+//        System.out.println(w2v.getNoDimensions());
+//        System.out.println(w2v.getWordSet().size());
     }
 }
