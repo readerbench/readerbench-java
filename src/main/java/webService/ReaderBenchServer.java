@@ -66,6 +66,7 @@ import javax.servlet.http.Part;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.openide.util.Exceptions;
 import runtime.cv.CVConstants;
 import runtime.cv.CVFeedback;
@@ -1308,12 +1309,24 @@ public class ReaderBenchServer {
 
             Map<String, String> hm = hmParams(json);
             Boolean cme = Boolean.parseBoolean(hm.get("cme"));
-            JSONObject expertise = (JSONObject) new JSONParser().parse(hm.get("expertise"));
-            // TODO: parse expertise (array of array of strings)
-            String topics = hm.get("topics");
-            String text = hm.get("text");
-            JSONObject themes = (JSONObject) new JSONParser().parse(hm.get("themes"));
-            // TODO: parse themes (array of strings)
+            String topics = "", text = "";
+            try {
+                JSONArray expertise = (JSONArray) new JSONParser().parse(hm.get("expertise"));
+                // TODO: parse expertise (array of array of strings)
+                
+                topics = hm.get("topics");
+                text = hm.get("text");
+            
+                JSONArray themes = (JSONArray) new JSONParser().parse(hm.get("themes"));
+                // TODO: parse themes (array of strings)
+                
+                
+            }
+            catch(Exception e) {
+                LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
+            }
+            
+            
 
             // Step 1: Filter lessons by expertise, topics and themes
             // TODO: Insert code here
