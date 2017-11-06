@@ -28,7 +28,6 @@ import services.converters.Txt2XmlConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
-import services.semanticModels.word2vec.Word2VecModel;
 import webService.ReaderBenchServer;
 
 public class DataGatheringTest {
@@ -75,7 +74,7 @@ public class DataGatheringTest {
 //        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
         LSA lsa = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
         LDA lda = LDA.loadLDA("resources/config/EN/LDA/COCA_newspaper", Lang.en);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
+//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA_LAK", Lang.en);
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA_LAK", Lang.en);
 //        LSA lsa = LSA.loadLSA("resources/config/ES/LSA/Jose_Antonio", Lang.es);
@@ -90,20 +89,25 @@ public class DataGatheringTest {
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
         models.add(lda);
-        models.add(w2v);
+//        models.add(w2v);
 
 //        convertAndProcess("resources/in/Cohesion/artificial cohesion_es", Lang.es, models);
 //        convertAndProcess("resources/in/Cohesion/artificial cohesion_en", Lang.en, models);
 //        convertAndProcess("resources/in/creativity/individual creativity tasks (txt)", Lang.en, models);
 //        convertAndProcess("resources/in/pairwise/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/Archive/texts", Lang.en, models);
-        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
+//        convertAndProcess("resources/in/cohesion/CohMetrix/texts", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/posttest essays fall 2009", Lang.en, models);
 //        convertAndProcess("resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays", Lang.en, models);
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/iStart mini-games/texts", Lang.en, "UTF-8");
+//        Txt2XmlConverter.parseTxtFiles("", "resources/in/tasa_equitable/SocialStudies", Lang.en, "UTF-8");
 //        Txt2XmlConverter.parseTxtFiles("", "resources/in/essays/stairstepper_en/texts", Lang.en, "ISO-8859-1");
 //        DataGathering.processTexts("resources/in/essays/stairstepper_en/texts", "", true, models, Lang.en, true, true);
-//        DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+        convertAndProcess("resources/in/essays/essays_FYP_en/texts", Lang.en, models);
+//        convertAndProcess("resources/in/corpus_chats", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/LanguageArts", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/Science", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/SocialStudies", Lang.en, models);
 //        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);

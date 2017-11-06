@@ -70,7 +70,7 @@ import runtime.cv.CVFeedback;
 import runtime.cv.CVValidation;
 import services.commons.Formatting;
 import services.converters.PdfToTextConverter;
-import services.mail.SendMail;
+import webService.mail.SendMail;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;

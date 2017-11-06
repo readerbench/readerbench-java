@@ -61,6 +61,16 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.logging.Level;
 import org.openide.util.Exceptions;
+//import services.complexity.rhythm.indices.AvgRhythmicUnits;
+//import services.complexity.rhythm.indices.AvgStressedSyllablesInRhythmicUnit;
+//import services.complexity.rhythm.indices.AvgStressedSyllablesInSentence;
+//import services.complexity.rhythm.indices.AvgSyllablesInRhythmicUnit;
+//import services.complexity.rhythm.indices.AvgSyllablesInSentence;
+//import services.complexity.rhythm.indices.LanguageRhythmicCoefficient;
+//import services.complexity.rhythm.indices.LanguageRhythmicIndexSM;
+//import services.complexity.rhythm.views.AlliterationDocumentView;
+//import services.complexity.rhythm.views.AssonanceDocumentView;
+//import services.complexity.rhythm.views.DocumentRhythmView;
 import services.semanticModels.SimilarityType;
 import utils.localization.LocalizationUtils;
 import view.models.document.DocumentManagementTableModel;
@@ -508,6 +518,21 @@ public class DocumentProcessingView extends JInternalFrame {
                 if (d instanceof Document) {
                     DocumentView view = new DocumentView((Document) d);
                     view.setVisible(true);
+//                    JFrame all = new AlliterationDocumentView((Document) d);
+//                    all.setVisible(true);
+//                    JFrame asson = new AssonanceDocumentView((Document) d);
+//                    asson.setVisible(true);
+//                    DocumentRythmView rdv = new DocumentRythmView((Document) d);
+//                    rdv.setVisible(true);
+
+//                    LanguageRhythmicIndexSM lri = new LanguageRhythmicIndexSM();
+//                    lri.compute(d);
+//                    LanguageRhythmicCoefficient lrc = new LanguageRhythmicCoefficient();
+//                    lrc.compute(d);
+//                    AvgStressedSyllablesInSentence assis = new AvgStressedSyllablesInSentence();
+//                    assis.compute(d);
+//                    AvgSyllablesInSentence asis = new AvgSyllablesInSentence();
+//                    asis.compute(d);
                 }
             } else {
                 JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
