@@ -15,6 +15,8 @@
  */
 package webService.result;
 
+import java.util.HashSet;
+import java.util.Set;
 import webService.enea.LessonDescriptives;
 
 public class ResultEneaLesson {
@@ -24,17 +26,25 @@ public class ResultEneaLesson {
     private final String uri;
     private final Integer time;
     private final Double similarityScore;
-	private final String pre;
-    private final String post;
+	private final Set<String> pre;
+    private final Set<String> post;
 
-	public ResultEneaLesson(LessonDescriptives ld, String title, String uri, Integer time, Double similarityScore, LessonDescriptives pre, LessonDescriptives post) {
-        this.untModLes = ld.toString();
+	public ResultEneaLesson(LessonDescriptives ld, String title, String uri, Integer time, Double similarityScore, Set<LessonDescriptives> pre, Set<LessonDescriptives> post) {
+        this.untModLes = ld.toString().trim();
         this.title = title;
 		this.uri = uri;
         this.time = time;
         this.similarityScore = similarityScore;
-        this.pre = pre.toString();
-        this.post = post.toString();
+        this.pre = new HashSet<>();
+        for (LessonDescriptives p : pre) {
+            String s = p.toString().trim();
+            if (s.compareTo("0.0.0") != 0) this.pre.add(p.toString().trim());
+        }
+        this.post = new HashSet<>();
+        for (LessonDescriptives p : post) {
+            String s = p.toString().trim();
+            if (s.compareTo("0.0.0") != 0) this.post.add(p.toString().trim());
+        }
 	}
     
     public String getTitle() {
@@ -53,11 +63,11 @@ public class ResultEneaLesson {
         return similarityScore;
     }
 
-    public String getPrerequisites() {
+    public Set<String> getPrerequisites() {
         return pre;
     }
 
-    public String getPostrequisites() {
+    public Set<String> getPostrequisites() {
         return post;
     }
     

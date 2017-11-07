@@ -1426,7 +1426,11 @@ public class ReaderBenchServer {
                 SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
                 double simScore = sc.getCohesion();
                 if (simScore >= threshold) {
-                    eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUrl(), l.getTime(), simScore, l.getPre(), l.getPost()), simScore);
+                    Set<LessonDescriptives> ldpre = new HashSet<>();
+                    ldpre.add(l.getPre());
+                    Set<LessonDescriptives> ldpost = new HashSet<>();
+                    ldpost.add(l.getPost());
+                    eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUrl(), l.getTime(), simScore, ldpre, ldpost), simScore);
                     keptLessons.put(l.getLessonDescriptives(), l);
                 }
             }
