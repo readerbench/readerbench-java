@@ -85,6 +85,13 @@ import spark.Spark;
 import services.extendedCNA.GraphMeasure;
 import webService.cv.CVHelper;
 import webService.cv.JobQuestHelper;
+import webService.enea.Lesson;
+import webService.enea.LessonDescriptives;
+import webService.enea.LessonExpertise;
+import static webService.enea.LessonThemes.themeToConstant;
+import webService.enea.LessonsReader;
+import static webService.enea.LessonExpertise.expertiseToConstant;
+import webService.enea.LessonThemes;
 import webService.keywords.KeywordsHelper;
 import webService.query.QueryHelper;
 import webService.queryResult.*;
@@ -1298,474 +1305,582 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
 
+            LessonsReader lessonsReader = new LessonsReader();
+            lessonsReader.parse();
+
             // default parameters
             Lang lang = Lang.en;
             Boolean usePosTagging = true;
             Boolean computeDialogism = false;
             Boolean useBigrams = false;
-            String lsaCorpora = "ENEA_TASA", ldaCorpora = "ENEA_TASA", w2vCorpora = "ENEA_TASA";
+            String lsaCorpora = "TASA", ldaCorpora = "TASA", w2vCorpora = "TASA";
             List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
             double threshold = 0.3;
 
             Map<String, String> hm = hmParams(json);
             Boolean cme = Boolean.parseBoolean(hm.get("cme"));
             String topics = "", text = "";
+
+            Set<Integer> expertiseValues = new HashSet<>();
+            Set<Integer> themeValues = new HashSet<>();
+            Map<LessonDescriptives, Lesson> lessons;
             try {
                 JSONArray expertise = (JSONArray) new JSONParser().parse(hm.get("expertise"));
-                // TODO: parse expertise (array of array of strings)
-                
+                for (int i = 0; i < expertise.size(); i++) {
+                    if (expertise.get(i) instanceof String) {
+                        String exp = (String) expertise.get(i);
+                        expertiseValues.add(expertiseToConstant(exp));
+                    } else {
+                        JSONObject expObject = (JSONObject) expertise.get(i);
+                        for (Object key : expObject.keySet()) {
+                            String keyStr = (String) key;
+                            JSONArray keyvalue = (JSONArray) expObject.get(keyStr);
+
+                            for (int j = 0; j < keyvalue.size(); j++) {
+                                String exp = keyStr + "_" + keyvalue.get(j);
+                                expertiseValues.add(expertiseToConstant(exp));
+                            }
+                        }
+                    }
+                }
+
                 topics = hm.get("topics");
                 text = hm.get("text");
-            
+
                 JSONArray themes = (JSONArray) new JSONParser().parse(hm.get("themes"));
-                // TODO: parse themes (array of strings)
-                
-                
-            }
-            catch(Exception e) {
+                for (int i = 0; i < themes.size(); i++) {
+                    String theme = (String) themes.get(i);
+                    themeValues.add(themeToConstant(theme));
+                }
+
+            } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
-            
-            
 
             // Step 1: Filter lessons by expertise, topics and themes
-            // TODO: Insert code here
+            lessons = lessonsReader.getLessons();
+            Iterator it = lessons.entrySet().iterator();
+            Map<LessonDescriptives, Lesson> keptLessons = new HashMap<>();
+            keptLessons.putAll(lessons);
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                LessonDescriptives ld = (LessonDescriptives) pair.getKey();
+                Lesson l = (Lesson) pair.getValue();
+
+                // remove lessons that do not cover expertise fields
+                LessonExpertise le = l.getLesssonExpertise();
+                if (!((expertiseValues.contains(webService.enea.Constants.EXPERTISE_MED_PAEDI) && le.isMedicinePaeditrician())
+                        || (expertiseValues.contains(webService.enea.Constants.EXPERTISE_MED_GYNO) && le.isMedicineGynocologist())
+                        || (expertiseValues.contains(webService.enea.Constants.EXPERTISE_MED_GP) && le.isMedicineGp())
+                        || (expertiseValues.contains(webService.enea.Constants.EXPERTISE_MED_OTHER) && le.isMedicineOther())
+                        || (expertiseValues.contains(webService.enea.Constants.EXPERTISE_NURSE) && le.isNursing())
+                        || (expertiseValues.contains(webService.enea.Constants.EXPERTISE_NUTRI) && le.isNutrition()))) {
+                    keptLessons.remove(ld);
+                    continue;
+                }
+
+                // remove lessons that do not cover topics
+                // remove lessons that do not cover themes
+                LessonThemes lt = l.getLessonThemes();
+                if (!((themeValues.contains(webService.enea.Constants.THEME_SCIENCE) && lt.isTheory())
+                        || (themeValues.contains(webService.enea.Constants.THEME_GUIDELINES) && lt.isGuidelines())
+                        || (themeValues.contains(webService.enea.Constants.THEME_PRACTICE) && lt.isPractice()))) {
+                    keptLessons.remove(ld);
+                    continue;
+                }
+            }
+
+            lessons = keptLessons;
+            if (lessons.isEmpty()) {
+                error = new QueryResult(false, "The selected fields are too restrictive! No lesson is retrieved!");
+                return error.convertToJson();
+            }
+
             // Step 2: If cme is true, sum up credits of the remaining lessons (1 credit = 60 mins);
             if (cme == true) {
                 double sumCredits = 0.0;
-                // sum here credits for filtered lessons
+                it = lessons.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    Lesson l = (Lesson) pair.getValue();
+                    sumCredits += l.getTime() / 60;
+                }
                 if (sumCredits < 5) {
-                    // Return error message response: The selected fields are too restrictive!
+                    error = new QueryResult(false, "The sum of remaining lessons is less than 5. No lesson is retrieved!");
+                    return error.convertToJson();
                 }
             }
 
             // Step 3: Compute semantic similarity between the free text and the remaining lessons
             Map<ResultEneaLesson, Double> eligibleLessons = new HashMap<>();
             AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
+            document.computeAll(computeDialogism, useBigrams);
             // iterate through all lessons
-            for (;;) {
-                AbstractDocument lessonDocument = QueryHelper.generateDocument("text here", lang, models, usePosTagging, computeDialogism, useBigrams);
+            it = lessons.entrySet().iterator();
+            keptLessons = new HashMap<>();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                Lesson l = (Lesson) pair.getValue();
+                AbstractDocument lessonDocument = QueryHelper.generateDocument(l.getDescription(), lang, models, usePosTagging, computeDialogism, useBigrams);
+                lessonDocument.computeAll(computeDialogism, useBigrams);
                 SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
                 double simScore = sc.getCohesion();
-                ResultEneaLesson lesson = new ResultEneaLesson("title", "uri", 3600, simScore, null, null);
                 if (simScore >= threshold) {
-                    eligibleLessons.put(lesson, simScore);
+                    eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUrl(), l.getTime(), simScore, l.getPre(), l.getPost()), simScore);
+                    keptLessons.put(l.getLessonDescriptives(), l);
                 }
-                break; // delete this after writing for statement
             }
+            lessons = keptLessons;
 
             // Step 4: Check again whether the sum up of credits make it enough for scoring
             if (cme == true) {
                 double sumCredits = 0.0;
                 // sum here credits for remaining lessons
+                it = lessons.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry) it.next();
+                    Lesson l = (Lesson) pair.getValue();
+                    sumCredits += l.getTime() / 60;
+                }
                 if (sumCredits < 5) {
-                    // Return error message response: The selected fields are too restrictive!
+                    error = new QueryResult(false, "The sum of remaining lessons (step 2) is less than 5. No lesson is retrieved!");
+                    return error.convertToJson();
                 }
             }
 
             // Step 5: Return lessons in descending order by similarity score
             Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
             List<ResultEneaLesson> lessonsList = new ArrayList();
-            eligibleLessonsSorted.keySet().addAll(lessonsList);
+            lessonsList.addAll(eligibleLessonsSorted.keySet());
 
             // Step 6: Perform DFS in prerequisites and append them to the response
             // Step 7: Perform DFS in postrequisites and append them to the response
             ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList);
             QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
-            try {
-                queryResult.setData(result);
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
-            }
+            queryResult.setData(result);
             response.type("application/json");
             return queryResult.convertToJson();
-        });
+        }
+        );
 
-        Spark.post("/folderUpload", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
-            MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
-            request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
-            List<Part> filesList = (List<Part>) request.raw().getParts();
-            for (Part file : filesList) {
-                FileProcessor.getInstance().saveFile(file, folder);
-            }
-            return folder.getName();
-        });
-        Spark.options("/folderUpload", (request, response) -> {
-            return "";
-        });
-        Spark.post("/vcop", (Request request, Response response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+        Spark.post(
+                "/folderUpload", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    File folder = FileProcessor.getInstance().createFolderForVCoPFiles();
+                    MultipartConfigElement multipartConfigElement = new MultipartConfigElement(folder.getAbsolutePath());
+                    request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+                    List<Part> filesList = (List<Part>) request.raw().getParts();
+                    for (Part file : filesList) {
+                        FileProcessor.getInstance().saveFile(file, folder);
+                    }
+                    return folder.getName();
+                }
+        );
+        Spark.options(
+                "/folderUpload", (request, response) -> {
+                    return "";
+                }
+        );
+        Spark.post(
+                "/vcop", (Request request, Response response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
-            response.type("application/json");
+                    response.type("application/json");
 
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/");
-            String community = (String) json.get("community");
-            communityFolder.append(community);
-            String startDateString = (String) json.get("startDate");
-            DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-            Date startDate = format.parse(startDateString);
-            String endDateString = (String) json.get("endDate");
-            Date endDate = format.parse(endDateString);
-            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
-            long monthIncrement = (Long) json.get("monthIncrement");
-            long dayIncrement = (Long) json.get("dayIncrement");
+                    StringBuilder communityFolder = new StringBuilder();
+                    communityFolder.append("resources/in/");
+                    String community = (String) json.get("community");
+                    communityFolder.append(community);
+                    String startDateString = (String) json.get("startDate");
+                    DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+                    Date startDate = format.parse(startDateString);
+                    String endDateString = (String) json.get("endDate");
+                    Date endDate = format.parse(endDateString);
+                    Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+                    long monthIncrement = (Long) json.get("monthIncrement");
+                    long dayIncrement = (Long) json.get("dayIncrement");
 
-            Community communityStartEnd = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDate, endDate,
-                    (int) monthIncrement, (int) dayIncrement);
-            communityStartEnd.computeMetrics(useTextualComplexity, true, true);
+                    Community communityStartEnd = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDate, endDate,
+                            (int) monthIncrement, (int) dayIncrement);
+                    communityStartEnd.computeMetrics(useTextualComplexity, true, true);
 
-            List<Community> subCommunities = communityStartEnd.getTimeframeSubCommunities();
+                    List<Community> subCommunities = communityStartEnd.getTimeframeSubCommunities();
 
-            Date startDateAllCommunities = format.parse("01/01/1970");
-            Date endDateAllCommunities = format.parse("01/01/2099");
+                    Date startDateAllCommunities = format.parse("01/01/1970");
+                    Date endDateAllCommunities = format.parse("01/01/2099");
 
-            Community allCommunity = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDateAllCommunities,
-                    endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
-            allCommunity.computeMetrics(useTextualComplexity, true, true);
+                    Community allCommunity = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, startDateAllCommunities,
+                            endDateAllCommunities, (int) monthIncrement, (int) dayIncrement);
+                    allCommunity.computeMetrics(useTextualComplexity, true, true);
 
-            List<ResultTopic> participantsInTimeFrame = new ArrayList<>();
+                    List<ResultTopic> participantsInTimeFrame = new ArrayList<>();
 
-            for (Community c : subCommunities) {
-                participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c, true));
-            }
+                    for (Community c : subCommunities) {
+                        participantsInTimeFrame.add(CommunityInteraction.buildParticipantGraph(c, true));
+                    }
 
-            QueryResultvCoP queryResult = new QueryResultvCoP();
-            ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity, true),
-                    CommunityInteraction.buildParticipantGraph(communityStartEnd, true), participantsInTimeFrame, null);
-            queryResult.setData(resultVcop);
+                    QueryResultvCoP queryResult = new QueryResultvCoP();
+                    ResultvCoP resultVcop = new ResultvCoP(CommunityInteraction.buildParticipantGraph(allCommunity, true),
+                            CommunityInteraction.buildParticipantGraph(communityStartEnd, true), participantsInTimeFrame, null);
+                    queryResult.setData(resultVcop);
 
-            String result = queryResult.convertToJson();
-            return result;
-        });
-        Spark.post("/vcopD3", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    String result = queryResult.convertToJson();
+                    return result;
+                }
+        );
+        Spark.post(
+                "/vcopD3", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
-            response.type("application/json");
+                    response.type("application/json");
 
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/Reddit/");
-            String communityName = (String) json.get("community");
-            communityFolder.append(communityName);
-            Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
+                    StringBuilder communityFolder = new StringBuilder();
+                    communityFolder.append("resources/in/Reddit/");
+                    String communityName = (String) json.get("community");
+                    communityFolder.append(communityName);
+                    Boolean useTextualComplexity = (Boolean) json.get("useTextualComplexity");
 
-            Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
-                    0, 7);
-            community.computeMetrics(useTextualComplexity, true, true);
+                    Community community = Community.loadMultipleConversations(communityFolder.toString(), Lang.en, true, null, null,
+                            0, 7);
+                    community.computeMetrics(useTextualComplexity, true, true);
 
-            JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
+                    JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
 
-            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
-            queryResult.setParticipants(participantsCommunities);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/vcopD3Week", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+                    queryResult.setParticipants(participantsCommunities);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.post(
+                "/vcopD3Week", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
 
-            response.type("application/json");
+                    response.type("application/json");
 
-            StringBuilder communityFolder = new StringBuilder();
-            communityFolder.append("resources/in/Reddit/");
-            String communityName = (String) json.get("community");
-            Integer weekNumber = Integer.valueOf((String) json.get("week"));
+                    StringBuilder communityFolder = new StringBuilder();
+                    communityFolder.append("resources/in/Reddit/");
+                    String communityName = (String) json.get("community");
+                    Integer weekNumber = Integer.valueOf((String) json.get("week"));
 
-            JSONArray participantsCommunities = new JSONArray();
-            JSONParser parser = new JSONParser();
-            try {
-                String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
-                LOGGER.log(Level.INFO, "Get participants for week {0} from file {1}", new Object[]{weekNumber, fileName});
-                Object obj = parser.parse(new FileReader(fileName));
-                JSONObject participantSubCommunity = (JSONObject) obj;
-                JSONObject subCommunityJson = new JSONObject();
-                subCommunityJson.put("week", weekNumber);
-                subCommunityJson.put("participants", participantSubCommunity);
-                participantsCommunities.add(subCommunityJson);
+                    JSONArray participantsCommunities = new JSONArray();
+                    JSONParser parser = new JSONParser();
+                    try {
+                        String fileName = communityFolder + communityName + "/" + communityName + "_d3_" + weekNumber + ".json";
+                        LOGGER.log(Level.INFO, "Get participants for week {0} from file {1}", new Object[]{weekNumber, fileName});
+                        Object obj = parser.parse(new FileReader(fileName));
+                        JSONObject participantSubCommunity = (JSONObject) obj;
+                        JSONObject subCommunityJson = new JSONObject();
+                        subCommunityJson.put("week", weekNumber);
+                        subCommunityJson.put("participants", participantSubCommunity);
+                        participantsCommunities.add(subCommunityJson);
 
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
-            queryResult.setParticipants(participantsCommunities);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/text-similarity", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            Set<String> requiredParams = new HashSet<>();
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            requiredParams.add("text1");
-            requiredParams.add("text2");
-            requiredParams.add("language");
-            requiredParams.add("model");
-            requiredParams.add("corpus");
-            // check whether all the required parameters are available
-            errorIfParamsMissing(requiredParams, json.keySet());
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
+                    queryResult.setParticipants(participantsCommunities);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.post(
+                "/text-similarity", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    Set<String> requiredParams = new HashSet<>();
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    requiredParams.add("text1");
+                    requiredParams.add("text2");
+                    requiredParams.add("language");
+                    requiredParams.add("model");
+                    requiredParams.add("corpus");
+                    // check whether all the required parameters are available
+                    errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(json);
-            String text1 = hm.get("text1");
-            String text2 = hm.get("text2");
-            Lang lang = Lang.getLang(hm.get("language"));
+                    Map<String, String> hm = hmParams(json);
+                    String text1 = hm.get("text1");
+                    String text2 = hm.get("text2");
+                    Lang lang = Lang.getLang(hm.get("language"));
 
-            QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
-            queryResult.setData(generateTextSimilarity(text1, text2, lang, hm.get("model"), hm.get("corpus")));
+                    QueryResultTextSimilarity queryResult = new QueryResultTextSimilarity();
+                    queryResult.setData(generateTextSimilarity(text1, text2, lang, hm.get("model"), hm.get("corpus")));
 
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/similar-concepts", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            Set<String> requiredParams = new HashSet<>();
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            requiredParams.add("seed");
-            requiredParams.add("language");
-            requiredParams.add("model");
-            requiredParams.add("corpus");
-            errorIfParamsMissing(requiredParams, json.keySet());
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.post(
+                "/similar-concepts", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    Set<String> requiredParams = new HashSet<>();
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    requiredParams.add("seed");
+                    requiredParams.add("language");
+                    requiredParams.add("model");
+                    requiredParams.add("corpus");
+                    errorIfParamsMissing(requiredParams, json.keySet());
 
-            Map<String, String> hm = hmParams(json);
-            String seed = hm.get("seed");
-            Lang lang = Lang.getLang(hm.get("language"));
-            String semanticCorpora = "";
-            if (hm.get("model") != null && (hm.get("model").compareTo("") != 0)) {
-                semanticCorpora = hm.get("model");
-            }
-            String corpus = hm.get("corpus");
-            double minThreshold;
-            try {
-                minThreshold = Double.parseDouble(hm.get("threshold"));
-            } catch (NullPointerException e) {
-                minThreshold = 0.3;
-            }
-            QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
-            queryResult.setData(generateSimilarConcepts(seed, lang, semanticCorpora, corpus, minThreshold));
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
+                    Map<String, String> hm = hmParams(json);
+                    String seed = hm.get("seed");
+                    Lang lang = Lang.getLang(hm.get("language"));
+                    String semanticCorpora = "";
+                    if (hm.get("model") != null && (hm.get("model").compareTo("") != 0)) {
+                        semanticCorpora = hm.get("model");
+                    }
+                    String corpus = hm.get("corpus");
+                    double minThreshold;
+                    try {
+                        minThreshold = Double.parseDouble(hm.get("threshold"));
+                    } catch (NullPointerException e) {
+                        minThreshold = 0.3;
+                    }
+                    QueryResultSimilarConcepts queryResult = new QueryResultSimilarConcepts();
+                    queryResult.setData(generateSimilarConcepts(seed, lang, semanticCorpora, corpus, minThreshold));
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
         // In contrast to textSimilarity, this endpoint returns similarity
         // scores of two texts using every similarity method available
-        Spark.post("/text-similarities", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            Set<String> requiredParams = new HashSet<>();
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            requiredParams.add("text1");
-            requiredParams.add("text2");
-            requiredParams.add("language");
-            requiredParams.add("pos-tagging");
-            requiredParams.add("lsa");
-            requiredParams.add("lda");
-            requiredParams.add("word2vec");
-            // check whether all the required parameters are available
-            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
-            if (error != null) {
-                return error.convertToJson();
-            }
-
-            Map<String, String> hm = hmParams(json);
-            String text1 = hm.get("text1");
-            String text2 = hm.get("text2");
-            Lang lang = Lang.getLang(hm.get("language"));
-            Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
-            Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
-            String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
-            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
-                lsaCorpora = hm.get("lsa");
-            }
-            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
-                ldaCorpora = hm.get("lda");
-            }
-            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
-                w2vCorpora = hm.get("w2v");
-            }
-            List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-            QueryResultTextSimilarities queryResult = new QueryResultTextSimilarities();
-            queryResult.setData(textSimilarities(text1, text2, lang, models, usePosTagging));
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-
-        Spark.post("/answer-matching", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            Set<String> requiredParams = new HashSet<>();
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            requiredParams.add("language");
-            requiredParams.add("pos-tagging");
-            requiredParams.add("dialogism");
-            requiredParams.add("lsa");
-            requiredParams.add("lda");
-            requiredParams.add("w2v");
-            requiredParams.add("user-answer");
-            requiredParams.add("predefined-answers");
-            QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
-            if (error != null) {
-                return error.convertToJson();
-            }
-
-            Map<String, String> hm = hmParams(json);
-            Lang lang = Lang.getLang(hm.get("language"));
-            Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
-            Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
-            Boolean useBigrams = false;
-            String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
-            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
-                lsaCorpora = hm.get("lsa");
-            }
-            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
-                ldaCorpora = hm.get("lda");
-            }
-            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
-                w2vCorpora = hm.get("w2v");
-            }
-            List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
-            String userAnswer = hm.get("user-answer");
-            List<String> predefinedAnswers = (ArrayList<String>) json.get("predefined-answers");
-            List<AbstractDocument> predefinedAnswerDocuments = new ArrayList<>();
-            for (String answer : predefinedAnswers) {
-                predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism, useBigrams));
-            }
-            AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism, useBigrams);
-            QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
-            queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-
-        Spark.get("/lak/nodes", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            response.type("application/json");
-            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            List<TwoModeGraphNode> authorNodes = graphBuilder.getNodes();
-            QueryResultTwoModeGraphNodes qResult = new QueryResultTwoModeGraphNodes(authorNodes);
-            return qResult.convertToJson();
-        });
-
-        Spark.post("/lak/graph", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            response.type("application/json");
-            String centerUri = (String) json.get("centerUri");
-            String searchText = (String) json.get("searchText");
-            int noAuthors = TwoModeGraphFilter.MaxNoAuthors;
-            int noArticles = TwoModeGraphFilter.MaxNoArticles;
-            boolean showAuthors = true, showArticles = true;
-            try {
-                noAuthors = ((Long) json.get("noAuthors")).intValue();
-                noArticles = ((Long) json.get("noArticles")).intValue();
-                showAuthors = (boolean) json.get("showAuthors");
-                showArticles = (boolean) json.get("showArticles");
-            } catch (Exception e) {
-            }
-
-            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
-            TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
-            LOGGER.log(Level.INFO, "[Before filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
-            graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
-            LOGGER.log(Level.INFO, "[After filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
-            QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
-            String result = queryResult.convertToJson();
-            return result;
-        });
-        Spark.get("/lak/measures", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            response.type("application/json");
-            List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
-            QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
-            return qResult.convertToJson();
-        });
-        Spark.get("/lak/years", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            List<ResearchArticle> articles = graphBuilder.getArticles();
-            Set<Integer> yearSet = new HashSet();
-            articles.forEach((article) -> {
-                if (article.getDate() != null) {
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(article.getDate());
-                    yearSet.add(cal.get(Calendar.YEAR));
-                }
-            });
-            List<Integer> yearList = new ArrayList();
-            yearList.addAll(yearSet);
-            Collections.sort(yearList);
-            QueryResultDocumentYears queryResult = new QueryResultDocumentYears(yearList);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.get("/lak/topicEvolution", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            List<ResearchArticle> articles = graphBuilder.getArticles();
-            TopicEvolutionBuilder builder = new TopicEvolutionBuilder(articles);
-            TopicEvolution topicEvolution = builder.build();
-            QueryResultTopicEvolution queryResult = new QueryResultTopicEvolution(topicEvolution);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-
-        Spark.post("/lak/topics", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
-            List<ResearchArticle> articles = graphBuilder.getArticles();
-            final List<ResearchArticle> filteredArticles = new ArrayList();
-            double threshold = 0.4;
-            try {
-                JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-                int year = ((Long) json.get("year")).intValue();
-                articles.forEach((article) -> {
-                    if (article.getDate() != null) {
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(article.getDate());
-                        if (cal.get(Calendar.YEAR) == year) {
-                            filteredArticles.add(article);
-                        }
+        Spark.post(
+                "/text-similarities", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    Set<String> requiredParams = new HashSet<>();
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    requiredParams.add("text1");
+                    requiredParams.add("text2");
+                    requiredParams.add("language");
+                    requiredParams.add("pos-tagging");
+                    requiredParams.add("lsa");
+                    requiredParams.add("lda");
+                    requiredParams.add("word2vec");
+                    // check whether all the required parameters are available
+                    QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+                    if (error != null) {
+                        return error.convertToJson();
                     }
-                });
-                threshold = (Double) json.get("threshold");
-            } catch (Exception e) {
-                filteredArticles.addAll(articles);
-            }
-            QueryResultTopic queryResult = new QueryResultTopic();
-            ResultTopic resultTopic = ConceptMap.getKeywords(filteredArticles, threshold, 25);
-            queryResult.setData(resultTopic);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
 
-        Spark.post("/ciModel", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Map<String, String> hm = hmParams(json);
+                    Map<String, String> hm = hmParams(json);
+                    String text1 = hm.get("text1");
+                    String text2 = hm.get("text2");
+                    Lang lang = Lang.getLang(hm.get("language"));
+                    Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
+                    Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+                    String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
+                    if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
+                        lsaCorpora = hm.get("lsa");
+                    }
+                    if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
+                        ldaCorpora = hm.get("lda");
+                    }
+                    if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
+                        w2vCorpora = hm.get("w2v");
+                    }
+                    List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+                    QueryResultTextSimilarities queryResult = new QueryResultTextSimilarities();
+                    queryResult.setData(textSimilarities(text1, text2, lang, models, usePosTagging));
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
 
-            double minActivationThreshold;
-            try {
-                minActivationThreshold = Double.parseDouble(hm.get("minActivationThreshold"));
-            } catch (NullPointerException e) {
-                minActivationThreshold = 0.3;
-            }
+        Spark.post(
+                "/answer-matching", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    Set<String> requiredParams = new HashSet<>();
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    requiredParams.add("language");
+                    requiredParams.add("pos-tagging");
+                    requiredParams.add("dialogism");
+                    requiredParams.add("lsa");
+                    requiredParams.add("lda");
+                    requiredParams.add("w2v");
+                    requiredParams.add("user-answer");
+                    requiredParams.add("predefined-answers");
+                    QueryResult error = errorIfParamsMissing(requiredParams, json.keySet());
+                    if (error != null) {
+                        return error.convertToJson();
+                    }
 
-            int maxSemanticExpand;
-            try {
-                maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
-            } catch (Exception e) {
-                maxSemanticExpand = 5;
-            }
+                    Map<String, String> hm = hmParams(json);
+                    Lang lang = Lang.getLang(hm.get("language"));
+                    Boolean usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
+                    Boolean computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
+                    Boolean useBigrams = false;
+                    String lsaCorpora = "", ldaCorpora = "", w2vCorpora = "";
+                    if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
+                        lsaCorpora = hm.get("lsa");
+                    }
+                    if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
+                        ldaCorpora = hm.get("lda");
+                    }
+                    if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
+                        w2vCorpora = hm.get("w2v");
+                    }
+                    List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+                    String userAnswer = hm.get("user-answer");
+                    List<String> predefinedAnswers = (ArrayList<String>) json.get("predefined-answers");
+                    List<AbstractDocument> predefinedAnswerDocuments = new ArrayList<>();
+                    for (String answer : predefinedAnswers) {
+                        predefinedAnswerDocuments.add(QueryHelper.generateDocument(answer, lang, models, usePosTagging, computeDialogism, useBigrams));
+                    }
+                    AbstractDocument userAnswerDocument = QueryHelper.generateDocument(userAnswer, lang, models, usePosTagging, computeDialogism, useBigrams);
+                    QueryResultAnswerMatching queryResult = new QueryResultAnswerMatching();
+                    queryResult.setData(computeScoresPerAnswer(userAnswerDocument, predefinedAnswerDocuments));
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
 
-            ComprehensionModelService cmService = new ComprehensionModelService(minActivationThreshold, maxSemanticExpand);
-            CMResult result = cmService.run(hm.get("text"));
-            QueryResultCM queryResult = new QueryResultCM(result);
-            String resultStr = queryResult.convertToJson();
-            return resultStr;
-        });
-        Spark.get("/community/communities", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
+        Spark.get(
+                "/lak/nodes", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    response.type("application/json");
+                    TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+                    List<TwoModeGraphNode> authorNodes = graphBuilder.getNodes();
+                    QueryResultTwoModeGraphNodes qResult = new QueryResultTwoModeGraphNodes(authorNodes);
+                    return qResult.convertToJson();
+                }
+        );
+
+        Spark.post(
+                "/lak/graph", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    response.type("application/json");
+                    String centerUri = (String) json.get("centerUri");
+                    String searchText = (String) json.get("searchText");
+                    int noAuthors = TwoModeGraphFilter.MaxNoAuthors;
+                    int noArticles = TwoModeGraphFilter.MaxNoArticles;
+                    boolean showAuthors = true, showArticles = true;
+                    try {
+                        noAuthors = ((Long) json.get("noAuthors")).intValue();
+                        noArticles = ((Long) json.get("noArticles")).intValue();
+                        showAuthors = (boolean) json.get("showAuthors");
+                        showArticles = (boolean) json.get("showArticles");
+                    } catch (Exception e) {
+                    }
+
+                    TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+                    TwoModeGraph graph = graphBuilder.getGraph(centerUri, searchText);
+                    TwoModeGraphFilter graphFilter = new TwoModeGraphFilter();
+                    LOGGER.log(Level.INFO, "[Before filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
+                    graph = graphFilter.filterGraph(graph, centerUri, noAuthors, noArticles, showAuthors, showArticles);
+                    LOGGER.log(Level.INFO, "[After filter] nodes = {0} edges = {1}", new Object[]{graph.nodeList.size(), graph.edgeList.size()});
+                    QueryResultTwoModeGraph queryResult = new QueryResultTwoModeGraph(graph);
+                    String result = queryResult.convertToJson();
+                    return result;
+                }
+        );
+        Spark.get(
+                "/lak/measures", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    response.type("application/json");
+                    List<GraphMeasure> measures = GraphMeasure.readGraphMeasures();
+                    QueryResultGraphMeasures qResult = new QueryResultGraphMeasures(measures);
+                    return qResult.convertToJson();
+                }
+        );
+        Spark.get(
+                "/lak/years", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+                    List<ResearchArticle> articles = graphBuilder.getArticles();
+                    Set<Integer> yearSet = new HashSet();
+                    articles.forEach((article) -> {
+                        if (article.getDate() != null) {
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(article.getDate());
+                            yearSet.add(cal.get(Calendar.YEAR));
+                        }
+                    });
+                    List<Integer> yearList = new ArrayList();
+                    yearList.addAll(yearSet);
+                    Collections.sort(yearList);
+                    QueryResultDocumentYears queryResult = new QueryResultDocumentYears(yearList);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.get(
+                "/lak/topicEvolution", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+                    List<ResearchArticle> articles = graphBuilder.getArticles();
+                    TopicEvolutionBuilder builder = new TopicEvolutionBuilder(articles);
+                    TopicEvolution topicEvolution = builder.build();
+                    QueryResultTopicEvolution queryResult = new QueryResultTopicEvolution(topicEvolution);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+
+        Spark.post(
+                "/lak/topics", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    TwoModeGraphBuilder graphBuilder = TwoModeGraphBuilder.getLakCorpusTwoModeGraphBuilder();
+                    List<ResearchArticle> articles = graphBuilder.getArticles();
+                    final List<ResearchArticle> filteredArticles = new ArrayList();
+                    double threshold = 0.4;
+                    try {
+                        JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                        int year = ((Long) json.get("year")).intValue();
+                        articles.forEach((article) -> {
+                            if (article.getDate() != null) {
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(article.getDate());
+                                if (cal.get(Calendar.YEAR) == year) {
+                                    filteredArticles.add(article);
+                                }
+                            }
+                        });
+                        threshold = (Double) json.get("threshold");
+                    } catch (Exception e) {
+                        filteredArticles.addAll(articles);
+                    }
+                    QueryResultTopic queryResult = new QueryResultTopic();
+                    ResultTopic resultTopic = ConceptMap.getKeywords(filteredArticles, threshold, 25);
+                    queryResult.setData(resultTopic);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+
+        Spark.post(
+                "/ciModel", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    Map<String, String> hm = hmParams(json);
+
+                    double minActivationThreshold;
+                    try {
+                        minActivationThreshold = Double.parseDouble(hm.get("minActivationThreshold"));
+                    } catch (NullPointerException e) {
+                        minActivationThreshold = 0.3;
+                    }
+
+                    int maxSemanticExpand;
+                    try {
+                        maxSemanticExpand = Integer.parseInt(hm.get("maxSemanticExpand"));
+                    } catch (Exception e) {
+                        maxSemanticExpand = 5;
+                    }
+
+                    ComprehensionModelService cmService = new ComprehensionModelService(minActivationThreshold, maxSemanticExpand);
+                    CMResult result = cmService.run(hm.get("text"));
+                    QueryResultCM queryResult = new QueryResultCM(result);
+                    String resultStr = queryResult.convertToJson();
+                    return resultStr;
+                }
+        );
+        Spark.get(
+                "/community/communities", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
 //            List<com.readerbench.solr.entities.cscl.Community> communities = SOLR_SERVICE_COMMUNITY.getCommunities();
 //
 //            Map<String, List<com.readerbench.solr.entities.cscl.Community>> results =
@@ -1777,90 +1892,97 @@ public class ReaderBenchServer {
 //                    results.put(community.getCategoryName(), Arrays.asList(community));
 //                }
 //            }
-            webService.services.cscl.result.dto.Community community1
+                    webService.services.cscl.result.dto.Community community1
                     = new webService.services.cscl.result.dto.Community("prisonarchitect", "Prison Architect");
-            webService.services.cscl.result.dto.Community community2
+                    webService.services.cscl.result.dto.Community community2
                     = new webService.services.cscl.result.dto.Community("ThisWarofMine_2014", "This War of Mine");
 
-            webService.services.cscl.result.dto.Community community3
+                    webService.services.cscl.result.dto.Community community3
                     = new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
-            webService.services.cscl.result.dto.Community community4
+                    webService.services.cscl.result.dto.Community community4
                     = new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
 
-            webService.services.cscl.result.dto.Category category1
+                    webService.services.cscl.result.dto.Category category1
                     = new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
                             Arrays.asList(community1, community2));
-            webService.services.cscl.result.dto.Category category2
+                    webService.services.cscl.result.dto.Category category2
                     = new webService.services.cscl.result.dto.Category("OKBC", "Online Knowledge Building Community",
                             Arrays.asList(community3));
-            webService.services.cscl.result.dto.Category category3
+                    webService.services.cscl.result.dto.Category category3
                     = new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
                             Arrays.asList(community4));
-            List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
-            QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
-            response.type("application/json");
-            return queryResult.convertToJson();
+                    List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
+                    QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
 
-        });
-        Spark.post("/community/participants", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Map<String, String> hm = hmParams(json);
-
-            String communityName = hm.get("communityName");
-            Integer week = Integer.valueOf(hm.get("week"));
-
-            List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
-
-            List<Map> filteredParticipants = participantsStats.stream()
-                    .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
-                    .collect(Collectors.toList());
-
-            List<Map> unique = new ArrayList<Map>();
-            for (Map map : filteredParticipants) {
-                if (!elasticsearchService.isDuplicate(map, unique)) {
-                    unique.add(map);
                 }
-            }
+        );
+        Spark.post(
+                "/community/participants", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    Map<String, String> hm = hmParams(json);
 
-            QueryResultParticipants queryResult = new QueryResultParticipants(unique);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/community/participants/directedGraph", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Map<String, String> hm = hmParams(json);
+                    String communityName = hm.get("communityName");
+                    Integer week = Integer.valueOf(hm.get("week"));
 
-            String communityName = hm.get("communityName");
+                    List<Map> participantsStats = elasticsearchService.searchParticipantsStatsPerWeek(communityName, week);
 
-            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
-                    "participants", "directedGraph", communityName);
+                    List<Map> filteredParticipants = participantsStats.stream()
+                            .filter(p -> Float.valueOf(p.get("Contrib").toString()) > 0)
+                            .collect(Collectors.toList());
+
+                    List<Map> unique = new ArrayList<Map>();
+                    for (Map map : filteredParticipants) {
+                        if (!elasticsearchService.isDuplicate(map, unique)) {
+                            unique.add(map);
+                        }
+                    }
+
+                    QueryResultParticipants queryResult = new QueryResultParticipants(unique);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.post(
+                "/community/participants/directedGraph", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    Map<String, String> hm = hmParams(json);
+
+                    String communityName = hm.get("communityName");
+
+                    List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                            "participants", "directedGraph", communityName);
 
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p ->  ((List)p.get("nodes")).size() > 0)
 //                    .collect(Collectors.toList());
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
-        Spark.post("/community/participants/edgeBundling", (request, response) -> {
-            SlackClient.logMessage(LoggerHelper.requestToString(request));
-            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
-            Map<String, String> hm = hmParams(json);
+                    QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
+        Spark.post(
+                "/community/participants/edgeBundling", (request, response) -> {
+                    SlackClient.logMessage(LoggerHelper.requestToString(request));
+                    JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+                    Map<String, String> hm = hmParams(json);
 
-            String communityName = hm.get("communityName");
+                    String communityName = hm.get("communityName");
 
-            List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
-                    "participants", "edgeBundling", communityName);
+                    List<Map> participantsInteraction = elasticsearchService.searchParticipantsGraphRepresentation(
+                            "participants", "edgeBundling", communityName);
 //            List<Map> filteredParticipantInteraction = participantsInteraction.stream()
 //                    .filter(p -> ((List) p.get("data")).size() > 0)
 //                    .collect(Collectors.toList());
 
-            QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
-            response.type("application/json");
-            return queryResult.convertToJson();
-        });
+                    QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
+                    response.type("application/json");
+                    return queryResult.convertToJson();
+                }
+        );
 
     }
 
