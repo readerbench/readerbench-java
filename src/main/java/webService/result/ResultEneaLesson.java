@@ -15,24 +15,26 @@
  */
 package webService.result;
 
-import java.util.List;
+import webService.enea.LessonDescriptives;
 
 public class ResultEneaLesson {
 
+    private final String untModLes;
     private final String title;
     private final String uri;
     private final Integer time;
     private final Double similarityScore;
-	private final List<ResultEneaLesson> prerequisites;
-    private final List<ResultEneaLesson> postrequisites;
+	private final String pre;
+    private final String post;
 
-	public ResultEneaLesson(String text, String uri, Integer time, Double similarityScore, List<ResultEneaLesson> prerequisites, List<ResultEneaLesson> postrequisites) {
-        this.title = text;
+	public ResultEneaLesson(LessonDescriptives ld, String title, String uri, Integer time, Double similarityScore, LessonDescriptives pre, LessonDescriptives post) {
+        this.untModLes = ld.toString();
+        this.title = title;
 		this.uri = uri;
         this.time = time;
         this.similarityScore = similarityScore;
-        this.prerequisites = prerequisites;
-        this.postrequisites = postrequisites;
+        this.pre = pre.toString();
+        this.post = post.toString();
 	}
     
     public String getTitle() {
@@ -51,12 +53,12 @@ public class ResultEneaLesson {
         return similarityScore;
     }
 
-    public List<ResultEneaLesson> getPrerequisites() {
-        return prerequisites;
+    public String getPrerequisites() {
+        return pre;
     }
 
-    public List<ResultEneaLesson> getPostrequisites() {
-        return postrequisites;
+    public String getPostrequisites() {
+        return post;
     }
     
 }
