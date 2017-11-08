@@ -159,6 +159,7 @@
         <javax.servlet.version>4.0.0</javax.servlet.version>
         <knowceanstools.version>1</knowceanstools.version>
         <wordnettools.vesion>3.0</wordnettools.vesion>
+        <jgrapht.version>1.0.1</jgrapht.version>
     </properties>
     <profiles>
         <profile>
@@ -224,6 +225,11 @@
                     <groupId>org.languagetool</groupId>
                     <artifactId>language-ro</artifactId>
                     <version>${languagetool.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jgrapht</groupId>
+                    <artifactId>jgrapht-core</artifactId>
+                    <version>${jgrapht.version}</version>
                 </dependency>
             </dependencies>
         </profile>

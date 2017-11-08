@@ -19,15 +19,18 @@ public class Lesson {
     private LessonThemes lessonThemes;
     private LessonExpertise lesssonExpertise;
     
-    private LessonDescriptives pre;
-    private LessonDescriptives post;
+    private LessonDescriptives prerequisites;
+    private LessonDescriptives postrequisites;
     private Integer time;
-    private String url;
+    private String uri;
+    
+    private Double similarityScore;
     
     public Lesson(String title, String description, Integer module, Integer unit, Integer lesson) {
         this.title = title;
         this.description = description;
         lessonDescriptives = new LessonDescriptives(module, unit, lesson);
+        similarityScore = 0.0;
     }
 
     public void setLessonKeywords(LessonKeywords lessonKeywords) {
@@ -42,20 +45,24 @@ public class Lesson {
         this.lesssonExpertise = lesssonExpertise;
     }
 
-    public void setPre(LessonDescriptives pre) {
-        this.pre = pre;
+    public void setPrerequisites(LessonDescriptives prerequisites) {
+        this.prerequisites = prerequisites;
     }
 
-    public void setPost(LessonDescriptives post) {
-        this.post = post;
+    public void setPostrequisites(LessonDescriptives postrequisites) {
+        this.postrequisites = postrequisites;
     }
 
     public void setTime(Integer time) {
         this.time = time;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public void setSimilarityScore(Double similarityScore) {
+        this.similarityScore = similarityScore;
     }
     
     public String getTitle() {
@@ -82,28 +89,32 @@ public class Lesson {
         return lesssonExpertise;
     }
 
-    public LessonDescriptives getPre() {
-        return pre;
+    public LessonDescriptives getPrerequisites() {
+        return prerequisites;
     }
 
-    public LessonDescriptives getPost() {
-        return post;
+    public LessonDescriptives getPostrequisites() {
+        return postrequisites;
     }
 
     public Integer getTime() {
         return time;
     }    
 
-    public String getUrl() {
-        return url;
+    public String getUri() {
+        return uri;
     }    
+
+    public Double getSimilarityScore() {
+        return similarityScore;
+    }
     
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(lessonDescriptives);
         sb.append(title).append(' ');
-        if (!"".equals(url)) sb.append('(').append(url).append(')').append(' ');
+        if (!"".equals(uri)) sb.append('(').append(uri).append(')').append(' ');
         if (time != 0) sb.append(time).append(' ');
         sb.append('(').append(description).append(')');
         sb.append(' ');
@@ -111,8 +122,8 @@ public class Lesson {
         sb.append(' ');
         sb.append(lessonThemes);
         sb.append(lesssonExpertise);
-        if (pre != null) sb.append("PRE: ").append(pre).append("; ");
-        if (post != null) sb.append("POST: ").append(post).append("; ");
+        if (prerequisites != null) sb.append("PRE: ").append(prerequisites).append("; ");
+        if (postrequisites != null) sb.append("POST: ").append(postrequisites).append("; ");
         return sb.toString();
     }
     

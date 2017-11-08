@@ -21,31 +21,35 @@ import webService.enea.LessonDescriptives;
 
 public class ResultEneaLesson {
 
-    private final String untModLes;
+    private final String id;
     private final String title;
     private final String uri;
     private final Integer time;
     private final Double similarityScore;
-	private final Set<String> pre;
-    private final Set<String> post;
+	private final Set<String> prerequisites;
+    private final Set<String> postrequisites;
 
-	public ResultEneaLesson(LessonDescriptives ld, String title, String uri, Integer time, Double similarityScore, Set<LessonDescriptives> pre, Set<LessonDescriptives> post) {
-        this.untModLes = ld.toString().trim();
+	public ResultEneaLesson(LessonDescriptives ld, String title, String uri, Integer time, Double similarityScore, Set<LessonDescriptives> prerequisites, Set<LessonDescriptives> postrequisites) {
+        this.id = ld.toString().trim();
         this.title = title;
 		this.uri = uri;
         this.time = time;
         this.similarityScore = similarityScore;
-        this.pre = new HashSet<>();
-        for (LessonDescriptives p : pre) {
+        this.prerequisites = new HashSet<>();
+        for (LessonDescriptives p : prerequisites) {
             String s = p.toString().trim();
-            if (s.compareTo("0.0.0") != 0) this.pre.add(p.toString().trim());
+            if (s.compareTo("0.0.0") != 0) this.prerequisites.add(p.toString().trim());
         }
-        this.post = new HashSet<>();
-        for (LessonDescriptives p : post) {
+        this.postrequisites = new HashSet<>();
+        for (LessonDescriptives p : postrequisites) {
             String s = p.toString().trim();
-            if (s.compareTo("0.0.0") != 0) this.post.add(p.toString().trim());
+            if (s.compareTo("0.0.0") != 0) this.postrequisites.add(p.toString().trim());
         }
 	}
+
+    public String getId() {
+        return id;
+    }
     
     public String getTitle() {
         return title;
@@ -64,11 +68,11 @@ public class ResultEneaLesson {
     }
 
     public Set<String> getPrerequisites() {
-        return pre;
+        return prerequisites;
     }
 
     public Set<String> getPostrequisites() {
-        return post;
+        return postrequisites;
     }
     
 }

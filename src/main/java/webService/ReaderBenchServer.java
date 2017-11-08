@@ -63,6 +63,10 @@ import java.util.stream.Collectors;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import org._3pq.jgrapht.*;
+import org._3pq.jgrapht.edge.DefaultEdge;
+import org._3pq.jgrapht.graph.*;
+import org._3pq.jgrapht.traverse.DepthFirstIterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -1305,9 +1309,6 @@ public class ReaderBenchServer {
                 return error.convertToJson();
             }
 
-            LessonsReader lessonsReader = new LessonsReader();
-            lessonsReader.parse();
-
             // default parameters
             Lang lang = Lang.en;
             Boolean usePosTagging = true;
@@ -1323,7 +1324,6 @@ public class ReaderBenchServer {
 
             Set<Integer> expertiseValues = new HashSet<>();
             Set<Integer> themeValues = new HashSet<>();
-            Map<LessonDescriptives, Lesson> lessons;
             try {
                 JSONArray expertise = (JSONArray) new JSONParser().parse(hm.get("expertise"));
                 for (int i = 0; i < expertise.size(); i++) {
@@ -1357,11 +1357,50 @@ public class ReaderBenchServer {
                 LOGGER.log(Level.SEVERE, "Exception: {0}", e.getMessage());
             }
 
-            // Step 1: Filter lessons by expertise, topics and themes
-            lessons = lessonsReader.getLessons();
-            Iterator it = lessons.entrySet().iterator();
+            // read all lessons from CSV file
+            LessonsReader lessonsReader = new LessonsReader();
+            lessonsReader.parse();
+            Map<LessonDescriptives, Lesson> lessons = lessonsReader.getLessons();
+            Iterator it;
             Map<LessonDescriptives, Lesson> keptLessons = new HashMap<>();
+            Map<LessonDescriptives, Lesson> preLessons = new HashMap<>();
+            Map<LessonDescriptives, Lesson> postLessons = new HashMap<>();
             keptLessons.putAll(lessons);
+            Map<LessonDescriptives, Lesson> auxLessons;
+
+//            DirectedGraph g = new DefaultDirectedGraph();
+//            g.addAllVertices(lessons.keySet());
+//
+//            // iterate through prerequisites
+//            it = lessons.entrySet().iterator();
+//            while (it.hasNext()) {
+//                Map.Entry pair = (Map.Entry) it.next();
+//                LessonDescriptives ld = (LessonDescriptives) pair.getKey();
+//                Lesson l = (Lesson) pair.getValue();
+//                LessonDescriptives ldPrerequisites = l.getPrerequisites();
+//                // TODO: check whether the two lessons exist
+//                g.addEdge(ldPrerequisites, ld);
+//            }
+//
+//            // iterate through postrequisites
+//            it = lessons.entrySet().iterator();
+//            while (it.hasNext()) {
+//                Map.Entry pair = (Map.Entry) it.next();
+//                LessonDescriptives ld = (LessonDescriptives) pair.getKey();
+//                Lesson l = (Lesson) pair.getValue();
+//                LessonDescriptives ldPostrequisites = l.getPostrequisites();
+//                // TODO: check whether the two lessons exist
+//                g.addEdge(ld, ldPostrequisites);
+//            }
+//
+//            DepthFirstIterator depthFirstIterator = new DepthFirstIterator(g);
+//            while (depthFirstIterator.hasNext()) {
+//                current = depthFirstIterator.next();
+//                trackSegment.add(current);
+//                spotPool.remove(current);
+//            }
+            // Step 1: Filter lessons by expertise, topics and themes
+            it = lessons.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
                 LessonDescriptives ld = (LessonDescriptives) pair.getKey();
@@ -1379,7 +1418,7 @@ public class ReaderBenchServer {
                     continue;
                 }
 
-                // remove lessons that do not cover topics
+                // TODO: remove lessons that do not cover topics
                 // remove lessons that do not cover themes
                 LessonThemes lt = l.getLessonThemes();
                 if (!((themeValues.contains(webService.enea.Constants.THEME_SCIENCE) && lt.isTheory())
@@ -1390,8 +1429,7 @@ public class ReaderBenchServer {
                 }
             }
 
-            lessons = keptLessons;
-            if (lessons.isEmpty()) {
+            if (keptLessons.isEmpty()) {
                 error = new QueryResult(false, "The selected fields are too restrictive! No lesson is retrieved!");
                 return error.convertToJson();
             }
@@ -1399,7 +1437,7 @@ public class ReaderBenchServer {
             // Step 2: If cme is true, sum up credits of the remaining lessons (1 credit = 60 mins);
             if (cme == true) {
                 double sumCredits = 0.0;
-                it = lessons.entrySet().iterator();
+                it = keptLessons.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
                     Lesson l = (Lesson) pair.getValue();
@@ -1412,11 +1450,12 @@ public class ReaderBenchServer {
             }
 
             // Step 3: Compute semantic similarity between the free text and the remaining lessons
-            Map<ResultEneaLesson, Double> eligibleLessons = new HashMap<>();
             AbstractDocument document = QueryHelper.generateDocument(text, lang, models, usePosTagging, computeDialogism, useBigrams);
             document.computeAll(computeDialogism, useBigrams);
             // iterate through all lessons
-            it = lessons.entrySet().iterator();
+            auxLessons = new HashMap<>();
+            auxLessons.putAll(keptLessons);
+            it = auxLessons.entrySet().iterator();
             keptLessons = new HashMap<>();
             while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry) it.next();
@@ -1426,21 +1465,16 @@ public class ReaderBenchServer {
                 SemanticCohesion sc = new SemanticCohesion(document, lessonDocument);
                 double simScore = sc.getCohesion();
                 if (simScore >= threshold) {
-                    Set<LessonDescriptives> ldpre = new HashSet<>();
-                    ldpre.add(l.getPre());
-                    Set<LessonDescriptives> ldpost = new HashSet<>();
-                    ldpost.add(l.getPost());
-                    eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUrl(), l.getTime(), simScore, ldpre, ldpost), simScore);
+                    l.setSimilarityScore(simScore);
                     keptLessons.put(l.getLessonDescriptives(), l);
                 }
             }
-            lessons = keptLessons;
 
             // Step 4: Check again whether the sum up of credits make it enough for scoring
             if (cme == true) {
                 double sumCredits = 0.0;
                 // sum here credits for remaining lessons
-                it = lessons.entrySet().iterator();
+                it = keptLessons.entrySet().iterator();
                 while (it.hasNext()) {
                     Map.Entry pair = (Map.Entry) it.next();
                     Lesson l = (Lesson) pair.getValue();
@@ -1452,14 +1486,76 @@ public class ReaderBenchServer {
                 }
             }
 
-            // Step 5: Return lessons in descending order by similarity score
+            // TODO: Step 5: Perform DFS in prerequisites and append them to the response
+            // TODO: Step 6: Perform DFS in postrequisites and append them to the response
+            // Step 7: Return lessons in descending order by similarity score
+            Map<ResultEneaLesson, Double> eligibleLessons = new HashMap<>();
+            it = keptLessons.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                Lesson l = (Lesson) pair.getValue();
+
+                Set<LessonDescriptives> ldpre = new HashSet<>();
+                ldpre.add(l.getPrerequisites());
+                Set<LessonDescriptives> ldpost = new HashSet<>();
+                ldpost.add(l.getPostrequisites());
+                eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), l.getSimilarityScore());
+            }
+
             Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
+
             List<ResultEneaLesson> lessonsList = new ArrayList();
             lessonsList.addAll(eligibleLessonsSorted.keySet());
 
-            // Step 6: Perform DFS in prerequisites and append them to the response
-            // Step 7: Perform DFS in postrequisites and append them to the response
-            ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList);
+            it = keptLessons.entrySet().iterator();
+            List<String> recommendedList = new ArrayList<>();
+            Integer time = 0;
+            Double cmePoints = 0.0;
+            Integer division = 60;
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                LessonDescriptives ld = (LessonDescriptives) pair.getKey();
+                Lesson l = (Lesson) pair.getValue();
+
+                Set<LessonDescriptives> ldpre = new HashSet<>();
+                ldpre.add(l.getPrerequisites());
+                if (lessons.get(l.getPrerequisites()) != null) {
+                    preLessons.put(l.getPrerequisites(), lessons.get(l.getPrerequisites()));
+                }
+                Set<LessonDescriptives> ldpost = new HashSet<>();
+                ldpost.add(l.getPostrequisites());
+                if (lessons.get(l.getPostrequisites()) != null) {
+                    postLessons.put(l.getPostrequisites(), lessons.get(l.getPostrequisites()));
+                }
+                eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), l.getSimilarityScore());
+                recommendedList.add(ld.toString().trim());
+                time += l.getTime();
+                cmePoints += l.getTime() * 1.0 / division;
+            }
+
+            it = preLessons.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                Lesson l = (Lesson) pair.getValue();
+                Set<LessonDescriptives> ldpre = new HashSet<>();
+                ldpre.add(l.getPrerequisites());
+                Set<LessonDescriptives> ldpost = new HashSet<>();
+                ldpost.add(l.getPostrequisites());
+                eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), 0.0);
+            }
+            
+            it = postLessons.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry) it.next();
+                Lesson l = (Lesson) pair.getValue();
+                Set<LessonDescriptives> ldpre = new HashSet<>();
+                ldpre.add(l.getPrerequisites());
+                Set<LessonDescriptives> ldpost = new HashSet<>();
+                ldpost.add(l.getPostrequisites());
+                eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), 0.0);
+            }
+
+            ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList, recommendedList, time, cmePoints);
             QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
             queryResult.setData(result);
             response.type("application/json");
