@@ -132,7 +132,7 @@ public class LessonsReader {
                 else preLes = 0;
                 
                 LessonDescriptives preLessonDescipritves = new LessonDescriptives(preMod, preUnit, preLes);
-                lesson.setPre(preLessonDescipritves);
+                lesson.setPrerequisites(preLessonDescipritves);
 
                 final Integer postMod;
                 if (!"".equals(record.get(COL_POST_MODULE))) postMod = Integer.parseInt(record.get(COL_POST_MODULE));
@@ -147,13 +147,13 @@ public class LessonsReader {
                 else postLes = 0;
                 
                 LessonDescriptives postLessonDescipritves = new LessonDescriptives(postMod, postUnit, postLes);
-                lesson.setPost(postLessonDescipritves);
+                lesson.setPostrequisites(postLessonDescipritves);
 
                 final Integer time = Integer.parseInt(record.get(COL_TIME));
                 lesson.setTime(time);
 
                 final String url = record.get(COL_URL);
-                lesson.setUrl(url);
+                lesson.setUri(url);
 
                 lessons.put(lesson.getLessonDescriptives(), lesson);
 

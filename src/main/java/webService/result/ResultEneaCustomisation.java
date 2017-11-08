@@ -20,13 +20,31 @@ import java.util.List;
 public class ResultEneaCustomisation {
 
 	private final List<ResultEneaLesson> lessons;
+    private final List<String> recommended;
+    private final Integer time;
+    private final Double cmePoints;
 
-	public ResultEneaCustomisation(List<ResultEneaLesson> lessons) {
+	public ResultEneaCustomisation(List<ResultEneaLesson> lessons, List<String> recommended, Integer time, Double cmePoints) {
 		this.lessons = lessons;
+        this.recommended = recommended;
+        this.time = time;
+        this.cmePoints = cmePoints;
 	}
 
 	public List<ResultEneaLesson> getLessons() {
 		return lessons;
 	}
-    
+
+    public List<String> getRecommended() {
+        return recommended;
+    }
+
+    public Integer getTime() {
+        return time;
+    }
+
+    public Double getCmePoints() {
+        return cmePoints;
+    }
+        
 }
