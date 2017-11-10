@@ -1502,11 +1502,6 @@ public class ReaderBenchServer {
                 eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), l.getSimilarityScore());
             }
 
-            Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
-
-            List<ResultEneaLesson> lessonsList = new ArrayList();
-            lessonsList.addAll(eligibleLessonsSorted.keySet());
-
             it = keptLessons.entrySet().iterator();
             List<String> recommendedList = new ArrayList<>();
             Integer time = 0;
@@ -1554,6 +1549,11 @@ public class ReaderBenchServer {
                 ldpost.add(l.getPostrequisites());
                 eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), 0.0);
             }
+            
+            Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
+
+            List<ResultEneaLesson> lessonsList = new ArrayList();
+            lessonsList.addAll(eligibleLessonsSorted.keySet());
 
             ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList, recommendedList, time, cmePoints);
             QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
