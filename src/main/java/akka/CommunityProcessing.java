@@ -19,7 +19,7 @@ public class CommunityProcessing {
          */
         AkkaActorSystem.init();
 
-        CommunityMessage communityMessage = new CommunityMessage("ThisWarofMine");
+        CommunityMessage communityMessage = new CommunityMessage("Barnes_MOOC");
         AkkaActorSystem.communityActor.tell(communityMessage, null);
 
     }
