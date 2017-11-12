@@ -1489,6 +1489,8 @@ public class ReaderBenchServer {
                     new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
             webService.services.cscl.result.dto.Community community4 =
                     new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+            webService.services.cscl.result.dto.Community community5 =
+                    new webService.services.cscl.result.dto.Community("Barnes_MOOC", "Barnes Massive Open Online Courses");
 
             webService.services.cscl.result.dto.Category category1 =
                     new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
@@ -1498,7 +1500,7 @@ public class ReaderBenchServer {
                             Arrays.asList(community3));
             webService.services.cscl.result.dto.Category category3 =
                     new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
-                            Arrays.asList(community4));
+                            Arrays.asList(community4, community5));
             List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
             QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
             response.type("application/json");
