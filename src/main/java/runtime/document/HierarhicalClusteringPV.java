@@ -92,7 +92,7 @@ public class HierarhicalClusteringPV extends Clustering {
             Exceptions.printStackTrace(ex);
         }
         LOGGER.info("Finished training model ...");
-
+        
         
         String modelPath = new File("resources/config/EN/TasaHClustering").getAbsolutePath();
         models = new ArrayList<>();
