@@ -191,7 +191,7 @@ public class Word2VecModel implements ISemanticModel {
     public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
         if (!inputFile.startsWith("resources")) {
             if (inputFile.contains("resources" + File.separatorChar)) {
-                inputFile = inputFile.replaceAll(".*resources", "resources");
+                inputFile = inputFile.replaceAll(".*resources", "resources").replaceAll(File.separator, "/");
             }
             else {
                 inputFile = inputFile.replaceAll(".*ReaderBench\\/", "resources/");
