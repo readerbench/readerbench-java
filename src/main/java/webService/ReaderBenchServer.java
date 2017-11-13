@@ -957,6 +957,27 @@ public class ReaderBenchServer {
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
 
+            Set<String> experienceSectionTitles = new HashSet<>();
+            experienceSectionTitles.add("Expérience");
+            experienceSectionTitles.add("Expériences");
+            experienceSectionTitles.add("Experience");
+            experienceSectionTitles.add("Experiences");
+            experienceSectionTitles.add("Expériences professionnelles");
+            experienceSectionTitles.add("Expériences professionnelle");
+            experienceSectionTitles.add("Parcours professionnell");
+            experienceSectionTitles.add("Experiences professionnelles");
+
+            Set<String> competencesSectionTitles = new HashSet<>();
+            competencesSectionTitles.add("Compétences");
+            competencesSectionTitles.add("Competences");
+            competencesSectionTitles.add("Compétence");
+            competencesSectionTitles.add("Competence");
+
+            Set<String> educationSectionTitles = new HashSet<>();
+            educationSectionTitles.add("Formation");
+            educationSectionTitles.add("Formations");
+            educationSectionTitles.add("compétence");
+
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -1050,6 +1071,18 @@ public class ReaderBenchServer {
             }
             if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(experienceSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("experience_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(competencesSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("competences_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(educationSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("formation_not_found"));
             }
 
             queryResult.setData(result);
