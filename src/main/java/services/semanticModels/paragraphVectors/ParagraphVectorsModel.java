@@ -220,4 +220,9 @@ public class ParagraphVectorsModel implements ISemanticModel {
         }
         return client;
     }
+    
+    public static void main(String[] args) throws FileNotFoundException {
+        
+        trainModel("resources/config/EN/TasaHClustering/train.txt");
+    }
 }
