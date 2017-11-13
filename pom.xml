@@ -148,7 +148,11 @@
         <sparkjava.version>2.5.4</sparkjava.version>
 
         <solrj.version>6.3.0</solrj.version>
-        <elasticsearch.version>5.6.2</elasticsearch.version>
+        <elasticsearch.version>5.4.0</elasticsearch.version>
+        <netty-all.version>4.1.7.Final</netty-all.version>
+        <log4j-core.version>2.7</log4j-core.version>
+        <log4j-api.version>2.7</log4j-api.version>
+        <lucene-core.vesrion>6.5.1</lucene-core.vesrion>
 
         <slf4j.version>1.7.10</slf4j.version>
         <c3p0.version>0.9.1.2</c3p0.version>
@@ -547,6 +551,27 @@
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
             <version>${elasticsearch.version}</version>
+        </dependency>
+        <!-- Ths -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${lucene-core.vesrion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty-all.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.thrift</groupId>

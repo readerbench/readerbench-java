@@ -957,6 +957,27 @@ public class ReaderBenchServer {
             socialNetworksLinks.add("LinkedIn");
             socialNetworksLinks.add("Viadeo");
 
+            Set<String> experienceSectionTitles = new HashSet<>();
+            experienceSectionTitles.add("Expérience");
+            experienceSectionTitles.add("Expériences");
+            experienceSectionTitles.add("Experience");
+            experienceSectionTitles.add("Experiences");
+            experienceSectionTitles.add("Expériences professionnelles");
+            experienceSectionTitles.add("Expériences professionnelle");
+            experienceSectionTitles.add("Parcours professionnell");
+            experienceSectionTitles.add("Experiences professionnelles");
+
+            Set<String> competencesSectionTitles = new HashSet<>();
+            competencesSectionTitles.add("Compétences");
+            competencesSectionTitles.add("Competences");
+            competencesSectionTitles.add("Compétence");
+            competencesSectionTitles.add("Competence");
+
+            Set<String> educationSectionTitles = new HashSet<>();
+            educationSectionTitles.add("Formation");
+            educationSectionTitles.add("Formations");
+            educationSectionTitles.add("compétence");
+
             Set<String> requiredParams = setInitialRequiredParams();
             JSONObject json = (JSONObject) new JSONParser().parse(request.body());
             // additional required parameters
@@ -1050,6 +1071,18 @@ public class ReaderBenchServer {
             }
             if (pdfToTxtConverter.getSocialNetworkLinks().get("Viadeo") == null) {
                 result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("social_network_viadeo_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(experienceSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("experience_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(competencesSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("competences_not_found"));
+            }
+
+            if (!pdfToTxtConverter.sectionExists(educationSectionTitles)) {
+                result.getWarnings().add(ResourceBundle.getBundle("utils.localization.cv_errors").getString("formation_not_found"));
             }
 
             queryResult.setData(result);
@@ -1502,11 +1535,6 @@ public class ReaderBenchServer {
                 eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), l.getSimilarityScore());
             }
 
-            Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
-
-            List<ResultEneaLesson> lessonsList = new ArrayList();
-            lessonsList.addAll(eligibleLessonsSorted.keySet());
-
             it = keptLessons.entrySet().iterator();
             List<String> recommendedList = new ArrayList<>();
             Integer time = 0;
@@ -1554,6 +1582,11 @@ public class ReaderBenchServer {
                 ldpost.add(l.getPostrequisites());
                 eligibleLessons.put(new ResultEneaLesson(l.getLessonDescriptives(), l.getTitle(), l.getUri(), l.getTime(), l.getSimilarityScore(), ldpre, ldpost), 0.0);
             }
+            
+            Map<ResultEneaLesson, Double> eligibleLessonsSorted = eligibleLessons.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e2, HashMap::new));
+
+            List<ResultEneaLesson> lessonsList = new ArrayList();
+            lessonsList.addAll(eligibleLessonsSorted.keySet());
 
             ResultEneaCustomisation result = new ResultEneaCustomisation(lessonsList, recommendedList, time, cmePoints);
             QueryResultEneaCustomisation queryResult = new QueryResultEneaCustomisation();
@@ -2001,6 +2034,8 @@ public class ReaderBenchServer {
                     = new webService.services.cscl.result.dto.Community("mathequalslove.blogspot.ro", "Math Equals Love");
                     webService.services.cscl.result.dto.Community community4
                     = new webService.services.cscl.result.dto.Community("MOOC", "Massive Open Online Courses");
+                    webService.services.cscl.result.dto.Community community5 =
+                            new webService.services.cscl.result.dto.Community("Barnes_MOOC", "Barnes Massive Open Online Courses");
 
                     webService.services.cscl.result.dto.Category category1
                     = new webService.services.cscl.result.dto.Category("online communities", "Online Communities",
@@ -2010,7 +2045,7 @@ public class ReaderBenchServer {
                             Arrays.asList(community3));
                     webService.services.cscl.result.dto.Category category3
                     = new webService.services.cscl.result.dto.Category("MOOC", "Massive Open Online Courses",
-                            Arrays.asList(community4));
+                            Arrays.asList(community4, community5));
                     List<webService.services.cscl.result.dto.Category> categories = Arrays.asList(category1, category2, category3);
                     QueryResultAllCommunities queryResult = new QueryResultAllCommunities(categories);
                     response.type("application/json");
