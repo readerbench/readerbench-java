@@ -16,27 +16,30 @@
 package view.models.document;
 
 import javax.swing.table.DefaultTableModel;
+import utils.LocalizationUtils;
 
 public class DocumentTableModel extends DefaultTableModel {
 
-	private static final long serialVersionUID = 1730686324860907760L;
+    private static final long serialVersionUID = 1730686324860907760L;
 
-	private Class<?>[] columnTypes = new Class[] { String.class, // ID
-			String.class // content
-	};
+    private final Class<?>[] columnTypes = new Class[]{String.class, // ID
+        String.class // content
+};
 
-	public DocumentTableModel() {
-		super(new Object[][] {}, new String[] { "ID", "Text" });
-	}
+    public DocumentTableModel() {
+        super(new Object[][]{}, new String[]{
+            LocalizationUtils.getGeneric("ID"),
+            LocalizationUtils.getGeneric("text")});
+    }
 
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return false;
-	}
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
 
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		return columnTypes[columnIndex];
-	}
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnTypes[columnIndex];
+    }
 
 }

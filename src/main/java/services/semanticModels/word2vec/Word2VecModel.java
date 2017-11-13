@@ -15,21 +15,12 @@
  */
 package services.semanticModels.word2vec;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 
 
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
-import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
 import data.AnalysisElement;
 import data.Word;
@@ -39,78 +30,99 @@ import java.util.Map;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
 import data.Lang;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.logging.Level;
-import org.apache.uima.analysis_engine.AnalysisEngine;
-import org.apache.uima.fit.factory.AnalysisEngineFactory;
-import org.apache.uima.resource.ResourceInitializationException;
-import org.deeplearning4j.text.annotator.SentenceAnnotator;
-import org.deeplearning4j.text.annotator.TokenizerAnnotator;
-import org.deeplearning4j.text.sentenceiterator.UimaSentenceIterator;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.UimaTokenizerFactory;
-import org.deeplearning4j.text.uima.UimaResource;
+import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TTransportException;
 import org.openide.util.Exceptions;
 import services.commons.VectorAlgebra;
 import services.semanticModels.SimilarityType;
+import thrift.Word2VecService;
 
 /**
  *
  * @author Stefan Ruseti, Mihai Dascalu
  */
 public class Word2VecModel implements ISemanticModel {
-
+    
     static final Logger LOGGER = Logger.getLogger("");
     private static final List<Word2VecModel> LOADED_WORD2VEC_MODELS = new ArrayList<>();
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en);
-
+    private static final String THRIFT_IP = "141.85.227.62";
+    private static final int THRIFT_PORT = 9090;
+    
     private final Lang language;
     private final String path;
     private final int noDimensions;
     private final Map<Word, double[]> wordVectors;
+    
+    private static Word2VecService.Client client = null;
 
-    private Word2VecModel(String path, Lang language, Word2Vec word2vec) {
+    private Word2VecModel(String path, Lang language, Map<String, List<Double>> model) {
         this.language = language;
         this.path = path;
-        this.wordVectors = word2vec.vocab().words().stream()
+        this.wordVectors = model.keySet().stream()
                 .map(w -> new Word(w, w, Stemmer.stemWord(w, language), null, null, language))
-                .distinct()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        w -> word2vec.getWordVector(w.getLemma())));
-        this.noDimensions = word2vec.getLayerSize();
+                        w -> model.get(w.getLemma()).stream().mapToDouble(d -> d).toArray()));
+        this.noDimensions = wordVectors.values().stream()
+                .findFirst()
+                .map(v -> v.length)
+                .get();
+    }
+    
+    private Word2VecModel(String path, Lang language, int dim) {
+        this.language = language;
+        this.path = path;
+        this.wordVectors = new HashMap<>();
+        this.noDimensions = dim;
     }
 
-    private static Word2Vec loadWord2Vec(String path) {
-        LOGGER.log(Level.INFO, "Loading word2vec model {0} ...", path);
-        Word2Vec word2Vec = WordVectorSerializer.readWord2VecModel(path + "/word2vec.model");
-        return word2Vec;
+    public static Word2VecModel loadFromTextFile(String path, Lang language) {
+        try (BufferedReader in = new BufferedReader(new FileReader(path))) {
+            String[] line = in.readLine().split(" ");
+            int nWords = Integer.parseInt(line[0]);
+            int dim = Integer.parseInt(line[1]);
+            Word2VecModel model = new Word2VecModel(path, language, dim);
+            for (int i = 0; i < nWords; i++) {
+                line = in.readLine().split(" ");
+                String label = line[0];
+                Word word = new Word(label, label, Stemmer.stemWord(label, language), null, null, language);
+                model.wordVectors.put(word, Arrays.stream(line, 1, line.length)
+                        .mapToDouble(Double::parseDouble)
+                        .toArray());
+            }
+            return model;
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
     }
-
+    
     public static Word2VecModel loadWord2Vec(String path, Lang language) {
         for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
             if (path.equals(w2v.getPath())) {
                 return w2v;
             }
         }
-        Word2VecModel w2v = new Word2VecModel(path, language, loadWord2Vec(path));
+        Word2VecModel w2v = loadFromTextFile(path + "/word2vec.model", language);
         LOADED_WORD2VEC_MODELS.add(w2v);
-
         return w2v;
-    }
-
-    public static Word2VecModel loadGoogleNewsModel() {
-        String path = "resources/config/EN/word2vec/Google news";
-        for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
-            if (path.equals(w2v.getPath())) {
-                return w2v;
-            }
-        }
-        Word2VecModel w2vm = new Word2VecModel(path, Lang.en, WordVectorSerializer.readWord2VecModel(path + "/GoogleNews-vectors-negative300.bin"));
-        return w2vm;
     }
 
     @Override
@@ -171,30 +183,24 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     public static void trainModel(String inputFile) throws FileNotFoundException {
+        trainModel(inputFile, 6, 300);
+    }
+    
+    
+    public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
+        if (!inputFile.startsWith("resources")) {
+            if (inputFile.contains("resources/")) {
+                inputFile = inputFile.replaceAll(".*resources", "resources");
+            }
+            else {
+                inputFile = inputFile.replaceAll(".*ReaderBench\\/", "resources/");
+            }
+        }
         try {
-            SentenceIterator iter = new UimaSentenceIterator(inputFile,
-                    new UimaResource(UimaTokenizerFactory.defaultAnalysisEngine()));
-            // Split on white spaces in the line to get words
-            TokenizerFactory t = new DefaultTokenizerFactory();
-            t.setTokenPreProcessor(new CommonPreprocessor());
-            LOGGER.info("Building word2vec model ...");
-            Word2Vec word2Vec = new Word2Vec.Builder()
-                    .batchSize(100)
-                    .minWordFrequency(5)
-                    .epochs(6)
-                    .layerSize(300)
-                    .seed(42)
-                    .windowSize(5)
-                    .negativeSample(10)
-                    .iterate(iter)
-                    .tokenizerFactory(t)
-                    .build();
-            word2Vec.fit();
-            
-            LOGGER.info("Writing word vectors to text file ...");
-            String outputPath = new File(inputFile).getParentFile().getAbsolutePath() + "/word2vec.model";
-            WordVectorSerializer.writeWord2VecModel(word2Vec, outputPath);
-        } catch (ResourceInitializationException ex) {
+            getClient().trainModel(inputFile, noEpochs, layerSize);
+            client = null;
+            LOGGER.info("Input file sent for training");
+        } catch (TException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
@@ -216,5 +222,23 @@ public class Word2VecModel implements ISemanticModel {
     @Override
     public int getNoDimensions() {
         return noDimensions;
+    }
+    
+    public static Word2VecService.Client getClient() throws TTransportException {
+        if (client == null) {
+            TTransport transport = new TSocket(THRIFT_IP, THRIFT_PORT);
+            transport.open();
+            TProtocol protocol = new TBinaryProtocol(transport);
+            client = new Word2VecService.Client(protocol);
+        }
+        return client;
+    }
+    
+    public static void main(String[] args) throws FileNotFoundException {
+        
+        trainModel("/Users/stefan/NetBeansProjects/ReaderBench/resources/corpora/EN/preprocessing/tasa_out.txt");
+//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA", Lang.en);
+//        System.out.println(w2v.getNoDimensions());
+//        System.out.println(w2v.getWordSet().size());
     }
 }

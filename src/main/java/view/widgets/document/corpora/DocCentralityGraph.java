@@ -75,6 +75,7 @@ import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
 import org.openide.util.Exceptions;
 import services.commons.Formatting;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class DocCentralityGraph extends JFrame {
@@ -150,7 +151,7 @@ public class DocCentralityGraph extends JFrame {
 
     public DocCentralityGraph(List<Document> docs, Document referenceDoc) {
         this.graphDepthLevel = 1;
-        super.setTitle("Document Centrality Graph");
+        super.setTitle(LocalizationUtils.getTitle(this.getClass()));
         super.getContentPane().setBackground(Color.WHITE);
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.docs = docs;
@@ -166,7 +167,7 @@ public class DocCentralityGraph extends JFrame {
     }
 
     private void generateLayout() {
-        lblThreshold = new JLabel("Threshold among documents");
+        lblThreshold = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblThreshold"));
         lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         sliderThreshold = new JSlider(0, 80, 50);
@@ -192,9 +193,10 @@ public class DocCentralityGraph extends JFrame {
         panelGraph.setBackground(Color.WHITE);
         panelGraph.setLayout(new BorderLayout());
 
-        JLabel lblCentrality = new JLabel("Top similar articles");
+        JLabel lblCentrality = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblCentrality"));
         lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
-        String[] header2 = {"Article", "Similarity"};
+        String[] header2 = {LocalizationUtils.getLocalizedString(this.getClass(), "header2Article"),
+			    LocalizationUtils.getLocalizedString(this.getClass(), "header2Similarity")};
         String[][] data2 = new String[0][2];
         tableCentralityModel = new DefaultTableModel(data2, header2);
         tableCentrality = new JTable(tableCentralityModel) {
@@ -223,7 +225,9 @@ public class DocCentralityGraph extends JFrame {
                         String doc2 = tableCentrality.getValueAt(row, 0).toString();
                         String score = tableCentrality.getValueAt(row, 1).toString();
 
-                        JOptionPane.showMessageDialog(DocCentralityGraph.this, "<html><b>Central Article:</b> " + docC + "<br> <b>Current Article:</b> " + doc2 + "<br> <b>Semantic Distance:</b> " + score + "</html>");
+                        JOptionPane.showMessageDialog(DocCentralityGraph.this, "<html><b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgCentralAricle") + ":</b> " + docC
+				+ "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgCurrentAricle") + ":</b> " + doc2 
+				+ "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgSemanticDistance") + ":</b> " + score + "</html>");
                     } catch (HeadlessException e) {
                         // e.printStackTrace();
                     }
@@ -239,7 +243,7 @@ public class DocCentralityGraph extends JFrame {
 
         String[] graphLevels = {"1", "2", "3"};
 
-        JLabel lblComboBox = new JLabel("Depth Level");
+        JLabel lblComboBox = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblComboBox"));
         lblComboBox.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JComboBox<String> docLevelsCombo = new JComboBox<>(graphLevels);

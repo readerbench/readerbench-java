@@ -29,7 +29,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import runtime.cv.CVConstants;
 import services.commons.Formatting;
+import services.complexity.ComplexityIndicesEnum;
+import services.complexity.cohesion.flow.DocFlowCriteria;
+import services.complexity.cohesion.flow.DocFlowIndex;
+import services.complexity.cohesion.flow.DocumentFlow;
+import services.complexity.dependencies.AvgDependenciesPerSentence;
 import services.converters.PdfToTxtConverter;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -153,7 +159,7 @@ public class JobQuestHelper {
         result.setNegativeWords(negativeWords);
         result.setVeryNegativeWords(veryNegativeWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, useBigrams, threshold));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument.getWordOccurences().keySet(), threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);
@@ -164,6 +170,49 @@ public class JobQuestHelper {
             similarityScores.put(semanticSimilarity.getKey().getAcronym(), Formatting.formatNumber(semanticSimilarity.getValue()));
         }
         result.setKeywordsDocumentSimilarity(similarityScores);
+        
+        // compute discriminants
+                
+        // global
+        double f_neg = result.getMinFontSize() * CVConstants.DISC_GLOBAL_MIN_FONT_SIZE_NEG + CVConstants.DISC_GLOBAL_CONSTANT_NEG;
+        double f_pos = result.getMaxFontSize() * CVConstants.DISC_GLOBAL_MIN_FONT_SIZE_POS + CVConstants.DISC_GLOBAL_CONSTANT_POS;
+        if (Math.max(f_neg, f_pos) == f_pos) {
+            result.setScoreGlobal(1);
+        }
+        else {
+            result.setScoreGlobal(-1);
+        }
+        
+        // visual
+        double docFlAdjAccWuPalmerAbvMeanStdev = document.getComplexityIndices().get(new DocFlowIndex(
+                        ComplexityIndicesEnum.DOC_FLOW_ADJACENCY_ACCURACY,
+                        DocFlowCriteria.ABOVE_MEAN_PLUS_STDEV, SimilarityType.WU_PALMER,
+                        DocumentFlow::getAdjacencyAccuracy));
+        f_neg = docFlAdjAccWuPalmerAbvMeanStdev * CVConstants.DISC_VISUAL_WU_PALMER_ABVMEANSTDEV_NEG + 
+                        result.getMinFontSize() * CVConstants.DISC_VISUAL_MIN_FONT_SIZE_NEG +
+                        result.getLiwcEmotions().get("Percept_LIWC").size() * CVConstants.DISC_VISUAL_PERCEPT_LIWC_NEG +
+                        CVConstants.DISC_GLOBAL_CONSTANT_NEG;
+        f_pos = docFlAdjAccWuPalmerAbvMeanStdev * CVConstants.DISC_VISUAL_WU_PALMER_ABVMEANSTDEV_POS + 
+                        result.getMinFontSize() * CVConstants.DISC_VISUAL_MIN_FONT_SIZE_POS +
+                        result.getLiwcEmotions().get("Percept_LIWC").size() * CVConstants.DISC_VISUAL_PERCEPT_LIWC_POS +
+                        CVConstants.DISC_GLOBAL_CONSTANT_POS;
+        if (Math.max(f_neg, f_pos) == f_pos) {
+            result.setScoreVisual(1);
+        }
+        else {
+            result.setScoreVisual(-1);
+        }
+        
+        // content
+        double avgDepsSenDobj = document.getComplexityIndices().get(new AvgDependenciesPerSentence(ComplexityIndicesEnum.DEPENDENCY_TYPES_PER_SENTENCE, "dobj"));
+        f_neg = avgDepsSenDobj * CVConstants.DISC_CONTENT_AVG_DEPSSEN_NEG + CVConstants.DISC_CONTENT_CONSTANT_NEG;
+        f_pos = avgDepsSenDobj * CVConstants.DISC_CONTENT_AVG_DEPSSEN_POS + CVConstants.DISC_CONTENT_CONSTANT_POS;
+        if (Math.max(f_neg, f_pos) == f_pos) {
+            result.setScoreContent(1);
+        }
+        else {
+            result.setScoreContent(-1);
+        }
 
         return result;
     }

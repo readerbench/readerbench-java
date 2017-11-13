@@ -37,7 +37,7 @@ public class CSCLCommunityTest {
 
 //        String path = "resources/in/MOOC/forum_posts&comments";
         String path = "resources/in/1 year/";
-        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/word2vec/TASA_LAK", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
         Community.processDocumentCollection(path, Lang.en, false, false, true, false, false, false, false, null, null, 0, 7);
 
 
@@ -52,7 +52,7 @@ public class CSCLCommunityTest {
     }
 
     public static void computeCommunity(String path){
-        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
+        SerialProcessing.processCorpus(path, "resources/config/EN/LSA/TASA", "resources/config/EN/LDA/TASA", "resources/config/EN/word2vec/TASA_LAK", Lang.en, true, true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
         CommunityUtils.processDocumentCollectionForClustering(path, false, false, new DateTime(2012, 8, 1, 0, 0).toDate(),
                                                               new DateTime(2013, 7, 11, 0, 0).toDate(), 0, 7);
     }

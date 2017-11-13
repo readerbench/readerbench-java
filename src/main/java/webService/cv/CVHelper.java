@@ -159,7 +159,7 @@ public class CVHelper {
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, useBigrams, threshold));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument.getWordOccurences().keySet(), threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

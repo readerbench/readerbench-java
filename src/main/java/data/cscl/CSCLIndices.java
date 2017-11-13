@@ -51,6 +51,6 @@ public enum CSCLIndices {
 	}
 
 	public String getAcronym() {
-		return ResourceBundle.getBundle("utils.localization.CSCL_indices_acro").getString(this.name());
+		return ResourceBundle.getBundle("utils.localization.CSCL_indices_acronyms").getString(this.name());
 	}
 }

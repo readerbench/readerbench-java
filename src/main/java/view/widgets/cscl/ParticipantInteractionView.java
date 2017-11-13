@@ -48,6 +48,7 @@ import javax.swing.GroupLayout.Alignment;
 
 import data.cscl.Participant;
 import services.discourse.CSCL.ParticipantEvaluation;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class ParticipantInteractionView extends JFrame {
@@ -64,12 +65,12 @@ public class ParticipantInteractionView extends JFrame {
     public ParticipantInteractionView(String path, List<Participant> participants,
             double[][] participantContributions, boolean displayEdgeLabels, boolean needsAnonymization) {
         super();
-        setTitle("ReaderBench - Participant Interaction");
-        setBackground(Color.WHITE);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setBackground(Color.WHITE);
         this.participants = participants;
         this.path = path;
         this.participantContributions = participantContributions;
-        getContentPane().setBackground(Color.WHITE);
+        super.getContentPane().setBackground(Color.WHITE);
 
         panelGraph = new JPanel();
         panelGraph.setBackground(Color.WHITE);

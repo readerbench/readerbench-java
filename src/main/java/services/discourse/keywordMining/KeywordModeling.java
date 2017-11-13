@@ -203,7 +203,9 @@ public class KeywordModeling {
             double[] vec = new double[model.getNoDimensions()];
             topics.stream().forEach((topic) -> {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
-                    vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    if (topic.getWord().getModelRepresentation(model.getType()) != null) {
+                        vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    }
                 }
             });
             modelVectors.put(model.getType(), vec);

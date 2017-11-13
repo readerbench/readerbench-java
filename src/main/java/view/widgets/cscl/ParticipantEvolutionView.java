@@ -26,6 +26,7 @@ import javax.swing.border.EmptyBorder;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
+import utils.LocalizationUtils;
 
 public class ParticipantEvolutionView extends JFrame {
 
@@ -36,19 +37,19 @@ public class ParticipantEvolutionView extends JFrame {
      * Create the frame.
      */
     public ParticipantEvolutionView(Conversation c) {
-        setTitle("ReaderBench - Participant Evolution");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 700, 500);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(100, 100, 700, 500);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        ArrayList<Participant> ls = new ArrayList<Participant>();
-        for (Participant p : c.getParticipants()) {
-            ls.add(p);
-        }
+        ArrayList<Participant> ls = new ArrayList<>();
+	c.getParticipants().forEach((p) -> {
+	    ls.add(p);
+	});
         // participant evolution
         String[] names = new String[c.getParticipants().size()];
         for (int j = 0; j < ls.size(); j++) {
@@ -70,8 +71,8 @@ public class ParticipantEvolutionView extends JFrame {
             }
         }
 
-        EvolutionGraph evolution = new EvolutionGraph("Participant evolution",
-                "Utterance", false, names, values, columns, null);
+        EvolutionGraph evolution = new EvolutionGraph(LocalizationUtils.getLocalizedString(this.getClass(), "evoGraphPartEvo"),
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraphUtterance"), false, names, values, columns, null);
 
         contentPane.add(evolution.evolution(), BorderLayout.CENTER);
     }

@@ -73,6 +73,7 @@ import data.Word;
 import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
 import services.commons.Formatting;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class DocConceptView extends JFrame {
@@ -105,7 +106,7 @@ public class DocConceptView extends JFrame {
 
     public DocConceptView(List<Keyword> keywords, String path) {
         paperConceptView = this;
-        super.setTitle("Network of Concepts Visualization");
+        super.setTitle(LocalizationUtils.getTitle(this.getClass()));
         super.getContentPane().setBackground(Color.WHITE);
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.wordRelevanceMap = new TreeMap<>();
@@ -125,7 +126,7 @@ public class DocConceptView extends JFrame {
     }
 
     private void generateLayout() {
-        JLabel lblThreshold = new JLabel("Threshold");
+        JLabel lblThreshold = new JLabel(LocalizationUtils.getGeneric("threshold"));
         lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         sliderThreshold = new JSlider(4, 8, 5);
@@ -151,9 +152,10 @@ public class DocConceptView extends JFrame {
         panelGraph.setBackground(Color.WHITE);
         panelGraph.setLayout(new BorderLayout());
 
-        JLabel lblCentrality = new JLabel("Relevance");
+        JLabel lblCentrality = new JLabel(LocalizationUtils.getGeneric("relevance"));
         lblCentrality.setFont(new Font("SansSerif", Font.BOLD, 14));
-        String[] header2 = {"Concept", "Cumulative relevance"};
+        String[] header2 = {LocalizationUtils.getLocalizedString(this.getClass(), "header21"), 
+	    LocalizationUtils.getLocalizedString(this.getClass(), "header22")};
         String[][] data2 = new String[0][2];
         tableCentralityModel = new DefaultTableModel(data2, header2);
         tableCentrality = new JTable(tableCentralityModel) {
@@ -183,8 +185,9 @@ public class DocConceptView extends JFrame {
                     String word = tableCentrality.getValueAt(row, 0).toString();
                     String centrality = tableCentrality.getValueAt(row, 1).toString();
 
-                    JOptionPane.showMessageDialog(paperConceptView, "<html><br> <b>Current Word:</b> " + word
-                            + "<br> <b>Word Cetrality:</b> " + centrality + "</html>");
+                    JOptionPane.showMessageDialog(paperConceptView, "<html><br> <b>" 
+			    + LocalizationUtils.getLocalizedString(this.getClass(), "msgCurrentWord") + ":</b> " + word
+                            + "<br> <b>" + LocalizationUtils.getLocalizedString(this.getClass(), "msgWordCentrality") + ":</b> " + centrality + "</html>");
                 }
             }
         });
