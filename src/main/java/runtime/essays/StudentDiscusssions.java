@@ -47,7 +47,7 @@ public class StudentDiscusssions {
 
         //write header
         try (BufferedWriter out = new BufferedWriter(new FileWriter(processingPath + "/measurements.csv", false))) {
-            out.write("Filename");
+            out.write("SEP=,\nFilename");
             for (int i = 0; i < lda.getNoDimensions(); i++) {
                 out.append(",").append("Topic " + i);
             }
@@ -91,7 +91,7 @@ public class StudentDiscusssions {
 
         LDA lda = LDA.loadLDA("resources/config/EN/LDA/Scott", Lang.en);
 
-        String path = "/Users/mihaidascalu/Desktop/Archive Scott";
+        String path = "/Users/mihaidascalu/Desktop/student texts";
         Txt2XmlConverter.parseTxtFiles("", path, Lang.en, "UTF-8");
         processLDA(path, lda, true);
     }

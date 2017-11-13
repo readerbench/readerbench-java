@@ -17,7 +17,6 @@ package view.widgets.complexity;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -49,27 +47,27 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-
-
-
 
 import services.commons.Formatting;
 import services.complexity.ComputeBalancedMeasure;
 import services.complexity.DataGathering;
-import utils.localization.LocalizationUtils;
 import data.complexity.Measurement;
+import java.awt.HeadlessException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
+import org.openide.util.Exceptions;
 import services.complexity.ComplexityIndexType;
+import utils.LocalizationUtils;
 
 public class CorpusEvaluationView extends JFrame {
 
     private static final long serialVersionUID = -4518616508590444786L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     private JPanel contentPane;
     private JTextField textFieldDirectory;
@@ -92,8 +90,8 @@ public class CorpusEvaluationView extends JFrame {
 
     private class Task extends SwingWorker<Void, Void> {
 
-        private String path;
-        private int Kfolds;
+        private final String path;
+        private final int Kfolds;
         private int noClasses;
 
         public Task(String path, int kfolds) {
@@ -152,9 +150,7 @@ public class CorpusEvaluationView extends JFrame {
                     }
                 }
 
-                logger.info("Ratio between training and testing sets: "
-                        + trainingMeasurements.size() + "/"
-                        + testMeasurements.size());
+                LOGGER.log(Level.INFO, "Ratio between training and testing sets: {0}/{1}", new Object[]{trainingMeasurements.size(), testMeasurements.size()});
                 // run SVM
                 ComputeBalancedMeasure svm = new ComputeBalancedMeasure();
                 svm.gridSearch(selectedMeasurements, trainingMeasurements,
@@ -162,12 +158,8 @@ public class CorpusEvaluationView extends JFrame {
             }
 
             // output results into corresponding file and into table
-            try {
-                // Open the file
-                FileWriter fstream = new FileWriter(path + "/complexity.csv",
-                        true);
-                BufferedWriter file = new BufferedWriter(fstream);
-                Vector<Object> dataRow = new Vector<Object>();
+            try (BufferedWriter file = new BufferedWriter(new FileWriter(path + "/complexity.csv", true))) {
+                List<Object> dataRow = new ArrayList<>();
 
                 file.write("\n" + testName + ",");
                 dataRow.add(testName);
@@ -204,16 +196,14 @@ public class CorpusEvaluationView extends JFrame {
                 file.write(Formatting.formatNumber(cumulativeAvg) + ",");
                 dataRow.add(Formatting.formatNumber(cumulativeAvg));
 
-                tableModel.addRow(dataRow);
-                file.close();
-            } catch (Exception e) {// Catch exception if any
+                tableModel.addRow(dataRow.toArray());
+            } catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
             }
         }
 
         public void RunTests() {
-            // run measurements, if selected, by including all existing textual
-            // complexity factors
+            // run measurements, if selected, by including all existing textual             // complexity factors
             if (chckbxAll.isSelected()) {
                 int[] factors = IntStream.range(0, ComplexityIndicesView.getAllIndices().length).toArray();
                 Test(factors, "All Factors Combined");
@@ -263,8 +253,7 @@ public class CorpusEvaluationView extends JFrame {
                     return null;
                 }
 
-                logger.info("Started to train SVM models on " + noClasses
-                        + " classes");
+                LOGGER.log(Level.INFO, "Started to train SVM models on {0} classes", noClasses);
 
                 // Empty the output file, write header
                 try {
@@ -286,7 +275,7 @@ public class CorpusEvaluationView extends JFrame {
                     file.write("Avg. AA");
 
                     file.close();
-                } catch (Exception e) {// Catch exception if any
+                } catch (IOException e) {
                     System.err.println("Error: " + e.getMessage());
                 }
 
@@ -332,8 +321,8 @@ public class CorpusEvaluationView extends JFrame {
                 scrollPane.setViewportView(table);
 
                 RunTests();
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (HeadlessException e) {
+                Exceptions.printStackTrace(e);
             }
             return null;
         }
@@ -350,18 +339,16 @@ public class CorpusEvaluationView extends JFrame {
     }
 
     public CorpusEvaluationView() {
-        setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.panelCorpusEvaluation.title"));
-        setBackground(Color.WHITE);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(50, 50, 1000, 600);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setBackground(Color.WHITE);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(50, 50, 1000, 600);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblPath.text") + ":");
+        JLabel lblPath = new JLabel(LocalizationUtils.getGeneric("path") + ":");
         lblPath.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldDirectory = new JTextField();
@@ -373,21 +360,17 @@ public class CorpusEvaluationView extends JFrame {
             JFileChooser fc = new JFileChooser(new File("in"));
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int returnVal = fc.showOpenDialog(CorpusEvaluationView.this);
-            
+
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = fc.getSelectedFile();
                 textFieldDirectory.setText(file.getPath());
             }
         });
 
-        chckbxAll = new JCheckBox(
-                ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.boxPerformMeasurementsAllFactors.text"));
+        chckbxAll = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxPerformMeasurementsAllFactors"));
         chckbxAll.setSelected(true);
 
-        chckbxClass = new JCheckBox(
-                ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.boxPerformMeasurementsEachClass.text"));
+        chckbxClass = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxPerformMeasurementsEachClass"));
         chckbxClass.setSelected(true);
 
         JLabel lblBaselines = new JLabel("Baselines");
@@ -395,28 +378,21 @@ public class CorpusEvaluationView extends JFrame {
 
         JSeparator separator = new JSeparator();
 
-        lblSelectiveMeasurements = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblSelecitveMeasuremets.text"));
+        lblSelectiveMeasurements = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSelecitveMeasuremets"));
         lblSelectiveMeasurements.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         separator_1 = new JSeparator();
 
-        chckbxIndividual = new JCheckBox(
-                ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.boxPerformMeasurementsIndividualFactor.text"));
+        chckbxIndividual = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxPerformMeasurementsIndividualFactor"));
         chckbxIndividual.setSelected(true);
 
-        chckbxAllSelected = new JCheckBox(
-                ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.boxPerformMeasurementsAllSelectedFactors.text"));
+        chckbxAllSelected = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "boxPerformMeasurementsAllSelectedFactors"));
         chckbxAllSelected.setSelected(true);
 
-        lblResults = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblResults.text"));
+        lblResults = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblResults"));
         lblResults.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        lblKCrossValidation = new JLabel(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblKCrossValidationFolds.text") + ":");
+        lblKCrossValidation = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblKCrossValidationFolds") + ":");
         lblKCrossValidation.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldCrossValidation = new JTextField();
@@ -424,8 +400,7 @@ public class CorpusEvaluationView extends JFrame {
         textFieldCrossValidation.setText("3");
         textFieldCrossValidation.setColumns(10);
 
-        btnSelectComplexityIndices = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblKCrossValidationFolds.text"));
+        btnSelectComplexityIndices = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "lblKCrossValidationFolds"));
         btnSelectComplexityIndices.addActionListener((ActionEvent e) -> {
             ComplexityIndicesView view = new ComplexityIndicesView();
             view.setVisible(true);
@@ -433,37 +408,34 @@ public class CorpusEvaluationView extends JFrame {
 
         separator_2 = new JSeparator();
 
-        btnPerformMeasurements = new JButton(ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.btnPerformMeasurements.text"));
+        btnPerformMeasurements = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnPerformMeasurements"));
         btnPerformMeasurements.addActionListener((ActionEvent e) -> {
             String path = textFieldDirectory.getText();
             if (!new File(path).isDirectory()) {
                 JOptionPane.showMessageDialog(contentPane,
-                        "Specified path should be a directory!", "Error",
+                        LocalizationUtils.getGeneric("msgSelectInputFolder"), "Error",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (!new File(path + "/measurements.csv").exists()) {
-                JOptionPane
-                        .showMessageDialog(
-                                contentPane,
-                                "Specified path should contain a precomputed \"measurements.csv\" file!",
-                                "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane,
+                        LocalizationUtils.getGeneric("Generic.msgNoMeasurementsFile"),
+                        "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             int noFolds;
             try {
                 noFolds = Integer.valueOf(textFieldCrossValidation
                         .getText());
-            } catch (Exception exception) {
+            } catch (NumberFormatException exception) {
                 noFolds = 0;
             }
             if (noFolds < 2 || noFolds > 10) {
                 JOptionPane
                         .showMessageDialog(
                                 contentPane,
-                                "Specified number of k cross-validation folds should be a number in the [2; 10] interval!",
+                                LocalizationUtils.getLocalizedString(this.getClass(), "msgKCrossValidation") + "!",
                                 "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -483,218 +455,203 @@ public class CorpusEvaluationView extends JFrame {
         scrollPane.setViewportView(table);
 
         lblComments = new JLabel(
-                "* EA - " + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblExactAgreement.text")
-                + " ; AA - " + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("CorpusEvaluationView.lblAdjacentAgreement.text"));
+                "* EA - " + LocalizationUtils.getLocalizedString(this.getClass(), "lblExactAgreement")
+                + " ; AA - " + LocalizationUtils.getLocalizedString(this.getClass(), "lblAdjacentAgreement"));
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane
                 .setHorizontalGroup(gl_contentPane
                         .createParallelGroup(Alignment.LEADING)
                         .addGroup(
                                 gl_contentPane
-                                .createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
-                                        .addComponent(
-                                                scrollPane,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                778,
-                                                Short.MAX_VALUE)
-                                        .addComponent(
-                                                separator_2,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                778,
-                                                Short.MAX_VALUE)
-                                        .addComponent(
-                                                separator_1,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                778,
-                                                Short.MAX_VALUE)
-                                        .addComponent(
-                                                separator,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                778,
-                                                Short.MAX_VALUE)
+                                        .createSequentialGroup()
+                                        .addContainerGap()
                                         .addGroup(
                                                 gl_contentPane
-                                                .createSequentialGroup()
-                                                .addComponent(
-                                                        lblPath)
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED)
-                                                .addComponent(
-                                                        textFieldDirectory,
-                                                        GroupLayout.DEFAULT_SIZE,
-                                                        684,
-                                                        Short.MAX_VALUE)
-                                                .addGap(18)
-                                                .addComponent(
-                                                        btnPath,
-                                                        GroupLayout.PREFERRED_SIZE,
-                                                        40,
-                                                        GroupLayout.PREFERRED_SIZE))
-                                        .addComponent(chckbxAll)
-                                        .addComponent(
-                                                chckbxClass)
-                                        .addComponent(
-                                                lblBaselines)
-                                        .addComponent(
-                                                lblSelectiveMeasurements)
-                                        .addComponent(
-                                                lblResults)
-                                        .addGroup(
-                                                gl_contentPane
-                                                .createSequentialGroup()
-                                                .addComponent(
-                                                        lblKCrossValidation)
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED)
-                                                .addComponent(
-                                                        textFieldCrossValidation,
-                                                        GroupLayout.PREFERRED_SIZE,
-                                                        51,
-                                                        GroupLayout.PREFERRED_SIZE))
-                                        .addGroup(
-                                                gl_contentPane
-                                                .createSequentialGroup()
-                                                .addGroup(
-                                                        gl_contentPane
                                                         .createParallelGroup(
                                                                 Alignment.LEADING)
                                                         .addComponent(
-                                                                chckbxIndividual)
+                                                                scrollPane,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                778,
+                                                                Short.MAX_VALUE)
                                                         .addComponent(
-                                                                chckbxAllSelected))
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED,
-                                                        243,
-                                                        Short.MAX_VALUE)
-                                                .addComponent(
-                                                        btnSelectComplexityIndices))
-                                        .addGroup(
-                                                Alignment.TRAILING,
-                                                gl_contentPane
-                                                .createSequentialGroup()
-                                                .addComponent(
-                                                        lblComments)
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED,
-                                                        558,
-                                                        Short.MAX_VALUE)
-                                                .addComponent(
-                                                        btnPerformMeasurements)))
-                                .addContainerGap()));
+                                                                separator_2,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                778,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                separator_1,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                778,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                separator,
+                                                                GroupLayout.DEFAULT_SIZE,
+                                                                778,
+                                                                Short.MAX_VALUE)
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                        .createSequentialGroup()
+                                                                        .addComponent(
+                                                                                lblPath)
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED)
+                                                                        .addComponent(
+                                                                                textFieldDirectory,
+                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                684,
+                                                                                Short.MAX_VALUE)
+                                                                        .addGap(18)
+                                                                        .addComponent(
+                                                                                btnPath,
+                                                                                GroupLayout.PREFERRED_SIZE,
+                                                                                40,
+                                                                                GroupLayout.PREFERRED_SIZE))
+                                                        .addComponent(chckbxAll)
+                                                        .addComponent(
+                                                                chckbxClass)
+                                                        .addComponent(
+                                                                lblBaselines)
+                                                        .addComponent(
+                                                                lblSelectiveMeasurements)
+                                                        .addComponent(
+                                                                lblResults)
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                        .createSequentialGroup()
+                                                                        .addComponent(
+                                                                                lblKCrossValidation)
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED)
+                                                                        .addComponent(
+                                                                                textFieldCrossValidation,
+                                                                                GroupLayout.PREFERRED_SIZE,
+                                                                                51,
+                                                                                GroupLayout.PREFERRED_SIZE))
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                        .createSequentialGroup()
+                                                                        .addGroup(
+                                                                                gl_contentPane
+                                                                                        .createParallelGroup(
+                                                                                                Alignment.LEADING)
+                                                                                        .addComponent(
+                                                                                                chckbxIndividual)
+                                                                                        .addComponent(
+                                                                                                chckbxAllSelected))
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED,
+                                                                                243,
+                                                                                Short.MAX_VALUE)
+                                                                        .addComponent(
+                                                                                btnSelectComplexityIndices))
+                                                        .addGroup(
+                                                                Alignment.TRAILING,
+                                                                gl_contentPane
+                                                                        .createSequentialGroup()
+                                                                        .addComponent(
+                                                                                lblComments)
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED,
+                                                                                558,
+                                                                                Short.MAX_VALUE)
+                                                                        .addComponent(
+                                                                                btnPerformMeasurements)))
+                                        .addContainerGap()));
         gl_contentPane
                 .setVerticalGroup(gl_contentPane
                         .createParallelGroup(Alignment.LEADING)
                         .addGroup(
                                 gl_contentPane
-                                .createSequentialGroup()
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.BASELINE)
-                                        .addComponent(
-                                                textFieldDirectory,
-                                                GroupLayout.PREFERRED_SIZE,
-                                                GroupLayout.DEFAULT_SIZE,
-                                                GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(lblPath)
-                                        .addComponent(btnPath))
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(lblBaselines)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(separator,
-                                        GroupLayout.PREFERRED_SIZE, 2,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(chckbxAll)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(chckbxClass)
-                                .addPreferredGap(
-                                        ComponentPlacement.UNRELATED)
-                                .addComponent(lblSelectiveMeasurements)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(separator_1,
-                                        GroupLayout.PREFERRED_SIZE, 2,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
+                                        .createSequentialGroup()
                                         .addGroup(
                                                 gl_contentPane
-                                                .createSequentialGroup()
-                                                .addComponent(
-                                                        chckbxIndividual)
-                                                .addPreferredGap(
-                                                        ComponentPlacement.RELATED)
-                                                .addComponent(
-                                                        chckbxAllSelected)
-                                                .addPreferredGap(
-                                                        ComponentPlacement.UNRELATED)
-                                                .addGroup(
-                                                        gl_contentPane
                                                         .createParallelGroup(
                                                                 Alignment.BASELINE)
                                                         .addComponent(
-                                                                lblKCrossValidation)
-                                                        .addComponent(
-                                                                textFieldCrossValidation,
+                                                                textFieldDirectory,
                                                                 GroupLayout.PREFERRED_SIZE,
                                                                 GroupLayout.DEFAULT_SIZE,
-                                                                GroupLayout.PREFERRED_SIZE))
-                                                .addGap(5)
-                                                .addComponent(
-                                                        lblResults))
-                                        .addComponent(
-                                                btnSelectComplexityIndices))
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(separator_2,
-                                        GroupLayout.PREFERRED_SIZE, 2,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addComponent(scrollPane,
-                                        GroupLayout.DEFAULT_SIZE, 269,
-                                        Short.MAX_VALUE)
-                                .addPreferredGap(
-                                        ComponentPlacement.RELATED)
-                                .addGroup(
-                                        gl_contentPane
-                                        .createParallelGroup(
-                                                Alignment.BASELINE)
-                                        .addComponent(
-                                                btnPerformMeasurements)
-                                        .addComponent(
-                                                lblComments))
-                                .addContainerGap()));
+                                                                GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(lblPath)
+                                                        .addComponent(btnPath))
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(lblBaselines)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(separator,
+                                                GroupLayout.PREFERRED_SIZE, 2,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(chckbxAll)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(chckbxClass)
+                                        .addPreferredGap(
+                                                ComponentPlacement.UNRELATED)
+                                        .addComponent(lblSelectiveMeasurements)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(separator_1,
+                                                GroupLayout.PREFERRED_SIZE, 2,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addGroup(
+                                                gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.LEADING)
+                                                        .addGroup(
+                                                                gl_contentPane
+                                                                        .createSequentialGroup()
+                                                                        .addComponent(
+                                                                                chckbxIndividual)
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.RELATED)
+                                                                        .addComponent(
+                                                                                chckbxAllSelected)
+                                                                        .addPreferredGap(
+                                                                                ComponentPlacement.UNRELATED)
+                                                                        .addGroup(
+                                                                                gl_contentPane
+                                                                                        .createParallelGroup(
+                                                                                                Alignment.BASELINE)
+                                                                                        .addComponent(
+                                                                                                lblKCrossValidation)
+                                                                                        .addComponent(
+                                                                                                textFieldCrossValidation,
+                                                                                                GroupLayout.PREFERRED_SIZE,
+                                                                                                GroupLayout.DEFAULT_SIZE,
+                                                                                                GroupLayout.PREFERRED_SIZE))
+                                                                        .addGap(5)
+                                                                        .addComponent(
+                                                                                lblResults))
+                                                        .addComponent(
+                                                                btnSelectComplexityIndices))
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(separator_2,
+                                                GroupLayout.PREFERRED_SIZE, 2,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addComponent(scrollPane,
+                                                GroupLayout.DEFAULT_SIZE, 269,
+                                                Short.MAX_VALUE)
+                                        .addPreferredGap(
+                                                ComponentPlacement.RELATED)
+                                        .addGroup(
+                                                gl_contentPane
+                                                        .createParallelGroup(
+                                                                Alignment.BASELINE)
+                                                        .addComponent(
+                                                                btnPerformMeasurements)
+                                                        .addComponent(
+                                                                lblComments))
+                                        .addContainerGap()));
 
         contentPane.setLayout(gl_contentPane);
-    }
-
-    private static void adjustToSystemGraphics() {
-        for (UIManager.LookAndFeelInfo info : UIManager
-                .getInstalledLookAndFeels()) {
-            if ("Nimbus".equals(info.getName())) {
-                try {
-                    UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 }

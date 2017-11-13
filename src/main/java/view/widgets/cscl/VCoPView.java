@@ -17,7 +17,6 @@ package view.widgets.cscl;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -50,15 +49,17 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import data.cscl.Community;
-import utils.localization.LocalizationUtils;
+import java.text.ParseException;
+import java.util.ResourceBundle;
+import utils.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
 public class VCoPView extends JFrame {
 
     private static final long serialVersionUID = 8894652868238113117L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
-    private JPanel contentPane;
+    private final JPanel contentPane;
     private JTextField textFieldPath;
 
     private static File lastDirectory = null;
@@ -72,7 +73,7 @@ public class VCoPView extends JFrame {
         /**
          * Grey by default*
          */
-        private Color placeholderForeground = new Color(160, 160, 160);
+        private final Color placeholderForeground = new Color(160, 160, 160);
         private boolean textWrittenIn;
 
         public CustomTextField(DateFormat df) {
@@ -166,45 +167,43 @@ public class VCoPView extends JFrame {
      * Create the frame.
      */
     public VCoPView() {
-        setTitle("ReaderBench - " + LocalizationUtils.getTranslation("View virtual Communities of Practice"));
-        setResizable(false);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 675, 325);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setResizable(false);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setBounds(100, 100, 675, 325);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel(LocalizationUtils.getTranslation("Path") + ":");
+        JLabel lblPath = new JLabel(LocalizationUtils.getGeneric("path") + ":");
 
         textFieldPath = new JTextField();
-        textFieldPath.setText("resources/in/MOOC/forum_posts&comments");
+        textFieldPath.setText("resources/in");
         textFieldPath.setColumns(10);
 
         JButton btnSearch = new JButton("...");
-        btnSearch.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JFileChooser fc = null;
-                if (lastDirectory == null) {
-                    fc = new JFileChooser(new File("resources/in"));
-                } else {
-                    fc = new JFileChooser(lastDirectory);
-                }
-                fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                int returnVal = fc.showOpenDialog(VCoPView.this);
+        btnSearch.addActionListener((ActionEvent e) -> {
+            JFileChooser fc = null;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("resources/in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int returnVal = fc.showOpenDialog(VCoPView.this);
 
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    lastDirectory = file.getParentFile();
-                    textFieldPath.setText(file.getPath());
-                }
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                textFieldPath.setText(file.getPath());
             }
         });
 
         JPanel panelViewCommunity = new JPanel();
         panelViewCommunity.setBackground(Color.WHITE);
         panelViewCommunity.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-                LocalizationUtils.getTranslation("View"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
+                LocalizationUtils.getLocalizedString(this.getClass(), "panelViewCommunity"), TitledBorder.LEADING, TitledBorder.TOP, null, null));
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
@@ -228,10 +227,10 @@ public class VCoPView extends JFrame {
                         .addComponent(panelViewCommunity, GroupLayout.PREFERRED_SIZE, 214, GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(64, Short.MAX_VALUE)));
 
-        JButton btnViewCommunity = new JButton(LocalizationUtils.getTranslation("View community"));
+        JButton btnViewCommunity = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnViewCommunity"));
 
-        JLabel lblInitialDate = new JLabel(LocalizationUtils.getTranslation("Initial Date") + ":");
-        JLabel lblFinalDate = new JLabel(LocalizationUtils.getTranslation("Final Date") + ":");
+        JLabel lblInitialDate = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblInitialDate") + ":");
+        JLabel lblFinalDate = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblFinalDate") + ":");
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         frmtdtxtfldInputdatetext = new CustomTextField(dateFormat);
         ((CustomTextField) frmtdtxtfldInputdatetext).setPlaceholder("dd-MM-yyyy");
@@ -279,12 +278,12 @@ public class VCoPView extends JFrame {
                 System.out.println("date1=" + date1 + ", date2=" + date2);
 
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                Community.processDocumentCollection(textFieldPath.getText(), ReaderBenchView.RUNTIME_LANGUAGE, true, true, date1, date2, 0, 7);
+                Community.processDocumentCollection(textFieldPath.getText(), ReaderBenchView.RUNTIME_LANGUAGE, true, true, true, true, false, false, true, date1, date2, 0, 7);
                 Toolkit.getDefaultToolkit().beep();
                 setCursor(null); // turn off the wait cursor
             } else {
                 JOptionPane.showMessageDialog(VCoPView.this,
-                        "Please select an appropriate input folder to be visualized!", "Error",
+                        LocalizationUtils.getGeneric("msgSelectInputFolder") + "!", "Error",
                         JOptionPane.WARNING_MESSAGE);
             }
         });
@@ -295,26 +294,8 @@ public class VCoPView extends JFrame {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         try {
             return dateFormat.parse(str);
-        } catch (Exception e) {
+        } catch (ParseException e) {
             return null;
-        }
-    }
-
-    private static void adjustToSystemGraphics() {
-        for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-            if ("Nimbus".equals(info.getName())) {
-                try {
-                    UIManager.setLookAndFeel(info.getClassName());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

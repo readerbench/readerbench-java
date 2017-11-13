@@ -18,59 +18,60 @@ package webService.query;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
+import data.SemanticCorpora;
 import data.document.Document;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
-import services.complexity.ComplexityIndices;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
+import services.semanticModels.SimilarityType;
 import services.semanticModels.word2vec.Word2VecModel;
+import services.commons.TextPreprocessing;
 
 public class QueryHelper {
 
     private static final Logger LOGGER = Logger.getLogger("");
-    private static final String SEMANTIC_MODELS_ROOT = "resources/config/";
 
-    public static AbstractDocument processQuery(Map<String, String> hm) {
-        LOGGER.info("Processign query ...");
-        Lang lang = Lang.getLang(hm.get("language"));
-        String semanticModelsPath = SEMANTIC_MODELS_ROOT + '/' + lang.toString().toUpperCase();
-        
-        AbstractDocumentTemplate template;
-        try {
-            template = AbstractDocumentTemplate.getDocumentModel(URLDecoder.decode(hm.get("text"), "UTF-8"));
-
-            List<ISemanticModel> models = new ArrayList<>();
-            if (hm.get("lsa") != null && (hm.get("lsa").compareTo("") != 0)) {
-                models.add(LSA.loadLSA(semanticModelsPath + '/' + "LSA" + '/' + hm.get("lsa"), lang));
-            }
-            if (hm.get("lda") != null && (hm.get("lda").compareTo("") != 0)) {
-                models.add(LDA.loadLDA(semanticModelsPath + '/' + "LDA" + '/' + hm.get("lda"), lang));
-            }
-            if (hm.get("w2v") != null && (hm.get("w2v").compareTo("") != 0)) {
-                models.add(Word2VecModel.loadWord2Vec(semanticModelsPath + '/' + "word2vec" + '/' + hm.get("w2v"), lang));
-            }
-            AbstractDocument document = new Document(
-                    null,
-                    template,
-                    models,
-                    lang,
-                    Boolean.parseBoolean(hm.get("pos-tagging"))
-            );
-            LOGGER.log(Level.INFO, "Built document has {0} blocks.", document.getBlocks().size());
-            document.computeAll(Boolean.parseBoolean(hm.get("dialogism")));
-            ComplexityIndices.computeComplexityFactors(document);
-            return document;
-        } catch (UnsupportedEncodingException ex) {
-            Exceptions.printStackTrace(ex);
+    public static List<ISemanticModel> loadSemanticModels(Lang lang, String lsaCorpora, String ldaCorpora, String w2vCorpora) {
+        List<ISemanticModel> models = new ArrayList<>();
+        if (lsaCorpora != null && (lsaCorpora.compareTo("") != 0)) {
+            models.add(LSA.loadLSA(SemanticCorpora.getSemanticCorpora(lsaCorpora, lang, SimilarityType.LSA).getFullPath(), lang));
         }
-        return null;
+        if (ldaCorpora != null && (ldaCorpora.compareTo("") != 0)) {
+            models.add(LDA.loadLDA(SemanticCorpora.getSemanticCorpora(ldaCorpora, lang, SimilarityType.LDA).getFullPath(), lang));
+        }
+        if (w2vCorpora != null && (w2vCorpora.compareTo("") != 0)) {
+            models.add(Word2VecModel.loadWord2Vec(SemanticCorpora.getSemanticCorpora(w2vCorpora, lang, SimilarityType.WORD2VEC).getFullPath(), lang));
+        }
+        return models;
+    }
+
+    public static String textToUTF8(String text) throws Exception {
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+        return URLDecoder.decode(text, "UTF-8");
+    }
+
+    public static AbstractDocument generateDocument(String text, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
+        LOGGER.info("Generating document...");
+        //text = QueryHelper.replaceSpecialChars(TextPreprocessing.cleanText(textToUTF8(text), lang));
+        text = QueryHelper.replaceSpecialChars(textToUTF8(text));
+        AbstractDocumentTemplate template = AbstractDocumentTemplate.getDocumentModel(text);
+        AbstractDocument document = new Document(null, template, models, lang, usePosTagging);
+        LOGGER.log(Level.INFO, "Generated document has {0} blocks.", document.getBlocks().size());
+        document.computeAll(computeDialogism, useBigrams);
+        return document;
+    }
+
+    public static String replaceSpecialChars(String text) {
+        text = text.replaceAll("%(?![0-9a-fA-F]{2})", " ");
+        text = text.replaceAll("\\+", " ");
+        text = text.replaceAll("%", " ");
+        return text;
     }
 }

@@ -15,34 +15,32 @@
  */
 package services.discourse.selfExplanations;
 
-
-
-import services.semanticModels.LSA.LSA;
 import data.Block;
 import data.discourse.SemanticCohesion;
 import data.document.Metacognition;
 import java.util.logging.Logger;
 
 public class VerbalizationAssessment {
-	static Logger logger = Logger.getLogger("");
 
-	public static void detRefBlockSimilarities(Metacognition metacognition) {
-		logger.info("Building metacognition block similarities");
+    static Logger logger = Logger.getLogger("");
 
-		// determine similarities with previous blocks from referred document
-		metacognition.setBlockSimilarities(new SemanticCohesion[metacognition.getReferredDoc().getBlocks().size()]);
+    public static void detRefBlockSimilarities(Metacognition metacognition) {
+        logger.info("Building metacognition block similarities");
 
-		int startIndex = 0;
-		int endIndex = 0;
-		for (Block v : metacognition.getBlocks()) {
-			if (v.getRefBlock() != null) {
-				endIndex = v.getRefBlock().getIndex();
-				for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
-					metacognition.getBlockSimilarities()[refBlockId] = new SemanticCohesion(v,
-							metacognition.getReferredDoc().getBlocks().get(refBlockId));
-				}
-				startIndex = endIndex + 1;
-			}
-		}
-	}
+        // determine similarities with previous blocks from referred document
+        metacognition.setBlockSimilarities(new SemanticCohesion[metacognition.getReferredDoc().getBlocks().size()]);
+
+        int startIndex = 0;
+        int endIndex = 0;
+        for (Block v : metacognition.getBlocks()) {
+            if (v.getRefBlock() != null) {
+                endIndex = v.getRefBlock().getIndex();
+                for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
+                    metacognition.getBlockSimilarities()[refBlockId] = new SemanticCohesion(v,
+                            metacognition.getReferredDoc().getBlocks().get(refBlockId));
+                }
+                startIndex = endIndex + 1;
+            }
+        }
+    }
 }

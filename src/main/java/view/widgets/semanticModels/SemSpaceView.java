@@ -24,6 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
@@ -36,8 +37,6 @@ import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-
-
 
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -62,20 +61,18 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
-import data.Lang;
 import org.openide.util.Exceptions;
 import services.semanticModels.GenerateSpace;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
-import view.widgets.ReaderBenchView;
 
 public class SemSpaceView extends JFrame {
 
     private static final long serialVersionUID = 1L;
     public static final Color COLOR_ORIGINAL_CONCEPT = new Color(176, 46, 46);
 
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
 
     public static final int MIN_NODE_SIZE = 10;
     public static final int MAX_NODE_SIZE = 20;
@@ -85,10 +82,10 @@ public class SemSpaceView extends JFrame {
     private JPanel adjustmentsPanel = null;
     private JPanel networkPanel = null;
     private JLabel NeighborsLabel = null;
-    private GenerateSpace lsaProc = null;
+    private GenerateSpace genSpace = null;
     private JLabel wordLabel = null;
     private JTextField wordTextField = null;
-    private JButton startButton = null;
+    private JButton btnStart = null;
     private JSlider thresholdSlider;
     private JLabel lblMaxDepth;
     private JSlider depthSlider;
@@ -96,13 +93,15 @@ public class SemSpaceView extends JFrame {
 
     /**
      * This is the default constructor
+     *
+     * @param semModel
      */
     public SemSpaceView(ISemanticModel semModel) {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        logger.info("Starting configuration load");
+        super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        LOGGER.info("Starting configuration load ...");
         this.semModel = semModel;
-        lsaProc = new GenerateSpace(semModel);
-        logger.info("Configuration loaded");
+        genSpace = new GenerateSpace(semModel);
+        LOGGER.info("Configuration loaded ...");
         initialize();
     }
 
@@ -116,7 +115,7 @@ public class SemSpaceView extends JFrame {
         this.setSize(new Dimension(1000, 700));
         this.setResizable(true);
         this.setContentPane(getViewSplitPane());
-        this.setTitle("Vector Space Vizualization - " + semModel.getPath());
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()) + " - " + semModel.getPath());
     }
 
     private void generateNetwork() {
@@ -135,13 +134,12 @@ public class SemSpaceView extends JFrame {
         AppearanceModel appearanceModel = appearanceController.getModel();
 
         if (wordTextField.getText().length() == 0) {
-            JOptionPane.showMessageDialog(viewSplitPane, "Please enter a word!", "Error", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(viewSplitPane, LocalizationUtils.getLocalizedString(this.getClass(), "msgInputWord") + "!", "Error", JOptionPane.WARNING_MESSAGE);
             this.pack();
             return;
         } else {
-            lsaProc.buildGraph(graph, graphModel, wordTextField.getText(), threshold, depth);
-            logger.info(
-                    wordTextField.getText() + " - nodes: " + graph.getNodeCount() + " edges: " + graph.getEdgeCount());
+            genSpace.buildGraph(graph, graphModel, wordTextField.getText(), threshold, depth);
+            LOGGER.log(Level.INFO, "{0} - nodes: {1} edges: {2}", new Object[]{wordTextField.getText(), graph.getNodeCount(), graph.getEdgeCount()});
         }
 
         // Run YifanHuLayout for 100 passes
@@ -175,13 +173,13 @@ public class SemSpaceView extends JFrame {
         degreeTransformer.setColorPositions(new float[]{0f, 1f});
         appearanceController.transform(degreeRanking);
 
-        logger.info("Performing SNA...");
+        LOGGER.info("Performing SNA ...");
         // Perform SNA
         GraphDistance distance = new GraphDistance();
         distance.setDirected(false);
         distance.execute(graphModel);
 
-        logger.info("Ranking size...");
+        LOGGER.info("Ranking size ...");
         // Rank size by centrality
         Column centralityColumn = graphModel.getNodeTable().getColumn(GraphDistance.BETWEENNESS);
         Function centralityRanking = appearanceModel.getNodeFunction(graph, centralityColumn,
@@ -203,7 +201,7 @@ public class SemSpaceView extends JFrame {
             }
         }
 
-        logger.info("Generating preview...");
+        LOGGER.info("Generating preview ...");
         // Preview configuration
         PreviewController previewController = Lookup.getDefault().lookup(PreviewController.class);
         PreviewModel previewModel = previewController.getModel();
@@ -223,7 +221,7 @@ public class SemSpaceView extends JFrame {
         networkPanel.add(previewSketch, BorderLayout.CENTER);
 
         // Export
-        logger.info("Saving export...");
+        LOGGER.info("Saving export ...");
         ExportController ec = Lookup.getDefault().lookup(ExportController.class);
         try {
             ec.exportFile(new File("out/graph_" + wordTextField.getText() + "_" + (new File(semModel.getPath()).getName()) + ".pdf"));
@@ -259,7 +257,6 @@ public class SemSpaceView extends JFrame {
      */
     private JPanel getAdjustmentsPanel() {
         if (adjustmentsPanel == null) {
-
             GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
             gridBagConstraints8.gridx = 1;
             gridBagConstraints8.gridy = 5;
@@ -300,7 +297,7 @@ public class SemSpaceView extends JFrame {
             gridBagConstraints.insets = new Insets(5, 10, 5, 5);
             gridBagConstraints.gridy = 2;
             NeighborsLabel = new JLabel();
-            NeighborsLabel.setText("Threshold:");
+            NeighborsLabel.setText(LocalizationUtils.getGeneric("threshold") + ":");
             NeighborsLabel.setHorizontalAlignment(SwingConstants.CENTER);
             adjustmentsPanel.add(NeighborsLabel, gridBagConstraints);
 
@@ -362,16 +359,16 @@ public class SemSpaceView extends JFrame {
      * @return javax.swing.JButton
      */
     private JButton getStartButton() {
-        if (startButton == null) {
-            startButton = new JButton();
-            startButton.setText("Start");
-            startButton.setFont(new Font("Dialog", Font.PLAIN, 14));
-            startButton.setPreferredSize(new Dimension(120, 25));
-            startButton.addActionListener((java.awt.event.ActionEvent e) -> {
+        if (btnStart == null) {
+            btnStart = new JButton();
+            btnStart.setText(LocalizationUtils.getLocalizedString(this.getClass(), "btnStart"));
+            btnStart.setFont(new Font("Dialog", Font.PLAIN, 14));
+            btnStart.setPreferredSize(new Dimension(120, 25));
+            btnStart.addActionListener((java.awt.event.ActionEvent e) -> {
                 generateNetwork();
             });
         }
-        return startButton;
+        return btnStart;
     }
 
     private JSlider getThresholdSlider() {
@@ -394,7 +391,7 @@ public class SemSpaceView extends JFrame {
 
     private JLabel getLblMaxDepth() {
         if (lblMaxDepth == null) {
-            lblMaxDepth = new JLabel("Max depth:");
+            lblMaxDepth = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblMaxDepth") + ":");
         }
         return lblMaxDepth;
     }
@@ -433,5 +430,4 @@ public class SemSpaceView extends JFrame {
         }
         return panel;
     }
-
 }

@@ -37,6 +37,7 @@ public class AbstractDocumentTemplate implements Serializable {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
         new SimpleDateFormat("dd MMMMMMMM yyyy HH:mm", Locale.FRANCE),
         new SimpleDateFormat("HH:mm:ss"),
+        new SimpleDateFormat("hh:mm a", Locale.ENGLISH),
         new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
     };
 
@@ -87,10 +88,10 @@ public class AbstractDocumentTemplate implements Serializable {
                 } catch (ParseException e) {
                 }
             }
-            if (time == null) {
+            if (aux == null) {
                 try {
                     Long longTime = Long.parseLong(time);
-                    aux = new Date(longTime * 1000);
+                    aux = new Date(longTime);
                 } catch (NumberFormatException e) {
                     LOGGER.log(Level.SEVERE, "Unparsable date: {0}", time);
                 }

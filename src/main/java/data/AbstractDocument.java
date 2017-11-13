@@ -56,6 +56,7 @@ import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.StringJoiner;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
@@ -160,8 +161,8 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public void computeAll(boolean computeDialogism) {
-        computeDiscourseAnalysis(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        computeDiscourseAnalysis(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(this);
     }
 
@@ -187,8 +188,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     /**
      *
      * @param computeDialogism
+     * @param useBigrams
      */
-    public void computeDiscourseAnalysis(boolean computeDialogism) {
+    public void computeDiscourseAnalysis(boolean computeDialogism, boolean useBigrams) {
         if (computeDialogism) {
             // build disambiguisation graph and lexical chains
             DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
@@ -219,7 +221,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        t2 = System.currentTimeMillis();
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
         // determine topics
-        KeywordModeling.determineKeywords(this);
+        KeywordModeling.determineKeywords(this, useBigrams);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
@@ -252,10 +254,10 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public static AbstractDocument loadGenericDocument(String pathToDoc,
             Map<SimilarityType, String> modelPaths, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
+            boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, String pathToComplexityModel,
             int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
-        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
+        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism, useBigrams,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
@@ -285,7 +287,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
-            Lang lang, boolean usePOSTagging, boolean computeDialogism,
+            Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams,
             String pathToComplexityModel, int[] selectedComplexityFactors,
             boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
@@ -303,13 +305,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
         if (isDocument) {
             Document d = Document.load(docFile, models, lang, usePOSTagging);
-            d.computeAll(computeDialogism);
+            d.computeAll(computeDialogism, useBigrams);
             d.save(saveOutput);
             return d;
         }
         if (isChat) {
             Conversation c = Conversation.load(docFile, models, lang, usePOSTagging);
-            c.computeAll(computeDialogism);
+            c.computeAll(computeDialogism, useBigrams);
             c.save(saveOutput);
             return c;
         }
@@ -382,6 +384,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         LOGGER.info("Writing document export");
         File output = new File(path.replace(".xml", ".csv"));
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
+            out.write("SEP=,\n");
             if (titleText != null) {
                 out.write(titleText.replaceAll(",", "").replaceAll("\\s+", " ") + "\n");
             }
@@ -417,7 +420,21 @@ public abstract class AbstractDocument extends AnalysisElement {
             out.write("\nTopics - Relevance\n");
             out.write("Keyword, Relevance,Tf,Average semantic similarity\n");
             for (Keyword t : this.getTopics()) {
-                out.write(t.getWord().getLemma() + " (" + t.getWord().getPOS() + "),"
+                out.write(t.getWord().getLemma() + " (");
+                if (t.getElement() instanceof Word) {
+                    out.write(t.getWord().getPOS());
+                }
+                else {
+                    NGram nGram = (NGram) t.getElement();
+                    StringBuilder sb = new StringBuilder();
+                    for (Word word : nGram.getWords()) {
+                        sb.append(word.getPOS()).append("_");
+                    }
+                    String nGramLemmas = sb.toString();
+                    sb.setLength(0);
+                    out.write(nGramLemmas.substring(0,nGramLemmas.length()-1));
+                }
+                out.write ("),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
@@ -427,7 +444,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write("\nTopics - Clusters\n");
                 Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
                 this.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getWord().getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
+                    Integer probClass = LDA.findMaxResemblance(t.getModelRepresentation(SimilarityType.LDA), this.getModelRepresentation(SimilarityType.LDA));
                     if (!topicClusters.containsKey(probClass)) {
                         topicClusters.put(probClass, new ArrayList<>());
                     }
@@ -522,13 +539,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
@@ -538,7 +555,7 @@ public abstract class AbstractDocument extends AnalysisElement {
             }
 
             // print semantic chains
-            if (voices.size() > 0) {
+            if (voices != null && voices.size() > 0) {
                 out.write("\nVoices - Semantic chains\n");
                 for (SemanticChain voice : voices) {
                     out.write(voice.toStringAllWords() + "\n");
@@ -803,5 +820,19 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
+    }
+    
+    @Override
+    public List<NGram> getBiGrams() {
+        return blocks.stream()
+                .flatMap(s -> s.getBiGrams().stream())
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NGram> getNGrams(int n) {
+        return blocks.stream()
+                .flatMap(s -> s.getNGrams(n).stream())
+                .collect(Collectors.toList());
     }
 }

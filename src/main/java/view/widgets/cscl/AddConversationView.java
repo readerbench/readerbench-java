@@ -17,7 +17,6 @@ package view.widgets.cscl;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.logging.Logger;
 
@@ -39,7 +38,7 @@ import javax.swing.filechooser.FileFilter;
 
 import view.widgets.ReaderBenchView;
 import data.Lang;
-import java.util.ResourceBundle;
+import utils.LocalizationUtils;
 
 public class AddConversationView extends JInternalFrame {
 
@@ -51,6 +50,7 @@ public class AddConversationView extends JInternalFrame {
     private JTextField textFieldPath;
     private JComboBox<String> comboBoxLSA;
     private JComboBox<String> comboBoxLDA;
+    private JComboBox<String> comboBoxWORD2VEC;
     private JCheckBox chckbxUsePosTagging;
     private JCheckBox chckbxCheckSer;
     private static File lastDirectory = null;
@@ -62,28 +62,27 @@ public class AddConversationView extends JInternalFrame {
      * @param view
      */
     public AddConversationView(Lang lang, ConversationProcessingView view) {
-        super.setTitle("ReaderBench - " + ResourceBundle.getBundle("utils.localization.messages")
-                .getString("ComprehensionModelManagementView.lblText.text"));
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         this.view = view;
         super.setResizable(false);
         super.setClosable(true);
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        super.setBounds(100, 100, 549, 166);
+        super.setBounds(100, 100, 600, 300);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         super.setContentPane(contentPane);
 
-        JLabel lblPath = new JLabel("Path:");
+        JLabel lblPath = new JLabel(LocalizationUtils.getGeneric("path") + ":");
 
-        JLabel lblLsaVectorSpace = new JLabel("LSA vector space:");
-
-        JLabel lblLdaModel = new JLabel("LDA model:");
-
+        JLabel lblLsaVectorSpace = new JLabel(LocalizationUtils.getGeneric("LSA") + ":");
+        JLabel lblLdaModel = new JLabel(LocalizationUtils.getGeneric("LDA") + ":");
+        JLabel lblWord2VecVectorSpace = new JLabel(LocalizationUtils.getGeneric("word2vec") + ":");
         comboBoxLSA = new JComboBox<>();
         comboBoxLDA = new JComboBox<>();
+        comboBoxWORD2VEC = new JComboBox<>();
 
-        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, lang);
+        ReaderBenchView.updateComboLanguage(comboBoxLSA, comboBoxLDA, comboBoxWORD2VEC, lang);
 
         textFieldPath = new JTextField();
         textFieldPath.setText("");
@@ -109,7 +108,7 @@ public class AddConversationView extends JInternalFrame {
 
                 @Override
                 public String getDescription() {
-                    return "XML file (*.xml) or directory";
+                    return LocalizationUtils.getGeneric("msgXMLFile");
                 }
             });
             int returnVal = fc.showOpenDialog(AddConversationView.this);
@@ -121,30 +120,30 @@ public class AddConversationView extends JInternalFrame {
             }
         });
 
-        JButton btnCancel = new JButton("Cancel");
+        JButton btnCancel = new JButton(LocalizationUtils.getGeneric("cancel"));
         btnCancel.addActionListener((ActionEvent e) -> {
             AddConversationView.this.dispose();
         });
 
-        JButton btnOk = new JButton("Ok");
+        JButton btnOk = new JButton(LocalizationUtils.getGeneric("ok"));
         btnOk.addActionListener((ActionEvent e) -> {
             if (!textFieldPath.getText().equals("")) {
                 ConversationProcessingView.DocumentProcessingTask task = AddConversationView.this.view.new DocumentProcessingTask(
                         textFieldPath.getText(), (String) comboBoxLSA.getSelectedItem(),
-                        (String) comboBoxLDA.getSelectedItem(), chckbxUsePosTagging.isSelected(), false, chckbxCheckSer.isSelected());
+                        (String) comboBoxLDA.getSelectedItem(), (String) comboBoxWORD2VEC.getSelectedItem(), chckbxUsePosTagging.isSelected(), false, chckbxCheckSer.isSelected());
                 task.execute();
                 AddConversationView.this.dispose();
             } else {
                 JOptionPane.showMessageDialog(AddConversationView.this,
-                        "Please select an appropriate input file to be analysed!", "Error",
+                        LocalizationUtils.getGeneric("msgSelectInputFile"), "Error",
                         JOptionPane.WARNING_MESSAGE);
             }
         });
 
-        chckbxUsePosTagging = new JCheckBox("Use POS tagging");
+        chckbxUsePosTagging = new JCheckBox(LocalizationUtils.getGeneric("usePOStagging"));
         chckbxUsePosTagging.setSelected(true);
 
-        chckbxCheckSer = new JCheckBox("Consider already pre-processed files");
+        chckbxCheckSer = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxCheckSer"));
         chckbxCheckSer.setSelected(true);
 
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
@@ -154,9 +153,10 @@ public class AddConversationView extends JInternalFrame {
                                 .createParallelGroup(Alignment.TRAILING).addGroup(gl_contentPane
                                 .createSequentialGroup().addGroup(
                                         gl_contentPane.createParallelGroup(Alignment.LEADING)
-                                        .addComponent(lblPath).addComponent(
-                                        lblLsaVectorSpace)
-                                        .addComponent(lblLdaModel))
+                                                .addComponent(lblPath).addComponent(
+                                                lblLsaVectorSpace)
+                                                .addComponent(lblLdaModel)
+                                                .addComponent(lblWord2VecVectorSpace))
                                 .addGap(13)
                                 .addGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
                                         .addComponent(comboBoxLDA, 0, 401, Short.MAX_VALUE)
@@ -166,17 +166,18 @@ public class AddConversationView extends JInternalFrame {
                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addComponent(btnSearch, GroupLayout.PREFERRED_SIZE, 41,
                                                         GroupLayout.PREFERRED_SIZE))
-                                        .addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE))
+                                        .addComponent(comboBoxLSA, 0, 401, Short.MAX_VALUE)
+                                        .addComponent(comboBoxWORD2VEC, 0, 401, Short.MAX_VALUE))
                                 .addGap(6))
                                 .addGroup(
                                         gl_contentPane.createSequentialGroup().addComponent(chckbxUsePosTagging)
-                                        .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
-                                        .addComponent(chckbxCheckSer)
-                                        .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
-                                        .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
-                                                GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCancel)
-                                        .addContainerGap()))));
+                                                .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
+                                                .addComponent(chckbxCheckSer)
+                                                .addPreferredGap(ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
+                                                .addComponent(btnOk, GroupLayout.PREFERRED_SIZE, 73,
+                                                        GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnCancel)
+                                                .addContainerGap()))));
         gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(Alignment.LEADING)
                 .addGroup(gl_contentPane.createSequentialGroup()
                         .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE)
@@ -192,6 +193,10 @@ public class AddConversationView extends JInternalFrame {
                                 .addComponent(comboBoxLDA, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
                                         GroupLayout.PREFERRED_SIZE)
                                 .addComponent(lblLdaModel))
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(lblWord2VecVectorSpace)
+                                .addComponent(comboBoxWORD2VEC, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE,
+                                        GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(ComponentPlacement.RELATED)
                         .addGroup(gl_contentPane.createParallelGroup(Alignment.BASELINE).addComponent(btnOk)
                                 .addComponent(btnCancel).addComponent(chckbxUsePosTagging).addComponent(chckbxCheckSer))

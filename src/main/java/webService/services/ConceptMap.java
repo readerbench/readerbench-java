@@ -16,7 +16,9 @@
 package webService.services;
 
 import data.AbstractDocument;
+import data.AnalysisElement;
 import data.Lang;
+import data.NGram;
 import data.Word;
 import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
@@ -30,10 +32,10 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import services.complexity.wordComplexity.WordComplexity;
 import services.discourse.keywordMining.KeywordModeling;
-import services.semanticModels.LSA.LSA;
 import services.semanticModels.LDA.LDA;
-import services.semanticModels.word2vec.Word2VecModel;
+import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
+import services.semanticModels.word2vec.Word2VecModel;
 import webService.result.ResultEdge;
 import webService.result.ResultNode;
 import webService.result.ResultTopic;
@@ -45,83 +47,148 @@ import webService.result.ResultTopic;
 public class ConceptMap {
 
     public static ResultTopic getKeywords(AbstractDocument queryDoc, double threshold, Set<Word> ignoredWords) {
-        List<AbstractDocument> queryDocs = new ArrayList();
-        queryDocs.add(queryDoc);
-        return getKeywords(queryDocs, threshold, ignoredWords);
-    }
-
-    public static ResultTopic getKeywords(List<? extends AbstractDocument> queryDocs, double threshold, Set<Word> ignoredWords) {
 
         List<ResultNode> nodes = new ArrayList<>();
-        List<ResultEdge> links = new ArrayList<>();
 
-        List<Keyword> keywords = KeywordModeling.getCollectionTopics(queryDocs);
-        if (ignoredWords != null && !ignoredWords.isEmpty()) keywords = keywords.stream()
-                .filter(k -> !ignoredWords.contains(k.getWord()))
-                .collect(Collectors.toList());
-        
+        List<Keyword> keywords = queryDoc.getTopics();
+        if (ignoredWords != null && !ignoredWords.isEmpty()) {
+            keywords = keywords.stream()
+                    .filter(k -> !ignoredWords.contains(k.getWord()))
+                    .collect(Collectors.toList());
+        }
+
         // build nodes
-        Map<Word, Integer> nodeIndexes = new TreeMap<>();
+        Map<Keyword, Integer> nodeIndexes = new TreeMap<>();
 
         int i = 0, j = 0;
-        Lang lang = queryDocs.get(0).getLanguage();
-        LSA lsa = (LSA) queryDocs.get(0).getSemanticModel(SimilarityType.LSA);
-        LDA lda = (LDA) queryDocs.get(0).getSemanticModel(SimilarityType.LDA);
-        Word2VecModel word2Vec = (Word2VecModel) queryDocs.get(0).getSemanticModel(SimilarityType.WORD2VEC);
+        Lang lang = queryDoc.getLanguage();
+        LSA lsa = (LSA) queryDoc.getSemanticModel(SimilarityType.LSA);
+        LDA lda = (LDA) queryDoc.getSemanticModel(SimilarityType.LDA);
+        Word2VecModel word2Vec = (Word2VecModel) queryDoc.getSemanticModel(SimilarityType.WORD2VEC);
         Map<Word, Double> mapIdf;
         if (lsa != null) {
             mapIdf = lsa.getMapIdf();
         } else {
             mapIdf = null;
         }
-        Map<Word, Integer> wordOcc = queryDocs.get(0).getWordOccurences();
+        Map<Word, Integer> wordOcc = queryDoc.getWordOccurences();
         for (Keyword t : keywords) {
             ResultNode node = new ResultNode(i, t.getWord().getText(), t.getRelevance(), 1);
-            nodeIndexes.put(t.getWord(), i);
-            node.setLemma(t.getWord().getLemma());
-            node.setPos(t.getWord().getPOS());
-            t.updateRelevance(queryDocs.get(0), t.getWord());
-            node.setNoOcc(wordOcc.get(t.getWord()));
+            nodeIndexes.put(t, i);
+            if (t.getElement() instanceof Word) {
+                node.setLemma(t.getWord().getLemma());
+                node.setPos(t.getWord().getPOS());
+                node.setNoOcc(t.getCount());
+            } else {
+                NGram nGram = (NGram) t.getElement();
+                node.setLemma(nGram.getWords().stream().map(w -> w.getLemma()).collect(Collectors.joining(" ")));
+                node.setPos(nGram.getWords().stream().map(w -> w.getPOS()).collect(Collectors.joining(" ")));
+                node.setNoOcc(t.getCount());
+            }
+            
             node.setTf(t.getTermFrequency());
-            if (mapIdf != null && mapIdf.containsKey(t.getWord())) {
-                node.setIdf(mapIdf.get(t.getWord()));
+            if (t.getElement() instanceof Word) {
+                if (mapIdf != null && mapIdf.containsKey(t.getWord())) {
+                    node.setIdf(mapIdf.get(t.getWord()));
+                } else {
+                    node.setIdf(-1);
+                }
             } else {
                 node.setIdf(-1);
             }
 
             // similarity scores between word and document using each semantic model
             if (lsa != null) {
-                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getWord(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.LSA.getAcronym(), lsa.getSimilarity(t.getElement(), queryDoc));
             }
             if (lda != null) {
-                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getWord(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.LDA.getAcronym(), lda.getSimilarity(t.getElement(), queryDoc));
             }
             if (word2Vec != null) {
-                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getWord(), queryDocs.get(0)));
+                node.addSemanticSimilarity(SimilarityType.WORD2VEC.getAcronym(), word2Vec.getSimilarity(t.getElement(), queryDoc));
             }
 
-            node.setAverageDistanceToHypernymTreeRoot(WordComplexity.getAverageDistanceToHypernymTreeRoot(t.getWord(), lang));
-            node.setMaxDistanceToHypernymTreeRoot(WordComplexity.getMaxDistanceToHypernymTreeRoot(t.getWord(), lang));
-            node.setPolysemyCount(WordComplexity.getPolysemyCount(t.getWord()));
+            if (t.getElement() instanceof Word) {
+                node.setAverageDistanceToHypernymTreeRoot(WordComplexity.getAverageDistanceToHypernymTreeRoot(t.getWord(), lang));
+                node.setMaxDistanceToHypernymTreeRoot(WordComplexity.getMaxDistanceToHypernymTreeRoot(t.getWord(), lang));
+                node.setPolysemyCount(WordComplexity.getPolysemyCount(t.getWord()));
+            } else {
+                NGram nGram = (NGram) t.getElement();
+                double averageDistanceToHypernymTreeRoot = 0.0;
+                double maxDistanceToHypernymTreeRoot = 0.0;
+                int polysemyCount = 0;
+                for (Word w : nGram.getWords()) {
+                    averageDistanceToHypernymTreeRoot += WordComplexity.getAverageDistanceToHypernymTreeRoot(w, lang);
+                    maxDistanceToHypernymTreeRoot += WordComplexity.getMaxDistanceToHypernymTreeRoot(w, lang);
+                    polysemyCount += WordComplexity.getPolysemyCount(w);
+                }
+                node.setAverageDistanceToHypernymTreeRoot(averageDistanceToHypernymTreeRoot / nGram.getWords().size());
+                node.setMaxDistanceToHypernymTreeRoot(maxDistanceToHypernymTreeRoot /  nGram.getWords().size());
+                node.setPolysemyCount(polysemyCount / nGram.getWords().size());
+            }
             nodes.add(node);
             i++;
         }
 
         // determine similarities
-        i = 0;
+        List<ResultEdge> links = buildLinks(keywords, threshold, nodeIndexes);
+        appendDegreeValues(nodes, links, nodeIndexes);
+
+        return new ResultTopic(nodes, links);
+    }
+
+    public static ResultTopic getKeywords(List<? extends AbstractDocument> documents, double threshold, Integer maxNoWords) {
+        List<ResultNode> nodes = new ArrayList<>();
+
+        List<Keyword> keywords = KeywordModeling.getCollectionTopics(documents);
+        if (maxNoWords != null) {
+            Collections.sort(keywords);
+            keywords = keywords.subList(0, Math.min(keywords.size(), maxNoWords));
+        }
+        Map<Keyword, Integer> nodeIndexes = new TreeMap<>();
+
+        for (int i = 0; i < keywords.size(); i++) {
+            Keyword keyword = keywords.get(i);
+            double relevance = Math.round(keyword.getRelevance() * 100.0) / 100.0;
+            String lemma;
+            if (keyword.getElement() instanceof Word) {
+                lemma = keyword.getWord().getLemma();
+            }
+            else {
+                StringBuilder sb = new StringBuilder();
+                NGram nGram = (NGram) keyword.getElement();
+                for (Word w : nGram.getWords()) {
+                    sb.append(w.getLemma()).append(" ");
+                }
+                lemma = sb.toString();
+            }
+            ResultNode node = new ResultNode(i, lemma, relevance, 1);
+            nodeIndexes.put(keyword, i);
+            nodes.add(node);
+        }
+        List<ResultEdge> links = buildLinks(keywords, threshold, nodeIndexes);
+        appendDegreeValues(nodes, links, nodeIndexes);
+
+        return new ResultTopic(nodes, links);
+    }
+
+    private static List<ResultEdge> buildLinks(List<Keyword> keywords, double threshold, Map<Keyword, Integer> nodeIndexes) {
+        List<ResultEdge> links = new ArrayList<>();
         for (Keyword t1 : keywords) {
             for (Keyword t2 : keywords) {
                 if (!t1.equals(t2)) {
-                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getWord(), t2.getWord());
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getElement(), t2.getElement());
                     if (sim >= threshold) {
-                        links.add(new ResultEdge("", nodeIndexes.get(t1.getWord()), nodeIndexes.get(t2.getWord()), sim));
+                        links.add(new ResultEdge("", nodeIndexes.get(t1), nodeIndexes.get(t2), sim));
                     }
                 }
             }
         }
         Collections.sort(links);
+        return links;
+    }
 
-        // determine number of links and degree of nodes
+    private static void appendDegreeValues(List<ResultNode> nodes, List<ResultEdge> links, Map<Keyword, Integer> nodeIndexes) {
         Map<Integer, Integer> noLinks = new HashMap<>();
         Map<Integer, Double> degree = new HashMap<>();
         for (Integer index : nodeIndexes.values()) {
@@ -136,7 +203,5 @@ public class ConceptMap {
             node.setNoLinks(noLinks.get(node.getId()));
             node.setDegree(degree.get(node.getId()));
         }
-
-        return new ResultTopic(nodes, links);
     }
 }

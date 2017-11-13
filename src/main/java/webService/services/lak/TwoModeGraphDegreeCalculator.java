@@ -59,7 +59,13 @@ public class TwoModeGraphDegreeCalculator {
         List<TwoModeGraphNode> nodeList = new ArrayList<>(this.graph.nodeList);
         Collections.sort(nodeList, (TwoModeGraphNode node1, TwoModeGraphNode node2) -> {
             Integer node1Degree = uriDegreeMap.get(node1.getUri());
+            if(node1Degree == null) {
+                node1Degree = 0;
+            }
             Integer node2Degree = uriDegreeMap.get(node2.getUri());
+            if(node2Degree == null) {
+                node2Degree = 0;
+            }
             return -node1Degree.compareTo(node2Degree);
         });
         return nodeList;

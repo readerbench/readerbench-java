@@ -43,6 +43,7 @@ import data.AbstractDocument.SaveType;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -60,7 +61,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 import org.openide.util.Exceptions;
 import services.semanticModels.SimilarityType;
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 import view.models.document.ConversationManagementTableModel;
 import view.widgets.ReaderBenchView;
 
@@ -89,23 +90,25 @@ public class ConversationProcessingView extends JInternalFrame {
         private final String pathToDoc;
         private final String pathToLSA;
         private final String pathToLDA;
+        private final String pathToWORD2VEC;
         private final boolean usePOSTagging;
         private boolean isSerialized;
         private final boolean chckSer;
 
-        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+        public DocumentProcessingTask(String pathToDoc, String pathToLSA, String pathToLDA, String pathToWORD2VEC, boolean usePOSTagging,
                 boolean isSerialized, boolean chckSer) {
             super();
             this.pathToDoc = pathToDoc;
             this.pathToLSA = pathToLSA;
             this.pathToLDA = pathToLDA;
+            this.pathToWORD2VEC = pathToWORD2VEC;
             this.usePOSTagging = usePOSTagging;
             this.isSerialized = isSerialized;
             this.chckSer = chckSer;
         }
 
         public DocumentProcessingTask(String pathToDoc) {
-            this(pathToDoc, null, null, false, true, false);
+            this(pathToDoc, null, null, null, false, true, false);
         }
 
         public AbstractDocument processDocument(String pathToIndividualFile) {
@@ -116,8 +119,11 @@ public class ConversationProcessingView extends JInternalFrame {
             if (pathToLDA != null & pathToLDA.length() > 0) {
                 modelPaths.put(SimilarityType.LDA, pathToLDA);
             }
+            if (pathToWORD2VEC != null & pathToWORD2VEC.length() > 0) {
+                modelPaths.put(SimilarityType.WORD2VEC, pathToWORD2VEC);
+            }
             return Conversation.loadGenericDocument(pathToIndividualFile, modelPaths,
-                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, null, null, true,
+                    ReaderBenchView.RUNTIME_LANGUAGE, usePOSTagging, true, false, null, null, true,
                     SaveType.SERIALIZED_AND_CSV_EXPORT);
         }
 
@@ -127,7 +133,9 @@ public class ConversationProcessingView extends JInternalFrame {
                 try {
                     d = AbstractDocument.loadSerializedDocument(pathToIndividualFile);
                 } catch (IOException | ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(desktopPane, "Error loading serialized file " + pathToIndividualFile + ". Please reprocess the file using the add document functionality.");
+                    JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getLocalizedString(this.getClass(), "errLoadSerFile1") + " "
+			    + pathToIndividualFile + ". " 
+			    + LocalizationUtils.getLocalizedString(this.getClass(), "errLoadSerFile2") + ".");
                     Exceptions.printStackTrace(ex);
                 }
             } else if (AbstractDocument.checkTagsDocument(new File(pathToIndividualFile), "Utterance")) {
@@ -148,10 +156,12 @@ public class ConversationProcessingView extends JInternalFrame {
                     d = processDocument(pathToIndividualFile);
                 }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + " does not have an appropriate conversation XML structure!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getGeneric("file") + " "
+			+ pathToIndividualFile + " " + LocalizationUtils.getLocalizedString(this.getClass(), "errXMLStructure") +"!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
             if (d != null && d.getLanguage() != ReaderBenchView.RUNTIME_LANGUAGE) {
-                JOptionPane.showMessageDialog(desktopPane, "File " + pathToIndividualFile + "Incorrect language for the loaded document!", "Information", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getGeneric("file") + " " 
+			+ pathToIndividualFile + " " + LocalizationUtils.getLocalizedString(this.getClass(), "errIncorLang") + "!", "Information", JOptionPane.INFORMATION_MESSAGE);
                 d = null;
             }
             if (d != null) {
@@ -298,7 +308,7 @@ public class ConversationProcessingView extends JInternalFrame {
      * Create the frame.
      */
     public ConversationProcessingView() {
-        super.setTitle("ReaderBench - " + LocalizationUtils.getTranslation("Conversation Processing"));
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         super.setResizable(true);
         super.setClosable(true);
@@ -310,7 +320,7 @@ public class ConversationProcessingView extends JInternalFrame {
 
         queryArticleName = "";
 
-        btnAddDocument = new JButton(LocalizationUtils.getTranslation("Add conversation(s)"));
+        btnAddDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnAddDocument"));
         btnAddDocument.addActionListener((ActionEvent e) -> {
             try {
                 JInternalFrame frame = new AddConversationView(ReaderBenchView.RUNTIME_LANGUAGE,
@@ -318,12 +328,12 @@ public class ConversationProcessingView extends JInternalFrame {
                 frame.setVisible(true);
                 desktopPane.add(frame);
                 frame.setSelected(true);
-            } catch (Exception ex) {
+            } catch (PropertyVetoException ex) {
                 Exceptions.printStackTrace(ex);
             }
         });
 
-        btnAddSerializedDocument = new JButton(LocalizationUtils.getTranslation("Add preprocessed conversation(s)"));
+        btnAddSerializedDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnAddSerializedDocument"));
         btnAddSerializedDocument.addActionListener((ActionEvent e) -> {
             JFileChooser fc = null;
             if (lastDirectory == null) {
@@ -387,7 +397,7 @@ public class ConversationProcessingView extends JInternalFrame {
         JPanel panelSingleDoc = new JPanel();
         panelSingleDoc.setBackground(Color.WHITE);
         panelSingleDoc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null),
-                LocalizationUtils.getTranslation("Specific conversation operations"), TitledBorder.LEFT,
+                LocalizationUtils.getLocalizedString(this.getClass(), "panelSingleDoc.border"), TitledBorder.LEFT,
                 TitledBorder.TOP, null, null));
 
         JPanel panelSearch = new JPanel();
@@ -418,7 +428,7 @@ public class ConversationProcessingView extends JInternalFrame {
                 .addContainerGap()));
 
         articleTextField = new CustomTextField(1);
-        articleTextField.setPlaceholder("Insert Conversation Name");
+        articleTextField.setPlaceholder(LocalizationUtils.getLocalizedString(this.getClass(), "conversationPlaceholder"));
         articleTextField.setFont(new Font("SansSerif", Font.ITALIC, 13));
         articleTextField.setPlaceholderForeground(Color.gray);
         articleTextField.getDocument().addDocumentListener(new DocumentListener() {
@@ -439,7 +449,7 @@ public class ConversationProcessingView extends JInternalFrame {
 
             public void warn() {
                 queryArticleName = articleTextField.getText();
-                if (queryArticleName.equalsIgnoreCase("Insert Conversation Name")) {
+                if (queryArticleName.equalsIgnoreCase(LocalizationUtils.getLocalizedString(this.getClass(), "conversationPlaceholder"))) {
                     queryArticleName = "";
                 }
                 newFilter();
@@ -452,7 +462,7 @@ public class ConversationProcessingView extends JInternalFrame {
         // splitPane.setLeftComponent(articleTextField);
         articleTextField.setColumns(25);
 
-        btnViewDocument = new JButton(LocalizationUtils.getTranslation("View conversation"));
+        btnViewDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnViewDocument"));
         btnViewDocument.setEnabled(false);
         btnViewDocument.addActionListener((ActionEvent e) -> {
             if (docTable.getSelectedRow() != -1) {
@@ -463,12 +473,11 @@ public class ConversationProcessingView extends JInternalFrame {
                     view.setVisible(true);
                 }
             } else {
-                JOptionPane.showMessageDialog(desktopPane, "Please select a document to be viewed!", "Information",
-                        JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(desktopPane, LocalizationUtils.getLocalizedString(this.getClass(), "msgViewDoc") + "!", "Information", JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        btnRemoveDocument = new JButton(LocalizationUtils.getTranslation("Remove conversation"));
+        btnRemoveDocument = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnRemoveDocument"));
         btnRemoveDocument.setEnabled(false);
         GroupLayout gl_panelSingleDoc = new GroupLayout(panelSingleDoc);
         gl_panelSingleDoc.setHorizontalGroup(gl_panelSingleDoc.createParallelGroup(Alignment.LEADING)
@@ -511,7 +520,9 @@ public class ConversationProcessingView extends JInternalFrame {
                 for (int i = 0; i < LOADED_CONVERSATIONS.size(); i++) {
                     int modelRow = docTable.convertRowIndexToModel(i);
                     Conversation toRemove = LOADED_CONVERSATIONS.get(modelRow);
-                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath()) && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())) {
+                    if (toRemove.getPath().equals(c.getPath()) && toRemove.getSemanticModel(SimilarityType.LSA).getPath().equals(c.getSemanticModel(SimilarityType.LSA).getPath())
+                            && toRemove.getSemanticModel(SimilarityType.LDA).getPath().equals(c.getSemanticModel(SimilarityType.LDA).getPath())
+                            && toRemove.getSemanticModel(SimilarityType.WORD2VEC).getPath().equals(c.getSemanticModel(SimilarityType.WORD2VEC).getPath())) {
                         LOADED_CONVERSATIONS.remove(toRemove);
                         docTableModel.removeRow(modelRow);
                     }
@@ -529,6 +540,11 @@ public class ConversationProcessingView extends JInternalFrame {
                 }
                 if (c.getSemanticModel(SimilarityType.LDA) != null) {
                     dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (c.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.WORD2VEC).getPath());
                 } else {
                     dataRow.add("");
                 }
@@ -551,41 +567,42 @@ public class ConversationProcessingView extends JInternalFrame {
 
     private void updateContents() {
         if (docTableModel != null) {
-            synchronized (docTableModel) {
-                // clean table
-                while (docTableModel.getRowCount() > 0) {
-                    docTableModel.removeRow(0);
-                }
-
-                synchronized (LOADED_CONVERSATIONS) {
-                    for (Conversation c : LOADED_CONVERSATIONS) {
-                        // add rows as loaded documents
-                        List<Object> dataRow = new ArrayList<>();
-                        dataRow.add(c.getTitleText());
-                        if (c.getSemanticModel(SimilarityType.LSA) != null) {
-                            dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
-                        } else {
-                            dataRow.add("");
-                        }
-                        if (c.getSemanticModel(SimilarityType.LDA) != null) {
-                            dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
-                        } else {
-                            dataRow.add("");
-                        }
-                        docTableModel.addRow(dataRow.toArray());
-                    }
-
-                    if (LOADED_CONVERSATIONS.size() > 0) {
-                        btnRemoveDocument.setEnabled(true);
-                        btnViewDocument.setEnabled(true);
-                    } else {
-                        btnRemoveDocument.setEnabled(false);
-                        btnViewDocument.setEnabled(false);
-                    }
-
-                    docTableModel.fireTableDataChanged();
-                }
+            // clean table
+            while (docTableModel.getRowCount() > 0) {
+                docTableModel.removeRow(0);
             }
+
+            for (Conversation c : LOADED_CONVERSATIONS) {
+                // add rows as loaded documents
+                List<Object> dataRow = new ArrayList<>();
+                dataRow.add(c.getTitleText());
+                if (c.getSemanticModel(SimilarityType.LSA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LSA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (c.getSemanticModel(SimilarityType.LDA) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.LDA).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                if (c.getSemanticModel(SimilarityType.WORD2VEC) != null) {
+                    dataRow.add(c.getSemanticModel(SimilarityType.WORD2VEC).getPath());
+                } else {
+                    dataRow.add("");
+                }
+                docTableModel.addRow(dataRow.toArray());
+            }
+
+            if (LOADED_CONVERSATIONS.size() > 0) {
+                btnRemoveDocument.setEnabled(true);
+                btnViewDocument.setEnabled(true);
+            } else {
+                btnRemoveDocument.setEnabled(false);
+                btnViewDocument.setEnabled(false);
+            }
+
+            docTableModel.fireTableDataChanged();
         }
     }
 

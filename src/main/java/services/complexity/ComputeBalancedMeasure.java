@@ -19,21 +19,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import services.libsvm.svm;
-import services.libsvm.svm_model;
-import services.libsvm.svm_node;
-import services.libsvm.svm_parameter;
-import services.libsvm.svm_problem;
 import data.AbstractDocument;
 import data.complexity.Measurement;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import java.util.ArrayList;
 import java.util.logging.Logger;
+import libsvm.svm;
+import libsvm.svm_model;
+import libsvm.svm_node;
+import libsvm.svm_parameter;
+import libsvm.svm_problem;
 
 public class ComputeBalancedMeasure {
 
-    static Logger logger = Logger.getLogger("");
+    public static Logger LOGGER = Logger.getLogger("");
 
     public svm_parameter getTrainingParameter(int noFactors) {
         svm_parameter param = new svm_parameter();
@@ -232,7 +232,7 @@ public class ComputeBalancedMeasure {
                 .getMeasurements(path + "/measurements.csv");
         Set<Double> classes = measurements.keySet();
         int noClasses = classes.size();
-        logger.info("Started to train custom SVM model on " + noClasses
+        LOGGER.info("Started to train custom SVM model on " + noClasses
                 + " classes on " + path + " corpus");
 
         // define training and testing sets

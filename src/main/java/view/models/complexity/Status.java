@@ -16,5 +16,5 @@
 package view.models.complexity;
 
 public enum Status {
-	SELECTED, DESELECTED, INDETERMINATE
+    SELECTED, DESELECTED, INDETERMINATE
 }

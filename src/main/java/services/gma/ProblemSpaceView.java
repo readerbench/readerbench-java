@@ -310,7 +310,7 @@ public class ProblemSpaceView extends JFrame {
 
             // word & similarity
             TreeMap<Word, Double> similarTopics = similarityHelper
-                    .getSimilarTopics(topic.getWord(), lsa, lda);
+                    .getSimilarTopics(topic.getElement(), lsa, lda);
 
             if (similarTopics != null && similarTopics.size() > 0) {
                 tableContents.put(topic, similarTopics);

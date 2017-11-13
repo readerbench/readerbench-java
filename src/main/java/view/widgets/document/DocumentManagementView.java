@@ -19,9 +19,7 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -31,8 +29,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.GroupLayout;
@@ -58,30 +54,27 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 
-
-
 import data.Block;
 import data.document.Document;
 import java.util.ArrayList;
 import org.openide.util.Exceptions;
 import services.converters.Txt2XmlConverter;
-import services.semanticModels.ISemanticModel;
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 import view.widgets.ReaderBenchView;
 
 public class DocumentManagementView extends JFrame {
 
     private static final long serialVersionUID = -2864356905020607155L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     public static final String VERBALIZATION_TAG = "//verbalization_breakpoint//";
 
     private Document loadedDocument = null;
-    private JPanel contentPane;
-    private JTextField textFieldTitle;
-    private JTextField textFieldAuthors;
-    private JTextField textFieldURI;
-    private JTextField txtComplexityLevel;
-    private JTextField textFieldSource;
+    private final JPanel contentPane;
+    private final JTextField textFieldTitle;
+    private final JTextField textFieldAuthors;
+    private final JTextField textFieldURI;
+    private final JTextField txtComplexityLevel;
+    private final JTextField textFieldSource;
     private JTextArea textAreaContent;
     private static File lastDirectory;
     private JButton btnVerbalizationBreakpoint;
@@ -91,154 +84,32 @@ public class DocumentManagementView extends JFrame {
      * Create the frame.
      */
     public DocumentManagementView() {
-        setTitle("ReaderBench - Document Management");
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 quitFormDialogue();
             }
         });
-        setBounds(100, 100, 750, 700);
-
-        JMenuBar menuBar = new JMenuBar();
-        setJMenuBar(menuBar);
-
-        JMenu mnFile = new JMenu(LocalizationUtils.getTranslation("File"));
-        mnFile.setMnemonic(KeyEvent.VK_F);
-        menuBar.add(mnFile);
-
-        JMenuItem mntmNew = new JMenuItem(LocalizationUtils.getTranslation("New"), KeyEvent.VK_N);
-        mntmNew.addActionListener((ActionEvent arg0) -> {
-            EventQueue.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    DocumentManagementView view = new DocumentManagementView();
-                    view.setLocation(DocumentManagementView.this.getLocation().x + 50,
-                            DocumentManagementView.this.getLocation().y + 50);
-                    view.setVisible(true);
-                }
-            });
-        });
-        mntmNew.setAccelerator(KeyStroke.getKeyStroke("control N"));
-        mnFile.add(mntmNew);
-
-        JMenuItem mntmOpen = new JMenuItem(LocalizationUtils.getTranslation("Open XML or txt"), KeyEvent.VK_O);
-        mntmOpen.addActionListener((ActionEvent e) -> {
-            JFileChooser fc = null;
-            if (lastDirectory == null) {
-                fc = new JFileChooser(new File("in"));
-            } else {
-                fc = new JFileChooser(lastDirectory);
-            }
-            fc.setFileFilter(new FileFilter() {
-                public boolean accept(File f) {
-                    if (f.isDirectory()) {
-                        return true;
-                    }
-                    return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
-                }
-                
-                public String getDescription() {
-                    return "XML files (*.xml) or simple text files (*.txt) in UTF-8 format";
-                }
-            });
-            int returnVal = fc.showOpenDialog(DocumentManagementView.this);
-            
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
-                File file = fc.getSelectedFile();
-                lastDirectory = file.getParentFile();
-                if (file.getName().endsWith(".xml")) {
-                    loadedDocument = Document.load(file, new ArrayList<>(), null, false);
-                    loadDocument();
-                } else if (file.getName().endsWith(".txt")) {
-                    textFieldTitle.setText(file.getName().replace(".txt", ""));
-                    
-                    // read txt content
-                    try {
-                        FileInputStream inputFile = new FileInputStream(file);
-                        InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-                        BufferedReader in = new BufferedReader(ir);
-                        String line;
-                        String content = "";
-                        while ((line = in.readLine()) != null) {
-                            if (line.trim().length() > 0) {
-                                content += line.trim() + "\n\n";
-                            }
-                        }
-                        textAreaContent.setText(content.trim());
-                        in.close();
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                    }
-                }
-            }
-        });
-        mntmOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
-        mnFile.add(mntmOpen);
-
-        JMenuItem mntmSave = new JMenuItem(LocalizationUtils.getTranslation("Save"), KeyEvent.VK_S);
-        mntmSave.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (loadedDocument == null) {
-                    updateDocument();
-                    saveDocumentDialogue();
-                } else {
-                    updateDocument();
-                    loadedDocument.exportXML(loadedDocument.getPath());
-                }
-                loadDocument();
-            }
-        });
-        mntmSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
-        mnFile.add(mntmSave);
-
-        JMenuItem mntmSaveAs = new JMenuItem(LocalizationUtils.getTranslation("Save as..."), KeyEvent.VK_S);
-        mntmSaveAs.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                updateDocument();
-                saveDocumentDialogue();
-                loadDocument();
-            }
-        });
-        mntmSaveAs.setAccelerator(KeyStroke.getKeyStroke("control alt S"));
-        mnFile.add(mntmSaveAs);
-
-        JMenuItem mntmQuit = new JMenuItem(LocalizationUtils.getTranslation("Quit"), KeyEvent.VK_Q);
-        mntmQuit.setAccelerator(KeyStroke.getKeyStroke("control Q"));
-        mntmQuit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                quitFormDialogue();
-            }
-        });
-        mnFile.add(mntmQuit);
-
-        JMenu mnTools = new JMenu(LocalizationUtils.getTranslation("Tools"));
-        menuBar.add(mnTools);
-
-        JMenuItem mntmConvert = new JMenuItem(
-                LocalizationUtils.getTranslation("Convert text files from folder to xml"));
-        mntmConvert.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                openTextDocumentDialogue();
-            }
-        });
-        mnTools.add(mntmConvert);
+        super.setBounds(100, 100, 750, 700);
 
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        super.setContentPane(contentPane);
 
-        JLabel lblTitle = new JLabel(LocalizationUtils.getTranslation("Title") + ":");
+        JLabel lblTitle = new JLabel(LocalizationUtils.getGeneric("title") + ":");
         lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
-        JLabel lblAuthors = new JLabel("Authors*:");
+        JLabel lblAuthors = new JLabel(LocalizationUtils.getGeneric("authors") + ":");
         lblAuthors.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
-        JLabel lblAuthorsComment = new JLabel(
-                "* " + LocalizationUtils.getTranslation("Multiple authors should be separated by commas"));
+        JLabel lblAuthorsComment = new JLabel("* " + LocalizationUtils.getGeneric("authorsComment"));
         lblAuthorsComment.setFont(new Font("Lucida Grande", Font.PLAIN, 9));
+
+        JLabel lblUri = new JLabel(LocalizationUtils.getGeneric("URI") + ":");
+        lblUri.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldTitle = new JTextField();
         textFieldTitle.setColumns(10);
@@ -246,34 +117,29 @@ public class DocumentManagementView extends JFrame {
         textFieldAuthors = new JTextField();
         textFieldAuthors.setColumns(10);
 
-        JLabel lblUri = new JLabel("URI:");
-        lblUri.setFont(new Font("SansSerif", Font.BOLD, 12));
-
         textFieldURI = new JTextField();
         textFieldURI.setColumns(10);
 
-        JLabel lblComplexityLevel = new JLabel(LocalizationUtils.getTranslation("Complexity level") + ":");
+        JLabel lblComplexityLevel = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblComplexityLevel") + ":");
         lblComplexityLevel.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         txtComplexityLevel = new JTextField();
         txtComplexityLevel.setHorizontalAlignment(SwingConstants.RIGHT);
         txtComplexityLevel.setColumns(10);
 
-        JLabel lblSource = new JLabel(LocalizationUtils.getTranslation("Source") + ":");
+        JLabel lblSource = new JLabel(LocalizationUtils.getGeneric("source") + ":");
         lblSource.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         textFieldSource = new JTextField();
         textFieldSource.setColumns(10);
 
-        JLabel lblText = new JLabel(LocalizationUtils.getTranslation("Text"));
+        JLabel lblText = new JLabel(LocalizationUtils.getGeneric("text"));
         lblText.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        btnVerbalizationBreakpoint = new JButton(LocalizationUtils.getTranslation("Insert verbalization breakpoint"));
-        btnVerbalizationBreakpoint.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int pos = textAreaContent.getCaretPosition();
-                textAreaContent.insert(VERBALIZATION_TAG, pos);
-            }
+        btnVerbalizationBreakpoint = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVerbalizationBreakpoint"));
+        btnVerbalizationBreakpoint.addActionListener((ActionEvent e) -> {
+            int pos = textAreaContent.getCaretPosition();
+            textAreaContent.insert(VERBALIZATION_TAG, pos);
         });
 
         JSeparator separator = new JSeparator();
@@ -281,14 +147,11 @@ public class DocumentManagementView extends JFrame {
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JLabel lblByDefault = new JLabel("* " + LocalizationUtils.getTranslation(
-                "by default a verbalization breakpoint is inserted at the end of each file, after the first save operation"));
+        JLabel lblByDefault = new JLabel("* " + LocalizationUtils.getLocalizedString(this.getClass(), "lblByDefault"));
 
-        chckbxIsEssay = new JCheckBox(LocalizationUtils.getTranslation("Is Essay"));
-        chckbxIsEssay.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                btnVerbalizationBreakpoint.setEnabled(!chckbxIsEssay.isSelected());
-            }
+        chckbxIsEssay = new JCheckBox(LocalizationUtils.getLocalizedString(this.getClass(), "chckbxIsEssay"));
+        chckbxIsEssay.addItemListener((ItemEvent e) -> {
+            btnVerbalizationBreakpoint.setEnabled(!chckbxIsEssay.isSelected());
         });
         GroupLayout gl_contentPane = new GroupLayout(contentPane);
         gl_contentPane.setHorizontalGroup(gl_contentPane.createParallelGroup(Alignment.TRAILING)
@@ -352,6 +215,116 @@ public class DocumentManagementView extends JFrame {
         textAreaContent.setLineWrap(true);
         textAreaContent.setWrapStyleWord(true);
         scrollPane.setViewportView(textAreaContent);
+
+        JMenuBar menuBar = new JMenuBar();
+        super.setJMenuBar(menuBar);
+
+        JMenu mnFile = new JMenu(LocalizationUtils.getGeneric("file"));
+        mnFile.setMnemonic(KeyEvent.VK_F);
+        menuBar.add(mnFile);
+
+        JMenuItem mntmNew = new JMenuItem(LocalizationUtils.getGeneric("new"), KeyEvent.VK_N);
+        mntmNew.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(() -> {
+                DocumentManagementView view = new DocumentManagementView();
+                view.setLocation(DocumentManagementView.this.getLocation().x + 50,
+                        DocumentManagementView.this.getLocation().y + 50);
+                view.setVisible(true);
+            });
+        });
+        mntmNew.setAccelerator(KeyStroke.getKeyStroke("control N"));
+        mnFile.add(mntmNew);
+
+        JMenuItem mntmOpen = new JMenuItem(LocalizationUtils.getGeneric("open"), KeyEvent.VK_O);
+        mntmOpen.addActionListener((ActionEvent e) -> {
+            JFileChooser fc;
+            if (lastDirectory == null) {
+                fc = new JFileChooser(new File("in"));
+            } else {
+                fc = new JFileChooser(lastDirectory);
+            }
+            fc.setFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File f) {
+                    if (f.isDirectory()) {
+                        return true;
+                    }
+                    return f.getName().endsWith(".xml") || f.getName().endsWith(".txt");
+                }
+
+                @Override
+                public String getDescription() {
+                    return LocalizationUtils.getGeneric("msgUTF8File");
+                }
+            });
+
+            int returnVal = fc.showOpenDialog(DocumentManagementView.this);
+
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fc.getSelectedFile();
+                lastDirectory = file.getParentFile();
+                if (file.getName().endsWith(".xml")) {
+                    loadedDocument = Document.load(file, new ArrayList<>(), null, false);
+                    loadDocument();
+                } else if (file.getName().endsWith(".txt")) {
+                    textFieldTitle.setText(file.getName().replace(".txt", ""));
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+                        String line;
+                        String content = "";
+                        while ((line = in.readLine()) != null) {
+                            if (line.trim().length() > 0) {
+                                content += line.trim() + "\n\n";
+                            }
+                        }
+                        textAreaContent.setText(content.trim());
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+        });
+        mntmOpen.setAccelerator(KeyStroke.getKeyStroke("control O"));
+        mnFile.add(mntmOpen);
+
+        JMenuItem mntmSave = new JMenuItem(LocalizationUtils.getGeneric("save"), KeyEvent.VK_S);
+        mntmSave.addActionListener((ActionEvent e) -> {
+            if (loadedDocument == null) {
+                updateDocument();
+                saveDocumentDialogue();
+            } else {
+                updateDocument();
+                loadedDocument.exportXML(loadedDocument.getPath());
+            }
+            loadDocument();
+        });
+        mntmSave.setAccelerator(KeyStroke.getKeyStroke("control S"));
+        mnFile.add(mntmSave);
+
+        JMenuItem mntmSaveAs = new JMenuItem(LocalizationUtils.getGeneric("saveAs"), KeyEvent.VK_S);
+        mntmSaveAs.addActionListener((ActionEvent e) -> {
+            updateDocument();
+            saveDocumentDialogue();
+            loadDocument();
+        });
+        mntmSaveAs.setAccelerator(KeyStroke.getKeyStroke("control alt S"));
+        mnFile.add(mntmSaveAs);
+
+        JMenuItem mntmQuit = new JMenuItem(LocalizationUtils.getGeneric("quit"), KeyEvent.VK_Q);
+        mntmQuit.setAccelerator(KeyStroke.getKeyStroke("control Q"));
+        mntmQuit.addActionListener((ActionEvent e) -> {
+            quitFormDialogue();
+        });
+        mnFile.add(mntmQuit);
+
+        JMenu mnTools = new JMenu(LocalizationUtils.getLocalizedString(this.getClass(), "mnTools"));
+        menuBar.add(mnTools);
+
+        JMenuItem mntmConvert = new JMenuItem(LocalizationUtils.getLocalizedString(this.getClass(), "mntmConvert"));
+        mntmConvert.addActionListener((ActionEvent e) -> {
+            openTextDocumentDialogue();
+        });
+        mnTools.add(mntmConvert);
+
         contentPane.setLayout(gl_contentPane);
     }
 
@@ -360,9 +333,7 @@ public class DocumentManagementView extends JFrame {
         this.setTitle("ReaderBench (" + loadedDocument.getPath() + ")");
 
         String authors = "";
-        for (String author : loadedDocument.getAuthors()) {
-            authors += author + ", ";
-        }
+        authors = loadedDocument.getAuthors().stream().map((author) -> author + ", ").reduce(authors, String::concat);
         textFieldAuthors.setText(authors.length() > 2 ? authors.substring(0, authors.length() - 2) : "");
 
         textFieldURI.setText(loadedDocument.getURI());
@@ -390,7 +361,7 @@ public class DocumentManagementView extends JFrame {
         loadedDocument.setTitleText(textFieldTitle.getText());
         this.setTitle("ReaderBench (" + loadedDocument.getPath() + ")");
 
-        loadedDocument.setAuthors(new LinkedList<String>());
+        loadedDocument.setAuthors(new ArrayList<>());
         String[] authors = textFieldAuthors.getText().split(",");
         for (String author : authors) {
             loadedDocument.getAuthors().add(author.trim());
@@ -405,18 +376,17 @@ public class DocumentManagementView extends JFrame {
         loadedDocument.setSource(textFieldSource.getText());
 
         int index = 0;
-        loadedDocument.setBlocks(new Vector<Block>());
+        loadedDocument.setBlocks(new ArrayList<>());
         for (String blocks : textAreaContent.getText().trim().split(VERBALIZATION_TAG)) {
             Block b = null;
             for (String block : blocks.split("(\n)+")) {
                 if (block.trim().length() > 0) {
-                    b = new Block(loadedDocument, index++, block.trim(), 
+                    b = new Block(loadedDocument, index++, block.trim(),
                             loadedDocument.getSemanticModels(), loadedDocument.getLanguage());
                     loadedDocument.getBlocks().add(b);
                 }
             }
-            // always last block is followed by a verbalization tag
-            // omit for essay!
+            // always last block is followed by a verbalization tag; omit for essay
             if (b != null && !chckbxIsEssay.isSelected()) {
                 b.setFollowedByVerbalization(true);
             }
@@ -424,13 +394,14 @@ public class DocumentManagementView extends JFrame {
     }
 
     public void saveDocumentDialogue() {
-        JFileChooser fc = null;
+        JFileChooser fc;
         if (lastDirectory == null) {
-            fc = new JFileChooser(new File("in"));
+            fc = new JFileChooser(new File("resources/in"));
         } else {
             fc = new JFileChooser(lastDirectory);
         }
         fc.setFileFilter(new FileFilter() {
+            @Override
             public boolean accept(File f) {
                 if (f.isDirectory()) {
                     return true;
@@ -438,27 +409,29 @@ public class DocumentManagementView extends JFrame {
                 return f.getName().endsWith(".xml");
             }
 
+            @Override
             public String getDescription() {
-                return "XML files (*.xml)";
+                return LocalizationUtils.getGeneric("msgXMLFileOnly");
             }
         });
 
         int returnVal = fc.showSaveDialog(DocumentManagementView.this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
+            String path;
             if (!file.getName().endsWith(".xml")) {
                 // add xml extension
-                loadedDocument.setPath(file.getPath() + ".xml");
-                loadedDocument.exportXML(loadedDocument.getPath());
+                path = file.getPath() + ".xml";
             } else {
-                loadedDocument.setPath(file.getPath());
-                loadedDocument.exportXML(loadedDocument.getPath());
+                path = file.getPath();
             }
+            loadedDocument.setPath(path);
+            loadedDocument.exportXML(path);
         }
     }
 
     public void openTextDocumentDialogue() {
-        JFileChooser fc = null;
+        JFileChooser fc;
         if (lastDirectory == null) {
             fc = new JFileChooser(new File("in"));
         } else {
@@ -466,15 +439,14 @@ public class DocumentManagementView extends JFrame {
         }
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fc.setFileFilter(new FileFilter() {
+            @Override
             public boolean accept(File f) {
-                if (f.isDirectory()) {
-                    return true;
-                }
-                return false;
+                return f.isDirectory();
             }
 
+            @Override
             public String getDescription() {
-                return "TXT files (*.txt)";
+                return LocalizationUtils.getGeneric("msgFolder");
             }
         });
 
@@ -490,11 +462,10 @@ public class DocumentManagementView extends JFrame {
     }
 
     public void quitFormDialogue() {
-        Object[] options = {LocalizationUtils.getTranslation("Yes"), LocalizationUtils.getTranslation("No"),
-            LocalizationUtils.getTranslation("Cancel")};
+        Object[] options = {LocalizationUtils.getGeneric("yes"), LocalizationUtils.getGeneric("no"), LocalizationUtils.getGeneric("cancel")};
         int value = JOptionPane.showOptionDialog(this,
-                LocalizationUtils.getTranslation("Do you want to save changes") + "?",
-                LocalizationUtils.getTranslation("Save"), JOptionPane.YES_NO_CANCEL_OPTION,
+                LocalizationUtils.getGeneric("questionSave"),
+                LocalizationUtils.getGeneric("save"), JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         if (value == JOptionPane.YES_OPTION) {
             if (loadedDocument == null) {

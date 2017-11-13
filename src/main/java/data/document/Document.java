@@ -90,13 +90,18 @@ public class Document extends AbstractDocument implements Comparable<Document> {
     }
 
     public Document(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels, Lang lang, boolean usePOSTagging) {
+        this(docTmp, semModels, lang, usePOSTagging, Parsing.getParser(lang));
+    }
+    
+    public Document(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels,
+            Lang lang, boolean usePOSTagging, Parsing parser) {
         setLanguage(lang);
         super.setSemanticModels(semModels);
         setDisambiguationGraph(new DisambiguationGraph(lang));
         setText(docTmp.getText());
-
         setDocTmp(docTmp);
-        Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
+
+        parser.parseDoc(docTmp, this, usePOSTagging);
     }
 
     public static Document load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
@@ -142,7 +147,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
                 } else {
                     block.setId(i);
                 }
-                block.setRefId(0);
+                block.setRefId(-1);
                 if (el.hasAttribute("verbalization_after")) {
                     block.setVerbId(noBreakPoints);
                     noBreakPoints++;

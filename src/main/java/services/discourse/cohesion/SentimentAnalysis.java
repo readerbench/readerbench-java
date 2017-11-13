@@ -18,8 +18,6 @@ package services.discourse.cohesion;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 import data.AbstractDocument;
 import data.Block;
 import data.Sentence;
@@ -48,6 +46,9 @@ public class SentimentAnalysis {
                 Double v = e.get(daoSe);
                 return (v == null ? 0. : v);
             }).sum() / s.getAllWords().size();
+            if (s.getSentimentEntity().getAll().containsKey(daoSe)) {
+                continue;
+            }
             s.getSentimentEntity().add(daoSe, value);
         }
     }

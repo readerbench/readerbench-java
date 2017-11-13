@@ -54,6 +54,7 @@ import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
 import data.discourse.SemanticChain;
+import utils.LocalizationUtils;
 
 public class ParticipantVoiceCoverageView extends JFrame {
 
@@ -74,7 +75,7 @@ public class ParticipantVoiceCoverageView extends JFrame {
 	 */
 	public ParticipantVoiceCoverageView(Conversation chat, List<SemanticChain> chains,
 			Map<Participant, Color> participantColors) {
-		super("ReaderBench - Implicit (alien) voices");
+		super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 		this.chat = chat;
 		this.chains = chains;
 		this.participantColors = participantColors;
@@ -90,23 +91,21 @@ public class ParticipantVoiceCoverageView extends JFrame {
 
 		updateGraph(chains.get(0));
 
-		JLabel lblSelectVoice = new JLabel("Select voice:");
+		JLabel lblSelectVoice = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSelectVoice") + ":");
 
-		comboBoxSelectVoice = new JComboBox<String>();
-		for (SemanticChain v : chains) {
-			comboBoxSelectVoice.addItem(v.toString());
-		}
+		comboBoxSelectVoice = new JComboBox<>();
+		chains.forEach((v) -> {
+		    comboBoxSelectVoice.addItem(v.toString());
+	    });
 
-		comboBoxSelectVoice.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (comboBoxSelectVoice.getSelectedIndex() >= 0) {
-					panel.removeAll();
-					panel.revalidate();
-					updateGraph(ParticipantVoiceCoverageView.this.chains
-							.get(comboBoxSelectVoice.getSelectedIndex()));
-					panel.repaint();
-				}
-			}
+		comboBoxSelectVoice.addActionListener((ActionEvent e) -> {
+		    if (comboBoxSelectVoice.getSelectedIndex() >= 0) {
+			panel.removeAll();
+			panel.revalidate();
+			updateGraph(ParticipantVoiceCoverageView.this.chains
+				.get(comboBoxSelectVoice.getSelectedIndex()));
+			panel.repaint();
+		    }
 		});
 
 		GroupLayout gl_contentPane = new GroupLayout(contentPane);
@@ -212,9 +211,9 @@ public class ParticipantVoiceCoverageView extends JFrame {
 
 		// create the chart...
 		JFreeChart chart = ChartFactory.createGanttChart(
-				"Implicit (alien) voices", // chart title
-				"Voice", // domain axis label
-				"Utterance", // range axis label
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartTitle"), // chart title
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartDomainAxis"), // domain axis label
+				LocalizationUtils.getLocalizedString(this.getClass(), "chartRangeAxis"), // range axis label
 				collection, // data
 				false, // include legend
 				false, // tooltips

@@ -26,7 +26,7 @@ public class Stemmer {
      * @param lang
      * @return
      */
-    public static String stemWord(String word, Lang lang) {
+    public static synchronized String stemWord(String word, Lang lang) {
         String w = word.toLowerCase();
         if (lang == null) {
             return w;

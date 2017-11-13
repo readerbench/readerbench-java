@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,13 @@
  */
 package data.cscl;
 
+import data.AbstractDocument;
+
 import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import data.AbstractDocument;
 
 public class Participant implements Comparable<Participant>, Serializable {
 
@@ -41,6 +41,8 @@ public class Participant implements Comparable<Participant>, Serializable {
     private double rhythmicCoefficient;
     private double chatEntropyForRegularity;
     
+    private ParticipantGroup participantGroup;
+
     public Participant(String name, AbstractDocument d) {
         super();
         this.name = name;
@@ -147,9 +149,18 @@ public class Participant implements Comparable<Participant>, Serializable {
         }
     }
 
+    public ParticipantGroup getParticipantGroup() {
+        return participantGroup;
+    }
+
+    public void setParticipantGroup(ParticipantGroup participantGroup) {
+        this.participantGroup = participantGroup;
+    }
+
     @Override
     public String toString() {
-        return name;
+        return name + ": { " + indices.get(CSCLIndices.INDEGREE) + ", " + indices.get(CSCLIndices.OUTDEGREE) + ", "
+                + indices.get(CSCLIndices.ECCENTRICITY) + ", " + participantGroup + "}\n";
     }
 
     @Override

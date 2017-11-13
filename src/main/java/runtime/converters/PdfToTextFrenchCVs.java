@@ -37,42 +37,40 @@ import data.discourse.Keyword;
 import data.document.Document;
 import data.Lang;
 import java.util.EnumMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndices;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
 import services.discourse.keywordMining.KeywordModeling;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
 
+/**
+ * Processes a path containing CV files in order to verify text extraction from
+ * PDF files
+ * @author Gabriel Gutu <gabriel.gutu at cs.pub.ro>
+ */
+@Deprecated
 public class PdfToTextFrenchCVs {
 
-    static Logger logger = Logger.getLogger("");
+    private static final Logger LOGGER = Logger.getLogger("");
 
     @Test
     public void process() {
-
-        // String prependPath =
-        // "/Users/Berilac/Projects/Eclipse/readerbench/resources/";
-        String prependPath = "/Users/Berilac/OneDrive/ReaderBench/";
-        logger.info("Starting French CVs processing...");
+        LOGGER.info("Starting French CVs processing...");
         StringBuilder sb = new StringBuilder();
         sb.append("sep=\t\nfile\tconcepts\n");
-
         try {
-            Files.walk(Paths.get(prependPath + "cv")).forEach(filePath -> {
+            Files.walk(Paths.get("resources/in/cv_analysis")).forEach(filePath -> {
                 String filePathString = filePath.toString();
                 if (filePathString.contains(".pdf")) {
-                    logger.info("Processing file: " + filePathString);
-
-                    // read PDF file contents
-                    PdfToTextConverter pdfConverter = new PdfToTextConverter();
-                    String documentContent = pdfConverter.pdftoText(filePathString, true);
-
-                    // process file
-                    List<ResultNode> nodes = getTopics(documentContent, "resources/config/FR/LSA/Le Monde", "resources/config/FR/LDA/Le Monde", "fr", false, false, 0.3);
+                    LOGGER.log(Level.INFO, "Processing file: {0}", filePathString);
+                    PdfToTxtConverter pdfConverter = new PdfToTxtConverter(filePathString, true);
+                    pdfConverter.process();
+                    List<ResultNode> nodes = getTopics(pdfConverter.getParsedText(), "resources/config/FR/LSA/Le_Monde", "resources/config/FR/LDA/Le_Monde", Lang.fr, false, false, false, 0.3);
 
                     StringBuilder sbNode = new StringBuilder();
                     nodes.stream().forEach((node) -> {
@@ -83,32 +81,24 @@ public class PdfToTextFrenchCVs {
                         sbNode.setLength(sbNode.length() - 2);
                     }
                     sbNode.append("\n");
-
                     sb.append(filePath.getFileName().toString()).append("\t").append(sbNode.toString());
-
-                    logger.info("Finished processing file: " + filePathString);
+                    LOGGER.log(Level.INFO, "Finished processing file: {0}", filePathString);
                 }
             });
-
-            // System.out.println(sb.toString());
-            File file = new File("frenchcvs.csv");
+            File file = new File("french_cvs.csv");
             FileUtils.writeStringToFile(file, sb.toString());
-            logger.info("Printed information to: " + file.getAbsolutePath());
-
+            LOGGER.log(Level.INFO, "Printed information to: {0}", file.getAbsolutePath());
         } catch (IOException e) {
-            logger.info("Error opening path.");
-            e.printStackTrace();
+            LOGGER.info("Error opening path.");
+            System.exit(-1);
         }
-
-        logger.info("French CVs processing ended...");
-
     }
 
-    private List<ResultNode> getTopics(String query, String pathToLSA, String pathToLDA, String lang,
-            boolean posTagging, boolean computeDialogism, double threshold) {
+    private List<ResultNode> getTopics(String query, String pathToLSA, String pathToLDA, Lang lang,
+            boolean posTagging, boolean computeDialogism, boolean useBigrams, double threshold) {
 
         List<ResultNode> nodes = new ArrayList<>();
-        AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism);
+        AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism, useBigrams);
 
         List<Keyword> topics = KeywordModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 
@@ -122,9 +112,6 @@ public class PdfToTextFrenchCVs {
         // determine similarities
         visibleConcepts.keySet().stream().forEach((Word w1) -> {
             for (Word w2 : visibleConcepts.keySet()) {
-                double lsaSim = 0;
-                double ldaSim = 0;
-
                 EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
                 for (ISemanticModel model : queryDoc.getSemanticModels()) {
                     similarities.put(model.getType(), model.getSimilarity(w1.getModelVectors().get(model.getType()), w2.getModelVectors().get(model.getType())));
@@ -147,12 +134,12 @@ public class PdfToTextFrenchCVs {
         return nodes;
     }
 
-    public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, String language,
-            boolean posTagging, boolean computeDialogism) {
-        logger.info("Processign query ...");
+    public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, Lang lang,
+            boolean posTagging, boolean computeDialogism, boolean useBigrams) {
+        LOGGER.info("Processign query ...");
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
         String[] blocks = query.split("\n");
-        logger.info("[Processing] There should be " + blocks.length + " blocks in the document");
+        LOGGER.log(Level.INFO, "[Processing] There should be {0} blocks in the document", blocks.length);
         for (int i = 0; i < blocks.length; i++) {
             BlockTemplate block = contents.new BlockTemplate();
             block.setId(i);
@@ -160,15 +147,13 @@ public class PdfToTextFrenchCVs {
             contents.getBlocks().add(block);
         }
 
-        // Lang lang = Lang.eng;
-        Lang lang = Lang.getLang(language);
         List<ISemanticModel> models = new ArrayList<>();
         models.add(LSA.loadLSA(pathToLSA, lang));
         models.add(LDA.loadLDA(pathToLDA, lang));
 
         AbstractDocument queryDoc = new Document(null, contents, models, lang, posTagging);
-        logger.info("Built document has " + queryDoc.getBlocks().size() + " blocks.");
-        queryDoc.computeAll(computeDialogism);
+        LOGGER.log(Level.INFO, "Built document has {0} blocks.", queryDoc.getBlocks().size());
+        queryDoc.computeAll(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(queryDoc);
 
         return queryDoc;

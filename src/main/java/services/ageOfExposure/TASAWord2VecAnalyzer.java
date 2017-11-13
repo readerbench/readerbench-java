@@ -33,16 +33,11 @@ import java.util.concurrent.ExecutionException;
 
 
 
-import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.cpu.nativecpu.CpuNDArrayFactory;
-import org.nd4j.linalg.factory.BaseNDArrayFactory;
-import org.nd4j.linalg.ops.transforms.Transforms;
-
 import data.Word;
 import java.util.Set;
 import java.util.logging.Logger;
 import services.commons.Formatting;
+import services.commons.VectorAlgebra;
 import services.semanticModels.word2vec.Word2VecModel;
 
 public class TASAWord2VecAnalyzer {
@@ -107,8 +102,7 @@ public class TASAWord2VecAnalyzer {
     }
 
     public void performMatching() throws InterruptedException, ExecutionException, FileNotFoundException {
-        BaseNDArrayFactory arrayFactory = new CpuNDArrayFactory();
-
+        
         /* Match topics with mature topics */
         for (int cLevel = 0; cLevel < noClasses - 1; cLevel++) {
             Word2VecModel intermediateModel = models.get(cLevel);
@@ -129,9 +123,7 @@ public class TASAWord2VecAnalyzer {
                     index++;
                 }
 
-                INDArray currentDimmensionArray = arrayFactory.create(similarityArray);
-                INDArray finalDimmensionArray = arrayFactory.create(referenceVectors.get(word));
-                double cosine = Transforms.cosineSim(currentDimmensionArray, finalDimmensionArray);
+                double cosine = VectorAlgebra.cosineSimilarity(similarityArray, referenceVectors.get(word));
                 outFile.println(word + "," + cosine);
                 wordEvolution.add(cosine);
             }

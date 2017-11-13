@@ -15,40 +15,36 @@
  */
 package view.models.verbalization;
 
-import java.util.ResourceBundle;
 import javax.swing.table.DefaultTableModel;
-
-import utils.localization.LocalizationUtils;
+import utils.LocalizationUtils;
 
 public class VerbalisationManagementTableModel extends DefaultTableModel {
 
-	private static final long serialVersionUID = 3089645556989916569L;
+    private static final long serialVersionUID = 3089645556989916569L;
 
-	private Class<?>[] columnTypes = new Class[] { String.class, // author
-			String.class, // document name
-			String.class, // LSA space
-			String.class // LDA model
-	};
+    private final Class<?>[] columnTypes = new Class[]{String.class, // author
+        String.class, // document name
+        String.class, // LSA space
+        String.class, // LDA model
+        String.class // Word2Vec space
+};
 
-	public VerbalisationManagementTableModel() {
-		super(new Object[][] {}, new String[] { ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.Author.text"), 
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.DocName.text"),
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LSAspace.text"), 
-				ResourceBundle.getBundle("utils.localization.messages")
-                .getString("TableModel.LDAvector.text") });
-	}
+    public VerbalisationManagementTableModel() {
+        super(new Object[][]{}, new String[]{
+            LocalizationUtils.getGeneric("author"),
+            LocalizationUtils.getGeneric("docName"),
+            LocalizationUtils.getGeneric("LSA"),
+            LocalizationUtils.getGeneric("LDA"),
+            LocalizationUtils.getGeneric("word2vec")});
+    }
 
-	@Override
-	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return false;
-	}
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
 
-	@Override
-	public Class<?> getColumnClass(int columnIndex) {
-		return columnTypes[columnIndex];
-	}
-
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnTypes[columnIndex];
+    }
 }

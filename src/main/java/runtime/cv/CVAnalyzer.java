@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +35,8 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndexType;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.ReaderBenchServer;
 import webService.cv.CVHelper;
@@ -44,44 +44,37 @@ import webService.query.QueryHelper;
 import webService.result.ResultComplexityIndex;
 import webService.result.ResultCv;
 import webService.result.ResultTextualComplexity;
-import webService.result.ResultValence;
 import webService.services.TextualComplexity;
 
 public class CVAnalyzer {
 
     public static final Logger LOGGER = Logger.getLogger("");
 
-    private Map<String, String> hm;
     private String path;
     private String keywords;
     private String ignoreWords;
-    
+
     private Lang lang;
+    private List<ISemanticModel> models;
     private boolean usePosTagging;
     private boolean computeDialogism;
+    private boolean useBigrams;
     private double threshold;
 
-    public CVAnalyzer(Map<String, String> hm) {
-        this.hm = hm;
+    public CVAnalyzer(Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams, Double minThreshold) {
         this.path = null;
         this.keywords = null;
         this.ignoreWords = null;
-        lang = Lang.getLang(hm.get("language"));
-        usePosTagging = Boolean.parseBoolean(hm.get("pos-tagging"));
-        computeDialogism = Boolean.parseBoolean(hm.get("dialogism"));
-        threshold = Double.parseDouble(hm.get("threshold"));
+        this.lang = lang;
+        this.models = models;
+        this.usePosTagging = usePosTagging;
+        this.computeDialogism = computeDialogism;
+        this.useBigrams = useBigrams;
+        threshold = minThreshold;
     }
 
     public CVAnalyzer() {
-        this(null);
-    }
-
-    public Map<String, String> getHm() {
-        return hm;
-    }
-
-    public void setHm(Map<String, String> hm) {
-        this.hm = hm;
+        this(null, null, true, false, false, 0.0);
     }
 
     public String getPath() {
@@ -130,7 +123,7 @@ public class CVAnalyzer {
         }
 
         // textual complexity factors
-        TextualComplexity textualComplexity = new TextualComplexity(lang, Boolean.parseBoolean(hm.get("postagging")), Boolean.parseBoolean(hm.get("dialogism")));
+        TextualComplexity textualComplexity = new TextualComplexity(lang, usePosTagging, computeDialogism);
         for (ComplexityIndexType cat : textualComplexity.getList()) {
             for (ComplexityIndex index : cat.getFactory().build(lang)) {
                 sb.append(index.getAcronym()).append(CVConstants.CSV_DELIM);
@@ -320,16 +313,14 @@ public class CVAnalyzer {
         return sb.toString();
     }
 
-    public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList, 
-            Lang lang, boolean usePosTagging, boolean computeDialogism, double threshold, PdfToTextConverter pdfConverter) {
-        String cvContent = pdfConverter.pdftoText(filePath, true);
-        hm.put("text", cvContent);
-        AbstractDocument cvDocument = QueryHelper.processQuery(hm);
-        hm.put("text", keywords);
-        AbstractDocument keywordsDocument = QueryHelper.processQuery(hm);
-        hm.put("text", cvContent);
-        return CVHelper.process(cvDocument, keywordsDocument, pdfConverter, keywordsList, ignoreList,
-                lang, usePosTagging, computeDialogism, threshold, CVConstants.FAN_DELTA, hm);
+    public ResultCv processFile(String filePath, Set<String> keywordsList, Set<String> ignoreList,
+            Lang lang, List<ISemanticModel> models, boolean usePosTagging, boolean computeDialogism, boolean useBigrams, double threshold) throws Exception {
+        PdfToTxtConverter pdfToTxtConverter = new PdfToTxtConverter(filePath, true);
+        pdfToTxtConverter.process();
+        AbstractDocument cvDocument = QueryHelper.generateDocument(pdfToTxtConverter.getParsedText(), lang, models, usePosTagging, computeDialogism, useBigrams);
+        AbstractDocument keywordsDocument = QueryHelper.generateDocument(keywords, lang, models, usePosTagging, computeDialogism, useBigrams);
+        return CVHelper.process(cvDocument, keywordsDocument, pdfToTxtConverter, keywordsList, ignoreList,
+                lang, models, usePosTagging, computeDialogism, useBigrams, threshold, CVConstants.FAN_DELTA);
     }
 
     public void processPath() {
@@ -340,7 +331,6 @@ public class CVAnalyzer {
         Set<String> keywordsList = new HashSet<>(Arrays.asList(keywords.split(",")));
         Set<String> ignoreList = new HashSet<>(Arrays.asList(ignoreWords.split(",[ ]*")));
 
-        PdfToTextConverter pdfConverter = new PdfToTextConverter();
         StringBuilder sb = new StringBuilder();
         sb.append(csvBuildHeader());
         LOGGER.log(Level.INFO, "Processing path: {0}", path);
@@ -352,8 +342,12 @@ public class CVAnalyzer {
                 if (filePath.toString().contains(".pdf")) {
                     String fileName = filePath.getFileName().toString().replaceAll("\\s+", "_");
                     int extensionStart = fileName.lastIndexOf(".");
-                    sb.append(csvBuildRow(fileName.substring(0, extensionStart),
-                            processFile(filePath.toString(), keywordsList, ignoreList, lang, usePosTagging, computeDialogism, threshold, pdfConverter)));
+                    try {
+                        sb.append(csvBuildRow(fileName.substring(0, extensionStart),
+                                processFile(filePath.toString(), keywordsList, ignoreList, lang, models, usePosTagging, computeDialogism, useBigrams, threshold)));
+                    } catch (Exception ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                 }
             });
             FileUtils.writeStringToFile(globalStatsFile, sb.toString(), "UTF-8");
@@ -365,33 +359,37 @@ public class CVAnalyzer {
         }
     }
 
-    private static Map<String, String> loadDefaultParameters() {
-        Map<String, String> hm = new HashMap<>();
-        hm.put("lsa", CVConstants.LSA_PATH_FR);
-        hm.put("lda", CVConstants.LDA_PATH_FR);
-        hm.put("word2vec", CVConstants.WOR2VEC_PATH_FR);
-        hm.put("language", CVConstants.LANG_FR);
-        hm.put("pos-tagging", CVConstants.POS_TAGGING);
-        hm.put("dialogism", CVConstants.DIALOGISM);
-        hm.put("threshold", CVConstants.THRESHOLD);
-        return hm;
-    }
-
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
-        Map<String, String> hm = loadDefaultParameters();
-        CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(hm);
+        Lang lang = Lang.getLang(CVConstants.LANG_FR);
+        Boolean usePosTagging = CVConstants.POS_TAGGING;
+        Boolean computeDialogism = CVConstants.DIALOGISM;
+        Boolean useBigrams = CVConstants.USE_BIGRAMS;
+        String lsaCorpora = CVConstants.LSA_CORPORA;
+        String ldaCorpora = CVConstants.LDA_CORPORA;
+        String w2vCorpora = CVConstants.WOR2VEC_CORPORA;
+        Double minThreshold = CVConstants.THRESHOLD;
+        List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+        CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
-        frenchCVAnalyzer.setPath(CVConstants.CV_PATH);
+        frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);
         frenchCVAnalyzer.processPath();
     }
 
     @Test
     public static void cvSampleTest() {
         ReaderBenchServer.initializeDB();
-        Map<String, String> hm = loadDefaultParameters();
-        CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(hm);
+        Lang lang = Lang.getLang(CVConstants.LANG_FR);
+        Boolean usePosTagging = CVConstants.POS_TAGGING;
+        Boolean computeDialogism = CVConstants.DIALOGISM;
+        Boolean useBigrams = CVConstants.USE_BIGRAMS;
+        String lsaCorpora = CVConstants.LSA_CORPORA;
+        String ldaCorpora = CVConstants.LDA_CORPORA;
+        String w2vCorpora = CVConstants.WOR2VEC_CORPORA;
+        Double minThreshold = CVConstants.THRESHOLD;
+        List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
+        CVAnalyzer frenchCVAnalyzer = new CVAnalyzer(lang, models, usePosTagging, computeDialogism, useBigrams, minThreshold);
         frenchCVAnalyzer.setKeywords(CVConstants.KEYWORDS);
         frenchCVAnalyzer.setIgnoreWords(CVConstants.IGNORE);
         frenchCVAnalyzer.setPath(CVConstants.CV_PATH_SAMPLE);

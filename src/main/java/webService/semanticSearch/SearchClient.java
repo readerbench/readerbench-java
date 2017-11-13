@@ -58,7 +58,7 @@ public class SearchClient {
         contents.getBlocks().add(block);
 
         AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getSemanticModels(), documents.get(0).getLanguage(), false);
-        queryDoc.computeAll(true);
+        queryDoc.computeAll(true, false);
         queryDoc.setTitleText(query);
 
         List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD, NO_RESULTS);

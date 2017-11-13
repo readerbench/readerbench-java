@@ -38,7 +38,6 @@ import services.semanticModels.SimilarityType;
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
-    private static final double SIMILARITY_THRESHOLD = 0.8;
 
     private transient Map<SimilarityType, ISemanticModel> semanticModels;
     private List<Word> words;
@@ -60,7 +59,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         this.chainSentiment = new SentimentEntity();
     }
 
-    public static double similarity(SemanticChain chain1, SemanticChain chain2) {
+    public static double computeSimilarity(SemanticChain chain1, SemanticChain chain2) {
         // determines whether 2 chains can be merged
         if (chain1 == null || chain2 == null) {
             return -1;
@@ -81,12 +80,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
             similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st), chain2.getModelVectors().get(st)));
         }
 
-        double dist = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
-        if (dist >= SIMILARITY_THRESHOLD) {
-            return dist;
-        }
-
-        return -1;
+        return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
     }
 
     public static SemanticChain merge(SemanticChain chain1, SemanticChain chain2) {
@@ -107,13 +101,13 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         for (Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
             double[] vec = new double[e.getValue().getNoDimensions()];
             words.stream()
-                .map(word -> word.getModelRepresentation(e.getKey()))
-                .filter(Objects::nonNull)
-                .forEach(v -> {
-                for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
-                    vec[i] += v[i];
-                }
-            });
+                    .map(word -> word.getModelRepresentation(e.getKey()))
+                    .filter(Objects::nonNull)
+                    .forEach(v -> {
+                        for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                            vec[i] += v[i];
+                        }
+                    });
             modelVectors.put(e.getKey(), vec);
         }
 

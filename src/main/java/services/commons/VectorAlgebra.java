@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +15,15 @@
  */
 package services.commons;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.math3.filter.DefaultMeasurementModel;
-import org.apache.commons.math3.filter.DefaultProcessModel;
-import org.apache.commons.math3.filter.KalmanFilter;
-import org.apache.commons.math3.filter.MeasurementModel;
-import org.apache.commons.math3.filter.ProcessModel;
+import org.apache.commons.math3.filter.*;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
+import java.util.ArrayList;
+import java.util.List;
 import cc.mallet.util.Maths;
 import java.util.Arrays;
 
@@ -50,10 +45,9 @@ public class VectorAlgebra {
 
         for (int i = 0; i < v.length; i++) {
             double sum = v[i];
-            INNER_LOOP:
             for (int j = 1; j < window; j++) {
                 if (i + j >= v.length || t[i + j] > max) {
-                    break INNER_LOOP;
+                    break;
                 }
                 if (i + j < v.length) {
                     sum += v[i + j];
@@ -72,12 +66,11 @@ public class VectorAlgebra {
 
         for (int i = 0; i < v.length; i++) {
             double sum = v[i];
-            INNER_LOOP:
             for (int j = 1; j < window; j++) {
                 if (i + j < v.length) {
                     sum += v[i + j];
                 } else {
-                    break INNER_LOOP;
+                    break;
                 }
             }
             result[i] = sum / window;
@@ -150,7 +143,7 @@ public class VectorAlgebra {
         }
         return Arrays.stream(v).map(x -> x * x / sum).toArray();
     }
-    
+
     public static double norm2(double[] x) {
         double norm = 0.0;
 
@@ -189,10 +182,7 @@ public class VectorAlgebra {
         if (sum1 > 0 && sum2 > 0) {
             sum = sum / (Math.sqrt(sum1) * Math.sqrt(sum2));
         }
-        if (sum >= 0 && sum <= 1) {
-            return sum;
-        }
-        return 0;
+        return Math.max(0, Math.min(sum, 1));
     }
 
     public static double pearsonCorrelation(double[] v1, double[] v2) {
@@ -493,6 +483,47 @@ public class VectorAlgebra {
         return (Math.log(C.length) - E_c) * max;
     }
 
+    public static double mean(double[] v1){
+        if (v1 == null) {
+            return -1;
+        }
+        double sum = 0;
+        for(int i = 0; i < v1.length; i++){
+            sum += v1[i];
+        }
+        return sum/v1.length;
+    }
+
+    public static double[] zScore(double[] v1){
+        double mean = mean(v1);
+        double stdev = stdev(v1);
+        for(int i = 0; i < v1.length; i++){
+            v1[i] = (v1[i] - mean) / stdev;
+        }
+        return v1;
+    }
+
+    public static double[] softmax(double[] v1){
+        double mean = mean(v1);
+        double stdev = stdev(v1);
+        for(int i = 0; i < v1.length; i++){
+            double zScore = (v1[i] - mean) / stdev;
+            v1[i] = 1 / ( 1 + Math.pow(Math.E, - zScore));
+        }
+        return v1;
+    }
+
+    public static double euclidianDistance(double[] v1, double[] v2) {
+        if (v1 == null || v2 == null || v1.length != v2.length) {
+            return 0;
+        }
+        double sum = 0;
+        for (int i = 0; i < v1.length; i++) {
+            sum += Math.pow(v2[i] - v1[i], 2);
+        }
+        return Math.sqrt(sum);
+    }
+
     public static void main(String[] args) {
         double[] v = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         double[] v1 = {1, 3, 1, 3, 1, 7, 1, 5};
@@ -525,5 +556,12 @@ public class VectorAlgebra {
         for (double d : VectorAlgebra.applyKalmanFilter(v1)) {
             System.out.print(d + " ");
         }
+
+        System.out.println();
+
+        System.out.println(mean(v1) + ", " + stdev(v1));
+
+        System.out.println(Arrays.toString(zScore(v1)));
+
     }
 }

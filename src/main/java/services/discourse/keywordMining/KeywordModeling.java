@@ -25,11 +25,14 @@ import java.util.TreeMap;
 
 import data.AbstractDocument;
 import data.AnalysisElement;
+import data.NGram;
 import data.Word;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import java.util.EnumMap;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import services.complexity.wordComplexity.WordComplexity;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -55,7 +58,7 @@ public class KeywordModeling {
         return filteredTopics;
     }
 
-    public static void determineKeywords(AnalysisElement e) {
+    public static void determineKeywords(AnalysisElement e, boolean useBigrams) {
         LOGGER.info("Determining keywords using Tf-IDf, LSA and LDA ...");
         // determine topics by using Tf-IDF and (LSA & LDA)
         for (Word w : e.getWordOccurences().keySet()) {
@@ -69,23 +72,69 @@ public class KeywordModeling {
                 e.getTopics().add(newTopic);
             }
         }
+        if (useBigrams) {
+            try {
+                Map<NGram, Long> ngrams = e.getBiGrams().stream()
+                        .collect(Collectors.groupingBy(
+                                Function.identity(),
+                                Collectors.counting()));
+
+                for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
+                    Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
+                    int index = e.getTopics().indexOf(newTopic);
+                    if (index >= 0) {
+                        // update frequency for identical lemmas
+                        Keyword refTopic = e.getTopics().get(index);
+                        refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
+                    } else {
+                        e.getTopics().add(newTopic);
+                    }
+                }
+            } catch (Exception x) {
+                x.printStackTrace();
+            }
+        }
         Collections.sort(e.getTopics());
     }
 
     public static List<Keyword> getSublist(List<Keyword> topics, int noTopics, boolean nounsOnly, boolean verbsOnly) {
+        if (noTopics == 0 && !nounsOnly && !verbsOnly) {
+            return topics;
+        }
         List<Keyword> results = new ArrayList<>();
         for (Keyword t : topics) {
-            if (results.size() >= noTopics || t.getRelevance() < 0) {
+            if ((noTopics > 0 && results.size() >= noTopics) || t.getRelevance() < 0) {
                 break;
             }
-            if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("NN")) {
-                results.add(t);
-            }
-            if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
-                results.add(t);
-            }
-            if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
-                results.add(t);
+            if (t.getElement() instanceof Word) {
+                if (nounsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("NN")) {
+                    results.add(t);
+                }
+                if (verbsOnly && t.getWord().getPOS() != null && t.getWord().getPOS().startsWith("VB")) {
+                    results.add(t);
+                }
+                if ((!nounsOnly && !verbsOnly) || t.getWord().getPOS() == null) {
+                    results.add(t);
+                }
+            } else if (t.getElement() instanceof NGram) {
+                NGram nGram = (NGram) t.getElement();
+                boolean keep = true;
+                for (Word w : nGram.getWords()) {
+                    if (nounsOnly && w.getPOS() != null && !w.getPOS().startsWith("NN")) {
+                        keep = false;
+                        break;
+                    }
+                    if (verbsOnly && w.getPOS() != null && !w.getPOS().startsWith("VB")) {
+                        keep = false;
+                        break;
+                    }
+                    if ((!nounsOnly && !verbsOnly) || w.getPOS() == null) {
+                        keep = true;
+                    }
+                }
+                if (keep) {
+                    results.add(t);
+                }
             }
         }
         return results;
@@ -154,7 +203,9 @@ public class KeywordModeling {
             double[] vec = new double[model.getNoDimensions()];
             topics.stream().forEach((topic) -> {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
-                    vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    if (topic.getWord().getModelRepresentation(model.getType()) != null) {
+                        vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    }
                 }
             });
             modelVectors.put(model.getType(), vec);
@@ -168,7 +219,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using LSA ...");
             TreeMap<Word, Double> listLSA;
             for (Keyword t : topics) {
-                listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLSA, LSA_WEIGHT);
             }
         }
@@ -178,7 +229,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using LDA ...");
             TreeMap<Word, Double> listLDA;
             for (Keyword t : topics) {
-                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getWord(), minThreshold);
+                listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listLDA, LDA_WEIGHT);
             }
         }
@@ -188,7 +239,7 @@ public class KeywordModeling {
             LOGGER.info("Determining similar concepts using word2vec ...");
             TreeMap<Word, Double> listW2V;
             for (Keyword t : topics) {
-                listW2V = e.getSemanticModel(SimilarityType.WORD2VEC).getSimilarConcepts(t.getWord(), minThreshold);
+                listW2V = e.getSemanticModel(SimilarityType.WORD2VEC).getSimilarConcepts(t.getElement(), minThreshold);
                 mergeMaps(inferredConceptsCandidates, listW2V, W2V_WEIGHT);
             }
         }

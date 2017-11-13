@@ -69,17 +69,17 @@ public class DataGathering {
     public static void processTexts(String processingPath, String saveLocation,
             String folderName, boolean writeHeader, List<ISemanticModel> models,
             Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, saveLocation, folderName, writeHeader, models, lang, usePOSTagging, computeDialogism, false);
+        processTexts(processingPath, saveLocation, folderName, writeHeader, models, lang, usePOSTagging, computeDialogism, false, false);
     }
 
     public static void processMetaDocuments(String processingPath, List<ISemanticModel> models,
             Lang lang, boolean usePOSTagging, boolean computeDialogism) throws IOException {
-        processTexts(processingPath, processingPath, "", true, models, lang, usePOSTagging, computeDialogism, true);
+        processTexts(processingPath, processingPath, "", true, models, lang, usePOSTagging, computeDialogism, false, true);
     }
 
     public static void processTexts(String processingPath, String saveLocation,
             String folderName, boolean writeHeader, List<ISemanticModel> models, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism, boolean meta) throws IOException {
+            boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, boolean meta) throws IOException {
         File dir = new File(processingPath);
 
         if (!dir.exists()) {
@@ -105,7 +105,7 @@ public class DataGathering {
                 } else {
                     d = Document.load(file, models, lang, usePOSTagging);
                 }
-                d.computeAll(computeDialogism);
+                d.computeAll(computeDialogism, useBigrams);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Runtime error while processing {0}: {1}", new Object[]{file.getName(), e.getMessage()});
                 Exceptions.printStackTrace(e);

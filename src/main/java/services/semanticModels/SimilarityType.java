@@ -37,7 +37,7 @@ public enum SimilarityType {
     PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages, false),
     LSA("LSA", "Cosine similarity in LSA vector space", services.semanticModels.LSA.LSA::getAvailableLanguages, true),
     LDA("LDA", "Inverse JSH in LDA probability distribution", services.semanticModels.LDA.LDA::getAvailableLanguages, true),
-    WORD2VEC("W2V", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
+    WORD2VEC("word2vec", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
 
     private final String acronym;
     private final String name;

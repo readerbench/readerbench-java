@@ -16,6 +16,7 @@
 package webService.cv;
 
 import data.AbstractDocument;
+import data.CVStructure;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
@@ -30,7 +31,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import services.commons.Formatting;
-import services.converters.PdfToTextConverter;
+import services.converters.PdfToTxtConverter;
+import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 import webService.keywords.KeywordsHelper;
 import webService.result.ResultCv;
@@ -42,15 +44,16 @@ public class CVHelper {
     public static ResultCv process(
             AbstractDocument document,
             AbstractDocument keywordsDocument,
-            PdfToTextConverter pdfConverter,
+            PdfToTxtConverter pdfConverter,
             Set<String> keywords,
             Set<String> ignoreWords,
             Lang lang,
-            boolean usePosTagging,
-            boolean computeDialogism,
-            double threshold,
-            double deltaFAN,
-            Map<String, String> hm
+            List<ISemanticModel> models,
+            Boolean usePosTagging,
+            Boolean computeDialogism,
+            Boolean useBigrams,
+            Double threshold,
+            Double deltaFAN
     ) {
         ResultCv result = new ResultCv();
 
@@ -122,41 +125,41 @@ public class CVHelper {
         }
 
         // remove any LIWC category that does not contain words
-        for (SentimentValence svLiwc : sentimentValences) {
-            if (svLiwc.getName().contains("LIWC")) {
-                if (liwcEmotions.get(svLiwc.getName()).isEmpty()) {
-                    liwcEmotions.remove(svLiwc.getName());
-                }
-            }
-        }
+//        for (SentimentValence svLiwc : sentimentValences) {
+//            if (svLiwc.getName().contains("LIWC")) {
+//                if (liwcEmotions.get(svLiwc.getName()).isEmpty()) {
+//                    liwcEmotions.remove(svLiwc.getName());
+//                }
+//            }
+//        }
 
         // textual complexity
         TextualComplexity textualComplexity = new TextualComplexity(document, lang, usePosTagging, computeDialogism);
         result.setTextualComplexity(textualComplexity.getComplexityIndices());
-        result.setImages(pdfConverter.getImages());
-        result.setColors(pdfConverter.getColors());
-        result.setPages(pdfConverter.getPages());
-        result.setParagraphs(document.getNoBlocks());
+        result.setImages(pdfConverter.getNoImages());
+        result.setColors(pdfConverter.getNoColors());
+        result.setPages(pdfConverter.getNoPages());
+        result.setParagraphs(pdfConverter.getNoParagraphs());
         result.setSentences(document.getNoSentences());
         result.setWords(document.getNoWords());
         result.setContentWords(document.getNoContentWords());
-        result.setFontTypes(pdfConverter.getFontTypes());
-        result.setFontTypesSimple(pdfConverter.getFontTypesSimple());
-        result.setFontSizes(pdfConverter.getFontSizes());
+        result.setFontTypes(pdfConverter.getNoFontTypes());
+        result.setFontTypesSimple(pdfConverter.getNoFontTypesSimple());
+        result.setFontSizes(pdfConverter.getNoFontSizes());
         result.setMinFontSize(pdfConverter.getMinFontSize());
         result.setMaxFontSize(pdfConverter.getMaxFontSize());
-        result.setTotalCharacters(pdfConverter.getTotalCharacters());
-        result.setBoldCharacters(pdfConverter.getBoldCharacters());
-        result.setBoldCharsCoverage(pdfConverter.getBoldCharsCoverage());
-        result.setItalicCharacters(pdfConverter.getItalicCharacters());
-        result.setItalicCharsCoverage(pdfConverter.getItalicCharsCoverage());
-        result.setBoldItalicCharacters(pdfConverter.getBoldItalicCharacters());
-        result.setBoldItalicCharsCoverage(pdfConverter.getBoldItalicCharsCoverage());
+        result.setTotalCharacters(pdfConverter.getNoTotalChars());
+        result.setBoldCharacters(pdfConverter.getNoBoldChars());
+        result.setBoldCharsCoverage(pdfConverter.getPctBoldChars());
+        result.setItalicCharacters(pdfConverter.getNoItalicChars());
+        result.setItalicCharsCoverage(pdfConverter.getPctItalicChars());
+        result.setBoldItalicCharacters(pdfConverter.getNoBoldItalicChars());
+        result.setBoldItalicCharsCoverage(pdfConverter.getPctBoldItalicChars());
         result.setPositiveWords(positiveWords);
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, threshold, hm));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument.getWordOccurences().keySet(), threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

@@ -21,12 +21,14 @@ public class CMEdgeDO {
     private final CMNodeDO node2;
     private final CMEdgeType edgeType;
     private final double score;
+    private boolean isActive;
 
     public CMEdgeDO(CMNodeDO node1, CMNodeDO node2, CMEdgeType edgeType, double score) {
         this.node1 = node1;
         this.node2 = node2;
         this.edgeType = edgeType;
         this.score = score;
+        this.isActive = true;
     }
 
     public CMNodeDO getNode1() {
@@ -48,7 +50,8 @@ public class CMEdgeDO {
     public boolean equals(CMEdgeDO otherEdge) {
         return ((this.node1.equals(otherEdge.node1) && this.node2.equals(otherEdge.node2))
                 || (this.node1.equals(otherEdge.node2) && this.node2.equals(otherEdge.node1)))
-                && this.edgeType == otherEdge.edgeType;
+                && this.edgeType == otherEdge.edgeType
+                && this.score == otherEdge.score;
     }
 
     public String getEdgeTypeString() {
@@ -64,8 +67,23 @@ public class CMEdgeDO {
         }
         return null;
     }
+
+    public boolean isActive() {
+        return this.isActive;
+    }
+
+    public void activate() {
+        this.isActive = true;
+    }
+
+    public void deactivate() {
+        this.isActive = false;
+    }
+
     @Override
     public String toString() {
-            return this.node1.getWord().getLemma() + " - " + this.node2.getWord().getLemma() + ": " + this.score;
+        return this.node1.getWord().getLemma() + " - " + this.node2.getWord().getLemma()
+                + " (" + this.getEdgeTypeString() + ")" + ": "
+                + this.score + " " + (this.isActive ? "1" : "0");
     }
 }

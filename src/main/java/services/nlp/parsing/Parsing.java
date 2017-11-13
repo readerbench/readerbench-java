@@ -114,6 +114,7 @@ public abstract class Parsing {
 
     public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
         Map<BlockTemplate, Annotation> annotations;
+        usePOSTagging = usePOSTagging && hasAnnotators();
         try {
             if (!adt.getBlocks().isEmpty()) {
                 annotations = adt.getBlocks().stream()
@@ -154,7 +155,7 @@ public abstract class Parsing {
                     b.setFollowedByVerbalization(followedByVerbalization);
                     Block.addBlock(d, b);
                     // add explicit reference, if the case
-                    if (ref != null) {
+                    if (ref != null && ref != -1) {
                         for (Block refB : d.getBlocks()) {
                             if (refB != null && refB.getIndex() == ref) {
                                 b.setRefBlock(refB);
@@ -186,17 +187,20 @@ public abstract class Parsing {
 
         // set Stanford sentences
         b.setStanfordSentences(sentences);
-        int utteranceCounter = 0;
-
-        for (CoreMap sentence : sentences) {
-            if (sentence.toString().trim().length() > 1) {
-                Sentence s = processSentence(b, utteranceCounter++, sentence);
-                // add utterance to block
-                b.getSentences().add(s);
-                b.setProcessedText(b.getProcessedText() + s.getProcessedText() + ". ");
-            }
+        
+        List<Sentence> finalSentences = sentences.parallelStream()
+                .filter(s -> s.toString().trim().length() > 1)
+                .map(s -> processSentence(b, 0, s))
+                .collect(Collectors.toList());
+        //Set sentence index
+        for (int i = 0; i < finalSentences.size(); i++) {
+            finalSentences.get(i).setIndex(i);
         }
-
+        b.setSentences(finalSentences);
+        b.setProcessedText(finalSentences.stream()
+                .map(s -> s.getProcessedText() + ". ")
+                .collect(Collectors.joining()));
+        
         b.finalProcessing();
         return b;
     }
@@ -241,5 +245,9 @@ public abstract class Parsing {
 
         s.finalProcessing();
         return s;
+    }
+    
+    public boolean hasAnnotators() {
+        return !getPipeline().getProperties().getProperty("annotators").isEmpty();
     }
 }
