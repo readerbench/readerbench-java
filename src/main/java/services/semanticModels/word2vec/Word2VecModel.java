@@ -31,6 +31,7 @@ import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
 import data.Lang;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -189,7 +190,7 @@ public class Word2VecModel implements ISemanticModel {
     
     public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
         if (!inputFile.startsWith("resources")) {
-            if (inputFile.contains("resources/")) {
+            if (inputFile.contains("resources" + File.separatorChar)) {
                 inputFile = inputFile.replaceAll(".*resources", "resources");
             }
             else {
@@ -236,7 +237,7 @@ public class Word2VecModel implements ISemanticModel {
     
     public static void main(String[] args) throws FileNotFoundException {
         
-        trainModel("/Users/stefan/NetBeansProjects/ReaderBench/resources/corpora/EN/preprocessing/tasa_out.txt");
+        trainModel("C:\\Git\\ReaderBench\\resources\\corpora\\ES\\Corpus Jose Antonio\\Corpus Jose Antonio.txt");
 //        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA", Lang.en);
 //        System.out.println(w2v.getNoDimensions());
 //        System.out.println(w2v.getWordSet().size());
