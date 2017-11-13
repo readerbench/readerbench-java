@@ -32,10 +32,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
-import services.complexity.rhythm.tools.SyllabifiedCMUDict;
 
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
+import services.complexity.rhythm.tools.SyllabifiedCMUDict;
 
 /**
  *
