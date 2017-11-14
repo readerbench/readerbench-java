@@ -471,6 +471,17 @@ public class VectorAlgebra {
         }
         return Math.pow(sum, 1d / p);
     }
+    
+    public static double peakOnChatFrame(double[] C) {
+        double E_c = VectorAlgebra.entropy(C);
+        double max = 0;
+        
+        for (double v : C) {
+            if (v > max)
+                max = v;
+        }
+        return (Math.log(C.length) - E_c) * max;
+    }
 
     public static double mean(double[] v1){
         if (v1 == null) {

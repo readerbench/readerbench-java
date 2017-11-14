@@ -54,7 +54,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.tools.ant.filters.StringInputStream;
 import org.jsoup.Jsoup;
 import org.openide.util.Exceptions;
 import org.w3c.dom.Element;
@@ -281,7 +280,7 @@ public class Txt2XmlConverter {
         while (!content.isEmpty()) {
             String line = content.poll();
             if (line.startsWith("<section")) {
-                org.w3c.dom.Document sectionDoc = builder.parse(new StringInputStream(line + "</section>"));
+                org.w3c.dom.Document sectionDoc = builder.parse(line + "</section>");
                 Element section = sectionDoc.getDocumentElement();
                 Element newSection = doc.createElement("section");
                 NamedNodeMap attributes = section.getAttributes();
@@ -396,12 +395,10 @@ public class Txt2XmlConverter {
             LOGGER.info("Finished processing all files.");
         } catch (FileNotFoundException e) {
             Exceptions.printStackTrace(e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException | SAXException | TransformerException | ParserConfigurationException e) {
             Exceptions.printStackTrace(e);
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
-        } catch (SAXException | TransformerException | ParserConfigurationException ex) {
-            Exceptions.printStackTrace(ex);
         }
     }
 

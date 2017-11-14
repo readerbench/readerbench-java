@@ -106,7 +106,11 @@ public class DataGatheringTest {
         convertAndProcess("resources/in/essays/texts 2 for familiarity", Lang.en, models);
         
 //        DataGathering.processTexts("resources/in/essays/stairstepper_en/texts", "", true, models, Lang.en, true, true);
-//        DataGathering.processTexts("resources/in/essays/essays_FYP_en/texts", -1, true, lsa, lda, Lang.en, true, true);
+        convertAndProcess("resources/in/essays/essays_FYP_en/texts", Lang.en, models);
+//        convertAndProcess("resources/in/corpus_chats", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/LanguageArts", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/Science", Lang.en, models);
+//        convertAndProcess("resources/in/tasa_equitable/SocialStudies", Lang.en, models);
 //        DataGathering.processTexts("resources/in/essays/iStart mini-games/texts", "", true, models, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/images_en/texts", -1, true, lsa, lda, Lang.en, true, true);
 //        DataGathering.processTexts("resources/in/essays/DC_essays_2009_en/texts", -1, true, lsa, lda, Lang.en, true, true);

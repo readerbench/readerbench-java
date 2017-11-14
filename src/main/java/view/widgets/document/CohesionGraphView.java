@@ -56,6 +56,7 @@ import data.Block;
 import data.discourse.SemanticCohesion;
 import java.util.logging.Level;
 import services.commons.Formatting;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class CohesionGraphView extends JFrame {
@@ -67,7 +68,7 @@ public class CohesionGraphView extends JFrame {
     private JPanel panelGraph;
 
     public CohesionGraphView(AbstractDocument doc) {
-        super("ReaderBench - Multi-layered Cohesion Graph");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         super.setBackground(Color.WHITE);
         this.doc = doc;
         super.getContentPane().setBackground(Color.WHITE);
@@ -99,14 +100,14 @@ public class CohesionGraphView extends JFrame {
         Color colorBlock = new Color(204, 204, 204); // silver
         Color colorDocument = new Color(170, 17, 17); // red tamarillor
 
-        int hierachicalLbl = graphModel.addEdgeType("hierachical");
-        int transitionLbl = graphModel.addEdgeType("transition");
-        int interBlockLbl = graphModel.addEdgeType("inter-block");
-        int interSentenceLbl = graphModel.addEdgeType("inter-sentence");
+        int hierachicalLbl = graphModel.addEdgeType(LocalizationUtils.getLocalizedString(this.getClass(), "hierachicalLbl"));
+        int transitionLbl = graphModel.addEdgeType(LocalizationUtils.getLocalizedString(this.getClass(), "transitionLbl"));
+        int interBlockLbl = graphModel.addEdgeType(LocalizationUtils.getLocalizedString(this.getClass(), "interBlockLbl"));
+        int interSentenceLbl = graphModel.addEdgeType(LocalizationUtils.getLocalizedString(this.getClass(), "interSentenceLbl"));
 
         // build document
-        Node document = graphModel.factory().newNode("Document");
-        document.setLabel("Document");
+        Node document = graphModel.factory().newNode(LocalizationUtils.getLocalizedString(this.getClass(), "document"));
+        document.setLabel(LocalizationUtils.getLocalizedString(this.getClass(), "document"));
         document.setColor(new Color((float) (colorDocument.getRed()) / 256, (float) (colorDocument.getGreen()) / 256,
                 (float) (colorDocument.getBlue()) / 256));
         document.setX((float) ((0.01 + Math.random()) * 1000) - 500);
@@ -118,8 +119,9 @@ public class CohesionGraphView extends JFrame {
         for (Block b : d.getBlocks()) {
             if (b != null) {
                 // build block element
-                Node block = graphModel.factory().newNode("Block " + b.getIndex());
-                block.setLabel("Block " + b.getIndex());
+                Node block = graphModel.factory().newNode(LocalizationUtils.getLocalizedString(this.getClass(), "block") 
+			+ " " + b.getIndex());
+                block.setLabel(LocalizationUtils.getLocalizedString(this.getClass(), "block") + " " + b.getIndex());
                 block.setColor(new Color((float) (colorBlock.getRed()) / 256, (float) (colorBlock.getGreen()) / 256,
                         (float) (colorBlock.getBlue()) / 256));
                 block.setX((float) ((0.01 + Math.random()) * 1000) - 500);

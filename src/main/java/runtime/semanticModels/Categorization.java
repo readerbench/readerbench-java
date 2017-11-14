@@ -40,11 +40,11 @@ public class Categorization {
 
     private static final Logger LOGGER = Logger.getLogger("");
 
-    public static void performCategorization(String description, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism) throws Exception {
-        AbstractDocument queryDoc = QueryHelper.generateDocument(description, lang, models, usePosTagging, computeDialogism);
+    public static void performCategorization(String description, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
+        AbstractDocument queryDoc = QueryHelper.generateDocument(description, lang, models, usePosTagging, computeDialogism, useBigrams);
 
         LOGGER.log(Level.INFO, "Built document has {0} blocks.", queryDoc.getBlocks().size());
-        queryDoc.computeAll(false);
+        queryDoc.computeAll(false, useBigrams);
         ComplexityIndices.computeComplexityFactors(queryDoc);
         List<ResultCategory> resultCategories = new ArrayList<>();
         List<Category> dbCategories = CategoryDAO.getInstance().findAll();
@@ -71,7 +71,7 @@ public class Categorization {
 
             AbstractDocument queryCategory;
             try {
-                queryCategory = QueryHelper.generateDocument(sb.toString(), lang, models, usePosTagging, computeDialogism);
+                queryCategory = QueryHelper.generateDocument(sb.toString(), lang, models, usePosTagging, computeDialogism, useBigrams);
                 SemanticCohesion sc = new SemanticCohesion(queryCategory, queryDoc);
                 resultCategories.add(new ResultCategory(cat.getLabel(), Formatting.formatNumber(sc.getCohesion()), cat.getType()));
             } catch (Exception ex) {
@@ -91,12 +91,13 @@ public class Categorization {
         Lang lang = Lang.getLang("English");
         Boolean usePosTagging = true;
         Boolean computeDialogism = false;
+        Boolean useBigrams = false;
         String lsaCorpora = "TASA_LAK";
         String ldaCorpora = "TASA_LAK";
         String w2vCorpora = "";
         List<ISemanticModel> models = QueryHelper.loadSemanticModels(lang, lsaCorpora, ldaCorpora, w2vCorpora);
         try {
-            performCategorization(description, lang, models, usePosTagging, computeDialogism);
+            performCategorization(description, lang, models, usePosTagging, computeDialogism, useBigrams);
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }

@@ -34,6 +34,7 @@ import javax.swing.table.TableRowSorter;
 import services.commons.Formatting;
 
 import data.discourse.SemanticChain;
+import utils.LocalizationUtils;
 
 public class ChatVoiceSimpleStatistics extends JFrame {
 
@@ -48,7 +49,7 @@ public class ChatVoiceSimpleStatistics extends JFrame {
 	 * Create the frame.
 	 */
 	public ChatVoiceSimpleStatistics(List<SemanticChain> chains) {
-		setTitle("ReaderBench - Chat Voices Statistics");
+		super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(100, 100, 1000, 400);
 		contentPane = new JPanel();
@@ -77,10 +78,15 @@ public class ChatVoiceSimpleStatistics extends JFrame {
 								356, Short.MAX_VALUE).addContainerGap()));
 
 		tableModel = new DefaultTableModel(new Object[][] {}, new Object[] {
-				"ID", "Voice", "No. Words",
-				"Average utterance importance score",
-				"Entropy Utterance Moving Average", "Average Recurrence",
-				"Stdev Recurrence", "Average sentiment", "Stdev sentiment" }) {
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn1"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn2"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn3"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn4"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn5"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn6"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn7"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn8"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "tableColumn9") }) {
 			private static final long serialVersionUID = 6850181164110466483L;
 
 			private Class<?>[] columnTypes = new Class[] { Integer.class, // identifier

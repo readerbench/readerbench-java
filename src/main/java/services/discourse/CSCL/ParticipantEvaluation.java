@@ -41,14 +41,21 @@ import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 
 import data.Block;
+import data.Sentence;
 import data.Word;
+import data.cscl.CSCLCriteria;
 import data.cscl.CSCLIndices;
 import data.cscl.Conversation;
 import data.cscl.Participant;
 import data.cscl.Utterance;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import services.commons.Formatting;
+import services.complexity.rhythm.tools.RhythmTool;
 
 public class ParticipantEvaluation {
 
@@ -279,5 +286,139 @@ public class ParticipantEvaluation {
                 return;
             }
         }
+    }
+    
+    public static void extractRhythmicIndex(Conversation c) {
+        Map<Participant, List<Integer>> rhythmicIndPerPart = new TreeMap<>();
+        
+        if (c.getParticipants().size() > 0) {
+            for (Block b : c.getBlocks()) {
+                if (b != null) {
+                    Utterance u = (Utterance) b;
+                    Participant p = u.getParticipant();
+                    if (!rhythmicIndPerPart.containsKey(p)) {
+                        rhythmicIndPerPart.put(p, new ArrayList<>());
+                    }
+                    for (Sentence s : u.getSentences()) {
+                        List<Word> unit = s.getAllWords();
+                        int ind = RhythmTool.calcRhythmicIndexSM(unit);
+                        if (ind != RhythmTool.UNDEFINED) {
+                            rhythmicIndPerPart.get(p).add(ind);
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (Map.Entry<Participant, List<Integer>> entry : rhythmicIndPerPart.entrySet()) {
+            if (entry.getValue().isEmpty())
+                continue;
+            int maxIndex = Collections.max(entry.getValue());
+            entry.getKey().getIndices().put(CSCLIndices.RHYTHMIC_INDEX, 1.0 * maxIndex);
+            entry.getKey().getIndices().put(CSCLIndices.FREQ_MAX_INDEX, 1.0 * Collections.frequency(entry.getValue(), 
+                    maxIndex) / entry.getValue().size());
+        }
+    }
+    
+    public static void extractRhythmicCoefficient(Conversation c) {
+        Map<Participant, Map<Integer, Integer>> cntSyllables = new TreeMap<>();
+        Map<Participant, Integer> deviations = new TreeMap<>();
+        
+        if (c.getParticipants().size() > 0) {
+            for (Block b : c.getBlocks()) {
+                if (b != null) {
+                    Utterance u = (Utterance) b;
+                    Participant p = u.getParticipant();
+                    if (!cntSyllables.containsKey(p)) {
+                        cntSyllables.put(p, new TreeMap());
+                    }
+                    for (Sentence s : u.getSentences()) {
+                        List<Word> unit = s.getAllWords();
+                        List<Integer> repr = RhythmTool.getNumericalRepresentation(unit);
+                        if (repr.isEmpty())
+                            continue;
+                        int NT = (repr.get(0) == 0) ? repr.size()-1 : repr.size();
+                        int NA = repr.stream().mapToInt(Integer::intValue).sum();
+                        Map<Integer, Integer> nrSylls = cntSyllables.get(p);
+                        for (Integer nr : repr) {
+                            if (nr == 0) continue;
+                            nrSylls.put(nr,
+                            nrSylls.containsKey(nr) ? nrSylls.get(nr)+1 : 1);
+                        }
+                        int devs = RhythmTool.calcDeviations(repr);
+                        deviations.put(p,
+                        deviations.containsKey(p) ? deviations.get(p)+1 : devs);
+                    }
+                }
+            }
+        }
+        
+        for (Participant p : c.getParticipants()) {
+            Map<Integer, Integer> nrSylls = cntSyllables.get(p);
+            int totalNumber = nrSylls.values().stream().reduce(0, Integer::sum);
+            for (Map.Entry<Integer, Integer> entry : nrSylls.entrySet()) {
+                double syllFreq = 1.0 * entry.getValue() / totalNumber;
+            }
+            int dominantInd = RhythmTool.getDominantIndex(nrSylls.values().stream()
+                .collect(Collectors.toList()));
+            int keyOfMaxVal = nrSylls.keySet().stream()
+                .collect(Collectors.toList()).get(dominantInd);
+            int sum = nrSylls.get(keyOfMaxVal);
+            sum += (nrSylls.containsKey(keyOfMaxVal-1)) ? nrSylls.get(keyOfMaxVal-1) : 0;
+            sum += (nrSylls.containsKey(keyOfMaxVal+1)) ? nrSylls.get(keyOfMaxVal+1) : 0;
+            double coeff = 1.0 * (deviations.get(p) + totalNumber - sum) / totalNumber;
+            p.getIndices().put(CSCLIndices.RHYTHMIC_COEFFICIENT, coeff);
+        }
+    }
+    
+    public static void computeEntropyForRegularityMeasure(Conversation c) {
+        Date chatStartTime = null;
+        Date chatEndTime = null;
+        long chatTime = 0;
+        long frameTime = 5 * 60;    // seconds
+        Map<Participant, List<Date>> timestamps = new TreeMap<>();
+        
+        for (Participant p : c.getParticipants()) {
+            List<Date> dates = new ArrayList<>();
+            for (Block b : p.getContributions().getBlocks()) {
+                Date d = ((Utterance) b).getTime();
+                dates.add(d);
+                if (chatStartTime == null && chatEndTime == null) {
+                    chatStartTime = chatEndTime = d;
+                } else {
+                    if (d.before(chatStartTime)) {
+                        chatStartTime = d;
+                    }
+                    if (d.after(chatEndTime)) {
+                        chatEndTime = d;
+                    }
+                }
+            }
+            timestamps.put(p, dates);
+        }
+        chatTime = (chatEndTime.getTime() - chatStartTime.getTime()) / 1000;
+        
+        Map<Participant, List<Double>> noInterventions = new TreeMap<>();
+        int index, size;
+        long diff;
+        
+        size = (int)Math.ceil((double)chatTime / frameTime);
+        for (Entry<Participant, List<Date>> entry : timestamps.entrySet()) {
+            List<Double> arr = new ArrayList<>(Collections.nCopies(size, 0.0));
+            for (Date d : entry.getValue()) {
+                diff = (d.getTime() - chatStartTime.getTime()) / 1000;
+                index = (int)Math.floor((double)diff / frameTime);
+                arr.set(index, arr.get(index) + 1);
+            }
+            noInterventions.put(entry.getKey(), arr);
+        }
+        
+        for (Map.Entry<Participant, List<Double>> entry : noInterventions.entrySet()) {
+            double value = CSCLCriteria.getValue(CSCLCriteria.PEAK_CHAT_FRAME, 
+                    entry.getValue().stream().mapToDouble(d -> d).toArray());
+            entry.getKey().getIndices().put(CSCLIndices.PERSONAL_REGULARITY_ENTROPY, value);
+//            System.out.println(entry.getKey().getName() + " " + value);
+        }
+        
     }
 }

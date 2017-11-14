@@ -131,7 +131,7 @@ public class ClassesOfWords implements Serializable {
                 .filter(b -> b != null)
                 .flatMap(b -> b.getSentences().stream())
                 .mapToInt(s -> countPatternOccurrences(
-                        TextPreprocessing.cleanText(s.getText(), document.getLanguage()), pattern))
+                        s.getCleanedText(), pattern))
                 .sum();
     }
     

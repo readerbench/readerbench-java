@@ -7,9 +7,18 @@ package runtime.essays;
 
 import edu.stanford.nlp.util.Pair;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.apache.commons.math3.util.Precision;
+import org.openide.util.Exceptions;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.MLPRegressor;
 import weka.classifiers.functions.MultilayerPerceptron;
@@ -32,7 +41,7 @@ public class RegressionScoring {
     public static final double PASS = 6;
     private static final Random random = new Random();
     
-    public static void checkInterval(Classifier model, Instances instances, double min, double max) throws Exception {
+    public static List<Double> checkInterval(Classifier model, Instances instances, double min, double max) throws Exception {
         int correct = 0;
         int partially = 0;
         int responses = 0;
@@ -63,18 +72,19 @@ public class RegressionScoring {
             }
         }
         System.out.println(min + " - " + max + ": ");
-        double precision = 100. * partially / responses;
-        double recall = 100. * correct / total;
-        double coverage = 100. * responses / instances.size();
+        double precision = Precision.round(100. * partially / responses, 2);
+        double recall = Precision.round(100. * correct / total, 2);
+        double coverage = Precision.round(100. * responses / instances.size(), 2);
         if (responses == 0) {
             precision = 100;
         }
         if (total == 0) {
             recall = 100;
         }
-        double f1 = 2 * precision * recall / (precision + recall);
+        double f1 = Precision.round(2 * precision * recall / (precision + recall), 2);
         System.out.println("precision: " + precision + ", recall: " + recall + 
                 ", f1: " + f1 + ", coverage: " + coverage);
+        return Arrays.asList(new Double[]{precision, recall, f1, coverage});
     }
     
     public static Instances filterInstances() throws Exception {
@@ -114,6 +124,41 @@ public class RegressionScoring {
         return new Pair<>(train, test);
     }
     
+    public static void printScores(List<Double>[][] scores, int index, String fileName) {
+        try (PrintWriter out = new PrintWriter(fileName)) {
+            String sep = ";";
+            out.println("sep=" + sep);
+            String header = IntStream.range(0, scores[0].length)
+                    .mapToDouble(j -> Precision.round(PASS + j * 0.1, 2))
+                    .mapToObj(b -> b + "")
+                    .collect(Collectors.joining(sep));
+            out.println("a\\b" + sep + header);
+            for (int i = 0; i < scores.length; i++) {
+                out.print(Precision.round(2 + i * 0.1, 2));
+                for (int j = 0; j < scores[i].length; j++) {
+                    out.print(sep + scores[i][j].get(index));
+                }
+                out.println();
+            }
+        } catch (FileNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
+    public static void printTestResults(Classifier model, Instances test, String outputFileName) {
+        try (PrintWriter out = new PrintWriter(outputFileName)) {
+            out.println("sep=;");
+            out.println("Target;Predicted");
+            for (Instance inst : test) {
+                double predicted = model.classifyInstance(inst);
+                double real = inst.classValue();
+                out.println(real + ";" + Precision.round(predicted, 2));
+            }
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+    
     public static void main(String[] args) throws Exception {
 //        Instances instances = filterInstances();
 //        Instances instances = new Instances(new FileReader("resources/in/VIBOA_nl/indices.arff"));
@@ -135,11 +180,19 @@ public class RegressionScoring {
         model.setActivationFunction(new Sigmoid());
         model.setNumFunctions(2);
         model.buildClassifier(train);
-        for (double i = 2; i < PASS; i += 0.5) {
-            for (double j = PASS + 0.5; j < 9.5; j += 0.5) {
-                checkInterval(model, test, i, j);
-            }
-        }
+        printTestResults(model, test, "resources/in/VIBOA_nl/test-results.csv");
+//        List<Double>[][] scores = new List[(int)((PASS - 2) / 0.1 + 1)][(int)((9.5-PASS) / 0.1 + 1)];
+//        for (int i = 0; 2 + i * 0.1 <= PASS; i ++) {
+//            for (int j = 0; PASS + j * 0.1 <= 9.5; j ++) {
+//                double a = Precision.round(2 + i * 0.1, 2);
+//                double b = Precision.round(PASS + j * 0.1, 2);
+//                scores[i][j] = checkInterval(model, test, a, b);
+//            }
+//        }
+//        printScores(scores, 0, "resources/in/VIBOA_nl/precision.csv");
+//        printScores(scores, 1, "resources/in/VIBOA_nl/recall.csv");
+//        printScores(scores, 2, "resources/in/VIBOA_nl/f1.csv");
+//        printScores(scores, 3, "resources/in/VIBOA_nl/coverage.csv");
         
     }
 }

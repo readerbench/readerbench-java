@@ -79,13 +79,13 @@ public class MetaDocument extends Document {
     }
 
     @Override
-    public void computeAll(boolean computeDialogism) {
-        computeAll(computeDialogism, true);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        computeAll(computeDialogism, useBigrams, true);
     }
 
-    public void computeAll(boolean computeDialogism, boolean recursive) {
+    public void computeAll(boolean computeDialogism, boolean useBigrams, boolean recursive) {
         if (!recursive) {
-            super.computeAll(computeDialogism);
+            super.computeAll(computeDialogism, useBigrams);
             return;
         }
         List<Document> leaves = getLeaves();
@@ -93,7 +93,7 @@ public class MetaDocument extends Document {
             if (doc instanceof MetaDocument) {
                 ((MetaDocument) doc).computeAll(computeDialogism, false);
             } else {
-                doc.computeAll(computeDialogism);
+                doc.computeAll(computeDialogism, useBigrams);
             }
         });
         if (leaves.isEmpty()) {

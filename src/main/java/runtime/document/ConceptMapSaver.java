@@ -98,7 +98,7 @@ public class ConceptMapSaver {
                     } else {
                         d = Document.load(file, models, lang, usePOSTagging);
                     }
-                    d.computeAll(computeDialogism);
+                    d.computeAll(computeDialogism, false);
                     d.save(AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
                     documents.add(d);
                 } catch (Exception e) {
