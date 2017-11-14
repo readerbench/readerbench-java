@@ -130,6 +130,7 @@
         <weka.version>3.9.1</weka.version>
         <weka.multiLayerPerceptrons.version>1.0.10</weka.multiLayerPerceptrons.version>
         <gephi.version>0.9.2</gephi.version>
+        <rosuda.JRI.version>0.8</rosuda.JRI.version>
 
         <apache.poi.version>3.15</apache.poi.version>
         <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
@@ -578,5 +579,27 @@
             <artifactId>libthrift</artifactId>
             <version>0.10.0</version>
         </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jazzy</groupId>
+            <artifactId>jazzy-core</artifactId>
+            <version>0.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.wendykierp</groupId>
+            <artifactId>JTransforms</artifactId>
+            <version>3.1</version>
+            <classifier>with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>rosuda.JRI</artifactId>
+            <version>${rosuda.JRI.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

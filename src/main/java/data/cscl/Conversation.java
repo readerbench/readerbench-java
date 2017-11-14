@@ -369,6 +369,10 @@ public class Conversation extends AbstractDocument {
         ParticipantEvaluation.evaluateInvolvement(this);
         ParticipantEvaluation.performSNA(this);
         ParticipantEvaluation.evaluateUsedConcepts(this);
+        
+//        ParticipantEvaluation.extractRhythmicIndex(this);
+//        ParticipantEvaluation.extractRhythmicCoefficient(this);
+//        ParticipantEvaluation.computeEntropyForRegularityMeasure(this);
     }
 
     public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {

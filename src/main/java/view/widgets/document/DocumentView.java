@@ -46,6 +46,10 @@ import data.Sentence;
 import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
+import services.complexity.rhythm.views.AlliterationDocumentView;
+import services.complexity.rhythm.views.AssonanceDocumentView;
+//import services.complexity.rhythm.views.DocumentRhythmView;
+import services.complexity.rhythm.views.DocumentRhythmView2;
 import services.discourse.keywordMining.KeywordModeling;
 import utils.LocalizationUtils;
 import view.events.LinkMouseListener;
@@ -85,7 +89,7 @@ public class DocumentView extends JFrame {
         this.document = documentToDisplay;
 
         // adjust view to desktop size
-        setBounds(50, 50, 1180, 700);
+        setBounds(50, 50, 1180, 710);
 
         generateLayout();
         updateContent();
@@ -121,7 +125,7 @@ public class DocumentView extends JFrame {
                                                 GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                                .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
+                                                .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 617,
                                                         Short.MAX_VALUE)
                                                 .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
                                         .addContainerGap()));
@@ -133,6 +137,19 @@ public class DocumentView extends JFrame {
 
         JScrollPane scrollPaneContent = new JScrollPane();
         scrollPaneContent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        JButton btnAdvancedView = new JButton("Advanced View");
+        btnAdvancedView.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        SentenceView view = new SentenceView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
 
         JButton btnVisualizeCohesionGraph = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVisualizeCohesionGraph"));
         btnVisualizeCohesionGraph.addActionListener((ActionEvent arg0) -> {
@@ -179,21 +196,70 @@ public class DocumentView extends JFrame {
                 view.setVisible(true);
             });
         });
+
+        JButton btnVisualizeAlliterations = new JButton("Alliterations");
+        btnVisualizeAlliterations.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new AlliterationDocumentView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+
+        JButton btnVisualizeAssonances = new JButton("Assonances");
+        btnVisualizeAssonances.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new AssonanceDocumentView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+
+        JButton btnRhythmFeatures = new JButton("Rhythm");
+        btnRhythmFeatures.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new DocumentRhythmView2(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+        
         GroupLayout gl_panelContents = new GroupLayout(panelContents);
         gl_panelContents
                 .setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
                         .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelContents
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(lblContents)
                                         .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
                                         .addComponent(separator, GroupLayout.DEFAULT_SIZE, 856,
                                                 Short.MAX_VALUE)
-                                        .addGroup(gl_panelContents.createSequentialGroup().addComponent(btnVisualizeCohesionGraph)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeDocumentFlow)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSelectVoices)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(btnDisplayVoiceInteranimation)).addComponent(lblContents))
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING, false)
+                                                .addGroup(gl_panelContents.createSequentialGroup()
+                                                        .addComponent(btnAdvancedView ,GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnVisualizeCohesionGraph, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnVisualizeDocumentFlow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                        .addGroup(gl_panelContents.createSequentialGroup()
+                                                .addComponent(btnVisualizeAlliterations).addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnVisualizeAssonances).addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnRhythmFeatures)))
                                 .addContainerGap()));
         gl_panelContents
                 .setVerticalGroup(
@@ -206,10 +272,16 @@ public class DocumentView extends JFrame {
                                         .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
                                         .addPreferredGap(ComponentPlacement.RELATED)
                                         .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(btnAdvancedView)
                                                 .addComponent(btnVisualizeCohesionGraph)
                                                 .addComponent(btnSelectVoices)
                                                 .addComponent(btnDisplayVoiceInteranimation)
                                                 .addComponent(btnVisualizeDocumentFlow))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(btnVisualizeAlliterations)
+                                                .addComponent(btnVisualizeAssonances)
+                                                .addComponent(btnRhythmFeatures))
                                         .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
         JLabel lblTitle = new JLabel(LocalizationUtils.getGeneric("title") + ":\n");
@@ -261,7 +333,7 @@ public class DocumentView extends JFrame {
                                                                 .addComponent(lblSubjectivityDescription))
                                                         .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
                                                                 .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
-                                                                GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
+                                                                        GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
         gl_panelHeader
                 .setVerticalGroup(
                         gl_panelHeader
@@ -271,7 +343,7 @@ public class DocumentView extends JFrame {
                                         gl_panelHeader.createSequentialGroup().addContainerGap()
                                                 .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
                                                         .addComponent(lblTitle).addComponent(
-                                                        lblTitleDescription))
+                                                                lblTitleDescription))
                                                 .addPreferredGap(ComponentPlacement.RELATED)
                                                 .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
                                                         .addComponent(lblSource).addComponent(lblSourceDescription)

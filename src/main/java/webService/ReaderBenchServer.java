@@ -130,6 +130,9 @@ import webService.services.cscl.CSCL;
 import webService.services.cscl.result.QueryResultAllCommunities;
 import webService.services.cscl.result.QueryResultParticipants;
 import webService.services.cscl.result.QueryResultParticipantsInteraction;
+import webService.services.essayFeedback.EFResult;
+import webService.services.essayFeedback.EssayAnalysis;
+import webService.services.essayFeedback.QueryResultEF;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -2116,8 +2119,37 @@ public class ReaderBenchServer {
                     QueryResultParticipantsInteraction queryResult = new QueryResultParticipantsInteraction(participantsInteraction);
                     response.type("application/json");
                     return queryResult.convertToJson();
-                }
-        );
+        });
+
+        Spark.post("/essay-feedback", (request, response) -> {
+            JSONObject json = (JSONObject) new JSONParser().parse(request.body());
+            Map<String, String> hm = hmParams(json);
+
+            Set<String> requiredParams = setInitialRequiredParams();
+            requiredParams.add("text");
+            errorIfParamsMissing(requiredParams, json.keySet());
+
+            // Initialize the essay score calculator
+            LSA lsa = LSA.loadLSA(SemanticCorpora.getSemanticCorpora("TASA", Lang.en, SimilarityType.LSA).getFullPath(), Lang.en);
+            LDA lda = LDA.loadLDA(SemanticCorpora.getSemanticCorpora("TASA", Lang.en, SimilarityType.LDA).getFullPath(), Lang.en);
+
+            List<ISemanticModel> models = new ArrayList<>();
+            models.add(lsa);
+            models.add(lda);
+            EssayAnalysis essayAnalysis = new EssayAnalysis(Lang.en, models, "resources/config/EN/essay feedback/TASA/thesis/loadings.csv",
+                    "resources/config/EN/essay feedback/TASA/thesis/zscores_means.csv",
+                    "resources/config/EN/essay feedback/TASA/thesis/zscores_sds.csv",
+                    "resources/config/EN/essay feedback/TASA/thesis/rules.json",
+                    "resources/config/EN/word lists/AoA/Kuperman.csv");
+
+            String text = hm.get("text");
+
+            AbstractDocument document = QueryHelper.generateDocument(text, Lang.en, models, true, true, false);
+            EFResult efResult = essayAnalysis.analyzeDocument(document);
+            QueryResultEF queryResultEF = new QueryResultEF(efResult);
+            System.out.println("Sending " + queryResultEF.convertToJson());
+            return queryResultEF.convertToJson();
+        });
 
     }
 
