@@ -130,6 +130,9 @@ import webService.services.cscl.CSCL;
 import webService.services.cscl.result.QueryResultAllCommunities;
 import webService.services.cscl.result.QueryResultParticipants;
 import webService.services.cscl.result.QueryResultParticipantsInteraction;
+import webService.services.essayFeedback.EFResult;
+import webService.services.essayFeedback.EssayAnalysis;
+import webService.services.essayFeedback.QueryResultEF;
 import webService.services.lak.TopicEvolutionBuilder;
 import webService.services.lak.TwoModeGraphBuilder;
 import webService.services.lak.TwoModeGraphFilter;
@@ -2141,7 +2144,7 @@ public class ReaderBenchServer {
 
             String text = hm.get("text");
 
-            AbstractDocument document = QueryHelper.generateDocument(text, Lang.en, models, true, true);
+            AbstractDocument document = QueryHelper.generateDocument(text, Lang.en, models, true, true, false);
             EFResult efResult = essayAnalysis.analyzeDocument(document);
             QueryResultEF queryResultEF = new QueryResultEF(efResult);
             System.out.println("Sending " + queryResultEF.convertToJson());
