@@ -33,6 +33,7 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import utils.LocalizationUtils;
 
 /**
  * @author Mihai Dascalu
@@ -83,8 +84,8 @@ public class EvolutionGraph {
 	private JFreeChart createChart(XYDataset dataset) {
 
 		// create the chart...
-		chart = ChartFactory.createXYLineChart(title, XAxes, "Value", dataset,
-				PlotOrientation.VERTICAL, true, true, true);
+		chart = ChartFactory.createXYLineChart(title, XAxes, LocalizationUtils.getLocalizedString(this.getClass(), "yAxis"), 
+			dataset, PlotOrientation.VERTICAL, true, true, true);
 
 		// set the background color for the chart...
 		final XYPlot plot = chart.getXYPlot();

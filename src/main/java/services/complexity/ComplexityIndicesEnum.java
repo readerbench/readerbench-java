@@ -158,7 +158,19 @@ public enum ComplexityIndicesEnum {
     
     AVG_WORDS_IN_LIST_PER_DOC(ComplexityIndexType.WORD_LISTS),
     AVG_WORDS_IN_LIST_PER_BLOCK(ComplexityIndexType.WORD_LISTS),
-    AVG_WORDS_IN_LIST_PER_SENTENCE(ComplexityIndexType.WORD_LISTS);
+    AVG_WORDS_IN_LIST_PER_SENTENCE(ComplexityIndexType.WORD_LISTS),
+    
+    AVG_SYLLABLES_SEN(ComplexityIndexType.RHYTHM),
+    AVG_STRESSED_SYLLABLES_SEN(ComplexityIndexType.RHYTHM),
+    LANGUAGE_RHYTHM_INDEX(ComplexityIndexType.RHYTHM),
+    FREQ_RHYTHM_INDEX(ComplexityIndexType.RHYTHM),
+    LANGUAGE_RHYTHM_DIAMETER(ComplexityIndexType.RHYTHM),
+    AVG_RHYTHMIC_UNITS(ComplexityIndexType.RHYTHM),
+    AVG_SYLLABLES_RHYTHMIC_UNIT(ComplexityIndexType.RHYTHM),
+    AVG_STRESSED_SYLLABLES_RHYTHMIC_UNIT(ComplexityIndexType.RHYTHM),
+    LANGUAGE_RHYTHM_COEFFICIENT(ComplexityIndexType.RHYTHM),
+    ALLITERATION(ComplexityIndexType.RHYTHM),
+    ASSONANCE(ComplexityIndexType.RHYTHM);
     
     private final ComplexityIndexType type;
 

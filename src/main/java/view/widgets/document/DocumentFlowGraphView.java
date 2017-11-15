@@ -54,6 +54,7 @@ import data.AbstractDocument;
 import data.Block;
 import services.commons.Formatting;
 import services.complexity.cohesion.flow.DocumentFlow;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class DocumentFlowGraphView extends JFrame {
@@ -68,7 +69,7 @@ public class DocumentFlowGraphView extends JFrame {
 	private JPanel panelGraph;
 
 	public DocumentFlowGraphView(AbstractDocument doc, DocumentFlow df) {
-		super("ReaderBench - Document Flow Graph");
+		super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 		setBackground(Color.WHITE);
 		this.doc = doc;
 		this.df = df;

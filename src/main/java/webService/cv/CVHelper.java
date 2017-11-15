@@ -16,6 +16,7 @@
 package webService.cv;
 
 import data.AbstractDocument;
+import data.CVStructure;
 import data.Lang;
 import data.Word;
 import data.discourse.SemanticCohesion;
@@ -50,6 +51,7 @@ public class CVHelper {
             List<ISemanticModel> models,
             Boolean usePosTagging,
             Boolean computeDialogism,
+            Boolean useBigrams,
             Double threshold,
             Double deltaFAN
     ) {
@@ -137,7 +139,7 @@ public class CVHelper {
         result.setImages(pdfConverter.getNoImages());
         result.setColors(pdfConverter.getNoColors());
         result.setPages(pdfConverter.getNoPages());
-        result.setParagraphs(document.getNoBlocks());
+        result.setParagraphs(pdfConverter.getNoParagraphs());
         result.setSentences(document.getNoSentences());
         result.setWords(document.getNoWords());
         result.setContentWords(document.getNoContentWords());
@@ -157,7 +159,7 @@ public class CVHelper {
         result.setNegativeWords(negativeWords);
         result.setNeutralWords(neutralWords);
         result.setLiwcEmotions(liwcEmotions);
-        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument, keywords, lang, models, usePosTagging, computeDialogism, threshold));
+        result.setKeywords(KeywordsHelper.getKeywords(document, keywordsDocument.getWordOccurences().keySet(), threshold));
 
         // (keywords, document) relevance
         SemanticCohesion scKeywordsDocument = new SemanticCohesion(keywordsDocument, document);

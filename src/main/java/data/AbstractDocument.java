@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -176,8 +176,8 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public void computeAll(boolean computeDialogism) {
-        computeDiscourseAnalysis(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        computeDiscourseAnalysis(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(this);
     }
 
@@ -203,8 +203,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     /**
      *
      * @param computeDialogism
+     * @param useBigrams
      */
-    public void computeDiscourseAnalysis(boolean computeDialogism) {
+    public void computeDiscourseAnalysis(boolean computeDialogism, boolean useBigrams) {
         if (computeDialogism) {
             // build disambiguisation graph and lexical chains
             DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
@@ -239,7 +240,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        t2 = System.currentTimeMillis();
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
         // determine topics
-        KeywordModeling.determineKeywords(this);
+        KeywordModeling.determineKeywords(this, useBigrams);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
@@ -271,11 +272,11 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(String pathToDoc,
-                                                       Map<SimilarityType, String> modelPaths, Lang lang,
-                                                       boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
-                                                       int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
+            Map<SimilarityType, String> modelPaths, Lang lang,
+            boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, String pathToComplexityModel,
+            int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
-        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
+        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism, useBigrams,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
@@ -305,9 +306,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
-                                                       Lang lang, boolean usePOSTagging, boolean computeDialogism,
-                                                       String pathToComplexityModel, int[] selectedComplexityFactors,
-                                                       boolean cleanInput, SaveType saveOutput) {
+            Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams,
+            String pathToComplexityModel, int[] selectedComplexityFactors,
+            boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
         LOGGER.log(Level.INFO, "Loading {0} file for processing", docFile.getPath());
         boolean isDocument = checkTagsDocument(docFile, "p");
@@ -323,13 +324,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
         if (isDocument) {
             Document d = Document.load(docFile, models, lang, usePOSTagging);
-            d.computeAll(computeDialogism);
+            d.computeAll(computeDialogism, useBigrams);
             d.save(saveOutput);
             return d;
         }
         if (isChat) {
             Conversation c = Conversation.load(docFile, models, lang, usePOSTagging);
-            c.computeAll(computeDialogism);
+            c.computeAll(computeDialogism, useBigrams);
             c.save(saveOutput);
             return c;
         }

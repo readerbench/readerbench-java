@@ -48,6 +48,7 @@ import services.converters.lifeConverter.Dialog;
 import services.converters.lifeConverter.Person;
 import services.converters.lifeConverter.Turn;
 import services.converters.lifeConverter.Utterance;
+import services.discourse.dialogism.DialogismComputations;
 import services.processing.SerialProcessing;
 import webService.ReaderBenchServer;
 
@@ -103,7 +104,7 @@ public class CreativityTest {
         }
     }
 
-    public static void processFolder(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, Lang lang, boolean usePOSTagging) {
+    public static void processFolder(String folder, boolean restartProcessing, String pathToLSA, String pathToLDA, String pathToWord2Vec, Lang lang, boolean usePOSTagging) {
         File dir = new File(folder);
 
         if (dir.isDirectory()) {
@@ -119,7 +120,7 @@ public class CreativityTest {
                     checkpoint.delete();
                 }
             }
-            SerialProcessing.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+            SerialProcessing.processCorpus(dir.getAbsolutePath(), pathToLSA, pathToLDA, pathToWord2Vec, lang, usePOSTagging,
                     true, true, AbstractDocument.SaveType.SERIALIZED_AND_CSV_EXPORT);
             processConversations(dir.getAbsolutePath());
         }
@@ -135,8 +136,19 @@ public class CreativityTest {
 
         File output = new File(path + "/measurements.csv");
         try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
-            out.write("SEP=,\nFilename,AVG(Social KB per participant), Normalized Social KB (per contribution), ABS(Social KB between participants), AVG(Dialogism per participant), Normalized Dialogism (per contribution),"
-                    + "# Voices, Avg voices, Avg voice length (# words), Max voice length (# words)");
+            out.write("SEP=,\n"
+                    + "Filename,"
+                    + "AVG(Social KB per participant),"
+                    + "Normalized Social KB (per contribution),"
+                    + "ABS(Social KB between participants),"
+                    + "AVG(Dialogism per participant),"
+                    + "Normalized Dialogism (per contribution),"
+                    + "# Voices,"
+                    + "Avg voices,"
+                    + "Avg voice length (# words),"
+                    + "Max voice length (# words),"
+                    + "Average inter-voice similarity");
+
             for (File f : filesTODO) {
                 Conversation c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
                 if (c.getParticipants().size() != 2) {
@@ -154,6 +166,7 @@ public class CreativityTest {
                             + "," + Formatting.formatNumber(new AvgNoVoices().compute(c))
                             + "," + Formatting.formatNumber(new VoicesAvgSpan().compute(c))
                             + "," + Formatting.formatNumber(new VoicesMaxSpan().compute(c))
+                            + "," + Formatting.formatNumber(DialogismComputations.determineAverageInterVoiceSimilarity(c))
                             + "," + c.getNoNounsInPerspectives()
                             + "," + c.getNoVerbsInPerspectives()
                             + "," + (c.getNoNounsInPerspectives() + c.getNoVerbsInPerspectives())
@@ -182,6 +195,6 @@ public class CreativityTest {
     public static void main(String[] args) {
         ReaderBenchServer.initializeDB();
 
-        CreativityTest.processFolder("resources/in/test", false, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", Lang.en, true);
+        CreativityTest.processFolder("resources/in/creativity/separated tasks", true, "resources/config/EN/LSA/TASA_LAK", "resources/config/EN/LDA/TASA_LAK", "resources/config/EN/word2vec/TASA_LAK", Lang.en, true);
     }
 }

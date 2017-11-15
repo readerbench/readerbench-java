@@ -38,6 +38,7 @@ import services.commons.Formatting;
 import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
 import data.cscl.Utterance;
+import utils.LocalizationUtils;
 
 public class CollaborationKBView extends JFrame {
 	private static final long serialVersionUID = -461457535432534468L;
@@ -52,7 +53,7 @@ public class CollaborationKBView extends JFrame {
 	private JTextField textFieldSocialKBvsScore;
 
 	public CollaborationKBView(Conversation chat) {
-		setTitle("ReaderBench - Collaboration and Knowledge Building visualization");
+		setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
 		getContentPane().setBackground(Color.WHITE);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.chat = chat;
@@ -65,11 +66,11 @@ public class CollaborationKBView extends JFrame {
 
 	private void generateLayout() {
 		JLabel lblQuantCollab = new JLabel(
-				"Percentage quantitative collaboration (% no. of links with different speakers):");
+				LocalizationUtils.getLocalizedString(this.getClass(), "lblQuantCollab") + ":");
 		lblQuantCollab.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		JLabel lblSocialKB = new JLabel(
-				"Percentage of social knowledge building in comparisson to overall KB:");
+				LocalizationUtils.getLocalizedString(this.getClass(), "lblSocialKB") + ":");
 		lblSocialKB.setFont(new Font("SansSerif", Font.BOLD, 12));
 		java.util.Hashtable<Integer, JLabel> labelTableConcepts = new java.util.Hashtable<Integer, JLabel>();
 		labelTableConcepts.put(new Integer(10), new JLabel("100"));
@@ -89,7 +90,7 @@ public class CollaborationKBView extends JFrame {
 		Double[][] valuesColab = new Double[1][chat.getBlocks().size()];
 		double[] columnsColab = new double[chat.getBlocks().size()];
 
-		String[] namesColab = { "Personal Knowledge Building" };
+		String[] namesColab = { LocalizationUtils.getLocalizedString(this.getClass(), "namesColab") };
 
 		for (int i = 0; i < chat.getBlocks().size(); i++) {
 			if (chat.getBlocks().get(i) != null) {
@@ -100,13 +101,14 @@ public class CollaborationKBView extends JFrame {
 		}
 
 		EvolutionGraph evolutionGraph = new EvolutionGraph(
-				"Personal Knowledge Building", "utterance", false, namesColab,
+				LocalizationUtils.getLocalizedString(this.getClass(), "graphPersKnow"),
+				LocalizationUtils.getLocalizedString(this.getClass(), "graphUtterance"), false, namesColab,
 				valuesColab, columnsColab, Color.RED);
 
 		panelPersonalKB.add(evolutionGraph.evolution());
 
 		JLabel lblSocialKBvsScore = new JLabel(
-				"Ratio of social knowledge bulding vs utterance scores:");
+				LocalizationUtils.getLocalizedString(this.getClass(), "lblSocialKBvsScore") + ":");
 		lblSocialKBvsScore.setFont(new Font("SansSerif", Font.BOLD, 12));
 
 		textFieldQuantCollab = new JTextField();
@@ -132,7 +134,7 @@ public class CollaborationKBView extends JFrame {
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
 		JLabel lblAutomaticallyIdentifiedIntense = new JLabel(
-				"Automatically identified intense collaboration zones");
+				LocalizationUtils.getLocalizedString(this.getClass(), "lblAutomaticallyIdentifiedIntense"));
 		lblAutomaticallyIdentifiedIntense.setFont(new Font("SansSerif",
 				Font.BOLD, 12));
 
@@ -142,7 +144,7 @@ public class CollaborationKBView extends JFrame {
 		panelSocialKB.setBackground(Color.WHITE);
 		panelSocialKB.setLayout(new BorderLayout());
 
-		namesColab[0] = "Social Knowledge Building";
+		namesColab[0] = LocalizationUtils.getLocalizedString(this.getClass(), "namesColab0");
 
 		for (int i = 0; i < chat.getBlocks().size(); i++) {
 			if (chat.getBlocks().get(i) != null) {
@@ -153,7 +155,8 @@ public class CollaborationKBView extends JFrame {
 		}
 
 		EvolutionGraph evolution = new EvolutionGraph(
-				"Social Knowledge Building", "utterance", false, namesColab,
+				LocalizationUtils.getLocalizedString(this.getClass(), "graphSocialKnow"), 
+				LocalizationUtils.getLocalizedString(this.getClass(), "graphUtterance"), false, namesColab,
 				valuesColab, columnsColab, Color.BLUE);
 
 		panelSocialKB.add(evolution.evolution());

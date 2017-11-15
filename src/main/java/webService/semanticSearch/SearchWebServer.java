@@ -167,7 +167,7 @@ public class SearchWebServer {
                 contents.getBlocks().add(block);
 
                 AbstractDocument queryDoc = new Document(null, contents, documents.get(0).getSemanticModels(), documents.get(0).getLanguage(), true);
-                queryDoc.computeAll(true);
+                queryDoc.computeAll(true, false);
 
                 List<SemanticSearchResult> results = SemanticSearch.search(queryDoc, documents, MIN_THRESHOLD,
                         NO_RESULTS);

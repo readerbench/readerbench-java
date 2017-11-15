@@ -25,52 +25,46 @@ import org.jfree.data.gantt.GanttCategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeriesCollection;
 
-public class CustomToolTipGeneratorVoice extends
-		IntervalCategoryToolTipGenerator {
-	private static final long serialVersionUID = 8900504035403010692L;
+public class CustomToolTipGeneratorVoice extends IntervalCategoryToolTipGenerator {
 
-	private static int nr = 0;
+    private static final long serialVersionUID = 8900504035403010692L;
 
-	public CustomToolTipGeneratorVoice() {
-		super();
-	}
+    private static int no = 0;
 
-	public String generateToolTip(CategoryDataset dataset, int row, int column) {
-		String res = "";
-		String DATE_FORMAT = "S";
-		SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+    public CustomToolTipGeneratorVoice() {
+        super();
+    }
 
-		if (((GanttCategoryDataset) dataset).getSubIntervalCount(row, column) == 0) {
-			nr = 0;
-			GregorianCalendar cal = new GregorianCalendar();
+    @Override
+    public String generateToolTip(CategoryDataset dataset, int row, int column) {
+        String res = "";
+        String DATE_FORMAT = "S";
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
 
-			if (dataset instanceof IntervalCategoryDataset) {
-				IntervalCategoryDataset icd = (IntervalCategoryDataset) dataset;
-				TaskSeriesCollection collection = (TaskSeriesCollection) icd;
-				Number start = collection.getStartValue(row, column);
-				cal.setTimeInMillis(start.longValue());
-				res += sdf.format(cal.getTime());
-			}
-			res += " - "
-					+ ((Task) ((((TaskSeriesCollection) dataset).getSeries(0)
-							.getTasks().get(column)))).getDescription();
-		} else {
-			GregorianCalendar cal = new GregorianCalendar();
-			if (dataset instanceof IntervalCategoryDataset) {
-				IntervalCategoryDataset icd = (IntervalCategoryDataset) dataset;
-				TaskSeriesCollection collection = (TaskSeriesCollection) icd;
-				Number start = collection.getStartValue(row, column, nr);
-				cal.setTimeInMillis(start.longValue());
-				res += sdf.format(cal.getTime());
-			}
-			res += " - "
-					+ ((Task) ((((TaskSeriesCollection) dataset).getSeries(0)
-							.getTasks().get(column)))).getSubtask(nr)
-							.getDescription();
-			nr = (nr + 1)
-					% ((GanttCategoryDataset) dataset).getSubIntervalCount(row,
-							column);
-		}
-		return res;
-	}
+        if (((GanttCategoryDataset) dataset).getSubIntervalCount(row, column) == 0) {
+            no = 0;
+            GregorianCalendar cal = new GregorianCalendar();
+
+            if (dataset instanceof IntervalCategoryDataset) {
+                IntervalCategoryDataset icd = (IntervalCategoryDataset) dataset;
+                TaskSeriesCollection collection = (TaskSeriesCollection) icd;
+                Number start = collection.getStartValue(row, column);
+                cal.setTimeInMillis(start.longValue());
+                res += sdf.format(cal.getTime());
+            }
+            res += " - " + ((Task) ((((TaskSeriesCollection) dataset).getSeries(0).getTasks().get(column)))).getDescription();
+        } else {
+            GregorianCalendar cal = new GregorianCalendar();
+            if (dataset instanceof IntervalCategoryDataset) {
+                IntervalCategoryDataset icd = (IntervalCategoryDataset) dataset;
+                TaskSeriesCollection collection = (TaskSeriesCollection) icd;
+                Number start = collection.getStartValue(row, column, no);
+                cal.setTimeInMillis(start.longValue());
+                res += sdf.format(cal.getTime());
+            }
+            res += " - " + ((Task) ((((TaskSeriesCollection) dataset).getSeries(0).getTasks().get(column)))).getSubtask(no).getDescription();
+            no = (no + 1) % ((GanttCategoryDataset) dataset).getSubIntervalCount(row, column);
+        }
+        return res;
+    }
 }

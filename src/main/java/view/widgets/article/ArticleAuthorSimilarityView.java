@@ -38,11 +38,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.gephi.appearance.api.AppearanceController;
 import org.gephi.appearance.api.AppearanceModel;
@@ -70,27 +67,29 @@ import data.article.ResearchArticle;
 import java.util.logging.Logger;
 import org.gephi.layout.plugin.force.StepDisplacement;
 import org.gephi.layout.plugin.force.yifanHu.YifanHuLayout;
+import org.openide.util.Exceptions;
 import view.models.PreviewSketch;
-import view.widgets.article.utils.ArticleContainer;
-import view.widgets.article.utils.ArticleAuthorParameterLogger;
-import view.widgets.article.utils.GraphMeasure;
-import view.widgets.article.utils.GraphNodeItem;
-import view.widgets.article.utils.SingleAuthorContainer;
-import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
+import services.extendedCNA.ArticleContainer;
+import services.extendedCNA.ArticleAuthorParameterLogger;
+import services.extendedCNA.GraphMeasure;
+import services.extendedCNA.GraphNodeItem;
+import services.extendedCNA.SingleAuthorContainer;
+import services.extendedCNA.distanceStrategies.IAuthorDistanceStrategy;
+import utils.LocalizationUtils;
 
 public class ArticleAuthorSimilarityView extends JFrame {
 
     static ArticleAuthorSimilarityView corpusView;
     private static final long serialVersionUID = -8582615231233815258L;
-    static Logger logger = Logger.getLogger("");
+    static final Logger LOGGER = Logger.getLogger("");
     public static final Color COLOR_AUTHOR = new Color(120, 120, 120);
     public static final Color COLOR_ARTICLE = new Color(255, 10, 0);
     public static final Color COLOR_CENTER_NODE = new Color(0, 21, 255);
 
-    private IAuthorDistanceStrategy[] distanceStrategyList;
-    private String graphCenterUri;
-    private ArticleContainer authorContainer;
-    private ArticleAuthorParameterLogger paramLogger;
+    private final IAuthorDistanceStrategy[] distanceStrategyList;
+    private final String graphCenterUri;
+    private final ArticleContainer authorContainer;
+    private final ArticleAuthorParameterLogger paramLogger;
 
     private JSlider sliderThreshold;
     private JPanel panelGraph;
@@ -103,14 +102,14 @@ public class ArticleAuthorSimilarityView extends JFrame {
         this.graphCenterUri = graphCenterUri;
 
         corpusView = this;
-        setTitle("Author & Document View");
-        getContentPane().setBackground(Color.WHITE);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
+        super.getContentPane().setBackground(Color.WHITE);
+        super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // adjust view to desktop size
         int margin = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
+        super.setBounds(margin, margin, screenSize.width - margin * 2, screenSize.height - margin * 2);
 
         generateLayout();
         generateGraph();
@@ -127,15 +126,13 @@ public class ArticleAuthorSimilarityView extends JFrame {
         sliderThreshold.setPaintLabels(true);
         sliderThreshold.setMinorTickSpacing(10);
         sliderThreshold.setMajorTickSpacing(50);
-        java.util.Hashtable<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
-        labelTableThreshold.put(new Integer(100), new JLabel("100%"));
-        labelTableThreshold.put(new Integer(50), new JLabel("50%"));
-        labelTableThreshold.put(new Integer(0), new JLabel("0"));
+        java.util.Dictionary<Integer, JLabel> labelTableThreshold = new java.util.Hashtable<Integer, JLabel>();
+        labelTableThreshold.put(100, new JLabel("100%"));
+        labelTableThreshold.put(50, new JLabel("50%"));
+        labelTableThreshold.put(0, new JLabel("0"));
         sliderThreshold.setLabelTable(labelTableThreshold);
-        sliderThreshold.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                generateGraph();
-            }
+        sliderThreshold.addChangeListener((ChangeEvent e) -> {
+            generateGraph();
         });
 
         panelGraph = new JPanel();
@@ -183,7 +180,7 @@ public class ArticleAuthorSimilarityView extends JFrame {
 
     public HashMap<Node, GraphNodeItem> buildConceptGraph(UndirectedGraph graph, GraphModel graphModel) {
         HashMap<Node, GraphNodeItem> outMap = new HashMap<>();
-        logger.info("Starting to build the author graph");
+        LOGGER.info("Starting to build the author graph");
         // build connected graph
         Map<GraphNodeItem, Boolean> visibleDocs = new TreeMap<>();
         // build nodes
@@ -374,16 +371,16 @@ public class ArticleAuthorSimilarityView extends JFrame {
         }
         panelGraph.add(previewSketch, BorderLayout.CENTER);
 
-        logger.info("Saving export...");
+        LOGGER.info("Saving export...");
         ExportController ec = Lookup.getDefault().lookup(ExportController.class);
         try {
-            ec.exportFile(new File("resources/out/graph_doc_corpus_view.pdf"));
+            ec.exportFile(new File("out/graph_doc_corpus_view.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();
-        logger.info("Finished building the graph");
+        LOGGER.info("Finished building the graph");
     }
 
     @Override

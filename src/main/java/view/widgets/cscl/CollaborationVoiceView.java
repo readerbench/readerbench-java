@@ -15,10 +15,12 @@ package view.widgets.cscl;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package view.widgets.cscl;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JFrame;
@@ -30,41 +32,53 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
+
 import javax.swing.JTextField;
+import utils.LocalizationUtils;
+
 public class CollaborationVoiceView extends JFrame {
+
     private static final long serialVersionUID = 2897644814459831682L;
+
     private JPanel contentPane;
     private JPanel panelMutualInformation;
     private JTextField txtOverlap;
+
     /**
      * Create the frame.
      */
     public CollaborationVoiceView(Conversation chat) {
-        setTitle("ReaderBench - Collaboration as Voice Overlapping");
+        setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 650, 550);
         contentPane = new JPanel();
         contentPane.setBackground(Color.WHITE);
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
+
         panelMutualInformation = new JPanel();
         panelMutualInformation.setBorder(new EtchedBorder(EtchedBorder.LOWERED,
                 null, null));
         panelMutualInformation.setBackground(Color.WHITE);
         panelMutualInformation.setLayout(new BorderLayout());
+
         JLabel label = new JLabel(
-                "Automatically identified intense collaboration zones");
+                LocalizationUtils.getLocalizedString(this.getClass(), "label"));
         label.setFont(new Font("SansSerif", Font.BOLD, 12));
+
         JScrollPane scrollPane = new JScrollPane();
         scrollPane
                 .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
         JLabel lblOverlap = new JLabel(
-                "Overlap with intense collaboration zones identified through social KB:");
+                LocalizationUtils.getLocalizedString(this.getClass(), "lblOverlap") + ":");
         lblOverlap.setFont(new Font("Lucida Grande", Font.BOLD, 13));
+
         txtOverlap = new JTextField();
         txtOverlap.setEditable(false);
         txtOverlap.setColumns(10);
@@ -130,18 +144,25 @@ public class CollaborationVoiceView extends JFrame {
         textPane.setEditable(false);
         textPane.setBackground(Color.WHITE);
         scrollPane.setViewportView(textPane);
+
         contentPane.setLayout(gl_contentPane);
+
         double[] evolution = chat.getVoicePMIEvolution();
+
         Double[][] values = new Double[1][evolution.length];
         double[] columns = new double[evolution.length];
-        String[] names = {"Cumulated Contextual Voice Co-Occurrences"};
+
+        String[] names = {LocalizationUtils.getLocalizedString(this.getClass(), "names")};
+
         for (int i = 0; i < evolution.length; i++) {
             values[0][i] = evolution[i];
             columns[i] = i;
         }
+
         EvolutionGraph evolutionGraph = new EvolutionGraph(
-                "Cumulated Contextual Voice Co-Occurrences",
-                "utterance", false, names, values, columns, Color.DARK_GRAY);
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph1"),
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph2"), false, names, values, columns, Color.DARK_GRAY);
+
         panelMutualInformation.add(evolutionGraph.evolution());
         for (CollaborationZone zone : chat.getIntenseCollabZonesVoice()) {
             textPane.setText(textPane.getText() + zone.toStringDetailed()

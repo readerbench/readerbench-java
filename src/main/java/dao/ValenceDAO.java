@@ -20,6 +20,7 @@ import data.pojo.Language;
 import java.util.List;
 import javax.persistence.TypedQuery;
 import data.pojo.SentimentValence;
+import java.util.EnumMap;
 
 /**
  *
@@ -28,7 +29,8 @@ import data.pojo.SentimentValence;
 public class ValenceDAO extends AbstractDAO<SentimentValence> {
 
     private static ValenceDAO instance = null;
-
+    private EnumMap<Lang, List<SentimentValence>> cache = new EnumMap<>(Lang.class);
+    
     private ValenceDAO() {
 
     }
@@ -49,14 +51,17 @@ public class ValenceDAO extends AbstractDAO<SentimentValence> {
     }
 
     public List<SentimentValence> findByLang(Lang lang) {
-        final Language language = Language.fromLang(lang);
-        return dao.executeQuery(em -> {
-            TypedQuery<SentimentValence> query = em.createNamedQuery(
-                    "SentimentValence.findByLang",
-                    SentimentValence.class);
-            query.setParameter("lang", language);
-            return query.getResultList();
-        });
+        if (!cache.containsKey(lang)) {
+            final Language language = Language.fromLang(lang);
+            cache.put(lang, dao.executeQuery(em -> {
+                TypedQuery<SentimentValence> query = em.createNamedQuery(
+                        "SentimentValence.findByLang",
+                        SentimentValence.class);
+                query.setParameter("lang", language);
+                return query.getResultList();
+            }));
+        }
+        return cache.get(lang);
     }
 
 }

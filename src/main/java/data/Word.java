@@ -35,6 +35,7 @@ import java.util.logging.Logger;
 
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
+import services.complexity.rhythm.tools.SyllabifiedCMUDict;
 
 /**
  *
@@ -59,6 +60,9 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     public double ldaSimilarityToUnderlyingConcept = -1;
 
     private transient SentimentEntity sentiment;
+    
+    public transient SyllabifiedCMUDict syllabifiedCMUDict;
+    private List<Syllable> syllables;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
         super.setText(text);
@@ -68,6 +72,8 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         this.NE = NE;
         setLanguage(lang);
         this.usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
+        this.syllabifiedCMUDict = SyllabifiedCMUDict.getInstance();
+        this.syllables = syllabifiedCMUDict.getDict().get(text.toLowerCase());
     }
 
     private void loadSentimentEntity() {
@@ -226,6 +232,14 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
 
     public void setSemanticChain(SemanticChain semanticChain) {
         this.semanticChain = semanticChain;
+    }
+    
+    public List<Syllable> getSyllables() {
+        return syllables;
+    }
+    
+    public void setSyllables(List<Syllable> syllables) {
+        this.syllables = syllables;
     }
 
     @Override

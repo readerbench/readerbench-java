@@ -50,7 +50,7 @@ public class ResearchArticleSerializer {
         //modelPaths.put(SimilarityType.LDA, ldsSpaces.get(0));
 
         ResearchArticle d = ResearchArticle.load(filePath, modelPaths, Lang.en, false, true);
-        d.computeAll(false);
+        d.computeAll(false, false);
         d.save(AbstractDocument.SaveType.SERIALIZED);
     }
 }

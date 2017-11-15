@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import services.commons.TextPreprocessing;
 import services.semanticModels.ISemanticModel;
 
 /**
@@ -46,6 +47,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     private transient Map<Word, List<ContextSentiment>> contextMap;
     private transient Tree tree;
     private final Map<Word, Word> pronimialReplacementMap;
+    private transient String cleanedText = null;
 
     public Sentence(Block b, int index, String text, List<ISemanticModel> models, Lang lang) {
         super(b, index, text.replaceAll("\\s", " ").trim(), models, lang);
@@ -105,6 +107,19 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public void setAllWords(List<Word> allWords) {
         this.allWords = allWords;
     }
+
+    public String getCleanedText() {
+        if (cleanedText == null) {
+            cleanedText = TextPreprocessing.cleanText(getText(), getLanguage());
+        }
+        return cleanedText;
+    }
+
+    public void setCleanedText(String cleanedText) {
+        this.cleanedText = cleanedText;
+    }
+    
+    
     
     private Word getWordByIndex(IndexedWord iw) {
         int index = iw.get(CoreAnnotations.IndexAnnotation.class) - 1;

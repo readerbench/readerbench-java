@@ -249,7 +249,7 @@ public class SimilarityAnalysisCombined {
                     LOGGER.log(Level.INFO, "Processing chat {0}", filePath.getFileName());
 
                     Conversation c = Conversation.load(filePathString, modelPaths, lang, usePOSTagging);
-                    c.computeAll(computeDialogism);
+                    c.computeAll(computeDialogism, false);
 
                     Utterance firstUtt, secondUtt;
                     for (int i = 1; i < c.getBlocks().size(); i++) {

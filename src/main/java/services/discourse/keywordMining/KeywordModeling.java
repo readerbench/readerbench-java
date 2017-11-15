@@ -58,7 +58,7 @@ public class KeywordModeling {
         return filteredTopics;
     }
 
-    public static void determineKeywords(AnalysisElement e) {
+    public static void determineKeywords(AnalysisElement e, boolean useBigrams) {
         LOGGER.info("Determining keywords using Tf-IDf, LSA and LDA ...");
         // determine topics by using Tf-IDF and (LSA & LDA)
         for (Word w : e.getWordOccurences().keySet()) {
@@ -72,25 +72,27 @@ public class KeywordModeling {
                 e.getTopics().add(newTopic);
             }
         }
-        try {
-            Map<NGram, Long> ngrams = e.getBiGrams().stream()
-                    .collect(Collectors.groupingBy(
-                            Function.identity(),
-                            Collectors.counting()));
+        if (useBigrams) {
+            try {
+                Map<NGram, Long> ngrams = e.getBiGrams().stream()
+                        .collect(Collectors.groupingBy(
+                                Function.identity(),
+                                Collectors.counting()));
 
-            for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
-                Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
-                int index = e.getTopics().indexOf(newTopic);
-                if (index >= 0) {
-                    // update frequency for identical lemmas
-                    Keyword refTopic = e.getTopics().get(index);
-                    refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
-                } else {
-                    e.getTopics().add(newTopic);
+                for (Map.Entry<NGram, Long> entry : ngrams.entrySet()) {
+                    Keyword newTopic = new Keyword(entry.getKey(), e, entry.getValue().intValue());
+                    int index = e.getTopics().indexOf(newTopic);
+                    if (index >= 0) {
+                        // update frequency for identical lemmas
+                        Keyword refTopic = e.getTopics().get(index);
+                        refTopic.updateRelevance(e, entry.getKey(), entry.getValue().intValue());
+                    } else {
+                        e.getTopics().add(newTopic);
+                    }
                 }
+            } catch (Exception x) {
+                x.printStackTrace();
             }
-        } catch (Exception x) {
-            x.printStackTrace();
         }
         Collections.sort(e.getTopics());
     }
@@ -201,7 +203,9 @@ public class KeywordModeling {
             double[] vec = new double[model.getNoDimensions()];
             topics.stream().forEach((topic) -> {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
-                    vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    if (topic.getWord().getModelRepresentation(model.getType()) != null) {
+                        vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    }
                 }
             });
             modelVectors.put(model.getType(), vec);

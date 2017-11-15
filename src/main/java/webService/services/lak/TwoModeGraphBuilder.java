@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import view.widgets.article.utils.ArticleContainer;
-import view.widgets.article.utils.CachedAuthorDistanceStrategyDecorator;
-import view.widgets.article.utils.GraphNodeItem;
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyFactory;
-import view.widgets.article.utils.distanceStrategies.AuthorDistanceStrategyType;
-import view.widgets.article.utils.distanceStrategies.IAuthorDistanceStrategy;
+import services.extendedCNA.ArticleContainer;
+import services.extendedCNA.CachedAuthorDistanceStrategyDecorator;
+import services.extendedCNA.GraphNodeItem;
+import services.extendedCNA.distanceStrategies.AuthorDistanceStrategyFactory;
+import services.extendedCNA.distanceStrategies.AuthorDistanceStrategyType;
+import services.extendedCNA.distanceStrategies.IAuthorDistanceStrategy;
 import webService.services.lak.result.TwoModeGraph;
 import webService.services.lak.result.TwoModeGraphEdge;
 import webService.services.lak.result.TwoModeGraphNode;
@@ -137,11 +137,12 @@ public class TwoModeGraphBuilder {
 
     public static TwoModeGraphBuilder getLakCorpusTwoModeGraphBuilder() {
         String LAK_CORPUS_FOLDER = "resources/in/LAK_corpus/parsed-documents";
-        if (LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER)) {
-            return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER);
+        String LAK_CORPUS_FOLDER_SAMPLE = "resources/in/LAK_corpus/parsed-documents-sample";
+        if (LOADED_GRAPH_BUILDERS.containsKey(LAK_CORPUS_FOLDER_SAMPLE)) {
+            return LOADED_GRAPH_BUILDERS.get(LAK_CORPUS_FOLDER_SAMPLE);
         }
-        TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER);
-        LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER, gaphBuilder);
+        TwoModeGraphBuilder gaphBuilder = new TwoModeGraphBuilder(LAK_CORPUS_FOLDER_SAMPLE);
+        LOADED_GRAPH_BUILDERS.put(LAK_CORPUS_FOLDER_SAMPLE, gaphBuilder);
         return gaphBuilder;
     }
     

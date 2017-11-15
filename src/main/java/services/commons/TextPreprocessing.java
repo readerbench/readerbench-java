@@ -138,8 +138,6 @@ public class TextPreprocessing {
     }
 
     public static String cleanText(String text, Lang lang) {
-        // clean initial text
-
         // lowercase + eliminate numbers
         String result = text.toLowerCase();
         for (Pair<Pattern, String> p : INITIAL) {

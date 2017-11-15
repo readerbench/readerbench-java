@@ -24,39 +24,33 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import org.openide.util.Exceptions;
 
 public class LinkMouseListener extends MouseAdapter {
 
-	@Override
-	public void mouseEntered(MouseEvent event) {
-		JLabel label = (JLabel) event.getSource();
-		label.setCursor(new Cursor(Cursor.HAND_CURSOR));
-	}
+    @Override
+    public void mouseEntered(MouseEvent event) {
+        JLabel label = (JLabel) event.getSource();
+        label.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
 
-	@Override
-	public void mouseExited(MouseEvent event) {
-		JLabel label = (JLabel) event.getSource();
-		label.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	}
+    @Override
+    public void mouseExited(MouseEvent event) {
+        JLabel label = (JLabel) event.getSource();
+        label.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
 
-	@Override
-	public void mouseClicked(MouseEvent event) {
-		try {
-			JLabel label = (JLabel) event.getSource();
-			Desktop desktop = Desktop.getDesktop();
-			URI uri = new java.net.URI(label.getText());
-			desktop.browse(uri);
-		} catch (URISyntaxException use) {
-			throw new AssertionError(use);
-		} catch (IOException ioe) {
-			ioe.printStackTrace();
-			JOptionPane
-					.showMessageDialog(
-							null,
-							"Sorry, a problem occurred while trying"
-									+ " to open this link in your system's standard browser.",
-							"A problem occured", JOptionPane.ERROR_MESSAGE);
-		}
-	}
+    @Override
+    public void mouseClicked(MouseEvent event) {
+        try {
+            JLabel label = (JLabel) event.getSource();
+            Desktop desktop = Desktop.getDesktop();
+            URI uri = new java.net.URI(label.getText());
+            desktop.browse(uri);
+        } catch (URISyntaxException use) {
+            Exceptions.printStackTrace(use);
+        } catch (IOException ioe) {
+            Exceptions.printStackTrace(ioe);
+        }
+    }
 }

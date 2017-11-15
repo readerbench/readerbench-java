@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +45,7 @@ public class DialogismComputations {
     public static final int WINDOW_SIZE = 5; // no contributions
     public static final int MAXIMUM_INTERVAL = 60; // seconds
     public static final int SEMANTIC_CHAIN_MIN_NO_WORDS = 7; //no words per voice
+    public static final double SIMILARITY_THRESHOLD = 0.8;
 
     public static void determineVoices(AbstractDocument d) {
         // merge chains based on LSA / LDA in order to generate semantic chains
@@ -69,15 +70,14 @@ public class DialogismComputations {
                         double simMax = -1;
                         int simMaxIndex = -1;
                         for (int j = i + 1; j < semanticChains.size(); j++) {
-                            double sim = SemanticChain.similarity(semanticChains.get(i), semanticChains.get(j));
-                            if (sim != -1 && simMax < sim) {
+                            double sim = SemanticChain.computeSimilarity(semanticChains.get(i), semanticChains.get(j));
+                            if (sim >= SIMILARITY_THRESHOLD && simMax < sim) {
                                 simMax = sim;
                                 simMaxIndex = j;
                             }
                         }
                         if (simMaxIndex != -1) {
-                            SemanticChain newChain = SemanticChain.merge(semanticChains.get(i),
-                                    semanticChains.get(simMaxIndex));
+                            SemanticChain newChain = SemanticChain.merge(semanticChains.get(i), semanticChains.get(simMaxIndex));
                             alreadyAdded = true;
                             newSemanticChains.add(newChain);
                             // make old reference void
@@ -168,6 +168,21 @@ public class DialogismComputations {
         }
     }
 
+    public static double determineAverageInterVoiceSimilarity(AbstractDocument d) {
+        double avg = 0;
+        int count = 0;
+        for (int i = 0; i < d.getVoices().size() - 1; i++) {
+            for (int j = i + 1; j < d.getVoices().size(); j++) {
+                avg += SemanticChain.computeSimilarity(d.getVoices().get(i), d.getVoices().get(j));
+                count++;
+            }
+        }
+        if (count == 0) {
+            return 0;
+        }
+        return avg / count;
+    }
+
     public static void determineExtendedVoiceDistribution(AnalysisElement e, AbstractDocument d) {
         if (d.getExtendedVoices() != null && d.getExtendedVoices().size() > 0) {
             e.setExtendedVoiceDistribution(new double[d.getExtendedVoices().size()]);
@@ -195,6 +210,7 @@ public class DialogismComputations {
                 }
             }
         }
+
         // build time intervals
         d.setBlockOccurrencePattern(new long[d.getBlocks().size()]);
         if (d instanceof Conversation) {
@@ -213,6 +229,7 @@ public class DialogismComputations {
                 }
             }
         }
+
         // determine spread
         if (d.getVoices() != null) {
             for (SemanticChain chain : d.getVoices()) {
@@ -228,7 +245,9 @@ public class DialogismComputations {
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         System.out.println(ex);
                     }
+
                     chain.getBlockDistribution()[blockIndex] += 1;
+
                     // build cumulative importance in terms of sentences in which occurrences have been spotted
                     if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
                         voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
@@ -236,11 +255,14 @@ public class DialogismComputations {
                     } else {
                         voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
                     }
+
                 }
+
                 for (String key : voiceOccurrences.keySet()) {
                     Integer blockIndex = Integer.valueOf(key.substring(0, key.indexOf("_")));
                     Integer sentenceIndex = Integer.valueOf(key.substring(key.indexOf("_") + 1));
                     Sentence s = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
+
                     if (s.getWords().size() > 0) {
                         chain.setAverageImportanceScore(chain.getAverageImportanceScore() + s.getScore());
                     }
@@ -249,6 +271,7 @@ public class DialogismComputations {
                 if (voiceOccurrences.size() > 0) {
                     chain.setAverageImportanceScore(chain.getAverageImportanceScore() / voiceOccurrences.size());
                 }
+
                 // normalize occurrences at sentence level
                 for (int i = 0; i < chain.getSentenceDistribution().length; i++) {
                     if (chain.getSentenceDistribution()[i] > 0) {

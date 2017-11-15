@@ -46,7 +46,12 @@ import data.Sentence;
 import data.discourse.Keyword;
 import data.document.Document;
 import services.commons.Formatting;
+import services.complexity.rhythm.views.AlliterationDocumentView;
+import services.complexity.rhythm.views.AssonanceDocumentView;
+//import services.complexity.rhythm.views.DocumentRhythmView;
+import services.complexity.rhythm.views.DocumentRhythmView2;
 import services.discourse.keywordMining.KeywordModeling;
+import utils.LocalizationUtils;
 import view.events.LinkMouseListener;
 import view.models.document.DocumentTable;
 import view.models.document.DocumentTableModel;
@@ -78,13 +83,13 @@ public class DocumentView extends JFrame {
     private JLabel lblSubjectivityDescription;
 
     public DocumentView(Document documentToDisplay) {
-        super("ReaderBench - Document Visualization");
+        super.setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.WHITE);
         this.document = documentToDisplay;
 
         // adjust view to desktop size
-        setBounds(50, 50, 1180, 700);
+        setBounds(50, 50, 1180, 710);
 
         generateLayout();
         updateContent();
@@ -115,17 +120,17 @@ public class DocumentView extends JFrame {
         groupLayout
                 .setVerticalGroup(
                         groupLayout.createParallelGroup(Alignment.LEADING)
-                        .addGroup(groupLayout.createSequentialGroup().addContainerGap()
-                                .addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
-                                        .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 607,
-                                                Short.MAX_VALUE)
-                                        .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
-                                .addContainerGap()));
+                                .addGroup(groupLayout.createSequentialGroup().addContainerGap()
+                                        .addComponent(panelHeader, GroupLayout.PREFERRED_SIZE, 53,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+                                                .addComponent(panelContents, GroupLayout.DEFAULT_SIZE, 617,
+                                                        Short.MAX_VALUE)
+                                                .addComponent(panelConcepts, GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE))
+                                        .addContainerGap()));
 
-        JLabel lblContents = new JLabel("Contents");
+        JLabel lblContents = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblContents"));
         lblContents.setFont(new Font("SansSerif", Font.BOLD, 13));
 
         JSeparator separator = new JSeparator();
@@ -146,101 +151,144 @@ public class DocumentView extends JFrame {
             }
         });
 
-        JButton btnVisualizeCohesionGraph = new JButton("Multi-Layered Cohesion Graph");
-        btnVisualizeCohesionGraph.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        CohesionGraphView view = new CohesionGraphView(document);
-                        view.setVisible(true);
-                    }
-                });
-            }
+        JButton btnVisualizeCohesionGraph = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVisualizeCohesionGraph"));
+        btnVisualizeCohesionGraph.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    CohesionGraphView view = new CohesionGraphView(document);
+                    view.setVisible(true);
+                }
+            });
         });
 
-        JButton btnSelectVoices = new JButton("Select Voices");
-        btnSelectVoices.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        JButton btnSelectVoices = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnSelectVoices"));
+        btnSelectVoices.addActionListener((ActionEvent e) -> {
+            EventQueue.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    JFrame frame = new VoiceSelectionView(document);
+                    frame.setVisible(true);
+                }
+            });
+        });
+
+        JButton btnDisplayVoiceInteranimation = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnDisplayVoiceInteranimation"));
+        btnDisplayVoiceInteranimation.addActionListener((ActionEvent e) -> {
+            if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
                 EventQueue.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        JFrame frame = new VoiceSelectionView(document);
+                        JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
                         frame.setVisible(true);
                     }
                 });
+            } else {
+                JOptionPane.showMessageDialog(DocumentView.this, LocalizationUtils.getLocalizedString(this.getClass(), "msgSelectVoice"),
+                        LocalizationUtils.getLocalizedString(this.getClass(), "msgInformation"), JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
-        JButton btnDisplayVoiceInteranimation = new JButton("Voice Inter-animation");
-        btnDisplayVoiceInteranimation.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (document.getSelectedVoices() != null && document.getSelectedVoices().size() > 0) {
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            JFrame frame = new SentenceLevelInterAnimationView(document, document.getSelectedVoices());
-                            frame.setVisible(true);
-                        }
-                    });
-                } else {
-                    JOptionPane.showMessageDialog(DocumentView.this, "At least one voice must be selected!",
-                            "Information", JOptionPane.INFORMATION_MESSAGE);
-                }
-            }
+        JButton btnVisualizeDocumentFlow = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnVisualizeDocumentFlow"));
+        btnVisualizeDocumentFlow.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(() -> {
+                JFrame view = new DocumentFlowView(document);
+                view.setVisible(true);
+            });
         });
 
-        JButton btnVisualizeDocumentFlow = new JButton("Document Flow");
-        btnVisualizeDocumentFlow.addActionListener(new ActionListener() {
+        JButton btnVisualizeAlliterations = new JButton("Alliterations");
+        btnVisualizeAlliterations.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
                 EventQueue.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        JFrame view = new DocumentFlowView(document);
+                        JFrame view = new AlliterationDocumentView(document);
                         view.setVisible(true);
                     }
                 });
             }
         });
+
+        JButton btnVisualizeAssonances = new JButton("Assonances");
+        btnVisualizeAssonances.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new AssonanceDocumentView(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+
+        JButton btnRhythmFeatures = new JButton("Rhythm");
+        btnRhythmFeatures.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                EventQueue.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        JFrame view = new DocumentRhythmView2(document);
+                        view.setVisible(true);
+                    }
+                });
+            }
+        });
+        
         GroupLayout gl_panelContents = new GroupLayout(panelContents);
         gl_panelContents
                 .setHorizontalGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING)
                         .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelContents
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
+                                .addGroup(gl_panelContents.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(lblContents)
                                         .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
                                         .addComponent(separator, GroupLayout.DEFAULT_SIZE, 856,
                                                 Short.MAX_VALUE)
-                                        .addGroup(gl_panelContents.createSequentialGroup().addComponent(btnAdvancedView)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeCohesionGraph)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnVisualizeDocumentFlow)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(btnSelectVoices)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(btnDisplayVoiceInteranimation)).addComponent(lblContents))
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.TRAILING, false)
+                                                .addGroup(gl_panelContents.createSequentialGroup()
+                                                        .addComponent(btnAdvancedView ,GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnVisualizeCohesionGraph, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnVisualizeDocumentFlow, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnSelectVoices, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                                        .addComponent(btnDisplayVoiceInteranimation, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                        .addGroup(gl_panelContents.createSequentialGroup()
+                                                .addComponent(btnVisualizeAlliterations).addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnVisualizeAssonances).addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(btnRhythmFeatures)))
                                 .addContainerGap()));
         gl_panelContents
                 .setVerticalGroup(
                         gl_panelContents.createParallelGroup(Alignment.LEADING)
-                        .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
-                                .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(btnAdvancedView).addComponent(btnVisualizeCohesionGraph)
-                                        .addComponent(btnSelectVoices)
-                                        .addComponent(btnDisplayVoiceInteranimation)
-                                        .addComponent(btnVisualizeDocumentFlow))
-                                .addContainerGap()));
+                                .addGroup(gl_panelContents.createSequentialGroup().addContainerGap()
+                                        .addComponent(lblContents).addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(separator, GroupLayout.PREFERRED_SIZE, 2,
+                                                GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addComponent(scrollPaneContent, GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(btnAdvancedView)
+                                                .addComponent(btnVisualizeCohesionGraph)
+                                                .addComponent(btnSelectVoices)
+                                                .addComponent(btnDisplayVoiceInteranimation)
+                                                .addComponent(btnVisualizeDocumentFlow))
+                                        .addPreferredGap(ComponentPlacement.RELATED)
+                                        .addGroup(gl_panelContents.createParallelGroup(Alignment.BASELINE)
+                                                .addComponent(btnVisualizeAlliterations)
+                                                .addComponent(btnVisualizeAssonances)
+                                                .addComponent(btnRhythmFeatures))
+                                        .addContainerGap()));
         panelContents.setLayout(gl_panelContents);
-        JLabel lblTitle = new JLabel("Title:\n");
+        JLabel lblTitle = new JLabel(LocalizationUtils.getGeneric("title") + ":\n");
         lblTitle.setFont(new Font("Lucida Grande", Font.BOLD, 13));
-        JLabel lblSource = new JLabel("Source:");
-        JLabel lblURI = new JLabel("URI:");
-        JLabel lblSubj = new JLabel("Sentiment polarity:");
+        JLabel lblSource = new JLabel(LocalizationUtils.getGeneric("source") + ":");
+        JLabel lblURI = new JLabel(LocalizationUtils.getGeneric("URI") + ":");
+        JLabel lblSubj = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblSubj") + ":");
 
         lblURIDescription = new JLabel("");
         lblSourceDescription = new JLabel("");
@@ -265,55 +313,55 @@ public class DocumentView extends JFrame {
         gl_panelHeader
                 .setHorizontalGroup(
                         gl_panelHeader.createParallelGroup(Alignment.LEADING)
-                        .addGroup(
-                                gl_panelHeader.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelHeader
-                                        .createParallelGroup(
-                                                Alignment.LEADING)
-                                        .addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
-                                                Short.MAX_VALUE)
-                                        .addGroup(gl_panelHeader.createSequentialGroup()
-                                                .addComponent(lblSource)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblSourceDescription).addGap(18)
-                                                .addComponent(lblURI)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblURIDescription)
-                                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                                .addComponent(lblSubj)
-                                                .addPreferredGap(ComponentPlacement.RELATED)
-                                                .addComponent(lblSubjectivityDescription))
-                                        .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
-                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
-                                                GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
+                                .addGroup(
+                                        gl_panelHeader.createSequentialGroup().addContainerGap()
+                                                .addGroup(gl_panelHeader
+                                                        .createParallelGroup(
+                                                                Alignment.LEADING)
+                                                        .addComponent(separatorDocument, GroupLayout.DEFAULT_SIZE, 1156,
+                                                                Short.MAX_VALUE)
+                                                        .addGroup(gl_panelHeader.createSequentialGroup()
+                                                                .addComponent(lblSource)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblSourceDescription).addGap(18)
+                                                                .addComponent(lblURI)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblURIDescription)
+                                                                .addPreferredGap(ComponentPlacement.UNRELATED)
+                                                                .addComponent(lblSubj)
+                                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                                .addComponent(lblSubjectivityDescription))
+                                                        .addGroup(gl_panelHeader.createSequentialGroup().addComponent(lblTitle)
+                                                                .addPreferredGap(ComponentPlacement.RELATED).addComponent(lblTitleDescription,
+                                                                        GroupLayout.DEFAULT_SIZE, 1113, Short.MAX_VALUE))).addContainerGap()));
         gl_panelHeader
                 .setVerticalGroup(
                         gl_panelHeader
-                        .createParallelGroup(
-                                Alignment.LEADING)
-                        .addGroup(
-                                gl_panelHeader.createSequentialGroup().addContainerGap()
-                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblTitle).addComponent(
-                                        lblTitleDescription))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
-                                        .addComponent(lblSource).addComponent(lblSourceDescription)
-                                        .addComponent(lblURIDescription).addComponent(lblURI)
-                                        .addComponent(lblSubj).addComponent(lblSubjectivityDescription))
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
+                                .createParallelGroup(
+                                        Alignment.LEADING)
+                                .addGroup(
+                                        gl_panelHeader.createSequentialGroup().addContainerGap()
+                                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                                        .addComponent(lblTitle).addComponent(
+                                                                lblTitleDescription))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addGroup(gl_panelHeader.createParallelGroup(Alignment.BASELINE)
+                                                        .addComponent(lblSource).addComponent(lblSourceDescription)
+                                                        .addComponent(lblURIDescription).addComponent(lblURI)
+                                                        .addComponent(lblSubj).addComponent(lblSubjectivityDescription))
+                                                .addPreferredGap(ComponentPlacement.RELATED)
+                                                .addComponent(separatorDocument, GroupLayout.PREFERRED_SIZE, 2, GroupLayout.PREFERRED_SIZE)
+                                                .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
         panelHeader.setLayout(gl_panelHeader);
 
-        JLabel lblTopics = new JLabel("Topics");
+        JLabel lblTopics = new JLabel(LocalizationUtils.getGeneric("topics"));
         lblTopics.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JSeparator separatorTopics = new JSeparator();
 
-        JLabel lblFilterOnly = new JLabel("Filter only:");
+        JLabel lblFilterOnly = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblFilterOnly") + ":");
 
-        chckbxVerbTopics = new JCheckBox("Verbs");
+        chckbxVerbTopics = new JCheckBox(LocalizationUtils.getGeneric("verbs"));
         chckbxVerbTopics.setBackground(Color.WHITE);
         chckbxVerbTopics.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -322,7 +370,7 @@ public class DocumentView extends JFrame {
         });
         chckbxVerbTopics.setSelected(true);
 
-        chckbxNounTopics = new JCheckBox("Nouns");
+        chckbxNounTopics = new JCheckBox(LocalizationUtils.getGeneric("nouns"));
         chckbxNounTopics.setBackground(Color.WHITE);
         chckbxNounTopics.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
@@ -347,36 +395,29 @@ public class DocumentView extends JFrame {
         sliderTopics.setMajorTickSpacing(5);
         sliderTopics.setPaintLabels(true);
         sliderTopics.setMinorTickSpacing(1);
-        java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<Integer, JLabel>();
+        java.util.Hashtable<Integer, JLabel> labelTable = new java.util.Hashtable<>();
         if (noMaxTopics == 20) {
-            labelTable.put(new Integer(20), new JLabel("100"));
+            labelTable.put(20, new JLabel("100"));
         }
         if (noMaxTopics >= 15) {
-            labelTable.put(new Integer(15), new JLabel("75"));
+            labelTable.put(15, new JLabel("75"));
         }
-        labelTable.put(new Integer(10), new JLabel("50"));
-        labelTable.put(new Integer(5), new JLabel("25"));
-        labelTable.put(new Integer(0), new JLabel("0"));
+        labelTable.put(10, new JLabel("50"));
+        labelTable.put(5, new JLabel("25"));
+        labelTable.put(0, new JLabel("0"));
         sliderTopics.setLabelTable(labelTable);
-        sliderTopics.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateTopics();
-            }
+        sliderTopics.addChangeListener((ChangeEvent e) -> {
+            updateTopics();
         });
 
-        JButton btnGenerateNetwork = new JButton("Generate network of concepts");
-        btnGenerateNetwork.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                EventQueue.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        ConceptView view = new ConceptView(null, document,
-                                KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
-                                        chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
-                        view.setVisible(true);
-                    }
-                });
-            }
+        JButton btnGenerateNetwork = new JButton(LocalizationUtils.getLocalizedString(this.getClass(), "btnGenerateNetwork"));
+        btnGenerateNetwork.addActionListener((ActionEvent arg0) -> {
+            EventQueue.invokeLater(() -> {
+                ConceptView view = new ConceptView(null, document,
+                        KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
+                                chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected()));
+                view.setVisible(true);
+            });
         });
 
         JScrollPane scrollPaneTopics = new JScrollPane();
@@ -455,8 +496,7 @@ public class DocumentView extends JFrame {
         List<Keyword> topTopics = KeywordModeling.getSublist(document.getTopics(), sliderTopics.getValue() * 5,
                 chckbxNounTopics.isSelected(), chckbxVerbTopics.isSelected());
         for (Keyword topic : topTopics) {
-            Object[] row = {topic.getWord().getLemma(),
-                Double.valueOf(Formatting.formatNumber(topic.getRelevance()))};
+            Object[] row = {topic.getWord().getLemma(), Formatting.formatNumber(topic.getRelevance())};
             modelTopics.addRow(row);
         }
     }

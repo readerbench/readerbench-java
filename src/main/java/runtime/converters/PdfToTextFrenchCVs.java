@@ -70,7 +70,7 @@ public class PdfToTextFrenchCVs {
                     LOGGER.log(Level.INFO, "Processing file: {0}", filePathString);
                     PdfToTxtConverter pdfConverter = new PdfToTxtConverter(filePathString, true);
                     pdfConverter.process();
-                    List<ResultNode> nodes = getTopics(pdfConverter.getParsedText(), "resources/config/FR/LSA/Le_Monde", "resources/config/FR/LDA/Le_Monde", Lang.fr, false, false, 0.3);
+                    List<ResultNode> nodes = getTopics(pdfConverter.getParsedText(), "resources/config/FR/LSA/Le_Monde", "resources/config/FR/LDA/Le_Monde", Lang.fr, false, false, false, 0.3);
 
                     StringBuilder sbNode = new StringBuilder();
                     nodes.stream().forEach((node) -> {
@@ -95,10 +95,10 @@ public class PdfToTextFrenchCVs {
     }
 
     private List<ResultNode> getTopics(String query, String pathToLSA, String pathToLDA, Lang lang,
-            boolean posTagging, boolean computeDialogism, double threshold) {
+            boolean posTagging, boolean computeDialogism, boolean useBigrams, double threshold) {
 
         List<ResultNode> nodes = new ArrayList<>();
-        AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism);
+        AbstractDocument queryDoc = processQuery(query, pathToLSA, pathToLDA, lang, posTagging, computeDialogism, useBigrams);
 
         List<Keyword> topics = KeywordModeling.getSublist(queryDoc.getTopics(), 50, false, false);
 
@@ -135,7 +135,7 @@ public class PdfToTextFrenchCVs {
     }
 
     public AbstractDocument processQuery(String query, String pathToLSA, String pathToLDA, Lang lang,
-            boolean posTagging, boolean computeDialogism) {
+            boolean posTagging, boolean computeDialogism, boolean useBigrams) {
         LOGGER.info("Processign query ...");
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
         String[] blocks = query.split("\n");
@@ -153,7 +153,7 @@ public class PdfToTextFrenchCVs {
 
         AbstractDocument queryDoc = new Document(null, contents, models, lang, posTagging);
         LOGGER.log(Level.INFO, "Built document has {0} blocks.", queryDoc.getBlocks().size());
-        queryDoc.computeAll(computeDialogism);
+        queryDoc.computeAll(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(queryDoc);
 
         return queryDoc;
