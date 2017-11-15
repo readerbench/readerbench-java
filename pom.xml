@@ -546,12 +546,12 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>${elasticsearch.version}</version>
+            <version>5.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
             <artifactId>transport</artifactId>
-            <version>${elasticsearch.version}</version>
+            <version>5.4.0</version>
         </dependency>
         <!-- Ths -->
         <dependency>

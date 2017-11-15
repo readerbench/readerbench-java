@@ -1,8 +1,8 @@
 package services.elasticsearch;
 
+import org.apache.spark.network.client.TransportClient;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class ElasticsearchService {
 
-    public TransportClient client;
+    public org.elasticsearch.client.transport.TransportClient client;
     private static final String ELASTICSEARCH_HOST_ADDRESS = "141.85.232.57";
 
     /**
