@@ -36,7 +36,7 @@ import services.commons.VectorAlgebra;
 import services.nlp.stemmer.Stemmer;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
-import thrift.Word2VecService;
+import thrift.ParagraphVectorsService;
 
 /**
  *
@@ -55,7 +55,7 @@ public class ParagraphVectorsModel implements ISemanticModel {
     private final int noDimensions;
     private final Map<Word, double[]> wordVectors;
     
-    private static Word2VecService.Client client = null;
+    private static ParagraphVectorsService.Client client = null;
 
     private ParagraphVectorsModel(String path, Lang language, Map<String, List<Double>> model) {
         this.language = language;
@@ -211,12 +211,12 @@ public class ParagraphVectorsModel implements ISemanticModel {
             Exceptions.printStackTrace(ex);
         }
     }
-    public static Word2VecService.Client getClient() throws TTransportException {
+    public static ParagraphVectorsService.Client getClient() throws TTransportException {
         if (client == null) {
             TTransport transport = new TSocket(THRIFT_IP, THRIFT_PORT);
             transport.open();
             TProtocol protocol = new TBinaryProtocol(transport);
-            client = new Word2VecService.Client(protocol);
+            client = new ParagraphVectorsService.Client(protocol);
         }
         return client;
     }
@@ -224,5 +224,8 @@ public class ParagraphVectorsModel implements ISemanticModel {
     public static void main(String[] args) throws FileNotFoundException {
         
         trainModel("resources/config/EN/TasaHClustering/train.txt");
+//        ParagraphVectorsModel pv = ParagraphVectorsModel.loadParagraphVectors("resources/config/EN/TasaHClustering", Lang.en);
+//        System.out.println(pv.getNoDimensions());
+//        System.out.println(pv.getWordSet().size());
     }
 }
