@@ -39,7 +39,7 @@ public class ConversationProcessing {
         data.cscl.Conversation c = new data.cscl.Conversation(models, lang).loadConversation(message.getConversation(), models, lang, usePOSTagging);
         c.setPath(message.getPath());
         LOGGER.info("Start computeAll ... ");
-        c.computeAll(computeDialogism);
+        c.computeAll(computeDialogism, false);
         return c;
     }
 

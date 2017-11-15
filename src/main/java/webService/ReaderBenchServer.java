@@ -162,6 +162,9 @@ public class ReaderBenchServer {
     private static List<AbstractDocument> loadedDocs;
     private static String loadedPath;
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
+    private static SolrService SOLR_SERVICE = new SolrService("http://141.85.232.56:8983/solr/", "community", 100);
+    private static SolrService SOLR_SERVICE_COMMUNITY = new SolrService("http://141.85.232.56:8983/solr/", "online_community", 100);
+
 
     private static QueryResult errorEmptyBody() {
         return new QueryResult(false, ParamsValidator.errorNoParams());
@@ -290,10 +293,6 @@ public class ReaderBenchServer {
         ReaderBenchServer server = new ReaderBenchServer();
         server.start();
     }
-
-    private static SolrService SOLR_SERVICE = new SolrService("http://141.85.232.56:8983/solr/", "community", 100);
-    private static SolrService SOLR_SERVICE_COMMUNITY = new SolrService("http://141.85.232.56:8983/solr/", "online_community", 100);
-    private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     public List<ResultCategory> generateCategories(AbstractDocument document, Lang lang, List<ISemanticModel> models, Boolean usePosTagging, Boolean computeDialogism, Boolean useBigrams) throws Exception {
         List<ResultCategory> resultCategories = new ArrayList<>();
@@ -1688,7 +1687,7 @@ public class ReaderBenchServer {
                             0, 7);
                     community.computeMetrics(useTextualComplexity, true, true);
 
-                    JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString());
+                    JSONArray participantsCommunities = community.generateParticipantViewSubCommunities(communityFolder.toString(), 1);
 
                     QueryResultCommunityParticipants queryResult = new QueryResultCommunityParticipants();
                     queryResult.setParticipants(participantsCommunities);

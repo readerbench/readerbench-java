@@ -40,7 +40,7 @@
             <id>netbeans</id>
             <url>http://bits.netbeans.org/maven2/</url>
         </repository>
-    </repositories>  
+    </repositories>
     <build>
         <pluginManagement>
             <plugins>
@@ -112,20 +112,6 @@
                 </executions>
             </plugin>
         </plugins>
-
-        <resources>
-            <!-- config file -->
-            <resource>
-                <directory>src/main/config</directory>
-            </resource>
-
-            <!-- Java resources -->
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-
-
     </build>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -156,6 +142,9 @@
         <apache.commons.pool.version>1.6</apache.commons.pool.version>
         <apache.httpcomponents.httpcore.version>4.4.7</apache.httpcomponents.httpcore.version>
         <apache.httpcomponents.httpclient.version>4.5.3</apache.httpcomponents.httpclient.version>
+
+        <akka.scala.version>2.10</akka.scala.version>
+        <akka.version>2.3.5</akka.version>
 
         <hibernate.version>5.2.6.Final</hibernate.version>
         <sqlite.version>3.8.11.2</sqlite.version>
@@ -557,5 +546,93 @@
             <artifactId>solr-solrj</artifactId>
             <version>${solrj.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>5.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>5.4.0</version>
+        </dependency>
+        <!-- Ths -->
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${lucene-core.vesrion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>${netty-all.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.13</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jazzy</groupId>
+            <artifactId>jazzy-core</artifactId>
+            <version>0.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.wendykierp</groupId>
+            <artifactId>JTransforms</artifactId>
+            <version>3.1</version>
+            <classifier>with-dependencies</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>rosuda.JRI</artifactId>
+            <version>${rosuda.JRI.version}</version>
+        </dependency>
+        <!-- SolrReaderBench -->
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>solr</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <!-- BEGIN akka dependency -->
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-remote_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-contrib_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-slf4j_${akka.scala.version}</artifactId>
+            <version>${akka.version}</version>
+        </dependency>
+        <!-- BEGIN akka dependency -->
+
+
+
     </dependencies>
 </project>
