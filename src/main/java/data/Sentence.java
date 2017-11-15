@@ -22,12 +22,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.trees.Tree;
+import services.nlp.parsing.ContextSentiment;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations;
 import edu.stanford.nlp.util.Pair;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import services.commons.TextPreprocessing;
 import services.semanticModels.ISemanticModel;
 
 /**
@@ -41,7 +44,10 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     private List<Word> words;
     private List<Word> allWords;
     private transient SemanticGraph dependencies;
+    private transient Map<Word, List<ContextSentiment>> contextMap;
+    private transient Tree tree;
     private final Map<Word, Word> pronimialReplacementMap;
+    private transient String cleanedText = null;
 
     public Sentence(Block b, int index, String text, List<ISemanticModel> models, Lang lang) {
         super(b, index, text.replaceAll("\\s", " ").trim(), models, lang);
@@ -85,6 +91,14 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public void setDependencies(SemanticGraph dependencies) {
         this.dependencies = dependencies;
     }
+    
+    public Tree getTree() {
+    	return tree;
+    }
+    
+    public void setTree(Tree tree) {
+    	this.tree = tree;
+    }
 
     public List<Word> getAllWords() {
         return allWords;
@@ -93,6 +107,19 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public void setAllWords(List<Word> allWords) {
         this.allWords = allWords;
     }
+
+    public String getCleanedText() {
+        if (cleanedText == null) {
+            cleanedText = TextPreprocessing.cleanText(getText(), getLanguage());
+        }
+        return cleanedText;
+    }
+
+    public void setCleanedText(String cleanedText) {
+        this.cleanedText = cleanedText;
+    }
+    
+    
     
     private Word getWordByIndex(IndexedWord iw) {
         int index = iw.get(CoreAnnotations.IndexAnnotation.class) - 1;
@@ -112,12 +139,16 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
         if (dependencies == null) {
             return new ArrayList<>();
         }
-        return StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+        List<NGram> collect = StreamSupport.stream(dependencies.edgeIterable().spliterator(), true)
+                .filter(edge -> 
+                        !edge.getSource().get(CoreAnnotations.IndexAnnotation.class).equals( 
+                        edge.getTarget().get(CoreAnnotations.IndexAnnotation.class)))
                 .map(edge -> new Pair<>(getWordByIndex(edge.getSource()), getWordByIndex(edge.getTarget())))
                 .filter(pair -> pair.first != null && pair.second != null)
                 .filter(pair -> pair.first.isContentWord() && pair.second.isContentWord())
                 .map(pair -> new NGram(pair.first, pair.second))
                 .collect(Collectors.toList());
+        return collect;
     }
     
     @Override
@@ -147,4 +178,13 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     public int compareTo(Sentence o) {
         return (int) (Math.signum(o.getScore() - this.getScore()));
     }
+
+    public void setContextMap(Map<Word, List<ContextSentiment>> contextMap) {
+        this.contextMap = contextMap;
+    }
+
+    public Map<Word, List<ContextSentiment>> getContextMap() {
+        return contextMap;
+    }
+
 }

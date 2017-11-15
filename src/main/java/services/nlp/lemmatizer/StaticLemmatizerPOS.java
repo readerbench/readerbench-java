@@ -23,6 +23,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import data.Lang;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
@@ -33,6 +34,7 @@ public class StaticLemmatizerPOS {
 
     private static Map<String, String> lemmas_fr = null;
     private static Map<String, String> lemmas_it = null;
+    private static Map<String, String> lemmas_es = null;
 
     private static Map<String, String> initialize(String path, Lang lang) {
         LOGGER.log(Level.INFO, "Initializing lemmas from {0} ...", path);
@@ -49,7 +51,7 @@ public class StaticLemmatizerPOS {
                 lemmas.put(strk.nextToken().toLowerCase(), strk.nextToken().toLowerCase());
             }
             in.close();
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
         return lemmas;
@@ -64,6 +66,9 @@ public class StaticLemmatizerPOS {
                 break;
             case it:
                 lemmas = getLemmasIt();
+                break;
+            case es:
+                lemmas = getLemmasEs();
                 break;
             default:
                 return StaticLemmatizer.lemmaStatic(w, lang);
@@ -105,6 +110,13 @@ public class StaticLemmatizerPOS {
             lemmas_it = initialize("resources/config/IT/word lists/lemmas_pos_it.txt", Lang.it);
         }
         return lemmas_it;
+    }
+
+    public static Map<String, String> getLemmasEs() {
+        if (lemmas_es == null) {
+            lemmas_es = initialize("resources/config/ES/word lists/lemmas_pos_es.txt", Lang.es);
+        }
+        return lemmas_es;
     }
 
     public static void main(String[] args) {

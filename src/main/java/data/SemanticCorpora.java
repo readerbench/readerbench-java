@@ -27,15 +27,26 @@ public enum SemanticCorpora implements Serializable {
     tasa_en_lsa("TASA", Lang.en, SimilarityType.LSA),
     tasa_en_lda("TASA", Lang.en, SimilarityType.LDA),
     tasa_en_word2vec("TASA", Lang.en, SimilarityType.WORD2VEC),
+    
     tasa_lak_en_lsa("TASA_LAK", Lang.en, SimilarityType.LSA),
     tasa_lak_en_lda("TASA_LAK", Lang.en, SimilarityType.LDA),
+    
+    sciref_en_lsa("SciRef", Lang.en, SimilarityType.LSA),
+    
+    enea_tasa_en_lsa("ENEA_TASA", Lang.en, SimilarityType.LSA),
+    enea_tasa_en_lda("ENEA_TASA", Lang.en, SimilarityType.LDA),
+    enea_tasa_en_word2vec("ENEA_TASA", Lang.en, SimilarityType.WORD2VEC),
     
     le_monde_fr_lsa("Le_Monde", Lang.fr, SimilarityType.LSA),
     le_monde_fr_lda("Le_Monde", Lang.fr, SimilarityType.LDA),
     le_monde_fr_word2vec("Le_Monde", Lang.fr, SimilarityType.WORD2VEC),
     
     euro_parlamentean_nl_lda("Euro_Parlamentean", Lang.nl, SimilarityType.LDA),
-    inl_nl_lda("INL", Lang.nl, SimilarityType.LDA);
+    inl_nl_lda("INL", Lang.nl, SimilarityType.LDA),
+    
+    jose_antonio_es_lsa("Jose_Antonio", Lang.es, SimilarityType.LSA),
+    jose_antonio_es_lda("Jose_Antonio", Lang.es, SimilarityType.LDA),
+    jose_antonio_es_word2vec("Jose_Antonio", Lang.es, SimilarityType.WORD2VEC);
     
     private final static String SEMANTIC_CORPORA_ROOT = "resources/config/";
     private final String corpora;
@@ -47,7 +58,7 @@ public enum SemanticCorpora implements Serializable {
         this.corpora = corpora;
         this.lang = lang;
         this.simType = simType;
-        this.fullPath = SEMANTIC_CORPORA_ROOT + '/' + lang.toString() + '/' + simType.getAcronym() + '/' + corpora;
+        this.fullPath = SEMANTIC_CORPORA_ROOT + '/' + lang.toString().toUpperCase() + '/' + simType.getAcronym() + '/' + corpora;
     }
 
     public String getCorpora() {

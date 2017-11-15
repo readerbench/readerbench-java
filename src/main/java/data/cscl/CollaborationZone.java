@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,26 +20,38 @@ import java.io.Serializable;
 import services.commons.Formatting;
 
 /**
- * 
+ *
  * @author Mihai Dascalu
  */
 public class CollaborationZone implements Serializable,
 		Comparable<CollaborationZone> {
 	private static final long serialVersionUID = 1479979327098147567L;
-	
+
 	private int start;
 	private int end;
 	private double averageCollaboration;
 	private int noBlocks;
 	private double zoneImportance;
+	private int typeZone;
 
 	public CollaborationZone(int start, int end, double averageCollaboration,
-			int noBlocks) {
+							 int noBlocks) {
 		this.start = start;
 		this.end = end;
 		this.averageCollaboration = averageCollaboration;
 		this.noBlocks = noBlocks;
 		this.zoneImportance = this.noBlocks * this.averageCollaboration;
+	}
+
+	//type zone = 1, if it is convergent zone and -1 if it is divergent zone
+	public CollaborationZone(int start, int end, double averageCollaboration,
+							 int noBlocks, int typeZone) {
+		this.start = start;
+		this.end = end;
+		this.averageCollaboration = averageCollaboration;
+		this.noBlocks = noBlocks;
+		this.zoneImportance = this.noBlocks * this.averageCollaboration;
+		this.typeZone = typeZone;
 	}
 
 	public CollaborationZone(int start, int end) {
@@ -48,6 +60,22 @@ public class CollaborationZone implements Serializable,
 	}
 
 	public String toStringDetailed() {
+		if (getTypeZone() == 1) {
+			return "[" + start + "; " + end + "] - Convergent zone: " + noBlocks
+					+ " utterances with "
+					+ Formatting.formatNumber(averageCollaboration)
+					+ " average values ("
+					+ Formatting.formatNumber(zoneImportance)
+					+ " cumulative values)";
+		}
+		else if (getTypeZone() == -1) {
+			return "[" + start + "; " + end + "] - Divergent zone: " + noBlocks
+					+ " utterances with "
+					+ Formatting.formatNumber(averageCollaboration)
+					+ " average values ("
+					+ Formatting.formatNumber(zoneImportance)
+					+ " cumulative values)";
+		}
 		return "[" + start + "; " + end + "] - " + noBlocks
 				+ " utterances with "
 				+ Formatting.formatNumber(averageCollaboration)
@@ -98,6 +126,14 @@ public class CollaborationZone implements Serializable,
 
 	public void setZoneImportance(double zoneImportance) {
 		this.zoneImportance = zoneImportance;
+	}
+
+	public int getTypeZone() {
+		return typeZone;
+	}
+
+	public void setTypeZone(int typeZone) {
+		this.typeZone = typeZone;
 	}
 
 	public int compareTo(CollaborationZone o) {

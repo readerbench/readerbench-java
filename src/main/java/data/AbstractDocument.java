@@ -122,7 +122,22 @@ public abstract class AbstractDocument extends AnalysisElement {
     protected Map<ComplexityIndex, Double> complexityIndices;
 
     private List<SemanticChain> voices;
+    private List<SemanticChain> extendedVoices;
     private transient List<SemanticChain> selectedVoices;
+    private int noNouns;
+    private int noVerbs;
+    private int noConvergentPoints;
+    private int noDivergentPoints;
+    private int noPerspectives;
+    private int noNounsInPerspectives;
+    private int noVerbsInPerspectives;
+    private double recurrenceRate;
+    private double determinism;
+    private double convergenceRate;
+    private double divergenceRate;
+    private double convergenceOrDivergenceRate;
+    private int maxLine;
+    private double averageLine;
 
     protected Map<SimilarityType, String> modelPaths;
 
@@ -169,8 +184,8 @@ public abstract class AbstractDocument extends AnalysisElement {
         }
     }
 
-    public void computeAll(boolean computeDialogism) {
-        computeDiscourseAnalysis(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        computeDiscourseAnalysis(computeDialogism, useBigrams);
         ComplexityIndices.computeComplexityFactors(this);
     }
 
@@ -196,8 +211,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     /**
      *
      * @param computeDialogism
+     * @param useBigrams
      */
-    public void computeDiscourseAnalysis(boolean computeDialogism) {
+    public void computeDiscourseAnalysis(boolean computeDialogism, boolean useBigrams) {
         if (computeDialogism) {
             // build disambiguisation graph and lexical chains
             LOGGER.info("Build disambiguation graph");
@@ -219,10 +235,14 @@ public abstract class AbstractDocument extends AnalysisElement {
             // determine semantic chains / voices
             LOGGER.info("Determine semantic chains / voices");
             DialogismComputations.determineVoices(this);
+            DialogismComputations.determineExtendedVoices(this);
+
+            DialogismComputations.findSentimentUsingContext(this);
 
             // determine voice distributions & importance
             LOGGER.info("Determine voice distributions & importance");
             DialogismComputations.determineVoiceDistributions(this);
+            DialogismComputations.determineExtendedVoiceDistributions(this);
         }
 
         // build coherence graph
@@ -236,7 +256,7 @@ public abstract class AbstractDocument extends AnalysisElement {
 //        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
         // determine topics
         LOGGER.info("Determine topics");
-        KeywordModeling.determineKeywords(this);
+        KeywordModeling.determineKeywords(this, useBigrams);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
@@ -270,10 +290,10 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public static AbstractDocument loadGenericDocument(String pathToDoc,
             Map<SimilarityType, String> modelPaths, Lang lang,
-            boolean usePOSTagging, boolean computeDialogism, String pathToComplexityModel,
+            boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, String pathToComplexityModel,
             int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
-        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism,
+        return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism, useBigrams,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
     }
 
@@ -303,7 +323,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
-            Lang lang, boolean usePOSTagging, boolean computeDialogism,
+            Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams,
             String pathToComplexityModel, int[] selectedComplexityFactors,
             boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
@@ -321,13 +341,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
         if (isDocument) {
             Document d = Document.load(docFile, models, lang, usePOSTagging);
-            d.computeAll(computeDialogism);
+            d.computeAll(computeDialogism, useBigrams);
             d.save(saveOutput);
             return d;
         }
         if (isChat) {
             Conversation c = Conversation.load(docFile, models, lang, usePOSTagging);
-            c.computeAll(computeDialogism);
+            c.computeAll(computeDialogism, useBigrams);
             c.save(saveOutput);
             return c;
         }
@@ -555,13 +575,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
@@ -756,6 +776,14 @@ public abstract class AbstractDocument extends AnalysisElement {
         this.voices = voices;
     }
 
+    public List<SemanticChain> getExtendedVoices() {
+        return extendedVoices;
+    }
+
+    public void setExtendedVoices(List<SemanticChain> extendedVoices) {
+        this.extendedVoices = extendedVoices;
+    }
+
     public List<SemanticChain> getSelectedVoices() {
         return selectedVoices;
     }
@@ -770,6 +798,118 @@ public abstract class AbstractDocument extends AnalysisElement {
 
     public void setBlockOccurrencePattern(long[] blockOccurrencePattern) {
         this.blockOccurrencePattern = blockOccurrencePattern;
+    }
+
+    public void setNoNouns(int no) {
+        this.noNouns = no;
+    }
+
+    public int getNoNouns() {
+        return noNouns;
+    }
+
+    public void setNoVerbs(int no) {
+        this.noVerbs = no;
+    }
+
+    public int getNoVerbs() {
+        return noVerbs;
+    }
+
+    public void setNoConvergentPoints(int no) {
+        this.noConvergentPoints = no;
+    }
+
+    public int getNoConvergentPoints() {
+        return noConvergentPoints;
+    }
+
+    public void setNoDivergentPoints(int no) {
+        this.noDivergentPoints = no;
+    }
+
+    public int getNoDivergentPoints() {
+        return noDivergentPoints;
+    }
+
+    public void setNoPerspectives(int noPerspectives) {
+        this.noPerspectives = noPerspectives;
+    }
+
+    public int getNoPerspectives() {
+        return noPerspectives;
+    }
+
+    public int getNoNounsInPerspectives() {
+        return noNounsInPerspectives;
+    }
+
+    public void setNoNounsInPerspectives(int noNounsInPerspectives) {
+        this.noNounsInPerspectives = noNounsInPerspectives;
+    }
+
+    public int getNoVerbsInPerspectives() {
+        return noVerbsInPerspectives;
+    }
+
+    public void setNoVerbsInPerspectives(int noVerbsInPerspectives) {
+        this.noVerbsInPerspectives = noVerbsInPerspectives;
+    }
+
+    public double getRecurrenceRate() {
+        return recurrenceRate;
+    }
+
+    public void setRecurrenceRate(double recurrenceRate) {
+        this.recurrenceRate = recurrenceRate;
+    }
+
+    public double getDeterminism() {
+        return determinism;
+    }
+
+    public void setDeterminism(double determinism) {
+        this.determinism = determinism;
+    }
+
+    public double getConvergenceOrDivergenceRate() {
+        return convergenceOrDivergenceRate;
+    }
+
+    public void setConvergenceOrDivergenceRate(double convergenceOrDivergenceRate) {
+        this.convergenceOrDivergenceRate = convergenceOrDivergenceRate;
+    }
+
+    public double getConvergenceRate() {
+        return convergenceRate;
+    }
+
+    public void setConvergenceRate(double convergenceRate) {
+        this.convergenceRate = convergenceRate;
+    }
+
+    public double getDivergenceRate() {
+        return divergenceRate;
+    }
+
+    public void setDivergenceRate(double divergenceRate) {
+        this.divergenceRate = divergenceRate;
+    }
+
+    public int getMaxLine() {
+        return maxLine;
+    }
+
+    public void setMaxLine(int maxLine) {
+        this.maxLine = maxLine;
+    }
+
+    public double getAverageLine() {
+        return averageLine;
+    }
+
+    public void setAverageLine(double averageLine) {
+        this.averageLine = averageLine;
     }
 
     public String getDescription() {
@@ -837,14 +977,14 @@ public abstract class AbstractDocument extends AnalysisElement {
     public boolean canUseSimType(SimilarityType simType) {
         return !simType.isLoadable() || getModelVectors().keySet().contains(simType);
     }
-    
+
     @Override
     public List<NGram> getBiGrams() {
         return blocks.stream()
                 .flatMap(s -> s.getBiGrams().stream())
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<NGram> getNGrams(int n) {
         return blocks.stream()

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@ import data.sentiment.SentimentEntity;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +39,6 @@ import services.semanticModels.SimilarityType;
 public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
-    private static final double SIMILARITY_THRESHOLD = 0.8;
 
     private transient Map<SimilarityType, ISemanticModel> semanticModels;
     private List<Word> words;
@@ -46,6 +46,8 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     private Map<SimilarityType, double[]> modelVectors;
     private double[] sentenceDistribution;
     private double[] blockDistribution;
+    private double[] extendedSentenceDistribution;
+    private double[] extendedBlockDistribution;
     private double[] blockMovingAverage;
     private double averageImportanceScore;
 
@@ -60,7 +62,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         this.chainSentiment = new SentimentEntity();
     }
 
-    public static double similarity(SemanticChain chain1, SemanticChain chain2) {
+    public static double computeSimilarity(SemanticChain chain1, SemanticChain chain2) {
         // determines whether 2 chains can be merged
         if (chain1 == null || chain2 == null) {
             return -1;
@@ -78,15 +80,11 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
         for (SimilarityType st : chain1.getSemanticModels().keySet()) {
             ISemanticModel model = chain1.getSemanticModels().get(st);
-            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st), chain2.getModelVectors().get(st)));
+            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st),
+                    chain2.getModelVectors().get(st)));
         }
 
-        double dist = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
-        if (dist >= SIMILARITY_THRESHOLD) {
-            return dist;
-        }
-
-        return -1;
+        return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
     }
 
     public static SemanticChain merge(SemanticChain chain1, SemanticChain chain2) {
@@ -99,6 +97,20 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         return chain1;
     }
 
+    /**
+     * @param chain1
+     * @param chain2
+     * @return true if chain1 is included in chain2
+     */
+    public static boolean includedIn(SemanticChain chain1, SemanticChain chain2) {
+        for (Word w : chain1.getWords()) {
+            if (!chain2.getWords().contains(w)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void updateSemanticRepresentation() {
         if (modelVectors == null) {
             modelVectors = new EnumMap<>(SimilarityType.class);
@@ -107,13 +119,13 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         for (Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
             double[] vec = new double[e.getValue().getNoDimensions()];
             words.stream()
-                .map(word -> word.getModelRepresentation(e.getKey()))
-                .filter(Objects::nonNull)
-                .forEach(v -> {
-                for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
-                    vec[i] += v[i];
-                }
-            });
+                    .map(word -> word.getModelRepresentation(e.getKey()))
+                    .filter(Objects::nonNull)
+                    .forEach(v -> {
+                        for (int i = 0; i < e.getValue().getNoDimensions(); i++) {
+                            vec[i] += v[i];
+                        }
+                    });
             modelVectors.put(e.getKey(), vec);
         }
 
@@ -256,6 +268,22 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         this.blockDistribution = blockDistribution;
     }
 
+    public double[] getExtendedSentenceDistribution() {
+        return extendedSentenceDistribution;
+    }
+
+    public void setExtendedSentenceDistribution(double[] extendedSentenceDistribution) {
+        this.extendedSentenceDistribution = extendedSentenceDistribution;
+    }
+
+    public double[] getExtendedBlockDistribution() {
+        return extendedBlockDistribution;
+    }
+
+    public void setExtendedBlockDistribution(double[] extendedBlockDistribution) {
+        this.extendedBlockDistribution = extendedBlockDistribution;
+    }
+
     public double[] getBlockMovingAverage() {
         return blockMovingAverage;
     }
@@ -313,4 +341,11 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     public Map<SimilarityType, double[]> getModelVectors() {
         return modelVectors;
     }
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
+
+
 }

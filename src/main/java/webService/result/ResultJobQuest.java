@@ -55,6 +55,10 @@ public class ResultJobQuest extends Result {
     private double keywordsDocumentRelevance;
     private Map<String, Double> keywordsDocumentSimilarity;
     
+    private double scoreGlobal;
+    private double scoreVisual;
+    private double scoreContent;
+    
     public static final Logger LOGGER = Logger.getLogger("");
 
     public ResultJobQuest() {
@@ -296,4 +300,28 @@ public class ResultJobQuest extends Result {
         this.keywordsDocumentSimilarity = keywordsDocumentSimilarity;
     }
 
+    public double getScoreGlobal() {
+        return scoreGlobal;
+    }
+    
+    public void setScoreGlobal(double scoreGlobal) {
+        this.scoreGlobal = scoreGlobal;
+    }
+
+    public double getScoreVisual() {
+        return scoreVisual;
+    }
+
+    public void setScoreVisual(double scoreVisual) {
+        this.scoreVisual = scoreVisual;
+    }
+    
+    public double getScoreContent() {
+        return scoreContent;
+    }
+
+    public void setScoreContent(double scoreContent) {
+        this.scoreContent = scoreContent;
+    }
+    
 }

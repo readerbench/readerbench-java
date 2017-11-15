@@ -22,7 +22,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -68,7 +67,9 @@ import data.cscl.Participant;
 import data.discourse.SemanticCohesion;
 import data.discourse.Keyword;
 import java.util.logging.Level;
+import org.openide.util.Exceptions;
 import services.discourse.keywordMining.KeywordModeling;
+import utils.LocalizationUtils;
 import view.models.PreviewSketch;
 
 public class ConceptView extends JFrame {
@@ -94,9 +95,10 @@ public class ConceptView extends JFrame {
 
     public ConceptView(Participant p, AbstractDocument d, List<Keyword> topics) {
         if (p != null && p.getName().length() > 0) {
-            super.setTitle("ReaderBench - Visualization of " + p.getName() + "'s network of concepts");
+            super.setTitle("ReaderBench - " + LocalizationUtils.getLocalizedString(this.getClass(), "participantTitle1") + " " 
+		    + p.getName() + LocalizationUtils.getLocalizedString(this.getClass(), "participantTitle2"));
         } else {
-            super.setTitle("ReaderBench - Network of concepts visualization");
+            super.setTitle("ReaderBench - " + LocalizationUtils.getLocalizedString(this.getClass(), "noParticipantTitle"));
         }
         super.getContentPane().setBackground(Color.WHITE);
         super.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -115,22 +117,22 @@ public class ConceptView extends JFrame {
     }
 
     private void generateLayout() {
-        JLabel lblInferredConcepts = new JLabel("Concepts");
+        JLabel lblInferredConcepts = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblInferredConcepts"));
         lblInferredConcepts.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        JLabel lblThreshold = new JLabel("Threshold");
+        JLabel lblThreshold = new JLabel(LocalizationUtils.getGeneric("threshold"));
         lblThreshold.setFont(new Font("SansSerif", Font.BOLD, 12));
 
-        JLabel lblIdentifyOnly = new JLabel("Identify only:");
+        JLabel lblIdentifyOnly = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblIdentifyOnly") + ":");
 
-        checkBoxVerb = new JCheckBox("Verbs");
+        checkBoxVerb = new JCheckBox(LocalizationUtils.getGeneric("verbs"));
         checkBoxVerb.setBackground(Color.WHITE);
         checkBoxVerb.addActionListener((ActionEvent e) -> {
             generateGraph();
         });
         checkBoxVerb.setSelected(true);
 
-        checkBoxNoun = new JCheckBox("Nouns");
+        checkBoxNoun = new JCheckBox(LocalizationUtils.getGeneric("nouns"));
         checkBoxNoun.setBackground(Color.WHITE);
         checkBoxNoun.addActionListener((ActionEvent e) -> {
             generateGraph();
@@ -167,10 +169,8 @@ public class ConceptView extends JFrame {
         labelTableThreshold.put(new Integer(5), new JLabel("50%"));
         labelTableThreshold.put(new Integer(0), new JLabel("0"));
         sliderThreshold.setLabelTable(labelTableThreshold);
-        sliderThreshold.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                generateGraph();
-            }
+        sliderThreshold.addChangeListener((ChangeEvent e) -> {
+            generateGraph();
         });
 
         panelGraph = new JPanel();
@@ -178,7 +178,7 @@ public class ConceptView extends JFrame {
         panelGraph.setBackground(Color.WHITE);
         panelGraph.setLayout(new BorderLayout());
 
-        JLabel lblListOfInferred = new JLabel("List of displayed inferred concepts");
+        JLabel lblListOfInferred = new JLabel(LocalizationUtils.getLocalizedString(this.getClass(), "lblListOfInferred"));
         lblListOfInferred.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JScrollPane scrollPaneInferredConcepts = new JScrollPane();
@@ -189,7 +189,7 @@ public class ConceptView extends JFrame {
         txtInferredConcepts.setBackground(COLOR_INFERRED_CONCEPT);
         txtInferredConcepts.setHorizontalAlignment(SwingConstants.CENTER);
         txtInferredConcepts.setFont(new Font("SansSerif", Font.BOLD, 10));
-        txtInferredConcepts.setText("Inferred Concepts");
+        txtInferredConcepts.setText(LocalizationUtils.getLocalizedString(this.getClass(), "txtInferredConcepts"));
         txtInferredConcepts.setColumns(10);
 
         txtTopics = new JTextField();
@@ -197,7 +197,7 @@ public class ConceptView extends JFrame {
         txtTopics.setHorizontalAlignment(SwingConstants.CENTER);
         txtTopics.setBackground(COLOR_TOPIC);
         txtTopics.setFont(new Font("SansSerif", Font.BOLD, 10));
-        txtTopics.setText("Topics");
+        txtTopics.setText(LocalizationUtils.getGeneric("topics"));
         txtTopics.setColumns(10);
 
         GroupLayout groupLayout = new GroupLayout(getContentPane());
@@ -361,7 +361,7 @@ public class ConceptView extends JFrame {
                 if (!w1.equals(w2) && visibleConcepts.get(w1) && visibleConcepts.get(w2)) {
                     double sim = SemanticCohesion.getAverageSemanticModelSimilarity(w1, w2);
                     if (sim >= threshold) {
-                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 1 - sim, false);
+                        Edge e = graphModel.factory().newEdge(nodes.get(w1), nodes.get(w2), 0, 10 * Math.max(sim, 0.1), false);
                         e.setLabel(sim + "");
                         graph.addEdge(e);
                     }
@@ -423,7 +423,7 @@ public class ConceptView extends JFrame {
         try {
             ec.exportFile(new File("out/graph.pdf"));
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Exceptions.printStackTrace(ex);
             return;
         }
         this.pack();

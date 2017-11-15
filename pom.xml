@@ -4,14 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com</groupId>
     <artifactId>ReaderBench</artifactId>
-    <version>2.3.1</version>
+    <version>2.3.5</version>
     <packaging>jar</packaging>
-    <repositories>
-        <repository>
-            <id>hibernatesqlite-maven</id>
-            <url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url>
-        </repository>
-    </repositories>
     <distributionManagement>
         <repository>
             <id>central</id>
@@ -19,6 +13,34 @@
             <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
         </repository>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>libs-snapshot</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-snapshot</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>maven-central</id>
+            <name>maven-central</name>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>netbeans</id>
+            <url>http://bits.netbeans.org/maven2/</url>
+        </repository>
+    </repositories>  
     <build>
         <pluginManagement>
             <plugins>
@@ -26,43 +48,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven.deploy.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>${maven.install.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>1</id>
-                            <phase>clean</phase>
-                            <goals>
-                                <goal>install-file</goal>
-                            </goals>
-                            <configuration>
-                                <groupId>org</groupId>
-                                <artifactId>knowceans-tools</artifactId>
-                                <version>1</version>
-                                <packaging>jar</packaging>
-                                <file>${project.basedir}/resources/lib/knowceans-tools.jar</file>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>2</id>
-                            <phase>clean</phase>
-                            <goals>
-                                <goal>install-file</goal>
-                            </goals>
-                            <configuration>
-                                <groupId>vu.wntools</groupId>
-                                <artifactId>WordnetTools</artifactId>
-                                <version>3</version>
-                                <packaging>jar</packaging>
-                                <file>${project.basedir}/resources/lib/WordnetTools-v3.0.jar</file>
-                                <javadoc>${project.basedir}/resources/lib/WordnetTools-v3.0-javadoc.jar</javadoc>
-                                <pomFile>${project.basedir}/resources/lib/WordnetTools-pom.xml</pomFile>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -149,39 +134,51 @@
         <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
         <maven.scala.plugin.version>2.15.2</maven.scala.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
-        <coreNLP.version>3.7.0</coreNLP.version>
+
+        <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
-        <dl4j.version>0.8.0</dl4j.version>
+        <apache.mahout.version>0.12.2</apache.mahout.version>
+        <wordnet.extjwnl.version>1.9.2</wordnet.extjwnl.version>
+        <languagetool.version>3.9</languagetool.version>
+        <svm.version>3.22</svm.version>
+        <weka.version>3.9.1</weka.version>
+        <weka.multiLayerPerceptrons.version>1.0.10</weka.multiLayerPerceptrons.version>
+        <gephi.version>0.9.2</gephi.version>
+        <rosuda.JRI.version>0.8</rosuda.JRI.version>
+
+        <apache.poi.version>3.15</apache.poi.version>
+        <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
+        <apache.commons.collections.version>4.1</apache.commons.collections.version>
+        <apache.commons.dbcp.version>1.4</apache.commons.dbcp.version>
+        <apache.commons.io.version>2.5</apache.commons.io.version>
+        <apache.commons.lang.version>3.6</apache.commons.lang.version>
         <apache.commons.math.version>3.6.1</apache.commons.math.version>
         <apache.commons.pool.version>1.6</apache.commons.pool.version>
-        <apache.commons.lang.version>3.5</apache.commons.lang.version>
-        <apache.commons.io.version>1.3.2</apache.commons.io.version>
-        <apache.commons.collections.version>4.1</apache.commons.collections.version>
-        <apache.commons.io.version>2.5</apache.commons.io.version>
-        <apache.commons.dbcp.version>1.4</apache.commons.dbcp.version>
-        <apache.poi.version>3.15</apache.poi.version>
-        <wordnet.extjwnl.version>1.9.1</wordnet.extjwnl.version>
-        <apache.httpcomponents.httpcore.version>4.4.5</apache.httpcomponents.httpcore.version>
-        <apache.httpcomponents.httpclient.version>4.5.2</apache.httpcomponents.httpclient.version>
-        <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
-        <apache.mahout.version>0.12.2</apache.mahout.version>
+        <apache.httpcomponents.httpcore.version>4.4.7</apache.httpcomponents.httpcore.version>
+        <apache.httpcomponents.httpclient.version>4.5.3</apache.httpcomponents.httpclient.version>
+
+        <hibernate.version>5.2.6.Final</hibernate.version>
+        <sqlite.version>3.8.11.2</sqlite.version>
         <simple.xml.version>2.7.1</simple.xml.version>
         <sparkjava.version>2.5.4</sparkjava.version>
-        <gephi.version>0.9.1</gephi.version>
-        <slf4j.version>1.7.10</slf4j.version>
+
         <solrj.version>6.3.0</solrj.version>
+        <elasticsearch.version>5.4.0</elasticsearch.version>
+        <netty-all.version>4.1.7.Final</netty-all.version>
+        <log4j-core.version>2.7</log4j-core.version>
+        <log4j-api.version>2.7</log4j-api.version>
+        <lucene-core.vesrion>6.5.1</lucene-core.vesrion>
+
+        <slf4j.version>1.7.10</slf4j.version>
         <c3p0.version>0.9.1.2</c3p0.version>
-        <hibernate.version>5.2.6.Final</hibernate.version>
         <smile-math.version>1.1.0</smile-math.version>
         <google.gson.version>2.6.2</google.gson.version>
-        <sqlite.version>3.8.11.2</sqlite.version>
-        <jsoup.version>1.10.2</jsoup.version>
+        <jsoup.version>1.10.3</jsoup.version>
         <json-simple.version>1.1.1</json-simple.version>
-        <javax.mail.version>1.5.5</javax.mail.version>
-        <javax.servlet.version>4.0.0-b01</javax.servlet.version>
-        <languagetool.version>3.7</languagetool.version>
-        <akka.scala.version>2.10</akka.scala.version>
-        <akka.version>2.3.5</akka.version>
+        <javax.servlet.version>4.0.0</javax.servlet.version>
+        <knowceanstools.version>1</knowceanstools.version>
+        <wordnettools.vesion>3.0</wordnettools.vesion>
+        <jgrapht.version>1.0.1</jgrapht.version>
     </properties>
     <profiles>
         <profile>
@@ -247,6 +244,11 @@
                     <groupId>org.languagetool</groupId>
                     <artifactId>language-ro</artifactId>
                     <version>${languagetool.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.jgrapht</groupId>
+                    <artifactId>jgrapht-core</artifactId>
+                    <version>${jgrapht.version}</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -354,16 +356,6 @@
     </profiles>
     <dependencies>
         <dependency>
-            <groupId>org</groupId>
-            <artifactId>knowceans-tools</artifactId>
-            <version>1</version>
-        </dependency>
-        <dependency>
-            <groupId>vu.wntools</groupId>
-            <artifactId>WordnetTools</artifactId>
-            <version>3</version>
-        </dependency>
-        <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
             <version>${coreNLP.version}</version>
@@ -383,7 +375,12 @@
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-dev</artifactId>
-            <version>3.9.0</version>
+            <version>3.9.1</version>
+        </dependency>
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>multiLayerPerceptrons</artifactId>
+            <version>${weka.multiLayerPerceptrons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -443,6 +440,11 @@
             <version>${gephi.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.datumbox</groupId>
+            <artifactId>libsvm</artifactId>
+            <version>${svm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
             <version>${hibernate.version}</version>
@@ -489,22 +491,6 @@
             <version>${sqlite.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-nlp</artifactId>
-            <version>${dl4j.version}</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-nlp-uima</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.extjwnl</groupId>
             <artifactId>extjwnl</artifactId>
             <version>${wordnet.extjwnl.version}</version>
@@ -536,21 +522,16 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-            <version>${javax.mail.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.github.haifengl</groupId>
             <artifactId>smile-math</artifactId>
             <version>${smile-math.version}</version>
             <type>jar</type>
         </dependency>
-        <dependency>
+        <!--        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -562,87 +543,19 @@
             <version>${languagetool.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>knowceans-tools</artifactId>
+            <version>${knowceanstools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>WordnetTools</artifactId>
+            <version>${wordnettools.vesion}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
             <version>${solrj.version}</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.solr/solr-solrj -->
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-solrj</artifactId>
-            <version>6.3.0</version>
-        </dependency>
-
-        <!-- BEGIN akka dependency -->
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_${akka.scala.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-remote_${akka.scala.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-contrib_${akka.scala.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-slf4j_${akka.scala.version}</artifactId>
-            <version>${akka.version}</version>
-        </dependency>
-        <!-- BEGIN akka dependency -->
-
-        <!-- SolrReaderBench -->
-        <dependency>
-            <groupId>com.readerbench</groupId>
-            <artifactId>solr</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <!-- /SolrReaderBench -->
-        <!-- Elasticsearch -->
-        <!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch -->
-        <dependency>
-            <groupId>org.elasticsearch</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>5.4.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.elasticsearch.client/transport -->
-        <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
-            <version>5.4.0</version>
-        </dependency>
-        <!-- Elasticsearch -->
-
-        <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>6.5.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.7</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-
     </dependencies>
 </project>

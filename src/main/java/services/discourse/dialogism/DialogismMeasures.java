@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import data.cscl.Participant;
 import services.commons.VectorAlgebra;
 import services.discourse.CSCL.Collaboration;
 import data.cscl.Conversation;
-import data.cscl.Participant;
 import data.discourse.SemanticChain;
 import java.util.logging.Logger;
 
@@ -221,7 +221,6 @@ public class DialogismMeasures {
             return null;
         }
         double[] evolution = new double[c.getVoices().get(0).getBlockMovingAverage().length];
-
         // take all voices
         for (int i = 0; i < c.getVoices().size(); i++) {
             // for different participants build collaboration based on inter-twined voices
@@ -238,9 +237,129 @@ public class DialogismMeasures {
                     }
                 }
             }
-            break;
         }
         c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
+        return evolution;
+    }
+
+    public static double[] getExtendedCollaborationEvolution(Conversation c) {
+        if (c.getExtendedVoices() == null || c.getExtendedVoices().isEmpty()) {
+            return null;
+        }
+        double[] evolution = new double[c.getExtendedVoices().get(0).getBlockMovingAverage().length];
+        Iterator<Participant> it = c.getParticipants().iterator();
+        List<Participant> lsPart = new ArrayList<>();
+        while (it.hasNext()) {
+            Participant part = it.next();
+            lsPart.add(part);
+        }
+
+        c.setNoConvergentPoints(0);
+        c.setNoDivergentPoints(0);
+        double[][] recurrencePlot = new double[c.getBlocks().size()][c.getBlocks().size()];
+        // take all voices
+        for (int i = 0; i < c.getExtendedVoices().size(); i++) {
+            // for different participants build collaboration based on inter-twined voices
+            for (int p1 = 0; p1 < lsPart.size() - 1; p1++) {
+                for (int p2 = p1 + 1; p2 < lsPart.size(); p2++) {
+                    double[] distribution1 = c.getExtendedParticipantBlockMovingAverage(c.getExtendedVoices().get(i), lsPart.get(p1));
+                    double[] distribution2 = c.getExtendedParticipantBlockMovingAverage(c.getExtendedVoices().get(i), lsPart.get(p2));
+
+                    double[][] mi = VectorAlgebra.recurrencePlot(distribution1, distribution2);
+                    for (int j = 0; j < evolution.length; j++) {
+                        evolution[j] += mi[j][j];
+                    }
+
+                    //build a cumulated recurrence plot
+                    for (int row = 0; row < c.getBlocks().size(); row++) {
+                        for (int col = 0; col < c.getBlocks().size(); col++) {
+                            if (recurrencePlot[row][col] == 0)
+                                recurrencePlot[row][col] += mi[row][col];
+                        }
+                    }
+                }
+            }
+        }
+
+        //determine the rqa indexes
+        int noRecurrencePoints = 0;
+        int noRecurrencePointsOnDiagonal = 0;
+        int[] lengthDiagonalLines = new int[c.getBlocks().size()];
+        int index = 0;
+        int lengthDiagonal = 0;
+        for (int row = 0; row < c.getBlocks().size(); row++) {
+            for (int col = 0; col < c.getBlocks().size(); col++) {
+                if (recurrencePlot[row][col] != 0) {
+                    noRecurrencePoints++;
+                    if (col == row) {
+                        noRecurrencePointsOnDiagonal++;
+                        //start or part of a diagonal line
+                        lengthDiagonal++;
+                    }
+                } else {
+                    //reset the length  of diagonal line because met a nul point
+                    if (col == row) {
+                        if (lengthDiagonal >= 2) {
+                            lengthDiagonalLines[index++] = lengthDiagonal;
+                        }
+                        lengthDiagonal = 0;
+                    }
+                }
+            }
+        }
+
+        int maxLine = -1;
+        int sumLines = 0;
+        double averageLine = 0;
+        int noDiagonalLines = 0;
+        for (int i = 0; i < lengthDiagonalLines.length; i++) {
+            //find the max line
+            if (lengthDiagonalLines[i] > maxLine) {
+                maxLine = lengthDiagonalLines[i];
+            }
+            if (lengthDiagonalLines[i] > 0) {
+                sumLines += lengthDiagonalLines[i];
+                noDiagonalLines++;
+            }
+        }
+        if (noDiagonalLines != 0 )
+            averageLine = sumLines * 1.0 / noDiagonalLines;
+        else averageLine = 0;
+
+
+
+        for (int j = 0; j < evolution.length; j++) {
+            if (evolution[j] > 0) {
+                c.setNoConvergentPoints(c.getNoConvergentPoints() + 1);
+            }
+            else if (evolution[j] < 0) {
+                c.setNoDivergentPoints(c.getNoDivergentPoints() + 1);
+            }
+        }
+
+        c.setRecurrenceRate(noRecurrencePoints * 1.0/ (c.getBlocks().size() * c.getBlocks().size()));
+        if (noRecurrencePoints != 0)
+            c.setDeterminism(noRecurrencePointsOnDiagonal * 1.0 / noRecurrencePoints);
+        else c.setDeterminism(0);
+        c.setConvergenceRate(c.getNoConvergentPoints() * 1.0 / c.getBlocks().size());
+        c.setDivergenceRate(c.getNoDivergentPoints() * 1.0 / c.getBlocks().size());
+        c.setConvergenceOrDivergenceRate((c.getNoConvergentPoints() + c.getNoDivergentPoints()) * 1.0 / c.getBlocks().size());
+        c.setMaxLine(maxLine);
+        c.setAverageLine(averageLine);
+
+        System.out.println("------Recurrence rate: " + c.getRecurrenceRate());
+        System.out.println("------Determinism: " + c.getDeterminism());
+        System.out.println("------Convergent or divergent points/ Total number of utterances: " + c.getConvergenceOrDivergenceRate());
+        System.out.println("------Convergent points/Total number of utterances: " + c.getConvergenceRate());
+        System.out.println("------Divergent points/Total number of utterances: " + c.getDivergenceRate());
+        System.out.println("------Max line: "+ maxLine);
+        System.out.println("------Average line: " + averageLine);
+        System.out.println("------Number of convergent points: " + c.getNoConvergentPoints());
+        System.out.println("------Number of divergent points: " + c.getNoDivergentPoints());
+
+
+        c.setIntenseConvergentZonesVoice(Collaboration.getConvergentZones(evolution));
+        c.setIntenseDivergentZonesVoice(Collaboration.getDivergentZones(evolution));
 
         return evolution;
     }

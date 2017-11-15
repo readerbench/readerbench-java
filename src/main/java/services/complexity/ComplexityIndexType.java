@@ -23,6 +23,7 @@ import services.complexity.dependencies.SyntacticDependenciesFactory;
 import services.complexity.dialogism.DialogismFactory;
 import services.complexity.entityDensity.EntityDensityFactory;
 import services.complexity.readability.ReadabilityFactory;
+import services.complexity.rhythm.RhythmFactory;
 import services.complexity.surface.SurfaceFactory;
 import services.complexity.syntax.SyntaxFactory;
 import services.complexity.wordComplexity.WordComplexityFactory;
@@ -43,7 +44,7 @@ public enum ComplexityIndexType {
     CONNECTIVES(new ConnectivesFactory()),
     COHESION(new CohesionFactory()),
     DIALOGISM(new DialogismFactory()),
-    RHYTHM(null),
+    RHYTHM(new RhythmFactory()),
     SEMANTIC_DEPENDENCIES(new SyntacticDependenciesFactory()),
     WORD_LISTS(new WordListsIndicesFactory());
     

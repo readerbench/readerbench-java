@@ -35,6 +35,13 @@ public class Participant implements Comparable<Participant>, Serializable {
     private double textualComplexityLevel;
     private EnumMap<CSCLIndices, Double> indices;
     private Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices;
+    
+    // added by valentin.sergiu.cioaca@gmail.com
+    private double rhythmicIndexSM;         // Solomon Marcus study
+    private double freqMaxRhythmIndex;
+    private double rhythmicCoefficient;
+    private double chatEntropyForRegularity;
+    
     private ParticipantGroup participantGroup;
 
     public Participant(String name, AbstractDocument d) {
@@ -58,6 +65,40 @@ public class Participant implements Comparable<Participant>, Serializable {
         this.longitudinalIndices = new HashMap<>();
         this.resetIndices();
     }
+
+/*----------------------------------------------------------------------------*/    
+    public void setRhythmicIndex(double rhythmicIndex) {
+        this.rhythmicIndexSM = rhythmicIndex;
+    }
+    
+    public void setRhythmicCoefficient(double rhythmicCoefficient) {
+        this.rhythmicCoefficient = rhythmicCoefficient;
+    }
+
+    public void setChatEntropy(double chatEntropy) {
+        this.chatEntropyForRegularity = chatEntropy;
+    }
+    
+    public void setFreqMaxRhythmIndex(double freqMaxId) {
+        this.freqMaxRhythmIndex = freqMaxId;
+    }
+    
+    public double getRhythmicIndex() {
+        return this.rhythmicIndexSM;
+    }
+    
+    public double getRhythmicCoefficient() {
+        return this.rhythmicCoefficient;
+    }
+    
+    public double getChatEntropy() {
+        return this.chatEntropyForRegularity;
+    }
+    
+    public double getFreqMaxRhythmIndex() {
+        return this.freqMaxRhythmIndex;
+    }
+/*----------------------------------------------------------------------------*/
 
     public String getName() {
         return name;
@@ -140,11 +181,13 @@ public class Participant implements Comparable<Participant>, Serializable {
                 + indices.get(CSCLIndices.ECCENTRICITY) + ", " + participantGroup + "}\n";
     }
 
+    @Override
     public boolean equals(Object obj) {
         Participant p = (Participant) obj;
         return this.getName().equals(p.getName());
     }
 
+    @Override
     public int compareTo(Participant o) {
         return this.getName().compareTo(o.getName());
     }

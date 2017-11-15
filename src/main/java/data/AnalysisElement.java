@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,7 @@ import data.discourse.Keyword;
 import data.sentiment.SentimentEntity;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.Objects;
 import java.util.logging.Logger;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
@@ -53,6 +54,7 @@ public abstract class AnalysisElement implements Serializable {
     private Map<Word, Integer> wordOccurences;
     private double score;
     private double[] voiceDistribution;
+    private double[] extendedVoiceDistribution;
     // specificity score computed for a specific class of topics
 
     private List<Keyword> topics;
@@ -323,6 +325,15 @@ public abstract class AnalysisElement implements Serializable {
         this.voiceDistribution = voiceDistribution;
     }
 
+
+    public double[] getExtendedVoiceDistribution() {
+        return extendedVoiceDistribution;
+    }
+
+    public void setExtendedVoiceDistribution(double[] extendedVoiceDistribution) {
+        this.extendedVoiceDistribution = extendedVoiceDistribution;
+    }
+
     /**
      * @return
      */
@@ -363,13 +374,43 @@ public abstract class AnalysisElement implements Serializable {
     public ISemanticModel getSemanticModel(SimilarityType type) {
         return semanticModels.get(type);
     }
-    
+
     public List<NGram> getBiGrams() {
         return new ArrayList<>();
     }
-    
+
     public List<NGram> getNGrams(int n) {
         return new ArrayList<>();
     }
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + this.index;
+        hash = 71 * hash + Objects.hashCode(this.text);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final AnalysisElement other = (AnalysisElement) obj;
+        if (this.index != other.index) {
+            return false;
+        }
+        if (!Objects.equals(this.text, other.text)) {
+            return false;
+        }
+        return true;
+    }
+
+
 }

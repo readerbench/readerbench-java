@@ -15,7 +15,6 @@
  */
 package services.commons;
 
-import cc.mallet.util.Maths;
 import org.apache.commons.math3.filter.*;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
@@ -24,7 +23,6 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import cc.mallet.util.Maths;
 import java.util.Arrays;
@@ -473,6 +471,17 @@ public class VectorAlgebra {
         }
         return Math.pow(sum, 1d / p);
     }
+    
+    public static double peakOnChatFrame(double[] C) {
+        double E_c = VectorAlgebra.entropy(C);
+        double max = 0;
+        
+        for (double v : C) {
+            if (v > max)
+                max = v;
+        }
+        return (Math.log(C.length) - E_c) * max;
+    }
 
     public static double mean(double[] v1){
         if (v1 == null) {
@@ -515,6 +524,28 @@ public class VectorAlgebra {
         return Math.sqrt(sum);
     }
 
+    public static double[][] recurrencePlot(double[] v1, double[] v2) {
+        if (v1 == null || v2 == null || v1.length != v2.length ) {
+            return null;
+        }
+
+        double[][] plot = new double[v1.length][v1.length];
+        for (int i = 0; i < v1.length; i++) {
+            for (int j = 0; j < v2.length; j++) {
+
+                //convergent point
+                if (v1[i] * v2[j] > 0)
+                    plot[i][j] = 1;
+                //divergent point
+                else if (v1[i] * v2[j] < 0)
+                    plot[i][j] = -1;
+                else
+                    plot[i][j] = 0;
+            }
+        }
+        return plot;
+    }
+
     public static void main(String[] args) {
         double[] v = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
         double[] v1 = {1, 3, 1, 3, 1, 7, 1, 5};
@@ -555,4 +586,5 @@ public class VectorAlgebra {
         System.out.println(Arrays.toString(zScore(v1)));
 
     }
+
 }

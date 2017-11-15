@@ -8,10 +8,9 @@ package runtime.semanticModels;
 import data.AbstractDocument;
 import data.AbstractDocumentTemplate;
 import data.Lang;
-import data.Word;
-import data.discourse.Keyword;
 import data.discourse.SemanticCohesion;
 import data.document.Document;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,9 +28,9 @@ import org.openide.util.Exceptions;
 import services.commons.Formatting;
 import services.semanticModels.DocumentClustering;
 import services.semanticModels.ISemanticModel;
-import services.semanticModels.LDA.LDA;
 import services.semanticModels.LSA.LSA;
 import services.semanticModels.SimilarityType;
+import webService.ReaderBenchServer;
 
 /**
  *
@@ -47,22 +46,18 @@ public class KeywordsClassification {
     private final Lang lang;
     private final boolean usePosTagging;
     private Map<String, String> categories;
-    private Map<String, String> abstractsAnnotations; // manually annotated
-    private Map<String, String> abstractsClassifications; // file name, category
-    private Map<String, String> abstractsTexts; // file name, content
-    
-    private final List<String> acceptedKeywords;
+    private Map<String, String> articlesAnnotations; // manually annotated
+    private Map<String, String> articlesClassifications; // file name, category
+    private Map<String, String> articlesTexts; // file name, content
 
     private Map<String, AbstractDocument> documentsCategories;
-    private Map<String, AbstractDocument> documentsAbstractsClassifications;
-    
-    private Map<String, AbstractDocument> documentKeywordsAbstractsClassifications;
+    private Map<String, AbstractDocument> documentsArticlesClassifications;
+
     private final List<SimilarityType> methods;
 
-    public KeywordsClassification(String abstractsPath, String categoriesPath, List<String> acceptedKeywords, List<ISemanticModel> semanticModels, Lang lang, boolean usePosTagging, List<SimilarityType> methods) {
+    public KeywordsClassification(String abstractsPath, String categoriesPath, List<ISemanticModel> semanticModels, Lang lang, boolean usePosTagging, List<SimilarityType> methods) {
         this.abstractsPath = abstractsPath;
         this.categoriesPath = categoriesPath;
-        this.acceptedKeywords = acceptedKeywords;
         this.semanticModels = semanticModels;
         this.lang = lang;
         this.usePosTagging = usePosTagging;
@@ -91,10 +86,10 @@ public class KeywordsClassification {
         }
     }
 
-    private void extractAbstracts(boolean ignoreAbstractsFirstLine) {
-        abstractsAnnotations = new HashMap<>();
-        abstractsClassifications = new HashMap<>();
-        abstractsTexts = new HashMap<>();
+    private void extractArticles(boolean ignoreArticlesFirstLine) {
+        articlesAnnotations = new HashMap<>();
+        articlesClassifications = new HashMap<>();
+        articlesTexts = new HashMap<>();
         try {
             Files.walk(Paths.get(abstractsPath)).forEach((Path filePath) -> {
                 String fileExtension = FilenameUtils.getExtension(filePath.getFileName().toString());
@@ -105,16 +100,16 @@ public class KeywordsClassification {
                         StringBuilder sb = new StringBuilder();
                         for (String line : lines) {
                             k++;
-                            if (ignoreAbstractsFirstLine && k == 1) {
+                            if (ignoreArticlesFirstLine && k == 1) {
                                 continue;
                             }
                             sb.append(line).append("\n");
-                        }                        
+                        }
                         String fileName = filePath.getFileName().toString();
                         String categoryLetter = fileName.substring(0, 1);
-                        abstractsAnnotations.put(filePath.getFileName().toString(), categoryLetter);
-                        abstractsClassifications.put(filePath.getFileName().toString(), "Z");
-                        abstractsTexts.put(filePath.getFileName().toString(), sb.toString());
+                        articlesAnnotations.put(filePath.getFileName().toString(), categoryLetter);
+                        articlesClassifications.put(filePath.getFileName().toString(), "Z");
+                        articlesTexts.put(filePath.getFileName().toString(), sb.toString());
                     } catch (IOException ex) {
                         Exceptions.printStackTrace(ex);
                     }
@@ -125,63 +120,52 @@ public class KeywordsClassification {
         }
     }
 
-    private void buildDocuments() {
-        buildCategoriesDocuments();
-        buildAbstractsDocument();
-    }
-
-    private void buildCategoriesDocuments() {
+    private void buildCategoriesDocuments(boolean useSerialized) {
         LOGGER.info("Building documents of categories");
         documentsCategories = new HashMap<>();
-        for (Map.Entry<String, String> category : categories.entrySet()) {
-            AbstractDocumentTemplate templateCategory = AbstractDocumentTemplate.getDocumentModel(category.getValue());
-            AbstractDocument documentCategory = new Document(category.getKey(), templateCategory, semanticModels, lang, usePosTagging);
-            documentsCategories.put(category.getKey(), documentCategory);
-        }
-    }
-
-    private void buildAbstractsDocument() {
-        LOGGER.info("Building documents of abstracts");
-        documentsAbstractsClassifications = new HashMap<>();
-        double percentage;
-        int index = 0;
-        for (String abstractFile : abstractsClassifications.keySet()) {
-            percentage = index++ / abstractsClassifications.size() * 100;
-            LOGGER.log(Level.INFO, "Building document for abstract {0} (" + percentage + "%" + ")", abstractFile);
-            AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(abstractsTexts.get(abstractFile));
-            AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
-            documentsAbstractsClassifications.put(abstractFile, documentAbstract);
-        }
-    }
-    
-    private void buildKeywordsDocument() {
-        LOGGER.info("Building documents of abstracts");
-        documentKeywordsAbstractsClassifications = new HashMap<>();
-        double percentage;
-        int index = 0;
-        for (String abstractFile : abstractsClassifications.keySet()) {
-            percentage = index++ / abstractsClassifications.size() * 100;
-            LOGGER.log(Level.INFO, "Building keywords document for abstract {0} (" + percentage + "%" + ")", abstractFile);
-            StringBuilder sb = new StringBuilder();
-            List<Keyword> keywords = documentsAbstractsClassifications.get(abstractFile).getTopics();
-            for (Keyword keyword : keywords) {
-                // add here condition to include if only in relevant keywords list
-                if (keyword.getElement() instanceof Word) {
-                    if (this.acceptedKeywords.contains(keyword.getWord().toString())) {
-                        sb.append(keyword.getWord().toString()).append(" ");
-                    }
+        if (useSerialized) {
+            File dir = new File(categoriesPath);
+            if (!dir.exists()) {
+                throw new RuntimeException("Inexistent Folder: " + dir.getPath());
+            }
+            File[] files = dir.listFiles((File pathname) -> {
+                return pathname.getName().toLowerCase().endsWith(".ser");
+            });
+            for (File file : files) {
+                Document d = null;
+                try {
+                    d = (Document) AbstractDocument.loadSerializedDocument(file.getPath());
+                    documentsCategories.put(file.getName().substring(0, 1), d);
+                } catch (IOException | ClassNotFoundException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             }
-            AbstractDocumentTemplate templateKeywords = AbstractDocumentTemplate.getDocumentModel(sb.toString());
-            AbstractDocument documentKeywords = new Document(abstractFile, templateKeywords, semanticModels, lang, usePosTagging);
-            documentKeywordsAbstractsClassifications.put(abstractFile, documentKeywords);
-        }
-        for (String abstractFile : abstractsClassifications.keySet()) {
-            LOGGER.log(Level.INFO, "Keywords for {0}:{1}", new Object[]{abstractFile, documentKeywordsAbstractsClassifications.get(abstractFile).getText()});
+        } else {
+            for (Map.Entry<String, String> category : categories.entrySet()) {
+                AbstractDocumentTemplate templateCategory = AbstractDocumentTemplate.getDocumentModel(category.getValue());
+                AbstractDocument documentCategory = new Document(category.getKey(), templateCategory, semanticModels, lang, usePosTagging);
+                documentCategory.saveSerializedDocument();
+                documentCategory.save(AbstractDocument.SaveType.SERIALIZED);
+                documentsCategories.put(category.getKey(), documentCategory);
+            }
         }
     }
 
-    private void categorizeAbstracts() {
+    private void buildArticlesDocuments() {
+        LOGGER.info("Building documents of abstracts");
+        documentsArticlesClassifications = new HashMap<>();
+        double percentage;
+        int index = 0;
+        for (String abstractFile : articlesClassifications.keySet()) {
+            percentage = index++ * 1.0 / articlesClassifications.size() * 100;
+            LOGGER.log(Level.INFO, "Building document for article {0} (" + percentage + "%" + ")", abstractFile);
+            AbstractDocumentTemplate templateAbstract = AbstractDocumentTemplate.getDocumentModel(articlesTexts.get(abstractFile));
+            AbstractDocument documentAbstract = new Document(abstractFile, templateAbstract, semanticModels, lang, usePosTagging);
+            documentsArticlesClassifications.put(abstractFile, documentAbstract);
+        }
+    }
+
+    private void categorizeArticles() {
 
         Map<SimilarityType, Integer> matchedAnnotations = new HashMap<>();
         Map<SimilarityType, FileWriter> matchedFiles = new HashMap<>();
@@ -191,7 +175,7 @@ public class KeywordsClassification {
         Integer cohesionMatchedAnnotations;
         FileWriter cohesionMatchedFile;
         LOGGER.info("Generating similarity score matrix...");
-        for (String abstractFile : abstractsClassifications.keySet()) {
+        for (String abstractFile : articlesClassifications.keySet()) {
             similarityScores.put(abstractFile, new HashMap<>());
             for (SimilarityType method : methods) {
                 similarityScores.get(abstractFile).put(method, new HashMap<>());
@@ -212,9 +196,9 @@ public class KeywordsClassification {
             // compute similarity scores
             LOGGER.info("Computing similarity scores...");
             int k = 0;
-            for (String abstractFile : abstractsClassifications.keySet()) {
+            for (String abstractFile : articlesClassifications.keySet()) {
                 k++;
-                AbstractDocument documentKeywords = documentKeywordsAbstractsClassifications.get(abstractFile);
+                AbstractDocument documentKeywords = documentsArticlesClassifications.get(abstractFile);
                 for (SimilarityType method : methods) {
                     for (Map.Entry<String, String> category : categories.entrySet()) {
                         AbstractDocument documentCategory = documentsCategories.get(category.getKey());
@@ -227,29 +211,29 @@ public class KeywordsClassification {
                 LOGGER.log(Level.INFO, "Gathering maximum similarity score for abstract no {0}...", k);
                 for (SimilarityType method : methods) {
                     Map.Entry<String, Double> maxSimilarityScore = Collections.max(similarityScores.get(abstractFile).get(method).entrySet(), Map.Entry.comparingByValue());
-                    LOGGER.log(Level.INFO, "Abstract [{0}]: {1} - {2}", new Object[]{method.getAcronym(), abstractsAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
-                    matchedFiles.get(method).write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
-                    if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
+                    LOGGER.log(Level.INFO, "Abstract [{0}]: {1} - {2}", new Object[]{method.getAcronym(), articlesAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
+                    matchedFiles.get(method).write("(" + articlesAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(articlesAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
+                    if (maxSimilarityScore.getKey().compareTo(articlesAnnotations.get(abstractFile)) == 0) {
                         matchedAnnotations.put(method, matchedAnnotations.get(method) + 1);
                     }
                 }
                 Map.Entry<String, Double> maxSimilarityScore = Collections.max(cohesionScores.get(abstractFile).entrySet(), Map.Entry.comparingByValue());
-                LOGGER.log(Level.INFO, "Abstract [cohesion]: {0} - {1}", new Object[]{abstractsAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
-                cohesionMatchedFile.write("(" + abstractsAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
-                if (maxSimilarityScore.getKey().compareTo(abstractsAnnotations.get(abstractFile)) == 0) {
+                LOGGER.log(Level.INFO, "Abstract [cohesion]: {0} - {1}", new Object[]{articlesAnnotations.get(abstractFile), maxSimilarityScore.getKey()});
+                cohesionMatchedFile.write("(" + articlesAnnotations.get(abstractFile) + ", " + maxSimilarityScore.getKey() + ") " + ((maxSimilarityScore.getKey().compareTo(articlesAnnotations.get(abstractFile)) == 0) ? "1" : "0") + "\n");
+                if (maxSimilarityScore.getKey().compareTo(articlesAnnotations.get(abstractFile)) == 0) {
                     cohesionMatchedAnnotations++;
                 }
             }
             // print detection percentages to dedicated files for each semantic model and close the files
             LOGGER.info("Printing final detection percentage rates...");
             for (SimilarityType method : methods) {
-                Double score = matchedAnnotations.get(method) * 1.0 / abstractsAnnotations.size();
-                matchedFiles.get(method).write("Total matched: " + matchedAnnotations.get(method) + " of " + abstractsAnnotations.size() + "\n");
+                Double score = matchedAnnotations.get(method) * 1.0 / articlesAnnotations.size();
+                matchedFiles.get(method).write("Total matched: " + matchedAnnotations.get(method) + " of " + articlesAnnotations.size() + "\n");
                 matchedFiles.get(method).write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
                 matchedFiles.get(method).close();
             }
-            Double score = cohesionMatchedAnnotations * 1.0 / abstractsAnnotations.size();
-            cohesionMatchedFile.write("Total matched: " + cohesionMatchedAnnotations + " of " + abstractsAnnotations.size() + "\n");
+            Double score = cohesionMatchedAnnotations * 1.0 / articlesAnnotations.size();
+            cohesionMatchedFile.write("Total matched: " + cohesionMatchedAnnotations + " of " + articlesAnnotations.size() + "\n");
             cohesionMatchedFile.write("Detection percentage: " + Formatting.formatNumber(score) + "\n");
             cohesionMatchedFile.close();
         } catch (IOException ex) {
@@ -257,7 +241,7 @@ public class KeywordsClassification {
         }
     }
 
-    private void clusterizeAbstracts(int noCats) {
+    private void clusterizeArticles(int noCats) {
 
         Map<ISemanticModel, FileWriter> clusterFiles = new HashMap<>();
         Map<ISemanticModel, DocumentClustering> dc = new HashMap<>();
@@ -265,17 +249,17 @@ public class KeywordsClassification {
         try {
             // generate output files - one for each semantic model
             LOGGER.info("Generating output files...");
-            List<AbstractDocument> docs = new ArrayList<>(documentsAbstractsClassifications.values());
+            List<AbstractDocument> docs = new ArrayList<>(documentsArticlesClassifications.values());
             LOGGER.log(Level.INFO, "{0} docs available", docs.size());
             LOGGER.log(Level.INFO, "{0} semantic models", semanticModels.size());
             for (ISemanticModel model : semanticModels) {
                 LOGGER.log(Level.INFO, "Creating file for {0}", model.getType().getAcronym());
-                clusterFiles.put(model, new FileWriter(abstractsPath + "/" + model.getType().getAcronym() + "_keywords.cluster"));
+                clusterFiles.put(model, new FileWriter(abstractsPath + "/" + model.getType().getAcronym() + ".cluster"));
                 dc.put(model, new DocumentClustering(model));
                 LOGGER.log(Level.INFO, "Performing clustering for {0}", model.getType().getAcronym());
                 dc.get(model).performKMeansClustering(docs, noCats);
                 LOGGER.log(Level.INFO, "Found {0} clustroids", dc.get(model).getClustroids().size());
-                
+
                 LOGGER.log(Level.INFO, "Printing clusters to file {0}", model.getType().getAcronym());
                 for (int i = 0; i < dc.get(model).getClustroids().size(); i++) {
                     LOGGER.log(Level.INFO, "Printing cluster {0}", (i + 1));
@@ -284,8 +268,7 @@ public class KeywordsClassification {
                         LOGGER.log(Level.INFO, "Checking whether document {0} is clustroid.", d.getPath());
                         if (dc.get(model).getClustroids().contains(d)) {
                             clusterFiles.get(model).write("(" + d.getPath() + ")\n");
-                        }
-                        else {
+                        } else {
                             clusterFiles.get(model).write(d.getPath() + "\n");
                         }
                     }
@@ -297,28 +280,6 @@ public class KeywordsClassification {
         }
     }
 
-    private void process(boolean ignoreAbstractsFirstLine) {
-        LOGGER.info("Extracting categories...");
-        extractCategories();
-        //LOGGER.info(categoriesToString());
-        //LOGGER.info("Number of categories: " + categories.size());
-        LOGGER.info("Extracting abstracts...");
-        extractAbstracts(ignoreAbstractsFirstLine);
-        //LOGGER.info(abstractsToString());
-        //LOGGER.info("Number of abstracts: " + abstractsAnnotations.size());
-        LOGGER.info("Building documents...");
-        buildDocuments();
-        LOGGER.info("Categorizing abstracts...");
-        categorizeAbstracts();
-    }
-
-    private void performClustering(boolean ignoreAbstractsFirstLine, int noClusters) {
-        extractAbstracts(ignoreAbstractsFirstLine);
-        buildAbstractsDocument();
-        buildKeywordsDocument();
-        //clusterizeAbstracts(noClusters);
-    }
-
     private String categoriesToString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Categories:").append("\n");
@@ -328,18 +289,31 @@ public class KeywordsClassification {
         return sb.toString();
     }
 
-    private String abstractsToString() {
+    private String articlesToString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Abstracts:").append("\n");
-        for (Map.Entry<String, String> entry : abstractsAnnotations.entrySet()) {
+        for (Map.Entry<String, String> entry : articlesAnnotations.entrySet()) {
             sb.append(entry.getKey()).append(": ").append(entry.getValue())
-                    .append(", ").append(abstractsClassifications.get(entry.getKey()))
+                    .append(", ").append(articlesClassifications.get(entry.getKey()))
+                    .append("\n");
+        }
+        return sb.toString();
+    }
+
+    private String keywordsToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Abstracts:").append("\n");
+        for (Map.Entry<String, String> entry : articlesClassifications.entrySet()) {
+            sb.append(entry.getKey()).append(": ")
+                    .append(documentsArticlesClassifications.get(entry.getKey()).getText())
                     .append("\n");
         }
         return sb.toString();
     }
 
     public static void main(String args[]) {
+        ReaderBenchServer.initializeDB();
+
         List<ISemanticModel> semanticModels = new ArrayList<>();
         Lang lang = Lang.en;
         semanticModels.add(LSA.loadLSA("resources/config/EN/LSA/SciRef", lang));
@@ -354,92 +328,29 @@ public class KeywordsClassification {
 //        methods.add(SimilarityType.PATH_SIM);
         //methods.add(SimilarityType.WORD2VEC);
 
-        boolean ignoreAbstractsFirstLine = false;
-        
-        List<String> keywords = new ArrayList<>();
-        keywords.add("supply");
-keywords.add("reserve");
-keywords.add("clean");
-keywords.add("hybrid");
-keywords.add("clickthrough");
-keywords.add("miss");
-keywords.add("browse");
-keywords.add("regard");
-keywords.add("insert");
-keywords.add("multicast");
-keywords.add("shift");
-keywords.add("relax");
-keywords.add("overload");
-keywords.add("stream");
-keywords.add("quantify");
-keywords.add("delete");
-keywords.add("primitive");
-keywords.add("facilitate");
-keywords.add("degrade");
-keywords.add("leverage");
-keywords.add("virtual");
-keywords.add("conflict");
-keywords.add("attack");
-keywords.add("click");
-keywords.add("middleware");
-keywords.add("finish");
-keywords.add("appeal");
-keywords.add("secure");
-keywords.add("multiagent");
-keywords.add("preserve");
-keywords.add("forward");
-keywords.add("unify");
-keywords.add("substitute");
-keywords.add("ignore");
-keywords.add("stop");
-keywords.add("subject");
-keywords.add("switch");
-keywords.add("embed");
-keywords.add("keyword");
-keywords.add("wireless");
-keywords.add("span");
-keywords.add("academic");
-keywords.add("remark");
-keywords.add("sound");
-keywords.add("randomise");
-keywords.add("testbed");
-keywords.add("transmit");
-keywords.add("hash");
-keywords.add("waste");
-keywords.add("judge");
-keywords.add("decentralize");
-keywords.add("cache");
-keywords.add("break");
-keywords.add("fall");
-keywords.add("digital");
-keywords.add("dataset");
-keywords.add("queue");
-keywords.add("reverse");
-keywords.add("encounter");
-keywords.add("fine");
-keywords.add("shape");
-keywords.add("electronic");
-keywords.add("reward");
-keywords.add("project");
-keywords.add("collaborative");
-keywords.add("spend");
-keywords.add("american");
-keywords.add("sensor");
-keywords.add("impose");
-keywords.add("operate");
-keywords.add("combinatorial");
-keywords.add("bear");
-keywords.add("advertise");
-keywords.add("remote");
-keywords.add("hide");
-keywords.add("discount");
-keywords.add("trigger");
-keywords.add("economic");
-keywords.add("boolean");
-keywords.add("client");
-        KeywordsClassification ac = new KeywordsClassification("resources/in/SciCorefCorpus/fulltexts", "resources/in/SciCorefCorpus/categories", keywords, semanticModels, lang, true, methods);
-//        ac.process(ignoreAbstractsFirstLine);
-        ac.performClustering(ignoreAbstractsFirstLine, 4);
+        boolean ignoreArticlesFirstLine = false;
+
+        KeywordsClassification ac = new KeywordsClassification("resources/in/SciCorefCorpus/keywords", "resources/in/SciCorefCorpus/categories", semanticModels, lang, true, methods);
+
+        // build categories documents
+        LOGGER.info("Extracting categories...");
+        ac.extractCategories();
+        LOGGER.info("Building categories documents...");
+        ac.buildCategoriesDocuments(false);
+        LOGGER.info(ac.categoriesToString());
+        LOGGER.log(Level.INFO, "Number of categories: {0}", ac.categories.size());
+
+        // build articles documents
+        LOGGER.info("Extracting articles...");
+        ac.extractArticles(ignoreArticlesFirstLine);
+        LOGGER.info("Building articles documents...");
+        ac.buildArticlesDocuments();
+        LOGGER.info(ac.articlesToString());
+        LOGGER.log(Level.INFO, "Number of articles: {0}", ac.articlesAnnotations.size());
+
+//        LOGGER.info("Categorizing abstracts...");
+//        ac.categorizeArticles();
+        ac.clusterizeArticles(4);
     }
 
 }

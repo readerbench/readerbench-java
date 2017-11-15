@@ -197,7 +197,7 @@ public class SearchSimilarityView extends JFrame {
         contents.getBlocks().add(block);
 
         this.query = new Document(null, contents, docs.get(0).getSemanticModels(), docs.get(0).getLanguage(), true);
-        this.query.computeAll(true);
+        this.query.computeAll(true, false);
         this.query.setTitleText(query);
 
         this.computeSimilarTopics();

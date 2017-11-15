@@ -34,7 +34,11 @@ public enum CSCLIndices {
 	AVERAGE_LENGTH_NEW_THREADS(false, false),
 	NEW_THREADS_OVERALL_SCORE(false, false),
 	NEW_THREADS_INTER_ANIMATION_DEGREE(false, false),
-	NEW_THREADS_CUMULATIVE_SOCIAL_KB(false, false);
+	NEW_THREADS_CUMULATIVE_SOCIAL_KB(false, false),
+	PERSONAL_REGULARITY_ENTROPY(false, false),
+	RHYTHMIC_INDEX(false, false),
+	FREQ_MAX_INDEX(false, false),
+	RHYTHMIC_COEFFICIENT(false, false);
 
 	private final boolean isUsedForTimeModeling;
 	private final boolean isIndividualStatsIndex;
@@ -57,6 +61,6 @@ public enum CSCLIndices {
 	}
 
 	public String getAcronym() {
-		return ResourceBundle.getBundle("utils.localization.CSCL_indices_acro").getString(this.name());
+		return ResourceBundle.getBundle("utils.localization.CSCL_indices_acronyms").getString(this.name());
 	}
 }

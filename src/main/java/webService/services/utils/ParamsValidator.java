@@ -5,6 +5,9 @@
  */
 package webService.services.utils;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,10 +27,21 @@ public class ParamsValidator {
      */
     public static Set<String> checkRequiredParams(Set<String> requiredParams, Set<String> params) {
         requiredParams.removeAll(params);
-        if (requiredParams.size() > 1) {
+        if (requiredParams.size() >= 1) {
             return requiredParams;
         }
         return null;
+    }
+    
+    public static Set<String> checkEmptyParams(Map<String, String> params) {
+        Set<String> emptyParams = new HashSet<>();
+        Iterator it = params.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            System.out.println(pair.getKey() + " = " + pair.getValue());
+            if (pair.getValue().toString().isEmpty()) emptyParams.add(pair.getKey().toString());
+        }
+        return emptyParams;
     }
 
     /**
@@ -43,6 +57,12 @@ public class ParamsValidator {
         StringBuilder sb = new StringBuilder();
         sb.append("Missing required parameters: ");
         sb.append(String.join(", ", requiredParamsMissing));
+        return sb.toString();
+    }
+    
+    public static String errorNoParams() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("No parameters set.");
         return sb.toString();
     }
 

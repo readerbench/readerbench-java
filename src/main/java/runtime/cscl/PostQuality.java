@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
+import services.commons.Formatting;
 import services.complexity.ComplexityIndex;
 import services.complexity.ComplexityIndices;
 import services.complexity.DataGathering;
@@ -71,7 +72,7 @@ public class PostQuality {
             concat.append(",").append(simplifiedConversation.getNoWords());
             concat.append(",").append(simplifiedConversation.getNoContentWords());
             for (ComplexityIndex factor : ComplexityIndices.getIndices(simplifiedConversation.getLanguage())) {
-                concat.append(",").append(simplifiedConversation.getComplexityIndices().get(factor));
+                concat.append(",").append(Formatting.formatNumber(simplifiedConversation.getComplexityIndices().get(factor)));
             }
             out.write(concat.toString());
         } catch (IOException ex) {

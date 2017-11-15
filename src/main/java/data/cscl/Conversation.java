@@ -63,6 +63,7 @@ import services.discourse.dialogism.DialogismComputations;
 import services.discourse.dialogism.DialogismMeasures;
 import services.discourse.keywordMining.KeywordModeling;
 import services.nlp.parsing.Parsing;
+import services.nlp.spellchecking.Spellchecking;
 import services.semanticModels.ISemanticModel;
 import services.semanticModels.SimilarityType;
 
@@ -73,11 +74,16 @@ import services.semanticModels.SimilarityType;
 public class Conversation extends AbstractDocument {
 
     private static final long serialVersionUID = 2096182930189552475L;
+    private static Spellchecking spellChecker = new Spellchecking();
 
     private List<Participant> participants;
+    private transient List<Participant> selectedParticipants;
+
     private double[][] participantContributions;
     private List<CollaborationZone> intenseCollabZonesSocialKB;
     private List<CollaborationZone> intenseCollabZonesVoice;
+    private List<CollaborationZone> intenseConvergentZonesVoice;
+    private List<CollaborationZone> intenseDivergentZonesVoice;
     private List<CollaborationZone> annotatedCollabZones;
     private double quantCollabPercentage;
     private double socialKBPercentage;
@@ -86,6 +92,7 @@ public class Conversation extends AbstractDocument {
     private double[] socialKBEvolution;
     // determine the distribution throughout the conversation of voice PMI
     private double[] voicePMIEvolution;
+    private double[] voiceExtendedEvolution;
     // determine the distribution of collaboration from annotations throughout the conversation
     private double[] annotatedCollabEvolution;
 
@@ -205,7 +212,9 @@ public class Conversation extends AbstractDocument {
                                         }
                                     }
                                 }
+
                                 String text = el.getFirstChild().getNodeValue();
+                                text = spellChecker.checkText(text, lang, "");
                                 block.setContent(text);
                                 if (text.length() > 0
                                         && !el.getFirstChild().getNodeValue().trim().equals("joins the room")
@@ -437,9 +446,32 @@ public class Conversation extends AbstractDocument {
      * @param p
      * @return
      */
+    public double[] getExtendedParticipantBlockDistribution(SemanticChain voice, Participant p) {
+        double[] distribution = new double[voice.getExtendedBlockDistribution().length];
+        for (int i = 0; i < getBlocks().size(); i++) {
+            if (getBlocks().get(i) != null && ((Utterance) getBlocks().get(i)).getParticipant().equals(p)) {
+                distribution[i] = voice.getExtendedBlockDistribution()[i];
+            }
+        }
+        return distribution;
+    }
+    /**
+     * @param voice
+     * @param p
+     * @return
+     */
     public double[] getParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getParticipantBlockDistribution(voice, p);
+        return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
+    }
 
+    /**
+     * @param voice
+     * @param p
+     * @return
+     */
+    public double[] getExtendedParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
+        double[] distribution = getExtendedParticipantBlockDistribution(voice, p);
         return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
     }
 
@@ -447,15 +479,16 @@ public class Conversation extends AbstractDocument {
      * @param computeDialogism
      */
     @Override
-    public void computeAll(boolean computeDialogism) {
-        super.computeAll(computeDialogism);
+    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+        super.computeAll(computeDialogism, useBigrams);
 
         this.getParticipants().stream().forEach((p) -> {
-            KeywordModeling.determineKeywords(p.getContributions());
+            KeywordModeling.determineKeywords(p.getContributions(), useBigrams);
         });
 
         Collaboration.evaluateSocialKB(this);
         setVoicePMIEvolution(DialogismMeasures.getCollaborationEvolution(this));
+        setVoiceExtendedEvolution(DialogismMeasures.getExtendedCollaborationEvolution(this));
         // Collaboration.printIntenseCollabZones(this);
 
         DialogismComputations.determineParticipantInterAnimation(this);
@@ -465,6 +498,10 @@ public class Conversation extends AbstractDocument {
         ParticipantEvaluation.evaluateInvolvement(this);
         ParticipantEvaluation.performSNA(this);
         ParticipantEvaluation.evaluateUsedConcepts(this);
+        
+//        ParticipantEvaluation.extractRhythmicIndex(this);
+//        ParticipantEvaluation.extractRhythmicCoefficient(this);
+//        ParticipantEvaluation.computeEntropyForRegularityMeasure(this);
     }
 
     public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
@@ -492,10 +529,10 @@ public class Conversation extends AbstractDocument {
             Exceptions.printStackTrace(ex);
         }
     }
-    
+
     public List<Utterance> getAllChildrenOfAnUtterance(Utterance u) {
         List<Utterance> children = new ArrayList<>();
-        
+
         for (Participant participant : this.participants) {
             for (Block b : participant.getContributions().getBlocks()) {
                 Utterance utterance = (Utterance) b;
@@ -505,7 +542,7 @@ public class Conversation extends AbstractDocument {
                 }
             }
         }
-        
+
         return children;
     }
 
@@ -662,6 +699,22 @@ public class Conversation extends AbstractDocument {
         this.intenseCollabZonesVoice = intenseCollabZonesVoice;
     }
 
+    public List<CollaborationZone> getIntenseConvergentZonesVoice() {
+        return intenseConvergentZonesVoice;
+    }
+
+    public void setIntenseConvergentZonesVoice(List<CollaborationZone> intenseConvergentZonesVoice) {
+        this.intenseConvergentZonesVoice = intenseConvergentZonesVoice;
+    }
+
+    public List<CollaborationZone> getIntenseDivergentZonesVoice() {
+        return intenseDivergentZonesVoice;
+    }
+
+    public void setIntenseDivergentZonesVoice(List<CollaborationZone> intenseDivergentZonesVoice) {
+        this.intenseDivergentZonesVoice = intenseDivergentZonesVoice;
+    }
+
     /**
      * @return
      */
@@ -746,6 +799,14 @@ public class Conversation extends AbstractDocument {
         this.voicePMIEvolution = voicePMIEvolution;
     }
 
+    public double[] getVoiceExtendedEvolution() {
+        return voiceExtendedEvolution;
+    }
+
+    public void setVoiceExtendedEvolution(double[] voiceExtendedEvolution) {
+        this.voiceExtendedEvolution = voiceExtendedEvolution;
+    }
+
     /**
      * @return
      */
@@ -759,4 +820,13 @@ public class Conversation extends AbstractDocument {
     public void setAnnotatedCollabEvolution(double[] annotatedCollabEvolution) {
         this.annotatedCollabEvolution = annotatedCollabEvolution;
     }
+
+    public List<Participant> getSelectedParticipants() {
+        return selectedParticipants;
+    }
+
+    public void setSelectedParticipants(List<Participant> selectedParticipants) {
+        this.selectedParticipants = selectedParticipants;
+    }
+
 }

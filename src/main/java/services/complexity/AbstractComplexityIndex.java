@@ -51,6 +51,13 @@ public abstract class AbstractComplexityIndex extends ComplexityIndex {
         this.countFunction = countFunction;
     }    
     
-
+    public IndexLevel getLevel() {
+        for (IndexLevel level : IndexLevel.values()) {
+            if (streamFunction == Functions.streamOf(level)) {
+                return level;
+            }
+        }
+        return null;
+    }
     
 }

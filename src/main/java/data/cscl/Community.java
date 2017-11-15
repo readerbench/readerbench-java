@@ -51,7 +51,7 @@ import services.discourse.cohesion.CohesionGraph;
 import services.discourse.keywordMining.KeywordModeling;
 import services.processing.SerialProcessing;
 import view.widgets.cscl.ParticipantInteractionView;
-import view.widgets.document.corpora.PaperConceptView;
+import view.widgets.document.corpora.DocConceptView;
 import webService.result.ResultvCoP;
 import webService.services.vCoP.CommunityInteraction;
 
@@ -290,8 +290,12 @@ public class Community extends AnalysisElement {
 
         if (useTextualComplexity) {
 
+            LOGGER.log(Level.INFO, participants.toString());
             // determine complexity indices
             for (Participant p : participants) {
+                LOGGER.log(Level.INFO, p.toString());
+                LOGGER.log(Level.INFO, p.getSignificantContributions().toString());
+
                 // establish minimum criteria
                 int noContentWords = 0;
                 for (Block b : p.getSignificantContributions().getBlocks()) {
@@ -597,7 +601,7 @@ public class Community extends AnalysisElement {
 
     public void generateConceptView(String path) {
         EventQueue.invokeLater(() -> {
-            PaperConceptView conceptView = new PaperConceptView(KeywordModeling.getCollectionTopics(documents), path);
+            DocConceptView conceptView = new DocConceptView(KeywordModeling.getCollectionTopics(documents), path);
             conceptView.setVisible(true);
         });
     }
@@ -963,7 +967,7 @@ public class Community extends AnalysisElement {
     }
 
     public static void processAllFolders(String folder, Lang lang, String prefix, boolean needsAnonymization,
-            boolean restartProcessing, String pathToLSA, String pathToLDA, boolean usePOSTagging,
+            boolean restartProcessing, String pathToLSA, String pathToLDA, String pathToWord2Vec, boolean usePOSTagging,
             boolean useTextualComplexity, boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
             boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         File dir = new File(folder);
@@ -979,7 +983,7 @@ public class Community extends AnalysisElement {
                             checkpoint.delete();
                         }
                     }
-                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, lang, usePOSTagging,
+                    SerialProcessing.processCorpus(f.getAbsolutePath(), pathToLSA, pathToLDA, pathToWord2Vec, lang, usePOSTagging,
                             true, true, SaveType.SERIALIZED_AND_CSV_EXPORT);
                     Community.processDocumentCollection(f.getAbsolutePath(), lang, needsAnonymization, useTextualComplexity,
                             exportIntoCsv, generateParticipantView, generateParticipantViewD3, generateParticipantViewSubCommunities, generateConceptView,

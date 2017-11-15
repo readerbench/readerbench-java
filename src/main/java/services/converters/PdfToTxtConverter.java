@@ -15,6 +15,7 @@
  */
 package services.converters;
 
+import data.CVStructure;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,12 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.StreamSupport;
 import org.apache.commons.io.FileUtils;
@@ -39,8 +35,6 @@ import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
-import org.apache.pdfbox.text.PDFTextStripper;
-import org.apache.pdfbox.text.TextPosition;
 import org.openide.util.Exceptions;
 
 public class PdfToTxtConverter {
@@ -187,7 +181,7 @@ public class PdfToTxtConverter {
      */
     public void process() {
         PDFParser pdfParser;
-        PDFTextStripper pdfStripper;
+        CVPDFTextStripper pdfStripper;
         PDDocument pdDoc = null;
         COSDocument cosDoc = null;
         File tmpFile;
@@ -215,42 +209,18 @@ public class PdfToTxtConverter {
             }
             
             pdfParser = new PDFParser(new RandomAccessBufferedFileInputStream(new FileInputStream(tmpFile)));
-            Map<Double, Integer> charsPerSize;
-            Map<String, Integer> charsPerFont;
             
             try (PrintWriter txtWriter = new PrintWriter(fileName.replace(".pdf", ".txt"), "UTF-8")) {
-                charsPerSize = new HashMap<>();
-                charsPerFont = new HashMap<>();
                 pdfParser.parse();
                 cosDoc = pdfParser.getDocument();
-                
-                pdfStripper = new PDFTextStripper() {
-                    @Override
-                    protected void processTextPosition(TextPosition text) {
-                        String fontName = text.getFont().getName();
-                        if (!charsPerFont.containsKey(fontName)) {
-                            charsPerFont.put(fontName, 1);
-                        } else {
-                            charsPerFont.put(fontName, charsPerFont.get(fontName) + 1);
-                        }
-                        
-                        double fontSize = text.getFontSize();
-                        if (!charsPerSize.containsKey(fontSize)) {
-                            charsPerSize.put(fontSize, 1);
-                        } else {
-                            charsPerSize.put(fontSize, charsPerSize.get(fontSize) + 1);
-                        }
-                        super.processTextPosition(text);
-                    }
-                };
+                pdfStripper = new CVPDFTextStripper();
                 
                 // settings to fix paragraph selection issues
                 pdfStripper.setLineSeparator(" ");
                 pdfStripper.setParagraphEnd("\n");
                 
                 pdDoc = new PDDocument(cosDoc);
-                noPages = pdDoc.getNumberOfPages();
-                
+                noPages = pdDoc.getNumberOfPages();  
                 noImages = 0;
                 for (PDPage page : pdDoc.getPages()) {
                     PDResources pdResources = page.getResources();
@@ -262,13 +232,16 @@ public class PdfToTxtConverter {
                 }
                 
                 ColorTextStripper stripper = new ColorTextStripper(txtWriter);
+                stripper.getText(pdDoc);
                 noColors = stripper.getCharsPerColor().size();
                 parsedText = pdfStripper.getText(pdDoc);
+                noParagraphs = pdfStripper.getCvStructure().getParagraphs();
+                pdfStripper.getCvStructure().getSentences(parsedText);
                 txtWriter.write(parsedText);
             }
 
             Map<String, Integer> simpleFonts = new HashMap<>();
-            Iterator<String> it = charsPerFont.keySet().iterator();
+            Iterator<String> it = pdfStripper.getCharsPerFont().keySet().iterator();
             noBoldChars = 0;
             noItalicChars = 0;
             noBoldItalicChars = 0;
@@ -312,25 +285,25 @@ public class PdfToTxtConverter {
                     }
                 }
                 if (simpleFonts.containsKey(fontNameSimple)) {
-                    simpleFonts.put(fontNameSimple, simpleFonts.get(fontNameSimple) + charsPerFont.get(fontKey));
+                    simpleFonts.put(fontNameSimple, simpleFonts.get(fontNameSimple) + pdfStripper.getCharsPerFont().get(fontKey));
                 } else {
-                    simpleFonts.put(fontNameSimple, charsPerFont.get(fontKey));
+                    simpleFonts.put(fontNameSimple, pdfStripper.getCharsPerFont().get(fontKey));
                 }
 
                 // determine bold, italic and bold italic chars
                 if (fontKey.toLowerCase().contains("bolditalic")) {
-                    noBoldItalicChars += charsPerFont.get(fontKey);
+                    noBoldItalicChars += pdfStripper.getCharsPerFont().get(fontKey);
                 } else if (fontKey.toLowerCase().contains("bold")) {
-                    noBoldChars += charsPerFont.get(fontKey);
+                    noBoldChars += pdfStripper.getCharsPerFont().get(fontKey);
                 } else if (fontKey.toLowerCase().contains("italic")) {
-                    noItalicChars += charsPerFont.get(fontKey);
+                    noItalicChars += pdfStripper.getCharsPerFont().get(fontKey);
                 }
-                noTotalChars += charsPerFont.get(fontKey);
+                noTotalChars += pdfStripper.getCharsPerFont().get(fontKey);
             }
             it.remove();
 
-            noFontTypes = charsPerFont.size();
-            noFontSizes = charsPerSize.size();
+            noFontTypes = pdfStripper.getCharsPerFont().size();
+            noFontSizes = pdfStripper.getCharsPerSize().size();
             noFontTypesSimple = simpleFonts.size();
             if (noTotalChars > 0) pctItalicChars = noItalicChars * 1.0 / noTotalChars;
             else pctItalicChars = 0.0;
@@ -338,9 +311,9 @@ public class PdfToTxtConverter {
             else pctBoldChars = 0.0;
             if (noBoldItalicChars > 0) pctBoldItalicChars = noBoldItalicChars * 1.0 / noBoldItalicChars;
             else pctBoldItalicChars = 0.0;
-            if (charsPerSize.size() > 0) {
-                maxFontSize = Collections.max(charsPerSize.keySet());
-                minFontSize = Collections.min(charsPerSize.keySet());
+            if (pdfStripper.getCharsPerSize().size() > 0) {
+                maxFontSize = Collections.max(pdfStripper.getCharsPerSize().keySet());
+                minFontSize = Collections.min(pdfStripper.getCharsPerSize().keySet());
             } else {
                 maxFontSize = 0.0;
                 minFontSize = 0.0;
@@ -440,8 +413,9 @@ public class PdfToTxtConverter {
             BufferedReader bufferReader = new BufferedReader(new StringReader(lowerParsedText));
             String line;
             while ((line = bufferReader.readLine()) != null) {
+                line.trim();
                 for (String sectionTitle : lowerSectionTitles) {
-                    if(line.contains(sectionTitle)) return true;
+                    if(line.equals(sectionTitle)) return true;
                 }
             }
         } catch (IOException ex) {

@@ -38,6 +38,13 @@ public class Spellchecking {
 
     private List<String> messages = new ArrayList<>();
 
+    /*
+    Spellchecking was designed for self-explanation - you give a text(exactly inputText), and you have to elaborate your
+    thoughts about what you read. From the recommendations from the  spellchecking, it's clear that you want to
+    prioritize words that appear in the original text since they are likely to be referred to.
+    For chat, the inputText is an empty string.
+     */
+
     public String checkText(String text, Lang lang, String inputText) {
         if (text == null || text.length() == 0) {
             return "";

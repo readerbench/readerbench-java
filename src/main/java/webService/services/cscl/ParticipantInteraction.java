@@ -32,7 +32,7 @@ public class ParticipantInteraction {
     public static ResultTopic buildParticipantGraph(Conversation c) {
         List<Participant> participants = new ArrayList<>();
         participants.addAll(c.getParticipants());
-        c.computeAll(true);
+        c.computeAll(true, false);
         double[][] participantContributions = c.getParticipantContributions();
 
         DecimalFormat formatter = new DecimalFormat("#.##");

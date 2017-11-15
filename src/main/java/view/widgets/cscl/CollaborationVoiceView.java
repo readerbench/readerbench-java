@@ -1,4 +1,6 @@
-/* 
+package view.widgets.cscl;
+
+/*
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package view.widgets.cscl;
+
+import javax.swing.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -37,6 +40,7 @@ import data.cscl.CollaborationZone;
 import data.cscl.Conversation;
 
 import javax.swing.JTextField;
+import utils.LocalizationUtils;
 
 public class CollaborationVoiceView extends JFrame {
 
@@ -50,7 +54,7 @@ public class CollaborationVoiceView extends JFrame {
      * Create the frame.
      */
     public CollaborationVoiceView(Conversation chat) {
-        setTitle("ReaderBench - Collaboration as Voice Overlapping");
+        setTitle("ReaderBench - " + LocalizationUtils.getTitle(this.getClass()));
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 650, 550);
         contentPane = new JPanel();
@@ -65,7 +69,7 @@ public class CollaborationVoiceView extends JFrame {
         panelMutualInformation.setLayout(new BorderLayout());
 
         JLabel label = new JLabel(
-                "Automatically identified intense collaboration zones");
+                LocalizationUtils.getLocalizedString(this.getClass(), "label"));
         label.setFont(new Font("SansSerif", Font.BOLD, 12));
 
         JScrollPane scrollPane = new JScrollPane();
@@ -73,7 +77,7 @@ public class CollaborationVoiceView extends JFrame {
                 .setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         JLabel lblOverlap = new JLabel(
-                "Overlap with intense collaboration zones identified through social KB:");
+                LocalizationUtils.getLocalizedString(this.getClass(), "lblOverlap") + ":");
         lblOverlap.setFont(new Font("Lucida Grande", Font.BOLD, 13));
 
         txtOverlap = new JTextField();
@@ -119,24 +123,23 @@ public class CollaborationVoiceView extends JFrame {
                                         .addContainerGap()));
         gl_contentPane.setVerticalGroup(gl_contentPane.createParallelGroup(
                 Alignment.TRAILING).addGroup(
-                        gl_contentPane
-                                .createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(panelMutualInformation,
-                                        GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
-                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                .addComponent(label, GroupLayout.PREFERRED_SIZE, 15,
-                                        GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE,
-                                        73, GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(ComponentPlacement.UNRELATED)
-                                .addComponent(lblOverlap)
-                                .addPreferredGap(ComponentPlacement.RELATED)
-                                .addComponent(txtOverlap, GroupLayout.PREFERRED_SIZE,
-                                        GroupLayout.DEFAULT_SIZE,
-                                        GroupLayout.PREFERRED_SIZE).addContainerGap()));
-
+                gl_contentPane
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(panelMutualInformation,
+                                GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(label, GroupLayout.PREFERRED_SIZE, 15,
+                                GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE,
+                                73, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(lblOverlap)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(txtOverlap, GroupLayout.PREFERRED_SIZE,
+                                GroupLayout.DEFAULT_SIZE,
+                                GroupLayout.PREFERRED_SIZE).addContainerGap()));
         JTextPane textPane = new JTextPane();
         textPane.setText("");
         textPane.setEditable(false);
@@ -150,7 +153,7 @@ public class CollaborationVoiceView extends JFrame {
         Double[][] values = new Double[1][evolution.length];
         double[] columns = new double[evolution.length];
 
-        String[] names = {"Cumulated Contextual Voice Co-Occurrences"};
+        String[] names = {LocalizationUtils.getLocalizedString(this.getClass(), "names")};
 
         for (int i = 0; i < evolution.length; i++) {
             values[0][i] = evolution[i];
@@ -158,11 +161,10 @@ public class CollaborationVoiceView extends JFrame {
         }
 
         EvolutionGraph evolutionGraph = new EvolutionGraph(
-                "Cumulated Contextual Voice Co-Occurrences",
-                "utterance", false, names, values, columns, Color.DARK_GRAY);
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph1"),
+                LocalizationUtils.getLocalizedString(this.getClass(), "evoGraph2"), false, names, values, columns, Color.DARK_GRAY);
 
         panelMutualInformation.add(evolutionGraph.evolution());
-
         for (CollaborationZone zone : chat.getIntenseCollabZonesVoice()) {
             textPane.setText(textPane.getText() + zone.toStringDetailed()
                     + "\n");
@@ -171,7 +173,6 @@ public class CollaborationVoiceView extends JFrame {
         double[] results = Collaboration.overlapCollaborationZones(chat,
                 chat.getIntenseCollabZonesSocialKB(),
                 chat.getIntenseCollabZonesVoice());
-
         txtOverlap.setText("P = "
                 + results[0]
                 + "; R = "
@@ -180,6 +181,6 @@ public class CollaborationVoiceView extends JFrame {
                 + results[2]
                 + "; r = "
                 + VectorAlgebra.pearsonCorrelation(chat.getVoicePMIEvolution(),
-                        chat.getSocialKBEvolution()));
+                chat.getSocialKBEvolution()));
     }
 }

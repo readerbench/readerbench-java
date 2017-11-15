@@ -1,6 +1,7 @@
 package webService.services.cscl.result;
 
 import com.readerbench.solr.entities.cscl.Community;
+
 import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Path;
 import webService.queryResult.QueryResult;
