@@ -72,8 +72,10 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         this.NE = NE;
         setLanguage(lang);
         this.usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
-        this.syllabifiedCMUDict = SyllabifiedCMUDict.getInstance();
-        this.syllables = syllabifiedCMUDict.getDict().get(text.toLowerCase());
+        if (lang == Lang.en) {
+            this.syllabifiedCMUDict = SyllabifiedCMUDict.getInstance();
+            this.syllables = syllabifiedCMUDict.getDict().get(text.toLowerCase());
+        }
     }
 
     private void loadSentimentEntity() {
