@@ -237,12 +237,11 @@ public abstract class AbstractDocument extends AnalysisElement {
             DialogismComputations.determineVoices(this);
             DialogismComputations.determineExtendedVoices(this);
 
-            DialogismComputations.findSentimentUsingContext(this);
-
+//            DialogismComputations.findSentimentUsingContext(this);
             // determine voice distributions & importance
             LOGGER.info("Determine voice distributions & importance");
             DialogismComputations.determineVoiceDistributions(this);
-            DialogismComputations.determineExtendedVoiceDistributions(this);
+//            DialogismComputations.determineExtendedVoiceDistributions(this);
         }
 
         // build coherence graph
@@ -366,7 +365,12 @@ public abstract class AbstractDocument extends AnalysisElement {
             fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
             try (ObjectOutputStream out = new ObjectOutputStream(fos)) {
                 out.writeObject(this);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            } catch (Error ex) {
+                ex.printStackTrace();
             }
+            
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -459,8 +463,7 @@ public abstract class AbstractDocument extends AnalysisElement {
                 out.write(t.getWord().getLemma() + " (");
                 if (t.getElement() instanceof Word) {
                     out.write(t.getWord().getPOS());
-                }
-                else {
+                } else {
                     NGram nGram = (NGram) t.getElement();
                     StringBuilder sb = new StringBuilder();
                     for (Word word : nGram.getWords()) {
@@ -468,9 +471,9 @@ public abstract class AbstractDocument extends AnalysisElement {
                     }
                     String nGramLemmas = sb.toString();
                     sb.setLength(0);
-                    out.write(nGramLemmas.substring(0,nGramLemmas.length()-1));
+                    out.write(nGramLemmas.substring(0, nGramLemmas.length() - 1));
                 }
-                out.write ("),"
+                out.write("),"
                         + Formatting.formatNumber(t.getRelevance()) + ","
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
@@ -575,13 +578,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());

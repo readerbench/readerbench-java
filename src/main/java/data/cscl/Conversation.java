@@ -484,7 +484,7 @@ public class Conversation extends AbstractDocument {
 
         Collaboration.evaluateSocialKB(this);
         setVoicePMIEvolution(DialogismMeasures.getCollaborationEvolution(this));
-        setVoiceExtendedEvolution(DialogismMeasures.getExtendedCollaborationEvolution(this));
+//        setVoiceExtendedEvolution(DialogismMeasures.getExtendedCollaborationEvolution(this));
         // Collaboration.printIntenseCollabZones(this);
 
         DialogismComputations.determineParticipantInterAnimation(this);
