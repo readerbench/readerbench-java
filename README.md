@@ -36,27 +36,27 @@ mvn clean install deploy -P {global, english, french, spanish, german, italian, 
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-all</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-all</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-all" rev="1.0.0">
-    <artifact name="readerbench-core-all" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-all" rev="3.0.0">
+    <artifact name="readerbench-all" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-all', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-all', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-all" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-all" % "3.0.0"
 ```
 
 ### English
@@ -64,27 +64,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-all" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-en</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-en</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-en" rev="1.0.0">
-    <artifact name="readerbench-core-en" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-en" rev="3.0.0">
+    <artifact name="readerbench-en" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-en', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-en', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-en" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-en" % "3.0.0"
 ```
 
 ### French
@@ -92,27 +92,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-en" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-fr</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-fr</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-fr" rev="1.0.0">
-    <artifact name="readerbench-core-fr" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-fr" rev="3.0.0">
+    <artifact name="readerbench-fr" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-fr', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-fr', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-fr" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-fr" % "3.0.0"
 ```
 
 ### Spanish
@@ -120,27 +120,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-fr" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-es</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-es</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-es" rev="1.0.0">
-    <artifact name="readerbench-core-es" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-es" rev="3.0.0">
+    <artifact name="readerbench-es" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-es', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-es', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-es" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-es" % "3.0.0"
 ```
 
 ### German
@@ -148,27 +148,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-es" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-de</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-de</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-de" rev="1.0.0">
-    <artifact name="readerbench-core-de" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-de" rev="3.0.0">
+    <artifact name="readerbench-de" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-de', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-de', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-de" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-de" % "3.0.0"
 ```
 
 ### Italian
@@ -176,27 +176,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-de" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-it</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-it</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-it" rev="1.0.0">
-    <artifact name="readerbench-core-it" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-it" rev="3.0.0">
+    <artifact name="readerbench-it" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-it', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-it', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-it" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-it" % "3.0.0"
 ```
 
 ### Dutch
@@ -204,27 +204,27 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-it" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-nl</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-nl</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-nl" rev="1.0.0">
-    <artifact name="readerbench-core-nl" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-nl" rev="3.0.0">
+    <artifact name="readerbench-nl" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-nl', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-nl', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-nl" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-nl" % "3.0.0"
 ```
 
 ### Romanian
@@ -232,25 +232,25 @@ libraryDependencies += "com.readerbench.core" % "readerbench-core-nl" % "1.0.0"
 * Maven
 ```sh
 <dependency>
-    <groupId>com.readerbench.core</groupId>
-    <artifactId>readerbench-core-ro</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.readerbench</groupId>
+    <artifactId>readerbench-ro</artifactId>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench.core" name="readerbench-core-ro" rev="1.0.0">
-    <artifact name="readerbench-core-ro" ext="jar"/>
+<dependency org="com.readerbench" name="readerbench-ro" rev="3.0.0">
+    <artifact name="readerbench-ro" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench.core', name: 'readerbench-core-ro', version: '1.0.0')
+compile(group: 'com.readerbench', name: 'readerbench-ro', version: '3.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench.core" % "readerbench-core-ro" % "1.0.0"
+libraryDependencies += "com.readerbench" % "readerbench-ro" % "3.0.0"
 ```
