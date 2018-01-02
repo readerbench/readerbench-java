@@ -2,17 +2,17 @@
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
     <persistence-unit name="ReaderBench" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>data.pojo.Word</class>
-        <class>data.pojo.Weight</class>
-        <class>data.pojo.SentimentValence</class>
-        <class>data.pojo.SentimentEntity</class>
-        <class>data.pojo.EntityXValence</class>
-        <class>data.pojo.Language</class>
-        <class>data.pojo.CategoryPhrase</class>
-        <class>data.pojo.Category</class>
+        <class>com.readerbench.data.pojo.Word</class>
+        <class>com.readerbench.data.pojo.Weight</class>
+        <class>com.readerbench.data.pojo.SentimentValence</class>
+        <class>com.readerbench.data.pojo.SentimentEntity</class>
+        <class>com.readerbench.data.pojo.EntityXValence</class>
+        <class>com.readerbench.data.pojo.Language</class>
+        <class>com.readerbench.data.pojo.CategoryPhrase</class>
+        <class>com.readerbench.data.pojo.Category</class>
         <properties>
             <property name="hibernate.show_sql" value="false"/>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLiteDialect"/>
+            <property name="hibernate.dialect" value="com.readerbench.dao.hibernate.dialect.SQLiteDialect"/>
             <property name="hibernate.c3p0.min_size" value="10" />
             <property name="hibernate.c3p0.max_size" value="20" />
             <property name="hibernate.c3p0.acquire_increment" value="1" />

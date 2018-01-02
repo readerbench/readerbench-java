@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="languagetool-core-3.7">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/resources/lib/languagetool-core-3.7.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

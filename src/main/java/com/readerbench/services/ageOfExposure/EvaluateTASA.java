@@ -1,0 +1,168 @@
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.readerbench.services.ageOfExposure;
+
+import com.readerbench.data.AbstractDocument;
+import com.readerbench.data.Lang;
+import com.readerbench.data.Word;
+import com.readerbench.data.document.Document;
+import com.readerbench.services.converters.GenericTasaDocument;
+import com.readerbench.services.converters.SplitTASA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+public class EvaluateTASA {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(EvaluateTASA.class);
+
+	private int noIndexes;
+	private Map<Word, double[]> wordWCIndexesValues;
+	private Map<Integer, String> WCIndexesNames;
+
+	public EvaluateTASA(String path) {
+		wordWCIndexesValues = new TreeMap<Word, double[]>();
+		WCIndexesNames = new TreeMap<Integer, String>();
+		getWordComplexityIndices(path);
+	}
+
+	private double getDocWordComplexity(AbstractDocument d, int index) {
+		double distanceSum = 0;
+		double totalWords = 0;
+		for (Entry<Word, Integer> e : d.getWordOccurences().entrySet()) {
+			if (wordWCIndexesValues.containsKey(e.getKey())) {
+				double[] indices = wordWCIndexesValues.get(e.getKey());
+				if (index < indices.length) {
+					distanceSum += indices[index] * e.getValue();
+					totalWords += e.getValue();
+				}
+			}
+		}
+		return (totalWords > 0 ? distanceSum / totalWords : 0);
+	}
+
+	private void getWordComplexityIndices(String path) {
+		LOGGER.info("Loading file " + path + "...");
+
+		/* Compute the AgeOfAcquisition Dictionary */
+		String tokens[];
+		String line;
+		String word;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(path));
+			// read first line
+			if ((line = br.readLine()) != null) {
+				tokens = line.split(",");
+				word = tokens[0].trim();
+				noIndexes = tokens.length - 1;
+				for (int i = 1; i < tokens.length; i++)
+					WCIndexesNames.put(i - 1, tokens[i]);
+			}
+			// read word indexes
+			while ((line = br.readLine()) != null) {
+				tokens = line.split(",");
+				if (tokens.length > 1) {
+					word = tokens[0].trim().replaceAll(" ", "");
+
+					double[] values = new double[noIndexes];
+					for (int i = 1; i < tokens.length; i++)
+						if (tokens[i] != null && tokens[i].length() > 0)
+							values[i - 1] = Double.parseDouble(tokens[i]);
+
+					wordWCIndexesValues.put(
+							Word.getWordFromConcept(word, Lang.en), values);
+				}
+			}
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void processWordComplexity(String input, String path,
+			boolean usePOStagging) throws FileNotFoundException, IOException {
+		List<GenericTasaDocument> docs = SplitTASA.getTASAdocs(input, path);
+
+		BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+				new FileOutputStream(new File(path + "/measurementsWC.csv")),
+				"UTF-8"), 32768);
+
+		// print header
+		out.write("Filename,Grade,DRP,Genre");
+		for (int i = 0; i < noIndexes; i++) {
+			out.write("," + WCIndexesNames.get(i));
+		}
+		out.write("\n");
+
+		int noProcessed = 0;
+
+		// create save folders
+//		String saveLocation = path + "/files";
+//		File dir = new File(saveLocation);
+//		if (!dir.exists()) {
+//			dir.mkdir();
+//		}
+//		// see if there are folders with genre names
+//		for (String g : SplitTASA.TASA_GENRES) {
+//			dir = new File(saveLocation + "/" + g);
+//			if (dir.exists()) {
+//				for (File f : dir.listFiles())
+//					f.delete();
+//				dir.delete();
+//			}
+//			dir.mkdir();
+//		}
+
+		for (GenericTasaDocument doc : docs) {
+			// save files
+//			doc.writeTxt(saveLocation);
+
+			Document d = doc.getDocument(usePOStagging);
+			out.write(doc.getID()
+					+ ","
+					+ GenericTasaDocument.get13GradeLevel(doc
+							.getDRPscore()) + "," + doc.getDRPscore() + ","
+					+ doc.getGenre());
+			for (int i = 0; i < noIndexes; i++) {
+				out.write("," + getDocWordComplexity(d, i));
+			}
+			out.write("\n");
+			if ((++noProcessed) % 1000 == 0) {
+				LOGGER.info("Finished processing " + noProcessed
+						+ " TASA documents");
+			}
+		}
+
+		out.close();
+	}
+
+	public static void main(String[] args) {
+		
+		try {
+			EvaluateTASA eval = new EvaluateTASA("in/word complexity/words.csv");
+			eval.processWordComplexity("tasa.txt", "in/word complexity", false);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
