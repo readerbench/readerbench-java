@@ -44,6 +44,7 @@ public enum SemanticCorpora implements Serializable {
     
     euro_parlamentean_nl_lda("Euro_Parlamentean", Lang.nl, SimilarityType.LDA),
     inl_nl_lda("INL", Lang.nl, SimilarityType.LDA),
+    inl_nl_word2vec("INL", Lang.nl, SimilarityType.WORD2VEC),
     
     jose_antonio_es_lsa("Jose_Antonio", Lang.es, SimilarityType.LSA),
     jose_antonio_es_lda("Jose_Antonio", Lang.es, SimilarityType.LDA),
