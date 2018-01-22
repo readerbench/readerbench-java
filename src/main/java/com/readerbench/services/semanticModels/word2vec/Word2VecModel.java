@@ -105,12 +105,13 @@ public class Word2VecModel implements ISemanticModel {
     }
     
     public static Word2VecModel loadWord2Vec(String path, Lang language) {
+        path += "/word2vec.model";
         for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
             if (path.equals(w2v.getPath())) {
                 return w2v;
             }
         }
-        Word2VecModel w2v = loadFromTextFile(path + "/word2vec.model", language);
+        Word2VecModel w2v = loadFromTextFile(path, language);
         LOADED_WORD2VEC_MODELS.add(w2v);
         return w2v;
     }

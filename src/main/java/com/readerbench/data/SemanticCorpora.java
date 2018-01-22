@@ -60,7 +60,7 @@ public enum SemanticCorpora implements Serializable {
         this.corpora = corpora;
         this.lang = lang;
         this.simType = simType;
-        this.fullPath = SEMANTIC_CORPORA_ROOT + '/' + lang.toString().toUpperCase() + '/' + simType.getAcronym() + '/' + corpora;
+        this.fullPath = SEMANTIC_CORPORA_ROOT + lang.toString().toUpperCase() + '/' + simType.getAcronym() + '/' + corpora;
     }
 
     public String getCorpora() {
