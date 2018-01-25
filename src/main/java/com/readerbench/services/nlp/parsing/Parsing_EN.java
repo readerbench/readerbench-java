@@ -72,5 +72,6 @@ class ParsingParams_EN extends Properties {
         // TODO: sentiment should be parameterized
         this.put("annotators", "tokenize, ssplit, pos,parse, lemma,depparse, ner, mention, coref, sentiment");
         this.put("coref.md.type", "dependency");
+        this.put("parse.maxlen", "100");
     }
 }
