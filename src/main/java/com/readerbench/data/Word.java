@@ -128,15 +128,6 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         return w;
     }
 
-    public double getDistanceInChain(Word word) {
-        if (!partOfSameLexicalChain(word)) {
-            return Double.MAX_VALUE;
-        } else {
-            LexicalChain chain = word.getLexicalChainLink().getLexicalChain();
-            return chain.getDistance(word.getLexicalChainLink(), word.getLexicalChainLink());
-        }
-    }
-
     public boolean isNoun() {
         return POS.startsWith("NN");
     }

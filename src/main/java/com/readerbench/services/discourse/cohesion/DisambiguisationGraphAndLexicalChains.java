@@ -146,14 +146,4 @@ public class DisambiguisationGraphAndLexicalChains {
         }
     }
 
-    /**
-     * Computes the word distances between the words in the lexical chains.
-     */
-    public static void computeWordDistances(AbstractDocument d) {
-        LOGGER.info("Computing all lexical chains distances");
-        for (LexicalChain chain : d.getLexicalChains()) {
-            chain.computeDistances();
-        }
-    }
-
 }

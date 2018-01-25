@@ -209,10 +209,6 @@ public abstract class AbstractDocument extends AnalysisElement {
             // System.out.println(chain);
             // }
 
-            LOGGER.info("Compute word distances");
-            DisambiguisationGraphAndLexicalChains.computeWordDistances(this);
-            // System.out.println(LexicalCohesion.getDocumentCohesion(this));
-
             // determine semantic chains / voices
             LOGGER.info("Determine semantic chains / voices");
             DialogismComputations.determineVoices(this);
