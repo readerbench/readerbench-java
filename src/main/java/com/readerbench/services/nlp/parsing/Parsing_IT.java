@@ -126,5 +126,6 @@ class ParsingParams_IT extends Properties {
         super();
         this.put("pos.model", "resources/config/IT/tagger/italian.tagger");
         this.put("annotators", "tokenize, ssplit, pos");
+        this.put("parse.maxlen", "100");
     }
 }
