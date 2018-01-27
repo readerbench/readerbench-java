@@ -112,8 +112,7 @@ public class DialogismComputations {
     public static void determineExtendedVoices(AbstractDocument d) {
         List<SemanticChain> extendedVoices = new ArrayList<>();
 
-        Map<String, Integer> auxiliaryVoices = new HashMap<String, Integer>();
-        System.out.println("-------Number of voices: " + d.getVoices().size());
+        Map<String, Integer> auxiliaryVoices = new HashMap<>();
         for (SemanticChain chain : d.getVoices()) {
             int noNouns = 0;
             int noVerbs = 0;
@@ -125,8 +124,11 @@ public class DialogismComputations {
                     extendedChain.getWords().add(w);
                     if (!auxiliaryVoices.containsKey(w.getText())) {
                         auxiliaryVoices.put(w.getText(), 1);
-                        if (w.isNoun()) noNouns++;
-                        else if (w.isVerb()) noVerbs++;
+                        if (w.isNoun()) {
+                            noNouns++;
+                        } else if (w.isVerb()) {
+                            noVerbs++;
+                        }
                     }
                 }
             }
@@ -140,11 +142,6 @@ public class DialogismComputations {
         }
 
         d.setExtendedVoices(extendedVoices);
-
-        System.out.println("-------Number of voices: " + d.getVoices().size());
-        System.out.println("-------Number of perspectives: " + d.getNoPerspectives());
-        System.out.println("-------Number of nouns in perspectives: " + d.getNoNounsInPerspectives());
-        System.out.println("-------Number of verbs in perspectives: " + d.getNoVerbsInPerspectives());
     }
 
     public static void determineVoiceDistribution(AnalysisElement e, AbstractDocument d) {
@@ -292,8 +289,6 @@ public class DialogismComputations {
         }
     }
 
-
-
     public static void determineExtendedVoiceDistributions(AbstractDocument d) {
         LOGGER.info("Identifying extended voice distributions...");
         // determine distribution of each lexical chain
@@ -307,7 +302,6 @@ public class DialogismComputations {
                 }
             }
         }
-
 
         // determine spread
         if (d.getExtendedVoices() != null) {
@@ -340,7 +334,6 @@ public class DialogismComputations {
                     }
 
                     chain.getExtendedBlockDistribution()[blockIndex] += valence;
-
 
                     // build cumulative importance in terms of sentences in which occurrences have been spotted
                     if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
@@ -392,25 +385,25 @@ public class DialogismComputations {
         }
     }
 
-
     /**
      * @param d
      *
-     * Build for every sentence a context map with all the voices and the associated context Tree with its valence
+     * Build for every sentence a context map with all the voices and the
+     * associated context Tree with its valence
      */
     public static void findSentimentUsingContext(AbstractDocument d) {
-        LOGGER.info("Searching context for every voice in every sentence");
+        LOGGER.info("Searching context for every voice in every sentence...");
         Context ctx = new Context();
 
         //for every sentence make a map which has key voice and value a list of pair(Tree, valence)
-        for (Block b: d.getBlocks()) {
-            for (Sentence sentence: b.getSentences()) {
+        for (Block b : d.getBlocks()) {
+            for (Sentence sentence : b.getSentences()) {
 
                 List<Word> words = sentence.getWords();
                 Map<Word, List<ContextSentiment>> contextMap = new HashMap<>();
 
-                for (SemanticChain chain: d.getVoices()) {
-                    for (Word w: chain.getWords()) {
+                for (SemanticChain chain : d.getVoices()) {
+                    for (Word w : chain.getWords()) {
                         //the context for this context was computed in the past
                         if (contextMap.containsKey(w)) {
                             continue;
@@ -420,7 +413,7 @@ public class DialogismComputations {
                             continue;
                         }
 
-                        List<ContextSentiment> contextTrees = new ArrayList<ContextSentiment>();
+                        List<ContextSentiment> contextTrees = new ArrayList<>();
                         //check if the word from voice is in sentence
                         for (Word aux : words) {
                             if (aux.getText().equals(w.getText())) {
@@ -428,7 +421,7 @@ public class DialogismComputations {
                                 Tree tree = sentence.getTree();
                                 List<Tree> subTrees = ctx.findContextTree(tree, w, w.isNoun());
                                 //for every contextSubtree compute the valence
-                                for (Tree subTree:subTrees) {
+                                for (Tree subTree : subTrees) {
                                     valence = RNNCoreAnnotations.getPredictedClass(subTree) - 2;
                                     contextTrees.add(new ContextSentiment(subTree, valence));
                                 }

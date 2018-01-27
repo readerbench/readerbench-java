@@ -166,8 +166,10 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public void computeAll(boolean computeDialogism, boolean useBigrams) {
-        computeDiscourseAnalysis(computeDialogism, useBigrams);
-        ComplexityIndices.computeComplexityFactors(this);
+        if (!blocks.isEmpty()) {
+            computeDiscourseAnalysis(computeDialogism, useBigrams);
+            ComplexityIndices.computeComplexityFactors(this);
+        }
     }
 
     public void save(SaveType saveOutput) {
@@ -197,50 +199,43 @@ public abstract class AbstractDocument extends AnalysisElement {
     public void computeDiscourseAnalysis(boolean computeDialogism, boolean useBigrams) {
         if (computeDialogism) {
             // build disambiguisation graph and lexical chains
-            LOGGER.info("Build disambiguation graph");
+            LOGGER.info("Build disambiguation graph...");
             DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(this);
-            LOGGER.info("Prune disambiguation graph");
+            LOGGER.info("Prune disambiguation graph...");
             DisambiguisationGraphAndLexicalChains.pruneDisambiguationGraph(this);
             // System.out.println(d.disambiguationGraph);
 
-            LOGGER.info("Build lexical chains");
+            LOGGER.info("Build lexical chains...");
             DisambiguisationGraphAndLexicalChains.buildLexicalChains(this);
             // for (LexicalChain chain : lexicalChains) {
             // System.out.println(chain);
             // }
 
             // determine semantic chains / voices
-            LOGGER.info("Determine semantic chains / voices");
+            LOGGER.info("Determine semantic chains / voices...");
             DialogismComputations.determineVoices(this);
             DialogismComputations.determineExtendedVoices(this);
 
-//            DialogismComputations.findSentimentUsingContext(this);
+            // DialogismComputations.findSentimentUsingContext(this);
             // determine voice distributions & importance
-            LOGGER.info("Determine voice distributions & importance");
+            LOGGER.info("Determine voice distributions & importance...");
             DialogismComputations.determineVoiceDistributions(this);
-//            DialogismComputations.determineExtendedVoiceDistributions(this);
+            // DialogismComputations.determineExtendedVoiceDistributions(this);
         }
 
         // build coherence graph
-        LOGGER.info("Build coherence graph");
+        LOGGER.info("Build coherence graph...");
         CohesionGraph.buildCohesionGraph(this);
 
-//        t1 = System.currentTimeMillis();
-//        // build coherence graph
-//        CohesionGraph.buildCohesionGraphOld(this);
-//        t2 = System.currentTimeMillis();
-//        System.out.println("old cohesion time: " + ((t2 - t1) / 1000.) + " sec");
-        // determine topics
-        LOGGER.info("Determine topics");
+        LOGGER.info("Determine topics...");
         KeywordModeling.determineKeywords(this, useBigrams);
         // TopicModel.determineTopicsLDA(this);
 
         Scoring.score(this);
         // assign sentiment values
-        LOGGER.info("Assign sentiment values");
+        LOGGER.info("Assign sentiment values...");
         SentimentAnalysis.weightSemanticValences(this);
-
-        LOGGER.info("Finished all discourse analysis processes ...");
+        LOGGER.info("Finished all discourse analysis processes");
     }
 
     public void setDocumentTitle(String title, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
@@ -265,9 +260,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(String pathToDoc,
-                                                       Map<SimilarityType, String> modelPaths, Lang lang,
-                                                       boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, String pathToComplexityModel,
-                                                       int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
+            Map<SimilarityType, String> modelPaths, Lang lang,
+            boolean usePOSTagging, boolean computeDialogism, boolean useBigrams, String pathToComplexityModel,
+            int[] selectedComplexityFactors, boolean cleanInput, SaveType saveOutput) {
         List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
         return loadGenericDocument(new File(pathToDoc), models, lang, usePOSTagging, computeDialogism, useBigrams,
                 pathToComplexityModel, selectedComplexityFactors, cleanInput, saveOutput);
@@ -299,9 +294,9 @@ public abstract class AbstractDocument extends AnalysisElement {
     }
 
     public static AbstractDocument loadGenericDocument(File docFile, List<ISemanticModel> models,
-                                                       Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams,
-                                                       String pathToComplexityModel, int[] selectedComplexityFactors,
-                                                       boolean cleanInput, SaveType saveOutput) {
+            Lang lang, boolean usePOSTagging, boolean computeDialogism, boolean useBigrams,
+            String pathToComplexityModel, int[] selectedComplexityFactors,
+            boolean cleanInput, SaveType saveOutput) {
         // parse the XML file
         LOGGER.info("Loading {} file for processing", docFile.getPath());
         boolean isDocument = checkTagsDocument(docFile, "p");
@@ -555,13 +550,13 @@ public abstract class AbstractDocument extends AnalysisElement {
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
                     results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
-                            .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
+                                    .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
                 results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());

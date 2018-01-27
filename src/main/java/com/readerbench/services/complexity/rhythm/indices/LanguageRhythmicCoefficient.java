@@ -9,6 +9,7 @@ import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.Block;
 import com.readerbench.data.Sentence;
 import com.readerbench.services.complexity.ComplexityIndex;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 import com.readerbench.services.complexity.rhythm.tools.RhythmTool;
 
@@ -30,60 +31,48 @@ public class LanguageRhythmicCoefficient extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
+        if (d.getBlocks().isEmpty()) {
+            return ComplexityIndices.IDENTITY;
+        }
         Map<Integer, Integer> cntSyllables = new TreeMap<>();
         int deviations = 0;
-        
+
         for (Block b : d.getBlocks()) {
             if (null == b) {
                 continue;
             }
             for (Sentence s : b.getSentences()) {
-//                System.out.println("Sentence: " + s.getText());
                 String[] units = s.getText().split("[\\p{Punct}]+");
                 for (String str : units) {
                     List<String> unit = Arrays.asList(str.trim().split("\\s+"));
-//                    System.out.println(u + "    " + u.size());
-                
-//                    List<Word> unit = s.getAllWords();
-//                    List<Integer> repr = RhythmTool.getNumericalRepresentation(unit);
                     List<Integer> repr = RhythmTool.testNewUnitDefinition(unit);
                     if (repr.isEmpty()) {
                         continue;
                     }
-                    for (Integer nr : repr) {
-                        if (nr == 0) continue;
-                        cntSyllables.put(nr,
-                        cntSyllables.containsKey(nr) ? cntSyllables.get(nr)+1 : 1);
-                    }
+                    repr.stream().filter((nr) -> !(nr == 0)).forEachOrdered((nr) -> {
+                        cntSyllables.put(nr, cntSyllables.containsKey(nr) ? cntSyllables.get(nr) + 1 : 1);
+                    });
                     deviations += RhythmTool.calcDeviations(repr);
-//                    System.out.println("Deviations: " + deviations);
-//                    System.out.println();
                 }
             }
         }
-//        DecimalFormat df = new DecimalFormat("#.##");
         int totalNumber = cntSyllables.values().stream().reduce(0, Integer::sum);
-//        for (Map.Entry<Integer, Integer> entry : cntSyllables.entrySet()) {
-//                double syllFreq = 1.0 * entry.getValue() / totalNumber;
-//                System.out.println(entry.getKey() + "\t" + totalNumber +
-//                                                    "\t" + entry.getValue() + 
-//                                                    "\t" + df.format(syllFreq));
-//        }
-//        Integer keyOfMaxVal = Collections.max(cntSyllables.entrySet(), Map.Entry.comparingByValue()).getKey();
+        if (totalNumber == 0) {
+            return ComplexityIndices.IDENTITY;
+        }
         int dominantInd = RhythmTool.getDominantIndex(cntSyllables.values().stream()
                 .collect(Collectors.toList()));
-//        System.out.println("Dominant ind: " + dominantInd);
+        if (dominantInd == -1) {
+            return ComplexityIndices.IDENTITY;
+        }
         int keyOfMaxVal = cntSyllables.keySet().stream()
                 .collect(Collectors.toList()).get(dominantInd);
-//        System.out.println("Key of max val: " + keyOfMaxVal);
         int sum = cntSyllables.get(keyOfMaxVal);
-        sum += (cntSyllables.containsKey(keyOfMaxVal-1)) ? cntSyllables.get(keyOfMaxVal-1) : 0;
-        sum += (cntSyllables.containsKey(keyOfMaxVal+1)) ? cntSyllables.get(keyOfMaxVal+1) : 0;
+        sum += (cntSyllables.containsKey(keyOfMaxVal - 1)) ? cntSyllables.get(keyOfMaxVal - 1) : 0;
+        sum += (cntSyllables.containsKey(keyOfMaxVal + 1)) ? cntSyllables.get(keyOfMaxVal + 1) : 0;
         double coeff = 1.0 * (deviations + totalNumber - sum) / totalNumber;
-//        System.out.println("Deviations: " + deviations);
-//        System.out.println("Coefficient: " + df.format(coeff));
-        
+
         return coeff;
     }
-    
+
 }
