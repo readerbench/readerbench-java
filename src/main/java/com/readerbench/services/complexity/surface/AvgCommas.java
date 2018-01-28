@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.readerbench.services.complexity.AbstractComplexityIndex;
 import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
-import com.readerbench.utils.IndexLevel;
+import com.readerbench.services.complexity.IndexLevel;
 
 /**
  *

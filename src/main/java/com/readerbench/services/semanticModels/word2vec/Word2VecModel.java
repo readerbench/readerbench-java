@@ -29,7 +29,7 @@ import com.readerbench.services.commons.VectorAlgebra;
 import com.readerbench.services.nlp.stemmer.Stemmer;
 import com.readerbench.services.semanticModels.ISemanticModel;
 import com.readerbench.services.semanticModels.SimilarityType;
-import com.readerbench.thrift.Word2VecService;
+import com.readerbench.services.thrift.Word2VecService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

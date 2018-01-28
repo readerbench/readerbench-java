@@ -4,7 +4,7 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated
  */
-package com.readerbench.thrift;
+package com.readerbench.services.thrift;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

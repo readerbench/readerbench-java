@@ -1,4 +1,4 @@
-package com.readerbench.utils;
+package com.readerbench.services.commons;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.util.Properties;
 /**
  * Created by dorinela on 28.11.2017.
  */
-public class App {
+public class ReadPropertiesFile {
 
     /**
      * read data from .properties files
@@ -20,7 +20,7 @@ public class App {
         InputStream input;
         try {
 
-            input = new App().getClass().getClassLoader().getResourceAsStream(resourceName);
+            input = new ReadPropertiesFile().getClass().getClassLoader().getResourceAsStream(resourceName);
             if (input == null) {
                 throw new RuntimeException("Configuration file missing: " + resourceName);
             }

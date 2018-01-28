@@ -10,7 +10,7 @@ import com.readerbench.data.AnalysisElement;
 import com.readerbench.data.sentiment.SentimentValence;
 import com.readerbench.services.complexity.AbstractComplexityIndex;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
-import com.readerbench.utils.IndexLevel;
+import com.readerbench.services.complexity.IndexLevel;
 
 /**
  *

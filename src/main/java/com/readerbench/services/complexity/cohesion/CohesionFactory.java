@@ -30,7 +30,7 @@ import com.readerbench.services.complexity.cohesion.lexicalChains.LexicalChainsC
 import com.readerbench.services.complexity.cohesion.lexicalChains.LexicalChainsMaxSpan;
 import com.readerbench.services.complexity.cohesion.semantic.*;
 import com.readerbench.services.semanticModels.SimilarityType;
-import com.readerbench.utils.IndexLevel;
+import com.readerbench.services.complexity.IndexLevel;
 
 import java.util.ArrayList;
 import java.util.List;

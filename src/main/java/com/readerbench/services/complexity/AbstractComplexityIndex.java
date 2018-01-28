@@ -7,8 +7,7 @@ package com.readerbench.services.complexity;
 
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.AnalysisElement;
-import com.readerbench.utils.Functions;
-import com.readerbench.utils.IndexLevel;
+import com.readerbench.services.commons.Functions;
 
 import java.util.function.Function;
 import java.util.stream.Stream;

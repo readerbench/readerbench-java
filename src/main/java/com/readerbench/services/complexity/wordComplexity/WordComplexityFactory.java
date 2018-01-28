@@ -19,7 +19,7 @@ import com.readerbench.data.Lang;
 import com.readerbench.services.complexity.ComplexityIndex;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 import com.readerbench.services.complexity.ComplexityIndicesFactory;
-import com.readerbench.utils.IndexLevel;
+import com.readerbench.services.complexity.IndexLevel;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;

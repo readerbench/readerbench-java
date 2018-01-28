@@ -19,7 +19,7 @@ import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.Block;
 import com.readerbench.data.Sentence;
 import com.readerbench.data.discourse.SemanticCohesion;
-import com.readerbench.utils.DoubleStatistics;
+import com.readerbench.services.commons.DoubleStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class CohesionGraph {
         DoubleStatistics statistics = IntStream.range(0, d.getBlocks().size() - 1).parallel()
                 .mapToObj(i -> i)
                 .flatMap(i -> IntStream.range(i + 1, d.getBlocks().size())
-                        .mapToObj(j -> d.getBlockDistances()[i][j]))
+                .mapToObj(j -> d.getBlockDistances()[i][j]))
                 .filter(Objects::nonNull)
                 .map(SemanticCohesion::getCohesion)
                 .collect(DoubleStatistics.collector());
@@ -106,7 +106,7 @@ public class CohesionGraph {
             avg = statistics.getAverage();
             stdev = statistics.getStandardDeviation();
         }
-        
+
         // prune initial graph, but always keep adjacent pairs of blocks or explicitly referred blocks
         // iterate through all pairs of blocks of the document
         for (int i = 0; i < d.getBlocks().size() - 1; i++) {
@@ -181,7 +181,7 @@ public class CohesionGraph {
                 statistics = IntStream.range(0, b.getSentences().size() - 1).parallel()
                         .mapToObj(i -> i)
                         .flatMap(i -> IntStream.range(i + 1, b.getSentences().size())
-                                .mapToObj(j -> b.getSentenceDistances()[i][j]))
+                        .mapToObj(j -> b.getSentenceDistances()[i][j]))
                         .filter(Objects::nonNull)
                         .map(SemanticCohesion::getCohesion)
                         .collect(DoubleStatistics.collector());

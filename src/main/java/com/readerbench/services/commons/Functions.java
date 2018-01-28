@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.readerbench.utils;
+package com.readerbench.services.commons;
 
+import com.readerbench.services.complexity.IndexLevel;
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.AnalysisElement;
 import com.readerbench.data.Block;

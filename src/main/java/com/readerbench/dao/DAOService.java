@@ -15,7 +15,7 @@
  */
 package com.readerbench.dao;
 
-import com.readerbench.utils.App;
+import com.readerbench.services.commons.ReadPropertiesFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -38,7 +38,7 @@ public class DAOService {
     private static final Object lock = new Object();
 
     private DAOService() {
-        Properties p = App.getProperties("db.properties");
+        Properties p = ReadPropertiesFile.getProperties("db.properties");
         emf = Persistence.createEntityManagerFactory("ReaderBench", p);
         em = emf.createEntityManager();
     }
