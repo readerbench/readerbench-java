@@ -16,13 +16,14 @@
 package com.readerbench.services.complexity.readability;
 
 import com.readerbench.data.AbstractDocument;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class ReadabilityFog extends ReadabilityIndex{
+public class ReadabilityFog extends ReadabilityIndex {
 
     public ReadabilityFog() {
         super(ComplexityIndicesEnum.READABILITY_FOG);
@@ -30,8 +31,11 @@ public class ReadabilityFog extends ReadabilityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
-        Fathom.Stats stats = Fathom.analyze(d.getProcessedText());
+        if (d.getText() == null || d.getText().length() == 0) {
+            return ComplexityIndices.IDENTITY;
+        }
+        Fathom.Stats stats = Fathom.analyze(d.getText());
         return calcFog(stats);
     }
-    
+
 }

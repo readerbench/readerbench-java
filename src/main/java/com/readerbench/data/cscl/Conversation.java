@@ -101,6 +101,7 @@ public class Conversation extends AbstractDocument {
         intenseCollabZonesVoice = new ArrayList<>();
         annotatedCollabZones = new ArrayList<>();
     }
+
     /**
      * @param path
      * @param contents
@@ -110,7 +111,6 @@ public class Conversation extends AbstractDocument {
      */
     public Conversation(String path, AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(path, models, lang);
-        this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
         this.determineParticipantContributions();
@@ -118,7 +118,6 @@ public class Conversation extends AbstractDocument {
 
     public Conversation(AbstractDocumentTemplate contents, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(models, lang);
-        this.setText(contents.getText());
         setDocTmp(contents);
         Parsing.getParser(lang).parseDoc(contents, this, usePOSTagging);
         this.determineParticipantContributions();
@@ -315,6 +314,7 @@ public class Conversation extends AbstractDocument {
 
     /**
      * Load conversation
+     *
      * @param conversation - conversation
      * @param models - semantic models
      * @param lang - language
@@ -322,7 +322,7 @@ public class Conversation extends AbstractDocument {
      * @return
      */
     public Conversation loadConversation(com.readerbench.solr.entities.cscl.Conversation conversation,
-                                         List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+            List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         Conversation c = null;
         // determine contents
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
@@ -360,9 +360,6 @@ public class Conversation extends AbstractDocument {
             support.mergeAdjacentContributions(blocks);
             contents.setBlocks(support.newBlocks);
             c = new Conversation(contents, models, lang, usePOSTagging);
-
-            c.setDocumentTitle("reddit", models, lang, usePOSTagging);
-
         } catch (Exception ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -371,6 +368,7 @@ public class Conversation extends AbstractDocument {
 
     /**
      * Transform long date to String date - "yyyy-MM-dd HH:mm:ss" format
+     *
      * @param time - Long date
      * @return - String date
      */
@@ -378,7 +376,7 @@ public class Conversation extends AbstractDocument {
         try {
             Date date = new Date(time);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            return  sdf.format(date);
+            return sdf.format(date);
         } catch (Exception e) {
             LOGGER.warn("Error transforming date..." + time);
             //e.printStackTrace();
@@ -440,6 +438,7 @@ public class Conversation extends AbstractDocument {
         }
         return distribution;
     }
+
     /**
      * @param voice
      * @param p
@@ -540,7 +539,7 @@ public class Conversation extends AbstractDocument {
             //initialization: create mapping between block IDs and initial index positions in array
             initialMapping = new TreeMap<>();
             for (int i = 0; i < blocks.size(); i++) {
-                if(blocks.get(i) != null && blocks.get(i).getId() != null) {
+                if (blocks.get(i) != null && blocks.get(i).getId() != null) {
                     initialMapping.put(blocks.get(i).getId(), i);
                 }
             }
@@ -557,7 +556,7 @@ public class Conversation extends AbstractDocument {
 
                     //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
                     boolean explicitRefCriterion = true;
-                    if (crt.getRefId()!= null && crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
+                    if (crt.getRefId() != null && crt.getRefId() != 0 && (!crt.getRefId().equals(prev.getId()))) {
                         explicitRefCriterion = false;
                     }
                     if (crt.getSpeaker().equals(prev.getSpeaker()) && diffMinutes <= 1 && explicitRefCriterion) {

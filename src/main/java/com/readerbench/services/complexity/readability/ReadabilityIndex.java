@@ -8,6 +8,7 @@ package com.readerbench.services.complexity.readability;
 import com.readerbench.data.AbstractDocument;
 import edu.stanford.nlp.util.Pair;
 import com.readerbench.services.complexity.ComplexityIndex;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 import com.readerbench.services.nlp.listOfWords.ClassesOfWords;
 import com.readerbench.services.nlp.listOfWords.ListOfWords;

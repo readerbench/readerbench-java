@@ -1,24 +1,20 @@
-/*************************************************************************
- * ADOBE CONFIDENTIAL
- * ___________________
+/*
+ * Copyright 2018 ReaderBench.
  *
- *  Copyright 2016 Adobe Systems Incorporated
- *  All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Adobe Systems Incorporated and its suppliers,
- * if any.  The intellectual and technical concepts contained
- * herein are proprietary to Adobe Systems Incorporated and its
- * suppliers and are protected by all applicable intellectual property
- * laws, including trade secret and copyright laws.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Adobe Systems Incorporated.
- **************************************************************************/
-
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.readerbench.data.cscl;
 
-import com.readerbench.services.commons.Formatting;
 import com.readerbench.services.commons.VectorAlgebra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +23,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import org.openide.util.Exceptions;
 
 public class ClusterCommunity {
 
@@ -36,7 +32,7 @@ public class ClusterCommunity {
     public static final int MAXIMUM_NUMBER_OF_ITERATIONS = 1000;
 
     public static void performKMeansClusteringForCSCL(List<Participant> initialParticipants,
-                                                      int K, String pathToFile) {
+            int K, String pathToFile) {
 
         List<ParticipantNormalized> participants = CommunityUtils.normalizeParticipantsData(initialParticipants);
 
@@ -44,12 +40,11 @@ public class ClusterCommunity {
 
         // sets initialization to random or "smart" node selection for maximum
         // dispersion
-
         // choose a random initial node
         int randomId = (int) (Math.random() * participants.size());
         ParticipantNormalized randomParticipant = participants.get(randomId);
 
-        LOGGER.info("Initializing k clustroids with best possible dispersion.");
+        LOGGER.info("Initializing k clustroids with best possible dispersion...");
         // compute kNN++
         for (int i = 0; i < K; i++) {
             double minDist = Double.MAX_VALUE;
@@ -59,8 +54,9 @@ public class ClusterCommunity {
                 if (!clustroids.contains(p)) {
                     double distance = 0;
                     distance += compareParticipants(p, randomParticipant);
-                    for (int j = 0; j < i; j++)
+                    for (int j = 0; j < i; j++) {
                         distance += compareParticipants(p, clustroids.get(j));
+                    }
                     if (distance < minDist) {
                         minDist = distance;
                         chosenParticipant = p;
@@ -72,9 +68,10 @@ public class ClusterCommunity {
 
         // cohesion and separation evolution
         double compactness = 0, isolation = 0;
-        List<List<ParticipantNormalized>> clusters = new Vector<>();
-        for (int i = 0; i < K; i++)
+        List<List<ParticipantNormalized>> clusters = new ArrayList<>();
+        for (int i = 0; i < K; i++) {
             clusters.add(new LinkedList<>());
+        }
 
         int noIterations = 0;
         // begin assigning process
@@ -119,15 +116,15 @@ public class ClusterCommunity {
 
             // determine inter-cluster separation (isolation)
             sumDist = 0;
-            for (int i = 0; i < clustroids.size() - 1; i++)
-                for (int j = i + 1; j < clustroids.size(); j++)
+            for (int i = 0; i < clustroids.size() - 1; i++) {
+                for (int j = i + 1; j < clustroids.size(); j++) {
                     sumDist += compareParticipants(clustroids.get(i), clustroids.get(j));
+                }
+            }
             isolation = sumDist / ((double) participants.size());
 
             // recompute clusteroids
             for (int i = 0; i < K; i++) {
-                if (clusters.get(i).isEmpty())
-                    System.out.println("Empty cluster!");
                 ParticipantNormalized localCluster = null;
                 // determine new centroid
                 double maxSim = Double.MIN_VALUE;
@@ -149,8 +146,9 @@ public class ClusterCommunity {
             }
 
             // if there are no further changes we have reached convergence
-            if (!changesMade)
+            if (!changesMade) {
                 break;
+            }
 
             noIterations++;
         }
@@ -162,45 +160,36 @@ public class ClusterCommunity {
 
             out.write(initialParticipants.toString() + "\n\n");
 
-        System.out.println(K + " clusters after " + noIterations
-                + " iterations with " + Formatting.formatNumber(compactness)
-                + " compactness and " + Formatting.formatNumber(isolation)
-                + " isolation");
-        for (int i = 0; i < clustroids.size(); i++) {
-            out.write(">>" + (i + 1) + ": ");
-            System.out.print(">>" + (i + 1) + ": ");
-            for (ParticipantNormalized p : clusters.get(i))
-                if (clustroids.contains(p)) {
-                    out.write("(" + p.toString() + "); \n");
-                    System.out.print("(" + p.toString() + "); ");
+            for (int i = 0; i < clustroids.size(); i++) {
+                out.write(">>" + (i + 1) + ": ");
+                for (ParticipantNormalized p : clusters.get(i)) {
+                    if (clustroids.contains(p)) {
+                        out.write("(" + p.toString() + "); \n");
+                    } else {
+                        out.write("(" + p.toString() + "); \n");
+                    }
                 }
-                else {
-                    out.write("(" + p.toString() + "); \n");
-                    System.out.print(p.toString() + "; ");
-                }
-            out.write("\n");
-            System.out.println();
-        }
-        out.close();
+                out.write("\n");
+            }
+            out.close();
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Exceptions.printStackTrace(e);
         }
     }
-
 
     public static void performAglomerativeClusteringForCSCL(List<Participant> initialParticipants, String pathToFile) {
 
         List<ParticipantNormalized> participants = CommunityUtils.normalizeParticipantsData(initialParticipants);
 
-        List<List<Integer>> groups = new LinkedList<List<Integer>>();
+        List<List<Integer>> groups = new ArrayList<>();
 
         // initialize groups
         for (int i = 0; i < participants.size(); i++) {
-            List<Integer> group = new LinkedList<Integer>();
+            List<Integer> group = new ArrayList<>();
             group.add(i);
             groups.add(group);
         }
@@ -226,150 +215,139 @@ public class ClusterCommunity {
             // merge groups 1 & 2 that have the minimum distance
             try {
                 groups.get(group1).addAll(groups.get(group2));
-
                 groups.remove(group2);
-            } catch(Exception e) {
-                System.out.println("Clustering error: " + e.getMessage());
+            } catch (Exception e) {
+                LOGGER.error("Clustering error: " + e.getMessage());
             }
-            
 
             noInterations++;
 
-            System.out.println(">> Iter: " + noInterations + " minSum:" + minSum );
+            // display groups only if 3
+            if (groups.size() == 3) {
+                File output = new File(pathToFile);
+                try {
+                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768);
 
-            // display groups onlu if 3
-            if(groups.size() == 3){
-            File output = new File(pathToFile);
-            try {
-                BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
-                        32768);
+                    double max = Double.MIN_VALUE;
+                    double min = Double.MAX_VALUE;
 
-                double max = Double.MIN_VALUE;
-                double min = Double.MAX_VALUE;
+                    int central = -1;
+                    int active = -1;
+                    int peripheral = -1;
 
-                int central = -1;
-                int active = -1;
-                int peripheral = -1;
+                    for (int i = 0; i < groups.size(); i++) {
+                        out.write(">>" + (i + 1) + "\n");
+                        double[] indegree = getIndegreeVector(getParticipantsFromGroup(groups.get(i), participants));
+                        double[] outdegree = getOutdegreeVector(getParticipantsFromGroup(groups.get(i), participants));
 
-                for (int i = 0; i < groups.size(); i++) {
-                    out.write(">>" + (i + 1) + "\n");
-                    System.out.print(">>" + (i + 1) + ": ");
-                    double[] indegree = getIndegreeVector(getParticipantsFromGroup(groups.get(i), participants));
-                    double[] outdegree = getOutdegreeVector(getParticipantsFromGroup(groups.get(i), participants));
+                        out.write(">>" + (i + 1) + ": \n");
+                        out.write("Size, Mean indegree, Stddev indegree, Mean outdegree, Stddv outdegree\n");
+                        out.write(groups.get(i).size() + "," + VectorAlgebra.mean(indegree) + "," + VectorAlgebra.stdev(indegree)
+                                + "," + VectorAlgebra.mean(outdegree) + "," + VectorAlgebra.stdev(outdegree) + "\n");
 
-                    out.write(">>" + (i + 1) + ": \n");
-                    out.write("Size, Mean indegree, Stddev indegree, Mean outdegree, Stddv outdegree\n");
-                    out.write(groups.get(i).size() + "," + VectorAlgebra.mean(indegree) + "," + VectorAlgebra.stdev(indegree)
-                            + "," + VectorAlgebra.mean(outdegree) + "," + VectorAlgebra.stdev(outdegree) + "\n");
-
-                    double meanGroup = (VectorAlgebra.mean(indegree) + VectorAlgebra.mean(outdegree)) / 2.0;
-                    if(meanGroup > max){
-                        max = meanGroup;
-                        central = i;
-                    }
-
-                    if(meanGroup < min){
-                        min = meanGroup;
-                        peripheral = i;
-                    }
-                    out.write("Name, Indegree, Outdegree");
-
-                    for(CSCLIndices csclIndices: CSCLIndices.values()){
-                        if(!csclIndices.equals(CSCLIndices.INDEGREE) || !(csclIndices.equals(CSCLIndices.OUTDEGREE))){
-                            out.write("," + csclIndices.toString());
+                        double meanGroup = (VectorAlgebra.mean(indegree) + VectorAlgebra.mean(outdegree)) / 2.0;
+                        if (meanGroup > max) {
+                            max = meanGroup;
+                            central = i;
                         }
-                    }
-                    out.write("\n");
 
-                    for (int j : groups.get(i)) {
-                        out.write(participants.get(j).toString());
+                        if (meanGroup < min) {
+                            min = meanGroup;
+                            peripheral = i;
+                        }
+                        out.write("Name, Indegree, Outdegree");
+
+                        for (CSCLIndices csclIndices : CSCLIndices.values()) {
+                            if (!csclIndices.equals(CSCLIndices.INDEGREE) || !(csclIndices.equals(CSCLIndices.OUTDEGREE))) {
+                                out.write("," + csclIndices.toString());
+                            }
+                        }
+                        out.write("\n");
+
+                        for (int j : groups.get(i)) {
+                            out.write(participants.get(j).toString());
                             //add other indices
-                            for(int ind = 0; ind < CSCLIndices.values().length; ind++){
+                            for (int ind = 0; ind < CSCLIndices.values().length; ind++) {
                                 out.write("," + initialParticipants.get(j).getIndices().get(CSCLIndices.values()[ind]));
                             }
                             out.write("\n");
-
-                        System.out.print(participants.get(j).toString() + "; ");
+                        }
+                        out.write("\n");
                     }
-                    out.write("\n");
-                    System.out.println();
-                }
 
-                for (int i = 0; i < groups.size(); i++) {
-                    if(i != central && i != peripheral)
-                        active = i;
-                }
-                assessParticipantsToGroup(initialParticipants, groups, central, active, peripheral);
+                    for (int i = 0; i < groups.size(); i++) {
+                        if (i != central && i != peripheral) {
+                            active = i;
+                        }
+                    }
+                    assessParticipantsToGroup(initialParticipants, groups, central, active, peripheral);
 
-            out.close();
-                break;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+                    out.close();
+                    break;
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
         }
     }
 
-
-
-
     public static double compareParticipants(ParticipantNormalized p1, ParticipantNormalized p2) {
-        if (p1 == null || p2 == null)
+        if (p1 == null || p2 == null) {
             return -1;
+        }
         return VectorAlgebra.euclidianDistance(
                 p1.getVector(),
                 p2.getVector());
     }
 
     public static double compareGroupsOfParticipants(List<ParticipantNormalized> participants,
-                                                     List<Integer> group1, List<Integer> group2) {
+            List<Integer> group1, List<Integer> group2) {
 
         double[] meanGroup1 = computeClusterCenter(getParticipantsFromGroup(group1, participants));
         double[] meanGroup2 = computeClusterCenter(getParticipantsFromGroup(group2, participants));
 
-        double coef = (double)(group1.size() * group2.size()) / (double)(group1.size() + group2.size());
+        double coef = (double) (group1.size() * group2.size()) / (double) (group1.size() + group2.size());
         return coef * VectorAlgebra.euclidianDistance(meanGroup1, meanGroup2);
     }
 
-    public static double[] computeClusterCenter(List<ParticipantNormalized> participants){
+    public static double[] computeClusterCenter(List<ParticipantNormalized> participants) {
         double[] indegree = new double[participants.size()];
         double[] outdegree = new double[participants.size()];
 
-        for(int i = 0; i < participants.size(); i++){
+        for (int i = 0; i < participants.size(); i++) {
             indegree[i] = participants.get(i).getIndegree();
             outdegree[i] = participants.get(i).getOutdegree();
         }
-        return new double[] {VectorAlgebra.mean(indegree),
-                             VectorAlgebra.mean(outdegree)};
+        return new double[]{VectorAlgebra.mean(indegree),
+            VectorAlgebra.mean(outdegree)};
     }
 
     public static List<ParticipantNormalized> getParticipantsFromGroup(List<Integer> group,
-                                                                       List<ParticipantNormalized> allParticipants){
+            List<ParticipantNormalized> allParticipants) {
         List<ParticipantNormalized> participantFromGroup = new ArrayList<>();
-        for(Integer i: group){
+        for (Integer i : group) {
             participantFromGroup.add(allParticipants.get(i));
         }
         return participantFromGroup;
     }
 
-
-    public static double[] getIndegreeVector(List<ParticipantNormalized> participants){
+    public static double[] getIndegreeVector(List<ParticipantNormalized> participants) {
         double[] indegree = new double[participants.size()];
-        for(int i = 0; i < participants.size(); i++) {
+        for (int i = 0; i < participants.size(); i++) {
             indegree[i] = participants.get(i).getIndegree();
         }
 
         return indegree;
     }
 
-    public static double[] getOutdegreeVector(List<ParticipantNormalized> participants){
+    public static double[] getOutdegreeVector(List<ParticipantNormalized> participants) {
         double[] outdegree = new double[participants.size()];
-        for(int i = 0; i < participants.size(); i++){
+        for (int i = 0; i < participants.size(); i++) {
             outdegree[i] = participants.get(i).getOutdegree();
         }
 
@@ -377,18 +355,16 @@ public class ClusterCommunity {
     }
 
     private static void assessParticipantsToGroup(List<Participant> participants, List<List<Integer>> groups,
-                                                  int central, int active, int peripheral){
+            int central, int active, int peripheral) {
         for (int i = 0; i < groups.size(); i++) {
             ParticipantGroup group = null;
-            if(i == central){
+            if (i == central) {
                 group = ParticipantGroup.CENTRAL;
-            } else if(i == active){
+            } else if (i == active) {
                 group = ParticipantGroup.ACTIVE;
-            } else if(i == peripheral){
+            } else if (i == peripheral) {
                 group = ParticipantGroup.PERIPHERAL;
-
             }
-
             for (int j : groups.get(i)) {
                 participants.get(j).setParticipantGroup(group);
             }

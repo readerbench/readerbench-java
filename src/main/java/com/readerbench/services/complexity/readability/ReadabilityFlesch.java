@@ -6,13 +6,14 @@
 package com.readerbench.services.complexity.readability;
 
 import com.readerbench.data.AbstractDocument;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 
 /**
  *
  * @author Stefan
  */
-public class ReadabilityFlesch extends ReadabilityIndex{
+public class ReadabilityFlesch extends ReadabilityIndex {
 
     public ReadabilityFlesch() {
         super(ComplexityIndicesEnum.READABILITY_FLESCH);
@@ -20,8 +21,11 @@ public class ReadabilityFlesch extends ReadabilityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
-        Fathom.Stats stats = Fathom.analyze(d.getProcessedText());
+        if (d.getText() == null || d.getText().length() == 0) {
+            return ComplexityIndices.IDENTITY;
+        }
+        Fathom.Stats stats = Fathom.analyze(d.getText());
         return calcFlesch(stats);
     }
-    
+
 }

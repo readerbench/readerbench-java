@@ -138,8 +138,6 @@ public class ParticipantEvaluation {
                     Utterance u = (Utterance) b;
                     u.getParticipant().getIndices().put(CSCLIndices.SCORE,
                             u.getParticipant().getIndices().get(CSCLIndices.SCORE) + b.getScore());
-                    u.getParticipant().getIndices().put(CSCLIndices.PERSONAL_KB,
-                            u.getParticipant().getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
                     u.getParticipant().getIndices().put(CSCLIndices.SOCIAL_KB,
                             u.getParticipant().getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
                     u.getParticipant().getIndices().put(CSCLIndices.NO_CONTRIBUTION,
@@ -173,7 +171,7 @@ public class ParticipantEvaluation {
     }
 
     public static void performSNA(List<Participant> participants, double[][] participantContributions,
-                                  boolean needsAnonymization, String exportPath) {
+            boolean needsAnonymization, String exportPath) {
         for (int index1 = 0; index1 < participants.size(); index1++) {
             for (int index2 = 0; index2 < participants.size(); index2++) {
                 if (index1 != index2) {
@@ -183,8 +181,7 @@ public class ParticipantEvaluation {
                     participants.get(index2).getIndices().put(CSCLIndices.INDEGREE,
                             participants.get(index2).getIndices().get(CSCLIndices.INDEGREE)
                             + participantContributions[index1][index2]);
-                }
-                else {
+                } else {
                     participants.get(index1).getIndices().put(CSCLIndices.OUTDEGREE,
                             participants.get(index1).getIndices().get(CSCLIndices.OUTDEGREE)
                             + participantContributions[index1][index1]);
@@ -275,10 +272,10 @@ public class ParticipantEvaluation {
             }
         }
     }
-    
+
     public static void extractRhythmicIndex(Conversation c) {
         Map<Participant, List<Integer>> rhythmicIndPerPart = new TreeMap<>();
-        
+
         if (c.getParticipants().size() > 0) {
             for (Block b : c.getBlocks()) {
                 if (b != null) {
@@ -297,10 +294,11 @@ public class ParticipantEvaluation {
                 }
             }
         }
-        
+
         for (Entry<Participant, List<Integer>> entry : rhythmicIndPerPart.entrySet()) {
-            if (entry.getValue().isEmpty())
+            if (entry.getValue().isEmpty()) {
                 continue;
+            }
             int maxIndex = Collections.max(entry.getValue());
             entry.getKey().getIndices().put(CSCLIndices.RHYTHMIC_INDEX, 1.0 * maxIndex);
             entry.getKey().getIndices().put(CSCLIndices.FREQ_MAX_INDEX, 1.0 * Collections.frequency(entry.getValue(),
@@ -323,19 +321,22 @@ public class ParticipantEvaluation {
                     for (Sentence s : u.getSentences()) {
                         List<Word> unit = s.getAllWords();
                         List<Integer> repr = RhythmTool.getNumericalRepresentation(unit);
-                        if (repr.isEmpty())
+                        if (repr.isEmpty()) {
                             continue;
-                        int NT = (repr.get(0) == 0) ? repr.size()-1 : repr.size();
+                        }
+                        int NT = (repr.get(0) == 0) ? repr.size() - 1 : repr.size();
                         int NA = repr.stream().mapToInt(Integer::intValue).sum();
                         Map<Integer, Integer> nrSylls = cntSyllables.get(p);
                         for (Integer nr : repr) {
-                            if (nr == 0) continue;
+                            if (nr == 0) {
+                                continue;
+                            }
                             nrSylls.put(nr,
-                            nrSylls.containsKey(nr) ? nrSylls.get(nr)+1 : 1);
+                                    nrSylls.containsKey(nr) ? nrSylls.get(nr) + 1 : 1);
                         }
                         int devs = RhythmTool.calcDeviations(repr);
                         deviations.put(p,
-                        deviations.containsKey(p) ? deviations.get(p)+1 : devs);
+                                deviations.containsKey(p) ? deviations.get(p) + 1 : devs);
                     }
                 }
             }
@@ -348,12 +349,12 @@ public class ParticipantEvaluation {
                 double syllFreq = 1.0 * entry.getValue() / totalNumber;
             }
             int dominantInd = RhythmTool.getDominantIndex(nrSylls.values().stream()
-                .collect(Collectors.toList()));
+                    .collect(Collectors.toList()));
             int keyOfMaxVal = nrSylls.keySet().stream()
-                .collect(Collectors.toList()).get(dominantInd);
+                    .collect(Collectors.toList()).get(dominantInd);
             int sum = nrSylls.get(keyOfMaxVal);
-            sum += (nrSylls.containsKey(keyOfMaxVal-1)) ? nrSylls.get(keyOfMaxVal-1) : 0;
-            sum += (nrSylls.containsKey(keyOfMaxVal+1)) ? nrSylls.get(keyOfMaxVal+1) : 0;
+            sum += (nrSylls.containsKey(keyOfMaxVal - 1)) ? nrSylls.get(keyOfMaxVal - 1) : 0;
+            sum += (nrSylls.containsKey(keyOfMaxVal + 1)) ? nrSylls.get(keyOfMaxVal + 1) : 0;
             double coeff = 1.0 * (deviations.get(p) + totalNumber - sum) / totalNumber;
             p.getIndices().put(CSCLIndices.RHYTHMIC_COEFFICIENT, coeff);
         }
@@ -390,23 +391,23 @@ public class ParticipantEvaluation {
         int index, size;
         long diff;
 
-        size = (int)Math.ceil((double)chatTime / frameTime);
+        size = (int) Math.ceil((double) chatTime / frameTime);
         for (Entry<Participant, List<Date>> entry : timestamps.entrySet()) {
             List<Double> arr = new ArrayList<>(Collections.nCopies(size, 0.0));
             for (Date d : entry.getValue()) {
                 diff = (d.getTime() - chatStartTime.getTime()) / 1000;
-                index = (int)Math.floor((double)diff / frameTime);
+                index = (int) Math.floor((double) diff / frameTime);
                 arr.set(index, arr.get(index) + 1);
             }
             noInterventions.put(entry.getKey(), arr);
         }
 
         for (Entry<Participant, List<Double>> entry : noInterventions.entrySet()) {
-            double value = CSCLCriteria.getValue(CSCLCriteria.PEAK_CHAT_FRAME, 
+            double value = CSCLCriteria.getValue(CSCLCriteria.PEAK_CHAT_FRAME,
                     entry.getValue().stream().mapToDouble(d -> d).toArray());
             entry.getKey().getIndices().put(CSCLIndices.PERSONAL_REGULARITY_ENTROPY, value);
 //            System.out.println(entry.getKey().getName() + " " + value);
         }
-        
+
     }
 }

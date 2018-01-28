@@ -16,13 +16,14 @@
 package com.readerbench.services.complexity.readability;
 
 import com.readerbench.data.AbstractDocument;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class ReadabilityKincaid extends ReadabilityIndex{
+public class ReadabilityKincaid extends ReadabilityIndex {
 
     public ReadabilityKincaid() {
         super(ComplexityIndicesEnum.READABILITY_KINCAID);
@@ -30,8 +31,11 @@ public class ReadabilityKincaid extends ReadabilityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
-        Fathom.Stats stats = Fathom.analyze(d.getProcessedText());
+        if (d.getText() == null || d.getText().length() == 0) {
+            return ComplexityIndices.IDENTITY;
+        }
+        Fathom.Stats stats = Fathom.analyze(d.getText());
         return calcKincaid(stats);
     }
-    
+
 }

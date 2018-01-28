@@ -1,21 +1,18 @@
-/*************************************************************************
- * ADOBE CONFIDENTIAL
- * ___________________
+/*
+ * Copyright 2018 ReaderBench.
  *
- *  Copyright 2016 Adobe Systems Incorporated
- *  All Rights Reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * NOTICE:  All information contained herein is, and remains
- * the property of Adobe Systems Incorporated and its suppliers,
- * if any.  The intellectual and technical concepts contained
- * herein are proprietary to Adobe Systems Incorporated and its
- * suppliers and are protected by all applicable intellectual property
- * laws, including trade secret and copyright laws.
- * Dissemination of this information or reproduction of this material
- * is strictly forbidden unless prior written permission is obtained
- * from Adobe Systems Incorporated.
- **************************************************************************/
-
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.readerbench.data.cscl;
 
 import java.util.Arrays;
@@ -87,19 +84,32 @@ public class ParticipantNormalized {
         return name + "," + indegree + "," + outdegree;
     }
 
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ParticipantNormalized)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ParticipantNormalized)) {
+            return false;
+        }
 
         ParticipantNormalized that = (ParticipantNormalized) o;
 
-        if (Double.compare(that.eccentricity, eccentricity) != 0) return false;
-        if (Double.compare(that.indegree, indegree) != 0) return false;
-        if (Double.compare(that.outdegree, outdegree) != 0) return false;
-        if (!name.equals(that.name)) return false;
-        if (!Arrays.equals(vector, that.vector)) return false;
+        if (Double.compare(that.eccentricity, eccentricity) != 0) {
+            return false;
+        }
+        if (Double.compare(that.indegree, indegree) != 0) {
+            return false;
+        }
+        if (Double.compare(that.outdegree, outdegree) != 0) {
+            return false;
+        }
+        if (!name.equals(that.name)) {
+            return false;
+        }
+        if (!Arrays.equals(vector, that.vector)) {
+            return false;
+        }
 
         return true;
     }
@@ -118,4 +128,3 @@ public class ParticipantNormalized {
         return result;
     }
 }
-

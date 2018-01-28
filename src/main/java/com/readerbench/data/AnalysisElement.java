@@ -15,6 +15,7 @@
  */
 package com.readerbench.data;
 
+import com.readerbench.data.cscl.Utterance;
 import com.readerbench.data.discourse.Keyword;
 import com.readerbench.data.sentiment.SentimentEntity;
 import com.readerbench.services.semanticModels.ISemanticModel;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
+
 /**
  * This abstract class is the base for all type of elements. It is extended
  * later for all processing elements in the following hierarchical order:
@@ -320,7 +322,6 @@ public abstract class AnalysisElement implements Serializable {
         this.voiceDistribution = voiceDistribution;
     }
 
-
     public double[] getExtendedVoiceDistribution() {
         return extendedVoiceDistribution;
     }
@@ -380,10 +381,10 @@ public abstract class AnalysisElement implements Serializable {
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + this.index;
-        hash = 71 * hash + Objects.hashCode(this.text);
-        return hash;
+        if (this instanceof Utterance) {
+            return Objects.hash(this.index, this.text, ((Utterance) this).getTime(), this.getContainer());
+        }
+        return Objects.hash(this.index, this.text, this.getContainer());
     }
 
     @Override
@@ -404,8 +405,9 @@ public abstract class AnalysisElement implements Serializable {
         if (!Objects.equals(this.text, other.text)) {
             return false;
         }
-        return true;
+        if (this instanceof Utterance && other instanceof Utterance && !Objects.equals(((Utterance) this).getTime(), ((Utterance) other).getTime())) {
+            return false;
+        }
+        return Objects.equals(this.getContainer(), other.getContainer());
     }
-
-
 }

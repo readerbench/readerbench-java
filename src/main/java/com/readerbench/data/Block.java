@@ -106,14 +106,8 @@ public class Block extends AnalysisElement implements Serializable {
     }
 
     public static void addBlock(AbstractDocument d, Block b) {
-//        if (b.getIndex() != -1) {
-//            while (d.getBlocks().size() < b.getIndex()) {
-//                d.getBlocks().add(null);
-//            }s
-//            d.getBlocks().add(b.getIndex(), b);
-//        } else {
         d.getBlocks().add(b);
-//        }
+        d.setText(d.getText() + b.getText() + "\n");
         d.setProcessedText(d.getProcessedText() + b.getProcessedText() + "\n");
     }
 
@@ -317,14 +311,14 @@ public class Block extends AnalysisElement implements Serializable {
                 .flatMap(s -> s.getBiGrams().stream())
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public List<NGram> getNGrams(int n) {
         return sentences.stream()
                 .flatMap(s -> s.getNGrams(n).stream())
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     public String toString() {
         String s = "";

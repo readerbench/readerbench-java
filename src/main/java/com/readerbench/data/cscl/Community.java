@@ -114,7 +114,7 @@ public class Community extends AnalysisElement {
                     for (Block b : p.getContributions().getBlocks()) {
                         Utterance u = (Utterance) b;
                         // select contributions in imposed timeframe
-                        if (u != null && u.getTime() !=  null && u.isEligible(startDate, endDate)) {
+                        if (u != null && u.getTime() != null && u.isEligible(startDate, endDate)) {
                             // determine first timestamp of considered contributions
                             if (firstContributionDate == null) {
                                 firstContributionDate = u.getTime();
@@ -137,7 +137,6 @@ public class Community extends AnalysisElement {
                             if (u.getTime().after(lastContributionDate)) {
                                 lastContributionDate = u.getTime();
                             }
-                            b.setIndex(-1);
                             Block.addBlock(participantToUpdate.getContributions(), b);
                             if (b.isSignificant()) {
                                 Block.addBlock(participantToUpdate.getSignificantContributions(), b);
@@ -181,8 +180,6 @@ public class Community extends AnalysisElement {
                         Participant participantToUpdate = participants.get(index1);
                         participantToUpdate.getIndices().put(CSCLIndices.SCORE,
                                 participantToUpdate.getIndices().get(CSCLIndices.SCORE) + u.getScore());
-                        participantToUpdate.getIndices().put(CSCLIndices.PERSONAL_KB,
-                                participantToUpdate.getIndices().get(CSCLIndices.PERSONAL_KB) + u.getPersonalKB());
                         participantToUpdate.getIndices().put(CSCLIndices.SOCIAL_KB,
                                 participantToUpdate.getIndices().get(CSCLIndices.SOCIAL_KB) + u.getSocialKB());
 
@@ -270,9 +267,7 @@ public class Community extends AnalysisElement {
         });
 
         //export(fileName + ".csv", modelTimeEvolution, additionalInfo);
-
         if (useTextualComplexity) {
-
             LOGGER.info(participants.toString());
             // determine complexity indices
             for (Participant p : participants) {
@@ -394,9 +389,9 @@ public class Community extends AnalysisElement {
         return community;
     }
 
-    public com.readerbench.data.cscl.Community loadMultipleConversations (List<AbstractDocument> abstractDocumentList, Lang lang,
-                                                                          boolean needsAnonymization, Date startDate, Date endDate,
-                                                                          int monthIncrement, int dayIncrement, String path) {
+    public com.readerbench.data.cscl.Community loadMultipleConversations(List<AbstractDocument> abstractDocumentList, Lang lang,
+            boolean needsAnonymization, Date startDate, Date endDate,
+            int monthIncrement, int dayIncrement, String path) {
 
         com.readerbench.data.cscl.Community community = new com.readerbench.data.cscl.Community(lang, needsAnonymization, startDate, endDate);
         community.setPath(path);
@@ -433,15 +428,6 @@ public class Community extends AnalysisElement {
         return community;
     }
 
-//todo - check
-//    public void generateParticipantView(String path) {
-//        EventQueue.invokeLater(() -> {
-//            ParticipantInteractionView view = new ParticipantInteractionView(path, participants,
-//                    participantContributions, true, needsAnonymization);
-//            view.setVisible(true);
-//        });
-//    }
-
     /**
      * Generate participants view for communities
      *
@@ -470,6 +456,10 @@ public class Community extends AnalysisElement {
     /**
      * Generate json file with all participants for graph representation (using
      * d3.js)
+     *
+     * @param communityName
+     * @param week
+     * @return
      */
     public JSONObject generateParticipantViewD3(String communityName, Integer week) {
 
@@ -483,8 +473,8 @@ public class Community extends AnalysisElement {
 
         for (int row = 0; row < this.participantContributions.length; row++) {
             for (int col = 0; col < this.participantContributions[row].length; col++) {
-                if (this.participantContributions[row][col] > 0 && this.participants.get(row).getParticipantGroup() != null &&
-                        this.participants.get(col).getParticipantGroup() != null ) {
+                if (this.participantContributions[row][col] > 0 && this.participants.get(row).getParticipantGroup() != null
+                        && this.participants.get(col).getParticipantGroup() != null) {
                     JSONObject link = new JSONObject();
                     link.put("source", row);
                     link.put("target", col);
@@ -492,25 +482,24 @@ public class Community extends AnalysisElement {
                     links.add(link);
 
                     if (!names.contains(this.participants.get(row).getName())) {
-                        names.add( this.participants.get(row).getName());
+                        names.add(this.participants.get(row).getName());
                         JSONObject rowP = new JSONObject();
                         rowP.put("name", this.participants.get(row).getName());
                         rowP.put("id", row);
 
-
-                        rowP.put("value", (this.participants.get(row).getIndices().get(CSCLIndices.INDEGREE) +
-                                this.participants.get(row).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
+                        rowP.put("value", (this.participants.get(row).getIndices().get(CSCLIndices.INDEGREE)
+                                + this.participants.get(row).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
                         rowP.put("group", this.participants.get(row).getParticipantGroup().getClusterNo());
                         nodes.add(rowP);
                     }
 
                     if (!names.contains(this.participants.get(col).getName())) {
-                        names.add( this.participants.get(col).getName());
+                        names.add(this.participants.get(col).getName());
                         JSONObject colP = new JSONObject();
                         colP.put("name", this.participants.get(col).getName());
                         colP.put("id", col);
-                        colP.put("value", (this.participants.get(col).getIndices().get(CSCLIndices.INDEGREE) +
-                                this.participants.get(col).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
+                        colP.put("value", (this.participants.get(col).getIndices().get(CSCLIndices.INDEGREE)
+                                + this.participants.get(col).getIndices().get(CSCLIndices.OUTDEGREE)) / 2);
                         colP.put("group", this.participants.get(col).getParticipantGroup().getClusterNo());
                         nodes.add(colP);
                     }
@@ -527,11 +516,11 @@ public class Community extends AnalysisElement {
         jsonObject.put("endDate", getLastContributionDate().getTime());
 
         return jsonObject;
-
     }
 
     /**
      * Create json object for hierarchical edge bundling
+     *
      * @param communityName - community name
      * @param week - week
      * @return
@@ -539,7 +528,6 @@ public class Community extends AnalysisElement {
     public JSONObject generateHierarchicalEdgeBundling(String communityName, Integer week) {
         JSONObject finalResult = new JSONObject();
         JSONArray edgeBundling = new JSONArray();
-        System.out.println("participantContributions generateHierarchicalEdgeBundling: ");
 
         try {
             for (int row = 0; row < this.participantContributions.length; row++) {
@@ -559,7 +547,7 @@ public class Community extends AnalysisElement {
 
                     }
                 }
-                if (participantJsonArray.size() != 0) {
+                if (!participantJsonArray.isEmpty()) {
                     participantObject.put("imports", participantJsonArray);
                 }
 
@@ -574,21 +562,12 @@ public class Community extends AnalysisElement {
             finalResult.put("week", week);
             finalResult.put("startDate", getFistContributionDate().getTime());
             finalResult.put("endDate", getLastContributionDate().getTime());
-
         } catch (Exception e) {
             LOGGER.error("Cannot create json array ...");
-            throw  new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         return finalResult;
     }
-
-//todo - check
-//    public void generateConceptView(String path) {
-//        EventQueue.invokeLater(() -> {
-//            DocConceptView conceptView = new DocConceptView(KeywordModeling.getCollectionTopics(documents), path);
-//            conceptView.setVisible(true);
-//        });
-//    }
 
     public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
         LOGGER.info("Writing document collection export");
@@ -689,6 +668,7 @@ public class Community extends AnalysisElement {
 
     /**
      * Export Individual Stats and Initiation
+     *
      * @param pathToFileIndividualStats - path to file with Individual State
      * @param pathToFileInitiation - path to file with Initiation
      */
@@ -697,8 +677,8 @@ public class Community extends AnalysisElement {
         // print participant statistics
         try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileIndividualStats)), "UTF-8"), 32768);
-             BufferedWriter outInitiation = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-                     new File(pathToFileInitiation)), "UTF-8"), 32768)) {
+                BufferedWriter outInitiation = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                        new File(pathToFileInitiation)), "UTF-8"), 32768)) {
 
             // print participant statistics
             if (participants.size() > 0) {
@@ -740,9 +720,10 @@ public class Community extends AnalysisElement {
 
     /**
      * Export Textual Complexity
+     *
      * @param pathToFileTextualComplexity - path to file
      */
-    public void exportTextualComplexity (String pathToFileTextualComplexity) {
+    public void exportTextualComplexity(String pathToFileTextualComplexity) {
         LOGGER.info("Writing Textual Complexity export");
         try (BufferedWriter outTextualComplexity = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileTextualComplexity)), "UTF-8"), 32768)) {
@@ -779,9 +760,10 @@ public class Community extends AnalysisElement {
 
     /**
      * Export Time Analysis
+     *
      * @param pathToFileTimeAnalysis
      */
-    public void exportTimeAnalysis (String pathToFileTimeAnalysis) {
+    public void exportTimeAnalysis(String pathToFileTimeAnalysis) {
         LOGGER.info("Writing Time Analysis export");
         try (BufferedWriter outTimeAnalysis = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileTimeAnalysis)), "UTF-8"), 32768)) {
@@ -823,6 +805,7 @@ public class Community extends AnalysisElement {
 
     /**
      * Export discussed topics
+     *
      * @param pathToFileDiscussedTopics - path to file
      */
     public void exportDiscussedTopics(String pathToFileDiscussedTopics) {
@@ -849,9 +832,10 @@ public class Community extends AnalysisElement {
 
     /**
      * Export individual threads statistics
+     *
      * @param pathToFile - path to file
      */
-    public void exportIndividualThreadStatistics (String pathToFile) {
+    public void exportIndividualThreadStatistics(String pathToFile) {
         LOGGER.info("Writing Individual Threads Statistics export");
         try (BufferedWriter outIndividualThreadsStatistics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFile)), "UTF-8"), 32768)) {
@@ -859,20 +843,20 @@ public class Community extends AnalysisElement {
             if (participants.size() > 0) {
                 // print general statistic per thread
                 outIndividualThreadsStatistics.write("\nIndividual thread statistics\n");
-                outIndividualThreadsStatistics.write("Thread path,No. contributions,No. involved paticipants," +
-                        "Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
+                outIndividualThreadsStatistics.write("Thread path,No. contributions,No. involved paticipants,"
+                        + "Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
                 for (AbstractDocument d : documents) {
                     int noBlocks = 0;
                     noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
 
                     outIndividualThreadsStatistics.write(
                             new File(d.getPath()).getName() + "," + noBlocks + ","
-                                    + ((Conversation) d).getParticipants().size() + ","
-                                    + Formatting.formatNumber(d.getScore()) + ","
-                                    + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-                                    + ","
-                                    + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-                                    + "\n");
+                            + ((Conversation) d).getParticipants().size() + ","
+                            + Formatting.formatNumber(d.getScore()) + ","
+                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                            + ","
+                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                            + "\n");
                 }
             }
 
@@ -885,6 +869,9 @@ public class Community extends AnalysisElement {
 
     /**
      * Write individual stats to Elasticsearch
+     * @param communityName
+     * @param week
+     * @return 
      */
     public List<Map<String, Object>> writeIndividualStatsToElasticsearch(String communityName, Integer week) {
         LOGGER.info("Writing Individual Stats to Elasticsearch");
@@ -897,7 +884,7 @@ public class Community extends AnalysisElement {
                 Map<String, Object> participantStats = new HashMap<>();
                 for (CSCLIndices CSCLindex : CSCLIndices.values()) {
                     if (CSCLindex.isIndividualStatsIndex()) {
-                        participantStats.put(CSCLindex.getAcronym(),Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                        participantStats.put(CSCLindex.getAcronym(), Formatting.formatNumber(p.getIndices().get(CSCLindex)));
                     }
                 }
                 participantStats.put("participantName", p.getName());
@@ -917,34 +904,33 @@ public class Community extends AnalysisElement {
         return participantsStats;
     }
 
-
-   public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity, 
+    public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity,
             boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
             boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
         Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
         if (dc != null) {
             dc.computeMetrics(useTextualComplexity, true, true);
             File f = new File(rootPath);
-            
+
             if (exportIntoCsv) {
                 dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
             }
-            
+
             if (generateParticipantView) {
                 //todo - check
                 //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
             }
-            
+
             if (generateParticipantViewD3) {
                 //todo - create a method with this parameter
                 //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
             }
-            
+
             if (generateParticipantViewSubCommunities) {
                 //todo - create a method with this parameter
                 //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
             }
-            
+
             if (generateConceptView) {
                 //todo - check
                 //dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
@@ -986,7 +972,6 @@ public class Community extends AnalysisElement {
 //                CommunityInteraction.buildParticipantGraph(allCommunities, true), null, null);
 //
 //    }
-
     public String getPath() {
         return path;
     }

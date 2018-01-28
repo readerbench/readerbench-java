@@ -68,7 +68,6 @@ public class Document extends AbstractDocument implements Comparable<Document> {
 
     public Document(String path, AbstractDocumentTemplate docTmp, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(path, models, lang);
-        this.setText(docTmp.getText());
         setDocTmp(docTmp);
         Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }

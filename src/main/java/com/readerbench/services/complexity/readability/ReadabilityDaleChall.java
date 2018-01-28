@@ -16,13 +16,14 @@
 package com.readerbench.services.complexity.readability;
 
 import com.readerbench.data.AbstractDocument;
+import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComplexityIndicesEnum;
 
 /**
  *
  * @author Stefan Ruseti
  */
-public class ReadabilityDaleChall extends ReadabilityIndex{
+public class ReadabilityDaleChall extends ReadabilityIndex {
 
     public ReadabilityDaleChall() {
         super(ComplexityIndicesEnum.READABILITY_DALE_CHALL);
@@ -30,7 +31,10 @@ public class ReadabilityDaleChall extends ReadabilityIndex{
 
     @Override
     public double compute(AbstractDocument d) {
+        if (d.getText() == null || d.getText().length() == 0) {
+            return ComplexityIndices.IDENTITY;
+        }
         return computeDaleChall(d);
     }
-    
+
 }
