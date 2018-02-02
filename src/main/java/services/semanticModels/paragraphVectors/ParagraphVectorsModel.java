@@ -223,9 +223,16 @@ public class ParagraphVectorsModel implements ISemanticModel {
     
     public static void main(String[] args) throws FileNotFoundException {
         
-        trainModel("resources/config/EN/TasaHClustering/train.txt");
+//        trainModel("resources/config/EN/TasaHClustering/train.txt");
 //        ParagraphVectorsModel pv = ParagraphVectorsModel.loadParagraphVectors("resources/config/EN/TasaHClustering", Lang.en);
 //        System.out.println(pv.getNoDimensions());
 //        System.out.println(pv.getWordSet().size());
+        try {
+            System.out.println(getClient().loadModel("resources/config/EN/TasaHClustering"));
+        } catch (TTransportException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (TException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 }
