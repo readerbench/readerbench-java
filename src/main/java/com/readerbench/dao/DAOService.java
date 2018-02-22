@@ -16,6 +16,12 @@
 package com.readerbench.dao;
 
 import com.readerbench.services.commons.ReadPropertiesFile;
+import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -23,6 +29,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import java.util.Properties;
 import java.util.function.Function;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -39,8 +46,35 @@ public class DAOService {
 
     private DAOService() {
         Properties p = ReadPropertiesFile.getProperties("db.properties");
+        makeTmpProperties(p);
         emf = Persistence.createEntityManagerFactory("ReaderBench", p);
         em = emf.createEntityManager();
+    }
+    
+    private void makeTmpProperties(Properties p) {
+        try {
+            // Create tmp folder
+            Path filePath = Files.createTempFile("temp", "");
+            if (p.containsKey("javax.persistence.jdbc.url")) {
+                String value = p.getProperty("javax.persistence.jdbc.url", null);
+                
+                if (value != null) {
+                    String[] parts = value.split(":");
+                    String pathToDbFileString = parts[parts.length - 1];
+                    Path pathToDbFile = Paths.get(pathToDbFileString);
+                    Long timestamp = System.currentTimeMillis();
+                    CopyOption[] options = new CopyOption[]{
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.COPY_ATTRIBUTES
+                    }; 
+                    Files.copy(pathToDbFile, filePath, options);
+                    
+                    p.setProperty("javax.persistence.jdbc.url", "jdbc:sqlite:" + filePath.toString());
+                }
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     public static DAOService getInstance() {
@@ -55,9 +89,9 @@ public class DAOService {
     public <T> T executeQuery(Function<EntityManager, T> f) {
         synchronized (this) {
             try {
-                em.getTransaction().begin();
+                //em.getTransaction().begin();
                 T result = f.apply(em);
-                em.getTransaction().commit();
+                //em.getTransaction().commit();
                 return result;
             } catch (NoResultException ex) {
                 if (em.getTransaction().isActive()) {

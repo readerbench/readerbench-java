@@ -82,7 +82,7 @@ public class Word2VecModel implements ISemanticModel {
     }
 
     public static Word2VecModel loadFromTextFile(String path, Lang language) {
-        try (BufferedReader in = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader in = new BufferedReader(new FileReader(path + "/word2vec.model"))) {
             String[] line = in.readLine().split(" ");
             int nWords = Integer.parseInt(line[0]);
             int dim = Integer.parseInt(line[1]);
@@ -105,7 +105,6 @@ public class Word2VecModel implements ISemanticModel {
     }
     
     public static Word2VecModel loadWord2Vec(String path, Lang language) {
-        path += "/word2vec.model";
         for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
             if (path.equals(w2v.getPath())) {
                 return w2v;

@@ -325,14 +325,22 @@ public abstract class AbstractDocument extends AnalysisElement {
 
         return null;
     }
+    
+    public void setModelPaths() {
+        modelPaths = new EnumMap<>(SimilarityType.class);
+        for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+            modelPaths.put(e.getKey(), e.getValue().getPath());
+        }
+    }
+
+    public Map<SimilarityType, String> getModelPaths() {
+        return modelPaths;
+    }
 
     public void saveSerializedDocument() {
         LOGGER.info("Saving serialized document ...");
         try {
-            modelPaths = new EnumMap<>(SimilarityType.class);
-            for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
-                modelPaths.put(e.getKey(), e.getValue().getPath());
-            }
+            setModelPaths();
             FileOutputStream fos;
             fos = new FileOutputStream(new File(getPath().replace(".xml", ".ser")));
             try (ObjectOutputStream out = new ObjectOutputStream(fos)) {
