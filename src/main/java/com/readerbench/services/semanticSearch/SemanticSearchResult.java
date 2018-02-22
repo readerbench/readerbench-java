@@ -16,10 +16,12 @@
 package com.readerbench.services.semanticSearch;
 
 import com.readerbench.data.AbstractDocument;
+import java.io.Serializable;
 
-public class SemanticSearchResult implements Comparable<SemanticSearchResult> {
+public class SemanticSearchResult implements Comparable<SemanticSearchResult>, Serializable {
 	private AbstractDocument doc;
 	private double relevance;
+        private static final long serialVersionUID = 2L;
 
 	public SemanticSearchResult(AbstractDocument doc, double relevance) {
 		super();
