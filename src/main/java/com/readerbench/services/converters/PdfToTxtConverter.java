@@ -69,6 +69,10 @@ public class PdfToTxtConverter {
         else url = resourcePath;
     }
 
+    public String getError() {
+        return error;
+    }
+    
     public String getFileName() {
         return fileName;
     }
