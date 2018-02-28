@@ -37,6 +37,7 @@ public class PdfToTxtConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PdfToTxtConverter.class);
     
+    private String error;
     private String fileName;
     private String url;
     private String parsedText;
@@ -175,7 +176,7 @@ public class PdfToTxtConverter {
     /**
      * Extract text from PDF resource.
      */
-    public void process() {
+    public boolean process() {
         PDFParser pdfParser;
         CVPDFTextStripper pdfStripper;
         PDDocument pdDoc = null;
@@ -199,8 +200,8 @@ public class PdfToTxtConverter {
                 // process local file
                 tmpFile = new File(fileName);
                 if (!tmpFile.isFile()) {
-                    System.err.println("File " + fileName + " does not exist.");
-                    System.exit(-1);
+                    this.error = "File " + fileName + " does not exist.";
+                    return false;
                 }
             }
             
@@ -332,6 +333,8 @@ public class PdfToTxtConverter {
                 System.err.println("Unable to close PDF Parser. " + e.getMessage());
             }
         }
+        
+        return true;
     }
 
     /**
