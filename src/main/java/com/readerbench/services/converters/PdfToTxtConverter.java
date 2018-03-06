@@ -384,10 +384,13 @@ public class PdfToTxtConverter {
             while ((line = bufferReader.readLine()) != null) {
                 for (String socialNetwork : socialNetworks) {
                     if (socialNetworkLinks.get(socialNetwork) == null) {
+                        line = line.trim();
+                        line += ' ';
+                        String lowerCaseLine = line.toLowerCase();
                         int pos;
-                        if (-1 != (pos = line.toLowerCase().indexOf(socialNetwork.toLowerCase()))) {
-                            int start = line.toLowerCase().substring(0, pos).lastIndexOf("http");
-                            int end = line.indexOf(' ', pos);
+                        if (-1 != (pos = lowerCaseLine.indexOf(socialNetwork.toLowerCase()))) {
+                            int start = lowerCaseLine.substring(0, pos).lastIndexOf("http");
+                            int end = lowerCaseLine.indexOf(' ', pos);
                             socialNetworkLinks.put(socialNetwork, line.substring(start, end));
                             break;
                         }
