@@ -70,7 +70,7 @@ public class LDA implements ISemanticModel, Serializable {
         this.path = path;
         LOGGER.info("Loading LDA model {} ...", path);
         try {
-            wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/LDA-small.model");
+            wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/lda.model");
             numTopics = wordProbDistributions.entrySet().stream()
                     .map(e -> e.getValue().length)
                     .findFirst().orElse(0);
@@ -238,7 +238,7 @@ public class LDA implements ISemanticModel, Serializable {
 
         // save the trained model
         //ObjectManipulation.saveObject(model, path + "/LDA.model");
-        ObjectManipulation.saveObject(buildWordVectors(model, language), path + "/LDA-small.model");
+        ObjectManipulation.saveObject(buildWordVectors(model, language), path + "/lda.model");
 
         LDA lda = new LDA(path, language);
         lda.printTopics(100);
@@ -506,7 +506,7 @@ public class LDA implements ISemanticModel, Serializable {
                 for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith(".") && !file.getName().equals("INL"))) {
                     ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject(folder.getPath() + "/LDA.model");
                     Map<Word, double[]> vectors = buildWordVectors(model, Lang.valueOf(lang.getName().toLowerCase()));
-                    ObjectManipulation.saveObject(vectors, folder.getPath() + "/LDA-small.model");
+                    ObjectManipulation.saveObject(vectors, folder.getPath() + "/lda.model");
                     System.out.println("Converted: " + folder.getPath());
                 }
             } catch (Exception ex) {
@@ -519,6 +519,6 @@ public class LDA implements ISemanticModel, Serializable {
         convertModels();
 //        ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject("resources/config/NL/LDA/INL/LDA.model");
 //        Map<Word, double[]> vectors = buildWordVectors(model, Lang.nl);
-//        ObjectManipulation.saveObject(vectors, "resources/config/NL/LDA/INL/LDA-small.model");
+//        ObjectManipulation.saveObject(vectors, "resources/config/NL/LDA/INL/lda.model");
     }
 }
