@@ -20,7 +20,7 @@ import com.readerbench.data.Lang;
 import com.readerbench.data.Word;
 import edu.stanford.nlp.ling.IndexedWord;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
-import com.readerbench.readerbenchcore.nlp.lemmatizer.StaticLemmatizer;
+import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
 
 import java.util.ArrayList;
 import java.util.Iterator;

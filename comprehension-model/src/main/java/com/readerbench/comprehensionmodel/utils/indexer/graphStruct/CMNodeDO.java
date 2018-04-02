@@ -15,7 +15,7 @@
  */
 package com.readerbench.comprehensionmodel.utils.indexer.graphStruct;
 
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
 
 public class CMNodeDO implements Comparable<CMNodeDO> {
 

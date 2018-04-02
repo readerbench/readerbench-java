@@ -1,7 +1,7 @@
 package com.readerbench.datasourceprovider.dao.hibernate;
 
 import com.readerbench.dao.WordDAO;
-import com.readerbench.readerbenchcore.data.sentiment.SentimentWeights;
+import com.readerbench.datasourceprovider.data.sentiment.SentimentWeights;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -18,6 +18,6 @@ public class SQLiteDatabase {
         LOGGER.info("Words initialization finished");
 
         SentimentWeights.initialize();
-        LOGGER.info("Valence map has {} sentiments after initialization.", com.readerbench.readerbenchcore.data.sentiment.SentimentValence.getValenceMap().size());
+        LOGGER.info("Valence map has {} sentiments after initialization.", com.readerbench.datasourceprovider.data.sentiment.SentimentValence.getValenceMap().size());
     }
 }

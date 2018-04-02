@@ -9,8 +9,8 @@ import com.readerbench.data.AbstractDocument;
 import edu.stanford.nlp.util.Pair;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.nlp.listOfWords.ClassesOfWords;
-import com.readerbench.readerbenchcore.nlp.listOfWords.ListOfWords;
+import com.readerbench.coreservices.nlp.listOfWords.ClassesOfWords;
+import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
 
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;

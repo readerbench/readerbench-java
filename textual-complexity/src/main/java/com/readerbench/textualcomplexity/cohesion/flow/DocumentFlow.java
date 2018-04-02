@@ -3,7 +3,7 @@ package com.readerbench.textualcomplexity.cohesion.flow;
 import com.readerbench.data.AbstractDocument;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import com.readerbench.textualcomplexity.ComplexityIndices;
-import com.readerbench.readerbenchcore.semanticModels.SimilarityType;
+import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -15,12 +15,12 @@
  */
 package com.readerbench.ageofexposure;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
-import com.readerbench.readerbenchcore.data.document.Document;
-import com.readerbench.readerbenchcore.converters.GenericTasaDocument;
-import com.readerbench.readerbenchcore.converters.SplitTASA;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Lang;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.data.ourceprovider.data.document.Document;
+import com.readerbench.coreservices.converters.GenericTasaDocument;
+import com.readerbench.coreservices.converters.SplitTASA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

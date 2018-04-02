@@ -68,8 +68,7 @@ public class DAOService {
                 }
             }
         } catch (IOException ex) {
-            //Exceptions.printStackTrace(ex);
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
     }
 

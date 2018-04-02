@@ -15,8 +15,8 @@
  */
 package com.readerbench.ageofexposure;
 
-import com.readerbench.readerbenchcore.converters.GenericTasaDocument;
-import com.readerbench.readerbenchcore.converters.SplitTASA;
+import com.readerbench.coreservices.converters.GenericTasaDocument;
+import com.readerbench.coreservices.converters.SplitTASA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

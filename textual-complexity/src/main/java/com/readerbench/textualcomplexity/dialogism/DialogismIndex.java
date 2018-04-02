@@ -16,7 +16,7 @@
 package com.readerbench.textualcomplexity.dialogism;
 
 import com.readerbench.data.AbstractDocument;
-import com.readerbench.readerbenchcore.data.discourse.SemanticChain;
+import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

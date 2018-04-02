@@ -20,7 +20,7 @@ import com.readerbench.data.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.nlp.listOfWords.ClassesOfWords;
+import com.readerbench.coreservices.nlp.listOfWords.ClassesOfWords;
 
 /**
  *

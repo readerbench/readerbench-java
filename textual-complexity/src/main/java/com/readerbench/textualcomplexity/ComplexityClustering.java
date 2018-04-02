@@ -6,8 +6,8 @@
 package com.readerbench.textualcomplexity;
 
 import com.readerbench.data.AbstractDocument;
-import com.readerbench.readerbenchcore.commons.Clustering;
-import com.readerbench.readerbenchcore.commons.VectorAlgebra;
+import com.readerbench.coreservices.commons.Clustering;
+import com.readerbench.coreservices.commons.VectorAlgebra;
 
 /**
  *

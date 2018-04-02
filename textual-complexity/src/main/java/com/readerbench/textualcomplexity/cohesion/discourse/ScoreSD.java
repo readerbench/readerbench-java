@@ -17,7 +17,7 @@ package com.readerbench.textualcomplexity.cohesion.discourse;
 
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.AnalysisElement;
-import com.readerbench.readerbenchcore.commons.DoubleStatistics;
+import com.readerbench.coreservices.commons.DoubleStatistics;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

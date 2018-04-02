@@ -8,7 +8,7 @@ package com.readerbench.textualcomplexity.rhythm.tools;
 import com.readerbench.data.Lang;
 import com.readerbench.data.Syllable;
 import com.readerbench.data.Word;
-import com.readerbench.readerbenchcore.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 
 import java.util.*;
 import java.util.stream.Collectors;

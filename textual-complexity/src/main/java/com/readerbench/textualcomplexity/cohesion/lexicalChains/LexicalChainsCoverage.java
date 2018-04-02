@@ -19,7 +19,7 @@ import com.readerbench.data.AbstractDocument;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.discourse.dialogism.DialogismComputations;
+import com.readerbench.coreservices.dialogism.DialogismComputations;
 
 /**
  *

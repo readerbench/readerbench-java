@@ -9,7 +9,7 @@ import com.readerbench.data.*;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 
 import java.util.ArrayList;
 import java.util.List;

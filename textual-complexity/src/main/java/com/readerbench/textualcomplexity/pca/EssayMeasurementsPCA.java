@@ -3,7 +3,7 @@ package com.readerbench.textualcomplexity.pca;
 import org.apache.commons.lang3.StringUtils;
 import org.rosuda.JRI.REXP;
 import org.rosuda.JRI.Rengine;
-import com.readerbench.readerbenchcore.commons.VectorAlgebra;
+import com.readerbench.coreservices.commons.VectorAlgebra;
 
 import java.io.*;
 import java.util.*;

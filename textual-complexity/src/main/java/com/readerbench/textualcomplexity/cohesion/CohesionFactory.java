@@ -29,7 +29,7 @@ import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsAvg
 import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsCoverage;
 import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsMaxSpan;
 import com.readerbench.textualcomplexity.cohesion.semantic.*;
-import com.readerbench.readerbenchcore.semanticModels.SimilarityType;
+import com.readerbench.coreservices.semanticModels.SimilarityType;
 import com.readerbench.textualcomplexity.IndexLevel;
 
 import java.util.ArrayList;

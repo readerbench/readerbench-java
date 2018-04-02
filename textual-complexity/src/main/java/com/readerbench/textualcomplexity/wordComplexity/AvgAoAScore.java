@@ -5,13 +5,14 @@
  */
 package com.readerbench.textualcomplexity.wordComplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Word;
 import edu.stanford.nlp.util.StringUtils;
-import org.openide.util.Exceptions;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.IndexLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
@@ -21,6 +22,8 @@ import java.util.*;
  * @author stefan
  */
 public class AvgAoAScore extends AbstractComplexityIndex {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AvgAoAScore.class);
 
     private Map<String, Double> map;
 
@@ -79,10 +82,10 @@ public class AvgAoAScore extends AbstractComplexityIndex {
                 }
             }
             catch (FileNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
+                LOGGER.error(ex.getMessage());
             }
             catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+                LOGGER.error(ex.getMessage());
             }
         }
         try (PrintWriter out = new PrintWriter(output)) {
@@ -107,7 +110,7 @@ public class AvgAoAScore extends AbstractComplexityIndex {
             }
         }
         catch (FileNotFoundException ex) {
-            Exceptions.printStackTrace(ex);
+            LOGGER.error(ex.getMessage());
         }
     }
 

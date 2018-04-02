@@ -19,9 +19,9 @@ import com.readerbench.data.AnalysisElement;
 import com.readerbench.data.Block;
 import com.readerbench.data.Sentence;
 import com.readerbench.data.Word;
-import com.readerbench.readerbenchcore.data.document.ReadingStrategyType;
+import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import org.apache.commons.lang3.StringUtils;
-import com.readerbench.readerbenchcore.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 
 import java.awt.*;
 

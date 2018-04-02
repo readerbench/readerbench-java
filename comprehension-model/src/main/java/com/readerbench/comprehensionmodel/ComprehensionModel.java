@@ -21,7 +21,7 @@ import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.pageRank.PageRank;
-import com.readerbench.readerbenchcore.semanticModels.ISemanticModel;
+import com.readerbench.coreservices.semanticModels.ISemanticModel;
 
 public class ComprehensionModel {
 

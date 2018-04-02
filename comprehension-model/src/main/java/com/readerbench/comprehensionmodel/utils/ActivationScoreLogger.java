@@ -15,17 +15,20 @@
  */
 package com.readerbench.comprehensionmodel.utils;
 
-import com.readerbench.data.Word;
-import org.openide.util.Exceptions;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.*;
 
 public class ActivationScoreLogger {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivationScoreLogger.class);
 
     public static final String OUTPUT_FILE_NAME = "out/comprehension_model_scores.csv";
     private final List<Map<Word, WordActivation>> activationHistory;
@@ -96,7 +99,7 @@ public class ActivationScoreLogger {
                 }
             }
         } catch (Exception e) {
-            Exceptions.printStackTrace(e);
+            LOGGER.error(e.getMessage());
         }
     }
 

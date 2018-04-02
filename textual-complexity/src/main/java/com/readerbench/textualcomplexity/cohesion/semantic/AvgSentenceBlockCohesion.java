@@ -19,7 +19,7 @@ import com.readerbench.data.AbstractDocument;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.semanticModels.SimilarityType;
+import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import java.util.Arrays;
 

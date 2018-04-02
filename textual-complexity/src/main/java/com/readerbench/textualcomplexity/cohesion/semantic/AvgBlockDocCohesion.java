@@ -16,11 +16,11 @@
 package com.readerbench.textualcomplexity.cohesion.semantic;
 
 import com.readerbench.data.AbstractDocument;
-import com.readerbench.readerbenchcore.data.discourse.SemanticCohesion;
+import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.readerbenchcore.semanticModels.SimilarityType;
+import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 /**
  *

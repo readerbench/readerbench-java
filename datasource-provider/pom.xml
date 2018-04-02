@@ -27,6 +27,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>core-services</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
             <exclusions>
@@ -36,6 +41,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <!-- Hibernate SQLITE -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -49,6 +55,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
         </dependency>
+
         <!-- /Hibernate SQLITE -->
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -60,8 +67,5 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
         </dependency>
-
     </dependencies>
-
-
 </project>

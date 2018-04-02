@@ -18,10 +18,10 @@ package com.readerbench.comprehensionmodel.utils.distanceStrategies;
 import com.readerbench.data.Word;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
-import com.readerbench.readerbenchcore.semanticModels.ISemanticModel;
-import com.readerbench.readerbenchcore.semanticModels.SpaceStatistics;
-import com.readerbench.readerbenchcore.semanticModels.utils.WordSimilarity;
-import com.readerbench.readerbenchcore.semanticModels.utils.WordSimilarityContainer;
+import com.readerbench.coreservices.semanticModels.ISemanticModel;
+import com.readerbench.coreservices.semanticModels.SpaceStatistics;
+import com.readerbench.coreservices.semanticModels.utils.WordSimilarity;
+import com.readerbench.coreservices.semanticModels.utils.WordSimilarityContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

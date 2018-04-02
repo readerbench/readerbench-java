@@ -26,8 +26,8 @@ import edu.stanford.nlp.semgraph.SemanticGraph;
 import edu.stanford.nlp.semgraph.SemanticGraphEdge;
 import edu.stanford.nlp.util.CoreMap;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
-import com.readerbench.readerbenchcore.nlp.lemmatizer.StaticLemmatizer;
-import com.readerbench.readerbenchcore.nlp.parsing.Parsing;
+import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
+import com.readerbench.coreservices.nlp.parsing.Parsing;
 
 import java.util.ArrayList;
 import java.util.List;

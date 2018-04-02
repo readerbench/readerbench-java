@@ -10,7 +10,7 @@ import com.readerbench.data.Syllable;
 import com.readerbench.data.Word;
 import com.readerbench.textualcomplexity.rhythm.tools.CMUDict;
 import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
-import com.readerbench.readerbenchcore.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 
 import java.util.ArrayList;
 import java.util.List;

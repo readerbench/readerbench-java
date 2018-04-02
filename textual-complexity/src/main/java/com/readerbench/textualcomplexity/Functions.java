@@ -5,10 +5,10 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.readerbenchcore.data.AbstractDocument;
-import com.readerbench.readerbenchcore.data.AnalysisElement;
-import com.readerbench.readerbenchcore.data.Block;
-import com.readerbench.readerbenchcore.data.Sentence;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
 
 import java.util.Objects;
 import java.util.function.Function;

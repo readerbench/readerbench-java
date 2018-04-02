@@ -15,7 +15,7 @@
  */
 package com.readerbench.ageofexposure;
 
-import com.readerbench.readerbenchcore.commons.Formatting;
+import com.readerbench.coreservices.commons.Formatting;
 
 import java.util.LinkedList;
 import java.util.Queue;

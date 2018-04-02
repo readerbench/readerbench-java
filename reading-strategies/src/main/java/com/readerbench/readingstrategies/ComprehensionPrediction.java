@@ -15,8 +15,8 @@
  */
 package com.readerbench.readingstrategies;
 
-import com.readerbench.readerbenchcore.data.complexity.Measurement;
-import com.readerbench.readerbenchcore.data.document.Metacognition;
+import com.readerbench.datasourceprovider.data.complexity.Measurement;
+import com.readerbench.datasourceprovider.data.document.Metacognition;
 import com.readerbench.services.complexity.ComplexityIndices;
 import com.readerbench.services.complexity.ComputeBalancedMeasure;
 import org.slf4j.Logger;

@@ -19,8 +19,8 @@ import com.readerbench.data.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
-import com.readerbench.readerbenchcore.nlp.listOfWords.ClassesOfWords;
-import com.readerbench.readerbenchcore.nlp.listOfWords.Pronouns;
+import com.readerbench.coreservices.nlp.listOfWords.ClassesOfWords;
+import com.readerbench.coreservices.nlp.listOfWords.Pronouns;
 
 import java.util.ArrayList;
 import java.util.List;

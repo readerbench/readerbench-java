@@ -16,12 +16,12 @@
 package com.readerbench.textualcomplexity;
 
 import com.readerbench.data.Lang;
-import com.readerbench.readerbenchcore.data.complexity.Measurement;
-import com.readerbench.readerbenchcore.data.document.Document;
-import com.readerbench.readerbenchcore.data.document.MetaDocument;
+import com.readerbench.datasourceprovider.data.complexity.Measurement;
+import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.data.document.MetaDocument;
 import org.apache.commons.io.FilenameUtils;
 import org.openide.util.Exceptions;
-import com.readerbench.readerbenchcore.semanticModels.ISemanticModel;
+import com.readerbench.coreservices.semanticModels.ISemanticModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class DataGathering {
             out.write(concat.toString());
         } catch (Exception e) {
             LOGGER.error("Runtime error while initializing measurements.csv file");
-            Exceptions.printStackTrace(e);
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ public class DataGathering {
                 d.computeAll(computeDialogism, useBigrams);
             } catch (Exception e) {
                 LOGGER.error("Runtime error while processing {}: {}", new Object[]{file.getName(), e.getMessage()});
-                Exceptions.printStackTrace(e);
+                LOGGER.error(e.getMessage());
             }
 
             if (d != null) {
@@ -124,7 +124,7 @@ public class DataGathering {
                     out.write(concat.toString());
                 } catch (IOException ex) {
                     LOGGER.error("Runtime error while initializing measurements.csv file");
-                    Exceptions.printStackTrace(ex);
+                    LOGGER.error(ex.getMessage());
                     throw ex;
                 }
             }
@@ -152,7 +152,7 @@ public class DataGathering {
                 result.get(classNumber).add(new Measurement(classNumber, values));
             }
         } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
+            LOGGER.error(ex.getMessage());
         }
         return result;
     }

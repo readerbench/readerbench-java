@@ -22,7 +22,7 @@ import org.openide.util.Exceptions;
 import com.readerbench.comprehensionmodel.utils.AoAMetric;
 import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
-import com.readerbench.readerbenchcore.semanticModels.LSA.LSA;
+import com.readerbench.coreservices.semanticModels.LSA.LSA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +223,7 @@ public class WordLinkageCalculator {
             try {
                 out.write(concat.toString());
             } catch (IOException ex) {
-                Exceptions.printStackTrace(ex);
+                LOGGER.error(ex.getMessage());
             }
             out.close();
         } catch (IOException e) {

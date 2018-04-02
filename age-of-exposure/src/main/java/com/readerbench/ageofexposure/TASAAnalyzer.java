@@ -15,12 +15,12 @@
  */
 package com.readerbench.ageofexposure;
 
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.openide.util.Exceptions;
-import com.readerbench.readerbenchcore.commons.Formatting;
-import com.readerbench.readerbenchcore.commons.VectorAlgebra;
-import com.readerbench.readerbenchcore.semanticModels.LDA.LDA;
+import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,7 +207,7 @@ public class TASAAnalyzer {
                 }
             }
         } catch (IOException | NumberFormatException e) {
-            Exceptions.printStackTrace(e);
+            LOGGER.error(e.getMessage());
         }
         return aoaWords;
     }
@@ -304,7 +304,7 @@ public class TASAAnalyzer {
             }
             loweValues.close();
         } catch (Exception e) {
-            Exceptions.printStackTrace(e);
+            LOGGER.error(e.getMessage());
         }
     }
 

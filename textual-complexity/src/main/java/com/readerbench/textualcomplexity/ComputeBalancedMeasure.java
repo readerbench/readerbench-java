@@ -16,9 +16,9 @@
 package com.readerbench.textualcomplexity;
 
 import com.readerbench.data.AbstractDocument;
-import com.readerbench.readerbenchcore.data.complexity.Measurement;
-import com.readerbench.readerbenchcore.data.cscl.Conversation;
-import com.readerbench.readerbenchcore.data.cscl.Participant;
+import com.readerbench.datasourceprovider.data.complexity.Measurement;
+import com.readerbench.datasourceprovider.data.cscl.Conversation;
+import com.readerbench.datasourceprovider.data.cscl.Participant;
 import libsvm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

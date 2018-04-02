@@ -7,7 +7,7 @@ package com.readerbench.textualcomplexity.wordLists;
 
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.AnalysisElement;
-import com.readerbench.readerbenchcore.data.sentiment.SentimentValence;
+import com.readerbench.datasourceprovider.data.sentiment.SentimentValence;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.IndexLevel;

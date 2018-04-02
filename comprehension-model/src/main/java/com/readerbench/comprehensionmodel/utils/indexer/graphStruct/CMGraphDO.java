@@ -23,9 +23,9 @@ import org.gephi.statistics.plugin.ConnectedComponents;
 import org.gephi.statistics.plugin.GraphDensity;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
-import com.readerbench.readerbenchcore.commons.VectorAlgebra;
-import com.readerbench.readerbenchcore.semanticModels.ISemanticModel;
-import com.readerbench.readerbenchcore.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.semanticModels.ISemanticModel;
+import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 
 import java.util.*;
 import java.util.stream.Collectors;

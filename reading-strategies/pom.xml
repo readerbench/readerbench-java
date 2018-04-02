@@ -12,5 +12,16 @@
     <artifactId>reading-strategies</artifactId>
     <name>Reading Strategies Module</name>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>datasource-provider</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>core-services</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

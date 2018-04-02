@@ -18,9 +18,9 @@ package com.readerbench.readingstrategies;
 import com.readerbench.data.Block;
 import com.readerbench.data.Sentence;
 import com.readerbench.data.Word;
-import com.readerbench.readerbenchcore.data.document.Metacognition;
-import com.readerbench.readerbenchcore.data.document.ReadingStrategyType;
-import com.readerbench.readerbenchcore.data.document.Summary;
+import com.readerbench.datasourceprovider.data.document.Metacognition;
+import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
+import com.readerbench.datasourceprovider.data.document.Summary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -21,7 +21,7 @@ import com.readerbench.data.Word;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.readability.Syllable;
-import com.readerbench.readerbenchcore.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import vu.wntools.wordnet.WordnetData;
 
 import java.util.ArrayList;
