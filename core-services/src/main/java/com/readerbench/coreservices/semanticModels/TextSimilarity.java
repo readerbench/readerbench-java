@@ -5,12 +5,12 @@
  */
 package com.readerbench.coreservices.semanticModels;
 
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -15,10 +15,10 @@
  */
 package com.readerbench.coreservices.semanticModels.LDA;
 
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
 import com.readerbench.coreservices.commons.ValueComparator;
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

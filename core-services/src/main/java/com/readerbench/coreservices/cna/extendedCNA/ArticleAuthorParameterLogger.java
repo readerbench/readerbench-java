@@ -15,8 +15,9 @@
  */
 package com.readerbench.coreservices.cna.extendedCNA;
 
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.cna.extendedCNA.distanceStrategies.IAuthorDistanceStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class ArticleAuthorParameterLogger {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArticleAuthorParameterLogger.class);
 
     public static String OUT_DIRECTORY = "out";
     public static int NO_TOP_SIMILAR = 5000;

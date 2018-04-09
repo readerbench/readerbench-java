@@ -11,6 +11,16 @@
     <artifactId>core-services</artifactId>
     <name>Readerbench Core Module</name>
 
+    <properties>
+        <commons-math3.version>3.0</commons-math3.version>
+        <mallet.version>2.0.8</mallet.version>
+        <gephi.version>0.9.2</gephi.version>
+        <wordnettools.vesion>3.0</wordnettools.vesion>
+        <knowceanstools.version>1</knowceanstools.version>
+        <apache.mahout.version>0.12.2</apache.mahout.version>
+        <libthrift.version>0.10.0</libthrift.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
@@ -28,7 +38,48 @@
             <artifactId>datasource-provider</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons-math3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cc.mallet</groupId>
+            <artifactId>mallet</artifactId>
+            <version>${mallet.version}</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.gephi</groupId>
+            <artifactId>gephi-toolkit</artifactId>
+            <version>${gephi.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>WordnetTools</artifactId>
+            <version>${wordnettools.vesion}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>knowceans-tools</artifactId>
+            <version>${knowceanstools.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.mahout</groupId>
+            <artifactId>mahout-spark_2.10</artifactId>
+            <version>${apache.mahout.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty.orbit</groupId>
+                    <artifactId>javax.servlet</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.thrift</groupId>
+            <artifactId>libthrift</artifactId>
+            <version>${libthrift.version}</version>
+        </dependency>
     </dependencies>
-
-
 </project>

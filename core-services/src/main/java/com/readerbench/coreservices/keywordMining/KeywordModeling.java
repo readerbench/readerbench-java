@@ -15,12 +15,12 @@
  */
 package com.readerbench.coreservices.keywordMining;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.NGram;
-import com.readerbench.data.Word;
+import com.readerbench.coreservices.HypernymTreeProcesing;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.NGram;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
-import com.readerbench.textualcomplexity.wordComplexity.WordComplexity;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
@@ -251,7 +251,7 @@ public class KeywordModeling {
             if (!containsLemma(w, e.getWordOccurences().keySet())) {
                 w.setSemanticModels(e.getSemanticModels());
                 // penalty for specificity
-                double height = WordComplexity.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
+                double height = HypernymTreeProcesing.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
                 if (height == -1) {
                     height = 10;
                 }

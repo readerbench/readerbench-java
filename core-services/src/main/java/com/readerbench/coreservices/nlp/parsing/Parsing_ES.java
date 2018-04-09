@@ -15,11 +15,10 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.ArrayList;
@@ -85,7 +84,7 @@ public class Parsing_ES extends Parsing {
 
     public static void main(String[] args) {
         AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
-        BlockTemplate block = docTmp.new BlockTemplate();
+        AbstractDocumentTemplate.BlockTemplate block = docTmp.new BlockTemplate();
         block.setId(0);
         block.setContent(
                 "Yo sí soy muy macho -grita uno- Yo me voy. Agarra sus muebles, sus hijos, sus animales, los mete en una carreta y atraviesa la calle central donde todo el pueblo lo ve. Hasta que todos dicen: Si este se atreve, pues nosotros también nos vamos. Y empiezan a desmantelar literalmente el pueblo. Se llevan las cosas, los animales, todo.Y uno de los últimos que abandona el pueblo, dice: Que no venga la desgracia a caer sobre lo que queda de nuestra casa, y entonces la incendia y otros incendian también sus casas.Huyen en un tremendo y verdadero pánico, como en un éxodo de guerra, y en medio de ellos va la señora que tuvo el presagio, le dice a su hijo que está a su lado: Vistes m'hijo, que algo muy grave iba a suceder en este pueblo?");

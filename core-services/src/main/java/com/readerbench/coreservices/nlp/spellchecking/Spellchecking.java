@@ -5,11 +5,10 @@
  */
 package com.readerbench.coreservices.nlp.spellchecking;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.languagetool.JLanguageTool;
 import org.languagetool.rules.RuleMatch;
 import org.languagetool.rules.spelling.SpellingCheckRule;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,11 +5,12 @@
  */
 package com.readerbench.coreservices.semanticModels.utils;
 
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
-import org.openide.util.Exceptions;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.datasourceprovider.pojo.Lang;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -22,6 +23,9 @@ import java.util.stream.Collectors;
  * @author stefan
  */
 public class SemanticModelSerializer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SemanticModelSerializer.class);
+
     public static void exportToCSV(ISemanticModel model, String fileName) {
         exportToCSV(model, fileName, ' ');
     }

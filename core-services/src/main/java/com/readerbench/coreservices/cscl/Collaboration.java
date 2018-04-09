@@ -15,12 +15,11 @@
  */
 package com.readerbench.coreservices.cscl;
 
-import com.readerbench.data.Block;
+import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.data.cscl.CollaborationZone;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.commons.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

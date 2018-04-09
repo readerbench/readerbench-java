@@ -15,11 +15,16 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentEntity;
 import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
 import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.StringTokenizer;
 

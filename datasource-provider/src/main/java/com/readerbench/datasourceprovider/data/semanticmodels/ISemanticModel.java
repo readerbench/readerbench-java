@@ -15,11 +15,9 @@
  */
 package com.readerbench.datasourceprovider.data.semanticmodels;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.Map;
 import java.util.Set;

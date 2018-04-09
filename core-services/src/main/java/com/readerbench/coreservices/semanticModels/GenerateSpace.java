@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.semanticModels;
 
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
@@ -42,7 +42,7 @@ public class GenerateSpace {
 
 	public void buildGraph(UndirectedGraph graph, GraphModel graphModel, String start, double threshold, int maxDepth) {
 		Word word = Word.getWordFromConcept(start, semSpace.getLanguage());
-		Map<Word, Integer> existingNodes = new TreeMap<Word, Integer>();
+		Map<Word, Integer> existingNodes = new TreeMap<>();
 		Map<Word, Integer> depthNodes = new TreeMap<Word, Integer>();
 
 		List<Word> currentProcessing = new LinkedList<Word>();

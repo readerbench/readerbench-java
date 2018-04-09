@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.readerbench.textualcomplexity.rhythm.tools;
+package com.readerbench.coreservices.rhythm;
 
-import com.readerbench.data.Syllable;
-import com.readerbench.textualcomplexity.rhythm.SyllableContainer;
+import com.readerbench.datasourceprovider.data.Syllable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class SyllabifiedCMUDict {
 
     private static SyllabifiedCMUDict instance = null;
     private String path = "resources/config/EN/word lists/syllabified_cmudict.txt";
-    private Map<String, List<SyllableContainer>> dict;
+    //private Map<String, List<SyllableContainer>> dict;
     private Map<String, List<Syllable>> newDict;
     
     private SyllabifiedCMUDict() {

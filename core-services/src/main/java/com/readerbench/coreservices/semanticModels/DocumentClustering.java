@@ -5,8 +5,8 @@
  */
 package com.readerbench.coreservices.semanticModels;
 
-import com.readerbench.data.AbstractDocument;
 import com.readerbench.coreservices.commons.Clustering;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 
 /**

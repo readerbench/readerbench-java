@@ -11,7 +11,7 @@ import com.readerbench.data.Sentence;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.textualcomplexity.rhythm.tools.RhythmTool;
+import com.readerbench.coreservices.rhythm.RhythmTool;
 
 import java.util.Arrays;
 import java.util.List;

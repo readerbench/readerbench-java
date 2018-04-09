@@ -10,7 +10,7 @@ import com.readerbench.data.Block;
 import com.readerbench.data.Sentence;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.textualcomplexity.rhythm.tools.RhythmTool;
+import com.readerbench.coreservices.rhythm.RhythmTool;
 
 import java.util.Collections;
 import java.util.List;

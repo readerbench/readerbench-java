@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.semanticModels.LDA;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.File;
 import java.io.IOException;

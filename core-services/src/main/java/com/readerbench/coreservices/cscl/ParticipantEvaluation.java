@@ -15,9 +15,10 @@
  */
 package com.readerbench.coreservices.cscl;
 
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.coreservices.rhythm.RhythmTool;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.cscl.*;
 import org.gephi.graph.api.*;
 import org.gephi.io.exporter.api.ExportController;
@@ -31,7 +32,6 @@ import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 import com.readerbench.coreservices.commons.Formatting;
-import com.readerbench.textualcomplexity.rhythm.tools.RhythmTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

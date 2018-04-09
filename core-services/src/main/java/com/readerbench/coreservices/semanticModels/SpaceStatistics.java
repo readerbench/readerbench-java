@@ -15,13 +15,12 @@
  */
 package com.readerbench.coreservices.semanticModels;
 
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.gephi.graph.api.*;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.*;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import com.readerbench.coreservices.commons.Formatting;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
@@ -32,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
 
 public class SpaceStatistics {
 
@@ -59,8 +57,8 @@ public class SpaceStatistics {
         double s00 = 0, s10 = 0, s20 = 0;
         double s01 = 0, s11 = 0, s21 = 0;
         List<WordPairSimilarity> allWordSimilarityPairList = new ArrayList<>();
-        for (Entry<Word, double[]> e1 : semModel.getWordRepresentations().entrySet()) {
-            for (Entry<Word, double[]> e2 : semModel.getWordRepresentations().entrySet()) {
+        for (Map.Entry<Word, double[]> e1 : semModel.getWordRepresentations().entrySet()) {
+            for (Map.Entry<Word, double[]> e2 : semModel.getWordRepresentations().entrySet()) {
                 if (e1.getKey().getLemma().compareTo(e2.getKey().getLemma()) > 0) {
                     sim = semModel.getSimilarity(e1.getValue(), e2.getValue());
                     s00++;

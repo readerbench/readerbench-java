@@ -15,16 +15,14 @@
  */
 package com.readerbench.textualcomplexity.wordComplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.textualcomplexity.readability.Syllable;
+import com.readerbench.coreservices.rhythm.Syllable;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
-import vu.wntools.wordnet.WordnetData;
 
-import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -52,66 +50,6 @@ public class WordComplexity extends ComplexityIndex {
 			return 0;
 		}
 		return OntologySupport.getWordSenses(word).size();
-	}
-
-	/**
-	 * Gets the distance to the root of the hypernym tree. If the word was
-	 * disambiguated it starts with the senseId that was determined. Otherwise
-	 * it uses the first sense id returned by WordNet. We go up the hypernym
-	 * tree always selecting the first hypernym returned by WordNet under the
-	 * assumption that it is the most likely one.
-	 */
-	public static int getMaxDistanceToHypernymTreeRoot(Word word, Lang lang) {
-		String senseId;
-
-		// if word was disambiguated
-		if (word.getLexicalChainLink() != null) {
-			senseId = word.getLexicalChainLink().getSenseId();
-		} else {
-			// get the first sense for the word
-			senseId = OntologySupport.getFirstSense(word);
-		}
-		WordnetData dictionary = OntologySupport.getDictionary(word);
-		ArrayList<ArrayList<String>> targetChains = new ArrayList<>();
-		if (dictionary.hyperRelations.containsKey(senseId)) {
-			dictionary.getMultipleHyperChain(senseId, targetChains);
-			return targetChains.stream().mapToInt(ArrayList::size).max().orElse(0);
-		}
-		return 0;
-	}
-
-	public static double getAverageDistanceToHypernymTreeRoot(Word word, Lang lang) {
-		String senseId;
-
-		// if word was disambiguated
-		if (word.getLexicalChainLink() != null) {
-			senseId = word.getLexicalChainLink().getSenseId();
-		} else {
-			// get the first sense for the word
-			senseId = OntologySupport.getFirstSense(word);
-		}
-		double avg = OntologySupport.getDictionary(word).getAverageDepthBySynset(senseId);
-        if (avg == 1) return 0;
-        return avg;
-	}
-
-	public static int getPathCountToHypernymTreeRoot(Word word, Lang lang) {
-		String senseId;
-
-		// if word was disambiguated
-		if (word.getLexicalChainLink() != null) {
-			senseId = word.getLexicalChainLink().getSenseId();
-		} else {
-			// get the first sense for the word
-			senseId = OntologySupport.getFirstSense(word);
-		}
-		WordnetData dictionary = OntologySupport.getDictionary(word);
-		ArrayList<ArrayList<String>> targetChains = new ArrayList<>();
-		if (dictionary.hyperRelations.containsKey(senseId)) {
-			dictionary.getMultipleHyperChain(senseId, targetChains);
-			return targetChains.size();
-		}
-		return 0;
 	}
 
 	public static int getDifferenceBetweenLemmaAndStem(Word word) {

@@ -13,8 +13,8 @@ import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.textualcomplexity.ComplexityIndex;
-import com.readerbench.textualcomplexity.rhythm.tools.RhythmTool;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
+import com.readerbench.coreservices.rhythm.RhythmTool;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 
 import java.text.DecimalFormat;
 import java.util.*;

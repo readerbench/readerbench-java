@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.cscl;
 
-import com.readerbench.data.Block;
+import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.data.cscl.CollaborationZone;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 

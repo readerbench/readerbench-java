@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.nlp.listOfWords;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 /**
  * Class containing all pronoun lists for supported languages that makes use of

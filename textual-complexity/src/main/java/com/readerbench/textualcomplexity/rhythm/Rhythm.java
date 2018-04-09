@@ -5,11 +5,12 @@
  */
 package com.readerbench.textualcomplexity.rhythm;
 
+import com.readerbench.coreservices.rhythm.Syllable;
 import com.readerbench.data.Lang;
 import com.readerbench.data.Syllable;
 import com.readerbench.data.Word;
 import com.readerbench.textualcomplexity.rhythm.tools.CMUDict;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class Rhythm {
                 // case when the word was not found in the dictionary
                 // count the number of syllables using Syllable.syllable() method
                 // the word is considered to be unstressed
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += Syllable.syllable(w.getText());
             } else {
                 for (Syllable syll : syllables) {
                     if (syll.isPrimaryStressed()) {

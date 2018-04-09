@@ -15,16 +15,14 @@
  */
 package com.readerbench.coreservices.semanticModels.word2vec;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
-import org.apache.thrift.TException;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
@@ -35,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -138,7 +135,7 @@ public class Word2VecModel implements ISemanticModel {
     private TreeMap<Word, Double> getSimilarConcepts(double[] vector, double minThreshold) {
         TreeMap<Word, Double> similarConcepts = new TreeMap<>();
         double sim;
-        for (Entry<Word, double[]> entry : wordVectors.entrySet()) {
+        for (Map.Entry<Word, double[]> entry : wordVectors.entrySet()) {
             sim = VectorAlgebra.cosineSimilarity(vector, entry.getValue());
             if (sim >= minThreshold) {
                 similarConcepts.put(entry.getKey(), sim);

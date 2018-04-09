@@ -15,13 +15,18 @@
  */
 package com.readerbench.coreservices.cna.extendedCNA;
 
-import org.openide.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GraphMeasure implements Comparable<GraphMeasure>, java.io.Serializable {
+public class
+
+GraphMeasure implements Comparable<GraphMeasure>, java.io.Serializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphMeasure.class);
 
     public static String SerializedFileLocation = "resources/in/LAK_corpus/graphMeasures.ser";
 

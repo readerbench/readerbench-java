@@ -21,11 +21,10 @@ import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.util.Pair;
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.commons.ObjectManipulation;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -292,7 +290,7 @@ public class LDA implements ISemanticModel, Serializable {
     public double[] getProbDistribution(AnalysisElement e) {
 //        if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
         double[] distrib = new double[numTopics];
-        for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
+        for (Map.Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
             double[] v = entry.getKey().getModelRepresentation(SimilarityType.LDA);
             if (v == null) {
                 continue;
@@ -417,7 +415,7 @@ public class LDA implements ISemanticModel, Serializable {
         }
         TreeMap<Word, Double> similarSum = getSimilarConcepts(sum, minThreshold);
         if (!similarSum.isEmpty()) {
-            for (Entry<Word, Double> sim : similarSum.entrySet()) {
+            for (Map.Entry<Word, Double> sim : similarSum.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "+" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
                             + sim.getValue() + ")");
@@ -426,7 +424,7 @@ public class LDA implements ISemanticModel, Serializable {
         }
         TreeMap<Word, Double> similarDiff = getSimilarConcepts(difference, minThreshold);
         if (!similarDiff.isEmpty()) {
-            for (Entry<Word, Double> sim : similarDiff.entrySet()) {
+            for (Map.Entry<Word, Double> sim : similarDiff.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "-" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
                             + sim.getValue() + ")");

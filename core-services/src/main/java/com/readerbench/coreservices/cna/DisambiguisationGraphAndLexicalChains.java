@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.cna;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChain;
 import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChainLink;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;

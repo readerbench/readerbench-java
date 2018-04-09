@@ -12,7 +12,7 @@ import com.readerbench.data.Syllable;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 
 import java.util.ArrayList;

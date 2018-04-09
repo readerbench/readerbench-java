@@ -5,13 +5,14 @@
  */
 package com.readerbench.textualcomplexity.rhythm.indices;
 
+import com.readerbench.coreservices.rhythm.Syllable;
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.Sentence;
 import com.readerbench.data.Syllable;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +40,7 @@ public class AvgSyllablesInRhythmicUnit extends ComplexityIndex {
                     List<Syllable> syllables = SyllabifiedCMUDict.getInstance()
                             .getDict().get(w.toLowerCase());
                     if (syllables == null) {
-                        cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w);
+                        cnt += Syllable.syllable(w);
                     } else {
                         cnt += syllables.size();
                     }

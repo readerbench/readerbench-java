@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.cna.extendedCNA;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.article.ArticleAuthor;
 import com.readerbench.datasourceprovider.data.article.ResearchArticle;
 

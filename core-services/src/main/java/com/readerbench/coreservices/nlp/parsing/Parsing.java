@@ -15,9 +15,7 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
-import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.*;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;

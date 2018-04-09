@@ -15,6 +15,8 @@
  */
 package com.readerbench.textualcomplexity.readability;
 
+import com.readerbench.coreservices.rhythm.Syllable;
+
 import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;

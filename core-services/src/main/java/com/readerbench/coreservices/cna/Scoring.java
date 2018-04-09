@@ -15,11 +15,11 @@
  */
 package com.readerbench.coreservices.cna;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
 import com.readerbench.coreservices.keywordMining.Keyword;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

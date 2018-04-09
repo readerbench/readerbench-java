@@ -19,6 +19,7 @@ import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,44 +32,13 @@ import java.util.regex.Pattern;
  *
  * @author Mihai Dascalu
  */
+//todo - the class need to be renamed
 public class PatternMatching {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PatternMatching.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(com.readerbench.coreservices.commons.PatternMatching.class);
 
-    private static ListOfWords patterns_causality_fr;
-    private static ListOfWords patterns_metacognition_fr;
-    private static ListOfWords patterns_causality_en;
-    private static ListOfWords patterns_metacognition_en;
     private static final Color COLOR_CAUSALITY = new Color(255, 0, 255);
     private static final Color COLOR_METACOGNITION = new Color(0, 203, 255);
-
-    public static ListOfWords getCausalityFr() {
-        if (patterns_causality_fr == null) {
-            patterns_causality_fr = new ListOfWords("resources/config/FR/word lists/causality_fr.txt");
-        }
-        return patterns_causality_fr;
-    }
-
-    public static ListOfWords getMetacognitionFr() {
-        if (patterns_metacognition_fr == null) {
-            patterns_metacognition_fr = new ListOfWords("resources/config/FR/word lists/metacognition_fr.txt");
-        }
-        return patterns_metacognition_fr;
-    }
-
-    public static ListOfWords getCausalityEn() {
-        if (patterns_causality_en == null) {
-            patterns_causality_en = new ListOfWords("resources/config/EN/word lists/causality_en.txt");
-        }
-        return patterns_causality_en;
-    }
-
-    public static ListOfWords getMetacognitionEn() {
-        if (patterns_metacognition_en == null) {
-            patterns_metacognition_en = new ListOfWords("resources/config/EN/word lists/metacognition_en.txt");
-        }
-        return patterns_metacognition_en;
-    }
 
     // returns the number of occurrences
     public static int containsStrategy(List<Sentence> sentences, AnalysisElement el, ReadingStrategyType strategy, boolean alreadyExistentCheck) {
@@ -82,10 +52,10 @@ public class PatternMatching {
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
                     case Lang.en:
-                        usedList = getCausalityEn();
+                        usedList = com.readerbench.coreservices.commons.PatternMatching.getCausalityEn();
                         break;
                     case Lang.fr:
-                        usedList = getCausalityFr();
+                        usedList = com.readerbench.coreservices.commons.PatternMatching.getCausalityFr();
                         break;
                     default:
                         break;
@@ -96,10 +66,10 @@ public class PatternMatching {
                 usedColor = usedColor.substring(2, usedColor.length());
                 switch (el.getLanguage()) {
                     case Lang.en:
-                        usedList = getMetacognitionEn();
+                        usedList = com.readerbench.coreservices.commons.PatternMatching.getMetacognitionEn();
                         break;
                     case Lang.fr:
-                        usedList = getMetacognitionFr();
+                        usedList = com.readerbench.coreservices.commons.PatternMatching.getMetacognitionFr();
                         break;
                     default:
                         break;

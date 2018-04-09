@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.nlp.listOfWords;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

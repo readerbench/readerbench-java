@@ -15,11 +15,10 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.ArrayList;
@@ -54,7 +53,7 @@ public class Parsing_FR extends Parsing {
      */
     protected static AbstractDocumentTemplate getDocumentModel() {
         AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
-        BlockTemplate block = docTmp.new BlockTemplate();
+        AbstractDocumentTemplate.BlockTemplate block = docTmp.new BlockTemplate();
         block.setId(0);
         block.setContent("Ce soir-là, la famille de Matilda "
                 + "dînait rapidement comme d'habitude devant la télévision.\nTout est bon.");

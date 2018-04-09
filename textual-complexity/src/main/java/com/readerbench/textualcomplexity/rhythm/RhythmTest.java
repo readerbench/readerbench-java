@@ -6,7 +6,7 @@
 package com.readerbench.textualcomplexity.rhythm;
 
 import com.readerbench.textualcomplexity.rhythm.tools.CMUDict;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 
 import java.util.Arrays;
 import java.util.List;

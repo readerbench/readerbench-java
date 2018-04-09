@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.nlp.listOfWords;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 public class Connectives {
 

@@ -5,9 +5,9 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.Serializable;
 import java.util.Objects;

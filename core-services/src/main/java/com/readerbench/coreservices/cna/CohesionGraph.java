@@ -15,10 +15,10 @@
  */
 package com.readerbench.coreservices.cna;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
 import com.readerbench.coreservices.commons.DoubleStatistics;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

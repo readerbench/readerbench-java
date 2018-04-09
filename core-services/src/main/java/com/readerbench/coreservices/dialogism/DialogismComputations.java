@@ -15,6 +15,7 @@
  */
 package com.readerbench.coreservices.dialogism;
 
+import com.readerbench.datasourceprovider.data.*;
 import com.readerbench.datasourceprovider.data.cscl.CSCLIndices;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;

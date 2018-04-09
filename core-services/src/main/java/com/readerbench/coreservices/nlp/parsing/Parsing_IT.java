@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

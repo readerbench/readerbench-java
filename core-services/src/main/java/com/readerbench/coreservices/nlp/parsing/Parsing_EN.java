@@ -15,10 +15,10 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
 import java.util.ArrayList;

@@ -18,7 +18,6 @@ package com.readerbench.coreservices.semanticModels.WordNet;
 import com.readerbench.datasourceprovider.data.POS;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;

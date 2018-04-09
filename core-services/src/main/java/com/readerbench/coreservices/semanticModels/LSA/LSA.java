@@ -15,12 +15,11 @@
  */
 package com.readerbench.coreservices.semanticModels.LSA;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
-import org.openide.util.Exceptions;
 import com.readerbench.coreservices.commons.ObjectManipulation;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;

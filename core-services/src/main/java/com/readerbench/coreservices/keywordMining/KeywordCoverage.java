@@ -15,10 +15,9 @@
  */
 package com.readerbench.coreservices.keywordMining;
 
-
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Word;
 import com.readerbench.coreservices.nlp.listOfWords.MapOfWordWeights;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Word;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,6 +5,7 @@
  */
 package com.readerbench.textualcomplexity.rhythm.indices;
 
+import com.readerbench.coreservices.rhythm.Syllable;
 import com.readerbench.data.AbstractDocument;
 import com.readerbench.data.Sentence;
 import com.readerbench.data.Syllable;
@@ -37,7 +38,7 @@ public class AvgSyllablesInSentence extends ComplexityIndex {
                 List<Syllable> syllables = w.getSyllables();
 //                System.out.print(syllables + " ");
                 if (syllables == null) {
-                    cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                    cnt += Syllable.syllable(w.getText());
                 } else {
                     cnt += syllables.size();
                 }

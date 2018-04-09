@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.readerbench.textualcomplexity.rhythm.tools;
+package com.readerbench.coreservices.rhythm;
 
-import com.readerbench.data.Lang;
-import com.readerbench.data.Syllable;
-import com.readerbench.data.Word;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
+import com.readerbench.datasourceprovider.data.Syllable;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,7 +33,7 @@ public class RhythmTool {
             if (StopWords.isStopWord(w.getText().toLowerCase(), Lang.en)) {
 //                System.out.println("Stop word: " + w.getText() + " " +
 //                        services.complexity.readability.Syllable.syllable(w.getText()));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w.getText());
                 continue;
             }
             List<Syllable> syllables = w.getSyllables();
@@ -43,7 +43,7 @@ public class RhythmTool {
                 // count the number of syllables using Syllable.syllable() method
                 // the word is considered to be unstressed
 //                System.out.println("NULL: " + services.complexity.readability.Syllable.syllable(w.getText()));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w.getText());
             } else {
                 for (Syllable syll : syllables) {
                     if (syll.isPrimaryStressed()) {
@@ -99,7 +99,7 @@ public class RhythmTool {
                 }
 //                System.out.println("Stop word: " + w.getText() + " " +
 //                        services.complexity.readability.Syllable.syllable(w.getText()));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w.getText());
                 continue;
             }
             List<Syllable> syllables = w.getSyllables();
@@ -110,7 +110,7 @@ public class RhythmTool {
                     numRepresentation.add(0);
                 }
 //                System.out.println("NULL: " + services.complexity.readability.Syllable.syllable(w.getText()));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w.getText());
             } else {
                 for (int j = 0; j < syllables.size(); j++) {
                     if (syllables.get(j).isPrimaryStressed()) {
@@ -153,7 +153,7 @@ public class RhythmTool {
                 }
 //                System.out.println("Stop word: " + w + " " +
 //                        services.complexity.readability.Syllable.syllable(w));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w);
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w);
                 continue;
             }
             List<Syllable> syllables = SyllabifiedCMUDict.getInstance().getDict().get(w.toLowerCase());
@@ -164,7 +164,7 @@ public class RhythmTool {
                     numRepresentation.add(0);
                 }
 //                System.out.println("NULL: " + services.complexity.readability.Syllable.syllable(w));
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w);
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w);
             } else {
                 for (int j = 0; j < syllables.size(); j++) {
                     if (syllables.get(j).isPrimaryStressed()) {
@@ -613,7 +613,7 @@ public class RhythmTool {
                 if (i == 0) {
                     SN += "!";
                 }
-                cnt += com.readerbench.textualcomplexity.readability.Syllable.syllable(w.getText());
+                cnt += com.readerbench.coreservices.rhythm.Syllable.syllable(w.getText());
             } else {
                 for (int j = 0; j < syllables.size(); j++) {
                     Syllable syllable = syllables.get(j);
@@ -696,7 +696,7 @@ public class RhythmTool {
         for (String w : unit) {
             List<Syllable> syllables = dict.getDict().get(w.toLowerCase());
             if (syllables == null) {
-                int nrSyll = com.readerbench.textualcomplexity.readability.Syllable.syllable(w.toLowerCase());
+                int nrSyll = com.readerbench.coreservices.rhythm.Syllable.syllable(w.toLowerCase());
                 for (int i = 0; i < nrSyll; ++i) {
                     pattern += "x ";
                 }

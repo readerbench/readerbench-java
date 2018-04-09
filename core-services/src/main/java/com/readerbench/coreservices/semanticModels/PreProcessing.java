@@ -15,12 +15,13 @@
  */
 package com.readerbench.coreservices.semanticModels;
 
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
+import com.readerbench.datasourceprovider.data.*;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
 import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
 import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +94,7 @@ public class PreProcessing {
      */
     protected AbstractDocumentTemplate getDocumentModel(String content) {
         AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
-        BlockTemplate block = docTmp.new BlockTemplate();
+        AbstractDocumentTemplate.BlockTemplate block = docTmp.new BlockTemplate();
         block.setId(0);
         block.setContent(content.trim().toLowerCase());
         docTmp.getBlocks().add(block);
