@@ -15,13 +15,13 @@
  */
 package com.readerbench.comprehensionmodel.utils.indexer;
 
-import com.readerbench.data.Word;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.IWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeType;
+import com.readerbench.datasourceprovider.data.Word;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -15,14 +15,14 @@
  */
 package com.readerbench.comprehensionmodel;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
-import org.openide.util.Exceptions;
+import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.*;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.comprehensionmodel.utils.AoAMetric;
 import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-
-import static com.readerbench.services.ageOfExposure.TASAAnalyzer.getWordAcquisitionAge;
 
 /**
  *
@@ -46,7 +44,7 @@ public class WordLinkageCalculator {
     private final double threshold;
     private AbstractDocument document;
 
-    private com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO graph;
+    private CMGraphDO graph;
 
     public WordLinkageCalculator(String text, LSA semanticModel, double threshold) {
         this.semanticModel = semanticModel;
@@ -57,24 +55,24 @@ public class WordLinkageCalculator {
         this.document = cmIndexer.getDocument();
         List<WordDistanceIndexer> syntacticIndexers = cmIndexer.getSyntacticIndexerList();
         for (WordDistanceIndexer indexer : syntacticIndexers) {
-            this.graph.combineWithLinksFrom(indexer.getCMGraph(com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMNodeType.TextBased));
+            this.graph.combineWithLinksFrom(indexer.getCMGraph(CMNodeType.TextBased));
         }
     }
 
-    private com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO buildSemanticGraph(AbstractDocument document) {
-        com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO semanticGraph = new com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphDO();
+    private CMGraphDO buildSemanticGraph(AbstractDocument document) {
+        CMGraphDO semanticGraph = new CMGraphDO();
         List<Word> wordList = this.getWordList(document);
         wordList.forEach((word) -> {
-            semanticGraph.addNodeIfNotExistsOrUpdate(new com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO(word, com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMNodeType.TextBased));
+            semanticGraph.addNodeIfNotExistsOrUpdate(new CMNodeDO(word, CMNodeType.TextBased));
         });
 
-        List<com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO> nodeList = semanticGraph.getNodeList();
-        List<com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO> edgeList = new ArrayList();
+        List<CMNodeDO> nodeList = semanticGraph.getNodeList();
+        List<CMEdgeDO> edgeList = new ArrayList();
         for (int i = 0; i < nodeList.size(); i++) {
             for (int j = i + 1; j < nodeList.size(); j++) {
                 double distance = this.semanticModel.getSimilarity(nodeList.get(i).getWord(), nodeList.get(j).getWord());
                 if (distance >= this.threshold) {
-                    com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO edge = new com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMEdgeDO(nodeList.get(i), nodeList.get(j), com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMEdgeType.Semantic, distance);
+                    CMEdgeDO edge = new CMEdgeDO(nodeList.get(i), nodeList.get(j), CMEdgeType.Semantic, distance);
                     edgeList.add(edge);
                 }
             }
@@ -102,7 +100,7 @@ public class WordLinkageCalculator {
         double numNodes = 0.0;
         double totalNoOccurences = 0.0;
         
-        for (com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMNodeDO node : this.graph.getNodeList()) {
+        for (CMNodeDO node : this.graph.getNodeList()) {
             double aoaScore = 0.0;
             if (aoa.containsKey(node.getWord().getLemma())) {
                 aoaScore = aoa.get(node.getWord().getLemma());
@@ -141,6 +139,40 @@ public class WordLinkageCalculator {
         return metric;
     }
 
+    /**
+     * The method was copied from com.readerbench.ageofexposur.TASAAnalyzer
+     * @param normFile
+     * @return
+     */
+    public static Map<String, Double> getWordAcquisitionAge(String normFile) {
+        Map<String, Double> aoaWords = new HashMap<>();
+        LOGGER.info("Loading file {}...", normFile);
+
+        /* Compute the AgeOfAcquisition Dictionary */
+        String tokens[];
+        String line;
+        String word;
+        try {
+            try (BufferedReader br = new BufferedReader(
+                    new FileReader("resources/config/EN/word lists/AoA/" + normFile))) {
+                while ((line = br.readLine()) != null) {
+                    tokens = line.split(",");
+                    word = tokens[0].trim().replaceAll(" ", "");
+
+                    if (tokens[1].equals("NA")) {
+                        continue;
+                    }
+
+                    Double.parseDouble(tokens[1]);
+                    aoaWords.put(word, Double.parseDouble(tokens[1]));
+                }
+            }
+        } catch (IOException | NumberFormatException e) {
+            LOGGER.error(e.getMessage());
+        }
+        return aoaWords;
+    }
+
     public static void analyzeFiles() {
         LSA semanticModel = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
 //        LSA semanticModel = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
@@ -163,7 +195,7 @@ public class WordLinkageCalculator {
 
         try {
             Map<String, List<AoAMetric>> scoreMap = new HashMap();
-            Map<String, com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphStatistics> graphStatisticsMap = new HashMap();
+            Map<String, CMGraphStatistics> graphStatisticsMap = new HashMap();
             
             String[] aoaFiles = {"Bird.csv", "Bristol.csv", "Cortese.csv", "Kuperman.csv", "Shock.csv"};
 
@@ -185,7 +217,7 @@ public class WordLinkageCalculator {
                 String fileKey = file.getName().replace(".txt", "");
                 scoreMap.put(fileKey, metricList);
                 
-                com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphStatistics statistics = calculator.graph.getGraphStatistics();
+                CMGraphStatistics statistics = calculator.graph.getGraphStatistics();
                 graphStatisticsMap.put(fileKey, statistics);
             }
             
@@ -208,7 +240,7 @@ public class WordLinkageCalculator {
                     concat.append(",").append(metric.getAvg()).append(",").append(metric.getWeightedAvg()).append(",").append(metric.getWeightedIdfAvg());
                 });
                 
-                com.readerbench.services.comprehensionModel.utils.indexer.graphStruct.CMGraphStatistics statistics = graphStatisticsMap.get(fileName);
+                CMGraphStatistics statistics = graphStatisticsMap.get(fileName);
                 concat.append(",").append(statistics.getDensity());
                 concat.append(",").append(statistics.getConnectedComponentsCount());
                 concat.append(",").append(statistics.getAverageClusteringCoefficient());

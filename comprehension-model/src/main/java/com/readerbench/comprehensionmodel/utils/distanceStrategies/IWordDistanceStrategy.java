@@ -15,8 +15,8 @@
  */
 package com.readerbench.comprehensionmodel.utils.distanceStrategies;
 
-import com.readerbench.data.Word;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
+import com.readerbench.datasourceprovider.data.Word;
 
 public interface IWordDistanceStrategy {
 	public double getDistance(Word w1, Word w2);

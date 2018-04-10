@@ -15,13 +15,13 @@
  */
 package com.readerbench.comprehensionmodel;
 
-import com.readerbench.data.Sentence;
 import com.readerbench.comprehensionmodel.utils.ActivationScoreLogger;
 import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.pageRank.PageRank;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 
 public class ComprehensionModel {
 

@@ -15,14 +15,14 @@
  */
 package com.readerbench.comprehensionmodel.utils.indexer;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.Sentence;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
+import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMCorefIndexer;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMSyntacticGraph;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;

@@ -15,12 +15,12 @@
  */
 package com.readerbench.comprehensionmodel.utils.distanceStrategies.utils;
 
-import com.readerbench.data.Word;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeType;
+import com.readerbench.datasourceprovider.data.Word;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -15,9 +15,9 @@
  */
 package com.readerbench.comprehensionmodel.utils;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.ling.IndexedWord;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;

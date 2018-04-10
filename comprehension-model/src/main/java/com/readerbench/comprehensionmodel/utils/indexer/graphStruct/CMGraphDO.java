@@ -15,7 +15,8 @@
  */
 package com.readerbench.comprehensionmodel.utils.indexer.graphStruct;
 
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import org.gephi.graph.api.*;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.ClusteringCoefficient;
@@ -24,7 +25,6 @@ import org.gephi.statistics.plugin.GraphDensity;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 
 import java.util.*;
