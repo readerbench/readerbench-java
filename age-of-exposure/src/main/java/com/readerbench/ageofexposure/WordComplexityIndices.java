@@ -25,7 +25,7 @@ import java.util.List;
 public class WordComplexityIndices {
 
 	public static double getInverseAverage(List<Double> stats) {
-		double sum = 0;
+			double sum = 0;
 		for (Double d : stats) {
 			sum += d;
 		}

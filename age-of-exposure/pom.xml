@@ -12,6 +12,10 @@
     <artifactId>age-of-exposure</artifactId>
     <name>Age of Exposure Module</name>
 
+    <properties>
+        <commons-math3.version>3.6.1</commons-math3.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.readerbench</groupId>
@@ -22,6 +26,11 @@
             <groupId>com.readerbench</groupId>
             <artifactId>core-services</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>${commons-math3.version}</version>
         </dependency>
     </dependencies>
 </project>

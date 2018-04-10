@@ -18,13 +18,12 @@ package com.readerbench.ageofexposure;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
-import com.readerbench.coreservices.converters.GenericTasaDocument;
-import com.readerbench.coreservices.converters.SplitTASA;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;

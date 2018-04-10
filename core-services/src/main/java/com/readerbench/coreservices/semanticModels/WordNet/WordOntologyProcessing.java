@@ -1,4 +1,4 @@
-package com.readerbench.coreservices;
+package com.readerbench.coreservices.semanticModels.WordNet;
 
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import com.readerbench.datasourceprovider.data.Word;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * @author Dorinela Sirbu <dorinela.92@gmail.com>
  */
-public class HypernymTreeProcesing {
+public class WordOntologyProcessing {
 
     /**
      * Gets the distance to the root of the hypernym tree. If the word was
@@ -19,7 +19,6 @@ public class HypernymTreeProcesing {
      * tree always selecting the first hypernym returned by WordNet under the
      * assumption that it is the most likely one.
      */
-    //todo - this method was moved from com.readerbench.textualcomplexity.wordComplexity.WordComplexity ??
     public static int getMaxDistanceToHypernymTreeRoot(Word word, Lang lang) {
         String senseId;
 

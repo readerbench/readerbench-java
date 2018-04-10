@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.keywordMining;
 
-import com.readerbench.coreservices.HypernymTreeProcesing;
+import com.readerbench.coreservices.semanticModels.WordNet.WordOntologyProcessing;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.NGram;
@@ -251,7 +251,7 @@ public class KeywordModeling {
             if (!containsLemma(w, e.getWordOccurences().keySet())) {
                 w.setSemanticModels(e.getSemanticModels());
                 // penalty for specificity
-                double height = HypernymTreeProcesing.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
+                double height = WordOntologyProcessing.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
                 if (height == -1) {
                     height = 10;
                 }
