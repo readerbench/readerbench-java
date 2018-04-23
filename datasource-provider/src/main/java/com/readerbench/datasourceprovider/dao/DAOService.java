@@ -15,7 +15,6 @@
  */
 package com.readerbench.datasourceprovider.dao;
 
-import com.readerbench.coreservices.commons.ReadPropertiesFile;
 import com.readerbench.datasourceprovider.dao.hibernate.SQLiteDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
