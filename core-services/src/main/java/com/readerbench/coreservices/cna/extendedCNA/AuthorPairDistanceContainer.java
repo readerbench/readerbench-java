@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.cna.extendedCNA;
 
-import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.datasourceprovider.data.Formatting;
 
 import java.util.Objects;
 

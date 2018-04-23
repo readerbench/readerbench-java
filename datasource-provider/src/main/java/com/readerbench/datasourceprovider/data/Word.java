@@ -15,6 +15,10 @@
  */
 package com.readerbench.datasourceprovider.data;
 
+import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
+import com.readerbench.coreservices.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.stemmer.Stemmer;
+import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.datasourceprovider.dao.WordDAO;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
@@ -25,10 +29,6 @@ import com.readerbench.datasourceprovider.data.sentiment.SentimentEntity;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentValence;
 import com.readerbench.datasourceprovider.pojo.EntityXValence;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.textualcomplexity.rhythm.tools.SyllabifiedCMUDict;
-import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
-import com.readerbench.coreservices.nlp.listOfWords.StopWords;
-import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

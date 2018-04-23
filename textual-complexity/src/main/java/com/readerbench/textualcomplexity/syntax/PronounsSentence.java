@@ -15,8 +15,8 @@
  */
 package com.readerbench.textualcomplexity.syntax;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

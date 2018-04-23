@@ -16,9 +16,6 @@
 package com.readerbench.datasourceprovider.data.article;
 
 public class ArticleAuthor implements java.io.Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	String authorName;
 	String authorUri;

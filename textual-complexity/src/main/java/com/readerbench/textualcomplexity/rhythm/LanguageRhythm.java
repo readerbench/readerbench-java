@@ -5,10 +5,10 @@
  */
 package com.readerbench.textualcomplexity.rhythm;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;

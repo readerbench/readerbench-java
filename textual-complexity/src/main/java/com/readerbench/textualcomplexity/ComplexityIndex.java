@@ -5,7 +5,7 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.complexity.IComplexityIndex;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 
@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
  *
  * @author Stefan Ruseti
  */
-public abstract class ComplexityIndex implements Serializable {
+public abstract class ComplexityIndex implements Serializable, IComplexityIndex {
 
     protected ComplexityIndicesEnum index;
     protected Lang lang;
@@ -47,8 +47,7 @@ public abstract class ComplexityIndex implements Serializable {
         this(index, null, null, aux);
     }
 
-    abstract public double compute(AbstractDocument d);
-
+    @Override
     public String getAcronym() {
         String acronym;
         try {
@@ -68,6 +67,7 @@ public abstract class ComplexityIndex implements Serializable {
         return acronym;
     }
 
+    @Override
     public String getDescription() {
         String description;
         try {
@@ -87,6 +87,7 @@ public abstract class ComplexityIndex implements Serializable {
         return description;
     }
 
+    @Override
     public String getCategoryName() {
         return index.getType().name();
     }
@@ -123,9 +124,5 @@ public abstract class ComplexityIndex implements Serializable {
             return false;
         }
         return this.simType == other.simType;
-    }
-
-    public ComplexityIndicesEnum getIndex() {
-        return index;
     }
 }

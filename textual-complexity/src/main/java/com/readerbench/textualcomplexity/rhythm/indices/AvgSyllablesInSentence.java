@@ -6,10 +6,9 @@
 package com.readerbench.textualcomplexity.rhythm.indices;
 
 import com.readerbench.coreservices.rhythm.Syllable;
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Syllable;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -35,7 +34,7 @@ public class AvgSyllablesInSentence extends ComplexityIndex {
 //            System.out.println("Sentence: " + s);
             int cnt = 0;
             for (Word w : s.getAllWords()) {
-                List<Syllable> syllables = w.getSyllables();
+                List<com.readerbench.datasourceprovider.data.Syllable> syllables = w.getSyllables();
 //                System.out.print(syllables + " ");
                 if (syllables == null) {
                     cnt += Syllable.syllable(w.getText());

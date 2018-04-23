@@ -22,7 +22,7 @@ import org.gephi.graph.api.*;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.*;
 import org.openide.util.Lookup;
-import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.datasourceprovider.data.Formatting;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import com.readerbench.coreservices.semanticModels.utils.WordPairSimilarity;
 import com.readerbench.coreservices.semanticModels.utils.WordSimilarityContainer;

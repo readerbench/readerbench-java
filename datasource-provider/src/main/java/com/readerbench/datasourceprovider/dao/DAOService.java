@@ -15,7 +15,10 @@
  */
 package com.readerbench.datasourceprovider.dao;
 
-import com.readerbench.datasourceprovider.common.ReadPropertiesFile;
+import com.readerbench.coreservices.commons.ReadPropertiesFile;
+import com.readerbench.datasourceprovider.dao.hibernate.SQLiteDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -31,6 +34,8 @@ import java.util.function.Function;
  * @author Stefan
  */
 public class DAOService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLiteDatabase.class);
 
     private static DAOService instance = null;
 

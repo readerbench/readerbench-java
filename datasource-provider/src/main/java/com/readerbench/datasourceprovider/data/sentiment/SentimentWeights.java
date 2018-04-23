@@ -15,8 +15,8 @@
  */
 package com.readerbench.datasourceprovider.data.sentiment;
 
-import com.readerbench.dao.ValenceDAO;
-import com.readerbench.dao.WeightDAO;
+import com.readerbench.datasourceprovider.dao.ValenceDAO;
+import com.readerbench.datasourceprovider.dao.WeightDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,9 +51,9 @@ public class SentimentWeights {
 		sentimentGrid = new SentimentGrid<>(noPrimarySentiments, noRageSentiments);
 
 		// load all sentiment valences from database
-		List<com.readerbench.data.pojo.SentimentValence> svs = ValenceDAO.getInstance().findAll();
+		List<com.readerbench.datasourceprovider.pojo.SentimentValence> svs = ValenceDAO.getInstance().findAll();
 		int i = 0, j = 0;
-		for (com.readerbench.data.pojo.SentimentValence sv : svs) {
+		for (com.readerbench.datasourceprovider.pojo.SentimentValence sv : svs) {
 			// create DAO SentimentValences HashMap for Sentiment Entity
 			// initialization
 			if (!sv.getRage())
@@ -63,8 +63,8 @@ public class SentimentWeights {
 		}
 
 		// load all sentiment valences weights and store them in SentimentGrid
-		List<com.readerbench.data.pojo.Weight> weights = WeightDAO.getInstance().findAll();
-		for (com.readerbench.data.pojo.Weight w : weights) {
+		List<com.readerbench.datasourceprovider.pojo.Weight> weights = WeightDAO.getInstance().findAll();
+		for (com.readerbench.datasourceprovider.pojo.Weight w : weights) {
 			sentimentGrid.set(w.getFkPrimaryValence().getIndexLabel(), w.getFkRageValence().getIndexLabel(),
 					w.getValue());
 		}

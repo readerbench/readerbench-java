@@ -15,7 +15,7 @@
  */
 package com.readerbench.datasourceprovider.data.cscl;
 
-import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.datasourceprovider.data.Formatting;
 
 import java.io.Serializable;
 

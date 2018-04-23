@@ -15,7 +15,7 @@
  */
 package com.readerbench.datasourceprovider.dao;
 
-import com.readerbench.datasourceprovider.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.datasourceprovider.pojo.Language;
 import com.readerbench.datasourceprovider.pojo.SentimentValence;
 

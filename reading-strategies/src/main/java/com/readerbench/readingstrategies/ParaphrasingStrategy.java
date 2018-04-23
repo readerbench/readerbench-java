@@ -15,10 +15,10 @@
  */
 package com.readerbench.readingstrategies;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;

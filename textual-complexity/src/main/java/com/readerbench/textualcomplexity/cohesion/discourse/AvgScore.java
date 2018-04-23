@@ -15,8 +15,8 @@
  */
 package com.readerbench.textualcomplexity.cohesion.discourse;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

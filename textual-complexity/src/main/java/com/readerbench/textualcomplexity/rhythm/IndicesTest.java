@@ -5,12 +5,12 @@
  */
 package com.readerbench.textualcomplexity.rhythm;
 
-import com.readerbench.data.Lang;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.rhythm.indices.LanguageRhythmicCoefficient;
 import com.readerbench.textualcomplexity.rhythm.indices.LanguageRhythmicIndexSM;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
 

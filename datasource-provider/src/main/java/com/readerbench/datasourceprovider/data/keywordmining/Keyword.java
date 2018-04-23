@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.keywordMining;
+package com.readerbench.datasourceprovider.data.keywordmining;
 
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.commons.Formatting;
@@ -69,7 +69,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         }
         count += newCount;
         termFrequency = 1 + Math.log(count);
-        if (e.getSemanticModels().isEmpty()) {
+        if (e.getSemanticModelsAsList().isEmpty()) {
             this.relevance = termFrequency;
             return;
         }
@@ -86,7 +86,7 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         termFrequency = 1 + Math.log(count);
         // do not consider Idf in order to limit corpus specificity
         // double inverseDocumentFrequency = word.getIdf();
-        if (e.getSemanticModels().isEmpty()) {
+        if (e.getSemanticModelsAsList().isEmpty()) {
             this.relevance = termFrequency;
             return;
         }

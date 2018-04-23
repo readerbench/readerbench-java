@@ -5,7 +5,7 @@
  */
 package com.readerbench.textualcomplexity.rhythm;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
 import com.readerbench.textualcomplexity.rhythm.indices.*;

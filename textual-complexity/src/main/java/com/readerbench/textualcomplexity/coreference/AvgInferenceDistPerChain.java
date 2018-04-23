@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity.coreference;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 

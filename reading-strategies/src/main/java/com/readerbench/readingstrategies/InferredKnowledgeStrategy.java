@@ -15,16 +15,16 @@
  */
 package com.readerbench.readingstrategies;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import org.apache.commons.lang3.StringUtils;
-import com.readerbench.coreservices.commons.Formatting;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
+import com.readerbench.datasourceprovider.data.Formatting;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 
 import java.awt.*;
@@ -59,7 +59,7 @@ public class InferredKnowledgeStrategy {
 
         int noOccur = 0;
 
-        List<ISemanticModel> semanticModels = sentences.get(0).getSemanticModels();
+        List<ISemanticModel> semanticModels = sentences.get(0).getSemanticModelsAsList();
 
         Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
 

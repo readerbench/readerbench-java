@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity.dialogism;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.textualcomplexity.ComplexityIndex;

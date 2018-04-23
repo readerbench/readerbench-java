@@ -6,9 +6,8 @@
 package com.readerbench.textualcomplexity.rhythm;
 
 import com.readerbench.coreservices.rhythm.Syllable;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Syllable;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.rhythm.tools.CMUDict;
 import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.coreservices.nlp.listOfWords.StopWords;
@@ -162,14 +161,14 @@ public class Rhythm {
         int cnt = 1;
         
         for (Word w : unit) {
-            List<Syllable> syllables = w.getSyllables();
+            List<com.readerbench.datasourceprovider.data.Syllable> syllables = w.getSyllables();
             if (null == syllables) {
                 // case when the word was not found in the dictionary
                 // count the number of syllables using Syllable.syllable() method
                 // the word is considered to be unstressed
                 cnt += Syllable.syllable(w.getText());
             } else {
-                for (Syllable syll : syllables) {
+                for (com.readerbench.datasourceprovider.data.Syllable syll : syllables) {
                     if (syll.isPrimaryStressed()) {
                         rhythmicStructure.add(cnt);
                         cnt = 1;

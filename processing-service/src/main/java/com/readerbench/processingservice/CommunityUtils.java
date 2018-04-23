@@ -13,9 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.datasourceprovider.data.cscl;
+package com.readerbench.processingservice;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.datasourceprovider.data.cscl.CSCLIndices;
+import com.readerbench.datasourceprovider.data.cscl.Community;
+import com.readerbench.datasourceprovider.data.cscl.Participant;
+import com.readerbench.datasourceprovider.data.cscl.ParticipantNormalized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;

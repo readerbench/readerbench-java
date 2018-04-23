@@ -21,7 +21,7 @@ import org.gephi.graph.api.Edge;
 import org.gephi.graph.api.GraphModel;
 import org.gephi.graph.api.Node;
 import org.gephi.graph.api.UndirectedGraph;
-import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.datasourceprovider.data.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

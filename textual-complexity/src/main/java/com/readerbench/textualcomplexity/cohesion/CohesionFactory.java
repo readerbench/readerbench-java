@@ -15,7 +15,8 @@
  */
 package com.readerbench.textualcomplexity.cohesion;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
@@ -29,7 +30,6 @@ import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsAvg
 import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsCoverage;
 import com.readerbench.textualcomplexity.cohesion.lexicalChains.LexicalChainsMaxSpan;
 import com.readerbench.textualcomplexity.cohesion.semantic.*;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 import com.readerbench.textualcomplexity.IndexLevel;
 
 import java.util.ArrayList;

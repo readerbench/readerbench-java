@@ -15,7 +15,7 @@
  */
 package com.readerbench.datasourceprovider.data.sentiment;
 
-import com.readerbench.dao.ValenceDAO;
+import com.readerbench.datasourceprovider.dao.ValenceDAO;
 
 import java.util.*;
 
@@ -32,8 +32,8 @@ public class SentimentValence implements java.io.Serializable {
 
     static {
         Map<String, SentimentValence> valenceMaplocal = new HashMap<>();
-        List<com.readerbench.data.pojo.SentimentValence> valenceEntities = ValenceDAO.getInstance().findAll();
-        for (com.readerbench.data.pojo.SentimentValence v : valenceEntities) {
+        List<com.readerbench.datasourceprovider.pojo.SentimentValence> valenceEntities = ValenceDAO.getInstance().findAll();
+        for (com.readerbench.datasourceprovider.pojo.SentimentValence v : valenceEntities) {
             SentimentValence sv = new SentimentValence(v.getId(), v.getLabel(), v.getIndexLabel(), v.getRage());
             valences.add(sv);
             valenceMaplocal.put(v.getIndexLabel(), sv);

@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity.readability;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
 

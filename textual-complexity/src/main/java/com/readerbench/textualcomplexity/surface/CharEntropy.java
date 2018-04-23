@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity.surface;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 

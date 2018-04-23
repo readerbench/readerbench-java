@@ -15,11 +15,11 @@
  */
 package com.readerbench.datasourceprovider.data.semanticmodels;
 
-import com.readerbench.data.Lang;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.ArrayList;
 import java.util.List;

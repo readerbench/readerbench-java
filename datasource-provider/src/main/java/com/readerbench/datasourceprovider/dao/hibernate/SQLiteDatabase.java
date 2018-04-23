@@ -1,6 +1,6 @@
 package com.readerbench.datasourceprovider.dao.hibernate;
 
-import com.readerbench.dao.WordDAO;
+import com.readerbench.datasourceprovider.dao.WordDAO;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentWeights;
 import org.slf4j.LoggerFactory;
 

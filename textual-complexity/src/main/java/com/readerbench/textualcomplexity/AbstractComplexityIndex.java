@@ -5,8 +5,8 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
 
 import java.util.function.Function;
 import java.util.stream.Stream;

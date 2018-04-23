@@ -15,28 +15,7 @@
  */
 package com.readerbench.datasourceprovider.data.cscl;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
-import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
-import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
-import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.solr.entities.cscl.Contribution;
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
-import com.readerbench.data.Block;
-import com.readerbench.data.Lang;
-import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
-import org.openide.util.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.services.complexity.ComputeBalancedMeasure;
 import com.readerbench.coreservices.cscl.Collaboration;
 import com.readerbench.coreservices.cscl.ParticipantEvaluation;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
@@ -44,12 +23,17 @@ import com.readerbench.coreservices.dialogism.DialogismMeasures;
 import com.readerbench.coreservices.keywordMining.KeywordModeling;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.nlp.spellchecking.Spellchecking;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.solr.entities.cscl.Contribution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -64,7 +48,6 @@ public class Conversation extends AbstractDocument {
     private static final Logger LOGGER = LoggerFactory.getLogger(Conversation.class);
 
     private static final long serialVersionUID = 2096182930189552475L;
-    private static Spellchecking spellChecker = new Spellchecking();
 
     private List<Participant> participants;
     private transient List<Participant> selectedParticipants;
@@ -140,182 +123,6 @@ public class Conversation extends AbstractDocument {
         return load(new File(pathToDoc), models, lang, usePOSTagging);
     }
 
-    /**
-     * Load a conversation
-     *
-     * @param docFile
-     * @param models
-     * @param lang
-     * @param usePOSTagging
-     * @return
-     */
-    public static Conversation load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
-        // parse the XML file
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        Conversation c = null;
-        // determine contents
-        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-        List<AbstractDocumentTemplate.BlockTemplate> blocks = new ArrayList<>();
-
-        try {
-            InputSource input = new InputSource(new FileInputStream(docFile));
-            input.setEncoding("UTF-8");
-
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            org.w3c.dom.Document dom = db.parse(input);
-
-            Element doc = dom.getDocumentElement();
-            Element turn, el;
-            NodeList nl1, nl2;
-
-            // reformat input accordingly to evaluation model
-            nl1 = doc.getElementsByTagName("Turn");
-            if (nl1 != null && nl1.getLength() > 0) {
-                for (int i = 0; i < nl1.getLength(); i++) {
-                    turn = (Element) nl1.item(i);
-                    nl2 = turn.getElementsByTagName("Utterance");
-                    if (nl2 != null && nl2.getLength() > 0) {
-                        for (int j = 0; j < nl2.getLength(); j++) {
-                            AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
-                            if (turn.hasAttribute("nickname") && turn.getAttribute("nickname").trim().length() > 0) {
-                                block.setSpeaker(turn.getAttribute("nickname").trim());
-                            } else {
-                                block.setSpeaker("unregistered member");
-                            }
-                            el = (Element) nl2.item(j);
-                            if (el.getFirstChild() != null) {
-                                if (el.hasAttribute("time")) {
-                                    block.setTime(el.getAttribute("time"));
-                                }
-                                if (el.hasAttribute("genid")) {
-                                    block.setId(Integer.parseInt(el.getAttribute("genid")));
-                                }
-                                if (el.hasAttribute("ref")) {
-                                    if (el.getAttribute("ref").isEmpty()) {
-                                        block.setRefId(0);
-                                    } else {
-                                        try {
-                                            block.setRefId(Integer.parseInt(el.getAttribute("ref")));
-                                        } catch (NumberFormatException e) {
-                                            block.setRefId(0);
-                                        }
-                                    }
-                                }
-
-                                String text = el.getFirstChild().getNodeValue();
-                                text = spellChecker.checkText(text, lang, "");
-                                block.setContent(text);
-                                if (text.length() > 0
-                                        && !el.getFirstChild().getNodeValue().trim().equals("joins the room")
-                                        && !el.getFirstChild().getNodeValue().trim().equals("leaves the room")) {
-                                    blocks.add(block);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            ConversationRestructuringSupport support = new ConversationRestructuringSupport();
-            support.mergeAdjacentContributions(blocks);
-            contents.setBlocks(support.newBlocks);
-            c = new Conversation(docFile.getAbsolutePath(), contents, models, lang, usePOSTagging);
-            // set title as a concatenation of topics
-            String title = "";
-            nl1 = doc.getElementsByTagName("Topic");
-            if (nl1 != null && nl1.getLength() > 0) {
-                for (int i = 0; i < nl1.getLength(); i++) {
-                    el = (Element) nl1.item(i);
-                    title += el.getFirstChild().getNodeValue() + " ";
-                }
-                c.setDocumentTitle(title, models, lang, usePOSTagging);
-            }
-
-            if (title.length() == 0) {
-                c.setDocumentTitle(docFile.getName(), models, lang, usePOSTagging);
-            }
-
-            // obtain annotator grades
-            nl1 = doc.getElementsByTagName("Grades");
-            if (nl1 != null && nl1.getLength() > 0) {
-                for (int i = 0; i < nl1.getLength(); i++) {
-                    el = (Element) nl1.item(i);
-                    nl1 = el.getElementsByTagName("General_grade");
-                    if (nl1 != null && nl1.getLength() > 0) {
-                        for (int j = 0; j < nl1.getLength(); j++) {
-                            el = (Element) nl1.item(j);
-                            if (!el.getAttribute("nickname").equals("")) {
-                                double nr;
-                                try {
-                                    nr = Double.valueOf(el.getAttribute("value"));
-                                } catch (NumberFormatException e) {
-                                    nr = 0;
-                                }
-                                for (Participant p : c.getParticipants()) {
-                                    if (p.getName().equals(el.getAttribute("nickname"))) {
-                                        p.setGradeAnnotator(nr);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            double[] collabEv = new double[c.getBlocks().size()];
-            nl1 = doc.getElementsByTagName("Collab_regions");
-            if (nl1 != null && nl1.getLength() > 0) {
-                for (int i = 0; i < nl1.getLength(); i++) {
-                    el = (Element) nl1.item(i);
-                    nl1 = el.getElementsByTagName("Collab_regions_annotation");
-                    if (nl1 != null && nl1.getLength() > 0) {
-                        for (int j = 0; j < nl1.getLength(); j++) {
-                            el = (Element) nl1.item(j);
-                            String text = el.getFirstChild().getNodeValue();
-                            // split annotated intense collaboration zones
-                            StringTokenizer stZones = new StringTokenizer(text, ",");
-                            while (stZones.hasMoreTokens()) {
-                                StringTokenizer stZone = new StringTokenizer(
-                                        stZones.nextToken().replaceAll("\\[", "").replaceAll("\\]", ""), ";");
-                                try {
-                                    int start = Integer.valueOf(stZone.nextToken());
-                                    int end = Integer.valueOf(stZone.nextToken());
-                                    if (support.initialMapping.containsKey(start)) {
-                                        start = support.initialMapping.get(start);
-                                    } else {
-                                        start = -1;
-                                    }
-
-                                    if (support.initialMapping.containsKey(end)) {
-                                        end = Math.min(support.initialMapping.get(end), c.getBlocks().size() - 1);
-                                    } else {
-                                        end = -1;
-                                    }
-                                    // increment accordingly the intense collaboration zones distribution
-                                    if (start >= 0 && start < end) {
-                                        for (int k = start; k <= end; k++) {
-                                            collabEv[k]++;
-                                        }
-                                    }
-                                } catch (NumberFormatException e) {
-                                    LOGGER.warn("Incorrect annotated collaboration zone format...");
-                                }
-                            }
-                        }
-                        c.setAnnotatedCollabZones(Collaboration.getCollaborationZones(collabEv));
-                    }
-                }
-            }
-            c.setAnnotatedCollabEvolution(collabEv);
-        } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + "!");
-            LOGGER.error(ex.getMessage());
-        } catch (SAXException | IOException ex) {
-            LOGGER.error(ex.getMessage());
-        }
-        return c;
-    }
 
     /**
      * Load conversation
@@ -331,13 +138,13 @@ public class Conversation extends AbstractDocument {
         Conversation c = null;
         // determine contents
         AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-        List<BlockTemplate> blocks = new ArrayList<>();
+        List<AbstractDocumentTemplate.BlockTemplate> blocks = new ArrayList<>();
 
         try {
             List<Contribution> contributions = conversation.getContributions();
             if (contributions != null && contributions.size() > 0) {
                 for (Contribution contribution : contributions) {
-                    BlockTemplate block = contents.new BlockTemplate();
+                    AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
                     if (contribution.getParticipantNickname() != null) {
                         block.setSpeaker(contribution.getParticipantNickname());
                     } else {
@@ -366,7 +173,7 @@ public class Conversation extends AbstractDocument {
             contents.setBlocks(support.newBlocks);
             c = new Conversation(contents, models, lang, usePOSTagging);
         } catch (Exception ex) {
-            LOGGER.error(ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
         return c;
     }
@@ -396,8 +203,8 @@ public class Conversation extends AbstractDocument {
     private void determineParticipantContributions() {
         if (getParticipants().size() > 0) {
             for (Participant p : getParticipants()) {
-                p.setContributions(new Conversation(null, getSemanticModels(), getLanguage()));
-                p.setSignificantContributions(new Conversation(null, getSemanticModels(), getLanguage()));
+                p.setContributions(new Conversation(null, getSemanticModelsAsList(), getLanguage()));
+                p.setSignificantContributions(new Conversation(null, getSemanticModelsAsList(), getLanguage()));
             }
             for (Block b : getBlocks()) {
                 if (b != null && ((Utterance) b).getParticipant() != null) {
@@ -493,11 +300,12 @@ public class Conversation extends AbstractDocument {
 //        ParticipantEvaluation.computeEntropyForRegularityMeasure(this);
     }
 
-    public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
-        if (pathToComplexityModel != null && selectedComplexityFactors != null) {
-            ComputeBalancedMeasure.evaluateTextualComplexityParticipants(this, pathToComplexityModel, selectedComplexityFactors);
-        }
-    }
+    //todo - to be moved
+//    public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
+//        if (pathToComplexityModel != null && selectedComplexityFactors != null) {
+//            ComputeBalancedMeasure.evaluateTextualComplexityParticipants(this, pathToComplexityModel, selectedComplexityFactors);
+//        }
+//    }
 
     public void exportIM() {
         LOGGER.info("Writing document export in IM format");
@@ -534,12 +342,28 @@ public class Conversation extends AbstractDocument {
         return children;
     }
 
-    private static class ConversationRestructuringSupport {
+    public static class ConversationRestructuringSupport {
 
         private Map<Integer, Integer> initialMapping;
-        private List<BlockTemplate> newBlocks;
+        private List<AbstractDocumentTemplate.BlockTemplate> newBlocks;
 
-        public void mergeAdjacentContributions(List<BlockTemplate> blocks) {
+        public List<AbstractDocumentTemplate.BlockTemplate> getNewBlocks() {
+            return newBlocks;
+        }
+
+        public void setNewBlocks(List<AbstractDocumentTemplate.BlockTemplate> newBlocks) {
+            this.newBlocks = newBlocks;
+        }
+
+        public Map<Integer, Integer> getInitialMapping() {
+            return initialMapping;
+        }
+
+        public void setInitialMapping(Map<Integer, Integer> initialMapping) {
+            this.initialMapping = initialMapping;
+        }
+
+        public void mergeAdjacentContributions(List<AbstractDocumentTemplate.BlockTemplate> blocks) {
             //initialization: create mapping between block IDs and initial index positions in array
             initialMapping = new TreeMap<>();
             for (int i = 0; i < blocks.size(); i++) {
@@ -551,8 +375,8 @@ public class Conversation extends AbstractDocument {
             //first iteration: merge contributions which have same speaker and timeframe <= 1 minute and no explicit ref other than previous contribution
             for (int i = blocks.size() - 1; i > 0; i--) {
                 if (blocks.get(i) != null && blocks.get(i - 1) != null) {
-                    BlockTemplate crt = blocks.get(i);
-                    BlockTemplate prev = blocks.get(i - 1);
+                    AbstractDocumentTemplate.BlockTemplate crt = blocks.get(i);
+                    AbstractDocumentTemplate.BlockTemplate prev = blocks.get(i - 1);
                     if (crt.getTime() == null || prev.getTime() == null) {
                         continue;
                     }
@@ -572,7 +396,7 @@ public class Conversation extends AbstractDocument {
             }
 
             //update refId
-            for (BlockTemplate b : blocks) {
+            for (AbstractDocumentTemplate.BlockTemplate b : blocks) {
                 if (b != null) {
                     if (b.getRefId() != null && b.getRefId() > 0) {
                         b.setRefId(initialMapping.get(b.getRefId()));
@@ -583,7 +407,7 @@ public class Conversation extends AbstractDocument {
             }
 
             //second iteration: fix explicit links that point now to null blocks
-            for (BlockTemplate b : blocks) {
+            for (AbstractDocumentTemplate.BlockTemplate b : blocks) {
                 if (b != null && b.getRefId() != null && blocks.get(b.getRefId()) == null) {
                     //determine first block which is not null above the referenced block
                     int index = b.getRefId() - 1;
@@ -605,7 +429,7 @@ public class Conversation extends AbstractDocument {
             for (int i = 0; i < blocks.size(); i++) {
                 if (blocks.get(i) != null) {
                     newMapping.put(i, noCrt);
-                    BlockTemplate crt = blocks.get(i);
+                    AbstractDocumentTemplate.BlockTemplate crt = blocks.get(i);
                     crt.setId(noCrt);
                     if (crt.getRefId() != null) {
                         crt.setRefId(newMapping.get(crt.getRefId()));

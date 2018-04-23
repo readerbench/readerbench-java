@@ -5,7 +5,7 @@
  */
 package com.readerbench.textualcomplexity.readability;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import edu.stanford.nlp.util.Pair;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

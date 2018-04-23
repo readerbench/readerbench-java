@@ -15,7 +15,6 @@
  */
 package com.readerbench.datasourceprovider.data.cscl;
 
-import com.readerbench.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 
 import java.io.Serializable;
@@ -49,8 +48,8 @@ public class Participant implements Comparable<Participant>, Serializable {
     public Participant(String name, AbstractDocument d) {
         super();
         this.name = name;
-        this.contributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
-        this.significantContributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.contributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
+        this.significantContributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
         this.alias = alias;
@@ -61,8 +60,8 @@ public class Participant implements Comparable<Participant>, Serializable {
         super();
         this.name = name;
         this.alias = alias;
-        this.contributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
-        this.significantContributions = new Conversation(null, d.getSemanticModels(), d.getLanguage());
+        this.contributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
+        this.significantContributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
         this.resetIndices();

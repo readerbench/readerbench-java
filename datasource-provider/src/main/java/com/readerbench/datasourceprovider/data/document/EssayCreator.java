@@ -15,11 +15,10 @@
  */
 package com.readerbench.datasourceprovider.data.document;
 
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
-import com.readerbench.data.Lang;
-import com.readerbench.data.Word;
-import org.openide.util.Exceptions;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -27,7 +26,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -54,7 +52,7 @@ public class EssayCreator extends Document {
         authors = new LinkedList<>();
     }
 
-    public EssayCreator(String path, AbstractDocumentTemplate docTmp, 
+    public EssayCreator(String path, AbstractDocumentTemplate docTmp,
             List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         super(path, docTmp, models, lang, usePOSTagging);
     }
@@ -79,7 +77,7 @@ public class EssayCreator extends Document {
             if (nl != null && nl.getLength() > 0) {
                 for (int i = 0; i < nl.getLength(); i++) {
                     el = (Element) nl.item(i);
-                    BlockTemplate block = contents.new BlockTemplate();
+                    AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
                     block.setId(Integer.parseInt(el.getAttribute("id")));
                     block.setRefId(0);
                     if (el.hasAttribute("verbalization_after")) {
@@ -99,7 +97,7 @@ public class EssayCreator extends Document {
             // determine title
             nl = doc.getElementsByTagName("title");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang,
+                d.processDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang,
                         usePOSTagging);
             }
 

@@ -15,17 +15,14 @@
  */
 package com.readerbench.datasourceprovider.data.document;
 
-import com.readerbench.data.AbstractDocumentTemplate;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
-import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.services.complexity.ComplexityIndices;
-import com.readerbench.services.readingStrategies.ReadingStrategies;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -113,11 +110,12 @@ public class Summary extends Metacognition {
         return cohesion;
     }
 
-    @Override
-    public void computeAll(boolean computeDialogism, boolean useBigrams) {
-        computeDiscourseAnalysis(computeDialogism, useBigrams);
-        ReadingStrategies.detReadingStrategies(this);
-        ComplexityIndices.computeComplexityFactors(this);
-        LOGGER.info("Finished processing summary ...");
-    }
+    //todo - to be moved
+//    @Override
+//    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+//        computeDiscourseAnalysis(computeDialogism, useBigrams);
+//        ReadingStrategies.detReadingStrategies(this);
+//        ComplexityIndices.computeComplexityFactors(this);
+//        LOGGER.info("Finished processing summary ...");
+//    }
 }

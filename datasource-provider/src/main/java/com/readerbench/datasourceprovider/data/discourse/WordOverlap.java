@@ -15,12 +15,16 @@
  */
 package com.readerbench.datasourceprovider.data.discourse;
 
-import com.readerbench.data.*;
+import com.readerbench.coreservices.nlp.parsing.Parsing_EN;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
-import com.readerbench.coreservices.nlp.parsing.Parsing_EN;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -129,7 +133,7 @@ public class WordOverlap {
 			CoreMap keywordSentence = keywordDocument.get(SentencesAnnotation.class).get(0);
 
 			Sentence docKeywords = Parsing_EN.getInstance()
-					.processSentence(new Block(null, 0, "", doc.getSemanticModels(), Lang.en), 0, keywordSentence);
+					.processSentence(new Block(null, 0, "", doc.getSemanticModelsAsList(), Lang.en), 0, keywordSentence);
 
 			SemanticCohesion semanticCohesion = new SemanticCohesion(docAbstract, docKeywords);
 			double cohesionVal = (float) semanticCohesion.getCohesion();

@@ -15,18 +15,16 @@
  */
 package com.readerbench.datasourceprovider.data.document;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
-import org.openide.util.Exceptions;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.services.complexity.ComplexityIndices;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,35 +81,37 @@ public class MetaDocument extends Document {
         return getLeavesStream().collect(Collectors.toList());
     }
 
-    @Override
-    public void computeAll(boolean computeDialogism, boolean useBigrams) {
-        computeAll(computeDialogism, useBigrams, true);
-    }
+    //todo - to be moved
+//    @Override
+//    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+//        computeAll(computeDialogism, useBigrams, true);
+//    }
 
-    public void computeAll(boolean computeDialogism, boolean useBigrams, boolean recursive) {
-        if (!recursive) {
-            super.computeAll(computeDialogism, useBigrams);
-            return;
-        }
-        List<Document> leaves = getLeaves();
-        leaves.stream().forEach(doc -> {
-            if (doc instanceof MetaDocument) {
-                ((MetaDocument) doc).computeAll(computeDialogism, false);
-            } else {
-                doc.computeAll(computeDialogism, useBigrams);
-            }
-        });
-        if (leaves.isEmpty()) {
-            LOGGER.error("Error while processing document - empty leaf documents!");
-        }
-        setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        index -> leaves.parallelStream()
-                        .mapToDouble(d -> d.getComplexityIndices().get(index))
-                        .filter(x -> x != -1)
-                        .average().orElse((double) ComplexityIndices.IDENTITY))));
-    }
+    //todo - to be moved
+//    public void computeAll(boolean computeDialogism, boolean useBigrams, boolean recursive) {
+//        if (!recursive) {
+//            super.computeAll(computeDialogism, useBigrams);
+//            return;
+//        }
+//        List<Document> leaves = getLeaves();
+//        leaves.stream().forEach(doc -> {
+//            if (doc instanceof MetaDocument) {
+//                ((MetaDocument) doc).computeAll(computeDialogism, false);
+//            } else {
+//                doc.computeAll(computeDialogism, useBigrams);
+//            }
+//        });
+//        if (leaves.isEmpty()) {
+//            LOGGER.error("Error while processing document - empty leaf documents!");
+//        }
+//        setComplexityIndices(leaves.get(0).getComplexityIndices().keySet().stream()
+//                .collect(Collectors.toMap(
+//                        Function.identity(),
+//                        index -> leaves.parallelStream()
+//                        .mapToDouble(d -> d.getComplexityIndices().get(index))
+//                        .filter(x -> x != -1)
+//                        .average().orElse((double) ComplexityIndices.IDENTITY))));
+//    }
 
     public static MetaDocument load(File file, List<ISemanticModel> models, Lang lang, boolean usePOSTagging, DocumentLevel maxLevel, int maxDepth) {
         // parse the XML file

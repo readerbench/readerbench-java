@@ -15,8 +15,8 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

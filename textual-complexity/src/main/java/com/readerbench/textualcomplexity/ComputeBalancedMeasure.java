@@ -15,18 +15,18 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.complexity.Measurement;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
+import com.readerbench.textualcomplexity.data.Measurement;
 import libsvm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
 public class ComputeBalancedMeasure {
 
@@ -225,8 +225,7 @@ public class ComputeBalancedMeasure {
             List<AbstractDocument> documents, String path,
             int[] selectedMeasurements) {
         // determine number of classes
-        Map<Double, List<Measurement>> measurements = DataGathering
-                .getMeasurements(path + "/measurements.csv");
+        Map<Double, List<Measurement>> measurements = getMeasurements(path + "/measurements.csv");
         Set<Double> classes = measurements.keySet();
         int noClasses = classes.size();
         LOGGER.info("Started to train custom SVM model on " + noClasses
@@ -271,5 +270,31 @@ public class ComputeBalancedMeasure {
         for (Participant part : chat.getParticipants()) {
             part.setTextualComplexityLevel(results[i++]);
         }
+    }
+
+    public static Map<Double, List<Measurement>> getMeasurements(String fileName) {
+        Map<Double, List<Measurement>> result = new TreeMap<>();
+
+        try (BufferedReader input = new BufferedReader(new FileReader(fileName))) {
+            // disregard first line
+            String line = input.readLine();
+            while ((line = input.readLine()) != null) {
+                String[] fields = line.split("[;,]");
+                double[] values = new double[fields.length - 4];
+
+                double classNumber;
+                classNumber = Double.parseDouble(fields[0]);
+                for (int i = 4; i < fields.length; i++) {
+                    values[i - 4] = Double.parseDouble(fields[i]);
+                }
+                if (!result.containsKey(classNumber)) {
+                    result.put(classNumber, new ArrayList<>());
+                }
+                result.get(classNumber).add(new Measurement(classNumber, values));
+            }
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+        }
+        return result;
     }
 }

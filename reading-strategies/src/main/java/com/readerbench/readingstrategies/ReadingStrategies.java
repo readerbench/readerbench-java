@@ -15,9 +15,9 @@
  */
 package com.readerbench.readingstrategies;
 
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Metacognition;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import com.readerbench.datasourceprovider.data.document.Summary;

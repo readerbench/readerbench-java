@@ -48,7 +48,7 @@ public class SentimentGrid<V> {
     /**
      * Sets a new index
      * 
-     * @param name
+     * @param key
      * 			index key
      * @param index
      * 			index value
@@ -65,7 +65,7 @@ public class SentimentGrid<V> {
      * 			the primary sentiment identifier
      * @param col
      * 			the RAGE sentiment identifier
-     * @param value
+     * @param weight
      * 			the weight of the pair
      */
     public void set(String row, String col, V weight) {

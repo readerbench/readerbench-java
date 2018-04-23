@@ -15,12 +15,12 @@
  */
 package com.readerbench.datasourceprovider.data;
 
-import com.readerbench.coreservices.keywordMining.Keyword;
+import com.readerbench.datasourceprovider.data.cscl.Utterance;
+import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
-import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentEntity;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
@@ -345,8 +345,12 @@ public abstract class AnalysisElement implements Serializable {
         this.sentimentEntity = sentimentEntity;
     }
 
-    public List<ISemanticModel> getSemanticModels() {
+    public List<ISemanticModel> getSemanticModelsAsList() {
         return new ArrayList<>(semanticModels.values());
+    }
+
+    public Map<SimilarityType, ISemanticModel> getSemanticModels() {
+        return semanticModels;
     }
 
     public final void setSemanticModels(List<ISemanticModel> models) {

@@ -15,11 +15,11 @@
  */
 package com.readerbench.textualcomplexity.cohesion.semantic;
 
-import com.readerbench.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import java.util.Arrays;
 

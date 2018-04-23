@@ -16,6 +16,7 @@
 package com.readerbench.datasourceprovider.dao;
 
 import com.readerbench.datasourceprovider.pojo.Weight;
+
 import javax.persistence.TypedQuery;
 
 /**

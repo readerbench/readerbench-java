@@ -5,7 +5,11 @@
  */
 package com.readerbench.textualcomplexity.rhythm.indices;
 
-import com.readerbench.data.*;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Syllable;
+import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

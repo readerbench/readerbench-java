@@ -16,9 +16,11 @@
 package com.readerbench.datasourceprovider.data.article;
 
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
-import com.readerbench.datasourceprovider.data.Lang;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -27,8 +29,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -121,7 +121,7 @@ public class ResearchArticle extends Document {
             // determine title
             nl = doc.getElementsByTagName("title");
             if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
+                d.processDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
             }
 
             // determine meta

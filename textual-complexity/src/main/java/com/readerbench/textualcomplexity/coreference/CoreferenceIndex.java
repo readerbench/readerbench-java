@@ -15,9 +15,9 @@
  */
 package com.readerbench.textualcomplexity.coreference;
 
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
+import com.readerbench.datasourceprovider.data.Word;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.coref.data.Dictionaries;
 import edu.stanford.nlp.ling.CoreAnnotations;

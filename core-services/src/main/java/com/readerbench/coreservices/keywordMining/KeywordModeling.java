@@ -21,6 +21,7 @@ import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.NGram;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
+import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
@@ -192,7 +193,7 @@ public class KeywordModeling {
 
         Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
 
-        for (ISemanticModel model : e.getSemanticModels()) {
+        for (ISemanticModel model : e.getSemanticModelsAsList()) {
             double[] vec = new double[model.getNoDimensions()];
             topics.stream().forEach((topic) -> {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
@@ -249,7 +250,7 @@ public class KeywordModeling {
         LOGGER.info("Building final list of inferred concepts ...");
         for (Word w : inferredConceptsCandidates.keySet()) {
             if (!containsLemma(w, e.getWordOccurences().keySet())) {
-                w.setSemanticModels(e.getSemanticModels());
+                w.setSemanticModels(e.getSemanticModelsAsList());
                 // penalty for specificity
                 double height = WordOntologyProcessing.getMaxDistanceToHypernymTreeRoot(w, e.getLanguage());
                 if (height == -1) {

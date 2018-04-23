@@ -5,9 +5,10 @@
  */
 package com.readerbench.datasourceprovider.data;
 
-import com.readerbench.datasourceprovider.data.document.Document;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -45,7 +45,7 @@ public class DialogismComputations {
         LOGGER.info("Starting to assess voices by first building semantic chains");
         List<SemanticChain> semanticChains = new ArrayList<>();
         for (LexicalChain chain : d.getLexicalChains()) {
-            SemanticChain newChain = new SemanticChain(chain, d.getSemanticModels());
+            SemanticChain newChain = new SemanticChain(chain, d.getSemanticModelsAsList());
             newChain.updateSemanticRepresentation();
             semanticChains.add(newChain);
         }
@@ -118,7 +118,7 @@ public class DialogismComputations {
             int noVerbs = 0;
 
             LexicalChain lexicalChain = new LexicalChain();
-            SemanticChain extendedChain = new SemanticChain(lexicalChain, d.getSemanticModels());
+            SemanticChain extendedChain = new SemanticChain(lexicalChain, d.getSemanticModelsAsList());
             for (Word w : chain.getWords()) {
                 if (w.isVerb() || w.isNoun()) {
                     extendedChain.getWords().add(w);

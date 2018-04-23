@@ -31,7 +31,7 @@ import java.util.StringTokenizer;
 public class SimpleParsing {
 
     public static Block processBlock(AbstractDocument d, int blockIndex, String paragraph) {
-        Block b = new Block(d, blockIndex, paragraph, d.getSemanticModels(), d.getLanguage());
+        Block b = new Block(d, blockIndex, paragraph, d.getSemanticModelsAsList(), d.getLanguage());
         // parse the text using a simple String Tokenizer
         StringTokenizer st = new StringTokenizer(b.getText(), ".!?");
         int utteranceCounter = 0;
@@ -53,7 +53,7 @@ public class SimpleParsing {
     public static Sentence processSentence(Block b, int utteranceIndex, String sentence) {
         // basic parsing
         Lang lang = b.getLanguage();
-        Sentence s = new Sentence(b, utteranceIndex, sentence, b.getSemanticModels(), lang);
+        Sentence s = new Sentence(b, utteranceIndex, sentence, b.getSemanticModelsAsList(), lang);
 
         Word w;
         StringTokenizer st = new StringTokenizer(s.getText(), " ,:;'-");
@@ -61,7 +61,7 @@ public class SimpleParsing {
             String wordText = st.nextToken().toLowerCase();
             String stem = Stemmer.stemWord(wordText, lang);
             String lemma = StaticLemmatizer.lemmaStatic(wordText, lang);
-            w = new Word(s, wordText, lemma, stem, null, null, s.getSemanticModels(),
+            w = new Word(s, wordText, lemma, stem, null, null, s.getSemanticModelsAsList(),
                     lang);
             s.getAllWords().add(w);
 

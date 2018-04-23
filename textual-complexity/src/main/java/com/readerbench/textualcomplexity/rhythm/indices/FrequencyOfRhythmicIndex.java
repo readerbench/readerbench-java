@@ -5,9 +5,9 @@
  */
 package com.readerbench.textualcomplexity.rhythm.indices;
 
-import com.readerbench.data.AbstractDocument;
-import com.readerbench.data.Block;
-import com.readerbench.data.Sentence;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

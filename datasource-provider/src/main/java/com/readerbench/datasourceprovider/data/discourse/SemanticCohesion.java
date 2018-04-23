@@ -15,14 +15,11 @@
  */
 package com.readerbench.datasourceprovider.data.discourse;
 
-import com.readerbench.data.AnalysisElement;
-import com.readerbench.data.Word;
 import com.readerbench.coreservices.commons.Formatting;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 
 import java.io.Serializable;
@@ -75,7 +72,7 @@ public class SemanticCohesion implements Serializable {
         this.destination = destination;
         this.similarities = new EnumMap<>(SimilarityType.class);
 
-        source.getSemanticModels().stream().forEach((semModel) -> {
+        source.getSemanticModelsAsList().stream().forEach((semModel) -> {
             this.similarities.put(semModel.getType(), semModel.getSimilarity(source, destination));
         });
         similarities.put(SimilarityType.LEACOCK_CHODOROW, getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
@@ -142,7 +139,7 @@ public class SemanticCohesion implements Serializable {
 
     public static double getAverageSemanticModelSimilarity(AnalysisElement u1, AnalysisElement u2) {
         Map<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
-        for (ISemanticModel model : u1.getSemanticModels()) {
+        for (ISemanticModel model : u1.getSemanticModelsAsList()) {
             similarities.put(model.getType(), model.getSimilarity(u1.getModelVectors().get(model.getType()), u2.getModelVectors().get(model.getType())));
         }
         return SemanticCohesion.getAggregatedSemanticMeasure(similarities);

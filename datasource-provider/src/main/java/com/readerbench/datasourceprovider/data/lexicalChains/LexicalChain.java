@@ -15,7 +15,7 @@
  */
 package com.readerbench.datasourceprovider.data.lexicalChains;
 
-import com.readerbench.data.Word;
+import com.readerbench.datasourceprovider.data.Word;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;

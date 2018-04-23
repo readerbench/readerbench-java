@@ -23,7 +23,6 @@
         <languagetool.version>3.9</languagetool.version>
 
         <weka-dev.version>3.9.1</weka-dev.version>
-        <svm.version>3.22</svm.version>
 
         <c3p0.version>0.9.1.2</c3p0.version>
         <sqlite.version>3.8.11.2</sqlite.version>
@@ -31,15 +30,11 @@
 
         <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
         <jsoup.version>1.10.3</jsoup.version>
-        <json-simple.version>1.1.1</json-simple.version>
-        <rosuda.JRI.version>0.8</rosuda.JRI.version>
         <codehaus-jackson-core-asl.version>1.9.13</codehaus-jackson-core-asl.version>
 
         <slf4j.version>1.7.25</slf4j.version>
         <log4j-core.version>2.10.0</log4j-core.version>
         <log4j-api.version>2.10.0</log4j-api.version>
-
-        <com.readerbench.solr.version>1.0.6</com.readerbench.solr.version>
     </properties>
 
     <modules>
@@ -49,6 +44,7 @@
         <module>datasource-provider</module>
         <module>reading-strategies</module>
         <module>textual-complexity</module>
+        <module>processing-service</module>
     </modules>
 
     <distributionManagement>
@@ -106,11 +102,6 @@
                 <version>${weka-dev.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.datumbox</groupId>
-                <artifactId>libsvm</artifactId>
-                <version>${svm.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>${hibernate.version}</version>
@@ -127,25 +118,9 @@
                 <version>${jsoup.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.googlecode.json-simple</groupId>
-                <artifactId>json-simple</artifactId>
-                <version>${json-simple.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.readerbench</groupId>
                 <artifactId>WordnetTools</artifactId>
                 <version>${wordnettools.vesion}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.readerbench</groupId>
-                <artifactId>rosuda.JRI</artifactId>
-                <version>${rosuda.JRI.version}</version>
-            </dependency>
-            <!-- SolrReaderBench -->
-            <dependency>
-                <groupId>com.readerbench</groupId>
-                <artifactId>solr</artifactId>
-                <version>${com.readerbench.solr.version}</version>
             </dependency>
             <!-- LOGGING -->
             <dependency>

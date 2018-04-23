@@ -15,22 +15,18 @@
  */
 package com.readerbench.datasourceprovider.data.document;
 
-import com.readerbench.datasourceprovider.data.*;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.lexicalChains.DisambiguationGraph;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
+import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
-import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.coreservices.nlp.parsing.Parsing;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -40,12 +36,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 
@@ -71,162 +65,151 @@ public class Document extends AbstractDocument implements Comparable<Document> {
     public Document(String path, AbstractDocumentTemplate docTmp, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
         this(path, models, lang);
         setDocTmp(docTmp);
-        Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
+        //Parsing.getParser(lang).parseDoc(docTmp, this, usePOSTagging);
     }
 
-    public Document(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels, Lang lang, boolean usePOSTagging) {
-        this(docTmp, semModels, lang, usePOSTagging, Parsing.getParser(lang));
-    }
-    
-    public Document(AbstractDocumentTemplate docTmp, List<ISemanticModel> semModels,
-            Lang lang, boolean usePOSTagging, Parsing parser) {
-        setLanguage(lang);
-        super.setSemanticModels(semModels);
-        setDisambiguationGraph(new DisambiguationGraph(lang));
-        setText(docTmp.getText());
-        setDocTmp(docTmp);
+    //todo - to be moved
+//    public static Document load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
+//        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
+//        return load(new File(pathToDoc), models, lang, usePOSTagging);
+//    }
 
-        parser.parseDoc(docTmp, this, usePOSTagging);
-    }
 
-    public static Document load(String pathToDoc, Map<SimilarityType, String> modelPaths, Lang lang, boolean usePOSTagging) {
-        List<ISemanticModel> models = SimilarityType.loadVectorModels(modelPaths, lang);
-        return load(new File(pathToDoc), models, lang, usePOSTagging);
-    }
+    //todo - to be moved
+//    public static Document load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+//        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+//        try {
+//            InputSource input = new InputSource(new FileInputStream(docFile));
+//            input.setEncoding("UTF-8");
+//            DocumentBuilder db = dbf.newDocumentBuilder();
+//            org.w3c.dom.Document dom = db.parse(input);
+//
+//            Element doc = dom.getDocumentElement();
+//            return load(docFile.getAbsolutePath(), doc, models, lang, usePOSTagging);
+//        } catch (ParserConfigurationException | SAXException | IOException e) {
+//            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
+//            LOGGER.error(e.getMessage());
+//        }
+//        return null;
+//    }
 
-    public static Document load(File docFile, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            InputSource input = new InputSource(new FileInputStream(docFile));
-            input.setEncoding("UTF-8");
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            org.w3c.dom.Document dom = db.parse(input);
-
-            Element doc = dom.getDocumentElement();
-            return load(docFile.getAbsolutePath(), doc, models, lang, usePOSTagging);
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.error("Error evaluating input file " + docFile.getPath() + " - " + e.getMessage());
-            LOGGER.error(e.getMessage());
-        }
-        return null;
-    }
-
-    public static Document load(String inputPath, Element root, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
-        // parse the XML file
-        Element el;
-        NodeList nl;
-        int noBreakPoints = 0;
-        // determine contents
-        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-        nl = root.getElementsByTagName("p");
-        if (nl != null && nl.getLength() > 0) {
-            for (int i = 0; i < nl.getLength(); i++) {
-                el = (Element) nl.item(i);
-                BlockTemplate block = contents.new BlockTemplate();
-                if (el.hasAttribute("id")) {
-                    try {
-                        block.setId(Integer.parseInt(el.getAttribute("id")));
-                    } catch (Exception e) {
-                        block.setId(i);
-                    }
-                } else {
-                    block.setId(i);
-                }
-                block.setRefId(-1);
-                if (el.hasAttribute("verbalization_after")) {
-                    block.setVerbId(noBreakPoints);
-                    noBreakPoints++;
-                }
-                // block.setContent(StringEscapeUtils.escapeXml(el.getFirstChild()
-                // .getNodeValue()));
-                if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null
-                        && el.getFirstChild().getNodeValue().trim().length() > 0) {
-                    block.setContent(el.getFirstChild().getNodeValue());
-                    contents.getBlocks().add(block);
-                }
-            }
-        }
-        Document d = new Document(inputPath, contents, models, lang, usePOSTagging);
-        d.setNoVerbalizationBreakPoints(noBreakPoints);
-
-        // determine title
-        nl = root.getElementsByTagName("title");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
-        }
-
-        // determine meta
-        nl = root.getElementsByTagName("meta");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
-        }
-
-        // get source
-        nl = root.getElementsByTagName("source");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setSource(((Element) nl.item(0)).getFirstChild().getNodeValue());
-        }
-
-        // get authors
-        nl = root.getElementsByTagName("author");
-        if (nl != null && nl.getLength() > 0) {
-            for (int i = 0; i < nl.getLength(); i++) {
-                if (((Element) nl.item(i)).getFirstChild() != null
-                        && ((Element) nl.item(i)).getFirstChild().getNodeValue() != null) {
-                    d.getAuthors().add(((Element) nl.item(i)).getFirstChild().getNodeValue());
-                }
-            }
-        }
-
-        // get complexity level
-        nl = root.getElementsByTagName("complexity_level");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setComplexityLevel(((Element) nl.item(0)).getFirstChild().getNodeValue());
-        }
-
-        // get genre
-        nl = root.getElementsByTagName("genre");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
-        }
-
-        // get URL
-        nl = root.getElementsByTagName("uri");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            d.setURI(((Element) nl.item(0)).getFirstChild().getNodeValue());
-        }
-
-        // get date
-        nl = root.getElementsByTagName("date");
-        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            el = (Element) nl.item(0);
-            Date date = null;
-            try {
-                DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
-                date = df.parse(el.getFirstChild().getNodeValue());
-            } catch (ParseException e) {
-                DateFormat df2 = new SimpleDateFormat("dd.mm.yyyy");
-                try {
-                    date = df2.parse(el.getFirstChild().getNodeValue());
-                } catch (ParseException e2) {
-                }
-            }
-            d.setDate(date);
-        }
-
-        // get topics
-        nl = root.getElementsByTagName("Topic");
-        if (nl != null && nl.getLength() > 0) {
-            for (int i = 0; i < nl.getLength(); i++) {
-                if (((Element) nl.item(i)).getFirstChild() != null
-                        && ((Element) nl.item(i)).getFirstChild().getNodeValue() != null) {
-                    String wordToAdd = ((Element) nl.item(i)).getFirstChild().getNodeValue().toLowerCase();
-                    d.getInitialTopics().add(Word.getWordFromConcept(wordToAdd, lang));
-                }
-            }
-        }
-        return d;
-    }
+    //todo - to be moved
+//    public static Document load(String inputPath, Element root, List<ISemanticModel> models, Lang lang, boolean usePOSTagging) {
+//        // parse the XML file
+//        Element el;
+//        NodeList nl;
+//        int noBreakPoints = 0;
+//        // determine contents
+//        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+//        nl = root.getElementsByTagName("p");
+//        if (nl != null && nl.getLength() > 0) {
+//            for (int i = 0; i < nl.getLength(); i++) {
+//                el = (Element) nl.item(i);
+//                AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
+//                if (el.hasAttribute("id")) {
+//                    try {
+//                        block.setId(Integer.parseInt(el.getAttribute("id")));
+//                    } catch (Exception e) {
+//                        block.setId(i);
+//                    }
+//                } else {
+//                    block.setId(i);
+//                }
+//                block.setRefId(-1);
+//                if (el.hasAttribute("verbalization_after")) {
+//                    block.setVerbId(noBreakPoints);
+//                    noBreakPoints++;
+//                }
+//                // block.setContent(StringEscapeUtils.escapeXml(el.getFirstChild()
+//                // .getNodeValue()));
+//                if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null
+//                        && el.getFirstChild().getNodeValue().trim().length() > 0) {
+//                    block.setContent(el.getFirstChild().getNodeValue());
+//                    contents.getBlocks().add(block);
+//                }
+//            }
+//        }
+//        Document d = new Document(inputPath, contents, models, lang, usePOSTagging);
+//        d.setNoVerbalizationBreakPoints(noBreakPoints);
+//
+//        // determine title
+//        nl = root.getElementsByTagName("title");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.processDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), models, lang, usePOSTagging);
+//        }
+//
+//        // determine meta
+//        nl = root.getElementsByTagName("meta");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
+//        }
+//
+//        // get source
+//        nl = root.getElementsByTagName("source");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.setSource(((Element) nl.item(0)).getFirstChild().getNodeValue());
+//        }
+//
+//        // get authors
+//        nl = root.getElementsByTagName("author");
+//        if (nl != null && nl.getLength() > 0) {
+//            for (int i = 0; i < nl.getLength(); i++) {
+//                if (((Element) nl.item(i)).getFirstChild() != null
+//                        && ((Element) nl.item(i)).getFirstChild().getNodeValue() != null) {
+//                    d.getAuthors().add(((Element) nl.item(i)).getFirstChild().getNodeValue());
+//                }
+//            }
+//        }
+//
+//        // get complexity level
+//        nl = root.getElementsByTagName("complexity_level");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.setComplexityLevel(((Element) nl.item(0)).getFirstChild().getNodeValue());
+//        }
+//
+//        // get genre
+//        nl = root.getElementsByTagName("genre");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.setGenre(((Element) nl.item(0)).getFirstChild().getNodeValue());
+//        }
+//
+//        // get URL
+//        nl = root.getElementsByTagName("uri");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            d.setURI(((Element) nl.item(0)).getFirstChild().getNodeValue());
+//        }
+//
+//        // get date
+//        nl = root.getElementsByTagName("date");
+//        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+//            el = (Element) nl.item(0);
+//            Date date = null;
+//            try {
+//                DateFormat df = new SimpleDateFormat("dd-mm-yyyy");
+//                date = df.parse(el.getFirstChild().getNodeValue());
+//            } catch (ParseException e) {
+//                DateFormat df2 = new SimpleDateFormat("dd.mm.yyyy");
+//                try {
+//                    date = df2.parse(el.getFirstChild().getNodeValue());
+//                } catch (ParseException e2) {
+//                }
+//            }
+//            d.setDate(date);
+//        }
+//
+//        // get topics
+//        nl = root.getElementsByTagName("Topic");
+//        if (nl != null && nl.getLength() > 0) {
+//            for (int i = 0; i < nl.getLength(); i++) {
+//                if (((Element) nl.item(i)).getFirstChild() != null
+//                        && ((Element) nl.item(i)).getFirstChild().getNodeValue() != null) {
+//                    String wordToAdd = ((Element) nl.item(i)).getFirstChild().getNodeValue().toLowerCase();
+//                    d.getInitialTopics().add(Word.getWordFromConcept(wordToAdd, lang));
+//                }
+//            }
+//        }
+//        return d;
+//    }
 
     public void addToXML(org.w3c.dom.Document doc, Element parent) {
         for (int i = 0; i < getBlocks().size(); i++) {
@@ -430,7 +413,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         if (this.getTitleText() != null) {
             descr.append(this.getTitleText()).append("_");
         }
-        for (ISemanticModel model : getSemanticModels()) {
+        for (ISemanticModel model : getSemanticModelsAsList()) {
             descr.append(model.getPath()).append("_");
         }
         if (this.getAuthors() != null) {

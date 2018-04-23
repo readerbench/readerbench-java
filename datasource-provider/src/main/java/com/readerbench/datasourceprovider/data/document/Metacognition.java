@@ -15,10 +15,10 @@
  */
 package com.readerbench.datasourceprovider.data.document;
 
-import com.readerbench.data.AbstractDocumentTemplate;
-import com.readerbench.data.AbstractDocumentTemplate.BlockTemplate;
+import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
-import org.openide.util.Exceptions;
+import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
@@ -26,11 +26,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import com.readerbench.services.complexity.ComplexityIndices;
-import com.readerbench.coreservices.discourse.selfExplanations.VerbalizationAssessment;
-import com.readerbench.services.readingStrategies.ReadingStrategies;
-import com.readerbench.coreservices.semanticModels.ISemanticModel;
-import com.readerbench.coreservices.semanticModels.SimilarityType;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -66,7 +61,7 @@ public class Metacognition extends Document {
 
     public Metacognition(String path, AbstractDocumentTemplate docTmp, Document initialReadingMaterial, boolean usePOSTagging) {
         // build the corresponding structure of verbalizations
-        super(path, docTmp, initialReadingMaterial.getSemanticModels(), initialReadingMaterial.getLanguage(), usePOSTagging);
+        super(path, docTmp, initialReadingMaterial.getSemanticModelsAsList(), initialReadingMaterial.getLanguage(), usePOSTagging);
         this.referredDoc = initialReadingMaterial;
         automatedReadingStrategies = new ArrayList<>();
         annotatedReadingStrategies = new ArrayList<>();
@@ -224,7 +219,7 @@ public class Metacognition extends Document {
         if (nl != null && nl.getLength() > 0) {
             for (int i = 0; i < nl.getLength(); i++) {
                 el = (Element) nl.item(i);
-                BlockTemplate block = tmp.new BlockTemplate();
+                AbstractDocumentTemplate.BlockTemplate block = tmp.new BlockTemplate();
                 if (el.hasAttribute("id")) {
                     try {
                         block.setId(Integer.parseInt(el.getAttribute("id")));
@@ -263,7 +258,7 @@ public class Metacognition extends Document {
         // determine title
         nl = doc.getElementsByTagName("title");
         if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-            meta.setDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), meta.getSemanticModels(), meta.getLanguage(), usePOSTagging);
+            meta.processDocumentTitle(((Element) nl.item(0)).getFirstChild().getNodeValue(), meta.getSemanticModelsAsList(), meta.getLanguage(), usePOSTagging);
         }
 
         // get author
@@ -367,7 +362,7 @@ public class Metacognition extends Document {
                 out.write("," + author);
             }
             out.write("\n");
-            for (ISemanticModel model : getSemanticModels()) {
+            for (ISemanticModel model : getSemanticModelsAsList()) {
                 out.write(model.getType() + " space:," + model.getPath() + "\n");
 
             }
@@ -421,16 +416,17 @@ public class Metacognition extends Document {
         }
     }
 
-    @Override
-    public void computeAll(boolean computeDialogism, boolean useBigrams) {
-        VerbalizationAssessment.detRefBlockSimilarities(this);
-        ReadingStrategies.detReadingStrategies(this);
-
-        computeDiscourseAnalysis(computeDialogism, useBigrams);
-        ComplexityIndices.computeComplexityFactors(this);
-        determineCohesion();
-        LOGGER.info("Finished processing self-explanations ...");
-    }
+    //todo - to be moved
+//    @Override
+//    public void computeAll(boolean computeDialogism, boolean useBigrams) {
+//        VerbalizationAssessment.detRefBlockSimilarities(this);
+//        ReadingStrategies.detReadingStrategies(this);
+//
+//        computeDiscourseAnalysis(computeDialogism, useBigrams);
+//        ComplexityIndices.computeComplexityFactors(this);
+//        determineCohesion();
+//        LOGGER.info("Finished processing self-explanations ...");
+//    }
 
     //global count of reading strategies given as input argument
     public EnumMap<ReadingStrategyType, Integer> getAllRS(List<EnumMap<ReadingStrategyType, Integer>> rsList) {

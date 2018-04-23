@@ -31,7 +31,7 @@ import org.gephi.preview.types.DependantOriginalColor;
 import org.gephi.project.api.ProjectController;
 import org.gephi.statistics.plugin.GraphDistance;
 import org.openide.util.Lookup;
-import com.readerbench.coreservices.commons.Formatting;
+import com.readerbench.datasourceprovider.data.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

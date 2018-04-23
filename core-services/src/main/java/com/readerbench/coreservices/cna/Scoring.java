@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.cna;
 
-import com.readerbench.coreservices.keywordMining.Keyword;
+import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.data.Sentence;

@@ -33,7 +33,7 @@ public class Utterance extends Block {
     private double personalKB;
 
     public Utterance(Block b, Participant p, Date time) {
-        super(b.getContainer(), b.getIndex(), b.getText(), b.getSemanticModels(), b.getLanguage());
+        super(b.getContainer(), b.getIndex(), b.getText(), b.getSemanticModelsAsList(), b.getLanguage());
         // inherit all attributes
         super.setSentences(b.getSentences());
         super.setRefBlock(b.getRefBlock());

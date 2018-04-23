@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.data.Lang;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.Serializable;
 import java.util.List;

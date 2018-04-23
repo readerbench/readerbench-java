@@ -15,9 +15,9 @@
  */
 package com.readerbench.textualcomplexity.dialogism;
 
-import com.readerbench.data.Lang;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.coreservices.commons.DoubleStatistics;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

@@ -15,7 +15,8 @@
  */
 package com.readerbench.textualcomplexity.wordComplexity;
 
-import com.readerbench.data.Lang;
+import com.readerbench.coreservices.semanticModels.WordNet.WordOntologyProcessing;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
@@ -47,13 +48,13 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
                 WordComplexity::getDifferenceBetweenWordAndStem));
         result.add(new WordComplexity(
                 ComplexityIndicesEnum.WORD_MAX_DEPTH_HYPERNYM_TREE, lang,
-                WordComplexity::getMaxDistanceToHypernymTreeRoot));
+                WordOntologyProcessing::getMaxDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
                 ComplexityIndicesEnum.WORD_AVERAGE_DEPTH_HYPERNYM_TREE, lang,
-                WordComplexity::getAverageDistanceToHypernymTreeRoot));
+                WordOntologyProcessing::getAverageDistanceToHypernymTreeRoot));
         result.add(new WordComplexity(
                 ComplexityIndicesEnum.WORD_PATH_COUNT_HYPERNYM_TREE, lang,
-                WordComplexity::getPathCountToHypernymTreeRoot));
+                WordOntologyProcessing::getPathCountToHypernymTreeRoot));
         result.add(new WordComplexity(
                 ComplexityIndicesEnum.WORD_POLYSEMY_COUNT, lang,
                 WordComplexity::getPolysemyCount));

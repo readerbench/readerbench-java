@@ -12,6 +12,11 @@
     <artifactId>datasource-provider</artifactId>
     <name>Datasource Provider Module</name>
 
+    <properties>
+        <json-simple.version>1.1.1</json-simple.version>
+        <com.readerbench.solr.version>1.0.6</com.readerbench.solr.version>
+    </properties>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
@@ -26,11 +31,11 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>com.readerbench</groupId>
-            <artifactId>core-services</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.readerbench</groupId>-->
+            <!--<artifactId>core-services</artifactId>-->
+            <!--<version>${project.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>edu.stanford.nlp</groupId>
             <artifactId>stanford-corenlp</artifactId>
@@ -66,6 +71,17 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${json-simple.version}</version>
+        </dependency>
+        <!-- SolrReaderBench -->
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>solr</artifactId>
+            <version>${com.readerbench.solr.version}</version>
         </dependency>
     </dependencies>
 </project>

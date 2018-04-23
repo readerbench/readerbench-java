@@ -174,7 +174,7 @@ public abstract class Parsing {
 
     public Block processBlock(AbstractDocument d, int blockIndex, String content, List<CoreMap> sentences) {
         // uses Stanford Core NLP
-        Block b = new Block(d, blockIndex, content, d.getSemanticModels(), d.getLanguage());
+        Block b = new Block(d, blockIndex, content, d.getSemanticModelsAsList(), d.getLanguage());
 
         // set Stanford sentences
         b.setStanfordSentences(sentences);
@@ -198,14 +198,14 @@ public abstract class Parsing {
 
     public Sentence processSentence(Block b, int utteranceIndex, CoreMap sentence) {
         // uses Stanford Core NLP
-        Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModels(), lang);
+        Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModelsAsList(), lang);
 
         sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
             String word = token.get(OriginalTextAnnotation.class);
             String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
             String ne = token.get(NamedEntityTagAnnotation.class);
             if (TextPreprocessing.isWord(word, lang)) {
-                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModels(), lang);
+                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModelsAsList(), lang);
                 s.getAllWords().add(w);
                 if (w.isContentWord()) {
                     s.getWords().add(w);

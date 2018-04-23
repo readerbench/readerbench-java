@@ -1,6 +1,5 @@
 package com.readerbench.coreservices.semanticModels.WordNet;
 
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import vu.wntools.wordnet.WordnetData;
