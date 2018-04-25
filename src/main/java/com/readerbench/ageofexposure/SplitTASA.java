@@ -478,11 +478,11 @@ public class SplitTASA {
                         tmpDoc.writeContent(path);
                         in.close();
                     } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage());
                     } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage());
                     }
 
                 }
@@ -498,9 +498,9 @@ public class SplitTASA {
             // SplitTASA.parseTasaEquitableDistribution("tasa.txt",
             // "/Users/mihaidascalu/Corpora/TASA");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 }

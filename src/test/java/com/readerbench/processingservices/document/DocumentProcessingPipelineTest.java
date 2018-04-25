@@ -48,12 +48,11 @@ public class DocumentProcessingPipelineTest {
 
         lang = Lang.en;
         LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-
+//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
         models = new ArrayList<>();
         models.add(lsa);
-        models.add(lda);
+//        models.add(lda);
         models.add(w2v);
 
         annotators = new ArrayList<>(Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY));
@@ -71,7 +70,7 @@ public class DocumentProcessingPipelineTest {
     @Test
     public void createDocumentXMLTest() {
         DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
-        Document d = pipeline.createDocumentFromXML("srcs/test/resources/reading_material_en.xml");
+        Document d = pipeline.createDocumentFromXML("src/test/resources/reading_material_en.xml");
         pipeline.processDocument(d);
         Assert.assertEquals(9, d.getNoBlocks());
     }

@@ -281,7 +281,7 @@ public class TextPreprocessing {
             }
         } catch (Exception ex) {
             System.err.print("Error evaluating input directory " + pathToDirectory + "!");
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
     }
 

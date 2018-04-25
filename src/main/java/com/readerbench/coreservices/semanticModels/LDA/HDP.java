@@ -28,9 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HDP {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HDP.class);
+    
     private String path;
     private InstanceList instances;
 
@@ -241,7 +245,7 @@ public class HDP {
         try (BufferedWriter out = new BufferedWriter(new FileWriter(path + "/hdp.csv", append))) {
             out.write(text + "\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 

@@ -162,17 +162,17 @@ public class SplitTASAincrementalFiles {
 		try {
 			SplitTASAincrementalFiles.parseTasaFromSingleFile("tasa.txt", "resources/in/AoE", false, false);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace()
+			LOGGER.error(e.getMessage())
 		} catch (IOException e) {
-			e.printStackTrace()
+			LOGGER.error(e.getMessage())
 		}
          */
         try {
             SplitTASAincrementalFiles.createFilesMixed("resources/in/AoE HDP full", "resources/in/AoE Mixed");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 }

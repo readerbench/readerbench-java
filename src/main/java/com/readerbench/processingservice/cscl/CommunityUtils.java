@@ -20,7 +20,6 @@ import com.readerbench.datasourceprovider.data.cscl.CSCLIndices;
 import com.readerbench.datasourceprovider.data.cscl.Community;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
 import com.readerbench.datasourceprovider.data.cscl.ParticipantNormalized;
-import com.readerbench.processingservice.ClusterCommunity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;

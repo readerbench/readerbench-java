@@ -271,7 +271,7 @@ public class ParticipantEvaluation {
             try {
                 ec.exportFile(new File(exportPath));
             } catch (IOException ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage());
                 return;
             }
         }

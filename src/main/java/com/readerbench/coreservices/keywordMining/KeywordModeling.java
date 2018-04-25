@@ -85,7 +85,7 @@ public class KeywordModeling {
                     }
                 }
             } catch (Exception x) {
-                x.printStackTrace();
+                LOGGER.error(x.getMessage());
             }
         }
         Collections.sort(e.getTopics());

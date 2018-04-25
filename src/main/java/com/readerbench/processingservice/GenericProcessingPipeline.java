@@ -62,7 +62,6 @@ public abstract class GenericProcessingPipeline {
         processDocumentTitle(abstractDocument);
 
         // build coherence graph
-        LOGGER.info("Build coherence graph...");
         CohesionGraph.buildCohesionGraph(abstractDocument);
 
         LOGGER.info("Determine topics...");

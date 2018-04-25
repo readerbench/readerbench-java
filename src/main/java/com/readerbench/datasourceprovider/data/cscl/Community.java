@@ -15,17 +15,27 @@
  */
 package com.readerbench.datasourceprovider.data.cscl;
 
+import com.readerbench.coreservices.cna.CohesionGraph;
+import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.cscl.ParticipantEvaluation;
+import com.readerbench.coreservices.keywordMining.KeywordModeling;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Block;
+import com.readerbench.datasourceprovider.data.Formatting;
 import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.processingservice.ImportDocument;
+import com.readerbench.textualcomplexity.ComplexityIndex;
+import com.readerbench.textualcomplexity.ComplexityIndices;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -197,88 +207,87 @@ public class Community extends AnalysisElement {
         return ls;
     }
 
-    //todo - to be moved
-//    public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-//        if (startDate != null && endDate != null && participants != null && participants.size() > 0) {
-//            LOGGER.info("Processing timeframe between {} and {} having {} participants ...", new Object[]{dateFormat.format(startDate), dateFormat.format(endDate), participants.size()});
-//        }
-//
-//        String fileName;
-//        if (startDate != null && endDate != null) {
-//            fileName = path + "/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate);
-//        } else {
-//            fileName = path + "/graph_" + System.currentTimeMillis();
-//        }
-//
-//        //ParticipantEvaluation.performSNA(participants, participantContributions, true, fileName + ".pdf");
-//        ParticipantEvaluation.performSNA(participants, participantContributions, true, null);
-//
-//        // update surface statistics
-//        for (AbstractDocument d : documents) {
-//            Participant p = null;
-//            for (int i = 0; i < d.getBlocks().size(); i++) {
-//                if (d.getBlocks().get(i) != null) {
-//                    if (p == null) {
-//                        p = ((Utterance) d.getBlocks().get(i)).getParticipant();
-//                        Participant participantToUpdate = participants.get(participants.indexOf(p));
-//                        participantToUpdate.getIndices().put(CSCLIndices.NO_NEW_THREADS,
-//                                participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
-//                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
-//                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_OVERALL_SCORE)
-//                                + d.getScore());
-//                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB,
-//                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB)
-//                                + VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
-//                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE,
-//                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE)
-//                                + VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()));
-//                        participantToUpdate.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
-//                                participantToUpdate.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
-//                                + d.getBlocks().get(i).getText().length());
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//
-//        participants.stream().filter((p) -> (p.getIndices().get(CSCLIndices.NO_NEW_THREADS) != 0)).forEach((p) -> {
-//            p.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
-//                    p.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
-//                    / p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
-//        });
-//
-//        //export(fileName + ".csv", modelTimeEvolution, additionalInfo);
-//        if (useTextualComplexity) {
-//            LOGGER.info(participants.toString());
-//            // determine complexity indices
-//            for (Participant p : participants) {
-//                LOGGER.info(p.toString());
-//                LOGGER.info(p.getSignificantContributions().toString());
-//
-//                // establish minimum criteria
-//                int noContentWords = 0;
-//                for (Block b : p.getSignificantContributions().getBlocks()) {
-//                    if (b != null) {
-//                        for (Entry<Word, Integer> entry : b.getWordOccurences().entrySet()) {
-//                            noContentWords += entry.getValue();
-//                        }
-//                    }
-//                }
-//
-//                if (p.getSignificantContributions().getBlocks().size() >= MIN_NO_CONTRIBUTIONS && noContentWords >= MIN_NO_CONTENT_WORDS) {
-//                    // build cohesion graph for additional indices
-//                    CohesionGraph.buildCohesionGraph(p.getSignificantContributions());
-//                    //ComplexityIndices.computeComplexityFactors(p.getSignificantContributions());
-//                }
-//            }
-//        }
-//
-//        if (modelTimeEvolution) {
-//            modelEvolution();
-//        }
-//    }
+    public void computeMetrics(boolean useTextualComplexity, boolean modelTimeEvolution, boolean additionalInfo) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+        if (startDate != null && endDate != null && participants != null && participants.size() > 0) {
+            LOGGER.info("Processing timeframe between {} and {} having {} participants ...", new Object[]{dateFormat.format(startDate), dateFormat.format(endDate), participants.size()});
+        }
 
+        String fileName;
+        if (startDate != null && endDate != null) {
+            fileName = path + "/graph_" + dateFormat.format(startDate) + "_" + dateFormat.format(endDate);
+        } else {
+            fileName = path + "/graph_" + System.currentTimeMillis();
+        }
+
+        //ParticipantEvaluation.performSNA(participants, participantContributions, true, fileName + ".pdf");
+        ParticipantEvaluation.performSNA(participants, participantContributions, true, null);
+
+        // update surface statistics
+        for (AbstractDocument d : documents) {
+            Participant p = null;
+            for (int i = 0; i < d.getBlocks().size(); i++) {
+                if (d.getBlocks().get(i) != null) {
+                    if (p == null) {
+                        p = ((Utterance) d.getBlocks().get(i)).getParticipant();
+                        Participant participantToUpdate = participants.get(participants.indexOf(p));
+                        participantToUpdate.getIndices().put(CSCLIndices.NO_NEW_THREADS,
+                                participantToUpdate.getIndices().get(CSCLIndices.NO_NEW_THREADS) + 1);
+                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_OVERALL_SCORE,
+                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_OVERALL_SCORE)
+                                + d.getScore());
+                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB,
+                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_CUMULATIVE_SOCIAL_KB)
+                                + VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()));
+                        participantToUpdate.getIndices().put(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE,
+                                participantToUpdate.getIndices().get(CSCLIndices.NEW_THREADS_INTER_ANIMATION_DEGREE)
+                                + VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()));
+                        participantToUpdate.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
+                                participantToUpdate.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
+                                + d.getBlocks().get(i).getText().length());
+                        break;
+                    }
+                }
+            }
+        }
+
+        participants.stream().filter((p) -> (p.getIndices().get(CSCLIndices.NO_NEW_THREADS) != 0)).forEach((p) -> {
+            p.getIndices().put(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS,
+                    p.getIndices().get(CSCLIndices.AVERAGE_LENGTH_NEW_THREADS)
+                    / p.getIndices().get(CSCLIndices.NO_NEW_THREADS));
+        });
+
+        //export(fileName + ".csv", modelTimeEvolution, additionalInfo);
+        if (useTextualComplexity) {
+            LOGGER.info(participants.toString());
+            // determine complexity indices
+            for (Participant p : participants) {
+                LOGGER.info(p.toString());
+                LOGGER.info(p.getSignificantContributions().toString());
+
+                // establish minimum criteria
+                int noContentWords = 0;
+                for (Block b : p.getSignificantContributions().getBlocks()) {
+                    if (b != null) {
+                        for (Entry<Word, Integer> entry : b.getWordOccurences().entrySet()) {
+                            noContentWords += entry.getValue();
+                        }
+                    }
+                }
+
+                if (p.getSignificantContributions().getBlocks().size() >= MIN_NO_CONTRIBUTIONS && noContentWords >= MIN_NO_CONTENT_WORDS) {
+                    // build cohesion graph for additional indices
+                    CohesionGraph.buildCohesionGraph(p.getSignificantContributions());
+                    //ComplexityIndices.computeComplexityFactors(p.getSignificantContributions());
+                }
+            }
+        }
+
+        if (modelTimeEvolution) {
+            modelEvolution();
+        }
+    }
+    
     public void modelEvolution() {
         LOGGER.info("Modeling time evolution for {} participants ...", participants.size());
         for (CSCLIndices index : CSCLIndices.values()) {
@@ -330,10 +339,11 @@ public class Community extends AnalysisElement {
             return null;
         }
         File[] filesTODO = dir.listFiles(filter);
+        ImportDocument id = new ImportDocument();
         for (File f : filesTODO) {
             Conversation c;
             try {
-                c = (Conversation) Conversation.loadSerializedDocument(f.getPath());
+                c = (Conversation) id.importSerializedDocument(f.getPath());
                 community.getDocuments().add(c);
             } catch (IOException | ClassNotFoundException ex) {
                 LOGGER.error(ex.getMessage());
@@ -373,10 +383,9 @@ public class Community extends AnalysisElement {
     }
 
     public com.readerbench.datasourceprovider.data.cscl.Community loadMultipleConversations(List<AbstractDocument> abstractDocumentList, Lang lang,
-                                                                                            boolean needsAnonymization, Date startDate, Date endDate,
-                                                                                            int monthIncrement, int dayIncrement, String path) {
-
-        com.readerbench.datasourceprovider.data.cscl.Community community = new com.readerbench.datasourceprovider.data.cscl.Community(lang, needsAnonymization, startDate, endDate);
+            boolean needsAnonymization, Date startDate, Date endDate,
+            int monthIncrement, int dayIncrement, String path) {
+        com.readerbench.datasourceprovider.data.cscl.Community community = new com.readerbench.datasourceprovider.data.cscl.Community(path, lang, needsAnonymization, startDate, endDate);
         community.setPath(path);
         for (AbstractDocument abstractDocument : abstractDocumentList) {
             community.getDocuments().add((com.readerbench.datasourceprovider.data.cscl.Conversation) abstractDocument);
@@ -552,195 +561,190 @@ public class Community extends AnalysisElement {
         return finalResult;
     }
 
-//    public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
-//        LOGGER.info("Writing document collection export");
-//        // print participant statistics
-//        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
-//            // print participant statistics
-//            if (participants.size() > 0) {
-//                out.write("Participant involvement and interaction\n");
-//                out.write("Participant name,Anonymized name");
-//                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                    out.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
-//                }
-//                if (modelTimeEvolution) {
-//                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                        if (CSCLindex.isUsedForTimeModeling()) {
-//                            for (CSCLCriteria crit : CSCLCriteria.values()) {
-//                                out.write("," + crit.getDescription() + "(" + CSCLindex.getAcronym() + ")");
-//                            }
-//                        }
-//                    }
-//                }
-//                List<ComplexityIndex> factors = ComplexityIndices.getIndices(getLanguage());
-//                for (ComplexityIndex factor : factors) {
-//                    out.write("," + factor.getAcronym());
-//                }
-//                out.write("\n");
-//
-//                for (int index = 0; index < participants.size(); index++) {
-//                    Participant p = participants.get(index);
-//                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
-//                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                        out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
-//                    }
-//                    if (modelTimeEvolution) {
-//                        for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                            if (CSCLindex.isUsedForTimeModeling()) {
-//                                for (CSCLCriteria crit : CSCLCriteria.values()) {
-//                                    out.write("," + p.getLongitudinalIndices().get(new AbstractMap.SimpleEntry<>(CSCLindex, crit)));
-//                                }
-//                            }
-//                        }
-//                    }
-//                    for (ComplexityIndex factor : factors) {
-//                        if (p.getSignificantContributions().getComplexityIndices() != null) {
-//                            out.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
-//                        }
-//                    }
-//                    out.write("\n");
-//                }
-//
-//                if (additionalInfo) {
-//                    // print discussed topics
-//                    out.write("\nDiscussed topics\n");
-//                    out.write("Concept,Relevance\n");
-//                    List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
-//                    for (Keyword t : topicL) {
-//                        out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
-//                    }
-//
-//                    // print general statistic per thread
-//                    out.write("\nIndividual thread statistics\n");
-//                    out.write("Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
-//                    for (AbstractDocument d : documents) {
-//                        int noBlocks = 0;
-//                        noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
-//
-//                        out.write(
-//                                new File(d.getPath()).getName() + "," + noBlocks + ","
-//                                + ((Conversation) d).getParticipants().size() + ","
-//                                + Formatting.formatNumber(d.getScore()) + ","
-//                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-//                                + ","
-//                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-//                                + "\n");
-//                    }
-//                }
-//
-//                // print interaction matrix
-//                out.write("\nInteraction matrix\n");
-//                for (Participant p : participants) {
-//                    out.write("," + p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
-//                }
-//                out.write("\n");
-//                for (int i = 0; i < participants.size(); i++) {
-//                    out.write(participants.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
-//                    for (int j = 0; j < participants.size(); j++) {
-//                        out.write("," + Formatting.formatNumber(participantContributions[i][j]));
-//                    }
-//                    out.write("\n");
-//                }
-//            }
-//            LOGGER.info("Successfully finished writing document collection export ...");
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//        }
-//    }
+    public void export(String pathToFile, boolean modelTimeEvolution, boolean additionalInfo) {
+        LOGGER.info("Writing document collection export");
+        // print participant statistics
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
+            // print participant statistics
+            if (participants.size() > 0) {
+                out.write("Participant involvement and interaction\n");
+                out.write("Participant name,Anonymized name");
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    out.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                }
+                if (modelTimeEvolution) {
+                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                        if (CSCLindex.isUsedForTimeModeling()) {
+                            for (CSCLCriteria crit : CSCLCriteria.values()) {
+                                out.write("," + crit.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                            }
+                        }
+                    }
+                }
+                List<ComplexityIndex> factors = ComplexityIndices.getIndices(getLanguage());
+                for (ComplexityIndex factor : factors) {
+                    out.write("," + factor.getAcronym());
+                }
+                out.write("\n");
 
-    //todo - to be moved
-//    /**
-//     * Export Individual Stats and Initiation
-//     *
-//     * @param pathToFileIndividualStats - path to file with Individual State
-//     * @param pathToFileInitiation - path to file with Initiation
-//     */
-//    public void exportIndividualStatsAndInitiation(String pathToFileIndividualStats, String pathToFileInitiation) {
-//        LOGGER.info("Writing Individual Stats and Initiation export");
-//        // print participant statistics
-//        try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-//                new File(pathToFileIndividualStats)), "UTF-8"), 32768);
-//                BufferedWriter outInitiation = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-//                        new File(pathToFileInitiation)), "UTF-8"), 32768)) {
-//
-//            // print participant statistics
-//            if (participants.size() > 0) {
-//                outIndividualStats.write("Individual stats\n");
-//                outIndividualStats.write("Participant name,Anonymized name");
-//
-//                outInitiation.write("Invocation\n");
-//                outInitiation.write("Participant name,Anonymized name");
-//                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                    if (CSCLindex.isIndividualStatsIndex()) {
-//                        outIndividualStats.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
-//                    } else {
-//                        outInitiation.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
-//                    }
-//                }
-//                outIndividualStats.write("\n");
-//                outInitiation.write("\n");
-//                for (int index = 0; index < participants.size(); index++) {
-//                    Participant p = participants.get(index);
-//                    outIndividualStats.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
-//                    outInitiation.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
-//                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                        if (CSCLindex.isIndividualStatsIndex()) {
-//                            outIndividualStats.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
-//                        } else {
-//                            outInitiation.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
-//                        }
-//                    }
-//                    outIndividualStats.write("\n");
-//                    outInitiation.write("\n");
-//                }
-//            }
-//            LOGGER.info("Successfully finished writing Individual Stats and Initiation export ...");
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//        }
-//    }
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    out.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                        out.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                    }
+                    if (modelTimeEvolution) {
+                        for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                            if (CSCLindex.isUsedForTimeModeling()) {
+                                for (CSCLCriteria crit : CSCLCriteria.values()) {
+                                    out.write("," + p.getLongitudinalIndices().get(new AbstractMap.SimpleEntry<>(CSCLindex, crit)));
+                                }
+                            }
+                        }
+                    }
+                    for (ComplexityIndex factor : factors) {
+                        if (p.getSignificantContributions().getComplexityIndices() != null) {
+                            out.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
+                        }
+                    }
+                    out.write("\n");
+                }
 
+                if (additionalInfo) {
+                    // print discussed topics
+                    out.write("\nDiscussed topics\n");
+                    out.write("Concept,Relevance\n");
+                    List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
+                    for (Keyword t : topicL) {
+                        out.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
+                    }
 
-    //todo - to be moved
+                    // print general statistic per thread
+                    out.write("\nIndividual thread statistics\n");
+                    out.write("Thread path,No. contributions,No. involved paticipants,Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
+                    for (AbstractDocument d : documents) {
+                        int noBlocks = 0;
+                        noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
+
+                        out.write(
+                                new File(d.getPath()).getName() + "," + noBlocks + ","
+                                + ((Conversation) d).getParticipants().size() + ","
+                                + Formatting.formatNumber(d.getScore()) + ","
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                                + ","
+                                + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                                + "\n");
+                    }
+                }
+
+                // print interaction matrix
+                out.write("\nInteraction matrix\n");
+                for (Participant p : participants) {
+                    out.write("," + p.getName().replaceAll(",", "").replaceAll("\\s+", " "));
+                }
+                out.write("\n");
+                for (int i = 0; i < participants.size(); i++) {
+                    out.write(participants.get(i).getName().replaceAll(",", "").replaceAll("\\s+", " "));
+                    for (int j = 0; j < participants.size(); j++) {
+                        out.write("," + Formatting.formatNumber(participantContributions[i][j]));
+                    }
+                    out.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing document collection export ...");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+    /**
+     * Export Individual Stats and Initiation
+     *
+     * @param pathToFileIndividualStats - path to file with Individual State
+     * @param pathToFileInitiation - path to file with Initiation
+     */
+    public void exportIndividualStatsAndInitiation(String pathToFileIndividualStats, String pathToFileInitiation) {
+        LOGGER.info("Writing Individual Stats and Initiation export");
+        // print participant statistics
+        try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileIndividualStats)), "UTF-8"), 32768);
+                BufferedWriter outInitiation = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                        new File(pathToFileInitiation)), "UTF-8"), 32768)) {
+
+            // print participant statistics
+            if (participants.size() > 0) {
+                outIndividualStats.write("Individual stats\n");
+                outIndividualStats.write("Participant name,Anonymized name");
+
+                outInitiation.write("Invocation\n");
+                outInitiation.write("Participant name,Anonymized name");
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    if (CSCLindex.isIndividualStatsIndex()) {
+                        outIndividualStats.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                    } else {
+                        outInitiation.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                    }
+                }
+                outIndividualStats.write("\n");
+                outInitiation.write("\n");
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    outIndividualStats.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    outInitiation.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+                    for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                        if (CSCLindex.isIndividualStatsIndex()) {
+                            outIndividualStats.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                        } else {
+                            outInitiation.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                        }
+                    }
+                    outIndividualStats.write("\n");
+                    outInitiation.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing Individual Stats and Initiation export ...");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
     /**
      * Export Textual Complexity
      *
      * @param pathToFileTextualComplexity - path to file
      */
-//    public void exportTextualComplexity(String pathToFileTextualComplexity) {
-//        LOGGER.info("Writing Textual Complexity export");
-//        try (BufferedWriter outTextualComplexity = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-//                new File(pathToFileTextualComplexity)), "UTF-8"), 32768)) {
-//
-//            // print participant statistics
-//            if (participants.size() > 0) {
-//                outTextualComplexity.write("Textual Complexity\n");
-//                outTextualComplexity.write("Participant name,Anonymized name");
-//
-//                List<ComplexityIndex> factors = ComplexityIndices.getIndices(getLanguage());
-//                for (ComplexityIndex factor : factors) {
-//                    outTextualComplexity.write("," + factor.getAcronym());
-//                }
-//                outTextualComplexity.write("\n");
-//
-//                for (int index = 0; index < participants.size(); index++) {
-//                    Participant p = participants.get(index);
-//                    outTextualComplexity.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
-//
-//                    for (ComplexityIndex factor : factors) {
-//                        if (p.getSignificantContributions().getComplexityIndices() != null) {
-//                            outTextualComplexity.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
-//                        }
-//                    }
-//                    outTextualComplexity.write("\n");
-//                }
-//            }
-//            LOGGER.info("Successfully finished writing Textual Complexity export ...");
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//        }
-//    }
+    public void exportTextualComplexity(String pathToFileTextualComplexity) {
+        LOGGER.info("Writing Textual Complexity export");
+        try (BufferedWriter outTextualComplexity = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileTextualComplexity)), "UTF-8"), 32768)) {
 
+            // print participant statistics
+            if (participants.size() > 0) {
+                outTextualComplexity.write("Textual Complexity\n");
+                outTextualComplexity.write("Participant name,Anonymized name");
+
+                List<ComplexityIndex> factors = ComplexityIndices.getIndices(getLanguage());
+                for (ComplexityIndex factor : factors) {
+                    outTextualComplexity.write("," + factor.getAcronym());
+                }
+                outTextualComplexity.write("\n");
+
+                for (int index = 0; index < participants.size(); index++) {
+                    Participant p = participants.get(index);
+                    outTextualComplexity.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+
+                    for (ComplexityIndex factor : factors) {
+                        if (p.getSignificantContributions().getComplexityIndices() != null) {
+                            outTextualComplexity.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
+                        }
+                    }
+                    outTextualComplexity.write("\n");
+                }
+            }
+            LOGGER.info("Successfully finished writing Textual Complexity export ...");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
     /**
      * Export Time Analysis
      *
@@ -785,145 +789,105 @@ public class Community extends AnalysisElement {
         }
     }
 
-    //todo - to be moved
-//    /**
-//     * Export discussed topics
-//     *
-//     * @param pathToFileDiscussedTopics - path to file
-//     */
-//    public void exportDiscussedTopics(String pathToFileDiscussedTopics) {
-//        LOGGER.info("Writing Discussed Topics export");
-//        try (BufferedWriter outDiscussedTopics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-//                new File(pathToFileDiscussedTopics)), "UTF-8"), 32768)) {
-//
-//            if (participants.size() > 0) {
-//                // print discussed topics
-//                outDiscussedTopics.write("\nDiscussed topics\n");
-//                outDiscussedTopics.write("Concept,Relevance\n");
-//                List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
-//                for (Keyword t : topicL) {
-//                    outDiscussedTopics.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
-//                }
-//            }
-//
-//            LOGGER.info("Successfully finished writing Discussed Topics export ...");
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//        }
-//    }
-
-    //todo - to be moved
     /**
-//     * Export individual threads statistics
-//     *
-//     * @param pathToFile - path to file
-//     */
-//    public void exportIndividualThreadStatistics(String pathToFile) {
-//        LOGGER.info("Writing Individual Threads Statistics export");
-//        try (BufferedWriter outIndividualThreadsStatistics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
-//                new File(pathToFile)), "UTF-8"), 32768)) {
-//
-//            if (participants.size() > 0) {
-//                // print general statistic per thread
-//                outIndividualThreadsStatistics.write("\nIndividual thread statistics\n");
-//                outIndividualThreadsStatistics.write("Thread path,No. contributions,No. involved paticipants,"
-//                        + "Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
-//                for (AbstractDocument d : documents) {
-//                    int noBlocks = 0;
-//                    noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
-//
-//                    outIndividualThreadsStatistics.write(
-//                            new File(d.getPath()).getName() + "," + noBlocks + ","
-//                            + ((Conversation) d).getParticipants().size() + ","
-//                            + Formatting.formatNumber(d.getScore()) + ","
-//                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
-//                            + ","
-//                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
-//                            + "\n");
-//                }
-//            }
-//
-//            LOGGER.info("Successfully finished writing Individual Threads Statistics export ...");
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//        }
-//    }
+     * Export discussed topics
+     *
+     * @param pathToFileDiscussedTopics - path to file
+     */
+    public void exportDiscussedTopics(String pathToFileDiscussedTopics) {
+        LOGGER.info("Writing Discussed Topics export");
+        try (BufferedWriter outDiscussedTopics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFileDiscussedTopics)), "UTF-8"), 32768)) {
 
+            if (participants.size() > 0) {
+                // print discussed topics
+                outDiscussedTopics.write("\nDiscussed topics\n");
+                outDiscussedTopics.write("Concept,Relevance\n");
+                List<Keyword> topicL = KeywordModeling.getCollectionTopics(documents);
+                for (Keyword t : topicL) {
+                    outDiscussedTopics.write(t.getWord().getLemma() + "," + t.getRelevance() + "\n");
+                }
+            }
 
-    //todo - to be moved
-//    /**
-//     * Write individual stats to Elasticsearch
-//     * @param communityName
-//     * @param week
-//     * @return
-//     */
-//    public List<Map<String, Object>> writeIndividualStatsToElasticsearch(String communityName, Integer week) {
-//        LOGGER.info("Writing Individual Stats to Elasticsearch");
-//        List<Map<String, Object>> participantsStats = new ArrayList<>();
-//
-//        // write participant statistics
-//        for (int index = 0; index < participants.size(); index++) {
-//            Participant p = participants.get(index);
-//            if (p.getParticipantGroup() != null) {
-//                Map<String, Object> participantStats = new HashMap<>();
-//                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-//                    if (CSCLindex.isIndividualStatsIndex()) {
-//                        participantStats.put(CSCLindex.getAcronym(), Formatting.formatNumber(p.getIndices().get(CSCLindex)));
-//                    }
-//                }
-//                participantStats.put("participantName", p.getName());
-//                participantStats.put("participantNickname", "Member " + index);
-//                participantStats.put("startDate", getFistContributionDate().getTime());
-//                participantStats.put("endDate", getLastContributionDate().getTime());
-//                participantStats.put("communityName", communityName);
-//                participantStats.put("week", week);
-//                participantStats.put("group", p.getParticipantGroup().name());
-//
-//                participantsStats.add(participantStats);
-//            }
-//        }
-//
-//        LOGGER.info("Successfully finished writing Individual Stats in Elasticsearch ...");
-//
-//        return participantsStats;
-//    }
+            LOGGER.info("Successfully finished writing Discussed Topics export ...");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
 
-    //todo - to be moved
-//    public static void processDocumentCollection(String rootPath, Lang lang, boolean needsAnonymization, boolean useTextualComplexity,
-//            boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
-//            boolean generateConceptView, Date startDate, Date endDate, int monthIncrement, int dayIncrement) {
-//        Community dc = Community.loadMultipleConversations(rootPath, lang, needsAnonymization, startDate, endDate, monthIncrement, dayIncrement);
-//        if (dc != null) {
-//            dc.computeMetrics(useTextualComplexity, true, true);
-//            File f = new File(rootPath);
-//
-//            if (exportIntoCsv) {
-//                dc.export(rootPath + "/" + f.getName() + ".csv", true, true);
-//            }
-//
-//            if (generateParticipantView) {
-//                //todo - check
-//                //dc.generateParticipantView(rootPath + "/" + f.getName() + "_participants.pdf");
-//            }
-//
-//            if (generateParticipantViewD3) {
-//                //todo - create a method with this parameter
-//                //dc.generateParticipantViewD3(rootPath + "/" + f.getName() + "_d3.json");
-//            }
-//
-//            if (generateParticipantViewSubCommunities) {
-//                //todo - create a method with this parameter
-//                //dc.generateParticipantViewSubCommunities(rootPath + "/" + f.getName() + "_d3_");
-//            }
-//
-//            if (generateConceptView) {
-//                //todo - check
-//                //dc.generateConceptView(rootPath + "/" + f.getName() + "_concepts.pdf");
-//            }
-//        }
-//    }
+    /**
+     * // * Export individual threads statistics // * // * @param pathToFile -
+     * path to file //
+     * @param pathToFile
+     */
+    public void exportIndividualThreadStatistics(String pathToFile) {
+        LOGGER.info("Writing Individual Threads Statistics export");
+        try (BufferedWriter outIndividualThreadsStatistics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
+                new File(pathToFile)), "UTF-8"), 32768)) {
 
-    //todo - to be moved
+            if (participants.size() > 0) {
+                // print general statistic per thread
+                outIndividualThreadsStatistics.write("\nIndividual thread statistics\n");
+                outIndividualThreadsStatistics.write("Thread path,No. contributions,No. involved paticipants,"
+                        + "Overall score,Cummulative inter-animation,Cummulative social knowledge-building\n");
+                for (AbstractDocument d : documents) {
+                    int noBlocks = 0;
+                    noBlocks = d.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
+
+                    outIndividualThreadsStatistics.write(
+                            new File(d.getPath()).getName() + "," + noBlocks + ","
+                            + ((Conversation) d).getParticipants().size() + ","
+                            + Formatting.formatNumber(d.getScore()) + ","
+                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getVoicePMIEvolution()))
+                            + ","
+                            + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) d).getSocialKBEvolution()))
+                            + "\n");
+                }
+            }
+
+            LOGGER.info("Successfully finished writing Individual Threads Statistics export ...");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
+    /**
+     * Write individual stats to Elasticsearch
+     * @param communityName
+     * @param week
+     * @return
+     */
+    public List<Map<String, Object>> writeIndividualStatsToElasticsearch(String communityName, Integer week) {
+        LOGGER.info("Writing Individual Stats to Elasticsearch");
+        List<Map<String, Object>> participantsStats = new ArrayList<>();
+
+        // write participant statistics
+        for (int index = 0; index < participants.size(); index++) {
+            Participant p = participants.get(index);
+            if (p.getParticipantGroup() != null) {
+                Map<String, Object> participantStats = new HashMap<>();
+                for (CSCLIndices CSCLindex : CSCLIndices.values()) {
+                    if (CSCLindex.isIndividualStatsIndex()) {
+                        participantStats.put(CSCLindex.getAcronym(), Formatting.formatNumber(p.getIndices().get(CSCLindex)));
+                    }
+                }
+                participantStats.put("participantName", p.getName());
+                participantStats.put("participantNickname", "Member " + index);
+                participantStats.put("startDate", getFistContributionDate().getTime());
+                participantStats.put("endDate", getLastContributionDate().getTime());
+                participantStats.put("communityName", communityName);
+                participantStats.put("week", week);
+                participantStats.put("group", p.getParticipantGroup().name());
+
+                participantsStats.add(participantStats);
+            }
+        }
+
+        LOGGER.info("Successfully finished writing Individual Stats in Elasticsearch ...");
+
+        return participantsStats;
+    }
+
 //    public static void processAllFolders(String folder, Lang lang, String prefix, boolean needsAnonymization,
 //            boolean restartProcessing, String pathToLSA, String pathToLDA, String pathToWord2Vec, boolean usePOSTagging,
 //            boolean useTextualComplexity, boolean exportIntoCsv, boolean generateParticipantView, boolean generateParticipantViewD3, boolean generateParticipantViewSubCommunities,
@@ -951,8 +915,6 @@ public class Community extends AnalysisElement {
 //        }
 //        LOGGER.info("Finished processsing all files...");
 //    }
-
-//todo - check
 //    public static ResultvCoP getAll(Community communityInTimeFrame, Community allCommunities) {
 //        return new ResultvCoP(CommunityInteraction.buildParticipantGraph(communityInTimeFrame, true),
 //                CommunityInteraction.buildParticipantGraph(allCommunities, true), null, null);

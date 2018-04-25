@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.processingservice;
+package com.readerbench.processingservice.cscl;
 
 import com.readerbench.processingservice.cscl.CommunityUtils;
 import com.readerbench.coreservices.commons.VectorAlgebra;
@@ -286,11 +286,11 @@ public class ClusterCommunity {
                     out.close();
                     break;
                 } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage());
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage());
                 }
             }
 

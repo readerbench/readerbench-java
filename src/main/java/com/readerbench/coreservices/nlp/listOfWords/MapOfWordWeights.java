@@ -51,7 +51,7 @@ public class MapOfWordWeights {
                         throw new Exception("Weight not in [0; 1] interval!");
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage());
                     weight = 1.0;
                 }
                 if (Dictionary.isDictionaryWord(word, lang)) {

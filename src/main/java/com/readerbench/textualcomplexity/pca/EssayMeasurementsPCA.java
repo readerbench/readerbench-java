@@ -7,11 +7,15 @@ import com.readerbench.coreservices.commons.VectorAlgebra;
 
 import java.io.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Robert Botarleanu on 05-Apr-17.
  */
 public class EssayMeasurementsPCA {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EssayMeasurementsPCA.class);
 
     // Values are considered equal to 0 under this threshhold
     private static final double EPSILON = 1e-6;
@@ -51,6 +55,7 @@ public class EssayMeasurementsPCA {
     }
 
     public static class MetricValue implements Comparable<MetricValue> {
+
         boolean isDescriptive;
         String desc; // either the category or the file name
         Double value;
@@ -76,12 +81,15 @@ public class EssayMeasurementsPCA {
 
         @Override
         public int compareTo(MetricValue o) {
-            if (isDescriptive && o.isDescriptive)
+            if (isDescriptive && o.isDescriptive) {
                 return desc.compareTo(o.desc);
-            if (!isDescriptive && !o.isDescriptive)
+            }
+            if (!isDescriptive && !o.isDescriptive) {
                 return value.compareTo(o.value);
-            if (!isDescriptive && o.isDescriptive)
+            }
+            if (!isDescriptive && o.isDescriptive) {
                 return 1;
+            }
             return -1;
         }
     }
@@ -100,7 +108,9 @@ public class EssayMeasurementsPCA {
                 document.put(metric, new ArrayList<>());
             }
             while ((line = br.readLine()) != null) {
-                if (line.trim().length() == 1) continue;
+                if (line.trim().length() == 1) {
+                    continue;
+                }
                 String[] values = line.split(",", -1);
                 // The first 2 are the category and the filename
                 document.get(header[0]).add(new MetricValue(values[0]));
@@ -120,9 +130,9 @@ public class EssayMeasurementsPCA {
             }
             badMetrics.forEach(metric -> document.remove(metric));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         return document;
@@ -173,7 +183,7 @@ public class EssayMeasurementsPCA {
     }
 
     private List<Integer> selectMetricsForRemoval(SortedSet<Map.Entry<Integer, ArrayList<Integer>>> sortedG,
-                                                  Map<Integer, ArrayList<Integer>> G) {
+            Map<Integer, ArrayList<Integer>> G) {
         Map<Integer, Boolean> eliminated = new HashMap<>();
 
         for (Map.Entry<Integer, ArrayList<Integer>> e : sortedG) {
@@ -201,7 +211,7 @@ public class EssayMeasurementsPCA {
     }
 
     private Map<String, ArrayList<MetricValue>> removeOutliers(Map<String, ArrayList<MetricValue>> doc,
-                                                               String measurementsPath) {
+            String measurementsPath) {
         List<String> headers = new ArrayList<String>(doc.keySet());
         System.out.println("Removing documents that are outliers for at least " + OUTLIER_PERCENTAGE * 100 + "% of metrics.");
         System.out.println("Initial document count: " + doc.get(headers.get(0)).size());
@@ -249,7 +259,7 @@ public class EssayMeasurementsPCA {
     }
 
     private Map<String, ArrayList<MetricValue>> pruneSkewnessKurtosis(Map<String, ArrayList<MetricValue>> doc,
-                                                                      String measurementsPath) {
+            String measurementsPath) {
         System.out.println("Removing metrics by skewness and kurtosis.");
         String fullPath = new File(measurementsPath).getAbsolutePath().replace("\\", "\\\\");
         // Construct the R matrix for the corelation computations
@@ -288,7 +298,7 @@ public class EssayMeasurementsPCA {
     }
 
     private Map<String, ArrayList<MetricValue>> removeCorrelatedMetrics(Map<String, ArrayList<MetricValue>> doc,
-                                                                        String measurementsPath) {
+            String measurementsPath) {
         // Construct the R matrix for the corelation computations
         String fullPath = new File(measurementsPath).getAbsolutePath().replace("\\", "\\\\");
         Map<Integer, ArrayList<Integer>> G = new TreeMap<>();
@@ -305,7 +315,9 @@ public class EssayMeasurementsPCA {
         System.out.println("Pruning correlated metrics.");
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
-                if (i == j) continue;
+                if (i == j) {
+                    continue;
+                }
                 if (M[i][j] > CORRELATION_THRESHOLD) {
                     if (!G.containsKey(i + 2)) {
                         G.put(i + 2, new ArrayList<>());
@@ -317,12 +329,12 @@ public class EssayMeasurementsPCA {
         // Sort by the number of redundancies
         SortedSet<Map.Entry<Integer, ArrayList<Integer>>> sortedG = new TreeSet<>(
                 new Comparator<Map.Entry<Integer, ArrayList<Integer>>>() {
-                    @Override
-                    public int compare(Map.Entry<Integer, ArrayList<Integer>> o1, Map.Entry<Integer, ArrayList<Integer>> o2) {
-                        int ans = new Integer(o2.getValue().size()).compareTo(new Integer(o1.getValue().size()));
-                        return ans == 0 ? 1 : ans;
-                    }
-                }
+            @Override
+            public int compare(Map.Entry<Integer, ArrayList<Integer>> o1, Map.Entry<Integer, ArrayList<Integer>> o2) {
+                int ans = new Integer(o2.getValue().size()).compareTo(new Integer(o1.getValue().size()));
+                return ans == 0 ? 1 : ans;
+            }
+        }
         );
         sortedG.addAll(G.entrySet());
 
@@ -332,7 +344,6 @@ public class EssayMeasurementsPCA {
 
         return doc;
     }
-
 
     private List<String> selectOverloadedMetrics(List<String> headers, double[][] loadings) {
         List<String> metricsToRemove = new ArrayList<>();
@@ -353,9 +364,9 @@ public class EssayMeasurementsPCA {
     }
 
     private Map<String, ArrayList<MetricValue>> PCAPruning(Map<String, ArrayList<MetricValue>> doc,
-                                                           String measurementsPath,
-                                                           String loadingsPath,
-                                                           String zScorePath) {
+            String measurementsPath,
+            String loadingsPath,
+            String zScorePath) {
         System.out.println("Beginning PCA pruning...");
         String fullMeasurementsPath = new File(measurementsPath).getAbsolutePath().replace("\\", "\\\\");
         String fullLoadingsPath = new File(loadingsPath).getAbsolutePath().replace("\\", "\\\\");
@@ -380,7 +391,7 @@ public class EssayMeasurementsPCA {
         componentCount = 0;
         double cumulatedVar = 0;
         for (int i = 0; i < variances.length && variances[i] > VARIANCE_THRESHOLD && componentCount < COMPONENT_LIMIT;
-             ++i, ++componentCount) {
+                ++i, ++componentCount) {
             cumulatedVar += variances[i];
             System.out.println("Variance " + i + " is " + variances[i]);
         }
@@ -388,8 +399,8 @@ public class EssayMeasurementsPCA {
         System.out.println("Cumulated variance: " + cumulatedVar);
 
         // Get the first componentCount rotated loadings
-        rengine.eval("rawLoadings <- pca$rotation[, 1:" + componentCount + "] %*% diag(pca$sdev, " +
-                componentCount + "," + componentCount + ")");
+        rengine.eval("rawLoadings <- pca$rotation[, 1:" + componentCount + "] %*% diag(pca$sdev, "
+                + componentCount + "," + componentCount + ")");
         rengine.eval("rotatedLoadings <- varimax(rawLoadings)$loadings");
         REXP r = rengine.eval("rotatedLoadings");
         rengine.getRsync().unlock();
@@ -430,7 +441,7 @@ public class EssayMeasurementsPCA {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -530,7 +541,7 @@ public class EssayMeasurementsPCA {
 
         // Add the metrics in their relative order
         newDoc.put(headers.get(0), new ArrayList<>(doc.get(headers.get(0))));
-        for (String m: indexes.keySet()) {
+        for (String m : indexes.keySet()) {
             int index = indexes.get(m);
             newDoc.get(headers.get(0)).set(index, new MetricValue(m));
         }
@@ -552,7 +563,9 @@ public class EssayMeasurementsPCA {
             }
 
             @Override
-            public String toString() { return metric + ": " + value; }
+            public String toString() {
+                return metric + ": " + value;
+            }
         }
 
         // Sort the metric values for each component
@@ -629,14 +642,16 @@ public class EssayMeasurementsPCA {
             String line = br.readLine();
 
             while ((line = br.readLine()) != null) {
-                if (line.trim().length() == 1) continue;
+                if (line.trim().length() == 1) {
+                    continue;
+                }
                 String[] values = line.split(",", -1);
                 document.put(values[0].replace("\"", ""), Double.parseDouble(values[1]));
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         return document;
@@ -648,7 +663,9 @@ public class EssayMeasurementsPCA {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.trim().length() == 1) continue;
+                if (line.trim().length() == 1) {
+                    continue;
+                }
                 String[] values = line.split(",", -1);
                 try {
                     document.put(values[0].replace("\"", ""), Double.parseDouble(values[1]));
@@ -657,9 +674,9 @@ public class EssayMeasurementsPCA {
                 }
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
 
         return document;
@@ -768,7 +785,7 @@ public class EssayMeasurementsPCA {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -795,4 +812,3 @@ public class EssayMeasurementsPCA {
         fe.close();
     }
 }
-

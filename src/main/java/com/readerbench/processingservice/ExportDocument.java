@@ -31,6 +31,9 @@ import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.datasourceprovider.data.document.Metacognition;
+import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
+import com.readerbench.datasourceprovider.data.document.Summary;
 import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChain;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
@@ -64,6 +67,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import static org.apache.hadoop.yarn.util.YarnVersionInfo.getDate;
 import org.openide.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -332,11 +336,74 @@ public class ExportDocument {
                 });
                 out.writeObject(modelPaths);
             } catch (Exception | Error ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage());
             }
 
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
+        }
+    }
+
+    public void exportMetacognitionCSV(Metacognition m) {
+        LOGGER.info("Writing advanced document export");
+        File output = new File(m.getPath().replace(".xml", ".csv"));
+        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768)) {
+            out.write("Referred document:," + m.getReferredDoc().getTitleText() + "\n");
+            out.write("Author:");
+            for (String author : m.getAuthors()) {
+                out.write("," + author);
+            }
+            out.write("\n");
+            for (ISemanticModel model : m.getSemanticModelsAsList()) {
+                out.write(model.getType() + " space:," + model.getPath() + "\n");
+
+            }
+
+            out.write("Text");
+            for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                out.write("," + rs.getName());
+            }
+            for (SimilarityType st : SimilarityType.values()) {
+                out.write("," + st.getName());
+            }
+
+            int startIndex = 0;
+            int endIndex;
+            for (int index = 0; index < m.getBlocks().size(); index++) {
+                endIndex = m.getBlocks().get(index).getRefBlock().getIndex();
+                for (int refBlockId = startIndex; refBlockId <= endIndex; refBlockId++) {
+                    // add rows as blocks within the document
+                    SemanticCohesion coh = m.getBlockSimilarities()[refBlockId];
+                    // add block text
+                    out.write(m.getReferredDoc().getBlocks().get(refBlockId).getText().replaceAll(",", "") + ",");
+                    // add cohesion
+                    out.write(",,,,,," + coh.print() + "\n");
+                }
+                startIndex = endIndex + 1;
+
+                // add corresponding verbalization
+                out.write(m.getBlocks().get(index).getText().replaceAll(",", "") + ",");
+
+                for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                    out.write(m.getAutomatedReadingStrategies().get(index).get(rs) + ",");
+                }
+                for (SimilarityType st : SimilarityType.values()) {
+                    out.write(m.getAvgCohesion().get(index).getSemanticSimilarities().get(st) + ",");
+                }
+                out.write("\n");
+            }
+
+            // add final row
+            out.write("Overall reading strategies,");
+
+            EnumMap<ReadingStrategyType, Integer> allAutomatedRS = m.getAllRS(m.getAutomatedReadingStrategies());
+            for (ReadingStrategyType rs : ReadingStrategyType.values()) {
+                out.write(allAutomatedRS.get(rs) + ",");
+            }
+            out.write("\n");
+            LOGGER.info("Successfully finished writing file {}", output.getName());
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -409,6 +476,61 @@ public class ExportDocument {
         }
     }
 
+    public void exportXML(Metacognition m, String path) {
+        try {
+            org.w3c.dom.Document dom = generateDOMforXMLexport(path);
+            Element docEl = writeDocumentDescriptors(m, dom);
+            Element bodyEl = dom.createElement("self_explanations_body");
+            docEl.appendChild(bodyEl);
+
+            for (int i = 0; i < m.getBlocks().size(); i++) {
+                if (m.getBlocks().get(i) != null) {
+                    Element pEl = dom.createElement("verbalization");
+                    pEl.setAttribute("id", i + "");
+                    //pEl.setAttribute("after_p", getBlocks().get(i).getRefBlock().getIndex() + "");
+                    if (!m.getAnnotatedRS().isEmpty() && i < m.getAnnotatedRS().size()) {
+                        pEl.setAttribute("no_metacognition", m.getAnnotatedRS().get(i).get(ReadingStrategyType.META_COGNITION) + "");
+                        pEl.setAttribute("no_causality", m.getAnnotatedRS().get(i).get(ReadingStrategyType.CAUSALITY) + "");
+                        pEl.setAttribute("no_paraphrase", m.getAnnotatedRS().get(i).get(ReadingStrategyType.PARAPHRASE) + "");
+                        pEl.setAttribute("no_inferred", m.getAnnotatedRS().get(i).get(ReadingStrategyType.INFERRED_KNOWLEDGE) + "");
+                        pEl.setAttribute("no_bridging", m.getAnnotatedRS().get(i).get(ReadingStrategyType.BRIDGING) + "");
+                    }
+
+                    pEl.setTextContent(m.getBlocks().get(i).getText());
+                    bodyEl.appendChild(pEl);
+                }
+            }
+            writeDOMforXMLexport(path, dom);
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
+            LOGGER.error(e.getMessage());
+        }
+    }
+
+    public void exportXML(Summary s, String path) {
+        try {
+            org.w3c.dom.Document dom = generateDOMforXMLexport(path);
+
+            Element docEl = writeDocumentDescriptors(s, dom);
+
+            Element bodyEl = dom.createElement("summary_body");
+            docEl.appendChild(bodyEl);
+
+            for (int i = 0; i < s.getBlocks().size(); i++) {
+                if (s.getBlocks().get(i) != null) {
+                    Element pEl = dom.createElement("p");
+                    pEl.setAttribute("id", i + "");
+                    pEl.setTextContent(s.getBlocks().get(i).getText());
+                    bodyEl.appendChild(pEl);
+                }
+            }
+
+            writeDOMforXMLexport(path, dom);
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException | TransformerException e) {
+            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage());
+        }
+    }
+
     /**
      * @param path
      * @param dom
@@ -418,7 +540,7 @@ public class ExportDocument {
      * @throws TransformerException
      * @throws UnsupportedEncodingException
      */
-    protected void writeDOMforXMLexport(String path, org.w3c.dom.Document dom)
+    private void writeDOMforXMLexport(String path, org.w3c.dom.Document dom)
             throws TransformerFactoryConfigurationError, TransformerConfigurationException, FileNotFoundException,
             TransformerException, UnsupportedEncodingException {
         TransformerFactory transfac = TransformerFactory.newInstance();
@@ -440,7 +562,7 @@ public class ExportDocument {
      * @throws SAXException
      * @throws IOException
      */
-    protected org.w3c.dom.Document generateDOMforXMLexport(String path) throws ParserConfigurationException, SAXException, IOException {
+    private org.w3c.dom.Document generateDOMforXMLexport(String path) throws ParserConfigurationException, SAXException, IOException {
         // generate a corresponding XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -467,5 +589,58 @@ public class ExportDocument {
             }
         }
         return dom;
+    }
+
+    protected Element writeDocumentDescriptors(Metacognition m, org.w3c.dom.Document dom) {
+        Element docEl = dom.createElement("document");
+        if (m.getLanguage() != null) {
+            docEl.setAttribute("language", m.getLanguage().toString());
+        }
+        dom.appendChild(docEl);
+
+        Element metaEl = dom.createElement("meta");
+        docEl.appendChild(metaEl);
+
+        // set source
+        Element sourceEl = dom.createElement("source");
+        sourceEl.setTextContent(m.getSource());
+        metaEl.appendChild(sourceEl);
+
+        // set author
+        Element authorEl = dom.createElement("author");
+        authorEl.setTextContent(m.getAuthors().toString());
+        metaEl.appendChild(authorEl);
+
+        // set teachers
+        Element teachersEl = dom.createElement("teachers");
+        metaEl.appendChild(teachersEl);
+        for (String teacher : m.getTutors()) {
+            Element teacherEl = dom.createElement("teacher");
+            teacherEl.setTextContent(teacher);
+            teachersEl.appendChild(teacherEl);
+        }
+
+        // set uri
+        Element uriEl = dom.createElement("uri");
+        uriEl.setTextContent(m.getURI());
+        metaEl.appendChild(uriEl);
+
+        // set date
+        Element dateEl = dom.createElement("date_of_verbalization");
+        DateFormat formatter = new SimpleDateFormat("dd-mm-yyyy");
+        dateEl.setTextContent(formatter.format(getDate()));
+        metaEl.appendChild(dateEl);
+
+        // set comprehension score
+        Element comprehenstionEl = dom.createElement("comprehension_score");
+        comprehenstionEl.setTextContent(m.getAnnotatedComprehensionScore() + "");
+        metaEl.appendChild(comprehenstionEl);
+
+        // set fluency
+        Element fluencyEl = dom.createElement("fluency");
+        fluencyEl.setTextContent(m.getAnnotatedFluency() + "");
+        metaEl.appendChild(fluencyEl);
+
+        return docEl;
     }
 }

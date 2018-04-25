@@ -139,7 +139,7 @@ GraphMeasure implements Comparable<GraphMeasure>, java.io.Serializable {
             ObjectInputStream objectinputstream = new ObjectInputStream(new FileInputStream(SerializedFileLocation));
             measures = (List<GraphMeasure>) objectinputstream.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
         return measures;
     }

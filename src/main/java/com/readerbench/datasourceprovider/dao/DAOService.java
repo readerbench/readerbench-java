@@ -69,7 +69,7 @@ public class DAOService {
             properties.load(input);
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
         return properties;
     }
@@ -122,7 +122,7 @@ public class DAOService {
                 }
                 return null;
             } catch (Exception ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage());
                 if (em.getTransaction().isActive()) {
                     em.getTransaction().rollback();
                 }

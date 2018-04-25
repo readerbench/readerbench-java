@@ -242,7 +242,7 @@ public abstract class Clustering {
                 }
             } catch (Exception ex) {
                 LOGGER.error(ex.getMessage());
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage());
             }
         }
     }

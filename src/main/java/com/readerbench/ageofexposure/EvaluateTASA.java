@@ -93,7 +93,7 @@ public class EvaluateTASA {
             }
             br.close();
         } catch (IOException | NumberFormatException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 
@@ -148,9 +148,9 @@ public class EvaluateTASA {
             EvaluateTASA eval = new EvaluateTASA("in/word complexity/words.csv");
             eval.processWordComplexity("tasa.txt", "in/word complexity", false);
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 }

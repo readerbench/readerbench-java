@@ -86,7 +86,7 @@ public class LDA implements ISemanticModel, Serializable {
                             .collect(Collectors.toList()))
                     .toArray(size -> new List[size]);
         } catch (ClassNotFoundException | IOException ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
     }
 
@@ -126,7 +126,7 @@ public class LDA implements ISemanticModel, Serializable {
                     // data, label, name fields
                     instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
                 } catch (FileNotFoundException | UnsupportedEncodingException ex) {
-                    ex.printStackTrace();
+                    LOGGER.error(ex.getMessage());
                 }
             }
         }
@@ -382,7 +382,7 @@ public class LDA implements ISemanticModel, Serializable {
                 out.write("\n\n");
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error(ex.getMessage());
         }
         LOGGER.info("Successfully finished writing topics");
     }
@@ -515,7 +515,7 @@ public class LDA implements ISemanticModel, Serializable {
                     System.out.println("Converted: " + folder.getPath());
                 }
             } catch (IOException | ClassNotFoundException ex) {
-                ex.printStackTrace();
+                LOGGER.error(ex.getMessage());
             }
         }
     }

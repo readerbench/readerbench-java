@@ -19,8 +19,12 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.File;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TrainAoELDAModels {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrainAoELDAModels.class);
 
     public static void trainModels(String path, int noThreads, int noIterations) throws IOException {
         // determine number of classes
@@ -52,7 +56,7 @@ public class TrainAoELDAModels {
         try {
             TrainAoELDAModels.trainModels("resources/in/AoE 100", 8, 20000);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
         }
     }
 }

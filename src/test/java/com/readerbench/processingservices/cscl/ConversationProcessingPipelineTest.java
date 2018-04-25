@@ -30,7 +30,7 @@ public class ConversationProcessingPipelineTest extends DocumentProcessingPipeli
     @Test
     public void createConversationXMLTest() {
         ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(lang, models, annotators);
-        Conversation c = pipeline.createConversationFromXML("srcs/test/resources/sample_chat_en.xml");
+        Conversation c = pipeline.createConversationFromXML("src/test/resources/sample_chat_en.xml");
         pipeline.processDocument(c);
         Assert.assertEquals(300, c.getNoBlocks());
     }
