@@ -21,19 +21,26 @@ import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.IDSorter;
 import cc.mallet.types.InstanceList;
 import cc.mallet.util.Maths;
-import com.readerbench.datasourceprovider.data.AnalysisElement;
-import com.readerbench.datasourceprovider.data.Word;
-import com.readerbench.datasourceprovider.pojo.Lang;
-import edu.stanford.nlp.util.Pair;
 import com.readerbench.coreservices.commons.ObjectManipulation;
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.datasourceprovider.data.AnalysisElement;
+import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
+import static com.readerbench.datasourceprovider.pojo.Lang.es;
+import static com.readerbench.datasourceprovider.pojo.Lang.fr;
+import static com.readerbench.datasourceprovider.pojo.Lang.it;
+import static com.readerbench.datasourceprovider.pojo.Lang.la;
+import static com.readerbench.datasourceprovider.pojo.Lang.nl;
+import static com.readerbench.datasourceprovider.pojo.Lang.ro;
+import edu.stanford.nlp.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -68,7 +75,7 @@ public class LDA implements ISemanticModel, Serializable {
         this.path = path;
         LOGGER.info("Loading LDA model {} ...", path);
         try {
-            wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/LDA.model");
+            wordProbDistributions = (Map<Word, double[]>) ObjectManipulation.loadObject(path + "/lda.model");
             numTopics = wordProbDistributions.entrySet().stream()
                     .map(e -> e.getValue().length)
                     .findFirst().orElse(0);
@@ -79,7 +86,7 @@ public class LDA implements ISemanticModel, Serializable {
                             .collect(Collectors.toList()))
                     .toArray(size -> new List[size]);
         } catch (ClassNotFoundException | IOException ex) {
-            LOGGER.error(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -119,7 +126,7 @@ public class LDA implements ISemanticModel, Serializable {
                     // data, label, name fields
                     instances.addThruPipe(new CsvIterator(fileReader, Pattern.compile("^(\\S*)[\\s,]*(\\S*)[\\s,]*(.*)$"), 3, 2, 1));
                 } catch (FileNotFoundException | UnsupportedEncodingException ex) {
-                    LOGGER.error(ex.getMessage());
+                    ex.printStackTrace();
                 }
             }
         }
@@ -236,7 +243,7 @@ public class LDA implements ISemanticModel, Serializable {
 
         // save the trained model
         //ObjectManipulation.saveObject(model, path + "/LDA.model");
-        ObjectManipulation.saveObject(buildWordVectors(model, language), path + "/LDA.model");
+        ObjectManipulation.saveObject(buildWordVectors(model, language), path + "/lda.model");
 
         LDA lda = new LDA(path, language);
         lda.printTopics(100);
@@ -290,7 +297,7 @@ public class LDA implements ISemanticModel, Serializable {
     public double[] getProbDistribution(AnalysisElement e) {
 //        if (e.getWordOccurences().size() < MIN_NO_WORDS_PER_DOCUMENT) {
         double[] distrib = new double[numTopics];
-        for (Map.Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
+        for (Entry<Word, Integer> entry : e.getWordOccurences().entrySet()) {
             double[] v = entry.getKey().getModelRepresentation(SimilarityType.LDA);
             if (v == null) {
                 continue;
@@ -375,7 +382,7 @@ public class LDA implements ISemanticModel, Serializable {
                 out.write("\n\n");
             }
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
+            ex.printStackTrace();
         }
         LOGGER.info("Successfully finished writing topics");
     }
@@ -415,7 +422,7 @@ public class LDA implements ISemanticModel, Serializable {
         }
         TreeMap<Word, Double> similarSum = getSimilarConcepts(sum, minThreshold);
         if (!similarSum.isEmpty()) {
-            for (Map.Entry<Word, Double> sim : similarSum.entrySet()) {
+            for (Entry<Word, Double> sim : similarSum.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "+" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
                             + sim.getValue() + ")");
@@ -424,7 +431,7 @@ public class LDA implements ISemanticModel, Serializable {
         }
         TreeMap<Word, Double> similarDiff = getSimilarConcepts(difference, minThreshold);
         if (!similarDiff.isEmpty()) {
-            for (Map.Entry<Word, Double> sim : similarDiff.entrySet()) {
+            for (Entry<Word, Double> sim : similarDiff.entrySet()) {
                 if (!sim.getKey().getStem().equals(w1.getStem()) && !sim.getKey().getStem().equals(w2.getStem())) {
                     System.out.println(w1.getLemma() + "-" + w2.getLemma() + ">>" + sim.getKey().getLemma() + " ("
                             + sim.getValue() + ")");
@@ -504,11 +511,11 @@ public class LDA implements ISemanticModel, Serializable {
                 for (File folder : ldaFolder.listFiles(file -> !file.getName().startsWith(".") && !file.getName().equals("INL"))) {
                     ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject(folder.getPath() + "/LDA.model");
                     Map<Word, double[]> vectors = buildWordVectors(model, Lang.valueOf(lang.getName().toLowerCase()));
-                    ObjectManipulation.saveObject(vectors, folder.getPath() + "/LDA.model");
+                    ObjectManipulation.saveObject(vectors, folder.getPath() + "/lda.model");
                     System.out.println("Converted: " + folder.getPath());
                 }
-            } catch (Exception ex) {
-                LOGGER.error(ex.getMessage());
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
             }
         }
     }
@@ -517,6 +524,6 @@ public class LDA implements ISemanticModel, Serializable {
         convertModels();
 //        ParallelTopicModel model = (ParallelTopicModel) ObjectManipulation.loadObject("resources/config/NL/LDA/INL/LDA.model");
 //        Map<Word, double[]> vectors = buildWordVectors(model, Lang.nl);
-//        ObjectManipulation.saveObject(vectors, "resources/config/NL/LDA/INL/LDA-small.model");
+//        ObjectManipulation.saveObject(vectors, "resources/config/NL/LDA/INL/lda.model");
     }
 }

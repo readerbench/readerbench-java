@@ -21,6 +21,9 @@ import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.processingservice.Annotators;
+import com.readerbench.processingservice.ExportDocument;
+import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,13 +138,13 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 
         Document d = getDocument(false);
 
-        d.exportXML(path + "/" + C_BASE_FOLDER_NAME
-                + gradeLevel + "/" + ID + ".xml");
+        ExportDocument ed = new ExportDocument();
+
+        ed.exportXML(d, path + "/" + C_BASE_FOLDER_NAME + gradeLevel + "/" + ID + ".xml");
         writeTxt(path);
     }
 
-    public StringBuilder getProcessedContent(boolean usePOStagging,
-            boolean annotateWithPOS) {
+    public StringBuilder getProcessedContent(boolean usePOStagging, boolean annotateWithPOS) {
         Document d = getDocument(usePOStagging);
         StringBuilder sb = new StringBuilder();
         for (Block b : d.getBlocks()) {
@@ -167,8 +170,7 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
      */
     public Document getDocument(boolean usePOStagging) {
         if (content.length() < SplitTASA.LOWER_BOUND) {
-            LOGGER.warn(ID
-                    + " has too few characters to be taken into consideration");
+            LOGGER.warn(ID + " has too few characters to be taken into consideration");
             return null;
         }
 
@@ -183,14 +185,17 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
         AbstractDocumentTemplate docTmp = new AbstractDocumentTemplate();
 
         docTmp.setGenre(genre);
+        docTmp.setTitle("TASA");
         while (st.hasMoreTokens()) {
             AbstractDocumentTemplate.BlockTemplate block = docTmp.new BlockTemplate();
             block.setId(crtBlock++);
             block.setContent(st.nextToken().trim());
             docTmp.getBlocks().add(block);
         }
-        Document d = new Document(null, docTmp, new ArrayList<>(), Lang.en, usePOStagging);
-        d.setTitleText("TASA");
+
+        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(Lang.en, new ArrayList<>(), new ArrayList<>());
+        Document d = pipeline.createDocumentFromTemplate(docTmp);
+
         List<String> authors = new LinkedList<>();
         authors.add(ID.replaceAll("[^a-z,A-Z]", ""));
         d.setGenre(genre);

@@ -16,17 +16,12 @@
 package com.readerbench.processingservice.document;
 
 import com.readerbench.coreservices.nlp.parsing.Parsing;
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
-import com.readerbench.coreservices.semanticModels.LSA.LSA;
-import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
-import com.readerbench.datasourceprovider.dao.hibernate.SQLiteDatabase;
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
-import com.readerbench.processingservice.ExportDocument;
 import com.readerbench.processingservice.GenericProcessingPipeline;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,8 +29,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -85,50 +78,54 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
             org.w3c.dom.Document dom = db.parse(input);
 
             Element root = dom.getDocumentElement();
-            // parse the XML file
-            Element el;
-            NodeList nl;
-            int noBreakPoints = 0;
-            // determine contents
-            AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
-            nl = root.getElementsByTagName("p");
-            if (nl != null && nl.getLength() > 0) {
-                for (int i = 0; i < nl.getLength(); i++) {
-                    el = (Element) nl.item(i);
-                    AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
-                    if (el.hasAttribute("id")) {
-                        try {
-                            block.setId(Integer.parseInt(el.getAttribute("id")));
-                        } catch (NumberFormatException e) {
-                            block.setId(i);
-                        }
-                    } else {
-                        block.setId(i);
-                    }
-                    block.setRefId(-1);
-                    if (el.hasAttribute("verbalization_after")) {
-                        block.setVerbId(noBreakPoints);
-                        noBreakPoints++;
-                    }
-                    // block.setContent(StringEscapeUtils.escapeXml(el.getFirstChild().getNodeValue()));
-                    if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null
-                            && el.getFirstChild().getNodeValue().trim().length() > 0) {
-                        block.setContent(el.getFirstChild().getNodeValue());
-                        contents.getBlocks().add(block);
-                    }
-                }
-            }
-            // determine title
-            nl = root.getElementsByTagName("title");
-            if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
-                contents.setTitle(((Element) nl.item(0)).getFirstChild().getNodeValue());
-            }
-            return contents;
+            return extractDocTemplateFromXML(root);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             LOGGER.error("Error evaluating input file " + path + " - " + e.getMessage());
             LOGGER.error(e.getMessage());
         }
         return null;
+    }
+
+    public AbstractDocumentTemplate extractDocTemplateFromXML(Element root) {
+        // parse the XML file
+        Element el;
+        NodeList nl;
+        int noBreakPoints = 0;
+        // determine contents
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        nl = root.getElementsByTagName("p");
+        if (nl != null && nl.getLength() > 0) {
+            for (int i = 0; i < nl.getLength(); i++) {
+                el = (Element) nl.item(i);
+                AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
+                if (el.hasAttribute("id")) {
+                    try {
+                        block.setId(Integer.parseInt(el.getAttribute("id")));
+                    } catch (NumberFormatException e) {
+                        block.setId(i);
+                    }
+                } else {
+                    block.setId(i);
+                }
+                block.setRefId(-1);
+                if (el.hasAttribute("verbalization_after")) {
+                    block.setVerbId(noBreakPoints);
+                    noBreakPoints++;
+                }
+                // block.setContent(StringEscapeUtils.escapeXml(el.getFirstChild().getNodeValue()));
+                if (el.getFirstChild() != null && el.getFirstChild().getNodeValue() != null
+                        && el.getFirstChild().getNodeValue().trim().length() > 0) {
+                    block.setContent(el.getFirstChild().getNodeValue());
+                    contents.getBlocks().add(block);
+                }
+            }
+        }
+        // determine title
+        nl = root.getElementsByTagName("title");
+        if (nl != null && nl.getLength() > 0 && ((Element) nl.item(0)).getFirstChild() != null) {
+            contents.setTitle(((Element) nl.item(0)).getFirstChild().getNodeValue());
+        }
+        return contents;
     }
 
     public void addInformationFromXML(String path, Document d) {
@@ -218,24 +215,5 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
             LOGGER.error("Error evaluating input file " + path + " - " + e.getMessage());
             LOGGER.error(e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        SQLiteDatabase.initializeDB();
-
-        Lang lang = Lang.en;
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
-
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(lsa);
-        models.add(w2v);
-
-        List<Annotators> annotators = new ArrayList<>(Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY));
-        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
-        ExportDocument ed = new ExportDocument();
-        Document d = pipeline.createDocumentFromXML("resources/in/NLP2012/reading_material_en.xml");
-//        pipeline.processDocument(d);
-        System.out.println("BAU" + d.getNoBlocks() + "/" + d.getProcessedText());
     }
 }

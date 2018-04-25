@@ -58,6 +58,10 @@ public class AbstractDocumentTemplate implements Serializable {
         return docTmp;
     }
 
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
     public String getGenre() {
         return genre;
     }
@@ -175,7 +179,7 @@ public class AbstractDocumentTemplate implements Serializable {
         public void setSpeakerAlias(String speakerAlias) {
             this.speakerAlias = speakerAlias;
         }
-
+        
         @Override
         public String toString() {
             return "BlockTemplate [speaker=" + speaker + ", speakerAlias=" + speakerAlias + ", time=" + time + ", "

@@ -28,58 +28,49 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 /**
- * 
+ *
  * @author Mihai Dascalu
  */
 public class MapOfWordWeights {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MapOfWordWeights.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapOfWordWeights.class);
 
-	private Map<String, Double> words;
+    private Map<String, Double> words;
 
-	public MapOfWordWeights(String path, Lang lang) {
-		BufferedReader in = null;
-		words = new TreeMap<String, Double>();
-		try {
-			FileInputStream inputFile = new FileInputStream(path);
-			InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-			in = new BufferedReader(ir);
-			String line = null;
-			while ((line = in.readLine()) != null) {
-				StringTokenizer st = new StringTokenizer(line.trim());
-				String word = st.nextToken();
-				Double weight = 0.0;
-				try {
-					weight = Double.valueOf(st.nextToken());
-					if (weight < 0 || weight > 1)
-						throw new Exception("Weight not in [0; 1] interval!");
-				} catch (Exception e) {
-					e.printStackTrace();
-					weight = 1.0;
-				}
-				if (Dictionary.isDictionaryWord(word, lang))
-					words.put(word, weight);
-				else
-					LOGGER.info("Word " + word
-							+ " was not found within the dictionary words");
-			}
-		} catch (IOException ex) {
-			LOGGER.error(ex.getMessage());
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ex) {
-				LOGGER.error(ex.getMessage());
-			}
-		}
-	}
+    public MapOfWordWeights(String path, Lang lang) {
+        words = new TreeMap<>();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"))) {
+            String line = null;
+            while ((line = in.readLine()) != null) {
+                StringTokenizer st = new StringTokenizer(line.trim());
+                String word = st.nextToken();
+                Double weight;
+                try {
+                    weight = Double.valueOf(st.nextToken());
+                    if (weight < 0 || weight > 1) {
+                        throw new Exception("Weight not in [0; 1] interval!");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    weight = 1.0;
+                }
+                if (Dictionary.isDictionaryWord(word, lang)) {
+                    words.put(word, weight);
+                } else {
+                    LOGGER.info("Word " + word + " was not found within the dictionary words");
+                }
+            }
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
+        }
+    }
 
-	public Map<String, Double> getWords() {
-		return words;
-	}
+    public Map<String, Double> getWords() {
+        return words;
+    }
 
-	public void setWords(Map<String, Double> words) {
-		this.words = words;
-	}
+    public void setWords(Map<String, Double> words) {
+        this.words = words;
+    }
 
 }

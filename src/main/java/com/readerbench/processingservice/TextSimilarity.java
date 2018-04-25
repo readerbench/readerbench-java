@@ -11,6 +11,7 @@ import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,15 +30,18 @@ public class TextSimilarity {
      * @param text2 Second text
      * @param lang The language of the models
      * @param models The models
-     * @param usePOSTagging use or not POS tagging
+     * @param annotators
      * @return
      */
-    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, Lang lang, List<ISemanticModel> models, boolean usePOSTagging) {
+    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
         if (text1 == null || text1.isEmpty() || text2 == null || text2.isEmpty() || lang == null || models == null || models.isEmpty()) {
             return null;
         }
-        Document docText1 = new Document(null, AbstractDocumentTemplate.getDocumentModel(text1), models, lang, usePOSTagging);
-        Document docText2 = new Document(null, AbstractDocumentTemplate.getDocumentModel(text2), models, lang, usePOSTagging);
+
+        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
+        Document docText1 = pipeline.createDocumentFromTemplate(AbstractDocumentTemplate.getDocumentModel(text1));
+        Document docText2 = pipeline.createDocumentFromTemplate(AbstractDocumentTemplate.getDocumentModel(text2));
+
         SemanticCohesion sc = new SemanticCohesion(docText1, docText2);
         List<SimilarityType> methods = new ArrayList();
         methods.add(SimilarityType.LSA);

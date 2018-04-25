@@ -259,7 +259,7 @@ public class WordLinkageCalculator {
             }
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace()
         }
     }
 

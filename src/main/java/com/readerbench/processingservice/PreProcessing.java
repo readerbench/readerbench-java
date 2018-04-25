@@ -26,6 +26,7 @@ import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
 import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +89,8 @@ public class PreProcessing {
             }
         }
         // perform processing
-        AbstractDocument d = new Document(null, docTmp, new ArrayList<>(), lang, usePOSTagging);
+        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(Lang.en, new ArrayList<>(), new ArrayList<>());
+        Document d = pipeline.createDocumentFromTemplate(docTmp);
         return parseDocumentProcessing(d, noMinWordPerDoc, wordsToIgnore);
     }
 

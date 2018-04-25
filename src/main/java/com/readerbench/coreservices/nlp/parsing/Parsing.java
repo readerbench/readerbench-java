@@ -172,7 +172,6 @@ public abstract class Parsing {
             d.determineSemanticDimensions();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            e.printStackTrace();
         }
     }
 

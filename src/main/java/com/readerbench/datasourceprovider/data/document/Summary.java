@@ -55,8 +55,7 @@ public class Summary extends Metacognition {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            InputSource input = new InputSource(new FileInputStream(new File(
-                    pathToDoc)));
+            InputSource input = new InputSource(new FileInputStream(new File(pathToDoc)));
             input.setEncoding("UTF-8");
 
             DocumentBuilder db = dbf.newDocumentBuilder();

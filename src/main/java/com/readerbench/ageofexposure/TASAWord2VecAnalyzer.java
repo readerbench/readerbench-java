@@ -50,10 +50,7 @@ public class TASAWord2VecAnalyzer {
 
     public void loadModels() {
         noClasses = (new File(path)).listFiles((File pathname) -> {
-            if (pathname.isDirectory()) {
-                return true;
-            }
-            return false;
+            return pathname.isDirectory();
         }).length;
 
         /* Load LDA Models */
@@ -90,32 +87,32 @@ public class TASAWord2VecAnalyzer {
     }
 
     public void performMatching() throws InterruptedException, ExecutionException, FileNotFoundException {
-        
+
         /* Match topics with mature topics */
         for (int cLevel = 0; cLevel < noClasses - 1; cLevel++) {
             Word2VecModel intermediateModel = models.get(cLevel);
-            PrintStream outFile = new PrintStream(new FileOutputStream(path + "/grade" + cLevel + "/similarity.csv"));
-            for (Word word : wordList) {
-                List<Double> wordEvolution = AoEEvolution.get(word);
-                if (!intermediateModel.getWordSet().contains(word)) {
-                    outFile.println(word + ",0.0");
-                    wordEvolution.add(0.0);
-                    continue;
-                }
+            try (PrintStream outFile = new PrintStream(new FileOutputStream(path + "/grade" + cLevel + "/similarity.csv"))) {
+                for (Word word : wordList) {
+                    List<Double> wordEvolution = AoEEvolution.get(word);
+                    if (!intermediateModel.getWordSet().contains(word)) {
+                        outFile.println(word + ",0.0");
+                        wordEvolution.add(0.0);
+                        continue;
+                    }
 
-                int index = 0;
-                double[] similarityArray = new double[wordList.size()];
-                for (Word referenceWord : wordList) {
-                    similarityArray[index] = intermediateModel.getSimilarity(word, referenceWord);
-                    similarityArray[index] = 0;
-                    index++;
-                }
+                    int index = 0;
+                    double[] similarityArray = new double[wordList.size()];
+                    for (Word referenceWord : wordList) {
+                        similarityArray[index] = intermediateModel.getSimilarity(word, referenceWord);
+                        similarityArray[index] = 0;
+                        index++;
+                    }
 
-                double cosine = VectorAlgebra.cosineSimilarity(similarityArray, referenceVectors.get(word));
-                outFile.println(word + "," + cosine);
-                wordEvolution.add(cosine);
+                    double cosine = VectorAlgebra.cosineSimilarity(similarityArray, referenceVectors.get(word));
+                    outFile.println(word + "," + cosine);
+                    wordEvolution.add(cosine);
+                }
             }
-            outFile.close();
         }
     }
 
@@ -128,14 +125,8 @@ public class TASAWord2VecAnalyzer {
         Map<String, Double> shockAoA = TASAAnalyzer.getWordAcquisitionAge("Shock.csv");
 
         BufferedWriter loweValues;
-        try (BufferedWriter loweStats = new BufferedWriter(
-                new OutputStreamWriter(
-                        new FileOutputStream(new File(path + "/AoE word2vec stats full matching.csv")), "UTF-8"),
-                32768)) {
-            loweValues = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream(new File(path + "/AoE word2vec word full matching.csv")), "UTF-8"),
-                    32768);
+        try (BufferedWriter loweStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path + "/AoE word2vec stats full matching.csv")), "UTF-8"), 32768)) {
+            loweValues = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(path + "/AoE word2vec word full matching.csv")), "UTF-8"), 32768);
             // create header
             String content = "Word,Bird_AoA,Bristol_AoA,Cortese_AoA,Kuperman_AoA,Shock_AoA";
             loweStats.write(content);
@@ -218,8 +209,6 @@ public class TASAWord2VecAnalyzer {
     }
 
     public static void main(String args[]) throws Exception {
-        
-
         TASAWord2VecAnalyzer analyzer = new TASAWord2VecAnalyzer("resources/in/AoE 100", Lang.en);
         analyzer.loadModels();
         analyzer.computeReferenceVectors();

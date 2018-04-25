@@ -132,7 +132,7 @@ public class EssayMeasurementsPCA {
      * Removes all metrics that do not have at least 20% non-null values.
      */
     public Map<String, ArrayList<MetricValue>> removeLocalMetrics(Map<String, ArrayList<MetricValue>> doc) {
-        List<String> headers = new ArrayList<String>(doc.keySet());
+        List<String> headers = new ArrayList<>(doc.keySet());
         List<String> metricsToPrune = new ArrayList<>();
 
         // Search for metrics to prune
