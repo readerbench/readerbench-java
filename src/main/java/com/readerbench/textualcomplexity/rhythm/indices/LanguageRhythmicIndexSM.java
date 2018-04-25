@@ -11,6 +11,7 @@ import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.coreservices.rhythm.RhythmTool;
+import com.readerbench.textualcomplexity.ComplexityIndices;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +30,7 @@ public class LanguageRhythmicIndexSM extends ComplexityIndex {
     @Override
     public double compute(AbstractDocument d) {
         List<Integer> rhythmicIndices = new ArrayList<>();
-        
+
         for (Block b : d.getBlocks()) {
             if (null == b) {
                 continue;
@@ -38,12 +39,16 @@ public class LanguageRhythmicIndexSM extends ComplexityIndex {
                 int unitRhythmicIndex = RhythmTool.calcRhythmicIndexSM(s.getAllWords());
 //                System.out.println("Rhythmic index: " + unitRhythmicIndex);
 //                System.out.println();
-                if (unitRhythmicIndex != RhythmTool.UNDEFINED)
+                if (unitRhythmicIndex != RhythmTool.UNDEFINED) {
                     rhythmicIndices.add(unitRhythmicIndex);
+                }
             }
         }
 //        Map<Integer, Long> counts = rhythmicIndices.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
 //        System.out.println(counts);
-        return Collections.max(rhythmicIndices);
+        if (!rhythmicIndices.isEmpty()) {
+            return Collections.max(rhythmicIndices);
+        }
+        return ComplexityIndices.IDENTITY;
     }
 }

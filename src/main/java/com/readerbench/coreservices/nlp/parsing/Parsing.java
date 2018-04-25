@@ -108,6 +108,7 @@ public abstract class Parsing {
     }
 
     public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
+        d.setTitleText(adt.getTitle());
         Map<AbstractDocumentTemplate.BlockTemplate, Annotation> annotations;
         usePOSTagging = usePOSTagging && hasAnnotators();
         try {
@@ -171,7 +172,7 @@ public abstract class Parsing {
             d.determineSemanticDimensions();
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            LOGGER.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 

@@ -113,20 +113,22 @@ public abstract class GenericProcessingPipeline {
     }
 
     public void processDocumentTitle(AbstractDocument abstractDocument) {
-        String processedText = abstractDocument.getTitleText().replaceAll("\\s+", " ");
+        if (abstractDocument.getTitleText() != null && abstractDocument.getTitleText().isEmpty()) {
+            String processedText = abstractDocument.getTitleText().replaceAll("\\s+", " ");
 
-        if (processedText.length() > 0) {
-            if (annotators.contains(Annotators.NLP_PREPROCESSING)) {
-                // create an empty Annotation just with the given text
-                Annotation document = new Annotation(processedText.replaceAll("[\\.\\!\\?\n]", ""));
-                // run all Annotators on this text
-                Parsing.getParser(abstractDocument.getLanguage()).getPipeline().annotate(document);
-                CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+            if (processedText.length() > 0) {
+                if (annotators.contains(Annotators.NLP_PREPROCESSING)) {
+                    // create an empty Annotation just with the given text
+                    Annotation document = new Annotation(processedText.replaceAll("[\\.\\!\\?\n]", ""));
+                    // run all Annotators on this text
+                    Parsing.getParser(abstractDocument.getLanguage()).getPipeline().annotate(document);
+                    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
 
-                // add corresponding block
-                abstractDocument.setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", models, lang), 0, sentence));
-            } else {
-                abstractDocument.setTitle(SimpleParsing.processSentence(new Block(null, 0, "", models, lang), 0, processedText));
+                    // add corresponding block
+                    abstractDocument.setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", models, lang), 0, sentence));
+                } else {
+                    abstractDocument.setTitle(SimpleParsing.processSentence(new Block(null, 0, "", models, lang), 0, processedText));
+                }
             }
         }
     }

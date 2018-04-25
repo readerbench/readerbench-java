@@ -19,6 +19,7 @@ import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import com.readerbench.coreservices.semanticModels.LSA.LSA;
 import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.datasourceprovider.dao.hibernate.SQLiteDatabase;
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
@@ -57,6 +58,13 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
 
     public DocumentProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
+    }
+
+    //consider the usage of the NLP pipeline when creating a new document
+    public Document createDocumentFromTemplate(AbstractDocumentTemplate docTmp) {
+        Document d = new Document(null, getModels(), getLanguage());
+        Parsing.getParser(getLanguage()).parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        return d;
     }
 
     //consider the usage of the NLP pipeline when creating a new document
@@ -213,21 +221,21 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
     }
 
     public static void main(String[] args) {
+        SQLiteDatabase.initializeDB();
+
         Lang lang = Lang.en;
         LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
-        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
         Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
 
         List<ISemanticModel> models = new ArrayList<>();
         models.add(lsa);
-        models.add(lda);
         models.add(w2v);
 
         List<Annotators> annotators = new ArrayList<>(Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY));
         DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
         ExportDocument ed = new ExportDocument();
         Document d = pipeline.createDocumentFromXML("resources/in/NLP2012/reading_material_en.xml");
-        pipeline.processDocument(d);
-        System.out.println(d.toString());
+//        pipeline.processDocument(d);
+        System.out.println("BAU" + d.getNoBlocks() + "/" + d.getProcessedText());
     }
 }

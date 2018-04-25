@@ -16,6 +16,7 @@
         <maven.install.plugin.version>2.5.2</maven.install.plugin.version>
         <maven.scala.plugin.version>2.15.2</maven.scala.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+        <maven.surefire.version>2.21.0</maven.surefire.version>
 
         <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
@@ -445,6 +446,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire.version}</version>
             </plugin>
         </plugins>
     </build>
