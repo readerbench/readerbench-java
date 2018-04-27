@@ -22,7 +22,7 @@ import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.document.Metacognition;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import com.readerbench.datasourceprovider.data.document.Summary;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 
 import java.awt.*;
 import java.util.List;

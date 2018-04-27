@@ -16,7 +16,7 @@
 package com.readerbench.coreservices.commons;
 
 import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.coreservices.keywordMining.KeywordModeling;
 import org.slf4j.Logger;

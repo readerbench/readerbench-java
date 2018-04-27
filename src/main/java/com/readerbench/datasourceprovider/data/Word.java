@@ -22,7 +22,7 @@ import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.datasourceprovider.dao.WordDAO;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
-import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChainLink;
+import com.readerbench.datasourceprovider.data.lexicalchains.LexicalChainLink;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentEntity;

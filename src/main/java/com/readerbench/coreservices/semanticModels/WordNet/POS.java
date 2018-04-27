@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.datasourceprovider.data;
+package com.readerbench.coreservices.semanticModels.WordNet;
 
 /**
  * Enum class for the POS (Part of Speech) that is one of Noun, Verb, Adjective and Adverb.

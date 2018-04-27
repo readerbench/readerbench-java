@@ -17,7 +17,7 @@ package com.readerbench.datasourceprovider.data.keywordmining;
 
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.datasourceprovider.data.NGram;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;

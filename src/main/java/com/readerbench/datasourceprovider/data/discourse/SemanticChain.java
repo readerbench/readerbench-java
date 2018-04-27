@@ -16,7 +16,7 @@
 package com.readerbench.datasourceprovider.data.discourse;
 
 import com.readerbench.datasourceprovider.data.Word;
-import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChain;
+import com.readerbench.datasourceprovider.data.lexicalchains.LexicalChain;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.data.sentiment.SentimentEntity;

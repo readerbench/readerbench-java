@@ -28,7 +28,7 @@ public class Participant implements Comparable<Participant>, Serializable {
 
     private static final long serialVersionUID = -4515721505776009876L;
 
-    private String name;
+    private final String name;
     private String alias;
     private AbstractDocument contributions;
     private AbstractDocument significantContributions;
@@ -52,19 +52,12 @@ public class Participant implements Comparable<Participant>, Serializable {
         this.significantContributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
         this.indices = new EnumMap<>(CSCLIndices.class);
         this.longitudinalIndices = new HashMap<>();
-        this.alias = alias;
         this.resetIndices();
     }
 
     public Participant(String name, String alias, AbstractDocument d) {
-        super();
-        this.name = name;
+        this(name, d);
         this.alias = alias;
-        this.contributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
-        this.significantContributions = new Conversation(null, d.getSemanticModelsAsList(), d.getLanguage());
-        this.indices = new EnumMap<>(CSCLIndices.class);
-        this.longitudinalIndices = new HashMap<>();
-        this.resetIndices();
     }
 
     public void setRhythmicIndex(double rhythmicIndex) {
@@ -171,8 +164,7 @@ public class Participant implements Comparable<Participant>, Serializable {
 
     @Override
     public String toString() {
-        return name + ": { " + indices.get(CSCLIndices.INDEGREE) + ", " + indices.get(CSCLIndices.OUTDEGREE) + ", "
-                + indices.get(CSCLIndices.ECCENTRICITY) + ", " + participantGroup + "}\n";
+        return name + ": { " + indices.get(CSCLIndices.INDEGREE) + ", " + indices.get(CSCLIndices.OUTDEGREE) + ", " + participantGroup + "}\n";
     }
 
     @Override

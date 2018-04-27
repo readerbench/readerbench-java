@@ -16,8 +16,8 @@
 package com.readerbench.coreservices.cna;
 
 import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChain;
-import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChainLink;
+import com.readerbench.datasourceprovider.data.lexicalchains.LexicalChain;
+import com.readerbench.datasourceprovider.data.lexicalchains.LexicalChainLink;
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -22,7 +22,7 @@ import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
-import com.readerbench.processingservice.ExportDocument;
+import com.readerbench.processingservice.exportdata.ExportDocument;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

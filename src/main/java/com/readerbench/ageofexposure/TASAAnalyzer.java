@@ -17,7 +17,7 @@ package com.readerbench.ageofexposure;
 
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.semanticModels.LDA.LDA;
 import org.slf4j.Logger;

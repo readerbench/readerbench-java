@@ -18,16 +18,10 @@ package com.readerbench.coreservices.semanticModels.word2vec;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
-import org.apache.thrift.transport.TTransportException;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.semanticModels.word2vec.thrift.Word2VecService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +41,11 @@ public class Word2VecModel implements ISemanticModel {
 
     private static final List<Word2VecModel> LOADED_WORD2VEC_MODELS = new ArrayList<>();
     private static final Set<Lang> AVAILABLE_FOR = EnumSet.of(Lang.en);
-    private static final String THRIFT_IP = "141.85.227.62";
-    private static final int THRIFT_PORT = 9090;
-    
+
     private final Lang language;
     private final String path;
     private final int noDimensions;
     private final Map<Word, double[]> wordVectors;
-    
-    private static Word2VecService.Client client = null;
 
     private Word2VecModel(String path, Lang language, Map<String, List<Double>> model) {
         this.language = language;
@@ -70,7 +60,7 @@ public class Word2VecModel implements ISemanticModel {
                 .map(v -> v.length)
                 .get();
     }
-    
+
     private Word2VecModel(String path, Lang language, int dim) {
         this.language = language;
         this.path = path;
@@ -100,7 +90,7 @@ public class Word2VecModel implements ISemanticModel {
         }
         return null;
     }
-    
+
     public static Word2VecModel loadWord2Vec(String path, Lang language) {
         for (Word2VecModel w2v : LOADED_WORD2VEC_MODELS) {
             if (path.equals(w2v.getPath())) {
@@ -169,29 +159,6 @@ public class Word2VecModel implements ISemanticModel {
         return language;
     }
 
-    public static void trainModel(String inputFile) throws FileNotFoundException {
-        trainModel(inputFile, 6, 300);
-    }
-    
-    
-    public static void trainModel(String inputFile, int noEpochs, int layerSize) throws FileNotFoundException {
-        if (!inputFile.startsWith("resources")) {
-            if (inputFile.contains("resources" + File.separatorChar)) {
-                inputFile = inputFile.replaceAll(".*resources", "resources").replaceAll("[\\\\/]", "/");
-            }
-            else {
-                inputFile = inputFile.replaceAll(".*ReaderBench\\/", "resources/");
-            }
-        }
-        try {
-            getClient().trainModel(inputFile, noEpochs, layerSize);
-            client = null;
-            LOGGER.info("Input file sent for training");
-        } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-        }
-    }
-
     public static Set<Lang> getAvailableLanguages() {
         return AVAILABLE_FOR;
     }
@@ -209,23 +176,5 @@ public class Word2VecModel implements ISemanticModel {
     @Override
     public int getNoDimensions() {
         return noDimensions;
-    }
-    
-    public static Word2VecService.Client getClient() throws TTransportException {
-        if (client == null) {
-            TTransport transport = new TSocket(THRIFT_IP, THRIFT_PORT);
-            transport.open();
-            TProtocol protocol = new TBinaryProtocol(transport);
-            client = new Word2VecService.Client(protocol);
-        }
-        return client;
-    }
-    
-    public static void main(String[] args) throws FileNotFoundException {
-        
-        trainModel("C:\\Git\\ReaderBench\\resources\\corpora\\ES\\Corpus Jose Antonio\\Corpus Jose Antonio.txt");
-//        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA", Lang.en);
-//        System.out.println(w2v.getNoDimensions());
-//        System.out.println(w2v.getWordSet().size());
     }
 }

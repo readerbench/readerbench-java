@@ -188,13 +188,14 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
                 }
                 contents.setTitle(title);
             }
+            return contents;
         } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
             LOGGER.error("Error evaluating input file " + path + "!");
             LOGGER.error(ex.getMessage());
         } catch (SAXException | IOException ex) {
             LOGGER.error(ex.getMessage());
         }
-        return contents;
+        return null;
     }
 
     private void addInformationFromXML(String path, Conversation c) {

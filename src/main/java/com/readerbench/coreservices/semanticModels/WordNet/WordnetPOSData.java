@@ -15,7 +15,6 @@
  */
 package com.readerbench.coreservices.semanticModels.WordNet;
 
-import com.readerbench.datasourceprovider.data.POS;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import vu.wntools.wnsimilarity.WordnetSimilarityApi;

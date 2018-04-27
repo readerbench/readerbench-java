@@ -1,5 +1,6 @@
 package com.readerbench.processingservice;
 
+import com.readerbench.processingservice.exportdata.ExportDocument;
 import com.readerbench.coreservices.cna.CohesionGraph;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import com.readerbench.coreservices.cna.DisambiguisationGraphAndLexicalChains;

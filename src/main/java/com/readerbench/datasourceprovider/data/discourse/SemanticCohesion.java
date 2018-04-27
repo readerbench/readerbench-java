@@ -17,7 +17,7 @@ package com.readerbench.datasourceprovider.data.discourse;
 
 import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;

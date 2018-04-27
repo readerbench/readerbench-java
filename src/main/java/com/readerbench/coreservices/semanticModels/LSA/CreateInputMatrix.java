@@ -17,11 +17,11 @@ package com.readerbench.coreservices.semanticModels.LSA;
 
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
 import org.apache.mahout.math.*;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.Vector.Element;
 import com.readerbench.processingservice.PreProcessing;
+import org.apache.commons.collections4.bidimap.DualTreeBidiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,7 +24,7 @@ import com.readerbench.datasourceprovider.data.cscl.CSCLIndices;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
-import com.readerbench.datasourceprovider.data.lexicalChains.LexicalChain;
+import com.readerbench.datasourceprovider.data.lexicalchains.LexicalChain;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import com.readerbench.coreservices.commons.VectorAlgebra;

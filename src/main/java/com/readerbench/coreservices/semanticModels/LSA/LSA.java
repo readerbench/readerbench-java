@@ -54,7 +54,6 @@ public class LSA implements ISemanticModel {
     private double[][] Vtk;
     private BidiMap<Word, Integer> words;
     private Map<Word, Double> mapIdf;
-    private double[] vectorSpaceMean;
     private Map<Word, double[]> wordVectors;
 
     public static LSA loadLSA(String path, Lang language) {
@@ -74,7 +73,6 @@ public class LSA implements ISemanticModel {
             lsaLoad.Uk = (double[][]) ObjectManipulation.loadObject(path + "/U.ser");
             //update K if different dimensionality
             lsaLoad.K = lsaLoad.Uk[0].length;
-            lsaLoad.determineSpaceMean();
             lsaLoad.determineWordRepresentations();
             LOADED_LSA_SPACES.add(lsaLoad);
             return lsaLoad;
@@ -164,21 +162,6 @@ public class LSA implements ISemanticModel {
             }
         }
         return vector;
-    }
-
-    private void determineSpaceMean() {
-        // determine space median
-        vectorSpaceMean = new double[K];
-        words.keySet().stream().forEach((w) -> {
-            double idf = Math.log(mapIdf.get(w));
-            int index = words.get(w);
-            for (int i = 0; i < K; i++) {
-                vectorSpaceMean[i] += Uk[index][i] * idf;
-            }
-        });
-        for (int i = 0; i < K; i++) {
-            vectorSpaceMean[i] /= words.size();
-        }
     }
 
     private void determineWordRepresentations() {
@@ -318,14 +301,6 @@ public class LSA implements ISemanticModel {
 
     public void setMapIdf(Map<Word, Double> mapIdf) {
         this.mapIdf = mapIdf;
-    }
-
-    public double[] getVectorSpaceMean() {
-        return vectorSpaceMean;
-    }
-
-    public void setVectorSpaceMean(double[] vectorSpaceMean) {
-        this.vectorSpaceMean = vectorSpaceMean;
     }
 
     public static Set<Lang> getAvailableLanguages() {

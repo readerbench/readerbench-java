@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.datasourceprovider.data;
+package com.readerbench.datasourceprovider.data.semanticmodels;
 
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
@@ -43,7 +43,6 @@ public enum SemanticCorpora implements Serializable {
     le_monde_fr_lda("Le_Monde", Lang.fr, SimilarityType.LDA),
     le_monde_fr_word2vec("Le_Monde", Lang.fr, SimilarityType.WORD2VEC),
     
-    euro_parlamentean_nl_lda("Euro_Parlamentean", Lang.nl, SimilarityType.LDA),
     inl_nl_lda("INL", Lang.nl, SimilarityType.LDA),
     inl_nl_word2vec("INL", Lang.nl, SimilarityType.WORD2VEC),
     

@@ -24,7 +24,7 @@ import com.readerbench.datasourceprovider.data.article.ResearchArticle;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
-import com.readerbench.processingservice.ImportDocument;
+import com.readerbench.processingservice.importdata.ImportDocument;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

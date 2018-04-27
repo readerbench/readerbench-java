@@ -20,7 +20,7 @@ import com.readerbench.datasourceprovider.data.cscl.CollaborationZone;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Utterance;
 import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
-import com.readerbench.datasourceprovider.data.Formatting;
+import com.readerbench.datasourceprovider.commons.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

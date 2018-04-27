@@ -1,7 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * Copyright 2016 ReaderBench.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.readerbench.datasourceprovider.data;
 
@@ -13,25 +23,26 @@ import java.util.stream.Collectors;
 
 /**
  *
- * @author admin_licenta
+ * @author Valentin Cioaca
  */
 public class Syllable implements Serializable, Comparable<Syllable> {
+
     private final String text;
     private final List<String> symbols;
     private final boolean primaryStressed;
     private final boolean secondaryStressed;
-    
+
     public Syllable(String syll) {
         text = syll;
         symbols = new ArrayList<>(Arrays.asList(syll.trim().split("\\s+")));
         primaryStressed = syll.contains("1");
         secondaryStressed = syll.contains("2");
     }
-    
+
     public String getText() {
         return text;
     }
-    
+
     public List<String> getSymbols() {
         return symbols;
     }
@@ -39,7 +50,7 @@ public class Syllable implements Serializable, Comparable<Syllable> {
     public boolean isPrimaryStressed() {
         return primaryStressed;
     }
-    
+
     public boolean isSecondaryStressed() {
         return secondaryStressed;
     }
@@ -48,25 +59,9 @@ public class Syllable implements Serializable, Comparable<Syllable> {
     public String toString() {
         return symbols.stream().map(Object::toString).collect(Collectors.joining(" ")).trim();
     }
-    
+
     @Override
     public int compareTo(Syllable s) {
         return text.compareTo(s.getText());
-    }
-    
-    public static void main(String[] args) {
-        String syll1 = "AE1 ";
-        String syll2 = "B AH0 ";
-        String syll3 = "K AH0 S";
-        
-        Syllable s1 = new Syllable(syll1);
-        System.out.println(s1.getSymbols());
-        System.out.println(s1.toString().length());
-        Syllable s2 = new Syllable(syll2);
-        System.out.println(s2.getSymbols());
-        System.out.println(s2.toString().length());
-        Syllable s3 = new Syllable(syll3);
-        System.out.println(s3.getSymbols().size());
-        System.out.println(s3.isPrimaryStressed());
     }
 }
