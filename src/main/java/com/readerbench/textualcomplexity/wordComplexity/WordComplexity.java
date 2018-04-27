@@ -21,7 +21,7 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.coreservices.rhythm.Syllable;
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 
 import java.util.Map.Entry;
 import java.util.function.BiFunction;

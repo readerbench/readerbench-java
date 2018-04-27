@@ -5,12 +5,12 @@
  */
 package com.readerbench.textualcomplexity.readability;
 
+import com.readerbench.coreservices.nlp.wordlists.ClassesOfWords;
+import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import edu.stanford.nlp.util.Pair;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.coreservices.nlp.listOfWords.ClassesOfWords;
-import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
 
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;

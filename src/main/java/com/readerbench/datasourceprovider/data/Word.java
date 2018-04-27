@@ -15,9 +15,9 @@
  */
 package com.readerbench.datasourceprovider.data;
 
-import com.readerbench.coreservices.nlp.listOfWords.Dictionary;
-import com.readerbench.coreservices.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
+import com.readerbench.coreservices.nlp.wordlists.StopWords;
 import com.readerbench.coreservices.rhythm.SyllabifiedCMUDict;
 import com.readerbench.datasourceprovider.dao.WordDAO;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;

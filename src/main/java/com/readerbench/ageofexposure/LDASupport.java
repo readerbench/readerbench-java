@@ -17,7 +17,7 @@ package com.readerbench.ageofexposure;
 
 import cc.mallet.util.Maths;
 import com.readerbench.datasourceprovider.data.Word;
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
+import com.readerbench.coreservices.semanticmodels.lda.LDA;
 
 import java.util.*;
 import java.util.stream.Collectors;

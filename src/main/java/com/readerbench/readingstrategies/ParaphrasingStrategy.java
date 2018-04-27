@@ -21,7 +21,7 @@ import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
 import org.apache.commons.lang3.StringUtils;
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 
 import java.awt.*;
 

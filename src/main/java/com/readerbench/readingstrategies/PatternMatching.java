@@ -18,7 +18,7 @@ package com.readerbench.readingstrategies;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.document.ReadingStrategyType;
-import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
+import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
 
 import java.awt.*;
 import java.util.List;

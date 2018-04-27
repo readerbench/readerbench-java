@@ -36,13 +36,6 @@ public class Participant implements Comparable<Participant>, Serializable {
     private double textualComplexityLevel;
     private EnumMap<CSCLIndices, Double> indices;
     private Map<Entry<CSCLIndices, CSCLCriteria>, Double> longitudinalIndices;
-
-    // added by valentin.sergiu.cioaca@gmail.com
-    private double rhythmicIndexSM;         // Solomon Marcus study
-    private double freqMaxRhythmIndex;
-    private double rhythmicCoefficient;
-    private double chatEntropyForRegularity;
-
     private ParticipantGroup participantGroup;
 
     public Participant(String name, AbstractDocument d) {
@@ -58,38 +51,6 @@ public class Participant implements Comparable<Participant>, Serializable {
     public Participant(String name, String alias, AbstractDocument d) {
         this(name, d);
         this.alias = alias;
-    }
-
-    public void setRhythmicIndex(double rhythmicIndex) {
-        this.rhythmicIndexSM = rhythmicIndex;
-    }
-
-    public void setRhythmicCoefficient(double rhythmicCoefficient) {
-        this.rhythmicCoefficient = rhythmicCoefficient;
-    }
-
-    public void setChatEntropy(double chatEntropy) {
-        this.chatEntropyForRegularity = chatEntropy;
-    }
-
-    public void setFreqMaxRhythmIndex(double freqMaxId) {
-        this.freqMaxRhythmIndex = freqMaxId;
-    }
-
-    public double getRhythmicIndex() {
-        return this.rhythmicIndexSM;
-    }
-
-    public double getRhythmicCoefficient() {
-        return this.rhythmicCoefficient;
-    }
-
-    public double getChatEntropy() {
-        return this.chatEntropyForRegularity;
-    }
-
-    public double getFreqMaxRhythmIndex() {
-        return this.freqMaxRhythmIndex;
     }
 
     public String getName() {

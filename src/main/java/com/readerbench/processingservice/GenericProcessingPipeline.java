@@ -6,7 +6,7 @@ import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import com.readerbench.coreservices.cna.DisambiguisationGraphAndLexicalChains;
 import com.readerbench.coreservices.cna.Scoring;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
-import com.readerbench.coreservices.keywordMining.KeywordModeling;
+import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.nlp.parsing.SimpleParsing;
 import com.readerbench.coreservices.sentimentanalysis.SentimentAnalysis;

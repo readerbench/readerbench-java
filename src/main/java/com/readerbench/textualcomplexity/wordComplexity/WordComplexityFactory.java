@@ -15,7 +15,7 @@
  */
 package com.readerbench.textualcomplexity.wordComplexity;
 
-import com.readerbench.coreservices.semanticModels.WordNet.WordOntologyProcessing;
+import com.readerbench.coreservices.semanticmodels.wordnet.WordOntologyProcessing;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;

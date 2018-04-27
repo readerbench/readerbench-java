@@ -25,7 +25,7 @@ import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.datasourceprovider.commons.Formatting;
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 
 import java.awt.*;
 import java.util.EnumMap;

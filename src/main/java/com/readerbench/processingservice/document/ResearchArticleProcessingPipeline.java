@@ -15,7 +15,7 @@
  */
 package com.readerbench.processingservice.document;
 
-import com.readerbench.coreservices.cna.extendedCNA.ArticleContainer;
+import com.readerbench.coreservices.cna.extendedcna.ArticleContainer;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.Word;

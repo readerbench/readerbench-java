@@ -1,6 +1,6 @@
 package com.readerbench.coreservices.commons;
 
-import com.readerbench.coreservices.nlp.listOfWords.ListOfWords;
+import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,7 +5,7 @@
  */
 package com.readerbench.datasourceprovider.data;
 
-import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
 
 import java.util.ArrayList;

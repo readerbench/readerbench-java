@@ -15,7 +15,6 @@
  */
 package com.readerbench.processingservice.cscl;
 
-import com.readerbench.processingservice.cscl.CommunityUtils;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.datasourceprovider.data.cscl.*;
 import org.slf4j.Logger;
@@ -39,13 +38,12 @@ public class ClusterCommunity {
 
         List<ParticipantNormalized> clustroids = new LinkedList<>();
 
-        // sets initialization to random or "smart" node selection for maximum
-        // dispersion
+        // sets initialization to random or "smart" node selection for maximum dispersion
         // choose a random initial node
         int randomId = (int) (Math.random() * participants.size());
         ParticipantNormalized randomParticipant = participants.get(randomId);
 
-        LOGGER.info("Initializing k clustroids with best possible dispersion...");
+        LOGGER.info("Initializing k clustroids with best possible dispersion ...");
         // compute kNN++
         for (int i = 0; i < K; i++) {
             double minDist = Double.MAX_VALUE;
@@ -156,8 +154,7 @@ public class ClusterCommunity {
 
         File output = new File(pathToFile);
         try {
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
-                    32768);
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768);
 
             out.write(initialParticipants.toString() + "\n\n");
 
@@ -225,10 +222,7 @@ public class ClusterCommunity {
 
             // display groups only if 3
             if (groups.size() == 3) {
-                File output = new File(pathToFile);
-                try {
-                    BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"), 32768);
-
+                try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFile)), "UTF-8"), 32768)) {
                     double max = Double.MIN_VALUE;
                     double min = Double.MAX_VALUE;
 
@@ -282,8 +276,6 @@ public class ClusterCommunity {
                         }
                     }
                     assessParticipantsToGroup(initialParticipants, groups, central, active, peripheral);
-
-                    out.close();
                     break;
                 } catch (UnsupportedEncodingException e) {
                     LOGGER.error(e.getMessage());
@@ -293,7 +285,6 @@ public class ClusterCommunity {
                     LOGGER.error(e.getMessage());
                 }
             }
-
         }
     }
 

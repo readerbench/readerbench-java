@@ -144,8 +144,7 @@ public class ParticipantEvaluation {
             }
             int maxIndex = Collections.max(entry.getValue());
             entry.getKey().getIndices().put(CSCLIndices.RHYTHMIC_INDEX, 1.0 * maxIndex);
-            entry.getKey().getIndices().put(CSCLIndices.FREQ_MAX_INDEX, 1.0 * Collections.frequency(entry.getValue(),
-                    maxIndex) / entry.getValue().size());
+            entry.getKey().getIndices().put(CSCLIndices.FREQ_MAX_RHYTMIC_INDEX, 1.0 * Collections.frequency(entry.getValue(), maxIndex) / entry.getValue().size());
         }
     }
 

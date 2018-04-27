@@ -21,9 +21,8 @@ import com.readerbench.datasourceprovider.data.Sentence;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.data.document.Document;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.processingservice.Annotators;
-import com.readerbench.processingservice.exportdata.ExportDocument;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
+import com.readerbench.processingservice.exportdata.ExportDocumentToXML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +137,7 @@ public class GenericTasaDocument implements Comparable<GenericTasaDocument> {
 
         Document d = getDocument(false);
 
-        ExportDocument ed = new ExportDocument();
+        ExportDocumentToXML ed = new ExportDocumentToXML();
 
         ed.exportXML(d, path + "/" + C_BASE_FOLDER_NAME + gradeLevel + "/" + ID + ".xml");
         writeTxt(path);

@@ -20,8 +20,8 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.coreservices.nlp.listOfWords.ClassesOfWords;
-import com.readerbench.coreservices.nlp.listOfWords.Connectives;
+import com.readerbench.coreservices.nlp.wordlists.ClassesOfWords;
+import com.readerbench.coreservices.nlp.wordlists.Connectives;
 
 import java.util.function.Function;
 

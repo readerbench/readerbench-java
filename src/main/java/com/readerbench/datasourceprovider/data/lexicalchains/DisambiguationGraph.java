@@ -15,7 +15,7 @@
  */
 package com.readerbench.datasourceprovider.data.lexicalchains;
 
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 

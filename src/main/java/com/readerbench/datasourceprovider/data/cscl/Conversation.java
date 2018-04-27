@@ -18,15 +18,12 @@ package com.readerbench.datasourceprovider.data.cscl;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.data.discourse.SemanticChain;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -118,31 +115,6 @@ public class Conversation extends AbstractDocument {
     public double[] getExtendedParticipantBlockMovingAverage(SemanticChain voice, Participant p) {
         double[] distribution = getExtendedParticipantBlockDistribution(voice, p);
         return VectorAlgebra.movingAverage(distribution, DialogismComputations.WINDOW_SIZE, getBlockOccurrencePattern(), DialogismComputations.MAXIMUM_INTERVAL);
-    }
-
-    //todo - to be moved
-//    public void predictComplexity(String pathToComplexityModel, int[] selectedComplexityFactors) {
-//        if (pathToComplexityModel != null && selectedComplexityFactors != null) {
-//            ComputeBalancedMeasure.evaluateTextualComplexityParticipants(this, pathToComplexityModel, selectedComplexityFactors);
-//        }
-//    }
-    public void exportIM() {
-        LOGGER.info("Writing document export in IM format");
-        File output = new File(getPath().replace(".xml", "_IM.txt"));
-        try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"),
-                32768)) {
-            out.write("ID\tReference ID\tName\tTime\tText\n");
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm");
-            for (Block b : getBlocks()) {
-                if (b != null) {
-                    out.write(b.getIndex() + "\t" + ((Utterance) b).getRefBlock().getIndex() + "\t"
-                            + ((Utterance) b).getParticipant().getName() + "\t" + df.format(((Utterance) b).getTime())
-                            + "\t" + b.getText() + "\n");
-                }
-            }
-        } catch (Exception ex) {
-            LOGGER.error(ex.getMessage());
-        }
     }
 
     /**

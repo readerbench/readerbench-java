@@ -5,7 +5,7 @@
  */
 package com.readerbench.coreservices.rhythm;
 
-import com.readerbench.coreservices.nlp.listOfWords.StopWords;
+import com.readerbench.coreservices.nlp.wordlists.StopWords;
 import com.readerbench.datasourceprovider.data.Syllable;
 import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;

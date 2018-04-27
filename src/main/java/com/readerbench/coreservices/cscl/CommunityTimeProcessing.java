@@ -18,8 +18,11 @@ package com.readerbench.coreservices.cscl;
 import com.readerbench.datasourceprovider.data.cscl.CSCLCriteria;
 import com.readerbench.datasourceprovider.data.cscl.CSCLIndices;
 import com.readerbench.datasourceprovider.data.cscl.Community;
+import com.readerbench.datasourceprovider.data.cscl.Conversation;
 import com.readerbench.datasourceprovider.data.cscl.Participant;
 import java.util.AbstractMap;
+import java.util.Calendar;
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +33,46 @@ import org.slf4j.LoggerFactory;
 public class CommunityTimeProcessing {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommunityTimeProcessing.class);
+
+    public void determineSubCommunities(Community community, int monthIncrement, int dayIncrement) {
+        // create corresponding sub-communities
+        Calendar cal = Calendar.getInstance();
+        if (community.getFistContributionDate() == null) {
+            LOGGER.error("first contribution date not existing");
+            return;
+        }
+        Date startSubCommunities = community.getFistContributionDate();
+        cal.setTime(startSubCommunities);
+        cal.add(Calendar.MONTH, monthIncrement);
+        cal.add(Calendar.DATE, dayIncrement);
+        Date endSubCommunities = cal.getTime();
+
+        while (endSubCommunities.before(community.getLastContributionDate())) {
+            community.getTimeframeSubCommunities().add(extractSubCommunity(community, startSubCommunities, endSubCommunities));
+
+            // update timeStamps
+            startSubCommunities = endSubCommunities;
+            cal.add(Calendar.MONTH, monthIncrement);
+            cal.add(Calendar.DATE, dayIncrement);
+            endSubCommunities = cal.getTime();
+        }
+        // create partial community with remaining contributions
+        community.getTimeframeSubCommunities().add(extractSubCommunity(community, startSubCommunities, community.getLastContributionDate()));
+
+        LOGGER.info("Finished creating {} timeframe sub-communities spanning from {} to {}", new Object[]{community.getTimeframeSubCommunities().size(), community.getFistContributionDate(), community.getLastContributionDate()});
+    }
+
+    private Community extractSubCommunity(Community community, Date startSubCommunities, Date endSubCommunities) {
+        Community subCommunity = new Community(community.getName(), community.getLanguage(), startSubCommunities, endSubCommunities);
+        for (Conversation c : community.getConversations()) {
+            subCommunity.getConversations().add(c);
+        }
+        CommunityProcessing cp = new CommunityProcessing();
+        cp.determineParticipantContributions(subCommunity);
+        cp.determineParticipantion(subCommunity);
+        cp.computeSNAMetrics(subCommunity);
+        return subCommunity;
+    }
 
     public void modelTimeEvolution(Community community) {
         LOGGER.info("Modeling time evolution for {} participants ...", community.getParticipants().size());

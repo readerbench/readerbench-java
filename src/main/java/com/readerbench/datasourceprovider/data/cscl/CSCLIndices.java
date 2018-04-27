@@ -33,7 +33,7 @@ public enum CSCLIndices {
     NEW_THREADS_CUMULATIVE_SOCIAL_KB(false, false),
     PERSONAL_REGULARITY_ENTROPY(false, false),
     RHYTHMIC_INDEX(false, false),
-    FREQ_MAX_INDEX(false, false),
+    FREQ_MAX_RHYTMIC_INDEX(false, false),
     RHYTHMIC_COEFFICIENT(false, false);
 
     private final boolean isUsedForTimeModeling;

@@ -19,7 +19,7 @@ import com.readerbench.datasourceprovider.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
+import com.readerbench.coreservices.semanticmodels.lda.LDA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

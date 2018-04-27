@@ -4,9 +4,10 @@ import com.readerbench.coreservices.cscl.Collaboration;
 import com.readerbench.coreservices.cscl.ParticipantEvaluation;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.dialogism.DialogismMeasures;
-import com.readerbench.coreservices.keywordMining.KeywordModeling;
+import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.nlp.spellchecking.Spellchecking;
+import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.data.cscl.Conversation;
@@ -16,6 +17,8 @@ import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.GenericProcessingPipeline;
+import com.readerbench.processingservice.exportdata.ExportDocument;
+import com.readerbench.processingservice.importdata.ImportDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -24,10 +27,12 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import javax.xml.parsers.DocumentBuilder;
@@ -58,7 +63,56 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
         return c;
     }
 
-    public void processDocument(Conversation c) {
+    //process all XMLs from a folder and save corresponding serialized files
+    public List<Conversation> processConversations(String path) {
+        LOGGER.info("Processing all conversations in {}", path);
+
+        List<Conversation> conversations = new ArrayList<>();
+
+        FileFilter filter = (File f) -> f.getName().endsWith(".xml");
+        File dir = new File(path);
+        if (!dir.isDirectory()) {
+            return null;
+        }
+        File[] filesTODO = dir.listFiles(filter);
+        ImportDocument id = new ImportDocument();
+        ExportDocument ed = new ExportDocument();
+        for (File f : filesTODO) {
+            Conversation c = createConversationFromXML(f.getPath());
+            processConversation(c);
+            ed.export(c, Arrays.asList(new AbstractDocument.SaveType[]{AbstractDocument.SaveType.SERIALIZED}));
+            conversations.add(c);
+        }
+
+        return conversations;
+    }
+
+    public List<Conversation> importConversations(String path) {
+        LOGGER.info("Importing all serialized conversations in {}", path);
+
+        List<Conversation> conversations = new ArrayList<>();
+
+        FileFilter filter = (File f) -> f.getName().endsWith(".ser");
+        File dir = new File(path);
+        if (!dir.isDirectory()) {
+            return null;
+        }
+        File[] filesTODO = dir.listFiles(filter);
+        ImportDocument id = new ImportDocument();
+        for (File f : filesTODO) {
+            Conversation c;
+            try {
+                c = (Conversation) id.importSerializedDocument(f.getPath());
+                conversations.add(c);
+            } catch (IOException | ClassNotFoundException ex) {
+                LOGGER.error(ex.getMessage());
+            }
+        }
+
+        return conversations;
+    }
+
+    public void processConversation(Conversation c) {
         super.processDocument(c);
 
         determineParticipantContributions(c);
@@ -190,7 +244,6 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
             }
             return contents;
         } catch (FileNotFoundException | ParserConfigurationException | NumberFormatException | DOMException ex) {
-            LOGGER.error("Error evaluating input file " + path + "!");
             LOGGER.error(ex.getMessage());
         } catch (SAXException | IOException ex) {
             LOGGER.error(ex.getMessage());

@@ -15,9 +15,9 @@
  */
 package com.readerbench.processingservices.document;
 
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
-import com.readerbench.coreservices.semanticModels.LSA.LSA;
-import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.coreservices.semanticmodels.lda.LDA;
+import com.readerbench.coreservices.semanticmodels.lsa.LSA;
+import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
 import com.readerbench.datasourceprovider.dao.hibernate.SQLiteDatabase;
 import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
 import com.readerbench.datasourceprovider.data.document.Document;

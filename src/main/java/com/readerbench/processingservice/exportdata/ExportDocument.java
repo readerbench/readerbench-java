@@ -17,7 +17,7 @@ package com.readerbench.processingservice.exportdata;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.cscl.Collaboration;
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
+import com.readerbench.coreservices.semanticmodels.lda.LDA;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.Block;
 import com.readerbench.datasourceprovider.commons.Formatting;

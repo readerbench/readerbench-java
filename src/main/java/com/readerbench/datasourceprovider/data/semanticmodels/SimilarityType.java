@@ -15,10 +15,10 @@
  */
 package com.readerbench.datasourceprovider.data.semanticmodels;
 
-import com.readerbench.coreservices.semanticModels.LDA.LDA;
-import com.readerbench.coreservices.semanticModels.LSA.LSA;
-import com.readerbench.coreservices.semanticModels.WordNet.OntologySupport;
-import com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel;
+import com.readerbench.coreservices.semanticmodels.lda.LDA;
+import com.readerbench.coreservices.semanticmodels.lsa.LSA;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.ArrayList;
@@ -35,8 +35,8 @@ public enum SimilarityType {
     LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
     WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
     PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages, false),
-    LSA("LSA", "Cosine similarity in LSA vector space", com.readerbench.coreservices.semanticModels.LSA.LSA::getAvailableLanguages, true),
-    LDA("LDA", "Inverse JSH in LDA probability distribution", com.readerbench.coreservices.semanticModels.LDA.LDA::getAvailableLanguages, true),
+    LSA("LSA", "Cosine similarity in LSA vector space", com.readerbench.coreservices.semanticmodels.lsa.LSA::getAvailableLanguages, true),
+    LDA("LDA", "Inverse JSH in LDA probability distribution", com.readerbench.coreservices.semanticmodels.lda.LDA::getAvailableLanguages, true),
     WORD2VEC("word2vec", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
 
     private final String acronym;
@@ -74,15 +74,15 @@ public enum SimilarityType {
             for (Map.Entry<SimilarityType, String> e : modelPaths.entrySet()) {
                 switch (e.getKey()) {
                     case LDA:
-                        LDA lda = com.readerbench.coreservices.semanticModels.LDA.LDA.loadLDA(e.getValue(), lang);
+                        LDA lda = com.readerbench.coreservices.semanticmodels.lda.LDA.loadLDA(e.getValue(), lang);
                         models.add(lda);
                         break;
                     case LSA:
-                        LSA lsa = com.readerbench.coreservices.semanticModels.LSA.LSA.loadLSA(e.getValue(), lang);
+                        LSA lsa = com.readerbench.coreservices.semanticmodels.lsa.LSA.loadLSA(e.getValue(), lang);
                         models.add(lsa);
                         break;
                     case WORD2VEC:
-                        Word2VecModel w2v = com.readerbench.coreservices.semanticModels.word2vec.Word2VecModel.loadWord2Vec(e.getValue(), lang);
+                        Word2VecModel w2v = com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel.loadWord2Vec(e.getValue(), lang);
                         models.add(w2v);
                         break;
                 }
