@@ -15,7 +15,8 @@
  */
 package com.readerbench.coreservices.keywordmining;
 
-import com.readerbench.coreservices.semanticmodels.WordOntologyProcessing;
+import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
+import com.readerbench.coreservices.semanticmodels.wordnet.WordOntologyProcessing;
 import com.readerbench.datasourceprovider.data.AbstractDocument;
 import com.readerbench.datasourceprovider.data.AnalysisElement;
 import com.readerbench.datasourceprovider.data.NGram;
@@ -24,7 +25,6 @@ import com.readerbench.datasourceprovider.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.data.keywordmining.Keyword;
 import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
 import com.readerbench.datasourceprovider.data.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.semanticmodels.OntologySupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
