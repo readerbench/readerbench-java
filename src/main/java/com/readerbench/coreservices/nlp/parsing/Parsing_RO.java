@@ -49,14 +49,15 @@ public class Parsing_RO extends Parsing {
     public StanfordCoreNLP getPipeline() {
         return pipeline;
     }
+}
 
-    class ParsingParams_RO extends Properties {
+class ParsingParams_RO extends Properties {
 
-        private static final long serialVersionUID = -161579346323407322L;
+    private static final long serialVersionUID = -161579346323407322L;
 
-        public ParsingParams_RO() {
-            super();
-            this.put("annotators", "");
-        }
+    public ParsingParams_RO() {
+        super();
+        this.put("annotators", "");
+        this.put("ner.useSUTime", "0");
     }
 }

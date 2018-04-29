@@ -52,15 +52,16 @@ public class Parsing_NL extends Parsing {
         }
         return pipeline;
     }
-
-    class ParsingParams_NL extends Properties {
-
-        private static final long serialVersionUID = -161579346323407322L;
-
-        public ParsingParams_NL() {
-            super();
-            this.put("annotators", "");
-        }
-    }
-
 }
+
+class ParsingParams_NL extends Properties {
+
+    private static final long serialVersionUID = -161579346323407322L;
+
+    public ParsingParams_NL() {
+        super();
+        this.put("annotators", "");
+        this.put("ner.useSUTime", "0");
+    }
+}
+

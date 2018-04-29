@@ -56,5 +56,6 @@ class ParsingParams_EN extends Properties {
         this.put("annotators", "tokenize, ssplit, pos,parse, lemma,depparse, ner, mention, coref, sentiment");
         this.put("coref.md.type", "dependency");
         this.put("parse.maxlen", "100");
+        this.put("ner.useSUTime", "0");
     }
 }

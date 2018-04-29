@@ -32,6 +32,6 @@ public class ConversationProcessingPipelineTest extends DocumentProcessingPipeli
         ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(lang, models, annotators);
         Conversation c = pipeline.createConversationFromXML("src/test/resources/sample_chat_en.xml");
         pipeline.processConversation(c);
-        Assert.assertEquals(300, c.getNoBlocks());
+        Assert.assertEquals(304, c.getNoBlocks());
     }
 }
