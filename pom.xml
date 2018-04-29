@@ -440,7 +440,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven.surefire.version}</version>
                 <configuration>
-                    <argLine>-Xmx15G -Xms1G -Xss1G</argLine>
+                    <argLine>-Xmx6G -Xms1G -Xss1G</argLine>
                 </configuration>
             </plugin>
         </plugins>
