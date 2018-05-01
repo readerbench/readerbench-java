@@ -15,7 +15,7 @@
  */
 package com.readerbench.comprehensionmodel.utils;
 
-import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.coreservices.data.Word;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeType;

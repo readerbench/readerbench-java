@@ -15,10 +15,10 @@
  */
 package com.readerbench.comprehensionmodel.utils.distanceStrategies.utils;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.Block;
-import com.readerbench.datasourceprovider.data.Sentence;
-import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.coreservices.data.Block;
+import com.readerbench.coreservices.data.Sentence;
+import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.coref.data.CorefChain;
@@ -107,7 +107,7 @@ public class CMCorefIndexer {
 
     private Word convertToWord(CoreLabel node) {
         String wordStr = node.word().toLowerCase();
-        Word word = Word.getWordFromConcept(wordStr, lang);
+        Word word = Parsing.getWordFromConcept(wordStr, lang);
         word.setLemma(StaticLemmatizer.lemmaStatic(wordStr, lang));
         word.setPOS("");
         if (node.tag() != null && node.tag().length() >= 2) {

@@ -15,8 +15,9 @@
  */
 package com.readerbench.comprehensionmodel.utils;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.coreservices.nlp.parsing.Parsing;
+import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.ling.IndexedWord;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
@@ -30,7 +31,7 @@ public class CMUtils {
 
     public Word convertToWord(IndexedWord node, Lang lang) {
         String wordStr = node.word().toLowerCase();
-        Word word = Word.getWordFromConcept(wordStr, lang);
+        Word word = Parsing.getWordFromConcept(wordStr, lang);
         word.setLemma(StaticLemmatizer.lemmaStatic(wordStr, lang));
         word.setPOS("");
         if (node.tag() != null && node.tag().length() >= 2) {
@@ -40,7 +41,7 @@ public class CMUtils {
     }
 
     public Word convertStringToWord(String wordString, Lang lang) {
-        Word word = Word.getWordFromConcept(wordString, lang);
+        Word word = Parsing.getWordFromConcept(wordString, lang);
         word.setLemma(StaticLemmatizer.lemmaStatic(wordString, lang));
         word.setPOS("");
         return word;

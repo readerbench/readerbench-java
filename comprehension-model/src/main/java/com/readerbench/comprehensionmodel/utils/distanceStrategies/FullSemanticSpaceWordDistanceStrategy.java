@@ -17,11 +17,11 @@ package com.readerbench.comprehensionmodel.utils.distanceStrategies;
 
 import com.readerbench.comprehensionmodel.utils.CMUtils;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
-import com.readerbench.coreservices.semanticModels.SpaceStatistics;
-import com.readerbench.coreservices.semanticModels.utils.WordSimilarity;
-import com.readerbench.coreservices.semanticModels.utils.WordSimilarityContainer;
-import com.readerbench.datasourceprovider.data.Word;
-import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.coreservices.data.Word;
+import com.readerbench.coreservices.semanticmodels.SpaceStatistics;
+import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.utils.WordSimilarity;
+import com.readerbench.coreservices.semanticmodels.utils.WordSimilarityContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,14 +15,14 @@
  */
 package com.readerbench.comprehensionmodel.utils.indexer;
 
-import com.readerbench.datasourceprovider.data.AbstractDocument;
-import com.readerbench.datasourceprovider.data.AbstractDocumentTemplate;
-import com.readerbench.datasourceprovider.data.Sentence;
-import com.readerbench.datasourceprovider.data.document.Document;
+import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.coreservices.data.AbstractDocumentTemplate;
+import com.readerbench.coreservices.data.Sentence;
+import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMCorefIndexer;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMSyntacticGraph;
-import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -43,15 +43,7 @@ public class CMIndexer {
     public CMIndexer(String text, ISemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;
-        this.loadDocument();
         this.indexSyntacticDistances();
-    }
-
-    private void loadDocument() {
-        AbstractDocumentTemplate contents = AbstractDocumentTemplate.getDocumentModel(this.text);
-        List<ISemanticModel> models = new ArrayList<>();
-        models.add(semanticModel);
-        this.document = new Document(contents, models, semanticModel.getLanguage(), true);
     }
 
     private void indexSyntacticDistances() {

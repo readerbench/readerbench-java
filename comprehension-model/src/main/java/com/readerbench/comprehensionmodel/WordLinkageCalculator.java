@@ -1,4 +1,4 @@
-/* 
+/**
  * Copyright 2016 ReaderBench.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,12 @@
 package com.readerbench.comprehensionmodel;
 
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.*;
-import com.readerbench.datasourceprovider.data.AbstractDocument;
+import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.comprehensionmodel.utils.AoAMetric;
 import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
-import com.readerbench.coreservices.semanticModels.LSA.LSA;
-import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.coreservices.data.Word;
+import com.readerbench.coreservices.semanticmodels.lsa.LSA;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,102 +173,9 @@ public class WordLinkageCalculator {
         return aoaWords;
     }
 
-    public static void analyzeFiles() {
-        LSA semanticModel = LSA.loadLSA("resources/config/EN/LSA/COCA_newspaper", Lang.en);
-//        LSA semanticModel = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/COCA_newspaper", Lang.en);
-        double threshold = 0.3;
-
-//        String filePath = "resources/in/essays/essays_FYP_en/texts/";
-//        String saveLocation = "resources/in/essays/essays_FYP_en/";
-        
-//        String filePath = "resources/in/cohesion/Archive/texts/";
-//        String saveLocation = "resources/in/cohesion/Archive/";
-
-//        String filePath = "resources/in/cohesion/CohMetrix/texts/";
-//        String saveLocation = "resources/in/cohesion/CohMetrix/";
-        
-//        String filePath = "resources/in/cohesion/msu timed/posttest essays fall 2009/";
-//        String saveLocation = "resources/in/cohesion/msu timed/";
-
-        String filePath = "resources/in/cohesion/msu timed/pretest spring 2010/1113 pretest essays/";
-        String saveLocation = "resources/in/cohesion/msu timed/pretest spring 2010/";
-
-        try {
-            Map<String, List<AoAMetric>> scoreMap = new HashMap();
-            Map<String, CMGraphStatistics> graphStatisticsMap = new HashMap();
-            
-            String[] aoaFiles = {"Bird.csv", "Bristol.csv", "Cortese.csv", "Kuperman.csv", "Shock.csv"};
-
-            File folder = new File(filePath);
-            FileFilter filter = (File f) -> f.getName().endsWith(".txt");
-            File[] files = folder.listFiles(filter);
-            for (File file : files) {
-                LOGGER.info("Analyzing + " + file.getName() + "  ...");
-                
-                String text = readFile(file.getPath());
-                WordLinkageCalculator calculator = new WordLinkageCalculator(text, semanticModel, threshold);
-                
-                List<AoAMetric> metricList = new ArrayList();
-                for(String aoaFile : aoaFiles) {
-                    AoAMetric metric = calculator.getScore(aoaFile);
-                    metricList.add(metric);
-                }
-                
-                String fileKey = file.getName().replace(".txt", "");
-                scoreMap.put(fileKey, metricList);
-                
-                CMGraphStatistics statistics = calculator.graph.getGraphStatistics();
-                graphStatisticsMap.put(fileKey, statistics);
-            }
-            
-            BufferedWriter out = new BufferedWriter(new FileWriter(saveLocation + "/measurements_word_linkage.csv", true));
-            StringBuilder concat = new StringBuilder();
-            concat.append("File");
-            for(String aoaFile : aoaFiles) {
-                String scoreDesc = aoaFile.replace(".csv", "");
-                concat.append("," + scoreDesc + " Avg," + scoreDesc + " Degree Avg," + scoreDesc + " Idf Avg");
-            }
-            concat.append(", Density, Connected Components Count, Average Clustering Coefficient, Betweenness, Closeness, Eccentricity, Diameter, Average Shortest Path Length");
-            concat.append("\n");
-                
-            scoreMap.entrySet().stream().forEach(score -> {
-                String fileName = score.getKey();
-                List<AoAMetric> metricList = score.getValue();
-                
-                concat.append(fileName);
-                metricList.forEach((metric) -> {
-                    concat.append(",").append(metric.getAvg()).append(",").append(metric.getWeightedAvg()).append(",").append(metric.getWeightedIdfAvg());
-                });
-                
-                CMGraphStatistics statistics = graphStatisticsMap.get(fileName);
-                concat.append(",").append(statistics.getDensity());
-                concat.append(",").append(statistics.getConnectedComponentsCount());
-                concat.append(",").append(statistics.getAverageClusteringCoefficient());
-                concat.append(",").append(statistics.getBetweenness());
-                concat.append(",").append(statistics.getCloseness());
-                concat.append(",").append(statistics.getEccentricity());
-                concat.append(",").append(statistics.getDiameter());
-                concat.append(",").append(statistics.getPathLength());
-                
-                concat.append("\n");
-            });
-            try {
-                out.write(concat.toString());
-            } catch (IOException ex) {
-                LOGGER.error(ex.getMessage());
-            }
-            out.close();
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage())
-        }
-    }
-
     static String readFile(String path) throws IOException {
         byte[] encoded = Files.readAllBytes(Paths.get(path));
         return new String(encoded, StandardCharsets.UTF_8);
     }
 
-    public static void main(String[] args) {
-        WordLinkageCalculator.analyzeFiles();
-    }
 }

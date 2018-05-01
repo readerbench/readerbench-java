@@ -20,7 +20,7 @@ import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeDO;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMNodeType;
-import com.readerbench.datasourceprovider.data.Word;
+import com.readerbench.coreservices.data.Word;
 
 import java.util.ArrayList;
 import java.util.List;

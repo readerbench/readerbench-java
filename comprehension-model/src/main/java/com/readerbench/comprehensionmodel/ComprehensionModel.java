@@ -20,8 +20,8 @@ import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.pageRank.PageRank;
-import com.readerbench.datasourceprovider.data.Sentence;
-import com.readerbench.datasourceprovider.data.semanticmodels.ISemanticModel;
+import com.readerbench.coreservices.data.Sentence;
+import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 
 public class ComprehensionModel {
 
