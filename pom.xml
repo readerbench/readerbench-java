@@ -52,6 +52,7 @@
         <module>reading-strategies</module>
         <module>processing-service</module>
         <module>core-services</module>
+        <module>parallel-processing-service</module>
     </modules>
 
     <dependencyManagement>
