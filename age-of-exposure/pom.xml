@@ -11,7 +11,7 @@
     </parent>
     <artifactId>age-of-exposure</artifactId>
     <packaging>jar</packaging>
-    <name>Age of Exposure Module</name>
+    <name>RB - Age of Exposure Module</name>
 
     <properties>
         <commons-math3.version>3.6.1</commons-math3.version>

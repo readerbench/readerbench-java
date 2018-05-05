@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>parallel-processing-service</artifactId>
-    <name>Parallel Processing Service Module</name>
+    <name>RB - Parallel Processing Service Module</name>
 
     <properties>
         <akka.version>2.5.2</akka.version>

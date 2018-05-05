@@ -7,7 +7,7 @@
     <artifactId>readerbench-nlp</artifactId>
     <version>4.0.0</version>
     <packaging>pom</packaging>
-    <name>ReaderBench Parent Project</name>
+    <name>RB - ReaderBench Parent Project</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

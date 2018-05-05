@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>core-services</artifactId>
-    <name>Readerbench Core Module</name>
+    <name>RB - Core Services Module</name>
 
     <dependencies>
         <dependency>
