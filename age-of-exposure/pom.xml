@@ -23,10 +23,5 @@
             <artifactId>processing-service</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.readerbench</groupId>
-            <artifactId>datasource-provider</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 </project>

@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.processingservice.cscl;
+package cscl;
 
 import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.processingservice.document.DocumentProcessingPipelineTest;
+import document.DocumentProcessingPipelineTest;
+import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.processingservice.document;
+package document;
 
 import com.readerbench.coreservices.commons.SQLiteDatabase;
 import com.readerbench.coreservices.semanticmodels.lsa.LSA;
@@ -23,6 +23,7 @@ import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
+import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 
 import java.util.ArrayList;
 import java.util.Arrays;
