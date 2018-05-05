@@ -1,5 +1,21 @@
 #folders synced via OwnCloud
-resources
+/resources
+!/datasource-provider/src/main/resources
+!/datasource-provider/src/test/resources
+!/age-of-exposur/src/main/resources
+!/age-of-exposur/src/test/resources
+!/comprehension-model/src/main/resources
+!/comprehension-model/src/test/resources
+!/core-service/src/main/resources
+!/core-servicer/src/test/resources
+!/parallel-processing-service/src/main/resources
+!/parallel-processing-service/src/test/resources
+!/processing-service/src/main/resources
+!/processing-service/src/test/resources
+!/reading-strategies/src/main/resources
+!/reading-strategies/src/test/resources
+!/textual-complexity/src/main/resources
+!/textual-complexity/src/test/resources
 
 # Output sources #
 out
