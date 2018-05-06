@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author ReaderBench
  */
 public class ConversationRestructuringSupport {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConversationRestructuringSupport.class);
 
     private Map<Integer, Integer> initialMapping;
@@ -67,7 +67,7 @@ public class ConversationRestructuringSupport {
                 if (crt.getTime() == null || prev.getTime() == null) {
                     continue;
                 }
-                long diffMinutes = (crt.getTime().getTime() - prev.getTime().getTime()) / (60 * 1000);
+                double diffMinutes = Math.floor(((crt.getTime().getTime() - prev.getTime().getTime()) / 1000) / 60);
 
                 //check if an explicit ref exists; in that case, perform merge only if link is between crt and previous contribution
                 boolean explicitRefCriterion = true;

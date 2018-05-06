@@ -5,21 +5,14 @@ import com.readerbench.coreservices.cscl.ParticipantEvaluation;
 import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.cscl.data.Participant;
 import com.readerbench.coreservices.cscl.data.Utterance;
-import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.data.AbstractDocumentTemplate;
-import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.dialogism.DialogismMeasures;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.nlp.spellchecking.Spellchecking;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.Block;
-import com.readerbench.coreservices.data.*;
-import com.readerbench.coreservices.data.*;
-import com.readerbench.coreservices.data.*;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
@@ -61,11 +54,16 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
         super(lang, models, annotators);
     }
 
-    //consider the usage of the NLP pipeline when creating a new document
-    public Conversation createConversationFromXML(String path) {
-        Conversation c = new Conversation(path, getModels(), getLanguage());
-        AbstractDocumentTemplate docTmp = extractConvTemplateFromXML(path);
+    //consider the usage of the NLP pipeline when creating a new conversation
+    public Conversation createConversationFromTemplate(AbstractDocumentTemplate docTmp) {
+        Conversation c = new Conversation(null, getModels(), getLanguage());
         Parsing.getParser(getLanguage()).parseDoc(docTmp, c, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        return c;
+    }
+
+    //consider the usage of the NLP pipeline when creating a new conversation
+    public Conversation createConversationFromXML(String path) {
+        Conversation c = createConversationFromTemplate(extractConvTemplateFromXML(path));
         addInformationFromXML(path, c);
         return c;
     }
@@ -170,7 +168,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
         }
     }
 
-    private AbstractDocumentTemplate extractConvTemplateFromXML(String path) {
+    public AbstractDocumentTemplate extractConvTemplateFromXML(String path) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         // determine contents

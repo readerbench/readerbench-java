@@ -36,40 +36,20 @@ public class ExportCommunityToES {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportCommunityToES.class);
 
-    /**
-     * Generate participants view for communities
-     *
-     * @param community
-     * @param week
-     * @return
-     */
-    public JSONArray generateParticipantViewSubCommunities(Community community, Integer week) {
-        int i = 1;
-        JSONArray participantsSubCommunities = new JSONArray();
-        for (Community subCommunity : community.getTimeframeSubCommunities()) {
-            JSONObject participantSubCommunity = generateParticipantViewD3(subCommunity, week);
+    private final Community community;
 
-            JSONObject subCommunityJson = new JSONObject();
-            subCommunityJson.put("week", i);
-            subCommunityJson.put("participants", participantSubCommunity);
-
-            participantsSubCommunities.add(subCommunityJson);
-
-            i++;
-        }
-
-        return participantsSubCommunities;
+    public ExportCommunityToES(Community community) {
+        this.community = community;
     }
 
     /**
      * Generate json file with all participants for graph representation (using
      * d3.js)
      *
-     * @param community
      * @param week
      * @return
      */
-    public JSONObject generateParticipantViewD3(Community community, Integer week) {
+    public JSONObject generateParticipantViewD3(Integer week) {
 
         JSONObject jsonObject = new JSONObject();
 
@@ -127,11 +107,10 @@ public class ExportCommunityToES {
     /**
      * Create json object for hierarchical edge bundling
      *
-     * @param community
      * @param week - week
      * @return
      */
-    public JSONObject generateHierarchicalEdgeBundling(Community community, Integer week) {
+    public JSONObject generateHierarchicalEdgeBundling(Integer week) {
         JSONObject finalResult = new JSONObject();
         JSONArray edgeBundling = new JSONArray();
 
@@ -178,11 +157,10 @@ public class ExportCommunityToES {
     /**
      * Write individual stats to Elasticsearch
      *
-     * @param community
      * @param week
      * @return
      */
-    public List<Map<String, Object>> writeIndividualStatsToElasticsearch(Community community, Integer week) {
+    public List<Map<String, Object>> writeIndividualStatsToElasticsearch(Integer week) {
         LOGGER.info("Writing Individual Stats to Elasticsearch");
         List<Map<String, Object>> participantsStats = new ArrayList<>();
 

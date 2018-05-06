@@ -10,7 +10,7 @@ import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.parallelprocessingservice.actors.AkkaActorSystem;
+import com.readerbench.parallelprocessingservice.actors.document.DocumentActorSystem;
 import com.readerbench.parallelprocessingservice.messages.ProcessDocumentsInitMessage;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
@@ -27,42 +27,40 @@ import scala.concurrent.duration.Duration;
  *
  * @author Dragos
  */
-public class ParallelProcessingPipeline {
-    
-    private static final Logger LOGGER = LoggerFactory.getLogger(ParallelProcessingPipeline.class);
-    
-    public List<Document> loadXMLsFromDirectory(String directoryPath, Lang lang,
-                                                List<ISemanticModel> models, List<Annotators> annotators) {
-        DocumentProcessingPipeline normalPipeline = new DocumentProcessingPipeline(lang, models, annotators);
+public class ParallelDocumentProcessingPipeline {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParallelDocumentProcessingPipeline.class);
+
+    public List<Document> loadXMLsFromDirectory(String directoryPath, Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
         List<AbstractDocumentTemplate> templates = new ArrayList<>();
-        
+
         File folder = new File(directoryPath);
-        File [] listOfFiles = folder.listFiles();
-        
+        File[] listOfFiles = folder.listFiles();
+
         for (int i = 0; i < listOfFiles.length; ++i) {
             if (listOfFiles[i].isFile()) {
-                AbstractDocumentTemplate template = normalPipeline.extractDocTemplateFromXML(
+                AbstractDocumentTemplate template = pipeline.extractDocTemplateFromXML(
                         directoryPath + "/" + listOfFiles[i].getName());
                 templates.add(template);
             }
         }
-        
+
         ProcessDocumentsInitMessage initMsg = new ProcessDocumentsInitMessage(templates, lang, models, annotators);
 
-        Future<Object> future = Patterns.ask(AkkaActorSystem.PROCESSING_MASTER, initMsg, AkkaActorSystem.TIMEOUT * 100);
-        
+        Future<Object> future = Patterns.ask(DocumentActorSystem.PROCESSING_MASTER, initMsg, DocumentActorSystem.TIMEOUT * 100);
+
         List<Document> listOfProcessedDocuments = null;
         try {
             Object result = Await.result(future, Duration.Inf());
             listOfProcessedDocuments = (List<Document>) result;
+        } catch (Exception e) {
+            LOGGER.error("Error in processing the documents in a parallel manner. Error message: " + e.getMessage());
         }
-        catch (Exception e) {
-            LOGGER.error("Error in processing the document in a parallel manner. Error message: " + e.getMessage());
-        }
-        
-        AkkaActorSystem.ACTOR_SYSTEM.terminate();
-        
+
+        DocumentActorSystem.ACTOR_SYSTEM.terminate();
+
         return listOfProcessedDocuments;
     }
-    
+
 }

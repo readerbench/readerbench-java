@@ -34,14 +34,8 @@ public class Summary extends Metacognition {
     public void setCohesion(SemanticCohesion cohesion) {
         this.cohesion = cohesion;
     }
-    
+
     public SemanticCohesion getCohesion() {
         return cohesion;
-    }
-    
-    
-
-    public void computeAll(boolean computeDialogism, boolean useBigrams) {
-        
     }
 }

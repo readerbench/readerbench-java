@@ -43,7 +43,7 @@ public class CommunityProcessingPipeline extends ConversationProcessingPipeline 
     private static final int MIN_NO_CONTRIBUTIONS = 3;
     private static final int MIN_NO_CONTENT_WORDS = 50;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Community.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommunityProcessingPipeline.class);
 
     public CommunityProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);

@@ -40,20 +40,26 @@ public class SummaryProcessingPipeline extends MetacognitionProcessingPipeline {
         super(lang, models, annotators);
     }
 
-    public Summary createSummaryFromXML(String path, Document initialReadingMaterial) {
-        Summary s = new Summary(path, initialReadingMaterial);
-        AbstractDocumentTemplate docTmp = extractDocumentContent(path, "p");
+    public Summary createSummaryFromTemplate(AbstractDocumentTemplate docTmp, Document initialReadingMaterial) {
         LOGGER.info("Building internal representation ...");
+        Summary s = new Summary(null, initialReadingMaterial);
         Parsing.getParser(getLanguage()).parseDoc(docTmp, s, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
-        addInformationFromXML(path, s);
         s.setCohesion(new SemanticCohesion(s, initialReadingMaterial));
+        return s;
+    }
+
+    public Summary createSummaryFromXML(String path, Document initialReadingMaterial) {
+        AbstractDocumentTemplate docTmp = extractDocumentContent(path, "p");
+        Summary s = createSummaryFromTemplate(docTmp, initialReadingMaterial);
+        s.setPath(path);
+        addInformationFromXML(path, s);
         return s;
     }
 
     public void processMetacognition(Summary s) {
         processDocument(s);
         ReadingStrategies.detReadingStrategies(s);
-        
+
         determineCohesion(s);
         LOGGER.info("Finished processing self-explanations ...");
     }

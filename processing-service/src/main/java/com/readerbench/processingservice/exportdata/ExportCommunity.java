@@ -39,14 +39,19 @@ public class ExportCommunity {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExportCommunity.class);
 
+    private final Community community;
+
+    public ExportCommunity(Community community) {
+        this.community = community;
+    }
+
     /**
      * Export Individual Stats and Initiation
      *
-     * @param community
      * @param pathToFileIndividualStats - path to file with Individual State
      * @param pathToFileInitiation - path to file with Initiation
      */
-    public void exportIndividualStatsAndInitiation(Community community, String pathToFileIndividualStats, String pathToFileInitiation) {
+    public void exportIndividualStatsAndInitiation(String pathToFileIndividualStats, String pathToFileInitiation) {
         LOGGER.info("Writing Individual Stats and Initiation export");
         // print participant statistics
         try (BufferedWriter outIndividualStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(pathToFileIndividualStats)), "UTF-8"), 32768);
@@ -92,10 +97,9 @@ public class ExportCommunity {
     /**
      * Export Textual Complexity
      *
-     * @param community
      * @param pathToFileTextualComplexity - path to file
      */
-    public void exportTextualComplexity(Community community, String pathToFileTextualComplexity) {
+    public void exportTextualComplexity(String pathToFileTextualComplexity) {
         LOGGER.info("Writing Textual Complexity export");
         try (BufferedWriter outTextualComplexity = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileTextualComplexity)), "UTF-8"), 32768)) {
@@ -132,10 +136,9 @@ public class ExportCommunity {
     /**
      * Export Time Analysis
      *
-     * @param community
      * @param pathToFileTimeAnalysis
      */
-    public void exportTimeAnalysis(Community community, String pathToFileTimeAnalysis) {
+    public void exportTimeAnalysis(String pathToFileTimeAnalysis) {
         LOGGER.info("Writing Time Analysis export");
         try (BufferedWriter outTimeAnalysis = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileTimeAnalysis)), "UTF-8"), 32768)) {
@@ -177,10 +180,9 @@ public class ExportCommunity {
     /**
      * Export discussed topics
      *
-     * @param community
      * @param pathToFileDiscussedTopics - path to file
      */
-    public void exportDiscussedTopics(Community community, String pathToFileDiscussedTopics) {
+    public void exportDiscussedTopics(String pathToFileDiscussedTopics) {
         LOGGER.info("Writing Discussed Topics export");
         try (BufferedWriter outDiscussedTopics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFileDiscussedTopics)), "UTF-8"), 32768)) {
@@ -202,13 +204,12 @@ public class ExportCommunity {
     }
 
     /**
-     * // * Export individual threads statistics // * // * @param pathToFile -
-     * path to file //
+     * // * Export individual threads statistics // * // * @param pathToFile
+     * -path to file //
      *
-     * @param community
      * @param pathToFile
      */
-    public void exportIndividualThreadStatistics(Community community, String pathToFile) {
+    public void exportIndividualThreadStatistics(String pathToFile) {
         LOGGER.info("Writing Individual Threads Statistics export");
         try (BufferedWriter outIndividualThreadsStatistics = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(
                 new File(pathToFile)), "UTF-8"), 32768)) {

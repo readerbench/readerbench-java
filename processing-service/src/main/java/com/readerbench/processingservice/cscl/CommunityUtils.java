@@ -20,10 +20,6 @@ import com.readerbench.coreservices.cscl.data.CSCLIndices;
 import com.readerbench.coreservices.cscl.data.Community;
 import com.readerbench.coreservices.cscl.data.Participant;
 import com.readerbench.coreservices.cscl.data.ParticipantNormalized;
-import com.readerbench.coreservices.data.*;
-import com.readerbench.coreservices.data.*;
-import com.readerbench.coreservices.data.*;
-import com.readerbench.coreservices.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
@@ -41,7 +37,7 @@ public class CommunityUtils {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public static void hierarchicalClustering(Community community, String pathToFile, String rootPath) {
+    public static void hierarchicalClustering(Community community, String pathToFile) {
         List<Participant> filteredParticipants = CommunityUtils.filterParticipants(community);
         ClusterCommunity.performAglomerativeClusteringForCSCL(filteredParticipants, pathToFile);
         LOGGER.info("Clustering finished");

@@ -16,6 +16,7 @@
         <json-simple.version>1.1.1</json-simple.version>
         <com.readerbench.solr.version>1.0.6</com.readerbench.solr.version>
         <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
+        <elasticsearch.version>5.4.0</elasticsearch.version>
     </properties>
 
     <build>
@@ -32,18 +33,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <version>${coreNLP.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!-- Hibernate SQLITE -->
         <dependency>
             <groupId>org.xerial</groupId>
@@ -55,7 +44,7 @@
             <artifactId>c3p0</artifactId>
             <version>${c3p0.version}</version>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
             <version>${hibernate.version}</version>
@@ -72,11 +61,16 @@
             <artifactId>json-simple</artifactId>
             <version>${json-simple.version}</version>
         </dependency>
-        <!-- SolrReaderBench -->
+        <!-- ElasticSearch -->
         <dependency>
-            <groupId>com.readerbench</groupId>
-            <artifactId>solr</artifactId>
-            <version>${com.readerbench.solr.version}</version>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>${elasticsearch.version}</version>
         </dependency>
     </dependencies>
 </project>

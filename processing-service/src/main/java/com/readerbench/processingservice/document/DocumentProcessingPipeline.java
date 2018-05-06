@@ -17,7 +17,6 @@ package com.readerbench.processingservice.document;
 
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
-import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
@@ -46,9 +45,9 @@ import org.xml.sax.SAXException;
  * @author ReaderBench
  */
 public class DocumentProcessingPipeline extends GenericProcessingPipeline {
-
+    
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentProcessingPipeline.class);
-
+    
     public DocumentProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
@@ -62,13 +61,12 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
 
     //consider the usage of the NLP pipeline when creating a new document
     public Document createDocumentFromXML(String path) {
-        Document d = new Document(path, getModels(), getLanguage());
-        AbstractDocumentTemplate docTmp = extractDocTemplateFromXML(path);
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        Document d = createDocumentFromTemplate(extractDocTemplateFromXML(path));
+        d.setPath(path);
         addInformationFromXML(path, d);
         return d;
     }
-
+    
     public AbstractDocumentTemplate extractDocTemplateFromXML(String path) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -76,7 +74,7 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
             input.setEncoding("UTF-8");
             DocumentBuilder db = dbf.newDocumentBuilder();
             org.w3c.dom.Document dom = db.parse(input);
-
+            
             Element root = dom.getDocumentElement();
             return extractDocTemplateFromXML(root);
         } catch (ParserConfigurationException | SAXException | IOException e) {
@@ -85,7 +83,7 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
         }
         return null;
     }
-
+    
     public AbstractDocumentTemplate extractDocTemplateFromXML(Element root) {
         // parse the XML file
         Element el;
@@ -127,7 +125,7 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
         }
         return contents;
     }
-
+    
     public void addInformationFromXML(String path, Document d) {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -135,7 +133,7 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
             input.setEncoding("UTF-8");
             DocumentBuilder db = dbf.newDocumentBuilder();
             org.w3c.dom.Document dom = db.parse(input);
-
+            
             Element root = dom.getDocumentElement();
             // parse the XML file
             Element el;
