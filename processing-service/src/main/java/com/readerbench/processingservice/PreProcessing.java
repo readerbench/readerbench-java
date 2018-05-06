@@ -15,10 +15,6 @@
  */
 package com.readerbench.processingservice;
 
-import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.data.Block;
-import com.readerbench.coreservices.data.Sentence;
-import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
