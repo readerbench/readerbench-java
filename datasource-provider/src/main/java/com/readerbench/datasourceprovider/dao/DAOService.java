@@ -44,7 +44,7 @@ public class DAOService {
     private static final Object lock = new Object();
 
     private DAOService() {
-        Properties p = getProperties("db.properties");
+        Properties p = getProperties("resources/db/db.properties");
         makeTmpProperties(p);
         emf = Persistence.createEntityManagerFactory("ReaderBench", p);
         em = emf.createEntityManager();
