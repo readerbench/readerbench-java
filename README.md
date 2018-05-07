@@ -29,7 +29,7 @@ Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artif
 mvn clean install deploy -P {global, english, french, spanish, german, italian, dutch, romanian}
 ```
 
-##Version bump
+## Version bump
 
 Changing the version number in all modules:
 ```sh
