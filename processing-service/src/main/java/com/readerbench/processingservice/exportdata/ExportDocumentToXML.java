@@ -41,7 +41,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import static org.apache.hadoop.yarn.util.YarnVersionInfo.getDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -277,7 +276,8 @@ public class ExportDocumentToXML {
         // set date
         Element dateEl = dom.createElement("date_of_verbalization");
         DateFormat formatter = new SimpleDateFormat("dd-mm-yyyy");
-        dateEl.setTextContent(formatter.format(getDate()));
+        // todo - what is that????
+        //dateEl.setTextContent(formatter.format(getDate()));
         metaEl.appendChild(dateEl);
 
         // set comprehension score

@@ -2,9 +2,9 @@ package com.readerbench.processingservice.pca;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math.stat.correlation.PearsonsCorrelation;
-import org.apache.commons.math.stat.descriptive.moment.Kurtosis;
-import org.apache.commons.math.stat.descriptive.moment.Skewness;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
+import org.apache.commons.math3.stat.descriptive.moment.Skewness;
 
 import java.io.*;
 import java.util.*;
