@@ -11,12 +11,6 @@
     <artifactId>parallel-processing-service</artifactId>
     <name>RB - Parallel Processing Service Module</name>
 
-    <properties>
-        <akka.version>2.5.2</akka.version>
-        <akka.scala.version>2.11</akka.scala.version>
-        
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.readerbench</groupId>
@@ -33,6 +27,7 @@
             <artifactId>datasource-provider</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- AKKA -->
         <dependency>
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-actor_${akka.scala.version}</artifactId>
@@ -49,6 +44,7 @@
             <groupId>com.typesafe.akka</groupId>
             <artifactId>akka-slf4j_${akka.scala.version}</artifactId>
         </dependency>
+        <!-- / AKKA -->
         <!-- LOGGING -->
         <dependency>
             <groupId>org.slf4j</groupId>
