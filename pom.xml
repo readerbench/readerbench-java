@@ -22,7 +22,7 @@
 
         <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
-        <apache.mahout.version>0.12.2</apache.mahout.version>
+        <apache.mahout.version>0.13.0</apache.mahout.version>
         <languagetool.version>3.9</languagetool.version>
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-math3.version>3.6.1</commons-math3.version>
@@ -186,6 +186,14 @@
                     <exclusion>
                         <groupId>org.eclipse.jetty.orbit</groupId>
                         <artifactId>javax.servlet</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.typesafe.akka</groupId>
+                        <artifactId>akka-remote_2.10</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.typesafe.akka</groupId>
+                        <artifactId>akka-slf4j_2.10</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
