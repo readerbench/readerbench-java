@@ -30,6 +30,19 @@ mvn clean install -DskipTests
 
 * Download resources from http://owncloud.readerbench.com/
 
+## Project structure (technical aspects)
+
+ReaderBench is a Maven project with 8 modules:
+
+* Datasource Provider Module
+* Core Services Module
+* Age of Exposure Module
+* Textual complexity Module
+* Comprehension Model Module
+* Reading Strategies Module
+* Processing Service Module
+* Paralle Processing Service Module
+
 ## Deploy
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
