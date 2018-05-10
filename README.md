@@ -16,6 +16,11 @@ ReaderBench targets both tutors and students by providing an integrated learning
 mvn clean install
 ```
 
+* Build without tests' running
+```sh
+mvn clean install -DskipTests
+```
+
 ## Prerequisites
 
 * Maven and JAVA_HOME environment variable
