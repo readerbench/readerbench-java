@@ -43,9 +43,19 @@ ReaderBench is a Maven project with 8 modules:
 * Processing Service Module
 * Paralle Processing Service Module
 
+### Versioning
+
+Change the version number and propagate it in all modules with the following command:
+
+```sh
+mvn versions:set -DnewVersion=x.y.z
+```
+
+
 ## Deploy
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
+
 ```sh
 mvn clean install deploy
 ```
