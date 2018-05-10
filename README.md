@@ -57,6 +57,15 @@ mvn versions:set -DnewVersion=x.y.z
 ```
 
 
+### Versioning
+
+Change the version number and propagate it in all modules with the following command:
+
+```sh
+mvn versions:set -DnewVersion=x.y.z
+```
+
+
 ## Deploy
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
