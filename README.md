@@ -43,7 +43,7 @@ ReaderBench is a Maven project with 8 modules:
 * Processing Service Module
 * Paralle Processing Service Module
 
-### Versioning
+## Versioning
 
 Change the version number and propagate it in all modules with the following command:
 
