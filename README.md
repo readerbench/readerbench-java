@@ -8,12 +8,12 @@ ReaderBench targets both tutors and students by providing an integrated learning
 
 ## Build
 
-* Version: 3.0.0
+* Version: 4.0.0
 * Demo available online at: http://www.readerbench.com/
 * Repo owner: mihai.dascalu@cs.pub.ro
 
 ```sh
-mvn clean install -P {global, english, french, spanish, german, italian, dutch, romanian}
+mvn clean install
 ```
 
 ## Prerequisites
@@ -22,235 +22,41 @@ mvn clean install -P {global, english, french, spanish, german, italian, dutch, 
 
 * The resources for each language need to be extracted for the corresponding archive available at the following link: http://readerbench.com/deployment
 
+* Download resources from http://owncloud.readerbench.com/
+
 ## Deploy
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
 ```sh
-mvn clean install deploy -P {global, english, french, spanish, german, italian, dutch, romanian}
+mvn clean install deploy
 ```
 
 ## Dependencies:
 
-### All languages
+### Age of Eposure Module
 
 * Maven
 ```sh
 <dependency>
     <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-all</artifactId>
-    <version>3.0.0</version>
+    <artifactId>age-of-exposure</artifactId>
+    <version>4.0.0</version>
 </dependency>
 ```
 
 * Ivy
 ```sh
-<dependency org="com.readerbench" name="readerbench-all" rev="3.0.0">
-    <artifact name="readerbench-all" ext="jar"/>
+<dependency org="com.readerbench" name="age-of-exposure" rev="4.0.0">
+    <artifact name="age-of-exposure" ext="jar"/>
 </dependency>
 ```
 
 * Gradle
 ```sh
-compile(group: 'com.readerbench', name: 'readerbench-all', version: '3.0.0')
+compile(group: 'com.readerbench', name: 'age-of-exposure', version: '4.0.0')
 ```
 
 * Sbt
 ```sh
-libraryDependencies += "com.readerbench" % "readerbench-all" % "3.0.0"
-```
-
-### English
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-en</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-en" rev="3.0.0">
-    <artifact name="readerbench-en" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-en', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-en" % "3.0.0"
-```
-
-### French
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-fr</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-fr" rev="3.0.0">
-    <artifact name="readerbench-fr" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-fr', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-fr" % "3.0.0"
-```
-
-### Spanish
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-es</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-es" rev="3.0.0">
-    <artifact name="readerbench-es" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-es', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-es" % "3.0.0"
-```
-
-### German
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-de</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-de" rev="3.0.0">
-    <artifact name="readerbench-de" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-de', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-de" % "3.0.0"
-```
-
-### Italian
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-it</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-it" rev="3.0.0">
-    <artifact name="readerbench-it" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-it', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-it" % "3.0.0"
-```
-
-### Dutch
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-nl</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-nl" rev="3.0.0">
-    <artifact name="readerbench-nl" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-nl', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-nl" % "3.0.0"
-```
-
-### Romanian
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>readerbench-ro</artifactId>
-    <version>3.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="readerbench-ro" rev="3.0.0">
-    <artifact name="readerbench-ro" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'readerbench-ro', version: '3.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "readerbench-ro" % "3.0.0"
+libraryDependencies += "com.readerbench" % "age-of-exposure" % "4.0.0"
 ```
