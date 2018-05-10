@@ -17,6 +17,7 @@ mvn clean install
 ```
 
 * Build without tests' running
+
 ```sh
 mvn clean install -DskipTests
 ```
