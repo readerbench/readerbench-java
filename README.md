@@ -57,7 +57,7 @@ mvn versions:set -DnewVersion=x.y.z
 ```
 
 
-### Versioning
+## Versioning
 
 Change the version number and propagate it in all modules with the following command:
 
