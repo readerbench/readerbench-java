@@ -72,9 +72,41 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--Stanford Core NLP models -->
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models-english</classifier>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models-french</classifier>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models-spanish</classifier>
+        </dependency>
+        <dependency>
+            <groupId>edu.stanford.nlp</groupId>
+            <artifactId>stanford-corenlp</artifactId>
+            <classifier>models-german</classifier>
+        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>../resources/db</directory>
+            </resource>
+            <resource>
+                <directory>../resources</directory>
+            </resource>
+        </resources>
+    </build>
+
 </project>

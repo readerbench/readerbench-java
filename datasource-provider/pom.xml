@@ -22,7 +22,32 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-remote-resources-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>**/*</include>
+                        <include>**/*</include>
+                    </includes>
+                </configuration>
+            </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>../resources/db</directory>
+            </resource>
+            <resource>
+                <directory>../resources</directory>
+            </resource>
+        </resources>
     </build>
 
     <dependencies>
@@ -83,6 +108,6 @@
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
         </dependency>
-
     </dependencies>
+
 </project>

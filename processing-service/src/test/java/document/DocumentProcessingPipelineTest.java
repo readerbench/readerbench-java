@@ -46,10 +46,11 @@ public class DocumentProcessingPipelineTest {
     public void initialize() {
         SQLiteDatabase.initializeDB();
 
+        //todo - the paths to files from resources need to be write in a .properties file
         lang = Lang.en;
-        LSA lsa = LSA.loadLSA("resources/config/EN/LSA/TASA", Lang.en);
+        LSA lsa = LSA.loadLSA("../resources/config/EN/LSA/TASA", Lang.en);
 //        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("resources/config/EN/word2vec/TASA", Lang.en);
+        Word2VecModel w2v = Word2VecModel.loadWord2Vec("../resources/config/EN/word2vec/TASA", Lang.en);
         models = new ArrayList<>();
         models.add(lsa);
 //        models.add(lda);

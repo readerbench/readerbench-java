@@ -24,7 +24,8 @@ public class SyllabifiedCMUDict {
     private static final Logger LOGGER = LoggerFactory.getLogger(SyllabifiedCMUDict.class);
 
     private static SyllabifiedCMUDict instance = null;
-    private String path = "resources/config/EN/word lists/syllabified_cmudict.txt";
+    //todo - this path will be moved to paths.properties
+    private String path = "../resources/config/EN/word lists/syllabified_cmudict.txt";
     //private Map<String, List<SyllableContainer>> dict;
     private Map<String, List<Syllable>> newDict;
     
