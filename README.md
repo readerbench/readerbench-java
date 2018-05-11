@@ -67,7 +67,7 @@ Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artif
 mvn clean install deploy
 ```
 
-The command above will deploy all modules if it is launched from parent directory. If you want to deploy only a specific module, launch the command from the module directory.
+The command above will deploy all modules if it is launched from the folder parent. If you want to deploy only a specific module, launch the command from the folder module.
 
 ## Dependencies:
 
