@@ -41,7 +41,14 @@ ReaderBench is a Maven project with 8 modules:
 * Comprehension Model Module
 * Reading Strategies Module
 * Processing Service Module
-* Paralle Processing Service Module
+* Parallel Processing Service Module
+
+### Dependencies between modules
+
+* Each module uses Datasource Provide Module and Core Services Module.
+* Processing Service Module uses Reading Strategies Module and Textual complexity Module
+* Age of Exposure Module uses Processing Service Module
+* Parallel Processing Service Module uses Processing Service Module
 
 ## Versioning
 
