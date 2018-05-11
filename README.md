@@ -67,6 +67,8 @@ Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artif
 mvn clean install deploy
 ```
 
+The command above will deploy all modules if it is launched from parent directory. If you want to deploy only a specific module, launch the command from the module directory.
+
 ## Dependencies:
 
 ### Datasource Provider Module
