@@ -62,6 +62,61 @@ mvn clean install deploy
 
 ## Dependencies:
 
+### Datasource Provider Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>datasource-provider</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="datasource-provider" rev="4.0.0">
+    <artifact name="datasource-provider" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'datasource-provider', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "datasource-provider" % "4.0.0"
+```
+
+### Core Services Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>core-services</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="core-services" rev="4.0.0">
+    <artifact name="core-services" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'core-services', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "core-services" % "4.0.0"
+```
 ### Age of Eposure Module
 
 * Maven
@@ -89,3 +144,144 @@ compile(group: 'com.readerbench', name: 'age-of-exposure', version: '4.0.0')
 ```sh
 libraryDependencies += "com.readerbench" % "age-of-exposure" % "4.0.0"
 ```
+
+### Textual Complexity Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>textual-complexity</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="textual-complexity" rev="4.0.0">
+    <artifact name="textual-complexity" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'textual-complexity', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "textual-complexity" % "4.0.0"
+```
+
+### Comprehension Model Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>comprehension-model</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="comprehension-model" rev="4.0.0">
+    <artifact name="comprehension-model" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'comprehension-model', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "comprehension-model" % "4.0.0"
+```
+
+### Reading Strategies Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>reading-strategies</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="reading-strategies" rev="4.0.0">
+    <artifact name="reading-strategies" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'reading-strategies', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "reading-strategies" % "4.0.0"
+```
+
+### Processing Service Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>processing-service</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="processing-service" rev="4.0.0">
+    <artifact name="processing-service" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'processing-service', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "processing-service" % "4.0.0"
+```
+
+### Parallel Processing Service Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>parallel-processing-service</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="parallel-processing-service" rev="4.0.0">
+    <artifact name="parallel-processing-service" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'parallel-processing-service', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "parallel-processing-service" % "4.0.0"
+```
+
