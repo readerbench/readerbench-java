@@ -317,13 +317,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <!--<distributionManagement>-->
-        <!--<repository>-->
-            <!--<id>central</id>-->
-            <!--<name>libs-release</name>-->
-            <!--<url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>-->
-        <!--</repository>-->
-    <!--</distributionManagement>-->
     <repositories>
         <repository>
             <snapshots>
@@ -381,9 +374,6 @@
                                 <goal>deploy</goal>
                             </goals>
                             <phase>deploy</phase>
-                            <configuration>
-                                <skip>true</skip>
-                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -402,27 +392,17 @@
                             <goal>deploy</goal>
                         </goals>
                         <phase>deploy</phase>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>deploy-config</id>
-                        <goals>
-                            <goal>deploy-file</goal>
-                        </goals>
-                        <phase>deploy</phase>
-                        <configuration>
-                            <repositoryId>${repo.id}</repositoryId>
-                            <url>${repo.url}</url>
-                            <groupId>${project.groupId}</groupId>
-                            <artifactId>configuration</artifactId>
-                            <version>${project.version}</version>
-                            <generatePom>false</generatePom>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+    </distributionManagement>
 </project>

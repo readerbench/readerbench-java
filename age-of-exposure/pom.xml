@@ -13,11 +13,12 @@
     <packaging>jar</packaging>
     <name>RB - Age of Exposure Module</name>
 
-    <properties>
-        <commons-math3.version>3.6.1</commons-math3.version>
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.readerbench</groupId>
             <artifactId>processing-service</artifactId>

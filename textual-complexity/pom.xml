@@ -10,14 +10,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>textual-complexity</artifactId>
+    <packaging>jar</packaging>
     <name>RB - Textual Complexity Module</name>
 
-    <properties>
-        <rosuda.JRI.version>0.8</rosuda.JRI.version>
-        <svm.version>3.22</svm.version>
-    </properties>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.readerbench</groupId>
             <artifactId>core-services</artifactId>

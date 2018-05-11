@@ -10,47 +10,23 @@
     </parent>
 
     <artifactId>datasource-provider</artifactId>
+    <packaging>jar</packaging>
     <name>RB - Datasource Provider Module</name>
 
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>${maven.resources.plugin.version}</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-remote-resources-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <includes>
-                        <include>**/*</include>
-                        <include>**/*</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-        <resources>
-            <resource>
-                <directory>../resources/db</directory>
-            </resource>
-            <resource>
-                <directory>../resources</directory>
-            </resource>
-        </resources>
-    </build>
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- LOGGING -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -109,5 +85,16 @@
             <artifactId>jackson-core-asl</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>../resources/db</directory>
+            </resource>
+            <resource>
+                <directory>../resources</directory>
+            </resource>
+        </resources>
+    </build>
 
 </project>

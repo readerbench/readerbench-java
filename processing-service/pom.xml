@@ -9,9 +9,23 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>processing-service</artifactId>
+    <packaging>jar</packaging>
     <name>RB - Processing Service Module</name>
 
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.readerbench</groupId>
             <artifactId>datasource-provider</artifactId>
