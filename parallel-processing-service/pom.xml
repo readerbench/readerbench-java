@@ -86,4 +86,11 @@
             <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/config</directory>
+            </resource>
+        </resources>
+    </build>
 </project>

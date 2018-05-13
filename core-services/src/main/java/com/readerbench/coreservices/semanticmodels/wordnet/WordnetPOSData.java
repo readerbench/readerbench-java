@@ -16,7 +16,9 @@
 package com.readerbench.coreservices.semanticmodels.wordnet;
 
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
+import java.io.IOException;
+import java.io.InputStream;
 import vu.wntools.wnsimilarity.WordnetSimilarityApi;
 import vu.wntools.wnsimilarity.measures.SimilarityPair;
 import vu.wntools.wordnet.WordnetData;
@@ -27,12 +29,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  *
  * @author Stefan
  */
-public class WordnetPOSData {
+public class WordnetPOSData extends WordnetLmfSaxParser {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(WordnetPOSData.class);
 
     private final Map<POS, WordnetData> dictionaries = new HashMap<>();
     private WordnetData general = null;
@@ -40,6 +51,10 @@ public class WordnetPOSData {
 
     public WordnetPOSData(String fileName) {
         this.fileName = fileName;
+    }
+
+    public WordnetPOSData() {
+        super();
     }
 
     public WordnetData getDictionary() {
@@ -57,7 +72,7 @@ public class WordnetPOSData {
     }
 
     public static WordnetData initWordNet(String fileName, POS pos) {
-        WordnetLmfSaxParser parser = new WordnetLmfSaxParser();
+        WordnetPOSData parser = new WordnetPOSData();
         if (pos != null) {
             parser.setPos(pos.name());
         }
@@ -71,6 +86,24 @@ public class WordnetPOSData {
             }
         }
         return parser.wordnetData;
+    }
+
+    @Override
+    public void parseFile(String filePath) {
+        try {
+            InputStream fis = this.getClass().getClassLoader().getResourceAsStream(filePath);
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(false);
+            SAXParser parser = factory.newSAXParser();
+            InputSource inp = new InputSource(fis);
+            parser.parse(inp, this);
+        } catch (SAXParseException ex) {
+            LOGGER.error(ex.getMessage());
+            ex.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException ex) {
+            LOGGER.error(ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     public double semanticSimilarity(Word w1, Word w2, SimilarityType type) {

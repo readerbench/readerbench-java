@@ -36,7 +36,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
-import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizerPOS;
+import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,7 +221,7 @@ public abstract class Parsing {
             String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
             String ne = token.get(NamedEntityTagAnnotation.class);
             if (TextPreprocessing.isWord(word, lang)) {
-                Word w = new Word(s, word, StaticLemmatizerPOS.lemmaStatic(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModelsAsList(), lang);
+                Word w = new Word(s, word, StaticLemmatizer.lemmaStaticPOS(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModelsAsList(), lang);
                 s.getAllWords().add(w);
                 if (w.isContentWord()) {
                     s.getWords().add(w);

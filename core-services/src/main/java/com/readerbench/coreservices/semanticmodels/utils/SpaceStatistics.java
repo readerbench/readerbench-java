@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.semanticmodels;
+package com.readerbench.coreservices.semanticmodels.utils;
 
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.data.Word;

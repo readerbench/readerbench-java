@@ -12,7 +12,7 @@ import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.nlp.wordlists.SyllabifiedCMUDict;
+import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.coreservices.rhythm.RhythmTool;
 
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 public class LanguageRhythm extends ComplexityIndex {
 
-    protected static SyllabifiedCMUDict syllCMUDict_en = null;
+    protected static SyllabifiedDictionary syllCMUDict_en = null;
 
     public LanguageRhythm() {
         super(null);

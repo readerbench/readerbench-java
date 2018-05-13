@@ -8,7 +8,7 @@ package com.readerbench.textualcomplexity.rhythm.indices;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Syllable;
-import com.readerbench.coreservices.nlp.wordlists.SyllabifiedCMUDict;
+import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
@@ -38,12 +38,13 @@ public class AvgStressedSyllablesInRhythmicUnit extends ComplexityIndex {
                 int cntStessedSyll = 0;
                 List<String> unit = Arrays.asList(str.trim().split("\\s+"));
                 for (String w : unit) {
-                    if (StopWords.isStopWord(w.toLowerCase(), Lang.en)) {
+                    if (StopWords.isStopWord(w.toLowerCase(), d.getLanguage())) {
                         continue;
                     }
-                    List<Syllable> syllables = SyllabifiedCMUDict.getInstance()
-                            .getDict().get(w.toLowerCase());
-                    if (syllables == null) continue;
+                    List<Syllable> syllables = SyllabifiedDictionary.getDictionary(d.getLanguage()).get(w.toLowerCase());
+                    if (syllables == null) {
+                        continue;
+                    }
                     cntStessedSyll++;
                 }
                 nrOfStressedSyllables.add(cntStessedSyll);
@@ -54,5 +55,5 @@ public class AvgStressedSyllablesInRhythmicUnit extends ComplexityIndex {
                 .average().orElse(ComplexityIndices.IDENTITY);
         return avg;
     }
-    
+
 }

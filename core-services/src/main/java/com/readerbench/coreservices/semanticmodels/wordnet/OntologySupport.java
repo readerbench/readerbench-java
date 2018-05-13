@@ -21,7 +21,8 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.wordlists.StopWords;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vu.wntools.wordnet.WordnetData;
@@ -46,17 +47,16 @@ public class OntologySupport {
     }
 
     private static final Map<Lang, WordnetPOSData> DICTIONARIES = new EnumMap<>(Lang.class);
-    private static final Map<Lang, String> WORDNET_FILEs = new EnumMap<>(Lang.class);
+    private static final Map<Lang, String> WORDNET_FILES = new EnumMap<>(Lang.class);
+    private static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.es, Lang.fr, Lang.it, Lang.nl, Lang.ro);
+    private static final String PROPERTY_WORDNET_NAME = "WORDNET_%s_PATH";
 
     static {
-        WORDNET_FILEs.put(Lang.ro, "resources/config/RO/WN/wn-ron-lmf.xml");
-        WORDNET_FILEs.put(Lang.en, "resources/config/EN/WN/wn-eng-lmf.xml");
-        WORDNET_FILEs.put(Lang.fr, "resources/config/FR/WN/wn-fra-lmf.xml");
-        WORDNET_FILEs.put(Lang.nl, "resources/config/NL/WN/wn-nld-lmf.xml");
-        WORDNET_FILEs.put(Lang.it, "resources/config/IT/WN/wn-ita-lmf.xml");
-        WORDNET_FILEs.put(Lang.es, "resources/config/ES/WN/wn-spa-lmf.xml");
-        WORDNET_FILEs.put(Lang.la, "resources/config/LA/WN/wn-la-lmf.xml");
-        WORDNET_FILEs.entrySet().stream().forEach((e) -> {
+        Properties props = ReadProperty.getProperties("paths.properties");
+        SUPPORTED_LANGUAGES.forEach((lang) -> {
+            WORDNET_FILES.put(lang, props.getProperty(String.format(PROPERTY_WORDNET_NAME, lang.name().toUpperCase())));
+        });
+        WORDNET_FILES.entrySet().stream().forEach((e) -> {
             DICTIONARIES.put(e.getKey(), new WordnetPOSData(e.getValue()));
         });
     }
@@ -95,7 +95,7 @@ public class OntologySupport {
     }
 
     public static <T> boolean haveCommonElements(List<T> set1, List<T> set2) {
-        return haveCommonElements(set1, new HashSet<T>(set2));
+        return haveCommonElements(set1, new HashSet(set2));
     }
 
     public static <T> boolean haveCommonElements(Collection<T> set1, Set<T> set2) {
@@ -294,7 +294,7 @@ public class OntologySupport {
 
     public static void correctFiles() {
         final Pattern find = Pattern.compile("relType='hype'");
-        WORDNET_FILEs.values().parallelStream()
+        WORDNET_FILES.values().parallelStream()
                 .forEach(fileName -> {
                     BufferedReader in = null;
                     BufferedWriter out = null;
@@ -330,7 +330,7 @@ public class OntologySupport {
     }
 
     public static Set<Lang> getAvailableLanguages() {
-        return WORDNET_FILEs.keySet();
+        return WORDNET_FILES.keySet();
     }
 
     public static TreeMap<Word, Double> getExtendedSymilarConcepts(Word word) {

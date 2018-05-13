@@ -15,6 +15,7 @@
  */
 package com.readerbench.coreservices.semanticmodels.data;
 
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;

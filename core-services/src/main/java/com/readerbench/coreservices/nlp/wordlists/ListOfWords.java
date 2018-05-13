@@ -32,23 +32,15 @@ public class ListOfWords {
 
     private Set<String> words;
 
-    public ListOfWords() {
-    }
-
     public ListOfWords(String path) {
         LOGGER.info("Loading file {} ...", path);
         words = new TreeSet<>();
-        try {
-            FileInputStream inputFile = new FileInputStream(path);
-            //InputStreamReader ir = new InputStreamReader(inputFile, "ISO-8859-1");
-            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            try (BufferedReader in = new BufferedReader(ir)) {
-                String line;
-                while ((line = in.readLine()) != null) {
-                    String word = line.toLowerCase().trim();
-                    if (word.length() > 0) {
-                        words.add(word);
-                    }
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path), "UTF-8"))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                String word = line.toLowerCase().trim();
+                if (word.length() > 0) {
+                    words.add(word);
                 }
             }
         } catch (IOException ex) {

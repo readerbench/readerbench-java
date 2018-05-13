@@ -15,18 +15,27 @@
  */
 package com.readerbench.coreservices.nlp.wordlists;
 
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
+/**
+ *
+ * @author ReaderBench
+ */
 public class Connectives {
 
-    public static ClassesOfWords connectives_en = null;
-    public static ClassesOfWords connectives_fr = null;
-    public static ClassesOfWords connectives_ro = null;
-    public static ClassesOfWords connectives_nl = null;
-    public static ClassesOfWords connectives_la = null;
+    private static final String PROPERTY_CONECTIVES_NAME = "CONNECTIVES_%s_PATH";
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    private static final Map<Lang, ClassesOfWords> CONNECTIVES = new TreeMap<>();
+    private static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.la, Lang.nl, Lang.ro);
 
     public static boolean isConnective(String s, Lang lang) {
-        if (lang == null) {
+        if (lang == null || (!SUPPORTED_LANGUAGES.contains(lang))) {
             return false;
         }
         ClassesOfWords connectives = getConnectives(lang);
@@ -37,54 +46,14 @@ public class Connectives {
     }
 
     public static ClassesOfWords getConnectives(Lang lang) {
-        switch (lang) {
-            case en:
-                return Connectives.getConnectivesEn();
-            case fr:
-                return Connectives.getConnectivesFr();
-            case ro:
-                return Connectives.getConnectivesRo();
-            case nl:
-                return Connectives.getConnectivesNl();
-            case la:
-                return Connectives.getConnectivesLa();
-            default:
-                return null;
+        if (!SUPPORTED_LANGUAGES.contains(lang)) {
+            return null;
         }
-    }
-
-    public static ClassesOfWords getConnectivesEn() {
-        if (connectives_en == null) {
-            connectives_en = new ClassesOfWords("resources/config/EN/word lists/connectives_en.txt");
+        if (CONNECTIVES.containsKey(lang)) {
+            return CONNECTIVES.get(lang);
         }
-        return connectives_en;
-    }
-
-    public static ClassesOfWords getConnectivesFr() {
-        if (connectives_fr == null) {
-            connectives_fr = new ClassesOfWords("resources/config/FR/word lists/connectives_fr.txt");
-        }
-        return connectives_fr;
-    }
-
-    public static ClassesOfWords getConnectivesRo() {
-        if (connectives_ro == null) {
-            connectives_ro = new ClassesOfWords("resources/config/RO/word lists/connectives_ro.txt");
-        }
-        return connectives_ro;
-    }
-
-    public static ClassesOfWords getConnectivesNl() {
-        if (connectives_nl == null) {
-            connectives_nl = new ClassesOfWords("resources/config/NL/word lists/connectives_nl.txt");
-        }
-        return connectives_nl;
-    }
-
-    public static ClassesOfWords getConnectivesLa() {
-        if (connectives_la == null) {
-            connectives_la = new ClassesOfWords("resources/config/LA/word lists/connectives_la.txt");
-        }
-        return connectives_la;
+        ClassesOfWords connectives = new ClassesOfWords(PROPERTIES.getProperty(String.format(PROPERTY_CONECTIVES_NAME, lang.name().toUpperCase())));
+        CONNECTIVES.put(lang, connectives);
+        return connectives;
     }
 }

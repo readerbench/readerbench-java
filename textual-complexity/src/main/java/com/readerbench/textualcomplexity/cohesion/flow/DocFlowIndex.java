@@ -16,7 +16,7 @@
 package com.readerbench.textualcomplexity.cohesion.flow;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 

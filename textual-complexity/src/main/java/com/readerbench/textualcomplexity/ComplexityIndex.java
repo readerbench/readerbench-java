@@ -1,7 +1,7 @@
 package com.readerbench.textualcomplexity;
 
 import com.readerbench.coreservices.data.complexity.IComplexityIndex;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.Serializable;

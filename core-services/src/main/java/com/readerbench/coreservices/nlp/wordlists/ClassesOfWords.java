@@ -36,36 +36,31 @@ import java.util.regex.Pattern;
 public class ClassesOfWords implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClassesOfWords.class);
-    
+
     private Map<String, Set<String>> classes;
-    
+
     public ClassesOfWords(String path) {
         LOGGER.info("Loading file " + path + " ...");
         classes = new TreeMap<>();
-        try {
-            FileInputStream inputFile = new FileInputStream(path);
-            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            try (BufferedReader in = new BufferedReader(ir)) {
-                String line;
-                String className = null;
-                while ((line = in.readLine()) != null) {
-                    String concept = line.toLowerCase().trim().toLowerCase();
-                    if (concept.startsWith("[")) {
-                        className = concept.replaceAll("\\[", "").replaceAll("\\]", "").trim();
-                        if (!classes.containsKey(className)) {
-                            classes.put(className, new TreeSet<>());
-                        }
-                    } else if (className != null && concept.length() > 0) {
-                        classes.get(className).add(concept);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path), "UTF-8"))) {
+            String line;
+            String className = null;
+            while ((line = in.readLine()) != null) {
+                String concept = line.toLowerCase().trim().toLowerCase();
+                if (concept.startsWith("[")) {
+                    className = concept.replaceAll("\\[", "").replaceAll("\\]", "").trim();
+                    if (!classes.containsKey(className)) {
+                        classes.put(className, new TreeSet<>());
                     }
+                } else if (className != null && concept.length() > 0) {
+                    classes.get(className).add(concept);
                 }
             }
-            LOGGER.info("Finished loading file " + path + " ...");
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
-    
+
     public void writeClassesOfWords(String path) {
         try {
             FileOutputStream outputFile = new FileOutputStream(path);
@@ -84,15 +79,15 @@ public class ClassesOfWords implements Serializable {
             LOGGER.error(ex.getMessage());
         }
     }
-    
+
     public Map<String, Set<String>> getClasses() {
         return classes;
     }
-    
+
     public Set<String> getWords(String className) {
         return classes.get(className);
     }
-    
+
     public Set<String> getAllWords() {
         Set<String> set = new TreeSet<>();
         classes.values().stream().forEach((words) -> {
@@ -100,11 +95,11 @@ public class ClassesOfWords implements Serializable {
         });
         return set;
     }
-    
+
     public static int countPatternOccurrences(String text, String pattern) {
         Pattern p = Pattern.compile("(?:\\s)" + pattern.trim() + "(?:\\s)");
         Matcher matcher = p.matcher(" " + text + " ");
-        
+
         int count = 0;
         if (matcher.find()) {
             count++;
@@ -114,23 +109,22 @@ public class ClassesOfWords implements Serializable {
                 count++;
             }
         }
-        
+
         return count;
     }
-    
+
     public static int countPatternOccurrences(AbstractDocument document, String pattern) {
         return document.getBlocks().stream()
                 .filter(b -> b != null)
                 .flatMap(b -> b.getSentences().stream())
                 .mapToInt(s -> countPatternOccurrences(
-                        TextPreprocessing.cleanText(s.getText(), s.getLanguage()), pattern))
+                TextPreprocessing.cleanText(s.getText(), s.getLanguage()), pattern))
                 .sum();
     }
-    
+
     public int countCategoryOccurrences(AbstractDocument document, String category) {
         return this.getClasses().get(category).stream()
                 .mapToInt(p -> countPatternOccurrences(document, p))
                 .sum();
     }
-
 }

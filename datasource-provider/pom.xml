@@ -13,14 +13,6 @@
     <packaging>jar</packaging>
     <name>RB - Datasource Provider Module</name>
 
-    <distributionManagement>
-        <repository>
-            <id>central</id>
-            <name>libs-release</name>
-            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
-        </repository>
-    </distributionManagement>
-
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -89,12 +81,8 @@
     <build>
         <resources>
             <resource>
-                <directory>../resources/db</directory>
-            </resource>
-            <resource>
-                <directory>../resources</directory>
+                <directory>src/main/config</directory>
             </resource>
         </resources>
     </build>
-
 </project>

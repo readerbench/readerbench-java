@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.semanticmodels.data;
+package com.readerbench.coreservices.semanticmodels;
 
+import cc.mallet.util.Maths;
+import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.semanticmodels.lda.LDA;
 import com.readerbench.coreservices.semanticmodels.lsa.LSA;
 import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 /**
@@ -32,22 +36,27 @@ import java.util.function.Supplier;
  * @author Stefan
  */
 public enum SimilarityType {
-    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
-    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", OntologySupport::getAvailableLanguages, false),
-    PATH_SIM("Path", "Inverse path length in WordNet", OntologySupport::getAvailableLanguages, false),
-    LSA("LSA", "Cosine similarity in LSA vector space", com.readerbench.coreservices.semanticmodels.lsa.LSA::getAvailableLanguages, true),
-    LDA("LDA", "Inverse JSH in LDA probability distribution", com.readerbench.coreservices.semanticmodels.lda.LDA::getAvailableLanguages, true),
-    WORD2VEC("word2vec", "Cosine similarity in word2vec space", Word2VecModel::getAvailableLanguages, true);
+    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", null, OntologySupport::getAvailableLanguages, false),
+    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", null, OntologySupport::getAvailableLanguages, false),
+    PATH_SIM("Path", "Inverse path length in WordNet", null, OntologySupport::getAvailableLanguages, false),
+    LSA("LSA", "Cosine similarity in LSA vector space", VectorAlgebra::cosineSimilarity,
+            com.readerbench.coreservices.semanticmodels.lsa.LSA::getAvailableLanguages, true),
+    LDA("LDA", "Inverse JSH in LDA probability distribution", (v1, v2) -> 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(v1), VectorAlgebra.normalize(v2)),
+            com.readerbench.coreservices.semanticmodels.lda.LDA::getAvailableLanguages, true),
+    WORD2VEC("word2vec", "Cosine similarity in word2vec space", VectorAlgebra::cosineSimilarity,
+            Word2VecModel::getAvailableLanguages, true);
 
     private final String acronym;
     private final String name;
     private final Supplier<Set<Lang>> supplier;
+    private final BiFunction<double[], double[], Double> similarityFuction;
     private final boolean loadable;
-    
-    private SimilarityType(String acronym, String name, Supplier<Set<Lang>> supplier, boolean loadable) {
+
+    private SimilarityType(String acronym, String name, BiFunction<double[], double[], Double> similarityFuction, Supplier<Set<Lang>> supplier, boolean loadable) {
         this.acronym = acronym;
         this.name = name;
         this.supplier = supplier;
+        this.similarityFuction = similarityFuction;
         this.loadable = loadable;
     }
 
@@ -66,7 +75,11 @@ public enum SimilarityType {
     public boolean isLoadable() {
         return loadable;
     }
-    
+
+    public BiFunction<double[], double[], Double> getSimilarityFuction() {
+        return similarityFuction;
+    }
+
     public static List<ISemanticModel> loadVectorModels(Map<SimilarityType, String> modelPaths, Lang lang) {
         // load also LSA vector space and LDA model
         List<ISemanticModel> models = new ArrayList<>();

@@ -5,7 +5,7 @@
  */
 package com.readerbench.textualcomplexity.rhythm;
 
-import com.readerbench.coreservices.nlp.wordlists.SyllabifiedCMUDict;
+import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
 import com.readerbench.coreservices.rhythm.Syllable;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
@@ -156,7 +156,7 @@ public class Rhythm {
         return k_real;
     }
     
-    public static int calculateRhythmIndexSM(List<Word> unit, SyllabifiedCMUDict syllabifiedCMUDict) {
+    public static int calculateRhythmIndexSM(List<Word> unit, SyllabifiedDictionary syllabifiedCMUDict) {
         List<Integer> rhythmicStructure = new ArrayList<>();
         int cnt = 1;
         

@@ -133,5 +133,29 @@
             <artifactId>log4j-api</artifactId>
         </dependency>
         <!-- /LOGGING -->
+        
+        <!-- ReaderBench resources-->
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-tasa-en</artifactId>
+        </dependency>
+        <!-- / ReaderBench resources-->
     </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>
+                    src/main/config
+                </directory>
+            </resource>
+        </resources>
+    </build>
 </project>

@@ -15,6 +15,7 @@
  */
 package com.readerbench.coreservices.semanticmodels.data;
 
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.Serializable;

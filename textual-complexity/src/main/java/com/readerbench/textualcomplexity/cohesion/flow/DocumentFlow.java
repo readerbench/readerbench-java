@@ -1,7 +1,7 @@
 package com.readerbench.textualcomplexity.cohesion.flow;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 

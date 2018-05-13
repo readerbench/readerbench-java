@@ -15,7 +15,11 @@
  */
 package com.readerbench.coreservices.nlp.wordlists;
 
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  *
@@ -23,82 +27,18 @@ import com.readerbench.datasourceprovider.pojo.Lang;
  */
 public class StopWords {
 
-    public static ListOfWords stopwords_ro = null;
-    public static ListOfWords stopwords_fr = null;
-    public static ListOfWords stopwords_en = null;
-    public static ListOfWords stopwords_it = null;
-    public static ListOfWords stopwords_es = null;
-    public static ListOfWords stopwords_nl = null;
-    public static ListOfWords stopwords_la = null;
+    private static final String PROPERTY_STOPWORS_NAME = "STOPWORDS_%s_PATH";
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    public static Map<Lang, ListOfWords> STOPWORDS = new TreeMap<>();
 
     public static boolean isStopWord(String s, Lang lang) {
         if (lang == null) {
             return false;
         }
-        switch (lang) {
-            case fr:
-                return getStopwordsFr().getWords().contains(s);
-            case it:
-                return getStopwordsIt().getWords().contains(s);
-            case es:
-                return getStopwordsEs().getWords().contains(s);
-            case ro:
-                return getStopwordsRo().getWords().contains(s);
-            case nl:
-                return getStopwordsNl().getWords().contains(s);
-            case la:
-                return getStopwordsLa().getWords().contains(s);
-            default:
-                return getStopwordsEn().getWords().contains(s);
+        if (!STOPWORDS.containsKey(lang)) {
+            ListOfWords stopwords = new ListOfWords(PROPERTIES.getProperty(String.format(PROPERTY_STOPWORS_NAME, lang.name().toUpperCase())));
+            STOPWORDS.put(lang, stopwords);
         }
-    }
-
-    public synchronized static ListOfWords getStopwordsRo() {
-        if (stopwords_ro == null) {
-            stopwords_ro = new ListOfWords("resources/config/RO/word lists/stopwords_ro.txt");
-        }
-        return stopwords_ro;
-    }
-
-    public synchronized static ListOfWords getStopwordsFr() {
-        if (stopwords_fr == null) {
-            stopwords_fr = new ListOfWords("resources/config/FR/word lists/stopwords_fr.txt");
-        }
-        return stopwords_fr;
-    }
-
-    public synchronized static ListOfWords getStopwordsEn() {
-        if (stopwords_en == null) {
-            stopwords_en = new ListOfWords("resources/config/EN/word lists/stopwords_en.txt");
-        }
-        return stopwords_en;
-    }
-
-    public synchronized static ListOfWords getStopwordsIt() {
-        if (stopwords_it == null) {
-            stopwords_it = new ListOfWords("resources/config/IT/word lists/stopwords_it.txt");
-        }
-        return stopwords_it;
-    }
-
-    public synchronized static ListOfWords getStopwordsEs() {
-        if (stopwords_es == null) {
-            stopwords_es = new ListOfWords("resources/config/ES/word lists/stopwords_es.txt");
-        }
-        return stopwords_es;
-    }
-
-    public synchronized static ListOfWords getStopwordsNl() {
-        if (stopwords_nl == null) {
-            stopwords_nl = new ListOfWords("resources/config/NL/word lists/stopwords_nl.txt");
-        }
-        return stopwords_nl;
-    }
-
-    public synchronized static ListOfWords getStopwordsLa() {
-        if (stopwords_la == null) {
-            stopwords_la = new ListOfWords("resources/config/LA/word lists/stopwords_la.txt");
-        }
-        return stopwords_la;
+        return STOPWORDS.get(lang).getWords().contains(s);
     }
 }

@@ -18,7 +18,7 @@ package com.readerbench.coreservices.data.discourse;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.coreservices.commons.ValueComparator;

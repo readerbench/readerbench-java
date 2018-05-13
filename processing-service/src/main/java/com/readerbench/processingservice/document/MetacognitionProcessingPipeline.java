@@ -23,7 +23,7 @@ import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.data.document.Metacognition;
 import com.readerbench.coreservices.data.document.ReadingStrategyType;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.readingstrategies.ReadingStrategies;

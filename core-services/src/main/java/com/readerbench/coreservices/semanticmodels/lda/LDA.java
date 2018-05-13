@@ -27,7 +27,7 @@ import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.util.Pair;
 import org.slf4j.Logger;
@@ -169,57 +169,6 @@ public class LDA implements ISemanticModel, Serializable {
         // Print out the features and the label
         // pipeList.add(new PrintInputAndTarget());
         return new SerialPipes(pipeList);
-    }
-
-    /**
-     * Analyze number of topics
-     *
-     * @param path
-     * @param initialTopics
-     * @param numIterations
-     * @return
-     */
-    public int createHDPModel(String path, int initialTopics, int numIterations) {
-        LOGGER.info("Running HDP on {} with {} initial topics and {} iterations", new Object[]{path, initialTopics, numIterations});
-        readDirectory(new File(path));
-
-        HDP hdp = new HDP(path, 1.0, 0.01, 1D, initialTopics);
-        hdp.initialize(instances);
-
-        // set number of iterations, and display result or not
-        hdp.estimate(numIterations);
-
-        // get topic distribution for first instance
-        // double[] distr = hdp.topicDistribution(0);
-        // // print out
-        //
-        // int no = 0;
-        // for (int j = 0; j < distr.length; j++) {
-        // if (Math.round(distr[j]) != 0) {
-        // System.out.print("!!" + j + "-" + distr[j] + "\n");
-        // no++;
-        // }
-        // }
-        // System.out.println(no);
-        // for inferencer
-        // readDirectory(new File(path));
-        // HDPInferencer inferencer = hdp.getInferencer();
-        // inferencer.setInstance(instances);
-        //
-        // inferencer.estimate(numIterations / 10);
-        // // get topic distribution for first test instance
-        // distr = inferencer.topicDistribution(0);
-        // // print out
-        // for (int j = 0; j < distr.length; j++) {
-        // System.out.print(distr[j] + "\n");
-        // }
-        // // get preplexity
-        // double prep = inferencer.getPreplexity();
-        // System.out.println("preplexity for the test set=" + prep);
-        // 10-folds cross validation, with 1000 iteration for each test.
-        // hdp.runCrossValidation(10, 1000);
-        hdp.printTopWord(100);
-        return hdp.getNoTopics();
     }
 
     public ParallelTopicModel processCorpus(String path, int noTopics, int noThreads, int noIterations) throws IOException {

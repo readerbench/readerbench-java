@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
@@ -39,8 +38,8 @@ public class MapOfWordWeights {
 
     public MapOfWordWeights(String path, Lang lang) {
         words = new TreeMap<>();
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"))) {
-            String line = null;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path), "UTF-8"))) {
+            String line;
             while ((line = in.readLine()) != null) {
                 StringTokenizer st = new StringTokenizer(line.trim());
                 String word = st.nextToken();

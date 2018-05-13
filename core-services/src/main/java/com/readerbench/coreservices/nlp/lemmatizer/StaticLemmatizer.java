@@ -15,11 +15,15 @@
  */
 package com.readerbench.coreservices.nlp.lemmatizer;
 
+import com.readerbench.datasourceprovider.commons.ReadProperty;
+import java.util.Properties;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -28,45 +32,40 @@ public class StaticLemmatizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticLemmatizer.class);
 
-    private static Map<String, String> lemmas_en;
-    private static Map<String, String> lemmas_ro;
-    private static Map<String, String> lemmas_nl;
-    private static Map<String, String> lemmas_la;
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    private static final String PROPERTY_LEMMAS_NAME = "LEMMAS_%s_PATH";
+    private static final String PROPERTY_LEMMAS_POS_NAME = "LEMMAS_POS_%s_PATH";
 
-    private static Map<String, String> initialize(String path, Lang lang) {
+    private static final Map<Lang, Map<String, String>> LISTS_OF_LEMMAS = new TreeMap<>();
+    private static final List<Lang> LANGUAGES_WITHOUT_POS = Arrays.asList(Lang.en, Lang.ro, Lang.nl, Lang.la);
+    private static final List<Lang> LANGUAGES_WITH_POS = Arrays.asList(Lang.fr, Lang.it, Lang.es);
+
+    private static synchronized void initialize(String path, Lang lang) {
         LOGGER.info("Initializing lemmas from {} ...", path);
         Map<String, String> lemmas = new TreeMap<>();
-        BufferedReader in;
-        String str_line = null;
-        try {
-            FileInputStream inputFile = new FileInputStream(path);
-            // InputStreamReader ir = new InputStreamReader(inputFile,
-            // "ISO-8859-1");
-            InputStreamReader ir = new InputStreamReader(inputFile, "UTF-8");
-            in = new BufferedReader(ir);
+        String str_line;
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(StaticLemmatizer.class.getClassLoader().getResourceAsStream(path), "UTF-8"))) {
             StringTokenizer strk;
             while ((str_line = in.readLine()) != null) {
                 strk = new StringTokenizer(str_line, "\t");
-                String lemma = strk.nextToken().replaceAll("[0-9]*", "");
-                String inflected = strk.nextToken().replaceAll("[0-9]*", "");
+                String inflected = strk.nextToken().replaceAll("[0-9]*", "").toLowerCase();
+                String lemma = strk.nextToken().replaceAll("[0-9]*", "").toLowerCase();
                 String existing = lemmas.get(inflected);
                 if (existing == null || lemma.length() < existing.length()) {
                     lemmas.put(inflected, lemma);
                 }
                 if (existing != null) {
-                    LOGGER.error("Duplicate entry: {}", inflected);
+                    LOGGER.warn("Duplicate entry: {}", inflected);
                 }
             }
             in.close();
         } catch (IOException e) {
-            LOGGER.info("Error processing line: {}", str_line);
             LOGGER.error(e.getMessage());
         }
-        return lemmas;
+        LISTS_OF_LEMMAS.put(lang, lemmas);
     }
 
-    public static void writeLemmas(String fileName, Map<String, String> lemmas)
-            throws FileNotFoundException, UnsupportedEncodingException {
+    public static synchronized void writeLemmas(String fileName, Map<String, String> lemmas) throws FileNotFoundException, UnsupportedEncodingException {
         try (PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(fileName), "UTF-8"))) {
             for (Map.Entry<String, String> e : lemmas.entrySet()) {
                 out.println(e.getValue() + "\t" + e.getKey());
@@ -74,32 +73,19 @@ public class StaticLemmatizer {
         }
     }
 
-    public static String lemmaStatic(String w, Lang lang) {
-        String lemma;
-        switch (lang) {
-            case en:
-                lemma = getLemmasEn().get(w);
-                break;
-            case fr:
-                lemma = StaticLemmatizerPOS.lemmaStatic(w, null, Lang.fr);
-                break;
-            case it:
-                lemma = StaticLemmatizerPOS.lemmaStatic(w, null, Lang.it);
-                break;
-            case ro:
-                lemma = getLemmasRo().get(w);
-                break;
-            case es:
-                lemma = StaticLemmatizerPOS.lemmaStatic(w, null, Lang.es);
-                break;
-            case nl:
-                lemma = getLemmasNl().get(w);
-                break;
-            case la:
-                lemma = getLemmasLa().get(w);
-                break;
-            default:
-                lemma = null;
+    public static synchronized String lemmaStatic(String w, Lang lang) {
+        String lemma = null;
+        if (LANGUAGES_WITHOUT_POS.contains(lang)) {
+            if (!LISTS_OF_LEMMAS.containsKey(lang)) {
+                initialize(PROPERTIES.getProperty(String.format(PROPERTY_LEMMAS_NAME, lang.name().toUpperCase())), lang);
+            }
+            lemma = LISTS_OF_LEMMAS.get(lang).get(w);
+        }
+        if (LANGUAGES_WITH_POS.contains(lang)) {
+            if (!LISTS_OF_LEMMAS.containsKey(lang)) {
+                initialize(PROPERTIES.getProperty(String.format(PROPERTY_LEMMAS_POS_NAME, lang.name().toUpperCase())), lang);
+            }
+            lemma = lemmaStaticPOS(w, null, lang);
         }
 
         if (lemma != null) {
@@ -108,31 +94,37 @@ public class StaticLemmatizer {
         return w;
     }
 
-    public synchronized static Map<String, String> getLemmasEn() {
-        if (lemmas_en == null) {
-            lemmas_en = initialize("resources/config/EN/word lists/lemmas_en.txt", Lang.en);
+    public static synchronized String lemmaStaticPOS(String word, String pos, Lang lang) {
+        String w = word.toLowerCase();
+        if (LANGUAGES_WITHOUT_POS.contains(lang) || pos == null) {
+            return lemmaStatic(w, lang);
         }
-        return lemmas_en;
-    }
-
-    public synchronized static Map<String, String> getLemmasRo() {
-        if (lemmas_ro == null) {
-            lemmas_ro = initialize("resources/config/RO/word lists/lemmas_ro.txt", Lang.ro);
+        if (LANGUAGES_WITH_POS.contains(lang)) {
+            if (!LISTS_OF_LEMMAS.containsKey(lang)) {
+                initialize(PROPERTIES.getProperty(String.format(PROPERTY_LEMMAS_POS_NAME, lang.name().toUpperCase())), lang);
+            }
         }
-        return lemmas_ro;
-    }
-
-    public synchronized static Map<String, String> getLemmasNl() {
-        if (lemmas_nl == null) {
-            lemmas_nl = initialize("resources/config/NL/word lists/lemmas_nl.txt", Lang.nl);
+        Map<String, String> lemmas = LISTS_OF_LEMMAS.get(lang);
+        if (lemmas == null) {
+            return w;
         }
-        return lemmas_nl;
-    }
-
-    public synchronized static Map<String, String> getLemmasLa() {
-        if (lemmas_la == null) {
-            lemmas_la = initialize("resources/config/LA/word lists/lemmas_la.txt", Lang.la);
+        String lemma = null;
+        lemma = lemmas.get((w + "_" + pos).toLowerCase());
+        if (lemma != null) {
+            return lemma;
         }
-        return lemmas_la;
+        // try each significant POS
+        String[] possiblePOSs = {"NN", "VB", "JJ", "RB", "PR", "DT", "IN", "UH", "CC"};
+        for (String possiblePOS : possiblePOSs) {
+            String concept = (w + "_" + possiblePOS).toLowerCase();
+            if (lemmas.containsKey(concept)) {
+                lemma = lemmas.get(concept);
+                break;
+            }
+        }
+        if (lemma != null) {
+            return lemma;
+        }
+        return w;
     }
 }

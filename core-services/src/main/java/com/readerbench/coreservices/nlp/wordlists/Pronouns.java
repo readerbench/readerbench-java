@@ -15,7 +15,13 @@
  */
 package com.readerbench.coreservices.nlp.wordlists;
 
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * Class containing all pronoun lists for supported languages that makes use of
@@ -25,14 +31,13 @@ import com.readerbench.datasourceprovider.pojo.Lang;
  */
 public class Pronouns {
 
-    public static ClassesOfWords pronouns_en = null;
-    public static ClassesOfWords pronouns_fr = null;
-    public static ClassesOfWords pronouns_ro = null;
-    public static ClassesOfWords pronouns_nl = null;
-    public static ClassesOfWords pronouns_la = null;
+    private static final String PROPERTY_PRONOUNS_NAME = "PRONOUNS_%s_PATH";
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    private static final Map<Lang, ClassesOfWords> PRONOUNS = new TreeMap<>();
+    private static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.la, Lang.nl, Lang.ro);
 
     public static boolean isConnective(String s, Lang lang) {
-        if (lang == null) {
+        if (lang == null || (!SUPPORTED_LANGUAGES.contains(lang))) {
             return false;
         }
         ClassesOfWords pronouns = getPronouns(lang);
@@ -43,54 +48,15 @@ public class Pronouns {
     }
 
     public static ClassesOfWords getPronouns(Lang lang) {
-        switch (lang) {
-            case en:
-                return getPronounsEn();
-            case fr:
-                return getPronounsFr();
-            case ro:
-                return getPronounsRo();
-            case nl:
-                return getPronounsNl();
-            case la:
-                return getPronounsLa();
-            default:
-                return null;
+        if (!SUPPORTED_LANGUAGES.contains(lang)) {
+            return null;
         }
-    }
+        if (PRONOUNS.containsKey(lang)) {
+            return PRONOUNS.get(lang);
+        }
+        ClassesOfWords pronouns = new ClassesOfWords(PROPERTIES.getProperty(String.format(PROPERTY_PRONOUNS_NAME, lang.name().toUpperCase())));
 
-    public static ClassesOfWords getPronounsEn() {
-        if (pronouns_en == null) {
-            pronouns_en = new ClassesOfWords("resources/config/EN/word lists/pronouns_en.txt");
-        }
-        return pronouns_en;
-    }
-
-    public static ClassesOfWords getPronounsFr() {
-        if (pronouns_fr == null) {
-            pronouns_fr = new ClassesOfWords("resources/config/FR/word lists/pronouns_fr.txt");
-        }
-        return pronouns_fr;
-    }
-
-    public static ClassesOfWords getPronounsRo() {
-        if (pronouns_ro == null) {
-            pronouns_ro = new ClassesOfWords("resources/config/RO/word lists/pronouns_ro.txt");
-        }
-        return pronouns_ro;
-    }
-
-    public static ClassesOfWords getPronounsNl() {
-        if (pronouns_nl == null) {
-            pronouns_nl = new ClassesOfWords("resources/config/NL/word lists/pronouns_nl.txt");
-        }
-        return pronouns_nl;
-    }
-
-    public static ClassesOfWords getPronounsLa() {
-        if (pronouns_la == null) {
-            pronouns_la = new ClassesOfWords("resources/config/EN/word lists/pronouns_la.txt");
-        }
-        return pronouns_la;
+        PRONOUNS.put(lang, pronouns);
+        return pronouns;
     }
 }

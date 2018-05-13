@@ -19,7 +19,7 @@ import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.cscl.Collaboration;
 import com.readerbench.coreservices.cscl.data.*;
 import com.readerbench.coreservices.keywordmining.Keyword;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticmodels.lda.LDA;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;

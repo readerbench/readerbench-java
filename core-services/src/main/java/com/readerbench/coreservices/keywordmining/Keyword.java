@@ -20,7 +20,7 @@ import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.coreservices.data.NGram;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 
 import java.io.Serializable;
 

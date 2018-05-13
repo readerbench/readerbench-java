@@ -23,7 +23,7 @@ import com.readerbench.coreservices.data.NGram;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

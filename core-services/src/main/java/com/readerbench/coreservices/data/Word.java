@@ -18,7 +18,7 @@ package com.readerbench.coreservices.data;
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.wordlists.StopWords;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
 import com.readerbench.datasourceprovider.dao.WordDAO;
@@ -27,7 +27,7 @@ import com.readerbench.coreservices.data.document.ReadingStrategyType;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChainLink;
 import com.readerbench.datasourceprovider.pojo.EntityXValence;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import com.readerbench.coreservices.nlp.wordlists.SyllabifiedCMUDict;
+import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,13 +54,7 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     private LexicalChainLink lexicalChainLink; // the lexical chain link associated with the word after disambiguation
     private SemanticChain semanticChain;
     private EnumSet<ReadingStrategyType> usedReadingStrategies;
-
-    public double lsaSimilarityToUnderlyingConcept = -1;
-    public double ldaSimilarityToUnderlyingConcept = -1;
-
     private transient SentimentEntity sentiment;
-    
-    public transient SyllabifiedCMUDict syllabifiedCMUDict;
     private List<Syllable> syllables;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
@@ -71,9 +65,8 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         this.NE = NE;
         setLanguage(lang);
         this.usedReadingStrategies = EnumSet.noneOf(ReadingStrategyType.class);
-        if (lang == Lang.en) {
-            this.syllabifiedCMUDict = SyllabifiedCMUDict.getInstance();
-            this.syllables = syllabifiedCMUDict.getDict().get(text.toLowerCase());
+        if (SyllabifiedDictionary.getDictionary(lang) != null) {
+            this.syllables = SyllabifiedDictionary.getDictionary(lang).get(text.toLowerCase());
         }
     }
 
@@ -86,7 +79,7 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         if (se == null) {
             return;
         }
-        synchronized (se){
+        synchronized (se) {
             sentiment = new SentimentEntity();
             List<EntityXValence> exvList = se.getEntityXValenceList();
             exvList.stream().forEach((exv) -> {
@@ -213,11 +206,11 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     public void setSemanticChain(SemanticChain semanticChain) {
         this.semanticChain = semanticChain;
     }
-    
+
     public List<Syllable> getSyllables() {
         return syllables;
     }
-    
+
     public void setSyllables(List<Syllable> syllables) {
         this.syllables = syllables;
     }

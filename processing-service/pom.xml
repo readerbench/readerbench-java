@@ -115,12 +115,8 @@
     <build>
         <resources>
             <resource>
-                <directory>../resources/db</directory>
-            </resource>
-            <resource>
-                <directory>../resources</directory>
+                <directory>src/main/config</directory>
             </resource>
         </resources>
     </build>
-
 </project>

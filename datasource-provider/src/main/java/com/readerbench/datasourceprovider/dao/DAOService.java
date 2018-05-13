@@ -15,6 +15,7 @@
  */
 package com.readerbench.datasourceprovider.dao;
 
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.Persistence;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.*;
 import java.util.Properties;
 import java.util.function.Function;
@@ -44,33 +44,10 @@ public class DAOService {
     private static final Object lock = new Object();
 
     private DAOService() {
-        Properties p = getProperties("db.properties");
+        Properties p = ReadProperty.getProperties("db.properties");
         makeTmpProperties(p);
         emf = Persistence.createEntityManagerFactory("ReaderBench", p);
         em = emf.createEntityManager();
-    }
-
-    /**
-     * read data from .properties files
-     *
-     * @param resourceName
-     * @return
-     */
-    public Properties getProperties(String resourceName) {
-        Properties properties = new Properties();
-        InputStream input;
-        try {
-
-            input = this.getClass().getClassLoader().getResourceAsStream(resourceName);
-            if (input == null) {
-                throw new RuntimeException("Configuration file missing: " + resourceName);
-            }
-            properties.load(input);
-
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage());
-        }
-        return properties;
     }
 
     private void makeTmpProperties(Properties p) {

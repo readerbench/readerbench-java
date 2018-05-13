@@ -21,7 +21,7 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.data.SimilarityType;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
