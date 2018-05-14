@@ -8,7 +8,7 @@ package com.readerbench.processingservice;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
@@ -33,7 +33,7 @@ public class TextSimilarity {
      * @param annotators
      * @return
      */
-    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public static Map<SimilarityType, Double> textSimilarities(String text1, String text2, Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         if (text1 == null || text1.isEmpty() || text2 == null || text2.isEmpty() || lang == null || models == null || models.isEmpty()) {
             return null;
         }

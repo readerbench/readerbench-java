@@ -16,11 +16,10 @@
 package com.readerbench.processingservice.exportdata;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.cscl.Collaboration;
+import com.readerbench.coreservices.cscl.CollaborationEvaluation;
 import com.readerbench.coreservices.cscl.data.*;
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.semanticmodels.lda.LDA;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.datasourceprovider.commons.Formatting;
@@ -31,7 +30,7 @@ import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.Metacognition;
 import com.readerbench.coreservices.data.document.ReadingStrategyType;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -82,8 +81,8 @@ public class ExportDocument {
             if (abstractDocument.getTitleText() != null) {
                 out.write(abstractDocument.getTitleText().replaceAll(",", "").replaceAll("\\s+", " ") + "\n");
             }
-            for (ISemanticModel model : abstractDocument.getSemanticModelsAsList()) {
-                out.write(model.getType() + " space:," + model.getPath() + "\n");
+            for (SemanticModel model : abstractDocument.getSemanticModelsAsList()) {
+                out.write(model.getSimilarityType() + " space:," + model.getName() + "\n");
             }
 
             out.write("\nBlock Index,Ref Block Index,Participant,Date,Score,Social Knowledge Building,Initial Text,Processed Text\n");
@@ -132,25 +131,6 @@ public class ExportDocument {
                         + Formatting.formatNumber(t.getTermFrequency()) + "," + Formatting.formatNumber(t.getSemanticSimilarity()) + "\n");
             }
             out.write("\n");
-
-            if (abstractDocument.getSemanticModels().containsKey(SimilarityType.LDA)) {
-                out.write("\nTopics - Clusters\n");
-                Map<Integer, List<Keyword>> topicClusters = new TreeMap<>();
-                abstractDocument.getTopics().stream().forEach((t) -> {
-                    Integer probClass = LDA.findMaxResemblance(t.getModelRepresentation(SimilarityType.LDA), abstractDocument.getModelRepresentation(SimilarityType.LDA));
-                    if (!topicClusters.containsKey(probClass)) {
-                        topicClusters.put(probClass, new ArrayList<>());
-                    }
-                    topicClusters.get(probClass).add(t);
-                });
-                for (Integer cluster : topicClusters.keySet()) {
-                    out.write(cluster + ":,");
-                    for (Keyword t : topicClusters.get(cluster)) {
-                        out.write(t.getWord().getLemma() + " (" + t.getRelevance() + "),");
-                    }
-                    out.write("\n");
-                }
-            }
 
             if (abstractDocument instanceof Conversation) {
                 out.write("\nTopics per Participant\n");
@@ -227,20 +207,20 @@ public class ExportDocument {
                 // print statistics
                 double[] results;
                 if (c.getAnnotatedCollabZones() != null && c.getAnnotatedCollabZones().size() > 0) {
-                    results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
+                    results = CollaborationEvaluation.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesSocialKB());
 
                     out.write("\nOverlap between annotated collaboration zones and Social KB model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
                                     .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getSocialKBEvolution()));
 
-                    results = Collaboration.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
+                    results = CollaborationEvaluation.overlapCollaborationZones(c, c.getAnnotatedCollabZones(),
                             c.getIntenseCollabZonesVoice());
                     out.write("\nOverlap between annotated collaboration zones and Voice PMI model\n" + "P=,"
                             + results[0] + "\nR=," + results[1] + "\nF1 score=," + results[2] + "\nr=," + VectorAlgebra
                                     .pearsonCorrelation(c.getAnnotatedCollabEvolution(), c.getVoicePMIEvolution()));
                 }
-                results = Collaboration.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
+                results = CollaborationEvaluation.overlapCollaborationZones(c, c.getIntenseCollabZonesSocialKB(),
                         c.getIntenseCollabZonesVoice());
                 out.write("\nOverlap between Social KB model and Voice PMI model\n" + "P=," + results[0] + "\nR=,"
                         + results[1] + "\nF1 score=," + results[2] + "\nr=,"
@@ -295,10 +275,9 @@ public class ExportDocument {
             fos = new FileOutputStream(new File(abstractDocument.getPath().replace(".xml", ".ser")));
             try (ObjectOutputStream out = new ObjectOutputStream(fos)) {
                 out.writeObject(this);
-                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class
-                );
+                Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);
                 abstractDocument.getSemanticModels().entrySet().forEach((e) -> {
-                    modelPaths.put(e.getKey(), e.getValue().getPath());
+                    modelPaths.put(e.getKey(), e.getValue().getName());
                 });
                 out.writeObject(modelPaths);
             } catch (Exception | Error ex) {
@@ -320,9 +299,8 @@ public class ExportDocument {
                 out.write("," + author);
             }
             out.write("\n");
-            for (ISemanticModel model : m.getSemanticModelsAsList()) {
-                out.write(model.getType() + " space:," + model.getPath() + "\n");
-
+            for (SemanticModel model : m.getSemanticModelsAsList()) {
+                out.write(model.getSimilarityType() + " space:," + model.getName() + "\n");
             }
 
             out.write("Text");

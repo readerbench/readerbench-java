@@ -20,7 +20,7 @@ import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -50,7 +50,7 @@ public class ImportDocument {
         return d;
     }
 
-    public void rebuildSemanticSpaces(AbstractDocument abstractDocument, List<ISemanticModel> models) {
+    public void rebuildSemanticSpaces(AbstractDocument abstractDocument, List<SemanticModel> models) {
         abstractDocument.setSemanticModels(models);
         for (Block b : abstractDocument.getBlocks()) {
             if (b != null) {

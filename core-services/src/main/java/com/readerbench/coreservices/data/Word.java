@@ -17,7 +17,6 @@ package com.readerbench.coreservices.data;
 
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.wordlists.StopWords;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
@@ -28,6 +27,7 @@ import com.readerbench.coreservices.data.lexicalchains.LexicalChainLink;
 import com.readerbench.datasourceprovider.pojo.EntityXValence;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,22 +88,22 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         }
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
+    public Word(String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
         super.setSemanticModels(models);
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+    public Word(String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, SentimentEntity sentiment, Lang lang) {
         this(text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }
 
-    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, Lang lang) {
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, models, lang);
         this.container = container;
     }
 
-    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<ISemanticModel> models, SentimentEntity sentiment, Lang lang) {
+    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, SentimentEntity sentiment, Lang lang) {
         this(container, text, lemma, stem, POS, NE, models, lang);
         this.sentiment = sentiment;
     }

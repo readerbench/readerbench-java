@@ -15,9 +15,9 @@
  */
 package com.readerbench.coreservices.data;
 
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import edu.stanford.nlp.coref.data.CorefChain;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.util.CoreMap;
@@ -61,7 +61,7 @@ public class Block extends AnalysisElement implements Serializable {
     private SemanticCohesion[] sentenceBlockDistances;
     private SemanticCohesion prevSentenceBlockDistance, nextSentenceBlockDistance;
 
-    public Block(AnalysisElement d, int index, String text, List<ISemanticModel> models, Lang lang) {
+    public Block(AnalysisElement d, int index, String text, List<SemanticModel> models, Lang lang) {
         super(d, index, text.trim(), models, lang);
         this.sentences = new ArrayList<>();
     }

@@ -21,8 +21,7 @@ import com.readerbench.comprehensionmodel.utils.AoAMetric;
 import com.readerbench.comprehensionmodel.utils.indexer.CMIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.lsa.LSA;
-import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +39,13 @@ public class WordLinkageCalculator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WordLinkageCalculator.class);
 
-    private final LSA semanticModel;
+    private final SemanticModel semanticModel;
     private final double threshold;
     private AbstractDocument document;
 
     private CMGraphDO graph;
 
-    public WordLinkageCalculator(String text, LSA semanticModel, double threshold) {
+    public WordLinkageCalculator(String text, SemanticModel semanticModel, double threshold) {
         this.semanticModel = semanticModel;
         this.threshold = threshold;
 
@@ -97,41 +96,37 @@ public class WordLinkageCalculator {
         double scoreSum = 0.0, degreeSum = 0.0, idfSum = 0.0;
         double sumAoa = 0.0;
         double idsAoaSum = 0.0;
-        double numNodes = 0.0;
         double totalNoOccurences = 0.0;
-        
+
         for (CMNodeDO node : this.graph.getNodeList()) {
-            double aoaScore = 0.0;
+            double aoaScore;
             if (aoa.containsKey(node.getWord().getLemma())) {
                 aoaScore = aoa.get(node.getWord().getLemma());
             } else if (aoa.containsKey(node.getWord().toString())) {
                 aoaScore = aoa.get(node.getWord().toString());
-            }
-            else {
+            } else {
                 continue;
             }
-            numNodes ++;
             double noOccurences = 1.0;
             if (document.getWordOccurences().containsKey(node.getWord())) {
-                noOccurences = (double)document.getWordOccurences().get(node.getWord());
+                noOccurences = (double) document.getWordOccurences().get(node.getWord());
             }
-            
+
             double nodeDegree = (double) this.graph.getEdgeList(node).size();
-            double idf = this.semanticModel.getWordIDf(node.getWord());
-            
-            idsAoaSum += noOccurences * idf * aoaScore;
-            idfSum += noOccurences * idf;
-            
+
+            idsAoaSum += noOccurences * aoaScore;
+            idfSum += noOccurences;
+
             scoreSum += nodeDegree * aoaScore;
             degreeSum += nodeDegree;
-            
+
             totalNoOccurences += noOccurences;
             sumAoa += noOccurences * aoaScore;
         }
         if (degreeSum == 0.0) {
             return new AoAMetric();
         }
-                
+
         AoAMetric metric = new AoAMetric();
         metric.setAvg(sumAoa / totalNoOccurences);
         metric.setWeightedAvg(scoreSum / degreeSum);
@@ -140,7 +135,7 @@ public class WordLinkageCalculator {
     }
 
     /**
-     * The method was copied from com.readerbench.ageofexposur.TASAAnalyzer
+     *
      * @param normFile
      * @return
      */

@@ -16,7 +16,7 @@
 package com.readerbench.coreservices.data.article;
 
 import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class ResearchArticle extends Document {
     private List<String> citationURIList = new ArrayList<>();
     private List<ArticleAuthor> articleAuthorList = new ArrayList<>();
 
-    public ResearchArticle(String path, List<ISemanticModel> models, Lang lang) {
+    public ResearchArticle(String path, List<SemanticModel> models, Lang lang) {
         super(path, models, lang);
     }
 

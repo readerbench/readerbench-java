@@ -14,7 +14,7 @@ import com.readerbench.coreservices.nlp.parsing.SimpleParsing;
 import com.readerbench.coreservices.sentimentanalysis.SentimentAnalysis;
 import com.readerbench.coreservices.data.*;
 import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import com.readerbench.textualcomplexity.ComplexityIndices;
@@ -46,11 +46,11 @@ public abstract class GenericProcessingPipeline {
 
     private final Lang lang;
 
-    private final List<ISemanticModel> models;
+    private final List<SemanticModel> models;
 
     private final List<Annotators> annotators;
 
-    public GenericProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public GenericProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         this.lang = lang;
         this.models = models;
         this.annotators = annotators;
@@ -197,7 +197,7 @@ public abstract class GenericProcessingPipeline {
         return lang;
     }
 
-    public List<ISemanticModel> getModels() {
+    public List<SemanticModel> getModels() {
         return models;
     }
 

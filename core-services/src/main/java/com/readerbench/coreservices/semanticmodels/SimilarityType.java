@@ -17,45 +17,35 @@ package com.readerbench.coreservices.semanticmodels;
 
 import cc.mallet.util.Maths;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.coreservices.semanticmodels.lda.LDA;
-import com.readerbench.coreservices.semanticmodels.lsa.LSA;
-import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
-import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
+import static com.readerbench.coreservices.semanticmodels.SimilarityType.LDA;
+import static com.readerbench.coreservices.semanticmodels.SimilarityType.LSA;
 import com.readerbench.datasourceprovider.pojo.Lang;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import org.apache.spark.ml.feature.Word2VecModel;
 
 /**
  *
  * @author Stefan
  */
 public enum SimilarityType {
-    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", null, OntologySupport::getAvailableLanguages, false),
-    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", null, OntologySupport::getAvailableLanguages, false),
-    PATH_SIM("Path", "Inverse path length in WordNet", null, OntologySupport::getAvailableLanguages, false),
-    LSA("LSA", "Cosine similarity in LSA vector space", VectorAlgebra::cosineSimilarity,
-            com.readerbench.coreservices.semanticmodels.lsa.LSA::getAvailableLanguages, true),
-    LDA("LDA", "Inverse JSH in LDA probability distribution", (v1, v2) -> 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(v1), VectorAlgebra.normalize(v2)),
-            com.readerbench.coreservices.semanticmodels.lda.LDA::getAvailableLanguages, true),
-    WORD2VEC("word2vec", "Cosine similarity in word2vec space", VectorAlgebra::cosineSimilarity,
-            Word2VecModel::getAvailableLanguages, true);
+    LEACOCK_CHODOROW("LeackockChodorow", "Leackock-Chodorow semantic distance in WordNet", null, false),
+    WU_PALMER("WuPalmer", "Wu-Palmer semantic distance in WordNet", null, false),
+    PATH_SIM("Path", "Inverse path length in WordNet", null, false),
+    LSA("LSA", "Cosine similarity in LSA vector space", VectorAlgebra::cosineSimilarity, true),
+    LDA("LDA", "Inverse JSH in LDA probability distribution", (v1, v2) -> 1 - Maths.jensenShannonDivergence(VectorAlgebra.normalize(v1), VectorAlgebra.normalize(v2)), true),
+    WORD2VEC("word2vec", "Cosine similarity in word2vec space", VectorAlgebra::cosineSimilarity, true);
 
     private final String acronym;
     private final String name;
-    private final Supplier<Set<Lang>> supplier;
     private final BiFunction<double[], double[], Double> similarityFuction;
     private final boolean loadable;
 
-    private SimilarityType(String acronym, String name, BiFunction<double[], double[], Double> similarityFuction, Supplier<Set<Lang>> supplier, boolean loadable) {
+    private SimilarityType(String acronym, String name, BiFunction<double[], double[], Double> similarityFuction, boolean loadable) {
         this.acronym = acronym;
         this.name = name;
-        this.supplier = supplier;
         this.similarityFuction = similarityFuction;
         this.loadable = loadable;
     }
@@ -68,10 +58,6 @@ public enum SimilarityType {
         return acronym;
     }
 
-    public Set<Lang> getAvailableLanguages() {
-        return supplier.get();
-    }
-
     public boolean isLoadable() {
         return loadable;
     }
@@ -80,26 +66,13 @@ public enum SimilarityType {
         return similarityFuction;
     }
 
-    public static List<ISemanticModel> loadVectorModels(Map<SimilarityType, String> modelPaths, Lang lang) {
+    public static List<SemanticModel> loadVectorModels(Map<SimilarityType, String> modelPaths, Lang lang) {
         // load also LSA vector space and LDA model
-        List<ISemanticModel> models = new ArrayList<>();
+        List<SemanticModel> models = new ArrayList<>();
         if (modelPaths != null) {
-            for (Map.Entry<SimilarityType, String> e : modelPaths.entrySet()) {
-                switch (e.getKey()) {
-                    case LDA:
-                        LDA lda = com.readerbench.coreservices.semanticmodels.lda.LDA.loadLDA(e.getValue(), lang);
-                        models.add(lda);
-                        break;
-                    case LSA:
-                        LSA lsa = com.readerbench.coreservices.semanticmodels.lsa.LSA.loadLSA(e.getValue(), lang);
-                        models.add(lsa);
-                        break;
-                    case WORD2VEC:
-                        Word2VecModel w2v = com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel.loadWord2Vec(e.getValue(), lang);
-                        models.add(w2v);
-                        break;
-                }
-            }
+            modelPaths.entrySet().stream().map((e) -> SemanticModel.loadModel(e.getValue(), lang, e.getKey())).filter((model) -> (model != null)).forEachOrdered((model) -> {
+                models.add(model);
+            });
         }
         return models;
     }

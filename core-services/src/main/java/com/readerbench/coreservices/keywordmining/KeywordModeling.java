@@ -22,7 +22,7 @@ import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.NGram;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,16 +192,16 @@ public class KeywordModeling {
 
         Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
 
-        for (ISemanticModel model : e.getSemanticModelsAsList()) {
+        for (SemanticModel model : e.getSemanticModelsAsList()) {
             double[] vec = new double[model.getNoDimensions()];
             topics.stream().forEach((topic) -> {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
-                    if (topic.getWord().getModelRepresentation(model.getType()) != null) {
-                        vec[i] += topic.getWord().getModelRepresentation(model.getType())[i];
+                    if (topic.getWord().getModelRepresentation(model.getSimilarityType()) != null) {
+                        vec[i] += topic.getWord().getModelRepresentation(model.getSimilarityType())[i];
                     }
                 }
             });
-            modelVectors.put(model.getType(), vec);
+            modelVectors.put(model.getSimilarityType(), vec);
         }
 
         TreeMap<Word, Double> inferredConceptsCandidates = new TreeMap<>();

@@ -17,7 +17,7 @@ package com.readerbench.coreservices.data.document;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class Document extends AbstractDocument implements Comparable<Document> {
     private Date date;
     private List<Word> initialTopics;
 
-    public Document(String path, List<ISemanticModel> models, Lang lang) {
+    public Document(String path, List<SemanticModel> models, Lang lang) {
         super(path, models, lang);
         this.authors = new ArrayList<>();
         this.initialTopics = new ArrayList<>();
@@ -92,8 +92,8 @@ public class Document extends AbstractDocument implements Comparable<Document> {
         if (this.getTitleText() != null) {
             descr.append(this.getTitleText()).append("_");
         }
-        for (ISemanticModel model : getSemanticModelsAsList()) {
-            descr.append(model.getPath()).append("_");
+        for (SemanticModel model : getSemanticModelsAsList()) {
+            descr.append(model.getName()).append("_");
         }
         if (this.getAuthors() != null) {
             descr.append(this.getAuthors().stream().map((author) -> author + "_").reduce("", String::concat));

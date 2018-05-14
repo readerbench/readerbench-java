@@ -20,7 +20,7 @@ import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.article.ArticleAuthor;
 import com.readerbench.coreservices.data.article.ResearchArticle;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.importdata.ImportDocument;
@@ -54,7 +54,7 @@ public class ResearchArticleProcessingPipeline extends DocumentProcessingPipelin
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResearchArticleProcessingPipeline.class);
 
-    public ResearchArticleProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public ResearchArticleProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
 

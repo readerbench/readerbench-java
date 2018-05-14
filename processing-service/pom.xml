@@ -111,6 +111,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
         </dependency>
+        
+        <!-- ReaderBench resources required for testing-->
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-tasa-en</artifactId>
+        </dependency>
+        <!-- / ReaderBench resources-->
     </dependencies>
     <build>
         <resources>

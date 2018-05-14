@@ -16,13 +16,11 @@
 package com.readerbench.comprehensionmodel.utils.indexer;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.Sentence;
-import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMCorefIndexer;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMSyntacticGraph;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,13 +32,13 @@ import java.util.List;
  */
 public class CMIndexer {
 
-    private final ISemanticModel semanticModel;
+    private final SemanticModel semanticModel;
     private final String text;
     public AbstractDocument document;
 
     private List<WordDistanceIndexer> syntacticIndexerList;
 
-    public CMIndexer(String text, ISemanticModel semanticModel) {
+    public CMIndexer(String text, SemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;
         this.indexSyntacticDistances();
@@ -73,7 +71,7 @@ public class CMIndexer {
         return this.document;
     }
 
-    public ISemanticModel getSemanticModel() {
+    public SemanticModel getSemanticModel() {
         return this.semanticModel;
     }
 }

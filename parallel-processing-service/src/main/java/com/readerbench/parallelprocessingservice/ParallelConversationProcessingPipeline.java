@@ -9,7 +9,7 @@ import akka.pattern.Patterns;
 import com.readerbench.coreservices.cscl.data.Community;
 import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.parallelprocessingservice.actors.cscl.ConversationActorSystem;
 import com.readerbench.datasourceprovider.elasticsearch.ElasticsearchService;
@@ -51,7 +51,7 @@ public class ParallelConversationProcessingPipeline {
 
     private String communityName;
     private Lang lang;
-    private List<ISemanticModel> models;
+    private List<SemanticModel> models;
     private List<Annotators> annotators;
     private Date startDate;
     private Date endDate;

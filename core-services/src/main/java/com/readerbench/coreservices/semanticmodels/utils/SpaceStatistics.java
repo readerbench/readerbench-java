@@ -17,12 +17,8 @@ package com.readerbench.coreservices.semanticmodels.utils;
 
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
-import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.commons.Formatting;
-import com.readerbench.coreservices.semanticmodels.lda.LDA;
-import com.readerbench.coreservices.semanticmodels.utils.WordPairSimilarity;
-import com.readerbench.coreservices.semanticmodels.utils.WordSimilarityContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,17 +31,15 @@ public class SpaceStatistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpaceStatistics.class);
 
-    private final ISemanticModel semModel;
+    private final SemanticModel semModel;
     private final int noWords;
     private List<WordPairSimilarity> relevantWordPairList;
     private WordSimilarityContainer wordSimilarityContainer;
-    private final String indexPath;
 
-    public SpaceStatistics(ISemanticModel semModel) {
-        LOGGER.info("Loading " + semModel.getPath() + "...");
+    public SpaceStatistics(SemanticModel semModel) {
+        LOGGER.info("Loading " + semModel.getName() + "...");
         this.semModel = semModel;
         this.noWords = semModel.getWordSet().size();
-        this.indexPath = semModel.getPath() + File.separator + "index.ser";
     }
 
     public void buildWordDistances() {
@@ -115,49 +109,14 @@ public class SpaceStatistics {
         LOGGER.info("No significant word associations (above avg-stdev):\t" + Formatting.formatNumber(s02));
         LOGGER.info("Average similarity for significant word associations (above avg-stdev):\t" + Formatting.formatNumber(avg));
         LOGGER.info("Stdev similarity for significant word associations (above avg-stdev):\t" + Formatting.formatNumber(stdev));
-
-        this.saveSerializedRelevantSimilarities();
-    }
-
-    private void saveSerializedRelevantSimilarities() {
-        try {
-            File f = new File(this.indexPath.substring(0, this.indexPath.lastIndexOf("/")));
-            f.mkdirs();
-
-            FileOutputStream fout = new FileOutputStream(this.indexPath);
-            try (ObjectOutputStream oos = new ObjectOutputStream(fout)) {
-                oos.writeObject(this.wordSimilarityContainer);
-            }
-            LOGGER.info("Written serialized relevant similarities to " + this.indexPath);
-        } catch (Exception ex) {
-            LOGGER.error("Error serializing relevant similarities to " + this.indexPath + " - " + ex.getMessage());
-            LOGGER.error(ex.getMessage());
-        }
-    }
-
-    private boolean loadRelevantSimilarities() {
-        try {
-            InputStream file = new FileInputStream(this.indexPath);
-            InputStream buffer = new BufferedInputStream(file);
-            try (ObjectInput input = new ObjectInputStream(buffer)) {
-                this.wordSimilarityContainer = (WordSimilarityContainer) input.readObject();
-                LOGGER.info("Loaded relevant similarities ...");
-            }
-            return true;
-        } catch (IOException | ClassNotFoundException ex) {
-            LOGGER.error("Failed to load the serialized relevant similarities from " + this.indexPath + " - " + ex.getMessage());
-            return false;
-        }
     }
 
     public WordSimilarityContainer getWordSimilarityContainer() {
-        if (!this.loadRelevantSimilarities()) {
-            this.buildWordDistances();
-        }
+        buildWordDistances();
         return this.wordSimilarityContainer;
     }
 
-    public ISemanticModel getSemModel() {
+    public SemanticModel getSemModel() {
         return semModel;
     }
 
@@ -179,7 +138,7 @@ public class SpaceStatistics {
                 32768)) {
             out.write("Word 1, Word 2");
             for (SpaceStatistics space : corpora) {
-                out.write("," + space.getSemModel().getPath());
+                out.write("," + space.getSemModel().getName());
             }
 
             for (WordPairSimilarity c : corpora.get(0).relevantWordPairList) {
@@ -217,7 +176,7 @@ public class SpaceStatistics {
         SIM_DEGREE
     }
 
-    public static void determineWLP(String pathToOutput, SpaceStatistics space, LDA referenceSpace) {
+    public static void determineWLP(String pathToOutput, SpaceStatistics space, SemanticModel referenceSpace) {
         LOGGER.info("Writing word linkage power statistics based on baseline corpus ...");
         File output = new File(pathToOutput);
 
@@ -225,10 +184,10 @@ public class SpaceStatistics {
                 32768)) {
             out.write("Word");
             for (SNAIndices index : SNAIndices.values()) {
-                out.write("," + index.name() + "(" + space.getSemModel().getPath() + ")");
+                out.write("," + index.name() + "(" + space.getSemModel().getName() + ")");
             }
             for (SNAIndices index : SNAIndices.values()) {
-                out.write(",NORM_" + index.name() + "(" + space.getSemModel().getPath() + ")");
+                out.write(",NORM_" + index.name() + "(" + space.getSemModel().getName() + ")");
             }
 
             Map<String, EnumMap<SNAIndices, Double>> wlps = new TreeMap<>();
@@ -268,28 +227,4 @@ public class SpaceStatistics {
         }
 
     }
-
-    public static void main(String[] args) {
-
-        // SpaceStatistics ss = new SpaceStatistics(LDA.loadLDA("in/HDP/grade4",
-        // Lang.eng));
-        // ss.buildWordDistances();
-        // ss.computeGraphStatistics();
-        // int initialGrade = 2;
-        // SpaceStatistics baseline = new
-        // SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + initialGrade,
-        // Lang.eng));
-        // List<SpaceStatistics> corpora = new ArrayList<SpaceStatistics>();
-        //
-        // corpora.add(baseline);
-        // for (int i = initialGrade - 1; i > 0; i--) {
-        // corpora.add(new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + i, Lang.eng)));
-        // }
-        // compareSpaces("resources/in/HDP/comparison HDP 12-.csv", corpora);
-        int gradeLevel = 0;
-        LDA matureSpace = LDA.loadLDA("resources/in/HDP/grade12", Lang.en);
-        determineWLP("resources/in/HDP/WLP HDP " + gradeLevel + ".csv",
-                new SpaceStatistics(LDA.loadLDA("resources/in/HDP/grade" + gradeLevel, Lang.en)), matureSpace);
-    }
-
 }

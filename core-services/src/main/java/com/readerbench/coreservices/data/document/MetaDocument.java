@@ -16,7 +16,7 @@
 package com.readerbench.coreservices.data.document;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,7 @@ public class MetaDocument extends Document {
     private final List<AbstractDocument> children = new ArrayList<>();
     private DocumentLevel level;
 
-    public MetaDocument(String path, List<ISemanticModel> models, Lang lang) {
+    public MetaDocument(String path, List<SemanticModel> models, Lang lang) {
         super(path, models, lang);
     }
 

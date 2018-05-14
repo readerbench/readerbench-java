@@ -8,7 +8,7 @@ package com.readerbench.parallelprocessingservice;
 import akka.pattern.Patterns;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.parallelprocessingservice.actors.document.DocumentActorSystem;
 import com.readerbench.parallelprocessingservice.messages.ProcessDocumentsInitMessage;
@@ -31,7 +31,7 @@ public class ParallelDocumentProcessingPipeline {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParallelDocumentProcessingPipeline.class);
 
-    public List<Document> loadXMLsFromDirectory(String directoryPath, Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public List<Document> loadXMLsFromDirectory(String directoryPath, Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
         List<AbstractDocumentTemplate> templates = new ArrayList<>();
 

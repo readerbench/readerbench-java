@@ -23,7 +23,7 @@ import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.cscl.data.Participant;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import java.util.Date;
@@ -45,7 +45,7 @@ public class CommunityProcessingPipeline extends ConversationProcessingPipeline 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommunityProcessingPipeline.class);
 
-    public CommunityProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public CommunityProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
 

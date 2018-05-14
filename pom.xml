@@ -59,7 +59,6 @@
     <modules>
         <module>datasource-provider</module>
         <module>textual-complexity</module>
-        <module>age-of-exposure</module>
         <module>comprehension-model</module>
         <module>reading-strategies</module>
         <module>processing-service</module>

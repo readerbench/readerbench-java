@@ -33,17 +33,13 @@ import java.util.List;
  * @author Mihai Dascalu
  */
 // class responsible for evaluating collaboration
-public class Collaboration {
+public class CollaborationEvaluation {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Collaboration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollaborationEvaluation.class);
 
     public static final double COLLABORATION_ZONE_SLACK = 0.1;
     public static final int COLLABORATION_ZONE_MIN_SPREAD = 3;
     public static double BETA_FSCORE = 1;
-    public static double COLLABORATION_SENTIMENT_SLACK = 0.5;
-    public static int INVALID_SENTIMENT_VALUE = -100;
-
-    CollaborationZones collaborations;
 
     public static List<CollaborationZone> getCollaborationZones(double[] distribution) {
         // generic method for determining intense collaboration zones
@@ -140,8 +136,6 @@ public class Collaboration {
         return zones;
     }
 
-
-
     public static void evaluateSocialKB(Conversation c) {
         try {
             LOGGER.info("Computing collaboration zones");
@@ -229,7 +223,7 @@ public class Collaboration {
     }
 
     public static double[] overlapCollaborationZones(Conversation c, List<CollaborationZone> l1,
-                                                     List<CollaborationZone> l2) {
+            List<CollaborationZone> l2) {
         // evaluate precision and recall for identified collaboration zones
         double precision = 0, recall = 0, fscore = 0;
         if (l1 != null && l2 != null && l1.size() > 0 && l2.size() > 0) {
@@ -292,213 +286,8 @@ public class Collaboration {
             }
 
             return new double[]{Formatting.formatNumber(precision), Formatting.formatNumber(recall),
-                    Formatting.formatNumber(fscore)};
+                Formatting.formatNumber(fscore)};
         }
         return new double[3];
     }
-
-    public static List<CollaborationZone> getConvergentZones(double[] distribution) {
-        // generic method for determining intense convergent zones
-        int maxDistance = Math.max(1, (int) (COLLABORATION_ZONE_SLACK * distribution.length));
-        double sumCollaboration = 0;
-        int noCollaboration = 0;
-        double avgCollaboration = 0;
-        // determine average collaborative gain
-        for (int i = 0; i < distribution.length; i++) {
-            if (distribution[i] >= 0) {
-                sumCollaboration += distribution[i];
-                noCollaboration++;
-            }
-        }
-
-        if (noCollaboration != 0) {
-            avgCollaboration = sumCollaboration / noCollaboration;
-        }
-
-        List<CollaborationZone> zones = new ArrayList<>();
-
-        boolean[] visited = new boolean[distribution.length];
-        int indexMax;
-        double valueMax;
-        while (true) {
-            indexMax = -1;
-            valueMax = Double.MIN_VALUE;
-            // determine maximum
-            for (int i = 0; i < distribution.length; i++) {
-                if (!visited[i]) {
-                    if (distribution[i] > valueMax) {
-                        valueMax = distribution[i];
-                        indexMax = i;
-                    }
-                }
-            }
-
-            if (valueMax < avgCollaboration) {
-                break;
-            }
-
-            if (indexMax != -1) {
-                visited[indexMax] = true;
-
-                // expand left
-                int left = indexMax;
-                while (true) {
-                    boolean expand = false;
-                    for (int i = 1; i <= maxDistance; i++) {
-                        if (left - i >= 0 && distribution[left - i] >= avgCollaboration) {
-                            left = left - i;
-                            visited[left] = true;
-                            expand = true;
-                            break;
-                        } else if (left - i >= 0 && distribution[left - i] < 0) {
-                            break;
-                        }
-                    }
-                    if (!expand) {
-                        break;
-                    }
-                }
-
-                // expand right
-                int right = indexMax;
-                while (true) {
-                    boolean expand = false;
-                    for (int i = 1; i <= maxDistance; i++) {
-                        if (right + i < distribution.length && distribution[right + i] >= avgCollaboration) {
-                            right = right + i;
-                            visited[right] = true;
-                            expand = true;
-                            break;
-                        } else if (right + i < distribution.length && distribution[right + i] < 0) {
-                            break;
-                        }
-                    }
-                    if (!expand) {
-                        break;
-                    }
-                }
-
-                // classify intense collaboration zone
-                int noBlocks = right - left + 1;
-                double sumValueUtterances = 0;
-                for (int i = left; i <= right; i++) {
-                    sumValueUtterances += distribution[i];
-                }
-                if (noBlocks != 0) {
-                    sumValueUtterances /= noBlocks;
-                }
-                if (noBlocks >= COLLABORATION_ZONE_MIN_SPREAD) {
-                    CollaborationZone zone = new CollaborationZone(left, right, sumValueUtterances, noBlocks, 1);
-                    zones.add(zone);
-                }
-            } else {
-                break;
-            }
-        }
-        Collections.sort(zones);
-        return zones;
-    }
-
-    public static List<CollaborationZone> getDivergentZones(double[] distribution) {
-        // generic method for determining intense divergent zones
-        int maxDistance = Math.max(1, (int) (COLLABORATION_ZONE_SLACK * distribution.length));
-        double sumCollaboration = 0;
-        int noCollaboration = 0;
-        double avgCollaboration = 0;
-        // determine average collaborative gain
-        for (int i = 0; i < distribution.length; i++) {
-            if (distribution[i] <= 0) {
-                sumCollaboration += distribution[i];
-                noCollaboration++;
-            }
-        }
-
-        if (noCollaboration != 0) {
-            avgCollaboration = sumCollaboration / noCollaboration;
-        }
-
-        List<CollaborationZone> zones = new ArrayList<>();
-
-        boolean[] visited = new boolean[distribution.length];
-        int indexMin;
-        double valueMin;
-        while (true) {
-            indexMin = -1;
-            valueMin = Double.MAX_VALUE;
-            // determine minimum
-            for (int i = 0; i < distribution.length; i++) {
-                if (!visited[i]) {
-                    if (distribution[i] < valueMin) {
-                        valueMin = distribution[i];
-                        indexMin = i;
-                    }
-                }
-            }
-
-            if (valueMin > avgCollaboration) {
-                break;
-            }
-
-            if (indexMin != -1) {
-                visited[indexMin] = true;
-
-                // expand left
-                int left = indexMin;
-                while (true) {
-                    boolean expand = false;
-                    for (int i = 1; i <= maxDistance; i++) {
-                        if (left - i >= 0 && distribution[left - i] <= avgCollaboration) {
-                            left = left - i;
-                            visited[left] = true;
-                            expand = true;
-                            break;
-                        } else if (left - i >= 0 && distribution[left - i] > 0) {
-                            break;
-                        }
-                    }
-                    if (!expand) {
-                        break;
-                    }
-                }
-
-                // expand right
-                int right = indexMin;
-                while (true) {
-                    boolean expand = false;
-                    for (int i = 1; i <= maxDistance; i++) {
-                        if (right + i < distribution.length && distribution[right + i] <= avgCollaboration) {
-                            right = right + i;
-                            visited[right] = true;
-                            expand = true;
-                            break;
-                        } else if (right + i < distribution.length && distribution[right + i] > 0) {
-                            break;
-                        }
-                    }
-                    if (!expand) {
-                        break;
-                    }
-                }
-
-                // classify intense collaboration zone
-                int noBlocks = right - left + 1;
-                double sumValueUtterances = 0;
-                for (int i = left; i <= right; i++) {
-                    sumValueUtterances += distribution[i];
-                }
-                if (noBlocks != 0) {
-                    sumValueUtterances /= noBlocks;
-                }
-                if (noBlocks >= COLLABORATION_ZONE_MIN_SPREAD) {
-                    CollaborationZone zone = new CollaborationZone(left, right, sumValueUtterances, noBlocks, -1);
-                    zones.add(zone);
-                }
-            } else {
-                break;
-            }
-        }
-        Collections.sort(zones);
-        return zones;
-    }
-
 }

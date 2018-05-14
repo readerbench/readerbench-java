@@ -24,7 +24,6 @@ import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
-import com.readerbench.coreservices.semanticmodels.lsa.LSA;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import org.slf4j.Logger;
@@ -37,8 +36,8 @@ import java.util.Map.Entry;
 public class PreProcessing {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreProcessing.class);
-
     public static final int MIN_NO_OCCURRENCES = 5;
+    public static final int LOWER_BOUND = 50;
 
     private final Map<String, Integer> newConcepts = new TreeMap<>();
 
@@ -134,7 +133,7 @@ public class PreProcessing {
             try (BufferedReader in = new BufferedReader(ir)) {
                 String line;
                 while ((line = in.readLine()) != null) {
-                    if (line.length() > LSA.LOWER_BOUND) {
+                    if (line.length() > LOWER_BOUND) {
                         total_docs_to_process++;
                     }
                 }
@@ -149,7 +148,7 @@ public class PreProcessing {
                 try (BufferedReader in = new BufferedReader(new FileReader(f))) {
                     String line, toWrite;
                     while ((line = in.readLine()) != null) {
-                        if (line.length() > LSA.LOWER_BOUND) {
+                        if (line.length() > LOWER_BOUND) {
                             // toWrite = processContent(
                             // TextPreprocessing.replaceFrCorpusAdnotations(StringEscapeUtils.escapeXml(line)),
                             // lang, usePOSTagging, noMinWordPerDoc);
@@ -203,7 +202,7 @@ public class PreProcessing {
                     String line, toWrite, content = "";
                     while ((line = in.readLine()) != null) {
                         if (line.length() == 0 || line.startsWith("<")) {
-                            if (content.length() > LSA.LOWER_BOUND) {
+                            if (content.length() > LOWER_BOUND) {
                                 toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
                                 if (toWrite.length() > 0) {
                                     out.write(toWrite + "\n");
@@ -225,7 +224,7 @@ public class PreProcessing {
                             }
                         }
                     }
-                    if (content.length() > LSA.LOWER_BOUND) {
+                    if (content.length() > LOWER_BOUND) {
                         LOGGER.info("Processing last block document {} of {}", new Object[]{++current_doc_to_process, total_docs_to_process});
                         toWrite = processContent(content, lang, usePOSTagging, noMinWordPerDoc, wordsToIgnore);
                         if (toWrite.length() > 0) {
@@ -272,7 +271,7 @@ public class PreProcessing {
                     String line, toWrite;
 
                     while ((line = in.readLine()) != null) {
-                        if (line.length() > LSA.LOWER_BOUND) {
+                        if (line.length() > LOWER_BOUND) {
                             line = line.replaceAll("##[0-9]* ]", "");
                             line = line.replaceAll("<p>", "\n");
                             line = line.replaceAll(" // ", "\n");

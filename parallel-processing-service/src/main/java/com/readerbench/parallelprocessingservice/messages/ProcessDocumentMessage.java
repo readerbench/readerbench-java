@@ -6,7 +6,7 @@
 package com.readerbench.parallelprocessingservice.messages;
 
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import java.util.List;
@@ -19,10 +19,10 @@ public class ProcessDocumentMessage {
     
     private AbstractDocumentTemplate template;
     private final Lang lang;
-    private final List<ISemanticModel> models;
+    private final List<SemanticModel> models;
     private final List<Annotators> annotators;
 
-    public ProcessDocumentMessage(AbstractDocumentTemplate template, Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public ProcessDocumentMessage(AbstractDocumentTemplate template, Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         this.template = template;
         this.lang = lang;
         this.models = models;
@@ -41,7 +41,7 @@ public class ProcessDocumentMessage {
         return lang;
     }
 
-    public List<ISemanticModel> getModels() {
+    public List<SemanticModel> getModels() {
         return models;
     }
 

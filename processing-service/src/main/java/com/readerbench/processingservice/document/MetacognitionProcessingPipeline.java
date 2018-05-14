@@ -22,7 +22,7 @@ import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.data.document.Metacognition;
 import com.readerbench.coreservices.data.document.ReadingStrategyType;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
@@ -56,7 +56,7 @@ public class MetacognitionProcessingPipeline extends DocumentProcessingPipeline 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetacognitionProcessingPipeline.class);
 
-    public MetacognitionProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public MetacognitionProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
 

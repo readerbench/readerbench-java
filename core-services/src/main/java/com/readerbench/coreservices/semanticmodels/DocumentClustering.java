@@ -7,7 +7,6 @@ package com.readerbench.coreservices.semanticmodels;
 
 import com.readerbench.coreservices.commons.Clustering;
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 
 /**
  *
@@ -15,9 +14,9 @@ import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
  */
 public class DocumentClustering extends Clustering {
 
-    private final ISemanticModel model;
+    private final SemanticModel model;
 
-    public DocumentClustering(ISemanticModel model) {
+    public DocumentClustering(SemanticModel model) {
         this.model = model;
     }
 

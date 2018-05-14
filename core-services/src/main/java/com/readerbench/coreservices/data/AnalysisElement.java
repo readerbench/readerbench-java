@@ -16,10 +16,10 @@
 package com.readerbench.coreservices.data;
 
 import com.readerbench.coreservices.keywordmining.Keyword;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.coreservices.cscl.data.Utterance;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public abstract class AnalysisElement implements Serializable {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AnalysisElement.class);
 
     private int index;
-    protected transient Map<SimilarityType, ISemanticModel> semanticModels;
+    protected transient Map<SimilarityType, SemanticModel> semanticModels;
     protected Map<SimilarityType, double[]> modelVectors;
 
     private Lang language;
@@ -78,11 +78,11 @@ public abstract class AnalysisElement implements Serializable {
      * @param models
      * @param language
      */
-    public AnalysisElement(List<ISemanticModel> models, Lang language) {
+    public AnalysisElement(List<SemanticModel> models, Lang language) {
         this();
         if (models != null) {
             models.stream().filter((model) -> (model != null)).forEach((model) -> {
-                semanticModels.put(model.getType(), model);
+                semanticModels.put(model.getSimilarityType(), model);
             });
         }
         this.language = language;
@@ -94,7 +94,7 @@ public abstract class AnalysisElement implements Serializable {
      * @param models
      * @param language
      */
-    public AnalysisElement(AnalysisElement elem, int index, List<ISemanticModel> models, Lang language) {
+    public AnalysisElement(AnalysisElement elem, int index, List<SemanticModel> models, Lang language) {
         this(models, language);
         this.index = index;
         this.container = elem;
@@ -105,7 +105,7 @@ public abstract class AnalysisElement implements Serializable {
      * @param models
      * @param language
      */
-    public AnalysisElement(String text, List<ISemanticModel> models, Lang language) {
+    public AnalysisElement(String text, List<SemanticModel> models, Lang language) {
         this(models, language);
         this.text = text;
         this.alternateText = text;
@@ -118,7 +118,7 @@ public abstract class AnalysisElement implements Serializable {
      * @param models
      * @param language
      */
-    public AnalysisElement(AnalysisElement elem, int index, String text, List<ISemanticModel> models, Lang language) {
+    public AnalysisElement(AnalysisElement elem, int index, String text, List<SemanticModel> models, Lang language) {
         this(elem, index, models, language);
         this.text = text;
         this.alternateText = text;
@@ -129,7 +129,7 @@ public abstract class AnalysisElement implements Serializable {
      * * individual word representation
      */
     public void determineSemanticDimensions() {
-        for (Map.Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+        for (Map.Entry<SimilarityType, SemanticModel> e : semanticModels.entrySet()) {
             double[] vec = new double[e.getValue().getNoDimensions()];
             for (Word word : wordOccurences.keySet()) {
                 if (word.getModelRepresentation(e.getKey()) != null) {
@@ -345,18 +345,18 @@ public abstract class AnalysisElement implements Serializable {
         this.sentimentEntity = sentimentEntity;
     }
 
-    public List<ISemanticModel> getSemanticModelsAsList() {
+    public List<SemanticModel> getSemanticModelsAsList() {
         return new ArrayList<>(semanticModels.values());
     }
 
-    public Map<SimilarityType, ISemanticModel> getSemanticModels() {
+    public Map<SimilarityType, SemanticModel> getSemanticModels() {
         return semanticModels;
     }
 
-    public final void setSemanticModels(List<ISemanticModel> models) {
+    public final void setSemanticModels(List<SemanticModel> models) {
         semanticModels = new EnumMap<>(SimilarityType.class);
-        for (ISemanticModel model : models) {
-            semanticModels.put(model.getType(), model);
+        for (SemanticModel model : models) {
+            semanticModels.put(model.getSimilarityType(), model);
         }
     }
 
@@ -372,7 +372,7 @@ public abstract class AnalysisElement implements Serializable {
         return modelVectors.get(type);
     }
 
-    public ISemanticModel getSemanticModel(SimilarityType type) {
+    public SemanticModel getSemanticModel(SimilarityType type) {
         return semanticModels.get(type);
     }
 

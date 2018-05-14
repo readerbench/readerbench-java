@@ -18,7 +18,7 @@ package com.readerbench.coreservices.dialogism;
 import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.cscl.Collaboration;
+import com.readerbench.coreservices.cscl.CollaborationEvaluation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,7 +236,7 @@ public class DialogismMeasures {
                 }
             }
         }
-        c.setIntenseCollabZonesVoice(Collaboration.getCollaborationZones(evolution));
+        c.setIntenseCollabZonesVoice(CollaborationEvaluation.getCollaborationZones(evolution));
         return evolution;
     }
     /*

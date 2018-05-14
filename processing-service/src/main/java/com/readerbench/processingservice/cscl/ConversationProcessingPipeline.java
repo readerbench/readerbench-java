@@ -1,6 +1,6 @@
 package com.readerbench.processingservice.cscl;
 
-import com.readerbench.coreservices.cscl.Collaboration;
+import com.readerbench.coreservices.cscl.CollaborationEvaluation;
 import com.readerbench.coreservices.cscl.ParticipantEvaluation;
 import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.cscl.data.Participant;
@@ -13,7 +13,7 @@ import com.readerbench.coreservices.nlp.spellchecking.Spellchecking;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.Block;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.GenericProcessingPipeline;
@@ -50,7 +50,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
     private final Spellchecking spellChecker = new Spellchecking();
     private final ConversationRestructuringSupport support = new ConversationRestructuringSupport();
 
-    public ConversationProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public ConversationProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
 
@@ -126,7 +126,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
             KeywordModeling.determineKeywords(p.getContributions(), getAnnotators().contains(Annotators.USE_BIGRAMS));
         });
 
-        Collaboration.evaluateSocialKB(c);
+        CollaborationEvaluation.evaluateSocialKB(c);
 
         if (getAnnotators().contains(Annotators.DIALOGISM)) {
             c.setVoicePMIEvolution(DialogismMeasures.getCollaborationEvolution(c));
@@ -337,7 +337,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
                                 }
                             }
                         }
-                        c.setAnnotatedCollabZones(Collaboration.getCollaborationZones(collabEv));
+                        c.setAnnotatedCollabZones(CollaborationEvaluation.getCollaborationZones(collabEv));
                     }
                 }
             }

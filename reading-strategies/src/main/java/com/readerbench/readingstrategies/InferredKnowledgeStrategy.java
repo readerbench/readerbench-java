@@ -19,9 +19,9 @@ import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.ReadingStrategyType;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.datasourceprovider.commons.Formatting;
@@ -59,18 +59,18 @@ public class InferredKnowledgeStrategy {
 
         int noOccur = 0;
 
-        List<ISemanticModel> semanticModels = sentences.get(0).getSemanticModelsAsList();
+        List<SemanticModel> semanticModels = sentences.get(0).getSemanticModelsAsList();
 
         Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
 
-        for (ISemanticModel model : semanticModels) {
+        for (SemanticModel model : semanticModels) {
             double[] vec = new double[model.getNoDimensions()];
             for (Sentence s : sentences) {
                 for (int i = 0; i < model.getNoDimensions(); i++) {
-                    vec[i] += s.getModelRepresentation(model.getType())[i];
+                    vec[i] += s.getModelRepresentation(model.getSimilarityType())[i];
                 }
             }
-            modelVectors.put(model.getType(), vec);
+            modelVectors.put(model.getSimilarityType(), vec);
         }
 
         for (Word w1 : v.getWordOccurences().keySet()) {
@@ -96,8 +96,8 @@ public class InferredKnowledgeStrategy {
                     Word closestWord = null;
 
                     Map<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
-                    for (ISemanticModel model : semanticModels) {
-                        similarities.put(model.getType(), model.getSimilarity(w1.getModelRepresentation(model.getType()), modelVectors.get(model.getType())));
+                    for (SemanticModel model : semanticModels) {
+                        similarities.put(model.getSimilarityType(), model.getSimilarity(w1.getModelRepresentation(model.getSimilarityType()), modelVectors.get(model.getSimilarityType())));
                     }
                     double simSentence = SemanticCohesion.getAggregatedSemanticMeasure(similarities);
 

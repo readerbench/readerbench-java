@@ -20,7 +20,7 @@ import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.data.document.MetaDocument;
 import static com.readerbench.coreservices.data.document.MetaDocument.getDocumentLevelOfElement;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.textualcomplexity.ComplexityIndices;
@@ -48,7 +48,7 @@ public class MetaDocumentProcessingPipeline extends DocumentProcessingPipeline {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetaDocumentProcessingPipeline.class);
 
-    public MetaDocumentProcessingPipeline(Lang lang, List<ISemanticModel> models, List<Annotators> annotators) {
+    public MetaDocumentProcessingPipeline(Lang lang, List<SemanticModel> models, List<Annotators> annotators) {
         super(lang, models, annotators);
     }
 

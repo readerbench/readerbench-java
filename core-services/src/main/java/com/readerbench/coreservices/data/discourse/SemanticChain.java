@@ -17,12 +17,12 @@ package com.readerbench.coreservices.data.discourse;
 
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.coreservices.commons.ValueComparator;
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 import java.io.Serializable;
 import java.util.*;
@@ -33,7 +33,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private static final long serialVersionUID = -7902005522958585451L;
 
-    private transient Map<SimilarityType, ISemanticModel> semanticModels;
+    private transient Map<SimilarityType, SemanticModel> semanticModels;
     private List<Word> words;
     private Map<String, Double> termOccurrences;
     private Map<SimilarityType, double[]> modelVectors;
@@ -46,7 +46,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     private transient SentimentEntity chainSentiment;
 
-    public SemanticChain(LexicalChain chain, List<ISemanticModel> models) {
+    public SemanticChain(LexicalChain chain, List<SemanticModel> models) {
         words = new LinkedList<>();
         this.setSemanticModels(models);
         chain.getLinks().stream().forEach((link) -> {
@@ -72,9 +72,8 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
         EnumMap<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
         for (SimilarityType st : chain1.getSemanticModels().keySet()) {
-            ISemanticModel model = chain1.getSemanticModels().get(st);
-            similarities.put(model.getType(), model.getSimilarity(chain1.getModelVectors().get(st),
-                    chain2.getModelVectors().get(st)));
+            SemanticModel model = chain1.getSemanticModels().get(st);
+            similarities.put(model.getSimilarityType(), model.getSimilarity(chain1.getModelVectors().get(st), chain2.getModelVectors().get(st)));
         }
 
         return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
@@ -109,7 +108,7 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
             modelVectors = new EnumMap<>(SimilarityType.class);
         }
 
-        for (Entry<SimilarityType, ISemanticModel> e : semanticModels.entrySet()) {
+        for (Entry<SimilarityType, SemanticModel> e : semanticModels.entrySet()) {
             double[] vec = new double[e.getValue().getNoDimensions()];
             words.stream()
                     .map(word -> word.getModelRepresentation(e.getKey()))
@@ -320,14 +319,14 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
         return (int) (Math.signum(o.getNoWords() - this.getNoWords()));
     }
 
-    public final void setSemanticModels(List<ISemanticModel> models) {
+    public final void setSemanticModels(List<SemanticModel> models) {
         semanticModels = new EnumMap<>(SimilarityType.class);
-        for (ISemanticModel model : models) {
-            semanticModels.put(model.getType(), model);
+        for (SemanticModel model : models) {
+            semanticModels.put(model.getSimilarityType(), model);
         }
     }
 
-    public Map<SimilarityType, ISemanticModel> getSemanticModels() {
+    public Map<SimilarityType, SemanticModel> getSemanticModels() {
         return semanticModels;
     }
 
@@ -339,6 +338,5 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     public int hashCode() {
         return this.toString().hashCode();
     }
-
 
 }

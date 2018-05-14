@@ -61,9 +61,8 @@ public class CohesionFactory extends ComplexityIndicesFactory {
         result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_SENTENCE_SCORE, IndexLevel.SENTENCE));
         result.add(new ScoreSD(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION, IndexLevel.BLOCK));
         result.add(new ScoreSD(ComplexityIndicesEnum.SENTENCE_SCORE_STANDARD_DEVIATION, IndexLevel.SENTENCE));
-        
+
         for (SimilarityType simType : SimilarityType.values()) {
-            if (!simType.getAvailableLanguages().contains(lang)) continue;
             result.add(new AvgBlockAdjacencyCohesion(simType));
             result.add(new AvgBlockDocCohesion(simType));
             result.add(new AvgInterBlockCohesion(simType));

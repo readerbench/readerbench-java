@@ -15,12 +15,12 @@
  */
 package com.readerbench.coreservices.data.discourse;
 
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.datasourceprovider.commons.Formatting;
 import com.readerbench.coreservices.data.Word;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 import java.io.Serializable;
 import java.util.EnumMap;
@@ -73,7 +73,7 @@ public class SemanticCohesion implements Serializable {
         this.similarities = new EnumMap<>(SimilarityType.class);
 
         source.getSemanticModelsAsList().stream().forEach((semModel) -> {
-            this.similarities.put(semModel.getType(), semModel.getSimilarity(source, destination));
+            this.similarities.put(semModel.getSimilarityType(), semModel.getSimilarity(source, destination));
         });
         similarities.put(SimilarityType.LEACOCK_CHODOROW, getOntologySim(source, destination, SimilarityType.LEACOCK_CHODOROW));
         similarities.put(SimilarityType.WU_PALMER, getOntologySim(source, destination, SimilarityType.WU_PALMER));
@@ -139,8 +139,8 @@ public class SemanticCohesion implements Serializable {
 
     public static double getAverageSemanticModelSimilarity(AnalysisElement u1, AnalysisElement u2) {
         Map<SimilarityType, Double> similarities = new EnumMap<>(SimilarityType.class);
-        for (ISemanticModel model : u1.getSemanticModelsAsList()) {
-            similarities.put(model.getType(), model.getSimilarity(u1.getModelVectors().get(model.getType()), u2.getModelVectors().get(model.getType())));
+        for (SemanticModel model : u1.getSemanticModelsAsList()) {
+            similarities.put(model.getSimilarityType(), model.getSimilarity(u1.getModelVectors().get(model.getSimilarityType()), u2.getModelVectors().get(model.getSimilarityType())));
         }
         return SemanticCohesion.getAggregatedSemanticMeasure(similarities);
     }

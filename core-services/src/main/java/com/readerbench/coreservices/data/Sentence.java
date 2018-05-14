@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.data;
 
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.sentimentanalysis.data.ContextSentiment;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations;
@@ -46,7 +46,7 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     private transient Tree tree;
     private final Map<Word, Word> pronimialReplacementMap;
 
-    public Sentence(Block b, int index, String text, List<ISemanticModel> models, Lang lang) {
+    public Sentence(Block b, int index, String text, List<SemanticModel> models, Lang lang) {
         super(b, index, text.replaceAll("\\s", " ").trim(), models, lang);
         this.words = new ArrayList<>();
         this.allWords = new ArrayList<>();

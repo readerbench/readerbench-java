@@ -16,11 +16,9 @@
 package document;
 
 import com.readerbench.coreservices.commons.SQLiteDatabase;
-import com.readerbench.coreservices.semanticmodels.lsa.LSA;
-import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
@@ -39,7 +37,7 @@ import org.junit.Test;
 public class DocumentProcessingPipelineTest {
 
     protected Lang lang;
-    protected List<ISemanticModel> models;
+    protected List<SemanticModel> models;
     protected List<Annotators> annotators;
 
     @Before
@@ -48,15 +46,9 @@ public class DocumentProcessingPipelineTest {
 
         //todo - the paths to files from resources need to be write in a .properties file
         lang = Lang.en;
-        LSA lsa = LSA.loadLSA("../resources/config/EN/LSA/TASA", Lang.en);
-//        LDA lda = LDA.loadLDA("resources/config/EN/LDA/TASA", Lang.en);
-        Word2VecModel w2v = Word2VecModel.loadWord2Vec("../resources/config/EN/word2vec/TASA", Lang.en);
-        models = new ArrayList<>();
-        models.add(lsa);
-//        models.add(lda);
-        models.add(w2v);
+        models = SemanticModel.loadModels("TASA", lang);
 
-        annotators = new ArrayList<>(Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY));
+        annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
     }
 
     @Test

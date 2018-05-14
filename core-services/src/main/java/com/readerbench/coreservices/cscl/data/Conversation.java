@@ -19,7 +19,7 @@ import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class Conversation extends AbstractDocument {
      * @param models
      * @param lang
      */
-    public Conversation(String path, List<ISemanticModel> models, Lang lang) {
+    public Conversation(String path, List<SemanticModel> models, Lang lang) {
         super(path, models, lang);
         participants = new ArrayList<>();
         intenseCollabZonesSocialKB = new ArrayList<>();

@@ -20,7 +20,7 @@ import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.lexicalchains.DisambiguationGraph;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public abstract class AbstractDocument extends AnalysisElement {
     private List<SemanticChain> voices;
     private List<SemanticChain> extendedVoices;
 
-    public AbstractDocument(String path, List<ISemanticModel> models, Lang lang) {
+    public AbstractDocument(String path, List<SemanticModel> models, Lang lang) {
         this.path = path;
         setLanguage(lang);
         this.disambiguationGraph = new DisambiguationGraph(lang);
@@ -207,7 +207,7 @@ public abstract class AbstractDocument extends AnalysisElement {
         if (!getSemanticModelsAsList().isEmpty()) {
             StringJoiner sj = new StringJoiner(", ", " [", "]");
             getSemanticModelsAsList().stream().forEach((model) -> {
-                sj.add(model.getPath());
+                sj.add(model.getName());
             });
             s += sj;
         }

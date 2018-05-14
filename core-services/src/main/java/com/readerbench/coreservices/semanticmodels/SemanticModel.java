@@ -64,76 +64,56 @@ public class SemanticModel {
     public static SemanticModel loadModel(String name, Lang lang, SimilarityType similarityType) {
         SemanticModel semModel = new SemanticModel(name, lang, similarityType);
         for (SemanticModel model : LOADED_MODELS) {
-            if (semModel.equals(model))  {
+            if (semModel.equals(model)) {
                 return model;
             }
         }
 
-        semModel.importFromCSV(String.format(SEMANTIC_MODELS_PATH, name, lang, similarityType.getAcronym()));
+        semModel.importModel(String.format(SEMANTIC_MODELS_PATH, name, lang, similarityType.getAcronym()));
         if (semModel.getWordRepresentations().isEmpty()) {
             return null;
         }
         return semModel;
     }
 
-    public void importFromCSV(String fileName) {
+    public static List<SemanticModel> loadModels(String name, Lang lang) {
+        List<SemanticModel> models = Arrays.asList(SimilarityType.LSA, SimilarityType.LDA, SimilarityType.WORD2VEC)
+                .stream()
+                .map((simType) -> loadModel(name, lang, simType))
+                .filter((model) -> (model != null))
+                .collect(Collectors.toList());
+        if (models.isEmpty()) {
+            return null;
+        }
+        return models;
+    }
+
+    private void importModel(String fileName) {
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(fileName); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
-            if (!(input.available() > 0)) {
-                return;
-            }
-            String line = in.readLine();
-            String sep = ",";
-            if (line.startsWith("SEP=")) {
-                sep = line.substring(line.length() - 1);
-            }
-
-            line = in.readLine();
-            noDimensions = 0;
-            try {
-                noDimensions = Integer.valueOf(line);
-            } catch (NumberFormatException e) {
-                LOGGER.error(e.getMessage());
-                return;
-            }
-            if (noDimensions == 0) {
-                return;
-            }
-
-            while ((line = in.readLine()) != null) {
-                if (line.equals("")) {
-                    continue;
-                }
-                String[] wordRepresentation = line.split(sep);
-                if (wordRepresentation.length != noDimensions + 1) {
-                    LOGGER.warn("Incorrect line that does not meet the standard format: " + line);
-                    continue;
-                }
-                Word word = Parsing.getWordFromConcept(wordRepresentation[0], language);
-                double[] wordVector = new double[noDimensions];
-                for (int i = 1; i <= noDimensions; i++) {
-                    try {
-                        wordVector[i - 1] = Double.valueOf(wordRepresentation[i]);
-                    } catch (NumberFormatException e) {
-                        LOGGER.error(e.getMessage());
-                        return;
-                    }
-                }
-                wordRepresentations.put(word, wordVector);
+            String[] line = in.readLine().split(" ");
+            int nWords = Integer.parseInt(line[0]);
+            noDimensions = Integer.parseInt(line[1]);
+            for (int i = 0; i < nWords; i++) {
+                line = in.readLine().split(" ");
+                String label = line[0];
+                Word word = Parsing.getWordFromConcept(label, language);
+                wordRepresentations.put(word, Arrays.stream(line, 1, line.length)
+                        .mapToDouble(Double::parseDouble)
+                        .toArray());
             }
         } catch (IOException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
 
-    public void exportToCSV(String fileName, char sep) {
+    public void exportToCSV(String fileName) {
         try (PrintWriter out = new PrintWriter(fileName)) {
-            out.println("sep=" + sep);
-            out.println(this.getNoDimensions());
+            out.println(wordRepresentations.size() + " " + this.getNoDimensions());
             for (Map.Entry<Word, double[]> entry : this.getWordRepresentations().entrySet()) {
                 String v = Arrays.stream(entry.getValue())
                         .mapToObj(d -> d + "")
-                        .collect(Collectors.joining(sep + ""));
-                out.println(entry.getKey().getText() + sep + v);
+                        .collect(Collectors.joining(" "));
+                out.println(entry.getKey().getText() + " " + v);
             }
         } catch (FileNotFoundException ex) {
             LOGGER.error(ex.getMessage());
@@ -227,5 +207,4 @@ public class SemanticModel {
         }
         return true;
     }
-
 }

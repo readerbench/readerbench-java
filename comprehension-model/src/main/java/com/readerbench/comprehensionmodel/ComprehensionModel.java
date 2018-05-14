@@ -21,7 +21,7 @@ import com.readerbench.comprehensionmodel.utils.indexer.WordDistanceIndexer;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMGraphDO;
 import com.readerbench.comprehensionmodel.utils.pageRank.PageRank;
 import com.readerbench.coreservices.data.Sentence;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 public class ComprehensionModel {
 
@@ -32,7 +32,7 @@ public class ComprehensionModel {
     private final CMIndexer cmIndexer;
     private CMGraphDO currentGraph;
 
-    public ComprehensionModel(String text, ISemanticModel semModel, double minActivationScore, int maxDictionaryExpansion) {
+    public ComprehensionModel(String text, SemanticModel semModel, double minActivationScore, int maxDictionaryExpansion) {
         this.cmIndexer = new CMIndexer(text, semModel);
         this.currentGraph = new CMGraphDO();
         this.minActivationScore = minActivationScore;
@@ -103,7 +103,7 @@ public class ComprehensionModel {
                 });
     }
     
-    public ISemanticModel getSemanticModel() {
+    public SemanticModel getSemanticModel() {
         return this.cmIndexer.getSemanticModel();
     }
     

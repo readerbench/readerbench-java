@@ -18,8 +18,8 @@ package com.readerbench.comprehensionmodel.utils.distanceStrategies;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
 import com.readerbench.comprehensionmodel.utils.indexer.graphStruct.CMEdgeType;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.SpaceStatistics;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
+import com.readerbench.coreservices.semanticmodels.utils.SpaceStatistics;
 import com.readerbench.coreservices.semanticmodels.utils.WordSimilarity;
 import com.readerbench.coreservices.semanticmodels.utils.WordSimilarityContainer;
 import org.slf4j.Logger;
@@ -38,12 +38,12 @@ public class FullSemanticSpaceWordDistanceStrategy implements IWordDistanceStrat
 
     private WordSimilarityContainer wordDistanceContainer;
     private List<Word> uniqueWordList;
-    private final ISemanticModel semanticModel;
+    private final SemanticModel semanticModel;
     private final int noTopSimilarWords;
     private final double threshold;
     private final CMUtils cmUtils;
 
-    public FullSemanticSpaceWordDistanceStrategy(ISemanticModel semanticModel, double threshold, int noTopSimilarWords) {
+    public FullSemanticSpaceWordDistanceStrategy(SemanticModel semanticModel, double threshold, int noTopSimilarWords) {
         this.semanticModel = semanticModel;
         this.cmUtils = new CMUtils();
         this.threshold = threshold;

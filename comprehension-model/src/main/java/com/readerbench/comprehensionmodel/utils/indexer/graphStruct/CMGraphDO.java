@@ -16,8 +16,8 @@
 package com.readerbench.comprehensionmodel.utils.indexer.graphStruct;
 
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.semanticmodels.data.ISemanticModel;
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 
 import java.util.*;
@@ -159,8 +159,8 @@ public class CMGraphDO {
         }
     }
 
-    public void combineWithSyntacticLinksFrom(CMGraphDO syntacticGraph, ISemanticModel semanticModel, int maxDictionaryExpansion) {
-        List<ISemanticModel> models = new ArrayList();
+    public void combineWithSyntacticLinksFrom(CMGraphDO syntacticGraph, SemanticModel semanticModel, int maxDictionaryExpansion) {
+        List<SemanticModel> models = new ArrayList();
         models.add(semanticModel);
 
         Set<CMNodeDO> allPotentialInferredNodeSet = new TreeSet<>();

@@ -5,8 +5,7 @@
  */
 package com.readerbench.coreservices.data;
 
-import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.semanticmodels.word2vec.Word2VecModel;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,11 +57,10 @@ public class NGram extends AnalysisElement {
                 .map(Word::getLemma)
                 .collect(Collectors.joining("_"));
         unified = new Word(label, label, label, null, null, words.get(0).getLanguage());
-        if (semanticModels.containsKey(SimilarityType.WORD2VEC)) {
-            Word2VecModel model = (Word2VecModel) semanticModels.get(SimilarityType.WORD2VEC);
+        for (SemanticModel model : semanticModels.values()) {
             double[] v = model.getWordRepresentation(unified);
             if (v != null) {
-                modelVectors.put(SimilarityType.WORD2VEC, v);
+                modelVectors.put(model.getSimilarityType(), v);
             }
         }
     }
