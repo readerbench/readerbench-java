@@ -125,7 +125,7 @@ public class SemanticModel {
     }
 
     public double getSimilarity(double[] v1, double[] v2) {
-        return getSimilarityFuction().apply(v1, v2);
+        return (v1 == null || v2 == null) ? 0 : getSimilarityFuction().apply(v1, v2);
     }
 
     public BiFunction<double[], double[], Double> getSimilarityFuction() {
