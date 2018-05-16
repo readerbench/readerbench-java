@@ -214,7 +214,7 @@ public abstract class AnalysisElement implements Serializable {
      * @return parsed text
      */
     public String getText() {
-        return text;
+        return text == null ? "" : text;
     }
 
     /**
@@ -229,7 +229,7 @@ public abstract class AnalysisElement implements Serializable {
      * @return processed text
      */
     public String getProcessedText() {
-        return processedText;
+        return processedText == null ? "" : processedText;
     }
 
     /**
@@ -271,7 +271,7 @@ public abstract class AnalysisElement implements Serializable {
      * @return
      */
     public String getAlternateText() {
-        return alternateText;
+        return alternateText == null ? "" : alternateText;
     }
 
     /**

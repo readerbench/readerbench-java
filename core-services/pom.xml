@@ -145,6 +145,10 @@
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
             <artifactId>semantic-models-tasa-en</artifactId>
         </dependency>
         <!-- / ReaderBench resources-->

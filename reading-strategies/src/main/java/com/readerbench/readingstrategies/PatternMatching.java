@@ -49,30 +49,12 @@ public class PatternMatching {
             case CAUSALITY:
                 usedColor = Integer.toHexString(COLOR_CAUSALITY.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
-                switch (el.getLanguage()) {
-                    case en:
-                        usedList = com.readerbench.coreservices.commons.PatternMatching.getCausalityEn();
-                        break;
-                    case fr:
-                        usedList = com.readerbench.coreservices.commons.PatternMatching.getCausalityFr();
-                        break;
-                    default:
-                        break;
-                }
+                usedList = com.readerbench.coreservices.commons.PatternMatching.getCausality(el.getLanguage());
                 break;
             case META_COGNITION:
                 usedColor = Integer.toHexString(COLOR_METACOGNITION.getRGB());
                 usedColor = usedColor.substring(2, usedColor.length());
-                switch (el.getLanguage()) {
-                    case en:
-                        usedList = com.readerbench.coreservices.commons.PatternMatching.getMetacognitionEn();
-                        break;
-                    case fr:
-                        usedList = com.readerbench.coreservices.commons.PatternMatching.getMetacognitionFr();
-                        break;
-                    default:
-                        break;
-                }
+                usedList = com.readerbench.coreservices.commons.PatternMatching.getMetacognition(el.getLanguage());
                 break;
         }
 
