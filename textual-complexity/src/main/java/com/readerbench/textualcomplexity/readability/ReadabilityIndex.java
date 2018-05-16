@@ -9,9 +9,12 @@ package com.readerbench.textualcomplexity.readability;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.nlp.wordlists.ClassesOfWords;
 import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.util.Pair;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
+import java.util.Properties;
 
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
@@ -22,7 +25,10 @@ import java.util.regex.Pattern;
  */
 public abstract class ReadabilityIndex extends ComplexityIndex {
 
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    private static final String PROPERTY_DALE_CHALL_SIMPLE_WORDS_NAME = "DALE_CHALL_SIMPLE_WORDS_%s_PATH";
     protected static ListOfWords simpleWords_en = null;
+    private static Lang lang = Lang.en;
 
     public ReadabilityIndex(ComplexityIndicesEnum index) {
         super(index);
@@ -134,7 +140,7 @@ public abstract class ReadabilityIndex extends ComplexityIndex {
 
     public static ListOfWords getSimpleWords() {
         if (simpleWords_en == null) {
-            simpleWords_en = new ListOfWords("resources/config/EN/word lists/Dale-Chall simple words.txt");
+            simpleWords_en = new ListOfWords(PROPERTIES.getProperty(String.format(PROPERTY_DALE_CHALL_SIMPLE_WORDS_NAME, lang.name().toUpperCase())));
         }
         return simpleWords_en;
     }

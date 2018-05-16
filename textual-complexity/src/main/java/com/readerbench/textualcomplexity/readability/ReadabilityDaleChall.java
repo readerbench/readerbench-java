@@ -24,7 +24,7 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  * @author Stefan Ruseti
  */
 public class ReadabilityDaleChall extends ReadabilityIndex {
-
+    
     public ReadabilityDaleChall() {
         super(ComplexityIndicesEnum.READABILITY_DALE_CHALL);
     }
