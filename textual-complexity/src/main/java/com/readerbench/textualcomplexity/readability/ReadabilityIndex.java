@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public abstract class ReadabilityIndex extends ComplexityIndex {
 
-    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
     private static final String PROPERTY_DALE_CHALL_SIMPLE_WORDS_NAME = "DALE_CHALL_SIMPLE_WORDS_%s_PATH";
     protected static ListOfWords simpleWords_en = null;
     private static Lang lang = Lang.en;

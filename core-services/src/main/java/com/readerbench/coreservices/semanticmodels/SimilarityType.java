@@ -17,14 +17,11 @@ package com.readerbench.coreservices.semanticmodels;
 
 import cc.mallet.util.Maths;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import static com.readerbench.coreservices.semanticmodels.SimilarityType.LDA;
-import static com.readerbench.coreservices.semanticmodels.SimilarityType.LSA;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import org.apache.spark.ml.feature.Word2VecModel;
 
 /**
  *
