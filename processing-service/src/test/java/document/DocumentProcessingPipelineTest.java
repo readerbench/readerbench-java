@@ -23,7 +23,6 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
@@ -46,7 +45,7 @@ public class DocumentProcessingPipelineTest {
 
         //todo - the paths to files from resources need to be write in a .properties file
         lang = Lang.en;
-        models = SemanticModel.loadModels("TASA", lang);
+        models = SemanticModel.loadModels("tasa", lang);
 
         annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
     }

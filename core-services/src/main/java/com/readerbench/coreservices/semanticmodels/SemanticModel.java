@@ -55,7 +55,7 @@ public class SemanticModel {
     private static final List<SemanticModel> LOADED_MODELS = new ArrayList<>();
 
     private SemanticModel(String name, Lang lang, SimilarityType similarityType) {
-        this.name = name;
+        this.name = name.toLowerCase();
         this.language = lang;
         this.similarityType = similarityType;
         this.wordRepresentations = new TreeMap<>();
@@ -69,7 +69,7 @@ public class SemanticModel {
             }
         }
 
-        semModel.importModel(String.format(SEMANTIC_MODELS_PATH, name, lang, similarityType.getAcronym()));
+        semModel.importModel(String.format(SEMANTIC_MODELS_PATH, name.toLowerCase(), lang, similarityType.getAcronym()));
         if (semModel.getWordRepresentations().isEmpty()) {
             return null;
         }
