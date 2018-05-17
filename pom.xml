@@ -194,6 +194,10 @@
                         <groupId>com.typesafe.akka</groupId>
                         <artifactId>akka-slf4j_2.10</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.solr</groupId>
+                        <artifactId>solr-commons-csv</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
