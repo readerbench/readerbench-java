@@ -22,10 +22,10 @@
 
         <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
-        <apache.mahout.version>0.13.0</apache.mahout.version>
         <languagetool.version>3.9</languagetool.version>
         <commons-lang3.version>3.7</commons-lang3.version>
         <commons-math3.version>3.6.1</commons-math3.version>
+        <commons-io.version>2.6</commons-io.version>
 
         <weka-dev.version>3.9.1</weka-dev.version>
         <svm.version>3.22</svm.version>
@@ -178,29 +178,6 @@
                 <version>${json-simple.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.mahout</groupId>
-                <artifactId>mahout-spark_2.10</artifactId>
-                <version>${apache.mahout.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.eclipse.jetty.orbit</groupId>
-                        <artifactId>javax.servlet</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-remote_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>com.typesafe.akka</groupId>
-                        <artifactId>akka-slf4j_2.10</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.solr</groupId>
-                        <artifactId>solr-commons-csv</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
                 <groupId>com.readerbench</groupId>
                 <artifactId>knowceans-tools</artifactId>
                 <version>${knowceanstools.version}</version>
@@ -292,6 +269,12 @@
                 <artifactId>commons-math3</artifactId>
                 <version>${commons-math3.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
             <!-- AKKA -->
             <dependency>
                 <groupId>com.typesafe.akka</groupId>
