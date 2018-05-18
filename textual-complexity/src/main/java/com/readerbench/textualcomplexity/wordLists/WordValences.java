@@ -6,6 +6,7 @@
 package com.readerbench.textualcomplexity.wordLists;
 
 import com.readerbench.coreservices.data.Word;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -16,6 +17,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,11 +29,12 @@ public class WordValences {
 
     private static final Map<Lang, Map<String, Map<String, Double>>> map = new EnumMap<>(Lang.class);
     private static final Map<Lang, List<String>> valencesForLang  = new EnumMap<>(Lang.class);
+    private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
+    private static final String PROPERTY_VALENCES_NAME = "VALENCES_%s_PATH";
     
     private static void initLang(Lang lang) {
-        String path = "../resources/new_config/wordlists-" + lang.name() + "/valences_" + lang.name() + ".csv";
         map.put(lang, new HashMap<>());
-        try (BufferedReader in = new BufferedReader(new FileReader(path))) {
+        try (BufferedReader in = new BufferedReader(new FileReader(PROPERTIES.getProperty(String.format(PROPERTY_VALENCES_NAME, lang.name().toUpperCase()))))) {
             String header = in.readLine();
             if (header.startsWith("sep")) {
                 header = in.readLine();
