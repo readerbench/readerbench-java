@@ -7,7 +7,6 @@ package com.readerbench.textualcomplexity.wordLists;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.IndexLevel;
@@ -18,20 +17,17 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class AvgWordsInList extends AbstractComplexityIndex {
 
-    protected SentimentValence valence;
+    protected String valence;
 
-    public AvgWordsInList(ComplexityIndicesEnum index, SentimentValence valence, IndexLevel level) {
-        super(index, valence.getName(), level);
+    public AvgWordsInList(ComplexityIndicesEnum index, String valence, IndexLevel level) {
+        super(index, valence, level);
         this.valence = valence;
     }
 
     private double countWords(AnalysisElement data) {
         return data.getWordOccurences().entrySet().stream()
                 .filter(e -> e.getValue() != null)
-                .filter(e -> e.getKey().getSentiment() != null)
-                .filter(e -> e.getKey().getSentiment().get(valence) != null)
-                .mapToDouble(
-                        e -> e.getKey().getSentiment().get(valence) * e.getValue())
+                .mapToDouble(e -> WordValences.getValenceForWord(e.getKey(), valence) * e.getValue())
                 .sum();
     }
 

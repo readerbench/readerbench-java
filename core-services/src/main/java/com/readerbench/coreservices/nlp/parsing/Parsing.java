@@ -15,7 +15,6 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
@@ -24,11 +23,9 @@ import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.cscl.data.Conversation;
 import com.readerbench.coreservices.cscl.data.Participant;
 import com.readerbench.coreservices.cscl.data.Utterance;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.coref.CorefCoreAnnotations;
 import edu.stanford.nlp.ling.CoreAnnotations.*;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
@@ -241,13 +238,13 @@ public abstract class Parsing {
             if (lang.equals(Lang.en)) {
                 Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 s.setTree(tree);
-                SentimentEntity se = new SentimentEntity();
+//                SentimentEntity se = new SentimentEntity();
                 // TODO: parse Stanford Valence
-                if (tree != null) {
-                    int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
-                    se.add(new SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
-                    s.setSentimentEntity(se);
-                }
+//                if (tree != null) {
+//                    int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
+//                    se.add(new SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
+//                    s.setSentimentEntity(se);
+//                }
             }
         }
 

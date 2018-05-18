@@ -11,7 +11,6 @@ import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.nlp.parsing.SimpleParsing;
-import com.readerbench.coreservices.sentimentanalysis.SentimentAnalysis;
 import com.readerbench.coreservices.data.*;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
@@ -99,11 +98,11 @@ public abstract class GenericProcessingPipeline {
             // DialogismComputations.determineExtendedVoiceDistributions(this);
         }
 
-        if (annotators.contains(Annotators.SENTIMENT_ANALYSIS)) {
-            // assign sentiment values
-            LOGGER.info("Assign sentiment values...");
-            SentimentAnalysis.weightSemanticValences(abstractDocument);
-        }
+//        if (annotators.contains(Annotators.SENTIMENT_ANALYSIS)) {
+//            // assign sentiment values
+//            LOGGER.info("Assign sentiment values...");
+//            SentimentAnalysis.weightSemanticValences(abstractDocument);
+//        }
 
         if (annotators.contains(Annotators.TEXTUAL_COMPLEXITY)) {
             LOGGER.info("Computing textual complexity indices...");

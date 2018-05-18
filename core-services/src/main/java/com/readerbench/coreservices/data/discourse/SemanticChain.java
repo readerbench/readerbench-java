@@ -18,7 +18,6 @@ package com.readerbench.coreservices.data.discourse;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.coreservices.commons.ValueComparator;
 import com.readerbench.coreservices.commons.VectorAlgebra;
@@ -44,15 +43,13 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
     private double[] blockMovingAverage;
     private double averageImportanceScore;
 
-    private transient SentimentEntity chainSentiment;
-
+    
     public SemanticChain(LexicalChain chain, List<SemanticModel> models) {
         words = new LinkedList<>();
         this.setSemanticModels(models);
         chain.getLinks().stream().forEach((link) -> {
             words.add(link.getWord());
         });
-        this.chainSentiment = new SentimentEntity();
     }
 
     public static double computeSimilarity(SemanticChain chain1, SemanticChain chain2) {
@@ -290,24 +287,6 @@ public class SemanticChain implements Serializable, Comparable<SemanticChain> {
 
     public void setAverageImportanceScore(double averageImportanceScore) {
         this.averageImportanceScore = averageImportanceScore;
-    }
-
-    public SentimentEntity getChainSentiment() {
-        return chainSentiment;
-    }
-
-    public void setChainSentiment(SentimentEntity chainSentiment) {
-        this.chainSentiment = chainSentiment;
-    }
-
-    public void setChainSentiment(int sentiment) {
-        SentimentEntity sre = new SentimentEntity();
-        String s = "";
-        for (Word w : words) {
-            s = s + w.getText() + " ";
-        }
-        // sre.addSentimentResultEntity(s, sentiment);
-        this.chainSentiment = sre;
     }
 
     public double getStdevSentiment() {

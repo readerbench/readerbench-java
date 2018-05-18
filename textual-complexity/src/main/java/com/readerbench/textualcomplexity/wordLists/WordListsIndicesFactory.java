@@ -5,8 +5,6 @@
  */
 package com.readerbench.textualcomplexity.wordLists;
 
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
-import com.readerbench.datasourceprovider.dao.ValenceDAO;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -25,8 +23,7 @@ public class WordListsIndicesFactory extends ComplexityIndicesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        ValenceDAO.getInstance().findByLang(lang).stream()
-            .map(sv -> SentimentValence.get(sv.getIndexLabel()))
+        WordValences.getValences(lang).stream()
             .forEach(sv -> {
                 result.add(new AvgWordsInList(
                         ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_DOC, 

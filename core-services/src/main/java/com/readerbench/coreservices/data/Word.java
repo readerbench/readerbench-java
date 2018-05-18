@@ -18,13 +18,9 @@ package com.readerbench.coreservices.data;
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.wordlists.StopWords;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentValence;
-import com.readerbench.datasourceprovider.dao.WordDAO;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.data.document.ReadingStrategyType;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChainLink;
-import com.readerbench.datasourceprovider.pojo.EntityXValence;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.nlp.wordlists.SyllabifiedDictionary;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
@@ -54,7 +50,6 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     private LexicalChainLink lexicalChainLink; // the lexical chain link associated with the word after disambiguation
     private SemanticChain semanticChain;
     private EnumSet<ReadingStrategyType> usedReadingStrategies;
-    private transient SentimentEntity sentiment;
     private List<Syllable> syllables;
 
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
@@ -70,42 +65,14 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         }
     }
 
-    private void loadSentimentEntity() {
-        com.readerbench.datasourceprovider.pojo.Word word = WordDAO.getInstance().findByLabel(getLemma(), getLanguage());
-        if (word == null) {
-            return; // empty sentiment entity - no info on the current word
-        }
-        com.readerbench.datasourceprovider.pojo.SentimentEntity se = word.getFkSentimentEntity();
-        if (se == null) {
-            return;
-        }
-        synchronized (se) {
-            sentiment = new SentimentEntity();
-            List<EntityXValence> exvList = se.getEntityXValenceList();
-            exvList.stream().forEach((exv) -> {
-                sentiment.add(SentimentValence.get(exv.getFkSentimentValence().getIndexLabel()), exv.getValue());
-            });
-        }
-    }
-
     public Word(String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, lang);
         super.setSemanticModels(models);
     }
 
-    public Word(String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, SentimentEntity sentiment, Lang lang) {
-        this(text, lemma, stem, POS, NE, models, lang);
-        this.sentiment = sentiment;
-    }
-
     public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, Lang lang) {
         this(text, lemma, stem, POS, NE, models, lang);
         this.container = container;
-    }
-
-    public Word(AnalysisElement container, String text, String lemma, String stem, String POS, String NE, List<SemanticModel> models, SentimentEntity sentiment, Lang lang) {
-        this(container, text, lemma, stem, POS, NE, models, lang);
-        this.sentiment = sentiment;
     }
 
     public boolean isNoun() {
@@ -266,17 +233,6 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
             return (this.getLemma() + "_" + this.getPOS()).compareTo(o.getLemma() + "_" + o.getPOS());
         }
         return this.getLemma().compareTo(o.getLemma());
-    }
-
-    public SentimentEntity getSentiment() {
-        if (sentiment == null) {
-            loadSentimentEntity();
-        }
-        return sentiment;
-    }
-
-    public void setSentiment(SentimentEntity sentimentEntity) {
-        this.sentiment = sentimentEntity;
     }
 
     @Override

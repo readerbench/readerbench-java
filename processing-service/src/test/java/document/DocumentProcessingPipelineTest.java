@@ -15,7 +15,6 @@
  */
 package document;
 
-import com.readerbench.coreservices.commons.SQLiteDatabase;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
@@ -23,7 +22,6 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Assert;
@@ -42,11 +40,9 @@ public class DocumentProcessingPipelineTest {
 
     @Before
     public void initialize() {
-        SQLiteDatabase.initializeDB();
-
         //todo - the paths to files from resources need to be write in a .properties file
         lang = Lang.en;
-        models = SemanticModel.loadModels("TASA", lang);
+        models = SemanticModel.loadModels("tasa", lang);
 
         annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
     }

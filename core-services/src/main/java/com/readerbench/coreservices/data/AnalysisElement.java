@@ -17,7 +17,6 @@ package com.readerbench.coreservices.data;
 
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.coreservices.cscl.data.Utterance;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
@@ -58,8 +57,6 @@ public abstract class AnalysisElement implements Serializable {
     private List<Keyword> topics;
     private List<Keyword> inferredConcepts;
 
-    private transient SentimentEntity sentimentEntity;
-
     /**
      *
      */
@@ -69,7 +66,6 @@ public abstract class AnalysisElement implements Serializable {
         this.wordOccurences = new TreeMap<>();
         this.topics = new ArrayList<>();
         this.inferredConcepts = new ArrayList<>();
-        this.sentimentEntity = new SentimentEntity();
         this.semanticModels = new EnumMap<>(SimilarityType.class);
         this.modelVectors = new EnumMap<>(SimilarityType.class);
     }
@@ -329,20 +325,6 @@ public abstract class AnalysisElement implements Serializable {
 
     public void setExtendedVoiceDistribution(double[] extendedVoiceDistribution) {
         this.extendedVoiceDistribution = extendedVoiceDistribution;
-    }
-
-    /**
-     * @return
-     */
-    public SentimentEntity getSentimentEntity() {
-        return sentimentEntity;
-    }
-
-    /**
-     * @param sentimentEntity
-     */
-    public void setSentimentEntity(SentimentEntity sentimentEntity) {
-        this.sentimentEntity = sentimentEntity;
     }
 
     public List<SemanticModel> getSemanticModelsAsList() {

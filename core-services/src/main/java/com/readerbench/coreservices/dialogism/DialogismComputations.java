@@ -28,8 +28,6 @@ import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
 import edu.stanford.nlp.trees.Tree;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.sentimentanalysis.SentimentContext;
-import com.readerbench.coreservices.sentimentanalysis.data.ContextSentiment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,77 +277,77 @@ public class DialogismComputations {
         }
     }
 
-    public static void determineExtendedVoiceDistributions(AbstractDocument d) {
-        LOGGER.info("Identifying extended voice distributions...");
-        // determine distribution of each lexical chain
-        int noSentences = 0;
-        int[][] traceability = new int[d.getBlocks().size()][];
-        for (int i = 0; i < d.getBlocks().size(); i++) {
-            if (d.getBlocks().get(i) != null) {
-                traceability[i] = new int[d.getBlocks().get(i).getSentences().size()];
-                for (int j = 0; j < d.getBlocks().get(i).getSentences().size(); j++) {
-                    traceability[i][j] = noSentences++;
-                }
-            }
-        }
-
-        // determine spread
-        if (d.getExtendedVoices() != null) {
-
-            for (SemanticChain chain : d.getExtendedVoices()) {
-                chain.setExtendedSentenceDistribution(new double[noSentences]);
-                chain.setExtendedBlockDistribution(new double[d.getBlocks().size()]);
-                Map<String, Integer> voiceOccurrences = new TreeMap<>();
-
-                for (Word w : chain.getWords()) {
-                    int blockIndex = w.getBlockIndex();
-                    int sentenceIndex = w.getUtteranceIndex();
-
-                    //find the valence for the context of this voice in the sentence
-                    Sentence sentence = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
-                    double valence = 0;
-
-                    List<ContextSentiment> ctxTrees = sentence.getContextMap().get(w);
-                    int noCtxTrees = ctxTrees.size();
-                    double valenceForContext = 0;
-                    //compute the average valence for contextTrees
-                    for (ContextSentiment ctxTree : ctxTrees) {
-                        valenceForContext += ctxTree.getValence();
-                    }
-                    valence = Math.round(valenceForContext / noCtxTrees);
-                    try {
-                        chain.getExtendedSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += valence;
-                    } catch (ArrayIndexOutOfBoundsException ex) {
-                        System.out.println(ex);
-                    }
-
-                    chain.getExtendedBlockDistribution()[blockIndex] += valence;
-
-                    // build cumulative importance in terms of sentences in which occurrences have been spotted
-                    if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
-                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
-                                voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
-                    } else {
-                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
-                    }
-
-                }
-
-                // define moving average at block level, relevant for chat conversations
-                chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getExtendedBlockDistribution(), WINDOW_SIZE,
-                        d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
-            }
-            // sort semantic chains (voices) by importance
-            Collections.sort(d.getExtendedVoices());
-
-            // build voice distribution vectors for each block
-            for (Block b : d.getBlocks()) {
-                if (b != null) {
-                    determineExtendedVoiceDistribution(b, d);
-                }
-            }
-        }
-    }
+//    public static void determineExtendedVoiceDistributions(AbstractDocument d) {
+//        LOGGER.info("Identifying extended voice distributions...");
+//        // determine distribution of each lexical chain
+//        int noSentences = 0;
+//        int[][] traceability = new int[d.getBlocks().size()][];
+//        for (int i = 0; i < d.getBlocks().size(); i++) {
+//            if (d.getBlocks().get(i) != null) {
+//                traceability[i] = new int[d.getBlocks().get(i).getSentences().size()];
+//                for (int j = 0; j < d.getBlocks().get(i).getSentences().size(); j++) {
+//                    traceability[i][j] = noSentences++;
+//                }
+//            }
+//        }
+//
+//        // determine spread
+//        if (d.getExtendedVoices() != null) {
+//
+//            for (SemanticChain chain : d.getExtendedVoices()) {
+//                chain.setExtendedSentenceDistribution(new double[noSentences]);
+//                chain.setExtendedBlockDistribution(new double[d.getBlocks().size()]);
+//                Map<String, Integer> voiceOccurrences = new TreeMap<>();
+//
+//                for (Word w : chain.getWords()) {
+//                    int blockIndex = w.getBlockIndex();
+//                    int sentenceIndex = w.getUtteranceIndex();
+//
+//                    //find the valence for the context of this voice in the sentence
+//                    Sentence sentence = d.getBlocks().get(blockIndex).getSentences().get(sentenceIndex);
+//                    double valence = 0;
+//
+//                    List<ContextSentiment> ctxTrees = sentence.getContextMap().get(w);
+//                    int noCtxTrees = ctxTrees.size();
+//                    double valenceForContext = 0;
+//                    //compute the average valence for contextTrees
+//                    for (ContextSentiment ctxTree : ctxTrees) {
+//                        valenceForContext += ctxTree.getValence();
+//                    }
+//                    valence = Math.round(valenceForContext / noCtxTrees);
+//                    try {
+//                        chain.getExtendedSentenceDistribution()[traceability[blockIndex][sentenceIndex]] += valence;
+//                    } catch (ArrayIndexOutOfBoundsException ex) {
+//                        System.out.println(ex);
+//                    }
+//
+//                    chain.getExtendedBlockDistribution()[blockIndex] += valence;
+//
+//                    // build cumulative importance in terms of sentences in which occurrences have been spotted
+//                    if (voiceOccurrences.containsKey(blockIndex + "_" + sentenceIndex)) {
+//                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex,
+//                                voiceOccurrences.get(blockIndex + "_" + sentenceIndex) + 1);
+//                    } else {
+//                        voiceOccurrences.put(blockIndex + "_" + sentenceIndex, 1);
+//                    }
+//
+//                }
+//
+//                // define moving average at block level, relevant for chat conversations
+//                chain.setBlockMovingAverage(VectorAlgebra.movingAverage(chain.getExtendedBlockDistribution(), WINDOW_SIZE,
+//                        d.getBlockOccurrencePattern(), MAXIMUM_INTERVAL));
+//            }
+//            // sort semantic chains (voices) by importance
+//            Collections.sort(d.getExtendedVoices());
+//
+//            // build voice distribution vectors for each block
+//            for (Block b : d.getBlocks()) {
+//                if (b != null) {
+//                    determineExtendedVoiceDistribution(b, d);
+//                }
+//            }
+//        }
+//    }
 
     public static void determineParticipantInterAnimation(Conversation c) {
         if (c.getVoices() == null || c.getVoices().isEmpty()) {
@@ -381,50 +379,50 @@ public class DialogismComputations {
      * Build for every sentence a context map with all the voices and the
      * associated context Tree with its valence
      */
-    public static void findSentimentUsingContext(AbstractDocument d) {
-        LOGGER.info("Searching context for every voice in every sentence...");
-        SentimentContext ctx = new SentimentContext();
-
-        //for every sentence make a map which has key voice and value a list of pair(Tree, valence)
-        for (Block b : d.getBlocks()) {
-            for (Sentence sentence : b.getSentences()) {
-
-                List<Word> words = sentence.getWords();
-                Map<Word, List<ContextSentiment>> contextMap = new HashMap<>();
-
-                for (SemanticChain chain : d.getVoices()) {
-                    for (Word w : chain.getWords()) {
-                        //the context for this context was computed in the past
-                        if (contextMap.containsKey(w)) {
-                            continue;
-                        }
-                        //for adj. voice it is not determined the context
-                        if (!w.isNoun() && !w.isVerb()) {
-                            continue;
-                        }
-
-                        List<ContextSentiment> contextTrees = new ArrayList<>();
-                        //check if the word from voice is in sentence
-                        for (Word aux : words) {
-                            if (aux.getText().equals(w.getText())) {
-                                double valence = 0;
-                                Tree tree = sentence.getTree();
-                                List<Tree> subTrees = ctx.findContextTree(tree, w, w.isNoun());
-                                //for every contextSubtree compute the valence
-                                for (Tree subTree : subTrees) {
-                                    valence = RNNCoreAnnotations.getPredictedClass(subTree) - 2;
-                                    contextTrees.add(new ContextSentiment(subTree, valence));
-                                }
-                                contextMap.put(w, contextTrees);
-
-                                break;
-                            }
-                        }
-                    }
-                }
-                //every sentence has a map with voice- (context, valence)
-                sentence.setContextMap(contextMap);
-            }
-        }
-    }
+//    public static void findSentimentUsingContext(AbstractDocument d) {
+//        LOGGER.info("Searching context for every voice in every sentence...");
+//        SentimentContext ctx = new SentimentContext();
+//
+//        //for every sentence make a map which has key voice and value a list of pair(Tree, valence)
+//        for (Block b : d.getBlocks()) {
+//            for (Sentence sentence : b.getSentences()) {
+//
+//                List<Word> words = sentence.getWords();
+//                Map<Word, List<ContextSentiment>> contextMap = new HashMap<>();
+//
+//                for (SemanticChain chain : d.getVoices()) {
+//                    for (Word w : chain.getWords()) {
+//                        //the context for this context was computed in the past
+//                        if (contextMap.containsKey(w)) {
+//                            continue;
+//                        }
+//                        //for adj. voice it is not determined the context
+//                        if (!w.isNoun() && !w.isVerb()) {
+//                            continue;
+//                        }
+//
+//                        List<ContextSentiment> contextTrees = new ArrayList<>();
+//                        //check if the word from voice is in sentence
+//                        for (Word aux : words) {
+//                            if (aux.getText().equals(w.getText())) {
+//                                double valence = 0;
+//                                Tree tree = sentence.getTree();
+//                                List<Tree> subTrees = ctx.findContextTree(tree, w, w.isNoun());
+//                                //for every contextSubtree compute the valence
+//                                for (Tree subTree : subTrees) {
+//                                    valence = RNNCoreAnnotations.getPredictedClass(subTree) - 2;
+//                                    contextTrees.add(new ContextSentiment(subTree, valence));
+//                                }
+//                                contextMap.put(w, contextTrees);
+//
+//                                break;
+//                            }
+//                        }
+//                    }
+//                }
+//                //every sentence has a map with voice- (context, valence)
+//                sentence.setContextMap(contextMap);
+//            }
+//        }
+//    }
 }

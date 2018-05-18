@@ -16,7 +16,6 @@
 package com.readerbench.coreservices.data;
 
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
-import com.readerbench.coreservices.sentimentanalysis.data.ContextSentiment;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.IndexedWord;
@@ -42,7 +41,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     private List<Word> words;
     private List<Word> allWords;
     private transient SemanticGraph dependencies;
-    private transient Map<Word, List<ContextSentiment>> contextMap;
     private transient Tree tree;
     private final Map<Word, Word> pronimialReplacementMap;
 
@@ -161,14 +159,6 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
     @Override
     public int compareTo(Sentence o) {
         return (int) (Math.signum(o.getScore() - this.getScore()));
-    }
-
-    public void setContextMap(Map<Word, List<ContextSentiment>> contextMap) {
-        this.contextMap = contextMap;
-    }
-
-    public Map<Word, List<ContextSentiment>> getContextMap() {
-        return contextMap;
     }
 
 }

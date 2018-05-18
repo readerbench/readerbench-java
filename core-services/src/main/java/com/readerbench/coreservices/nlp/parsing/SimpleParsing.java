@@ -19,7 +19,6 @@ import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.sentimentanalysis.data.SentimentEntity;
 import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
 import com.readerbench.coreservices.nlp.wordlists.Dictionary;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
@@ -77,11 +76,6 @@ public class SimpleParsing {
                     s.getWordOccurences().put(w, 1);
                 }
             }
-        }
-
-        if (s.getLanguage().equals(Lang.en)) {
-            SentimentEntity se = new SentimentEntity();
-            s.setSentimentEntity(se);
         }
 
         s.finalProcessing();
