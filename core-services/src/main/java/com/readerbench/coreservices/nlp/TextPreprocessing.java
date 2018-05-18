@@ -217,11 +217,11 @@ public class TextPreprocessing {
             result = p.first.matcher(result).replaceAll(p.second);
         }
 
-        for (String pattern : PatternMatching.getCausalityEn().getWords()) {
+        for (String pattern : PatternMatching.getCausality(Lang.en).getWords()) {
             result = result.replaceAll("( " + pattern + ")+", " " + pattern);
         }
 
-        for (String pattern : PatternMatching.getCausalityFr().getWords()) {
+        for (String pattern : PatternMatching.getCausality(Lang.fr).getWords()) {
             result = result.replaceAll("( " + pattern + ")+", " " + pattern);
         }
 

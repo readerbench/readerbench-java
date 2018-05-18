@@ -1,6 +1,11 @@
 package com.readerbench.coreservices.commons;
 
 import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
+import com.readerbench.datasourceprovider.pojo.Lang;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,38 +15,25 @@ import org.slf4j.LoggerFactory;
 public class PatternMatching {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternMatching.class);
+    private static final String PROPERTY_CAUSALITY_NAME = "CAUSALITY_%s_PATH";
+    private static final String PROPERTY_METACOGNITION_NAME = "METACOGNITION_%s_PATH";
+    private static final Properties PROPERTIES = ReadProperty.getProperties("paths.properties");
+    
+    private static final Map<Lang, ListOfWords> PATTERNS_CAUSALITY = new HashMap<>();
+    private static final Map<Lang, ListOfWords> PATTERNS_METACOGNITION = new HashMap<>();
 
-    private static ListOfWords patterns_causality_fr;
-    private static ListOfWords patterns_metacognition_fr;
-    private static ListOfWords patterns_causality_en;
-    private static ListOfWords patterns_metacognition_en;
-
-    public static ListOfWords getCausalityFr() {
-        if (patterns_causality_fr == null) {
-            patterns_causality_fr = new ListOfWords("resources/config/FR/word lists/causality_fr.txt");
+    public static ListOfWords getCausality(Lang lang) {
+        if (PATTERNS_CAUSALITY.get(lang) == null) {
+            PATTERNS_CAUSALITY.put(lang, new ListOfWords(PROPERTIES.getProperty(String.format(PROPERTY_CAUSALITY_NAME, lang.name().toUpperCase()))));
         }
-        return patterns_causality_fr;
+        return PATTERNS_CAUSALITY.get(lang);
     }
 
-    public static ListOfWords getMetacognitionFr() {
-        if (patterns_metacognition_fr == null) {
-            patterns_metacognition_fr = new ListOfWords("resources/config/FR/word lists/metacognition_fr.txt");
+    public static ListOfWords getMetacognition(Lang lang) {
+        if (PATTERNS_METACOGNITION.get(lang) == null) {
+            PATTERNS_METACOGNITION.put(lang, new ListOfWords(PROPERTIES.getProperty(String.format(PROPERTY_METACOGNITION_NAME, lang.name().toUpperCase()))));
         }
-        return patterns_metacognition_fr;
-    }
-
-    public static ListOfWords getCausalityEn() {
-        if (patterns_causality_en == null) {
-            patterns_causality_en = new ListOfWords("resources/config/EN/word lists/causality_en.txt");
-        }
-        return patterns_causality_en;
-    }
-
-    public static ListOfWords getMetacognitionEn() {
-        if (patterns_metacognition_en == null) {
-            patterns_metacognition_en = new ListOfWords("resources/config/EN/word lists/metacognition_en.txt");
-        }
-        return patterns_metacognition_en;
+        return PATTERNS_METACOGNITION.get(lang);
     }
 
 }
