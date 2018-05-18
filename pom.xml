@@ -311,12 +311,67 @@
             </dependency>
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-fr</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
                 <artifactId>wordlists-fr</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-nl</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordlists-nl</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-es</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordlists-es</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
                 <artifactId>semantic-models-tasa-en</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-coca-en</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-coca_newspaper_magazine-en</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-enea_tasa-en</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-le_monde-fr</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-inl-nl</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-jose_antonio-es</artifactId>
                 <version>1.0</version>
             </dependency>
             <!-- / ReaderBench resources-->
