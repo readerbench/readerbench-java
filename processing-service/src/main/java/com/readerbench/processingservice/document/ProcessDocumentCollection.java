@@ -78,8 +78,10 @@ public class ProcessDocumentCollection {
             try {
                 if (meta) {
                     d = pipelineMetaDoc.createMetaDocumentFromXML(file.getPath(), MetaDocument.DocumentLevel.Section, 5);
+                    pipelineDoc.processDocument(d);
                 } else {
                     d = pipelineDoc.createDocumentFromXML(file.getPath());
+                    pipelineDoc.processDocument(d);
                 }
             } catch (Exception e) {
                 LOGGER.error("Runtime error while processing {}: {}", new Object[]{file.getName(), e.getMessage()});
@@ -108,7 +110,7 @@ public class ProcessDocumentCollection {
     public static void main(String[] args) {
         Lang lang = Lang.en;
         List<SemanticModel> models = SemanticModel.loadModels("tasa", lang);
-        String path = "../resources/in/essays/all essays";
+        String path = "C:\\ReaderBench\\ReaderBench\\resources\\in\\essays\\all essays";
 
         Txt2XmlConverter converter = new Txt2XmlConverter(lang);
         converter.parseTxtFiles(path, lang, "UTF-8", false);
