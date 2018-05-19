@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.wordComplexity;
 
 import com.readerbench.coreservices.semanticmodels.wordnet.WordOntologyProcessing;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -24,18 +25,30 @@ import com.readerbench.textualcomplexity.IndexLevel;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Stefan Ruseti
  */
 public class WordComplexityFactory extends ComplexityIndicesFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WordComplexityFactory.class);
+    private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
+    private static final String PROPERTY_GENERIC_NAME = "GENERIC_%s_PATH";
+
+    private static final Map<Lang, Map<String, Map<String, Double>>> AoA = new TreeMap<>();
+    private static final Map<Lang, Map<String, Map<String, Double>>> AoE = new TreeMap<>();
 
     @Override
     public List<ComplexityIndex> build(Lang lang) {
@@ -62,51 +75,54 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
             result.add(new WordComplexity(
                     ComplexityIndicesEnum.WORD_SYLLABLE_COUNT, lang,
                     WordComplexity::getSyllables));
-        }
-        Map<String, Map<String, Double>> map = readCSV(lang, "AoA.csv");
-        for (Map.Entry<String, Map<String, Double>> e : map.entrySet()) {
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOA_PER_DOC, 
-                    e.getKey(), 
-                    IndexLevel.DOC, 
-                    e.getValue()));
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOA_PER_BLOCK, 
-                    e.getKey(), 
-                    IndexLevel.BLOCK, 
-                    e.getValue()));
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOA_PER_SENTENCE, 
-                    e.getKey(), 
-                    IndexLevel.SENTENCE, 
-                    e.getValue()));
-        }
-        
-        map = readCSV(lang, "AoE-small.csv");
-        for (Map.Entry<String, Map<String, Double>> e : map.entrySet()) {
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOE_PER_DOC, 
-                    e.getKey(), 
-                    IndexLevel.DOC, 
-                    e.getValue()));
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOE_PER_BLOCK, 
-                    e.getKey(), 
-                    IndexLevel.BLOCK, 
-                    e.getValue()));
-            result.add(new AvgAoAScore(
-                    ComplexityIndicesEnum.AVG_AOE_PER_SENTENCE, 
-                    e.getKey(), 
-                    IndexLevel.SENTENCE, 
-                    e.getValue()));
+            if (!AoA.containsKey(lang)) {
+                AoA.put(lang, readCSV(lang, "AoA.csv"));
+            }
+            for (Map.Entry<String, Map<String, Double>> e : AoA.get(lang).entrySet()) {
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOA_PER_DOC,
+                        e.getKey(),
+                        IndexLevel.DOC,
+                        e.getValue()));
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOA_PER_BLOCK,
+                        e.getKey(),
+                        IndexLevel.BLOCK,
+                        e.getValue()));
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOA_PER_SENTENCE,
+                        e.getKey(),
+                        IndexLevel.SENTENCE,
+                        e.getValue()));
+            }
+            if (!AoE.containsKey(lang)) {
+                AoE.put(lang, readCSV(lang, "AoE.csv"));
+            }
+            for (Map.Entry<String, Map<String, Double>> e : AoE.get(lang).entrySet()) {
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOE_PER_DOC,
+                        e.getKey(),
+                        IndexLevel.DOC,
+                        e.getValue()));
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOE_PER_BLOCK,
+                        e.getKey(),
+                        IndexLevel.BLOCK,
+                        e.getValue()));
+                result.add(new AvgAoAScore(
+                        ComplexityIndicesEnum.AVG_AOE_PER_SENTENCE,
+                        e.getKey(),
+                        IndexLevel.SENTENCE,
+                        e.getValue()));
+            }
         }
         return result;
     }
 
     private Map<String, Map<String, Double>> readCSV(Lang lang, String fileName) {
         Map<String, Map<String, Double>> map = new HashMap<>();
-        String aoaFile = "resources/config/" + lang.toString() + "/word lists/" + fileName;
-        try (BufferedReader in = new BufferedReader(new FileReader(aoaFile))) {
+        String path = PROPERTIES.getProperty(String.format(PROPERTY_GENERIC_NAME, lang.name().toUpperCase())) + "/" + fileName;
+        try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(path); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             in.readLine();
             String line = in.readLine();
             String[] header = line.split(",");
@@ -120,18 +136,15 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
                     try {
                         double val = Double.parseDouble(split[i]);
                         map.get(header[i]).put(word, val);
-                    }
-                    catch (NumberFormatException ex) {
-                        
+                    } catch (NumberFormatException ex) {
                     }
                 }
             }
-        }
-        catch (FileNotFoundException ex) {
-        }
-        catch (IOException ex) {
+        } catch (FileNotFoundException ex) {
+            LOGGER.error(ex.getMessage());
+        } catch (IOException ex) {
+            LOGGER.error(ex.getMessage());
         }
         return map;
     }
-    
 }

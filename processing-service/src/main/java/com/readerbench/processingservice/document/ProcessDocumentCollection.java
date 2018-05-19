@@ -110,7 +110,7 @@ public class ProcessDocumentCollection {
     public static void main(String[] args) {
         Lang lang = Lang.en;
         List<SemanticModel> models = SemanticModel.loadModels("tasa", lang);
-        String path = "C:\\ReaderBench\\ReaderBench\\resources\\in\\essays\\all essays";
+        String path = "../resources/in/essays/all essays";
 
         Txt2XmlConverter converter = new Txt2XmlConverter(lang);
         converter.parseTxtFiles(path, lang, "UTF-8", false);

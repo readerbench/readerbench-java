@@ -25,7 +25,7 @@ public class AvgAoAScore extends AbstractComplexityIndex {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvgAoAScore.class);
 
-    private Map<String, Double> map;
+    private final Map<String, Double> map;
 
     public AvgAoAScore(
             ComplexityIndicesEnum index,
@@ -75,16 +75,13 @@ public class AvgAoAScore extends AbstractComplexityIndex {
                         } else {
                             words.get(word)[i] = val;
                         }
-                    }
-                    catch (NumberFormatException ex) {
+                    } catch (NumberFormatException ex) {
 
                     }
                 }
-            }
-            catch (FileNotFoundException ex) {
+            } catch (FileNotFoundException ex) {
                 LOGGER.error(ex.getMessage());
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 LOGGER.error(ex.getMessage());
             }
         }
@@ -108,8 +105,7 @@ public class AvgAoAScore extends AbstractComplexityIndex {
                 }
                 out.println(StringUtils.join(values, ","));
             }
-        }
-        catch (FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             LOGGER.error(ex.getMessage());
         }
     }
