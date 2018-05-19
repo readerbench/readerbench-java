@@ -6,8 +6,8 @@
 package com.readerbench.parallelprocessingservice;
 
 import akka.pattern.Patterns;
-import com.readerbench.coreservices.cscl.data.Community;
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Community;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;

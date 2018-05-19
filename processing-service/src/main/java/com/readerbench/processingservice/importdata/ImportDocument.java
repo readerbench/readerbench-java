@@ -50,7 +50,7 @@ public class ImportDocument {
         return d;
     }
 
-    public void rebuildSemanticSpaces(AbstractDocument abstractDocument, List<SemanticModel> models) {
+    private void rebuildSemanticSpaces(AbstractDocument abstractDocument, List<SemanticModel> models) {
         abstractDocument.setSemanticModels(models);
         for (Block b : abstractDocument.getBlocks()) {
             if (b != null) {

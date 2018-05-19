@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.cscl.data;
+package com.readerbench.coreservices.data.cscl;
 
 import java.util.Arrays;
 
@@ -22,20 +22,11 @@ public class ParticipantNormalized {
     private String name;
     private double indegree;
     private double outdegree;
-    private double eccentricity;
     private double[] vector;
-
-    public ParticipantNormalized(double indegree, double outdegree, double eccentricity) {
-        this.indegree = indegree;
-        this.outdegree = outdegree;
-        this.eccentricity = eccentricity;
-        this.vector = new double[]{indegree, outdegree, eccentricity};
-    }
 
     public ParticipantNormalized(double indegree, double outdegree) {
         this.indegree = indegree;
         this.outdegree = outdegree;
-        this.eccentricity = eccentricity;
         this.vector = new double[]{indegree, outdegree};
     }
 
@@ -53,14 +44,6 @@ public class ParticipantNormalized {
 
     public void setOutdegree(double outdegree) {
         this.outdegree = outdegree;
-    }
-
-    public double getEccentricity() {
-        return eccentricity;
-    }
-
-    public void setEccentricity(double eccentricity) {
-        this.eccentricity = eccentricity;
     }
 
     public double[] getVector() {
@@ -95,9 +78,6 @@ public class ParticipantNormalized {
 
         ParticipantNormalized that = (ParticipantNormalized) o;
 
-        if (Double.compare(that.eccentricity, eccentricity) != 0) {
-            return false;
-        }
         if (Double.compare(that.indegree, indegree) != 0) {
             return false;
         }
@@ -122,8 +102,6 @@ public class ParticipantNormalized {
         temp = Double.doubleToLongBits(indegree);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         temp = Double.doubleToLongBits(outdegree);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(eccentricity);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }

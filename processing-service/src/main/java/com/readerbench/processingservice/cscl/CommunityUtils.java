@@ -16,10 +16,10 @@
 package com.readerbench.processingservice.cscl;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.cscl.data.CSCLIndices;
-import com.readerbench.coreservices.cscl.data.Community;
-import com.readerbench.coreservices.cscl.data.Participant;
-import com.readerbench.coreservices.cscl.data.ParticipantNormalized;
+import com.readerbench.coreservices.data.cscl.CSCLIndices;
+import com.readerbench.coreservices.data.cscl.Community;
+import com.readerbench.coreservices.data.cscl.Participant;
+import com.readerbench.coreservices.data.cscl.ParticipantNormalized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;

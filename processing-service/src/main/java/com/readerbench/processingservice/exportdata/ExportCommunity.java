@@ -15,8 +15,12 @@
  */
 package com.readerbench.processingservice.exportdata;
 
+import com.readerbench.coreservices.data.cscl.CSCLIndices;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Participant;
+import com.readerbench.coreservices.data.cscl.CSCLCriteria;
+import com.readerbench.coreservices.data.cscl.Community;
 import com.readerbench.coreservices.commons.VectorAlgebra;
-import com.readerbench.coreservices.cscl.data.*;
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.datasourceprovider.commons.Formatting;

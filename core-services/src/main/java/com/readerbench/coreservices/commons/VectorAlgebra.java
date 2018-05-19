@@ -471,44 +471,45 @@ public class VectorAlgebra {
         }
         return Math.pow(sum, 1d / p);
     }
-    
+
     public static double peakOnChatFrame(double[] C) {
         double E_c = VectorAlgebra.entropy(C);
         double max = 0;
-        
+
         for (double v : C) {
-            if (v > max)
+            if (v > max) {
                 max = v;
+            }
         }
         return (Math.log(C.length) - E_c) * max;
     }
 
-    public static double mean(double[] v1){
+    public static double mean(double[] v1) {
         if (v1 == null) {
             return -1;
         }
         double sum = 0;
-        for(int i = 0; i < v1.length; i++){
+        for (int i = 0; i < v1.length; i++) {
             sum += v1[i];
         }
-        return sum/v1.length;
+        return sum / v1.length;
     }
 
-    public static double[] zScore(double[] v1){
+    public static double[] zScore(double[] v1) {
         double mean = mean(v1);
         double stdev = stdev(v1);
-        for(int i = 0; i < v1.length; i++){
+        for (int i = 0; i < v1.length; i++) {
             v1[i] = (v1[i] - mean) / stdev;
         }
         return v1;
     }
 
-    public static double[] softmax(double[] v1){
+    public static double[] softmax(double[] v1) {
         double mean = mean(v1);
         double stdev = stdev(v1);
-        for(int i = 0; i < v1.length; i++){
+        for (int i = 0; i < v1.length; i++) {
             double zScore = (v1[i] - mean) / stdev;
-            v1[i] = 1 / ( 1 + Math.pow(Math.E, - zScore));
+            v1[i] = 1 / (1 + Math.pow(Math.E, -zScore));
         }
         return v1;
     }
@@ -525,7 +526,7 @@ public class VectorAlgebra {
     }
 
     public static double[][] recurrencePlot(double[] v1, double[] v2) {
-        if (v1 == null || v2 == null || v1.length != v2.length ) {
+        if (v1 == null || v2 == null || v1.length != v2.length) {
             return null;
         }
 
@@ -534,57 +535,16 @@ public class VectorAlgebra {
             for (int j = 0; j < v2.length; j++) {
 
                 //convergent point
-                if (v1[i] * v2[j] > 0)
+                if (v1[i] * v2[j] > 0) {
                     plot[i][j] = 1;
-                //divergent point
-                else if (v1[i] * v2[j] < 0)
+                } //divergent point
+                else if (v1[i] * v2[j] < 0) {
                     plot[i][j] = -1;
-                else
+                } else {
                     plot[i][j] = 0;
+                }
             }
         }
         return plot;
     }
-
-    public static void main(String[] args) {
-        double[] v = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-        double[] v1 = {1, 3, 1, 3, 1, 7, 1, 5};
-        double[] v2 = {3, 3, 3, 3, 3, 3, 3, 3};
-        double[] v3 = {7, 6, 5, 4, 1};
-
-        System.out.println(cosineSimilarity(v1, v2));
-        long[] t = {2, 2, 2, 2, 2, 1, 2, 2};
-        for (double d : VectorAlgebra.movingAverage(v, 2, t, 2)) {
-            System.out.print(d + " ");
-        }
-        System.out.println(entropy(VectorAlgebra.movingAverage(v, 2, t, 2)));
-        for (double d : VectorAlgebra.movingAverage(v, 2, t, 1)) {
-            System.out.print(d + " ");
-        }
-        System.out.println(entropy(VectorAlgebra.movingAverage(v, 2, t, 1)));
-        System.out.println(mutualInformation(v, v));
-        System.out.println(entropy(normalize(v)));
-        System.out.println(entropy(v1));
-        System.out.println(entropy(v2));
-        System.out.println("Slope:" + slope(v1));
-        System.out.println("Slope:" + slope(v3));
-
-        for (double d : VectorAlgebra.movingAverage(v1, 2)) {
-            System.out.print(d + " ");
-        }
-
-        System.out.println();
-
-        for (double d : VectorAlgebra.applyKalmanFilter(v1)) {
-            System.out.print(d + " ");
-        }
-
-        System.out.println();
-
-        System.out.println(mean(v1) + ", " + stdev(v1));
-
-        System.out.println(Arrays.toString(zScore(v1)));
-
-    }
-
 }

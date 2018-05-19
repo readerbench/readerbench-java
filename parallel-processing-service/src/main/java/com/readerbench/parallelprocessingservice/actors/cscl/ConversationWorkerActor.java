@@ -8,7 +8,7 @@ package com.readerbench.parallelprocessingservice.actors.cscl;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import akka.routing.RoundRobinPool;
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.parallelprocessingservice.messages.ProcessDocumentMessage;
 import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;

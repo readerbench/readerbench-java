@@ -1,6 +1,6 @@
 package com.readerbench.coreservices.data.discourse;
 
-import com.readerbench.coreservices.cscl.data.Participant;
+import com.readerbench.coreservices.data.cscl.Participant;
 
 /**
  * @author Florea Anda

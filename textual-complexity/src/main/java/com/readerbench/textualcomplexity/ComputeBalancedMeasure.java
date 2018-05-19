@@ -15,8 +15,8 @@
  */
 package com.readerbench.textualcomplexity;
 
-import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.coreservices.cscl.data.Participant;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.complexity.Measurement;
 import libsvm.*;

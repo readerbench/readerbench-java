@@ -1,6 +1,6 @@
 package com.readerbench.processingservice;
 
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.processingservice.exportdata.ExportDocument;
 import com.readerbench.coreservices.cna.CohesionGraph;

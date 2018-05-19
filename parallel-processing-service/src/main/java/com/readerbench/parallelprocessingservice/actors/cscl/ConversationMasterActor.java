@@ -13,7 +13,7 @@ import akka.dispatch.Mapper;
 import akka.dispatch.OnComplete;
 import akka.pattern.Patterns;
 import akka.routing.RoundRobinPool;
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.parallelprocessingservice.messages.ProcessDocumentMessage;
 import com.readerbench.parallelprocessingservice.messages.ProcessDocumentsInitMessage;
