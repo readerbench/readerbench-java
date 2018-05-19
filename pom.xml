@@ -155,12 +155,6 @@
                 <version>${svm.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-entitymanager</artifactId>
-                <version>${hibernate.version}</version>
-                <type>jar</type>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>
                 <version>${apache.pdfbox.vesion}</version>

@@ -8,10 +8,8 @@ package com.readerbench.textualcomplexity.wordLists;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -34,7 +32,8 @@ public class WordValences {
     
     private static void initLang(Lang lang) {
         map.put(lang, new HashMap<>());
-        try (BufferedReader in = new BufferedReader(new FileReader(PROPERTIES.getProperty(String.format(PROPERTY_VALENCES_NAME, lang.name().toUpperCase()))))) {
+        String fileName = PROPERTIES.getProperty(String.format(PROPERTY_VALENCES_NAME, lang.name().toUpperCase()));
+        try (InputStream input = WordValences.class.getClassLoader().getResourceAsStream(fileName); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             String header = in.readLine();
             if (header.startsWith("sep")) {
                 header = in.readLine();
