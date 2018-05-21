@@ -15,9 +15,9 @@
  */
 package com.readerbench.processingservice.exportdata;
 
-import com.readerbench.coreservices.cscl.data.CSCLIndices;
-import com.readerbench.coreservices.cscl.data.Community;
-import com.readerbench.coreservices.cscl.data.Participant;
+import com.readerbench.coreservices.data.cscl.CSCLIndices;
+import com.readerbench.coreservices.data.cscl.Community;
+import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.datasourceprovider.commons.Formatting;
 import java.util.ArrayList;
 import java.util.HashMap;

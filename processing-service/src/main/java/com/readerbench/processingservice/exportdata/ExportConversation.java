@@ -15,8 +15,8 @@
  */
 package com.readerbench.processingservice.exportdata;
 
-import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.coreservices.cscl.data.Utterance;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.data.Block;
 import java.io.BufferedWriter;
 import java.io.File;

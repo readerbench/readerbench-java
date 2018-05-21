@@ -15,7 +15,7 @@
  */
 package com.readerbench.coreservices.dialogism;
 
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.cscl.CollaborationEvaluation;

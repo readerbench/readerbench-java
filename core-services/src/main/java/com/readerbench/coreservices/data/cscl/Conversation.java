@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.cscl.data;
+package com.readerbench.coreservices.data.cscl;
 
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
@@ -40,8 +40,6 @@ public class Conversation extends AbstractDocument {
     private double[][] participantContributions;
     private List<CollaborationZone> intenseCollabZonesSocialKB;
     private List<CollaborationZone> intenseCollabZonesVoice;
-    private List<CollaborationZone> intenseConvergentZonesVoice;
-    private List<CollaborationZone> intenseDivergentZonesVoice;
     private List<CollaborationZone> annotatedCollabZones;
     private double quantCollabPercentage;
     private double socialKBPercentage;
@@ -50,7 +48,6 @@ public class Conversation extends AbstractDocument {
     private double[] socialKBEvolution;
     // determine the distribution throughout the conversation of voice PMI
     private double[] voicePMIEvolution;
-    private double[] voiceExtendedEvolution;
     // determine the distribution of collaboration from annotations throughout the conversation
     private double[] annotatedCollabEvolution;
 
@@ -173,22 +170,6 @@ public class Conversation extends AbstractDocument {
         this.intenseCollabZonesVoice = intenseCollabZonesVoice;
     }
 
-    public List<CollaborationZone> getIntenseConvergentZonesVoice() {
-        return intenseConvergentZonesVoice;
-    }
-
-    public void setIntenseConvergentZonesVoice(List<CollaborationZone> intenseConvergentZonesVoice) {
-        this.intenseConvergentZonesVoice = intenseConvergentZonesVoice;
-    }
-
-    public List<CollaborationZone> getIntenseDivergentZonesVoice() {
-        return intenseDivergentZonesVoice;
-    }
-
-    public void setIntenseDivergentZonesVoice(List<CollaborationZone> intenseDivergentZonesVoice) {
-        this.intenseDivergentZonesVoice = intenseDivergentZonesVoice;
-    }
-
     /**
      * @return
      */
@@ -271,14 +252,6 @@ public class Conversation extends AbstractDocument {
      */
     public void setVoicePMIEvolution(double[] voicePMIEvolution) {
         this.voicePMIEvolution = voicePMIEvolution;
-    }
-
-    public double[] getVoiceExtendedEvolution() {
-        return voiceExtendedEvolution;
-    }
-
-    public void setVoiceExtendedEvolution(double[] voiceExtendedEvolution) {
-        this.voiceExtendedEvolution = voiceExtendedEvolution;
     }
 
     /**

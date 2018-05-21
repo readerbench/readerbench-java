@@ -17,7 +17,7 @@ package com.readerbench.coreservices.data;
 
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import com.readerbench.coreservices.cscl.data.Utterance;
+import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.LoggerFactory;

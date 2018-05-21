@@ -69,27 +69,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--Stanford Core NLP models -->
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-english</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-french</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-spanish</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-german</classifier>
-        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
@@ -98,6 +77,20 @@
             <groupId>com.datumbox</groupId>
             <artifactId>libsvm</artifactId>
         </dependency>
+        <!-- ReaderBench resources-->
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-nl</artifactId>
+        </dependency>
+        <!-- / ReaderBench resources-->
     </dependencies>
     <build>
         <resources>

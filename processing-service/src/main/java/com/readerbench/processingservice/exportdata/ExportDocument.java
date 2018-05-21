@@ -15,9 +15,13 @@
  */
 package com.readerbench.processingservice.exportdata;
 
+import com.readerbench.coreservices.data.cscl.CSCLIndices;
+import com.readerbench.coreservices.data.cscl.Utterance;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Participant;
+import com.readerbench.coreservices.data.cscl.CollaborationZone;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.cscl.CollaborationEvaluation;
-import com.readerbench.coreservices.cscl.data.*;
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.data.AbstractDocument;

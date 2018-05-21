@@ -15,7 +15,7 @@
  */
 package cscl;
 
-import com.readerbench.coreservices.cscl.data.Conversation;
+import com.readerbench.coreservices.data.cscl.Conversation;
 import document.DocumentProcessingPipelineTest;
 import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import org.junit.Assert;

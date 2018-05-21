@@ -2,9 +2,9 @@ package com.readerbench.processingservice.cscl;
 
 import com.readerbench.coreservices.cscl.CollaborationEvaluation;
 import com.readerbench.coreservices.cscl.ParticipantEvaluation;
-import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.coreservices.cscl.data.Participant;
-import com.readerbench.coreservices.cscl.data.Utterance;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Participant;
+import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.dialogism.DialogismMeasures;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.readerbench.coreservices.cscl.data;
+package com.readerbench.coreservices.data.cscl;
 
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.datasourceprovider.pojo.Lang;

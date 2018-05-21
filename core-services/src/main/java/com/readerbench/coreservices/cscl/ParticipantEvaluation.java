@@ -15,11 +15,11 @@
  */
 package com.readerbench.coreservices.cscl;
 
-import com.readerbench.coreservices.cscl.data.CSCLCriteria;
-import com.readerbench.coreservices.cscl.data.Utterance;
-import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.coreservices.cscl.data.CSCLIndices;
-import com.readerbench.coreservices.cscl.data.Participant;
+import com.readerbench.coreservices.data.cscl.CSCLCriteria;
+import com.readerbench.coreservices.data.cscl.Utterance;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.CSCLIndices;
+import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.coreservices.rhythm.RhythmTool;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;

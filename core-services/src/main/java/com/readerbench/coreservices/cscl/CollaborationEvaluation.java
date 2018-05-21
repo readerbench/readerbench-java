@@ -16,9 +16,9 @@
 package com.readerbench.coreservices.cscl;
 
 import com.readerbench.coreservices.data.Block;
-import com.readerbench.coreservices.cscl.data.CollaborationZone;
-import com.readerbench.coreservices.cscl.data.Conversation;
-import com.readerbench.coreservices.cscl.data.Utterance;
+import com.readerbench.coreservices.data.cscl.CollaborationZone;
+import com.readerbench.coreservices.data.cscl.Conversation;
+import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.datasourceprovider.commons.Formatting;
 import org.slf4j.Logger;
