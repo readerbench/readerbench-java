@@ -16,6 +16,8 @@
 package com.readerbench.processingservice.document;
 
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
+import com.readerbench.coreservices.data.Block;
+import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
@@ -64,6 +67,24 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
         Document d = createDocumentFromTemplate(extractDocTemplateFromXML(path));
         d.setPath(path);
         addInformationFromXML(path, d);
+        return d;
+    }
+    
+    public Document createDocumentFromBlock(Block block) {
+        Document d = new Document("", block.getSemanticModelsAsList(), block.getLanguage());
+        List<Block> blocks = new ArrayList<>(1);
+        blocks.add(block);
+        d.setBlocks(blocks);
+        return d;
+    }
+    
+    public Document createDocumentFromSentence(Sentence sentence) {
+        Document d = new Document("", sentence.getSemanticModelsAsList(), sentence.getLanguage());
+        List<Block> blocks = new ArrayList<>(1);
+        Block block = new Block(d, 0, sentence.getText(), sentence.getSemanticModelsAsList(), sentence.getLanguage());
+        block.getSentences().add(sentence);
+        blocks.add(block);
+        d.setBlocks(blocks);
         return d;
     }
     
@@ -213,5 +234,9 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
             LOGGER.error("Error evaluating input file " + path + " - " + e.getMessage());
             LOGGER.error(e.getMessage());
         }
+    }
+    
+    public static void main(String[] args) {
+        
     }
 }
