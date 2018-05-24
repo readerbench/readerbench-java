@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -72,20 +73,18 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
     
     public Document createDocumentFromBlock(Block block) {
         Document d = new Document("", block.getSemanticModelsAsList(), block.getLanguage());
-        List<Block> blocks = new ArrayList<>(1);
-        blocks.add(block);
-        d.setBlocks(blocks);
+        Block.addBlock(d, block);
+        d.determineWordOccurences(d.getBlocks());
+        d.determineSemanticDimensions();
         return d;
     }
     
     public Document createDocumentFromSentence(Sentence sentence) {
-        Document d = new Document("", sentence.getSemanticModelsAsList(), sentence.getLanguage());
-        List<Block> blocks = new ArrayList<>(1);
-        Block block = new Block(d, 0, sentence.getText(), sentence.getSemanticModelsAsList(), sentence.getLanguage());
+       Block block = new Block(null, 0, sentence.getText(), sentence.getSemanticModelsAsList(), sentence.getLanguage());
         block.getSentences().add(sentence);
-        blocks.add(block);
-        d.setBlocks(blocks);
-        return d;
+        block.setProcessedText(sentence.getProcessedText() + ". ");
+        block.finalProcessing();
+        return createDocumentFromBlock(block);
     }
     
     public AbstractDocumentTemplate extractDocTemplateFromXML(String path) {
