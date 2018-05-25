@@ -54,4 +54,14 @@ public abstract class AbstractComplexityIndex extends ComplexityIndex {
         return null;
     }
     
+    protected double normalize(AbstractDocument doc, double score) {
+        double factor = 1.;
+        if (getLevel() == IndexLevel.DOC) {
+            factor = Functions.streamOfSentences(doc)
+                    .flatMap(s -> s.getAllWords().stream())
+                    .count();
+        }
+        return score / factor;
+    }
+    
 }

@@ -35,7 +35,7 @@ public class ComplexityIndices {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComplexityIndices.class);
 
-    public static final int IDENTITY = -1;
+    public static final int IDENTITY = 0;
 
     public static void computeComplexityFactors(AbstractDocument d) {
         d.setComplexityIndices(

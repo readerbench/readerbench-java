@@ -33,11 +33,11 @@ public class AvgWords extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToInt(b -> b.getWordOccurences().values().stream()
                         .mapToInt(x -> x)
                         .sum())
-                .average().orElse(ComplexityIndices.IDENTITY);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
     
 

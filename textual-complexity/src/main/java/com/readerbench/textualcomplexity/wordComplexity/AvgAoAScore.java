@@ -9,6 +9,7 @@ import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
 import edu.stanford.nlp.util.StringUtils;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
+import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.IndexLevel;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class AvgAoAScore extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToDouble(b -> {
                     double sum = 0;
                     int count = 0;
@@ -53,7 +54,7 @@ public class AvgAoAScore extends AbstractComplexityIndex {
                     }
                     return sum / count;
                 })
-                .average().orElse(0);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 
     public static void createAoACSV(String inputFolder, String output) {

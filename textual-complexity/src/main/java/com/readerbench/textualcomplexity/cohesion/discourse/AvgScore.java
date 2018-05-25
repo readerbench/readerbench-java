@@ -34,9 +34,9 @@ public class AvgScore extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToDouble(AnalysisElement::getScore)
-                .average().orElse(ComplexityIndices.IDENTITY);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 }
 

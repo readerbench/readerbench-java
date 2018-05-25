@@ -8,6 +8,7 @@ package com.readerbench.textualcomplexity.wordLists;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
+import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.IndexLevel;
 
@@ -33,8 +34,8 @@ public class AvgWordsInList extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToDouble(this::countWords)
-                .average().orElse(0.);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 }

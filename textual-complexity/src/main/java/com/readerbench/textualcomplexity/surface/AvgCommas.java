@@ -34,9 +34,9 @@ public class AvgCommas extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToInt(b -> StringUtils.countMatches(b.getText(), ","))
-                .average().orElse(ComplexityIndices.IDENTITY);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 
 }

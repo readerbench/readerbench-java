@@ -34,10 +34,10 @@ public class SDUniqueWords extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .map(b -> b.getWordOccurences().keySet().size() * 1.)
                 .collect(DoubleStatistics.collector())
-                .getStandardDeviation(ComplexityIndices.IDENTITY);
+                .getStandardDeviation(ComplexityIndices.IDENTITY));
     }
 
 }

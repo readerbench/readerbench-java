@@ -35,12 +35,12 @@ public class AvgNamedEntities extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToInt(b -> b.getWordOccurences().entrySet().stream()
                         .filter(e -> e.getKey().getNE() != null && !e.getKey().getNE().equals("O"))
                         .mapToInt(Map.Entry::getValue)
                         .sum())
-                .average().orElse(ComplexityIndices.IDENTITY);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 
 }

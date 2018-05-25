@@ -33,9 +33,9 @@ public class AvgUniqueWords extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .mapToInt(b -> b.getWordOccurences().keySet().size())
-                .average().orElse(ComplexityIndices.IDENTITY);
+                .average().orElse(ComplexityIndices.IDENTITY));
     }
 
 }

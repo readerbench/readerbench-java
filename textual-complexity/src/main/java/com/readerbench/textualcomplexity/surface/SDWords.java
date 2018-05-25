@@ -34,12 +34,12 @@ public class SDWords extends AbstractComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return streamFunction.apply(d)
+        return normalize(d, streamFunction.apply(d)
                 .map(b -> b.getWordOccurences().values().stream()
                         .mapToDouble(x -> x)
                         .sum())
                 .collect(DoubleStatistics.collector())
-                .getStandardDeviation(ComplexityIndices.IDENTITY);
+                .getStandardDeviation(ComplexityIndices.IDENTITY));
     }
 
 }
