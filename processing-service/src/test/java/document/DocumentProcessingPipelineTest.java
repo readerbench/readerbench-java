@@ -62,6 +62,7 @@ public class DocumentProcessingPipelineTest {
 
     @Test
     public void createDocumentXMLTest() {
+        models = SemanticModel.loadModels("coca", lang);
         DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(lang, models, annotators);
         Document d = pipeline.createDocumentFromXML("src/test/resources/reading_material_en.xml");
         pipeline.processDocument(d);

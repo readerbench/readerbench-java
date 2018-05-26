@@ -330,16 +330,6 @@
             </dependency>
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
-                <artifactId>semantic-models-coca_newspaper_magazine-en</artifactId>
-                <version>1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.readerbench.resources</groupId>
-                <artifactId>semantic-models-enea_tasa-en</artifactId>
-                <version>1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.readerbench.resources</groupId>
                 <artifactId>semantic-models-le_monde-fr</artifactId>
                 <version>1.0</version>
             </dependency>
