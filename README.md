@@ -32,11 +32,10 @@ mvn clean install -DskipTests
 
 ## Project structure (technical aspects)
 
-ReaderBench is a Maven project with 8 modules:
+ReaderBench is a Maven project with 7 modules:
 
 * Datasource Provider Module
 * Core Services Module
-* Age of Exposure Module
 * Textual complexity Module
 * Comprehension Model Module
 * Reading Strategies Module
@@ -47,7 +46,6 @@ ReaderBench is a Maven project with 8 modules:
 
 * Each module uses Datasource Provide Module and Core Services Module.
 * Processing Service Module uses Reading Strategies Module and Textual complexity Module
-* Age of Exposure Module uses Processing Service Module
 * Parallel Processing Service Module uses Processing Service Module
 
 ## Versioning
@@ -125,33 +123,6 @@ compile(group: 'com.readerbench', name: 'core-services', version: '4.0.0')
 * Sbt
 ```sh
 libraryDependencies += "com.readerbench" % "core-services" % "4.0.0"
-```
-### Age of Eposure Module
-
-* Maven
-```sh
-<dependency>
-    <groupId>com.readerbench</groupId>
-    <artifactId>age-of-exposure</artifactId>
-    <version>4.0.0</version>
-</dependency>
-```
-
-* Ivy
-```sh
-<dependency org="com.readerbench" name="age-of-exposure" rev="4.0.0">
-    <artifact name="age-of-exposure" ext="jar"/>
-</dependency>
-```
-
-* Gradle
-```sh
-compile(group: 'com.readerbench', name: 'age-of-exposure', version: '4.0.0')
-```
-
-* Sbt
-```sh
-libraryDependencies += "com.readerbench" % "age-of-exposure" % "4.0.0"
 ```
 
 ### Textual Complexity Module
