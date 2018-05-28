@@ -8,12 +8,18 @@ ReaderBench targets both tutors and students by providing an integrated learning
 
 ## Build
 
-* Version: 3.0.0
+* Version: 4.0.0
 * Demo available online at: http://www.readerbench.com/
 * Repo owner: mihai.dascalu@cs.pub.ro
 
 ```sh
-mvn clean install -P {global, english, french, spanish, german, italian, dutch, romanian}
+mvn clean install
+```
+
+* Build without tests' running
+
+```sh
+mvn clean install -DskipTests
 ```
 
 ## Prerequisites
@@ -22,19 +28,269 @@ mvn clean install -P {global, english, french, spanish, german, italian, dutch, 
 
 * The resources for each language need to be extracted for the corresponding archive available at the following link: http://readerbench.com/deployment
 
-## Deploy
+* Download resources from http://owncloud.readerbench.com/
 
-Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
-```sh
-mvn clean install deploy -P {global, english, french, spanish, german, italian, dutch, romanian}
-```
+## Project structure (technical aspects)
 
-## Version bump
+ReaderBench is a Maven project with 8 modules:
 
-Changing the version number in all modules:
+* Datasource Provider Module
+* Core Services Module
+* Age of Exposure Module
+* Textual complexity Module
+* Comprehension Model Module
+* Reading Strategies Module
+* Processing Service Module
+* Parallel Processing Service Module
+
+### Dependencies between modules
+
+* Each module uses Datasource Provide Module and Core Services Module.
+* Processing Service Module uses Reading Strategies Module and Textual complexity Module
+* Age of Exposure Module uses Processing Service Module
+* Parallel Processing Service Module uses Processing Service Module
+
+## Versioning
+
+Change the version number and propagate it in all modules with the following command:
+
 ```sh
 mvn versions:set -DnewVersion=x.y.z
 ```
 
+
+## Deploy
+
+Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
+
+```sh
+mvn clean install deploy
+```
+
+The command above will deploy all modules if it is launched from the folder parent. If you want to deploy only a specific module, launch the command from the folder module.
+
 ## Dependencies:
-todo
+
+### Datasource Provider Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>datasource-provider</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="datasource-provider" rev="4.0.0">
+    <artifact name="datasource-provider" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'datasource-provider', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "datasource-provider" % "4.0.0"
+```
+
+### Core Services Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>core-services</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="core-services" rev="4.0.0">
+    <artifact name="core-services" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'core-services', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "core-services" % "4.0.0"
+```
+### Age of Eposure Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>age-of-exposure</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="age-of-exposure" rev="4.0.0">
+    <artifact name="age-of-exposure" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'age-of-exposure', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "age-of-exposure" % "4.0.0"
+```
+
+### Textual Complexity Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>textual-complexity</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="textual-complexity" rev="4.0.0">
+    <artifact name="textual-complexity" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'textual-complexity', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "textual-complexity" % "4.0.0"
+```
+
+### Comprehension Model Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>comprehension-model</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="comprehension-model" rev="4.0.0">
+    <artifact name="comprehension-model" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'comprehension-model', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "comprehension-model" % "4.0.0"
+```
+
+### Reading Strategies Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>reading-strategies</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="reading-strategies" rev="4.0.0">
+    <artifact name="reading-strategies" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'reading-strategies', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "reading-strategies" % "4.0.0"
+```
+
+### Processing Service Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>processing-service</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="processing-service" rev="4.0.0">
+    <artifact name="processing-service" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'processing-service', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "processing-service" % "4.0.0"
+```
+
+### Parallel Processing Service Module
+
+* Maven
+```sh
+<dependency>
+    <groupId>com.readerbench</groupId>
+    <artifactId>parallel-processing-service</artifactId>
+    <version>4.0.0</version>
+</dependency>
+```
+
+* Ivy
+```sh
+<dependency org="com.readerbench" name="parallel-processing-service" rev="4.0.0">
+    <artifact name="parallel-processing-service" ext="jar"/>
+</dependency>
+```
+
+* Gradle
+```sh
+compile(group: 'com.readerbench', name: 'parallel-processing-service', version: '4.0.0')
+```
+
+* Sbt
+```sh
+libraryDependencies += "com.readerbench" % "parallel-processing-service" % "4.0.0"
+```
+
