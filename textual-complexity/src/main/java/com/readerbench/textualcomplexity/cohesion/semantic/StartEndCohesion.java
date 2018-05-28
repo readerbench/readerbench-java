@@ -35,7 +35,7 @@ public class StartEndCohesion extends ComplexityIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        if (!d.canUseSimType(simType)) {
+        if (!d.canUseSimType(simType) || (d.getNoBlocks() < 3)) {
             return ComplexityIndices.IDENTITY;
         }
         Block startBlock = null;

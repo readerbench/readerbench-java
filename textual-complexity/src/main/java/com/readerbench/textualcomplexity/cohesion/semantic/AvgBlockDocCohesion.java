@@ -39,7 +39,7 @@ public class AvgBlockDocCohesion extends ComplexityIndex {
         }
         int no = 0;
         double sum = 0;
-        if (d != null && d.getBlockDocDistances() != null) {
+        if (d.getBlockDocDistances() != null) {
             for (SemanticCohesion coh : d.getBlockDocDistances()) {
                 if (coh != null && coh.getCohesion() > 0) {
                     sum += coh.getSemanticSimilarities().get(simType);
