@@ -119,7 +119,7 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
         return result;
     }
 
-    private Map<String, Map<String, Double>> readCSV(Lang lang, String fileName) {
+    public Map<String, Map<String, Double>> readCSV(Lang lang, String fileName) {
         Map<String, Map<String, Double>> map = new HashMap<>();
         String path = PROPERTIES.getProperty(String.format(PROPERTY_GENERIC_NAME, lang.name().toUpperCase())) + "/" + fileName;
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(path); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
