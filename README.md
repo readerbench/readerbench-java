@@ -53,7 +53,11 @@ mvn versions:set -DnewVersion=x.y.z
 ```
 
 
-## Deploy - only for admins
+## Deploy
+
+```diff
+- Only for admins. If you need a new version on artifactory, please send an email to readerbench@lists.cs.pub.ro 
+```
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
 
