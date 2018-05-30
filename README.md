@@ -26,10 +26,6 @@ mvn clean install -DskipTests
 
 * Maven and JAVA_HOME environment variable
 
-* The resources for each language need to be extracted for the corresponding archive available at the following link: http://readerbench.com/deployment
-
-* Download resources from http://owncloud.readerbench.com/
-
 ## Project structure (technical aspects)
 
 ReaderBench is a Maven project with 7 modules:
@@ -57,7 +53,7 @@ mvn versions:set -DnewVersion=x.y.z
 ```
 
 
-## Deploy
+## Deploy - only for admins
 
 Deploy on ReaderBench Artifactory: http://artifactory.readerbench.com:8081/artifactory/webapp/
 
