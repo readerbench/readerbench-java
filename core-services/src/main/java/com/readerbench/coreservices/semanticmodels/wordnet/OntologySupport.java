@@ -84,10 +84,16 @@ public class OntologySupport {
         if (!w1.getLanguage().equals(w2.getLanguage())) {
             return 0;
         }
-        if (w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
-            return 0;
+        double sim;
+        if (w1.getPOS() == null && w2.getPOS() == null) {
+            sim = DICTIONARIES.get(w1.getLanguage()).semanticSimilarity(w1.getLemma(), w2.getLemma(), null, type);
         }
-        double sim = DICTIONARIES.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);
+        else {
+            if (w1.getPOS() == null || w2.getPOS() == null || !w1.getPOS().equals(w2.getPOS())) {
+                return 0;
+            }
+            sim = DICTIONARIES.get(w1.getLanguage()).semanticSimilarity(w1, w2, type);
+        }
         if (sim > THRESHOLDS.get(type)) {
             sim = THRESHOLDS.get(type);
         }

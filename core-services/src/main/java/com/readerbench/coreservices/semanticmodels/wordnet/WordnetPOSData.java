@@ -65,6 +65,9 @@ public class WordnetPOSData extends WordnetLmfSaxParser {
     }
 
     public WordnetData getByPOS(POS pos) {
+        if (pos == null) {
+            return getDictionary();
+        }
         if (!dictionaries.containsKey(pos)) {
             dictionaries.put(pos, initWordNet(fileName, pos));
         }
