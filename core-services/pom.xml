@@ -130,6 +130,14 @@
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-en</artifactId>
         </dependency>
         <dependency>
