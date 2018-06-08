@@ -184,6 +184,14 @@ public class VectorAlgebra {
         }
         return Math.max(0, Math.min(sum, 1));
     }
+    
+    public static double hellinger(double[] v1, double[] v2) {
+        double sum = 0;
+        for (int i = 0; i < v1.length; i++) {
+            sum += Math.pow(Math.sqrt(v1[i]) - Math.sqrt(v2[i]), 2);
+        }
+        return Math.sqrt(sum) / Math.sqrt(2);
+    }
 
     public static double pearsonCorrelation(double[] v1, double[] v2) {
         if (v1 == null || v2 == null || v1.length != v2.length || v1.length == 0) {
