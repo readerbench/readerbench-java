@@ -7,6 +7,7 @@ package com.readerbench.textualcomplexity.wordLists;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -20,8 +21,8 @@ public class AvgWordsInList extends AbstractComplexityIndex {
 
     protected String valence;
 
-    public AvgWordsInList(ComplexityIndicesEnum index, String valence, IndexLevel level) {
-        super(index, valence, level);
+    public AvgWordsInList(ComplexityIndicesEnum index, Lang lang, String valence, IndexLevel level) {
+        super(index, lang, valence, level);
         this.valence = valence;
     }
 

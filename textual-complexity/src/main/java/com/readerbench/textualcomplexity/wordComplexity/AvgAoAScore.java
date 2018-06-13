@@ -7,6 +7,7 @@ package com.readerbench.textualcomplexity.wordComplexity;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import edu.stanford.nlp.util.StringUtils;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
@@ -30,10 +31,11 @@ public class AvgAoAScore extends AbstractComplexityIndex {
 
     public AvgAoAScore(
             ComplexityIndicesEnum index,
+            Lang lang,
             String aux,
             IndexLevel level,
             Map<String, Double> map) {
-        super(index, aux, level);
+        super(index, lang, aux, level);
         this.map = map;
     }
 

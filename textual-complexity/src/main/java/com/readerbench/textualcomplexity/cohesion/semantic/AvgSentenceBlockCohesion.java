@@ -17,10 +17,10 @@ package com.readerbench.textualcomplexity.cohesion.semantic;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-
 import java.util.Arrays;
 
 /**
@@ -29,8 +29,8 @@ import java.util.Arrays;
  */
 public class AvgSentenceBlockCohesion extends ComplexityIndex {
 
-    public AvgSentenceBlockCohesion(SimilarityType simType) {
-        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_BLOCK_COHESION, simType);
+    public AvgSentenceBlockCohesion(SimilarityType simType, Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_BLOCK_COHESION, lang, simType);
     }
 
     @Override

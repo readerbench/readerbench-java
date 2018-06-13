@@ -19,6 +19,7 @@ import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -29,8 +30,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgStartMiddleCohesion extends ComplexityIndex {
 
-    public AvgStartMiddleCohesion(SimilarityType simType) {
-        super(ComplexityIndicesEnum.AVERAGE_START_MIDDLE_COHESION, simType);
+    public AvgStartMiddleCohesion(SimilarityType simType, Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_START_MIDDLE_COHESION, lang, simType);
     }
 
     @Override

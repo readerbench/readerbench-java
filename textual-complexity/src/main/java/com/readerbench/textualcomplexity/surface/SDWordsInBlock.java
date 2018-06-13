@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.commons.DoubleStatistics;
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -27,8 +28,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class SDWordsInBlock extends ComplexityIndex {
 
-    public SDWordsInBlock() {
-        super(ComplexityIndicesEnum.BLOCK_STANDARD_DEVIATION_NO_WORDS);
+    public SDWordsInBlock(Lang lang) {
+        super(ComplexityIndicesEnum.BLOCK_STANDARD_DEVIATION_NO_WORDS, lang);
     }
 
     @Override
@@ -36,8 +37,8 @@ public class SDWordsInBlock extends ComplexityIndex {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .map(b -> b.getSentences().stream()
-                        .mapToInt(s -> s.getWords().size())
-                        .sum() * 1.)
+                .mapToInt(s -> s.getWords().size())
+                .sum() * 1.)
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY);
     }

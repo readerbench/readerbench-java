@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import org.apache.commons.lang3.StringUtils;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
@@ -28,8 +29,8 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class AvgCommas extends AbstractComplexityIndex {
 
-    public AvgCommas(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public AvgCommas(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override

@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -26,16 +27,16 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgSentenceLength extends ComplexityIndex {
 
-    public AvgSentenceLength() {
-        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_LENGTH);
+    public AvgSentenceLength(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_SENTENCE_LENGTH, lang);
     }
 
     @Override
     public double compute(AbstractDocument d) {
         return d.getSentencesInDocument().parallelStream()
                 .mapToInt(s -> s.getWords().stream()
-                        .mapToInt(w -> w.getText().length())
-                        .sum())
+                .mapToInt(w -> w.getText().length())
+                .sum())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 

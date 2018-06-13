@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -27,18 +28,17 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class AvgWords extends AbstractComplexityIndex {
 
-    public AvgWords(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public AvgWords(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
         return normalize(d, streamFunction.apply(d)
                 .mapToInt(b -> b.getWordOccurences().values().stream()
-                        .mapToInt(x -> x)
-                        .sum())
+                .mapToInt(x -> x)
+                .sum())
                 .average().orElse(ComplexityIndices.IDENTITY));
     }
-    
 
 }

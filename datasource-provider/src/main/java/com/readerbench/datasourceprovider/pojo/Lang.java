@@ -22,7 +22,7 @@ public enum Lang implements Serializable {
     en("English", Locale.ENGLISH),
     fr("French", Locale.FRENCH),
     it("Italian", Locale.ENGLISH),
-    ro("Romanian", Locale.ENGLISH),
+    ro("Romanian", new Locale("ro", "RO")),
     es("Spanish", new Locale("es", "ES")),
     de("German", Locale.ENGLISH),
     nl("Dutch", Locale.ENGLISH),

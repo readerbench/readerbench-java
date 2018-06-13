@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.cohesion.discourse;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -28,8 +29,8 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class AvgScore extends AbstractComplexityIndex {
 
-    public AvgScore(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public AvgScore(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override
@@ -39,4 +40,3 @@ public class AvgScore extends AbstractComplexityIndex {
                 .average().orElse(ComplexityIndices.IDENTITY));
     }
 }
-

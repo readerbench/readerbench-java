@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.dialogism;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -37,17 +38,18 @@ public class DialogismSynergyIndex extends ComplexityIndex {
     private transient final Function<Double, Double> mapper;
 
     public DialogismSynergyIndex(ComplexityIndicesEnum index,
+            Lang lang,
             Function<SemanticChain, double[]> listFunction,
             Function<Stream<? extends Number>, Double> combine,
             Function<Double, Double> mapper) {
-        super(index);
+        super(index, lang);
         this.listFunction = listFunction;
         this.combine = combine;
         this.mapper = mapper;
     }
 
-    public DialogismSynergyIndex(ComplexityIndicesEnum index, Function<SemanticChain, double[]> listFunction, Function<Stream<? extends Number>, Double> combine) {
-        this(index, listFunction, combine, Function.identity());
+    public DialogismSynergyIndex(ComplexityIndicesEnum index, Lang lang, Function<SemanticChain, double[]> listFunction, Function<Stream<? extends Number>, Double> combine) {
+        this(index, lang, listFunction, combine, Function.identity());
     }
 
     @Override

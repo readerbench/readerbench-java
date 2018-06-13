@@ -17,10 +17,10 @@ package com.readerbench.textualcomplexity.syntax;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +31,8 @@ public class AvgUniquePosPerBlock extends ComplexityIndex {
 
     private final String pos;
 
-    public AvgUniquePosPerBlock(ComplexityIndicesEnum index, String pos) {
-        super(index);
+    public AvgUniquePosPerBlock(ComplexityIndicesEnum index, String pos, Lang lang) {
+        super(index, lang);
         this.pos = pos;
     }
 
@@ -41,10 +41,10 @@ public class AvgUniquePosPerBlock extends ComplexityIndex {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .mapToInt(b -> b.getSentences().stream()
-                        .flatMap(s -> s.getAllWords().stream())
-                        .filter(w -> w.getPOS() != null && w.getPOS().contains(pos))
-                        .map(Word::getLemma)
-                        .collect(Collectors.toSet()).size())
+                .flatMap(s -> s.getAllWords().stream())
+                .filter(w -> w.getPOS() != null && w.getPOS().contains(pos))
+                .map(Word::getLemma)
+                .collect(Collectors.toSet()).size())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 

@@ -18,7 +18,6 @@ package com.readerbench.textualcomplexity.surface;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,24 +30,24 @@ public class SurfaceFactory extends ComplexityIndicesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        result.add(new AvgBlockLength());
-        result.add(new AvgCommasPerBlock());
-        result.add(new AvgCommasPerSentence());
-        result.add(new AvgSentenceLength());
-        result.add(new AvgSentencesInBlock());
-        result.add(new AvgUniqueWordsInBlock());
-        result.add(new AvgUniqueWordsInSentence());
-        result.add(new AvgWordLength());
-        result.add(new AvgWordsInBlock());
-        result.add(new AvgWordsInSentence());
-        result.add(new CharEntropy());
-        result.add(new SDSentencesInBlock());
-        result.add(new SDUniqueWordsInBlock());
-        result.add(new SDUniqueWordsInSentence());
-        result.add(new SDWordsInBlock());
-        result.add(new SDWordsInSentence());
-        result.add(new WordEntropy());
-        result.add(new WordLettersSD());
+        result.add(new AvgBlockLength(lang));
+        result.add(new AvgCommasPerBlock(lang));
+        result.add(new AvgCommasPerSentence(lang));
+        result.add(new AvgSentenceLength(lang));
+        result.add(new AvgSentencesInBlock(lang));
+        result.add(new AvgUniqueWordsInBlock(lang));
+        result.add(new AvgUniqueWordsInSentence(lang));
+        result.add(new AvgWordLength(lang));
+        result.add(new AvgWordsInBlock(lang));
+        result.add(new AvgWordsInSentence(lang));
+        result.add(new CharEntropy(lang));
+        result.add(new SDSentencesInBlock(lang));
+        result.add(new SDUniqueWordsInBlock(lang));
+        result.add(new SDUniqueWordsInSentence(lang));
+        result.add(new SDWordsInBlock(lang));
+        result.add(new SDWordsInSentence(lang));
+        result.add(new WordEntropy(lang));
+        result.add(new WordLettersSD(lang));
         return result;
     }
 

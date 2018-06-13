@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -26,8 +27,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgWordLength extends ComplexityIndex {
 
-    public AvgWordLength() {
-        super(ComplexityIndicesEnum.AVERAGE_WORD_LENGTH);
+    public AvgWordLength(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_WORD_LENGTH, lang);
     }
 
     @Override

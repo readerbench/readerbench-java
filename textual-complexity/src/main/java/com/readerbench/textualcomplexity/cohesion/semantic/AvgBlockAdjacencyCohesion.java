@@ -18,6 +18,7 @@ package com.readerbench.textualcomplexity.cohesion.semantic;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -28,8 +29,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgBlockAdjacencyCohesion extends ComplexityIndex {
 
-    public AvgBlockAdjacencyCohesion(SimilarityType simType) {
-        super(ComplexityIndicesEnum.AVERAGE_BLOCK_ADJACENCY_COHESION, simType);
+    public AvgBlockAdjacencyCohesion(SimilarityType simType, Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_BLOCK_ADJACENCY_COHESION, lang, simType);
     }
 
     @Override

@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.cohesion.lexicalChains;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -26,8 +27,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class LexicalChainsAvgSpan extends ComplexityIndex {
 
-    public LexicalChainsAvgSpan() {
-        super(ComplexityIndicesEnum.LEXICAL_CHAINS_AVERAGE_SPAN);
+    public LexicalChainsAvgSpan(Lang lang) {
+        super(ComplexityIndicesEnum.LEXICAL_CHAINS_AVERAGE_SPAN, lang);
     }
 
     @Override

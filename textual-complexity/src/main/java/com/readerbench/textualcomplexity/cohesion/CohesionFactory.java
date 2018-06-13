@@ -53,50 +53,50 @@ public class CohesionFactory extends ComplexityIndicesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        result.add(new LexicalChainsAvgSpan());
-        result.add(new LexicalChainsMaxSpan());
-        result.add(new AvgLexicalChainsPerBlock());
-        result.add(new LexicalChainsCoverage());
-        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_BLOCK_SCORE, IndexLevel.BLOCK));
-        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_SENTENCE_SCORE, IndexLevel.SENTENCE));
-        result.add(new ScoreSD(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION, IndexLevel.BLOCK));
-        result.add(new ScoreSD(ComplexityIndicesEnum.SENTENCE_SCORE_STANDARD_DEVIATION, IndexLevel.SENTENCE));
+        result.add(new LexicalChainsAvgSpan(lang));
+        result.add(new LexicalChainsMaxSpan(lang));
+        result.add(new AvgLexicalChainsPerBlock(lang));
+        result.add(new LexicalChainsCoverage(lang));
+        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_BLOCK_SCORE, lang, IndexLevel.BLOCK));
+        result.add(new AvgScore(ComplexityIndicesEnum.AVERAGE_SENTENCE_SCORE, lang, IndexLevel.SENTENCE));
+        result.add(new ScoreSD(ComplexityIndicesEnum.BLOCK_SCORE_STANDARD_DEVIATION, lang, IndexLevel.BLOCK));
+        result.add(new ScoreSD(ComplexityIndicesEnum.SENTENCE_SCORE_STANDARD_DEVIATION, lang, IndexLevel.SENTENCE));
 
         for (SimilarityType simType : SimilarityType.values()) {
-            result.add(new AvgBlockAdjacencyCohesion(simType));
-            result.add(new AvgBlockDocCohesion(simType));
-            result.add(new AvgInterBlockCohesion(simType));
-            result.add(new AvgIntraBlockCohesion(simType));
-            result.add(new AvgMiddleEndCohesion(simType));
-            result.add(new AvgSentenceAdjacencyCohesion(simType));
-            result.add(new AvgSentenceBlockCohesion(simType));
-            result.add(new AvgStartMiddleCohesion(simType));
-            result.add(new AvgTransitionCohesion(simType));
-            result.add(new StartEndCohesion(simType));
+            result.add(new AvgBlockAdjacencyCohesion(simType, lang));
+            result.add(new AvgBlockDocCohesion(simType, lang));
+            result.add(new AvgInterBlockCohesion(simType, lang));
+            result.add(new AvgIntraBlockCohesion(simType, lang));
+            result.add(new AvgMiddleEndCohesion(simType, lang));
+            result.add(new AvgSentenceAdjacencyCohesion(simType, lang));
+            result.add(new AvgSentenceBlockCohesion(simType, lang));
+            result.add(new AvgStartMiddleCohesion(simType, lang));
+            result.add(new AvgTransitionCohesion(simType, lang));
+            result.add(new StartEndCohesion(simType, lang));
             for (DocFlowCriteria crit : DocFlowCriteria.values()) {
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_POSITION_ACCURACY,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getAbsolutePositionAccuracy));
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_ABSOLUTE_DISTANCE_ACCURACY,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getAbsoluteDistanceAccuracy));
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_ADJACENCY_ACCURACY,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getAdjacencyAccuracy));
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_AVERAGE_COHESION,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getAverageFlowCohesion));
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_MAX_ORDERED_SEQUENCE,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getMaxOrderedSequence));
                 result.add(new DocFlowIndex(
                         ComplexityIndicesEnum.DOC_FLOW_SPEARMAN_CORRELATION,
-                        crit, simType,
+                        lang, crit, simType,
                         DocumentFlow::getSpearmanCorrelation));
             }
         }

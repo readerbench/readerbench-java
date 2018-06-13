@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.commons.DoubleStatistics;
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -28,16 +29,16 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class SDWords extends AbstractComplexityIndex {
 
-    public SDWords(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public SDWords(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override
     public double compute(AbstractDocument d) {
         return normalize(d, streamFunction.apply(d)
                 .map(b -> b.getWordOccurences().values().stream()
-                        .mapToDouble(x -> x)
-                        .sum())
+                .mapToDouble(x -> x)
+                .sum())
                 .collect(DoubleStatistics.collector())
                 .getStandardDeviation(ComplexityIndices.IDENTITY));
     }
