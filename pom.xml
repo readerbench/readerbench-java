@@ -320,6 +320,36 @@
             </dependency>
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-la</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordlists-la</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-it</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordlists-it</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordnet-ro</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>wordlists-ro</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
                 <artifactId>semantic-models-tasa-en</artifactId>
                 <version>1.0</version>
             </dependency>

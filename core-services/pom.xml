@@ -138,6 +138,18 @@
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-it</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-la</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-en</artifactId>
         </dependency>
         <dependency>
@@ -147,6 +159,18 @@
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-it</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-la</artifactId>
         </dependency>
         <!-- / ReaderBench resources-->
         <dependency>
