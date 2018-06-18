@@ -70,9 +70,9 @@ public class ExportCommunity {
                 outInitiation.write("Participant name,Anonymized name");
                 for (CSCLIndices CSCLindex : CSCLIndices.values()) {
                     if (CSCLindex.isIndividualStatsIndex()) {
-                        outIndividualStats.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                        outIndividualStats.write("," + CSCLindex.getDescription(community.getLanguage()) + "(" + CSCLindex.getAcronym() + ")");
                     } else {
-                        outInitiation.write("," + CSCLindex.getDescription() + "(" + CSCLindex.getAcronym() + ")");
+                        outInitiation.write("," + CSCLindex.getDescription(community.getLanguage()) + "(" + CSCLindex.getAcronym() + ")");
                     }
                 }
                 outIndividualStats.write("\n");
