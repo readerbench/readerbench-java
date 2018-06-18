@@ -78,7 +78,7 @@ public class CommunityTimeProcessing {
         LOGGER.info("Modeling time evolution for {} participants ...", community.getParticipants().size());
         for (CSCLIndices index : CSCLIndices.values()) {
             if (index.isUsedForTimeModeling()) {
-                LOGGER.info("Modeling based on {}", index.getDescription());
+                LOGGER.info("Modeling based on {}", index.getDescription(community.getLanguage()));
                 int no = 0;
                 for (Participant p : community.getParticipants()) {
                     // model time evolution of each participant
