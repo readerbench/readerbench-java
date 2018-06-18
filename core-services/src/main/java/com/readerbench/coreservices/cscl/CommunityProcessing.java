@@ -106,6 +106,12 @@ public class CommunityProcessing {
                 }
             }
         }
+        if (community.getStartDate()==null) {
+            community.setStartDate(community.getFistContributionDate());
+        }
+        if (community.getEndDate() == null) {
+            community.setEndDate(community.getLastContributionDate());
+        }
     }
 
     public void determineParticipantion(Community community) {

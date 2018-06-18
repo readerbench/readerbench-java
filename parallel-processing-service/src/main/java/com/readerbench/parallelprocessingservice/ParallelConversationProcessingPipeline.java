@@ -21,10 +21,9 @@ import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import com.readerbench.processingservice.exportdata.ExportCommunity;
 import com.readerbench.processingservice.exportdata.ExportCommunityToES;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import org.joda.time.DateTime;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +58,15 @@ public class ParallelConversationProcessingPipeline {
     private int dayIncrement;
     private ElasticsearchService elasticsearchService = new ElasticsearchService();
 
+    public ParallelConversationProcessingPipeline(String communityName, Lang lang, List<SemanticModel> models, List<Annotators> annotators, int monthIncrement, int dayIncrement) {
+        this.communityName = communityName;
+        this.lang = lang;
+        this.models = models;
+        this.annotators = annotators;
+        this.monthIncrement = monthIncrement;
+        this.dayIncrement = dayIncrement;
+    }
+
     public List<Conversation> loadXMLsFromDirectory(String directoryPath) {
         ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(lang, models, annotators);
         List<AbstractDocumentTemplate> templates = new ArrayList<>();
@@ -75,7 +83,7 @@ public class ParallelConversationProcessingPipeline {
 
         ProcessDocumentsInitMessage initMsg = new ProcessDocumentsInitMessage(templates, lang, models, annotators);
 
-        Future<Object> future = Patterns.ask(ConversationActorSystem.PROCESSING_MASTER, initMsg, ConversationActorSystem.TIMEOUT * 100);
+        Future<Object> future = Patterns.ask(ConversationActorSystem.PROCESSING_MASTER, initMsg, ConversationActorSystem.TIMEOUT * 10000);
 
         List<Conversation> listOfProcessedConversations = null;
         try {
@@ -101,39 +109,49 @@ public class ParallelConversationProcessingPipeline {
         ExportCommunityToES ec = new ExportCommunityToES(community);
 
         List<Map<String, Object>> participantsStats = ec.writeIndividualStatsToElasticsearch(0);
-        elasticsearchService.indexParticipantsStats(participantsStats);
+        LOGGER.info("participantsStats: " + participantsStats);
+        //elasticsearchService.indexParticipantsStats(participantsStats);
         /**
          * index participant interaction results
          */
         LOGGER.info("Start generating participants directed graph representation.");
         JSONObject participantInteraction = ec.generateParticipantViewD3(0);
-        elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
+        LOGGER.info("participantInteraction: " + participantInteraction);
+        //elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteraction);
 
         LOGGER.info("Start generating hierarchical edge bundling.");
         JSONObject hierarchicalEdgeBundling = ec.generateHierarchicalEdgeBundling(0);
-        elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
+        LOGGER.info("hierarchicalEdgeBundling: " + hierarchicalEdgeBundling);
+        //elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundling);
 
         LOGGER.info("\n----------- Subcommunities stats -------- \n");
+        LOGGER.info("\n----------- The number of communities are: " + community.getTimeframeSubCommunities().size() + "\n");
         for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+            LOGGER.info("Start extracting statistics for community " + (i + 1));
             Community subCommunity = community.getTimeframeSubCommunities().get(i);
             CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + communityName + "_clustered_results_week_" + (i + 1) + ".csv");
             ec = new ExportCommunityToES(subCommunity);
 
             List<Map<String, Object>> participantsStatsSubCommunity = ec.writeIndividualStatsToElasticsearch(i + 1);
-            elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
+            LOGGER.info("participantsStatsSubCommunity: " + participantsStatsSubCommunity);
+            //elasticsearchService.indexParticipantsStats(participantsStatsSubCommunity);
 
             /**
              * index participant interaction results
              */
             LOGGER.info("Start generating participants directed graph representation.");
             JSONObject participantInteractionSubcommunity = ec.generateParticipantViewD3(i + 1);
-            elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteractionSubcommunity);
+            LOGGER.info("participantInteractionSubcommunity: " + participantInteractionSubcommunity);
+            //elasticsearchService.indexParticipantGraphRepresentation("participants", "directedGraph", participantInteractionSubcommunity);
 
             LOGGER.info("Start generating hierarchical edge bundling.");
             JSONObject hierarchicalEdgeBundlingSubcommunity = ec.generateHierarchicalEdgeBundling(i + 1);
-            elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundlingSubcommunity);
+            LOGGER.info("hierarchicalEdgeBundlingSubcommunity: " + hierarchicalEdgeBundlingSubcommunity);
+            //elasticsearchService.indexParticipantGraphRepresentation("participants", "edgeBundling", hierarchicalEdgeBundlingSubcommunity);
         }
 
+        LOGGER.info("\n------- Ending subcommunities processing -------\n");
+        LOGGER.info("---------- Starting export community statistics to files --------\n");
         ExportCommunity export = new ExportCommunity(community);
         
         export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
@@ -142,5 +160,37 @@ public class ParallelConversationProcessingPipeline {
         export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
         export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
     }
+
+    public static void main(String[] args) {
+        processMathCourse();
+
+    }
+
+    private static void processMathCourse() {
+        Lang lang = Lang.en;
+        List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
+        List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
+        String communityName = "Online Math Course";
+
+        ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
+                communityName, lang, models, annotators, 0, 7 );
+
+        processingPipeline.processCommunity("C:\\Users\\Dorinela\\Desktop\\mooc");
+    }
+
+    private static void processEDMMooc() {
+        Lang lang = Lang.en;
+        List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
+        List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
+        String communityName = "EDM MOOC";
+
+        ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
+                communityName, lang, models, annotators, 0, 7 );
+
+        processingPipeline.startDate = new Date(1382630400);
+        processingPipeline.endDate = new Date(1387472400);
+        processingPipeline.processCommunity("C:\\Users\\Dorinela\\Desktop\\mooc");
+    }
+
 
 }

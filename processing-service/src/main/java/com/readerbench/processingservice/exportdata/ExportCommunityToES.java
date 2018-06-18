@@ -19,10 +19,9 @@ import com.readerbench.coreservices.data.cscl.CSCLIndices;
 import com.readerbench.coreservices.data.cscl.Community;
 import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.datasourceprovider.commons.Formatting;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -98,8 +97,11 @@ public class ExportCommunityToES {
 
         jsonObject.put("communityName", community.getName());
         jsonObject.put("week", week);
-        jsonObject.put("startDate", community.getFistContributionDate().getTime());
-        jsonObject.put("endDate", community.getLastContributionDate().getTime());
+
+        Date sDate = community.getStartDate() != null ? community.getStartDate() : community.getFistContributionDate();
+        Date lDate = community.getEndDate() != null ? community.getEndDate() : community.getLastContributionDate();
+        jsonObject.put("startDate", sDate.getTime());
+        jsonObject.put("endDate", lDate.getTime());
 
         return jsonObject;
     }
@@ -145,8 +147,11 @@ public class ExportCommunityToES {
             finalResult.put("data", edgeBundling);
             finalResult.put("communityName", community.getName());
             finalResult.put("week", week);
-            finalResult.put("startDate", community.getFistContributionDate().getTime());
-            finalResult.put("endDate", community.getLastContributionDate().getTime());
+
+            Date sDate = community.getStartDate() != null ? community.getStartDate() : community.getFistContributionDate();
+            Date lDate = community.getEndDate() != null ? community.getEndDate() : community.getLastContributionDate();
+            finalResult.put("startDate", sDate.getTime());
+            finalResult.put("endDate", lDate.getTime());
         } catch (Exception e) {
             LOGGER.error("Cannot create json array ...");
             throw new RuntimeException(e);
@@ -176,8 +181,11 @@ public class ExportCommunityToES {
                 }
                 participantStats.put("participantName", p.getName());
                 participantStats.put("participantNickname", "Member " + index);
-                participantStats.put("startDate", community.getFistContributionDate().getTime());
-                participantStats.put("endDate", community.getLastContributionDate().getTime());
+
+                Date sDate = community.getStartDate() != null ? community.getStartDate() : community.getFistContributionDate();
+                Date lDate = community.getEndDate() != null ? community.getEndDate() : community.getLastContributionDate();
+                participantStats.put("startDate", sDate.getTime());
+                participantStats.put("endDate", lDate.getTime());
                 participantStats.put("communityName", community.getName());
                 participantStats.put("week", week);
                 participantStats.put("group", p.getParticipantGroup().name());
