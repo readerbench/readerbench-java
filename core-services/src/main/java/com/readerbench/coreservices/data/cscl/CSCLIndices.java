@@ -57,7 +57,7 @@ public enum CSCLIndices {
     }
 
     public String getDescription(Lang lang) {
-        return ResourceBundle.getBundle("cscl_indices_descriptions_" + Lang.en.name(), lang.getLocale()).getString(this.name());
+        return ResourceBundle.getBundle("cscl_indices_descriptions", lang.getLocale()).getString(this.name());
     }
 
     public String getAcronym() {
