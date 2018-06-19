@@ -16,8 +16,8 @@
 package com.readerbench.textualcomplexity.coreference;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
+import org.apache.commons.lang3.NotImplementedException;
 
 /**
  *
@@ -31,13 +31,14 @@ public class AvgInferenceDistPerChain extends CoreferenceIndex {
 
     @Override
     public double compute(AbstractDocument d) {
-        return d.getBlocks().parallelStream()
-                .filter(b -> b != null)
-                .filter(b -> b.getCorefs() != null)
-                .flatMapToDouble(b -> b.getCorefs().values().stream()
-                        .filter(c -> c.getMentionsInTextualOrder().size() > 1)
-                        .mapToDouble(c -> getInferenceDistance(c, b.getStanfordSentences())))
-                .average().orElse(ComplexityIndices.IDENTITY);
+        throw new UnsupportedOperationException("Not supported yet.");
+//        return d.getBlocks().parallelStream()
+//                .filter(b -> b != null)
+//                .filter(b -> b.getCorefs() != null)
+//                .flatMapToDouble(b -> b.getCorefs().values().stream()
+//                        .filter(c -> c.getMentionsInTextualOrder().size() > 1)
+//                        .mapToDouble(c -> getInferenceDistance(c, b.getStanfordSentences())))
+//                .average().orElse(ComplexityIndices.IDENTITY);
     }
 
 }

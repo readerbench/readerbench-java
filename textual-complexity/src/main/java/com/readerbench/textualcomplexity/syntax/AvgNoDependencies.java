@@ -36,7 +36,7 @@ public class AvgNoDependencies extends ComplexityIndex {
                 .filter(s -> s.getWords().size() > 0)
                 .mapToInt(s -> {
                     if (s.getDependencies() == null) return 0;
-                    return s.getDependencies().typedDependencies().size();
+                    return s.getDependencies().size();
                 })
                 .average().orElse(ComplexityIndices.IDENTITY);
     }

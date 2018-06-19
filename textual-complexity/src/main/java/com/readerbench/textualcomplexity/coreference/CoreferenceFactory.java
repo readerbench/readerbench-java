@@ -31,13 +31,14 @@ public class CoreferenceFactory extends ComplexityIndicesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        if (lang != Lang.en) return result;
-        result.add(new TotalCorefChains());
-        result.add(new AvgCorefsPerChain());
-        result.add(new AvgChainSpan());
-        result.add(new AvgInferenceDistPerChain());
-        result.add(new ActiveCorefChainsPerWord());
-        result.add(new CorefChainsWithBigSpan());
         return result;
+//        if (lang != Lang.en) return result;
+//        result.add(new TotalCorefChains());
+//        result.add(new AvgCorefsPerChain());
+//        result.add(new AvgChainSpan());
+//        result.add(new AvgInferenceDistPerChain());
+//        result.add(new ActiveCorefChainsPerWord());
+//        result.add(new CorefChainsWithBigSpan());
+//        return result;
     }
 }

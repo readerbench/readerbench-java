@@ -26,37 +26,6 @@
             <version>4.0.0</version>
         </dependency>
         <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>javax.servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--Stanford Core NLP models -->
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-english</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-french</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-spanish</classifier>
-        </dependency>
-        <dependency>
-            <groupId>edu.stanford.nlp</groupId>
-            <artifactId>stanford-corenlp</artifactId>
-            <classifier>models-german</classifier>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
         </dependency>
@@ -127,31 +96,42 @@
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordnet-en</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordnet-fr</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordnet-nl</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-en</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-fr</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordlists-nl</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <!-- / ReaderBench resources-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mashape.unirest</groupId>
+            <artifactId>unirest-java</artifactId>
+            <version>1.4.9</version>
         </dependency>
     </dependencies>
     <build>

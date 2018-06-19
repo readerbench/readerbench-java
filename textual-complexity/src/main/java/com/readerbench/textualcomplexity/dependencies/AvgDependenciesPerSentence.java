@@ -28,9 +28,8 @@ public class AvgDependenciesPerSentence extends ComplexityIndex{
             .filter(Objects::nonNull)
             .flatMap(b -> b.getSentences().stream())
             .filter(s -> s.getDependencies() != null)
-            .mapToDouble(s -> StreamSupport.stream(
-                        s.getDependencies().edgeIterable().spliterator(), false)
-                    .map(edge -> edge.getRelation().getShortName())
+            .mapToDouble(s -> s.getDependencies().stream()
+                    .map(triple -> triple.getRight())
                     .filter(dep -> dep.equals(param))
                     .count())
             .average().orElse(0);

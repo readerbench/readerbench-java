@@ -38,8 +38,7 @@ public class Utterance extends Block {
         super.setSentences(b.getSentences());
         super.setRefBlock(b.getRefBlock());
         super.setFollowedByVerbalization(b.isFollowedByVerbalization());
-        super.setCorefs(b.getCorefs());
-        super.setStanfordSentences(b.getStanfordSentences());
+//        super.setCorefs(b.getCorefs());
         super.setWordOccurences(b.getWordOccurences());
         super.setModelVectors(new EnumMap<>(b.getModelVectors()));
         super.setProcessedText(b.getProcessedText());

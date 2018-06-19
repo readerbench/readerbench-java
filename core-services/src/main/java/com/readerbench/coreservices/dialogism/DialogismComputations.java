@@ -25,8 +25,6 @@ import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
-import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations;
-import edu.stanford.nlp.trees.Tree;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

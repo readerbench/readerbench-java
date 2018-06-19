@@ -62,7 +62,7 @@ public class ResearchArticleProcessingPipeline extends DocumentProcessingPipelin
     public ResearchArticle createResearchArticleFromXML(String path) {
         ResearchArticle d = new ResearchArticle(path, getModels(), getLanguage());
         AbstractDocumentTemplate docTmp = super.extractDocTemplateFromXML(path);
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        Parsing.parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
         this.addInformationFromXML(path, d);
         return d;
     }

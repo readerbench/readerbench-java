@@ -96,7 +96,7 @@ public class MetaDocumentProcessingPipeline extends DocumentProcessingPipeline {
         if (extraText) {
             Document d = new Document(inputPath, getModels(), getLanguage());
             AbstractDocumentTemplate docTmp = extractDocTemplateFromXML(root);
-            Parsing.getParser(getLanguage()).parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+            Parsing.parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
             doc.addInfo(d);
         }
         return doc;

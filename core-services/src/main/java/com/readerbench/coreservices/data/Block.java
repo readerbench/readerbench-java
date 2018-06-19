@@ -18,9 +18,6 @@ package com.readerbench.coreservices.data;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
-import edu.stanford.nlp.coref.data.CorefChain;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.CoreMap;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,11 +46,9 @@ public class Block extends AnalysisElement implements Serializable {
     // verbalizations and the initial text
     private boolean isFollowedByVerbalization;
 
-    private transient Annotation annotation; // useful for rebuilding
-    // coref-chains
-    private transient Map<Integer, CorefChain> corefs;
-    private transient List<CoreMap> stanfordSentences;
-
+   // coref-chains
+//    private transient Map<Integer, CorefChain> corefs;
+    
     // inter-sentence cohesion values
     private SemanticCohesion[][] sentenceDistances;
     private SemanticCohesion[][] prunnedSentenceDistances;
@@ -112,21 +107,13 @@ public class Block extends AnalysisElement implements Serializable {
         this.sentences = sentences;
     }
 
-    public Annotation getAnnotation() {
-        return annotation;
-    }
-
-    public void setAnnotation(Annotation annotation) {
-        this.annotation = annotation;
-    }
-
-    public Map<Integer, CorefChain> getCorefs() {
-        return corefs;
-    }
-
-    public void setCorefs(Map<Integer, CorefChain> corefs) {
-        this.corefs = corefs;
-    }
+//    public Map<Integer, CorefChain> getCorefs() {
+//        return corefs;
+//    }
+//
+//    public void setCorefs(Map<Integer, CorefChain> corefs) {
+//        this.corefs = corefs;
+//    }
 
     public Block getRefBlock() {
         return refBlock;
@@ -134,14 +121,6 @@ public class Block extends AnalysisElement implements Serializable {
 
     public void setRefBlock(Block refBlock) {
         this.refBlock = refBlock;
-    }
-
-    public List<CoreMap> getStanfordSentences() {
-        return stanfordSentences;
-    }
-
-    public void setStanfordSentences(List<CoreMap> sentences) {
-        this.stanfordSentences = sentences;
     }
 
     /**

@@ -20,7 +20,6 @@
         <versions-maven-plugin.version>2.5</versions-maven-plugin.version>
         <maven.resources.plugin.version>2.7</maven.resources.plugin.version>
 
-        <coreNLP.version>3.8.0</coreNLP.version>
         <mallet.version>2.0.8</mallet.version>
         <languagetool.version>3.9</languagetool.version>
         <commons-lang3.version>3.7</commons-lang3.version>
@@ -66,42 +65,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>edu.stanford.nlp</groupId>
-                <artifactId>stanford-corenlp</artifactId>
-                <version>${coreNLP.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>javax.servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <!--Stanford Core NLP models -->
-            <dependency>
-                <groupId>edu.stanford.nlp</groupId>
-                <artifactId>stanford-corenlp</artifactId>
-                <version>${coreNLP.version}</version>
-                <classifier>models-english</classifier>
-            </dependency>
-            <dependency>
-                <groupId>edu.stanford.nlp</groupId>
-                <artifactId>stanford-corenlp</artifactId>
-                <version>${coreNLP.version}</version>
-                <classifier>models-french</classifier>
-            </dependency>
-            <dependency>
-                <groupId>edu.stanford.nlp</groupId>
-                <artifactId>stanford-corenlp</artifactId>
-                <version>${coreNLP.version}</version>
-                <classifier>models-spanish</classifier>
-            </dependency>
-            <dependency>
-                <groupId>edu.stanford.nlp</groupId>
-                <artifactId>stanford-corenlp</artifactId>
-                <version>${coreNLP.version}</version>
-                <classifier>models-german</classifier>
-            </dependency>
             <!-- Spellchecking -->
             <dependency>
                 <groupId>org.languagetool</groupId>

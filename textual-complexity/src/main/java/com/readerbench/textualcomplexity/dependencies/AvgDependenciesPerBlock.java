@@ -28,9 +28,8 @@ public class AvgDependenciesPerBlock extends ComplexityIndex{
             .filter(Objects::nonNull)
             .mapToDouble(b -> b.getSentences().stream()
                     .filter(s -> s.getDependencies() != null)
-                    .flatMap(s -> StreamSupport.stream(
-                        s.getDependencies().edgeIterable().spliterator(), false))
-                    .map(edge -> edge.getRelation().getShortName())
+                    .flatMap(s -> s.getDependencies().stream())
+                    .map(triple -> triple.getRight())
                     .filter(dep -> dep.equals(param))
                     .count())
             .average().orElse(0);

@@ -65,7 +65,7 @@ public class MetacognitionProcessingPipeline extends DocumentProcessingPipeline 
         Metacognition m = new Metacognition(path, initialReadingMaterial);
         AbstractDocumentTemplate docTmp = extractDocumentContent(path, "verbalization");
         LOGGER.info("Building internal representation ...");
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, m, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        Parsing.parseDoc(docTmp, m, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
         addInformationFromXML(path, m);
         addSpecificInformationFromXML(path, m);
         return m;

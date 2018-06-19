@@ -57,7 +57,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
     //consider the usage of the NLP pipeline when creating a new conversation
     public Conversation createConversationFromTemplate(AbstractDocumentTemplate docTmp) {
         Conversation c = new Conversation(null, getModels(), getLanguage());
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, c, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        Parsing.parseDoc(docTmp, c, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
         return c;
     }
 

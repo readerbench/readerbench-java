@@ -30,10 +30,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,12 +55,7 @@ public class DocumentProcessingPipeline extends GenericProcessingPipeline {
     }
 
     //consider the usage of the NLP pipeline when creating a new document
-    public Document createDocumentFromTemplate(AbstractDocumentTemplate docTmp) {
-        Document d = new Document(null, getModels(), getLanguage());
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
-        return d;
-    }
-
+    
     //consider the usage of the NLP pipeline when creating a new document
     public Document createDocumentFromXML(String path) {
         Document d = createDocumentFromTemplate(extractDocTemplateFromXML(path));
