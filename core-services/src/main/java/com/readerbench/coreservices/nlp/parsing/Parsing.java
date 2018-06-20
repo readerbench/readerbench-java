@@ -33,6 +33,7 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,7 +93,15 @@ public class Parsing {
                 c.getParticipants().add(activeSpeaker);
             }
         }
-        Utterance u = new Utterance(b, activeSpeaker, (Date)blockJSON.get("time"));
+        Date time = null;
+        if (blockJSON.has("time")) {
+            try {
+                time = AbstractDocumentTemplate.DATE_FORMATS[0].parse(blockJSON.getString("time"));
+            } catch (ParseException ex) {
+                LOGGER.error(ex.getMessage());
+            }
+        }
+        Utterance u = new Utterance(b, activeSpeaker, time);
         return u;
     }
 
@@ -108,6 +117,9 @@ public class Parsing {
             block.put("ref", bt.getRefId());
             if (bt.getVerbId() != null) {
                 block.put("verbId", bt.getVerbId());
+            }
+            if (bt.getTime() != null) {
+                block.put("time", AbstractDocumentTemplate.DATE_FORMATS[0].format(bt.getTime()));
             }
             blocks.add(block);
         }
