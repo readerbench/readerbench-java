@@ -8,7 +8,6 @@ package com.readerbench.textualcomplexity.wordComplexity;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import edu.stanford.nlp.util.StringUtils;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *

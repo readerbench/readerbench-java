@@ -15,67 +15,49 @@
  */
 package com.readerbench.coreservices.nlp.parsing;
 
-import com.readerbench.coreservices.data.Sentence;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.async.Callback;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Block;
+import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.coreservices.data.cscl.Utterance;
+import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import edu.stanford.nlp.coref.CorefCoreAnnotations;
-import edu.stanford.nlp.ling.CoreAnnotations.*;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.EnhancedPlusPlusDependenciesAnnotation;
-import edu.stanford.nlp.sentiment.SentimentCoreAnnotations;
-import edu.stanford.nlp.trees.Tree;
-import edu.stanford.nlp.util.CoreMap;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
-import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
+import com.readerbench.datasourceprovider.commons.ReadProperty;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * General NLP parsing class relying on the Stanford Core NLP
  *
  * @author Mihai Dascalu
  */
-public abstract class Parsing {
+public class Parsing {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Parsing.class);
 
     public static final int STANFORD_ID = 10000;
-
-    protected Lang lang;
-
-    public static Parsing getParser(Lang lang) {
-        switch (lang) {
-            case fr:
-                return Parsing_FR.getInstance();
-            case it:
-                return Parsing_IT.getInstance();
-            case es:
-                return Parsing_ES.getInstance();
-            case nl:
-                return Parsing_NL.getInstance();
-            case ro:
-                return Parsing_RO.getInstance();
-            case en:
-                return Parsing_EN.getInstance();
-            case la:
-                return Parsing_LA.getInstance();
-            default:
-                return null;
-        }
-    }
 
     public static Word getWordFromConcept(String concept, Lang lang) {
         Word w;
@@ -96,12 +78,10 @@ public abstract class Parsing {
         return pos;
     }
 
-    public abstract StanfordCoreNLP getPipeline();
-
-    private Utterance getUtterance(Conversation c, AbstractDocumentTemplate.BlockTemplate blockTmp, Block b) {
+    private static Utterance getUtterance(Conversation c, JSONObject blockJSON, Block b) throws JSONException {
         Participant activeSpeaker = null;
-        if (!blockTmp.getSpeaker().isEmpty()) {
-            activeSpeaker = new Participant(blockTmp.getSpeaker(), blockTmp.getSpeakerAlias(), c);
+        if (blockJSON.has("speaker")) {
+            activeSpeaker = new Participant(blockJSON.getString("speaker"), blockJSON.optString("speakerAlias"), c);
             boolean contains = false;
             for (Participant p : c.getParticipants()) {
                 if (p.equals(activeSpeaker)) {
@@ -113,146 +93,165 @@ public abstract class Parsing {
                 c.getParticipants().add(activeSpeaker);
             }
         }
-        Utterance u = new Utterance(b, activeSpeaker, blockTmp.getTime());
+        Date time = null;
+        if (blockJSON.has("time")) {
+            try {
+                time = AbstractDocumentTemplate.DATE_FORMATS[0].parse(blockJSON.getString("time"));
+            } catch (ParseException ex) {
+                LOGGER.error(ex.getMessage());
+            }
+        }
+        Utterance u = new Utterance(b, activeSpeaker, time);
         return u;
     }
 
-    public void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging) {
-        d.setTitleText(adt.getTitle());
-        Map<AbstractDocumentTemplate.BlockTemplate, Annotation> annotations;
-        usePOSTagging = usePOSTagging && hasAnnotators();
-        try {
-            if (!adt.getBlocks().isEmpty()) {
-                annotations = adt.getBlocks().stream()
-                        .collect(Collectors.toMap(
-                                Function.identity(),
-                                (blockTmp) -> new Annotation(TextPreprocessing.basicTextCleaning(blockTmp.getContent(), lang))));
-                if (usePOSTagging) {
-                    getPipeline().annotate(annotations.values());
-                }
-                for (AbstractDocumentTemplate.BlockTemplate blockTmp : adt.getBlocks()) {
-                    String text = annotations.get(blockTmp).toString();
-                    // get block ID
-                    Integer id = blockTmp.getId();
-                    Integer ref = blockTmp.getRefId();
+    public static JSONObject doc2JSON(AbstractDocumentTemplate adt, Lang lang) throws JSONException {
+        JSONObject request = new JSONObject();
+        JSONObject doc = new JSONObject();
+        request.put("doc", doc);
+        List<JSONObject> blocks = new ArrayList<>();
+        for (AbstractDocumentTemplate.BlockTemplate bt : adt.getBlocks()) {
+            JSONObject block = new JSONObject();
+            block.put("text", bt.getContent());
+            block.put("id", bt.getId());
+            block.put("ref", bt.getRefId());
+            if (bt.getVerbId() != null) {
+                block.put("verbId", bt.getVerbId());
+            }
+            if (bt.getTime() != null) {
+                block.put("time", AbstractDocumentTemplate.DATE_FORMATS[0].format(bt.getTime()));
+            }
+            if (bt.getSpeaker() != null) {
+                block.put("speaker", bt.getSpeaker());
+            }
+            if (bt.getSpeakerAlias()!= null) {
+                block.put("speakerAlias", bt.getSpeakerAlias());
+            }
+            blocks.add(block);
+        }
+        JSONArray blockArr = new JSONArray(blocks);
+        doc.put("blocks", blockArr);
+        doc.put("lang", lang.toString());
+        return request;
+    }
 
-                    boolean followedByVerbalization = false;
-                    // mark if the block has a verbalization afterwards
-                    if (null != blockTmp.getVerbId()) {
-                        try {
-                            followedByVerbalization = true;
-                        } catch (Exception e) {
-                            LOGGER.error(e.getMessage());
-                        }
-                    }
-
-                    Block b;
-                    Annotation document = null;
-                    if (usePOSTagging) {
-                        document = annotations.get(blockTmp);
-                        // create an empty Annotation just with the given text
-                        b = processBlock(d, id, text, document.get(SentencesAnnotation.class));
-                    } else {
-                        b = SimpleParsing.processBlock(d, id, text);
-                    }
-                    if (d instanceof Conversation) {
-                        b = getUtterance((Conversation) d, blockTmp, b);
-                    }
-                    b.setFollowedByVerbalization(followedByVerbalization);
-                    Block.addBlock(d, b);
-                    // add explicit reference, if the case
-                    if (ref != null && ref != -1) {
-                        for (Block refB : d.getBlocks()) {
-                            if (refB != null && refB.getIndex() == ref) {
-                                b.setRefBlock(refB);
-                                break;
-                            }
-                        }
-                    }
-
-                    if (usePOSTagging && lang.equals(Lang.en)) {
-                        // Build the co-reference link graph
-                        // Each chain stores a set of mentions that link to each other, along with a method for getting the most representative mention.
-                        b.setCorefs(document.get(CorefCoreAnnotations.CorefChainAnnotation.class));
+    public static void JSON2Doc(JSONObject json, AbstractDocument d) throws JSONException {
+        JSONObject doc = json.getJSONObject("doc");
+        JSONArray blocks = doc.getJSONArray("blocks");
+        for (int i = 0; i < blocks.length(); i++) {
+            Integer id = i;
+            Integer ref = null;
+            JSONObject block = blocks.getJSONObject(i);
+            if (block.has("id")) {
+                id = block.getInt("id");
+            }
+            if (block.has("ref")) {
+                ref = block.getInt("ref");
+            }
+            boolean followedByVerbalization = block.has("verbId");
+            Block b = JSON2Block(block, d, id);
+            if (d instanceof Conversation) {
+                b = getUtterance((Conversation) d, block, b);
+            }
+            b.setFollowedByVerbalization(followedByVerbalization);
+            // add explicit reference, if the case
+            if (ref != null && ref != -1) {
+                for (Block refB : d.getBlocks()) {
+                    if (refB != null && refB.getIndex() == ref) {
+                        b.setRefBlock(refB);
+                        break;
                     }
                 }
             }
-            // determine overall word occurrences
-            d.determineWordOccurences(d.getBlocks());
-            d.determineSemanticDimensions();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
+            Block.addBlock(d, b);
+            
         }
+        
     }
-
-    public Block processBlock(AbstractDocument d, int blockIndex, String content, List<CoreMap> sentences) {
-        // uses Stanford Core NLP
-        Block b = new Block(d, blockIndex, content, d.getSemanticModelsAsList(), d.getLanguage());
-
-        // set Stanford sentences
-        b.setStanfordSentences(sentences);
-
-        List<Sentence> finalSentences = sentences.parallelStream()
-                .filter(s -> s.toString().trim().length() > 1)
-                .map(s -> processSentence(b, 0, s))
-                .collect(Collectors.toList());
-        //Set sentence index
-        for (int i = 0; i < finalSentences.size(); i++) {
-            finalSentences.get(i).setIndex(i);
+    
+    public static Block JSON2Block(JSONObject blockJSON, AbstractDocument d, int id) throws JSONException {
+        Block block = new Block(d, id, blockJSON.getString("text"), d.getSemanticModelsAsList(), d.getLanguage());
+        JSONArray sentences = blockJSON.getJSONArray("sentences");
+        for (int i = 0; i < sentences.length(); i++) {
+            JSONObject sentence = sentences.getJSONObject(i);
+            block.getSentences().add(JSON2Sentence(sentence, block, i));
         }
-        b.setSentences(finalSentences);
-        b.setProcessedText(finalSentences.stream()
-                .map(s -> s.getProcessedText() + ". ")
-                .collect(Collectors.joining()));
-
-        b.finalProcessing();
-        return b;
+        block.finalProcessing();
+        return block;
     }
-
-    public Sentence processSentence(Block b, int utteranceIndex, CoreMap sentence) {
-        // uses Stanford Core NLP
-        Sentence s = new Sentence(b, utteranceIndex, sentence.toString().trim(), b.getSemanticModelsAsList(), lang);
-
-        sentence.get(TokensAnnotation.class).stream().forEach((token) -> {
-            String word = token.get(OriginalTextAnnotation.class);
-            String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
-            String ne = token.get(NamedEntityTagAnnotation.class);
-            if (TextPreprocessing.isWord(word, lang)) {
-                Word w = new Word(s, word, StaticLemmatizer.lemmaStaticPOS(word, pos, lang), Stemmer.stemWord(word, lang), Parsing.getParser(lang).convertToPenn(pos), ne, s.getSemanticModelsAsList(), lang);
-                s.getAllWords().add(w);
+    
+    public static Sentence JSON2Sentence(JSONObject sentenceJSON, Block parent, int id) throws JSONException {
+        Sentence sentence = new Sentence(parent, id, sentenceJSON.getString("text"), parent.getSemanticModelsAsList(), parent.getLanguage());
+        JSONArray words = sentenceJSON.getJSONArray("words");
+        Map<Integer, Word> wordIndex = new HashMap<>();
+        
+        for (int i = 0; i < words.length(); i++) {
+            JSONObject word = words.getJSONObject(i);
+            String text = word.getString("text");
+            String pos = word.getString("pos");
+            String lemma = word.getString("lemma");
+            String ner = null;
+            if (word.has("ner")) {
+                ner = word.getString("ner");   
+            }
+            if (TextPreprocessing.isWord(text, parent.getLanguage())) {
+                Word w = new Word(sentence, text, lemma, Stemmer.stemWord(text, sentence.getLanguage()), 
+                        pos, ner, sentence.getSemanticModelsAsList(), sentence.getLanguage());
+                wordIndex.put(word.getInt("index"), w);
+                sentence.getAllWords().add(w);
                 if (w.isContentWord()) {
-                    s.getWords().add(w);
-                    if (s.getWordOccurences().containsKey(w)) {
-                        s.getWordOccurences().put(w, s.getWordOccurences().get(w) + 1);
+                    sentence.getWords().add(w);
+                    if (sentence.getWordOccurences().containsKey(w)) {
+                        sentence.getWordOccurences().put(w, sentence.getWordOccurences().get(w) + 1);
                     } else {
-                        s.getWordOccurences().put(w, 1);
+                        sentence.getWordOccurences().put(w, 1);
                     }
                 }
             }
-        });
-
-        if (lang.equals(Lang.en) || lang.equals(Lang.fr) || lang.equals(Lang.es)) {
-            if (lang.equals(Lang.en) || lang.equals(Lang.fr)) {
-                s.setDependencies(sentence.get(EnhancedPlusPlusDependenciesAnnotation.class));
-            }
-            if (lang.equals(Lang.en)) {
-                Tree tree = sentence.get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
-                s.setTree(tree);
-//                SentimentEntity se = new SentimentEntity();
-                // TODO: parse Stanford Valence
-//                if (tree != null) {
-//                    int score = RNNCoreAnnotations.getPredictedClass(tree) - 2;
-//                    se.add(new SentimentValence(STANFORD_ID, "Stanford", "STANFORD", false), score);
-//                    s.setSentimentEntity(se);
-//                }
-            }
         }
-
-        s.finalProcessing();
-        return s;
+        for (int i = 0; i < words.length(); i++) {
+            JSONObject word = words.getJSONObject(i);
+            String dep = word.getString("dep");
+            Word w1 = wordIndex.getOrDefault(word.getInt("index"), null);
+            Word w2 = wordIndex.getOrDefault(word.getInt("head"), null);
+            if (w1 == null || w2 == null || w1 == w2) {
+                continue;
+            }
+            sentence.getDependencies().add(new ImmutableTriple<>(w1, w2, dep));
+            w1.setHead(w2);
+            w1.setDep(dep);
+        }
+        sentence.finalProcessing();
+        return sentence;
     }
+    
+    public static void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging, Lang lang) {
+        d.setTitleText(adt.getTitle());
 
-    public boolean hasAnnotators() {
-        return !getPipeline().getProperties().getProperty("annotators").isEmpty();
+        for (AbstractDocumentTemplate.BlockTemplate bt : adt.getBlocks()) {
+            bt.setContent(TextPreprocessing.basicTextCleaning(bt.getContent(), lang));
+        }
+        try {
+
+            if (!adt.getBlocks().isEmpty()) {
+                JSONObject doc = doc2JSON(adt, lang);
+                String ip = ReadProperty.getProperties("paths.properties").get("PYTHON_ADDRESS").toString();
+                String port = ReadProperty.getProperties("paths.properties").get("PYTHON_PORT").toString();
+                HttpResponse<JsonNode> response = Unirest
+                        .post("http://" + ip + ":" + port + "/spacy")
+                        .header("accept", "application/json")
+                        .header("Content-Type", "application/json")
+                        .body(doc)
+                        .asJson();
+                JSON2Doc(response.getBody().getObject(), d);
+            }
+        } catch (JSONException ex) {
+            java.util.logging.Logger.getLogger(Parsing.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnirestException ex) {
+            java.util.logging.Logger.getLogger(Parsing.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        // determine overall word occurrences
+        d.determineWordOccurences(d.getBlocks());
+        d.determineSemanticDimensions();
     }
 }

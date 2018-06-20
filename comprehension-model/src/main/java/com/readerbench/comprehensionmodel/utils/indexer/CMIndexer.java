@@ -41,27 +41,27 @@ public class CMIndexer {
     public CMIndexer(String text, SemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;
-        this.indexSyntacticDistances();
+//        this.indexSyntacticDistances();
     }
 
-    private void indexSyntacticDistances() {
-        CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, this.semanticModel.getLanguage());
-
-        List<Sentence> sentenceList = this.document.getSentencesInDocument();
-        Iterator<Sentence> sentenceIterator = sentenceList.iterator();
-        this.syntacticIndexerList = new ArrayList<>();
-        int sentenceNum = 0;
-        while (sentenceIterator.hasNext()) {
-            Sentence sentence = sentenceIterator.next();
-
-            CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
-            SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
-
-            WordDistanceIndexer wdIndexer = new WordDistanceIndexer(syntacticGraph.getWordList(), syntacticStrategy);
-            this.syntacticIndexerList.add(wdIndexer);
-            sentenceNum++;
-        }
-    }
+//    private void indexSyntacticDistances() {
+//        CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, this.semanticModel.getLanguage());
+//
+//        List<Sentence> sentenceList = this.document.getSentencesInDocument();
+//        Iterator<Sentence> sentenceIterator = sentenceList.iterator();
+//        this.syntacticIndexerList = new ArrayList<>();
+//        int sentenceNum = 0;
+//        while (sentenceIterator.hasNext()) {
+//            Sentence sentence = sentenceIterator.next();
+//
+//            CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
+//            SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
+//
+//            WordDistanceIndexer wdIndexer = new WordDistanceIndexer(syntacticGraph.getWordList(), syntacticStrategy);
+//            this.syntacticIndexerList.add(wdIndexer);
+//            sentenceNum++;
+//        }
+//    }
 
     public List<WordDistanceIndexer> getSyntacticIndexerList() {
         return this.syntacticIndexerList;

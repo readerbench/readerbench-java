@@ -51,7 +51,9 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
     private SemanticChain semanticChain;
     private EnumSet<ReadingStrategyType> usedReadingStrategies;
     private List<Syllable> syllables;
-
+    private Word head;
+    private String dep;
+    
     public Word(String text, String lemma, String stem, String POS, String NE, Lang lang) {
         super.setText(text);
         super.setProcessedText(lemma);
@@ -182,6 +184,22 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         this.syllables = syllables;
     }
 
+    public Word getHead() {
+        return head;
+    }
+
+    public void setHead(Word head) {
+        this.head = head;
+    }
+
+    public String getDep() {
+        return dep;
+    }
+
+    public void setDep(String dep) {
+        this.dep = dep;
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Word)) {

@@ -43,7 +43,7 @@ public class SummaryProcessingPipeline extends MetacognitionProcessingPipeline {
     public Summary createSummaryFromTemplate(AbstractDocumentTemplate docTmp, Document initialReadingMaterial) {
         LOGGER.info("Building internal representation ...");
         Summary s = new Summary(null, initialReadingMaterial);
-        Parsing.getParser(getLanguage()).parseDoc(docTmp, s, getAnnotators().contains(Annotators.NLP_PREPROCESSING));
+        Parsing.parseDoc(docTmp, s, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
         s.setCohesion(new SemanticCohesion(s, initialReadingMaterial));
         return s;
     }

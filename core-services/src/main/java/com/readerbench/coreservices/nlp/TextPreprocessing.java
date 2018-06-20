@@ -17,7 +17,6 @@ package com.readerbench.coreservices.nlp;
 
 import com.readerbench.coreservices.commons.PatternMatching;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import edu.stanford.nlp.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
@@ -33,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.regex.Pattern;
+import org.apache.commons.math3.util.Pair;
 
 public class TextPreprocessing {
 
@@ -129,7 +129,7 @@ public class TextPreprocessing {
             return result;
         }
         for (Pair<Pattern, String> p : patterns) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
         return result;
     }
@@ -138,7 +138,7 @@ public class TextPreprocessing {
         // lowercase + eliminate numbers
         String result = text.toLowerCase();
         for (Pair<Pattern, String> p : INITIAL) {
-            result = p.first.matcher(result).replaceAll(p.second).trim();
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond()).trim();
         }
 
         Pair<Pattern, String>[] patterns;
@@ -148,10 +148,10 @@ public class TextPreprocessing {
             patterns = LANG_PATTERNS.get(Lang.en);
         }
         for (Pair<Pattern, String> p : patterns) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
         for (Pair<Pattern, String> p : FINAL_PATTERNS) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
         return result.trim();
     }
@@ -160,7 +160,7 @@ public class TextPreprocessing {
         String result = " " + text.toLowerCase().trim() + " ";
 
         for (Pair<Pattern, String> p : INITIAL) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
 
         Pair[] cleaning = {new Pair<>(Pattern.compile(" j' "), " je "), new Pair<>(Pattern.compile(" d' "), " de "),
@@ -210,11 +210,11 @@ public class TextPreprocessing {
             new Pair<>(Pattern.compile("\\s+"), " ")};
 
         for (Pair<Pattern, String> p : cleaning) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
 
         for (Pair<Pattern, String> p : FINAL_PATTERNS) {
-            result = p.first.matcher(result).replaceAll(p.second);
+            result = p.getFirst().matcher(result).replaceAll(p.getSecond());
         }
 
         for (String pattern : PatternMatching.getCausality(Lang.en).getWords()) {

@@ -11,13 +11,14 @@ import com.readerbench.coreservices.nlp.wordlists.ClassesOfWords;
 import com.readerbench.coreservices.nlp.wordlists.ListOfWords;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import edu.stanford.nlp.util.Pair;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import java.util.Properties;
 
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  *
@@ -152,12 +153,12 @@ public abstract class ReadabilityIndex extends ComplexityIndex {
         // ASL : average sentence length (the number of words divided by the number of sentences)
 
         double DS, ASL;
-        Pair[] restore = {new Pair<>(Pattern.compile("\\s"), " "), new Pair<>(Pattern.compile("' "), "'"),
-            new Pair<>(Pattern.compile(" \\- "), "\\-"),};
+        Pair[] restore = {new ImmutablePair<>(Pattern.compile("\\s"), " "), new ImmutablePair<>(Pattern.compile("' "), "'"),
+            new ImmutablePair<>(Pattern.compile(" \\- "), "\\-"),};
 
         String text = d.getText().toLowerCase();
         for (Pair<Pattern, String> p : restore) {
-            text = p.first.matcher(text).replaceAll(p.second).trim();
+            text = p.getLeft().matcher(text).replaceAll(p.getRight()).trim();
         }
         double no_occurrences = 0;
 

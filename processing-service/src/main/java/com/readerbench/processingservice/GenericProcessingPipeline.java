@@ -7,19 +7,15 @@ import com.readerbench.coreservices.cna.CohesionGraph;
 import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 import com.readerbench.coreservices.cna.DisambiguisationGraphAndLexicalChains;
 import com.readerbench.coreservices.cna.Scoring;
+import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.dialogism.DialogismComputations;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;
-import com.readerbench.coreservices.nlp.parsing.Parsing;
-import com.readerbench.coreservices.nlp.parsing.SimpleParsing;
-import com.readerbench.coreservices.data.*;
 import com.readerbench.coreservices.data.document.Document;
+import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import com.readerbench.textualcomplexity.ComplexityIndices;
-import edu.stanford.nlp.ling.CoreAnnotations;
-import edu.stanford.nlp.pipeline.Annotation;
-import edu.stanford.nlp.util.CoreMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +99,6 @@ public abstract class GenericProcessingPipeline {
 //            LOGGER.info("Assign sentiment values...");
 //            SentimentAnalysis.weightSemanticValences(abstractDocument);
 //        }
-
         if (annotators.contains(Annotators.TEXTUAL_COMPLEXITY)) {
             LOGGER.info("Computing textual complexity indices...");
             ComplexityIndices.computeComplexityFactors(abstractDocument);
@@ -112,23 +107,21 @@ public abstract class GenericProcessingPipeline {
         LOGGER.info("Finished all discourse analysis processes");
     }
 
+    public Document createDocumentFromTemplate(AbstractDocumentTemplate docTmp) {
+        Document d = new Document(null, getModels(), getLanguage());
+        Parsing.parseDoc(docTmp, d, getAnnotators().contains(Annotators.NLP_PREPROCESSING), getLanguage());
+        return d;
+    }
+
     public void processDocumentTitle(AbstractDocument abstractDocument) {
         if (abstractDocument.getTitleText() != null && abstractDocument.getTitleText().isEmpty()) {
             String processedText = abstractDocument.getTitleText().replaceAll("\\s+", " ");
 
             if (processedText.length() > 0) {
-                if (annotators.contains(Annotators.NLP_PREPROCESSING)) {
-                    // create an empty Annotation just with the given text
-                    Annotation document = new Annotation(processedText.replaceAll("[\\.\\!\\?\n]", ""));
-                    // run all Annotators on this text
-                    Parsing.getParser(abstractDocument.getLanguage()).getPipeline().annotate(document);
-                    CoreMap sentence = document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-
-                    // add corresponding block
-                    abstractDocument.setTitle(Parsing.getParser(lang).processSentence(new Block(null, 0, "", models, lang), 0, sentence));
-                } else {
-                    abstractDocument.setTitle(SimpleParsing.processSentence(new Block(null, 0, "", models, lang), 0, processedText));
-                }
+                AbstractDocumentTemplate adt = AbstractDocumentTemplate.getDocumentModel(processedText);
+                Document doc = createDocumentFromTemplate(adt);
+                // add corresponding block
+                abstractDocument.setTitle(doc.getBlocks().get(0).getSentences().get(0));
             }
         }
     }
