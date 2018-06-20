@@ -15,7 +15,11 @@
  */
 package com.readerbench.coreservices.data.cscl;
 
+import com.readerbench.datasourceprovider.pojo.Lang;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public enum CSCLIndices {
     NO_CONTRIBUTION(true, true),
@@ -39,7 +43,7 @@ public enum CSCLIndices {
     private final boolean isUsedForTimeModeling;
     private final boolean isIndividualStatsIndex;
 
-    private CSCLIndices(boolean isUsedForTimeModeling, boolean isIndividualStatsIndex) {
+    private CSCLIndices( boolean isUsedForTimeModeling, boolean isIndividualStatsIndex) {
         this.isUsedForTimeModeling = isUsedForTimeModeling;
         this.isIndividualStatsIndex = isIndividualStatsIndex;
     }
@@ -52,11 +56,18 @@ public enum CSCLIndices {
         return isIndividualStatsIndex;
     }
 
-    public String getDescription() {
-        return ResourceBundle.getBundle("utils.localization.CSCL_indices_descr").getString(this.name());
+    public String getDescription(Lang lang) {
+        return ResourceBundle.getBundle("cscl_indices_descriptions", lang.getLocale()).getString(this.name());
     }
 
     public String getAcronym() {
-        return ResourceBundle.getBundle("utils.localization.CSCL_indices_acronyms").getString(this.name());
+        return ResourceBundle.getBundle("cscl_indices_acronyms").getString(this.name());
+    }
+    
+    public static void main(String[] args) {
+        Lang lang = Lang.en;
+        for (CSCLIndices index : CSCLIndices.values()) {
+            System.out.println(index.getAcronym() + "\t" + index.getDescription(lang));
+        }
     }
 }

@@ -16,7 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -27,8 +27,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgWordsInBlock extends ComplexityIndex {
 
-    public AvgWordsInBlock() {
-        super(ComplexityIndicesEnum.AVERAGE_WORDS_IN_BLOCK);
+    public AvgWordsInBlock(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_WORDS_IN_BLOCK, lang);
     }
 
     @Override
@@ -36,10 +36,9 @@ public class AvgWordsInBlock extends ComplexityIndex {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .mapToInt(b -> b.getSentences().stream()
-                        .mapToInt(s -> s.getWords().size())
-                        .sum())
+                .mapToInt(s -> s.getWords().size())
+                .sum())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
-    
 
 }

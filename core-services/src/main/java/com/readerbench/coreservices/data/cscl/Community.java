@@ -33,7 +33,7 @@ public class Community extends AnalysisElement {
     private List<Conversation> conversations;
     private List<Community> timeframeSubCommunities;
     private double[][] participantContributions;
-    private final Date startDate, endDate;
+    private Date startDate, endDate;
     private Date firstContributionDate, lastContributionDate;
 
     public Community(String name, Lang lang, Date startDate, Date endDate) {
@@ -58,8 +58,16 @@ public class Community extends AnalysisElement {
         return startDate;
     }
 
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
     public Date getEndDate() {
         return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public List<Participant> getParticipants() {

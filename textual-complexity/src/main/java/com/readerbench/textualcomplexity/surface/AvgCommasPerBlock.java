@@ -16,10 +16,11 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import org.apache.commons.lang3.StringUtils;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -27,8 +28,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgCommasPerBlock extends ComplexityIndex {
 
-    public AvgCommasPerBlock() {
-        super(ComplexityIndicesEnum.AVERAGE_COMMAS_PER_BLOCK);
+    public AvgCommasPerBlock(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_COMMAS_PER_BLOCK, lang);
     }
 
     @Override
@@ -36,8 +37,8 @@ public class AvgCommasPerBlock extends ComplexityIndex {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .mapToInt(b -> b.getSentences().stream()
-                        .mapToInt(s -> StringUtils.countMatches(s.getText(), ","))
-                        .sum())
+                .mapToInt(s -> StringUtils.countMatches(s.getText(), ","))
+                .sum())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 

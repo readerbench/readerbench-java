@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.commons.DoubleStatistics;
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -27,8 +28,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class WordLettersSD extends ComplexityIndex {
 
-    public WordLettersSD() {
-        super(ComplexityIndicesEnum.WORD_LETTERS_STANDARD_DEVIATION);
+    public WordLettersSD(Lang lang) {
+        super(ComplexityIndicesEnum.WORD_LETTERS_STANDARD_DEVIATION, lang);
     }
 
     @Override

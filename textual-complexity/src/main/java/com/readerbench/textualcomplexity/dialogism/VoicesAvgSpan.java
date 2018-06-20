@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.dialogism;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -26,8 +27,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class VoicesAvgSpan extends ComplexityIndex {
 
-    public VoicesAvgSpan() {
-        super(ComplexityIndicesEnum.VOICES_AVERAGE_SPAN);
+    public VoicesAvgSpan(Lang lang) {
+        super(ComplexityIndicesEnum.VOICES_AVERAGE_SPAN, lang);
     }
 
     @Override

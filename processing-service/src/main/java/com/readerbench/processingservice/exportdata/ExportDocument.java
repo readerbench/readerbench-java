@@ -155,7 +155,7 @@ public class ExportDocument {
                     out.write("\nParticipant involvement and interaction\n");
                     out.write("Participant name");
                     for (CSCLIndices CSCLindex : CSCLIndices.values()) {
-                        out.write("," + CSCLindex.getDescription());
+                        out.write("," + CSCLindex.getDescription(c.getLanguage()));
                     }
                     out.write("\n");
                     for (Participant p : c.getParticipants()) {

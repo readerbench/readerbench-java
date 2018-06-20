@@ -18,6 +18,7 @@ package com.readerbench.textualcomplexity.dialogism;
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.discourse.SemanticChain;
 import com.readerbench.coreservices.commons.VectorAlgebra;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -37,9 +38,10 @@ public class DialogismMutualInformationIndex extends ComplexityIndex {
     private transient final Function<SemanticChain, double[]> listFunction;
 
     public DialogismMutualInformationIndex(ComplexityIndicesEnum index,
+            Lang lang,
             Function<SemanticChain, double[]> listFunction,
             Function<Stream<? extends Number>, Double> combine) {
-        super(index);
+        super(index, lang);
         this.listFunction = listFunction;
         this.combine = combine;
     }

@@ -81,16 +81,19 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
             for (Map.Entry<String, Map<String, Double>> e : AoA.get(lang).entrySet()) {
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOA_PER_DOC,
+                        lang,
                         e.getKey(),
                         IndexLevel.DOC,
                         e.getValue()));
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOA_PER_BLOCK,
+                        lang,
                         e.getKey(),
                         IndexLevel.BLOCK,
                         e.getValue()));
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOA_PER_SENTENCE,
+                        lang,
                         e.getKey(),
                         IndexLevel.SENTENCE,
                         e.getValue()));
@@ -101,16 +104,19 @@ public class WordComplexityFactory extends ComplexityIndicesFactory {
             for (Map.Entry<String, Map<String, Double>> e : AoE.get(lang).entrySet()) {
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOE_PER_DOC,
+                        lang,
                         e.getKey(),
                         IndexLevel.DOC,
                         e.getValue()));
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOE_PER_BLOCK,
+                        lang,
                         e.getKey(),
                         IndexLevel.BLOCK,
                         e.getValue()));
                 result.add(new AvgAoAScore(
                         ComplexityIndicesEnum.AVG_AOE_PER_SENTENCE,
+                        lang,
                         e.getKey(),
                         IndexLevel.SENTENCE,
                         e.getValue()));

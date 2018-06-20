@@ -16,10 +16,11 @@
 package com.readerbench.textualcomplexity.cohesion.lexicalChains;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.coreservices.dialogism.DialogismComputations;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-import com.readerbench.coreservices.dialogism.DialogismComputations;
 
 /**
  *
@@ -27,8 +28,8 @@ import com.readerbench.coreservices.dialogism.DialogismComputations;
  */
 public class LexicalChainsCoverage extends ComplexityIndex {
 
-    public LexicalChainsCoverage() {
-        super(ComplexityIndicesEnum.PERCENTAGE_LEXICAL_CHAINS_COVERAGE);
+    public LexicalChainsCoverage(Lang lang) {
+        super(ComplexityIndicesEnum.PERCENTAGE_LEXICAL_CHAINS_COVERAGE, lang);
     }
 
     @Override

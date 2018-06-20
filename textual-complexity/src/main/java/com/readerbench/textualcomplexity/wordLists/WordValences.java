@@ -11,6 +11,7 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +30,13 @@ public class WordValences {
     private static final Map<Lang, List<String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
     private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
     private static final String PROPERTY_VALENCES_NAME = "VALENCES_%s_PATH";
+    public static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.es);
 
     private static void initLang(Lang lang) {
         WORD_VALENCE_MAP.put(lang, new HashMap<>());
+        if (!SUPPORTED_LANGUAGES.contains(lang)) {
+            return;
+        }
         String fileName = PROPERTIES.getProperty(String.format(PROPERTY_VALENCES_NAME, lang.name().toUpperCase()));
         try (InputStream input = WordValences.class.getClassLoader().getResourceAsStream(fileName); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             String header = in.readLine();

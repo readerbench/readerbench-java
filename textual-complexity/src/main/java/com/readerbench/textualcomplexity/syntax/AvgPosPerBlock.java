@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.syntax;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -28,8 +29,8 @@ public class AvgPosPerBlock extends ComplexityIndex {
 
     private final String pos;
 
-    public AvgPosPerBlock(ComplexityIndicesEnum index, String pos) {
-        super(index);
+    public AvgPosPerBlock(ComplexityIndicesEnum index, String pos, Lang lang) {
+        super(index, lang);
         this.pos = pos;
     }
 
@@ -38,9 +39,9 @@ public class AvgPosPerBlock extends ComplexityIndex {
         return d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .mapToLong(b -> b.getSentences().stream()
-                        .flatMap(s -> s.getAllWords().stream())
-                        .filter(w -> w.getPOS() != null && w.getPOS().contains(pos))
-                        .count())
+                .flatMap(s -> s.getAllWords().stream())
+                .filter(w -> w.getPOS() != null && w.getPOS().contains(pos))
+                .count())
                 .average().orElse(ComplexityIndices.IDENTITY);
     }
 

@@ -111,6 +111,32 @@
             <groupId>com.readerbench.resources</groupId>
             <artifactId>semantic-models-coca-en</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-le_monde-fr</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-inl-nl</artifactId>
+        </dependency>
         <!-- / ReaderBench resources-->
     </dependencies>
     <build>

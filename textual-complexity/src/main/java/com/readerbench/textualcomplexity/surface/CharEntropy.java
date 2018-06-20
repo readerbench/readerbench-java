@@ -16,9 +16,9 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
-
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
  */
 public class CharEntropy extends ComplexityIndex {
 
-    public CharEntropy() {
-        super(ComplexityIndicesEnum.CHAR_ENTROPY);
+    public CharEntropy(Lang lang) {
+        super(ComplexityIndicesEnum.CHAR_ENTROPY, lang);
     }
 
     @Override
@@ -38,15 +38,14 @@ public class CharEntropy extends ComplexityIndex {
         Map<Character, Long> occurences = d.getBlocks().parallelStream()
                 .filter(b -> b != null)
                 .flatMap(b -> b.getSentences().stream()
-                        .flatMap(s -> s.getAllWords().stream()
-                                .flatMap(w -> w.getText().chars().mapToObj(c -> (char)c))))
+                .flatMap(s -> s.getAllWords().stream()
+                .flatMap(w -> w.getText().chars().mapToObj(c -> (char) c))))
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         long no = occurences.values().stream().mapToLong(x -> x).sum();
         return occurences.values().parallelStream()
                 .mapToDouble(x -> ((double) x) / no)
                 .map(x -> -x * Math.log(x))
                 .sum();
-	}
+    }
 
 }
-

@@ -37,16 +37,24 @@ public abstract class ComplexityIndex implements Serializable, IComplexityIndex 
     public ComplexityIndex(ComplexityIndicesEnum index, SimilarityType simType) {
         this(index, null, simType, null);
     }
+    
+    public ComplexityIndex(ComplexityIndicesEnum index, Lang lang, SimilarityType simType) {
+        this(index, lang, simType, null);
+    }
 
     public ComplexityIndex(ComplexityIndicesEnum index, String aux) {
         this(index, null, null, aux);
+    }
+    
+    public ComplexityIndex(ComplexityIndicesEnum index, Lang lang, String aux) {
+        this(index, lang, null, aux);
     }
 
     @Override
     public String getAcronym() {
         String acronym;
         try {
-            acronym = ResourceBundle.getBundle("utils.localization.textual_complexity_acronyms").getString(index.name());
+            acronym = ResourceBundle.getBundle("textual_complexity_acronyms").getString(index.name());
         } catch (Exception ex) {
             acronym = null;
         }
@@ -66,7 +74,7 @@ public abstract class ComplexityIndex implements Serializable, IComplexityIndex 
     public String getDescription() {
         String description;
         try {
-            description = ResourceBundle.getBundle("utils.localization.textual_complexity_descriptions").getString(index.name());
+            description = ResourceBundle.getBundle("textual_complexity_descriptions", lang.getLocale()).getString(index.name());
         } catch (Exception ex) {
             description = null;
         }

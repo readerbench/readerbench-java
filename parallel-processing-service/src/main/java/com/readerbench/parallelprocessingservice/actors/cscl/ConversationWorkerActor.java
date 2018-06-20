@@ -31,7 +31,7 @@ public class ConversationWorkerActor extends AbstractActor {
                     AbstractDocumentTemplate template = message.getTemplate();
                     ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(message.getLang(), message.getModels(), message.getAnnotators());
                     Conversation conversation = pipeline.createConversationFromTemplate(template);
-                    pipeline.processDocument(conversation);
+                    pipeline.processConversation(conversation);
 
                     getSender().tell(conversation, getSelf());
                 })

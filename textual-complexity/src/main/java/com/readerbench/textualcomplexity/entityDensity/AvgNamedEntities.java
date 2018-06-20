@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.entityDensity;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -29,8 +30,8 @@ import java.util.Map;
  */
 public class AvgNamedEntities extends AbstractComplexityIndex {
 
-    public AvgNamedEntities(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public AvgNamedEntities(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override

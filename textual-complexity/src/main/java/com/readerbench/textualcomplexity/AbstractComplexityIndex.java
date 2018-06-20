@@ -2,6 +2,7 @@ package com.readerbench.textualcomplexity;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
+import com.readerbench.datasourceprovider.pojo.Lang;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -17,30 +18,34 @@ public abstract class AbstractComplexityIndex extends ComplexityIndex {
     
     public AbstractComplexityIndex(
             ComplexityIndicesEnum index,
+            Lang lang,
             IndexLevel level) {
-        this(index, null, level);
+        this(index, lang, null, level);
     }
 
     public AbstractComplexityIndex(
             ComplexityIndicesEnum index, 
+            Lang lang,
             String aux, 
             IndexLevel level) {
-        this(index, aux, Functions.streamOf(level), Functions.getNumberOfElements(level));
+        this(index, lang, aux, Functions.streamOf(level), Functions.getNumberOfElements(level));
     }
     
     public AbstractComplexityIndex(
             ComplexityIndicesEnum index, 
+            Lang lang,
             String aux, 
             Function<AbstractDocument, Stream<? extends AnalysisElement>> streamFunction) {
-        this(index, aux, streamFunction, null);
+        this(index, lang, aux, streamFunction, null);
     }
 
     public AbstractComplexityIndex(
             ComplexityIndicesEnum index, 
+            Lang lang,
             String aux, 
             Function<AbstractDocument, Stream<? extends AnalysisElement>> streamFunction,
             Function<AbstractDocument, Integer> countFunction) {
-        super(index, aux);
+        super(index, lang, aux);
         this.streamFunction = streamFunction;
         this.countFunction = countFunction;
     }    

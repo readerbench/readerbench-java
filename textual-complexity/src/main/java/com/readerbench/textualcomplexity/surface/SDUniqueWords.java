@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.commons.DoubleStatistics;
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -28,8 +29,8 @@ import com.readerbench.textualcomplexity.IndexLevel;
  */
 public class SDUniqueWords extends AbstractComplexityIndex {
 
-    public SDUniqueWords(ComplexityIndicesEnum index, IndexLevel level) {
-        super(index, level);
+    public SDUniqueWords(ComplexityIndicesEnum index, Lang lang, IndexLevel level) {
+        super(index, lang, level);
     }
 
     @Override
@@ -41,4 +42,3 @@ public class SDUniqueWords extends AbstractComplexityIndex {
     }
 
 }
-

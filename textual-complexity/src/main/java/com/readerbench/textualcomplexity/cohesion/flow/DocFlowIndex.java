@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.cohesion.flow;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 
@@ -30,8 +31,8 @@ public class DocFlowIndex extends ComplexityIndex {
     private final DocFlowCriteria crit;
     private transient final Function<DocumentFlow, Double> op;
 
-    public DocFlowIndex(ComplexityIndicesEnum index, DocFlowCriteria crit, SimilarityType simType, Function<DocumentFlow, Double> op) {
-        super(index, null, simType, crit.getAcronym());
+    public DocFlowIndex(ComplexityIndicesEnum index, Lang lang, DocFlowCriteria crit, SimilarityType simType, Function<DocumentFlow, Double> op) {
+        super(index, lang, simType, crit.getAcronym());
         this.crit = crit;
         this.op = op;
     }

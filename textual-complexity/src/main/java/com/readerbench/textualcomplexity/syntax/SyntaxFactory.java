@@ -21,7 +21,6 @@ import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 import com.readerbench.textualcomplexity.ComplexityIndicesFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,26 +33,26 @@ public class SyntaxFactory extends ComplexityIndicesFactory {
     @Override
     public List<ComplexityIndex> build(Lang lang) {
         List<ComplexityIndex> result = new ArrayList<>();
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_NOUNS_PER_BLOCK, "NN"));
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_PRONOUNS_PER_BLOCK, "PR"));
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_VERBS_PER_BLOCK, "VB"));
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_ADVERBS_PER_BLOCK, "RB"));
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_ADJECTIVES_PER_BLOCK, "JJ"));
-        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_PREPOSITIONS_PER_BLOCK, "IN"));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_NOUNS_PER_BLOCK, "NN", lang));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_PRONOUNS_PER_BLOCK, "PR", lang));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_VERBS_PER_BLOCK, "VB", lang));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_ADVERBS_PER_BLOCK, "RB", lang));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_ADJECTIVES_PER_BLOCK, "JJ", lang));
+        result.add(new AvgPosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_PREPOSITIONS_PER_BLOCK, "IN", lang));
 
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_NOUNS_PER_SENTENCE, "NN"));
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_PRONOUNS_PER_SENTENCE, "PR"));
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_VERBS_PER_SENTENCE, "VB"));
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_ADVERBS_PER_SENTENCE, "RB"));
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_ADJECTIVES_PER_SENTENCE, "JJ"));
-        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE, "IN"));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_NOUNS_PER_SENTENCE, "NN", lang));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_PRONOUNS_PER_SENTENCE, "PR", lang));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_VERBS_PER_SENTENCE, "VB", lang));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_ADVERBS_PER_SENTENCE, "RB", lang));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_ADJECTIVES_PER_SENTENCE, "JJ", lang));
+        result.add(new AvgPosPerSentence(ComplexityIndicesEnum.AVERAGE_NO_PREPOSITIONS_PER_SENTENCE, "IN", lang));
 
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK, "NN"));
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK, "PR"));
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK, "VB"));
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK, "RB"));
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK, "JJ"));
-        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK, "IN"));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_NOUNS_PER_BLOCK, "NN", lang));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_PRONOUNS_PER_BLOCK, "PR", lang));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_VERBS_PER_BLOCK, "VB", lang));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_ADVERBS_PER_BLOCK, "RB", lang));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_ADJECTIVES_PER_BLOCK, "JJ", lang));
+        result.add(new AvgUniquePosPerBlock(ComplexityIndicesEnum.AVERAGE_NO_UNIQUE_PREPOSITIONS_PER_BLOCK, "IN", lang));
 
         ClassesOfWords classes = Pronouns.getPronouns(lang);
         if (classes != null) {

@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -26,8 +27,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgWordsInSentence extends ComplexityIndex {
 
-    public AvgWordsInSentence() {
-        super(ComplexityIndicesEnum.AVERAGE_WORDS_IN_SENTENCE);
+    public AvgWordsInSentence(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_WORDS_IN_SENTENCE, lang);
     }
 
     @Override
@@ -38,4 +39,3 @@ public class AvgWordsInSentence extends ComplexityIndex {
     }
 
 }
-

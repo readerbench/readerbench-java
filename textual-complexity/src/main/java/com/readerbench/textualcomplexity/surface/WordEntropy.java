@@ -17,6 +17,7 @@ package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
 
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
  */
 public class WordEntropy extends ComplexityIndex {
 
-    public WordEntropy() {
-        super(ComplexityIndicesEnum.WORD_ENTROPY);
+    public WordEntropy(Lang lang) {
+        super(ComplexityIndicesEnum.WORD_ENTROPY, lang);
     }
 
     @Override

@@ -16,10 +16,11 @@
 package com.readerbench.textualcomplexity.surface;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import org.apache.commons.lang3.StringUtils;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.ComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  *
@@ -27,8 +28,8 @@ import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
  */
 public class AvgCommasPerSentence extends ComplexityIndex {
 
-    public AvgCommasPerSentence() {
-        super(ComplexityIndicesEnum.AVERAGE_COMMAS_PER_SENTENCE);
+    public AvgCommasPerSentence(Lang lang) {
+        super(ComplexityIndicesEnum.AVERAGE_COMMAS_PER_SENTENCE, lang);
     }
 
     @Override

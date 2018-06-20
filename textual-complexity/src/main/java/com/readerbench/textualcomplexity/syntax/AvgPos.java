@@ -16,6 +16,7 @@
 package com.readerbench.textualcomplexity.syntax;
 
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.textualcomplexity.AbstractComplexityIndex;
 import com.readerbench.textualcomplexity.ComplexityIndices;
 import com.readerbench.textualcomplexity.ComplexityIndicesEnum;
@@ -31,8 +32,8 @@ public class AvgPos extends AbstractComplexityIndex {
 
     private final String pos;
 
-    public AvgPos(ComplexityIndicesEnum index, String pos, IndexLevel level) {
-        super(index, level);
+    public AvgPos(ComplexityIndicesEnum index, Lang lang, String pos, IndexLevel level) {
+        super(index, lang, level);
         this.pos = pos;
     }
 
