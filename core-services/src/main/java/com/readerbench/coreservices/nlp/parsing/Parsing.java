@@ -81,7 +81,7 @@ public class Parsing {
     private static Utterance getUtterance(Conversation c, JSONObject blockJSON, Block b) throws JSONException {
         Participant activeSpeaker = null;
         if (blockJSON.has("speaker")) {
-            activeSpeaker = new Participant(blockJSON.getString("speaker"), blockJSON.getString("speakerAlias"), c);
+            activeSpeaker = new Participant(blockJSON.getString("speaker"), blockJSON.optString("speakerAlias"), c);
             boolean contains = false;
             for (Participant p : c.getParticipants()) {
                 if (p.equals(activeSpeaker)) {
