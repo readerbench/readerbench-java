@@ -157,8 +157,7 @@ public class Parsing {
                     }
                 }
             }
-
-            d.getBlocks().add(b);
+            Block.addBlock(d, b);
             
         }
         
