@@ -121,6 +121,12 @@ public class Parsing {
             if (bt.getTime() != null) {
                 block.put("time", AbstractDocumentTemplate.DATE_FORMATS[0].format(bt.getTime()));
             }
+            if (bt.getSpeaker() != null) {
+                block.put("speaker", bt.getSpeaker());
+            }
+            if (bt.getSpeakerAlias()!= null) {
+                block.put("speakerAlias", bt.getSpeakerAlias());
+            }
             blocks.add(block);
         }
         JSONArray blockArr = new JSONArray(blocks);
