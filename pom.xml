@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.readerbench</groupId>
     <artifactId>readerbench-nlp</artifactId>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
     <packaging>pom</packaging>
     <name>RB - ReaderBench Parent Project</name>
 
@@ -340,6 +340,11 @@
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
                 <artifactId>semantic-models-jose_antonio-es</artifactId>
+                <version>1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-readme-ro</artifactId>
                 <version>1.0</version>
             </dependency>
             <!-- / ReaderBench resources-->

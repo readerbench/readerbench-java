@@ -137,6 +137,19 @@
             <groupId>com.readerbench.resources</groupId>
             <artifactId>semantic-models-inl-nl</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-readme-ro</artifactId>
+        </dependency>
         <!-- / ReaderBench resources-->
     </dependencies>
     <build>
