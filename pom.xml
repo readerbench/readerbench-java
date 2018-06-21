@@ -342,6 +342,11 @@
                 <artifactId>semantic-models-jose_antonio-es</artifactId>
                 <version>1.0</version>
             </dependency>
+            <dependency>
+                <groupId>com.readerbench.resources</groupId>
+                <artifactId>semantic-models-readme-ro</artifactId>
+                <version>1.0</version>
+            </dependency>
             <!-- / ReaderBench resources-->
         </dependencies>
     </dependencyManagement>
