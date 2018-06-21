@@ -18,12 +18,12 @@ package com.readerbench.coreservices.keywordmining;
 import com.readerbench.coreservices.nlp.wordlists.MapOfWordWeights;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.Word;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 public class KeywordCoverage {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeywordCoverage.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(KeywordCoverage.class);
 
     // returns the coverage with the predefined topic class
     public static double coverage(MapOfWordWeights usedMap, AnalysisElement el) {

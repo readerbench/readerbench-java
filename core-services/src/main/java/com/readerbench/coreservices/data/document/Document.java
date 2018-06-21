@@ -19,15 +19,15 @@ import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class Document extends AbstractDocument implements Comparable<Document> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Document.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(Document.class);
 
     private static final long serialVersionUID = 9219491499980439567L;
 

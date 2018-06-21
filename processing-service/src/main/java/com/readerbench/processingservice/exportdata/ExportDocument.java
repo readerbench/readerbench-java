@@ -276,7 +276,9 @@ public class ExportDocument {
         LOGGER.info("Saving serialized document ...");
         try {
             FileOutputStream fos;
-            fos = new FileOutputStream(new File(abstractDocument.getPath().replace(".xml", ".ser")));
+            System.out.println("nume: " + abstractDocument.getPath());
+            System.out.println(abstractDocument.getPath().replace(".txt", ".ser"));
+            fos = new FileOutputStream(new File(abstractDocument.getPath().replace(".txt", ".ser")));
             try (ObjectOutputStream out = new ObjectOutputStream(fos)) {
                 out.writeObject(this);
                 Map<SimilarityType, String> modelPaths = new EnumMap<>(SimilarityType.class);

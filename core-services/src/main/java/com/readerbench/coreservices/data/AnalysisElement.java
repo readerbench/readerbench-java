@@ -20,7 +20,7 @@ import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.data.cscl.Utterance;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
@@ -36,7 +36,7 @@ public abstract class AnalysisElement implements Serializable {
 
     private static final long serialVersionUID = -8110285459013257550L;
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AnalysisElement.class);
+    //private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AnalysisElement.class);
 
     private int index;
     protected transient Map<SimilarityType, SemanticModel> semanticModels;

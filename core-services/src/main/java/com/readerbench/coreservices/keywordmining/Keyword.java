@@ -16,13 +16,17 @@
 package com.readerbench.coreservices.keywordmining;
 
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
+import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.datasourceprovider.commons.Formatting;
+
 import com.readerbench.coreservices.data.NGram;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -38,6 +42,8 @@ public class Keyword implements Comparable<Keyword>, Serializable {
     private double termFrequency;
     private double semanticSimilarity;
     private int count = 0;
+    private double arfScore;	// average reduced frequency
+    private double awtScore;	// average waiting time
     
     public Keyword(Word word, AnalysisElement e) {
         this.word = word;
@@ -93,6 +99,28 @@ public class Keyword implements Comparable<Keyword>, Serializable {
         double semSim = SemanticCohesion.getAverageSemanticModelSimilarity(newWord, e);
         this.relevance = termFrequency * semSim;
         this.semanticSimilarity = semSim;
+    }
+    
+    public final void computeARFScore(AbstractDocument d) {
+		Double segmentLength, score = 0.0;
+		int noWords = d.getNoWords();
+		List<Word> words = d.getAllWords();
+		List<Integer> occurencesPos = new ArrayList<>();
+		
+		for (int i = 0; i < words.size(); i++)
+			if (words.get(i).compareTo(this.word) == 0)
+				occurencesPos.add(i);
+		
+		segmentLength = noWords * 1.0 / this.count;
+		for (int i = 0; i < this.count; i++) {
+			Integer dist;
+			if (i == 0)
+				dist = occurencesPos.get(0) + noWords - occurencesPos.get(this.count - 1);
+			else
+				dist = occurencesPos.get(i) - occurencesPos.get(i - 1);
+			score += Math.min(segmentLength, dist);
+		}
+		this.arfScore = score / segmentLength;
     }
     
     public double getTermFrequency() {

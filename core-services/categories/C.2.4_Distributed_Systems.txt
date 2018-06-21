@@ -1,0 +1,1 @@
+Client/server, Distributed applications, Distributed databases, Network operating systems, Cloud computing, Client-server architectures, Grid computing, Organizing principles for web applications

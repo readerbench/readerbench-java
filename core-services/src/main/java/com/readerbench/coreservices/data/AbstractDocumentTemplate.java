@@ -15,8 +15,8 @@
  */
 package com.readerbench.coreservices.data;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//mport org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -27,7 +27,7 @@ public class AbstractDocumentTemplate implements Serializable {
 
     private static final long serialVersionUID = 6486392022508461270L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDocumentTemplate.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDocumentTemplate.class);
 
     public static final SimpleDateFormat[] DATE_FORMATS = {
         new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"),
@@ -133,7 +133,7 @@ public class AbstractDocumentTemplate implements Serializable {
                     Long longTime = Long.parseLong(time);
                     aux = new Date(longTime);
                 } catch (NumberFormatException e) {
-                    LOGGER.error("Unparsable date: {}", time);
+                    //LOGGER.error("Unparsable date: {}", time);
                 }
             }
 

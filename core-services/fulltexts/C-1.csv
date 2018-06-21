@@ -1,0 +1,1266 @@
+SEP=,
+C-1
+LSA space:,resources/config/EN/LSA/TASA
+LDA space:,resources/config/EN/LDA/TASA
+WORD2VEC space:,resources/config/EN/word2vec/TASA
+
+Block Index,Ref Block Index,Participant,Date,Score,Social Knowledge Building,Initial Text,Processed Text
+0,,,,35.00472734029208,,Efficient discovery of grid services is essential for the success of grid computing. The standardization of grids based on web services has resulted in the need for scalable web service Permission to make digital or hard copies of all or part of this work for personal or classroom use is granted without fee provided that copies are not made or distributed for profit or commercial advantage and that copies bear this notice and the full citation on the first page. To copy otherwiseto republish to post on servers or to redistribute to lists requires prior specific permission and/or a fee.,efficient discovery grid service essential success grid compute. standardise grid base web service result need scalable web service permission make digital hard copy part work personal classroom use grant fee provide copy make distribute profit commercial advantage copy bear notice full citation page. copy republish post server redistribute list require prior specific permission fee.
+1,,,,39.261308151179485,,MGC '05 November 28- December 2 2005 Grenoble  France discovery mechanisms to be deployed in grids. Grid discovery services provide the ability to monitor and discover resources and services on grids. They provide the ability to query and subscribe to resource/service information. In addition threshold traps might be required to indicate specific change in existing conditions. The state of the data needs to be maintained in a soft state so that the most recent information is always available. The information gathered needs to be provided to variety of systems for the purpose of either utilizing the grid or proving summary information. However the fundamental problem is the need to be scalable to handle huge amounts of data from multiple sources.,november december grenoble france discovery mechanism deploy grid. grid discovery service provide ability monitor discover resource service grid. provide ability query subscribe information. addition threshold trap require indicate specific change exist condition. state datum need maintain soft state recent information always available. information gather need provide variety system purpose utilize grid prove summary information. fundamental problem need scalable handle huge datum multiple source.
+2,,,,20.726470687083207,,The web services community has addressed the need for service discovery before grids were anticipated via an industry standard called UDDI. However even though UDDI has been the de facto industry standard for web-services discovery imposed requirements of tight-replication among registries and lack of autonomous control among other things has severely hindered its widespread deployment and usage [7]. With the advent of grid computing the scalability issue with UDDI will become a roadblock that will prevent its deployment in grids.,web service community address need service discovery grid anticipate industry standard call. industry standard discovery impose requirement registry lack autonomous control thing severely hinder widespread deployment usage. advent grid compute scalability issue become roadblock prevent deployment grid.
+3,,,,19.778810466572917,,This paper tackles the scalability issue and a way to find services across multiple registries in UDDI by developing a distributed web services discovery architecture. Distributing UDDI functionality can be achieved in multiple ways and perhaps using different distributed computing infrastructure/platforms (e.g.,paper tackle scalability issue way service multiple registry develop distribute web service discovery architecture. distribute functionality achieve multiple way use different distribute compute.
+4,,,,17.806790511677335,,CORBA DCE etc.). In this paper we explore how Distributed Hash Table (DHT) technology can be leveraged to develop a scalable distributed web services discovery architecture. A DHT is a peer-to-peer (P2P) distributed system that forms a structured overlay allowing more efficient routing than the underlying network. This crucial design choice is motivated by two factors.,. paper explore distribute hash table dht technology leverage develop scalable distribute web service discovery architecture. dht distribute system form structure overlie allow efficient route underlie network. crucial design choice motivate factor.
+5,,,,27.491823891634155,,The first motivating factor is the inherent simplicity of the put/get abstraction that DHTs provide which makes it easy to rapidly build applications on top of DHTs. We recognize that having just this abstraction may not suffice for all distributed applications but for the objective at hand works very well as will become clear later. Other distributed computing platforms/middleware while providing more functionality have much higher overhead and complexity. The second motivating factor stems from the fact that DHTs are relatively new tool for building distributed applications and we would like to test its potential by applying it to the problem of distributing UDDI.,motivate factor inherent simplicity abstraction provide make easy rapidly build application top. recognise abstraction suffice distribute application objective hand work become clear late. distribute compute provide functionality high overhead complexity. motivate factor stem fact relatively new tool build distribute application test potential apply problem distribute.
+6,,,,26.551997720861092,,In the next section we provide a brief overview of grid information services UDDI and its limitations which is followed by an overview of DHTs in Section 3. Section 4 describes our proposed architecture with details on use cases. In Section 5 we Article 2 describe our current implementation followed by our findings in Section 6. Section 7 discusses the related work in this area and Section 8 contains our concluding remarks.,section provide brief overview grid information service limitation follow overview section. section describe propose architecture detail use case. section article describe current implementation follow finding section. section discuss relate work area section contain conclude remark.
+7,,,,32.23749091281467,,Grid computing is based on standards which use web services technology. In the architecture presented in [6] the service discovery function is assigned to a specialized Grid service called Registry. The implementation of the web service version of the Monitoring and Discovery Service (WS MDS) also known as the MDS4 component of the Globus Toolkit version 4 (GT4) includes such a registry in the form of the Index service Resource and service properties are collected and indexed by this service.,grid compute base standard use web service technology. architecture present service discovery function assign specialize grid service call registry. implementation web service version monitor discovery service mds know component globus toolkit version include registry form index service resource service property collect index service.
+8,,,,10.498363983148362,,Its basic function makes it similar to UDDI registry. To attain scalability Index services from different Globus containers can register with each other in a hierarchical fashion to aggregate data.,basic function make similar registry. attain scalability index service different globus container register hierarchical fashion aggregate datum.
+9,,,,9.717343282583897,,This approach for attaining scalability works best in hierarchical Virtual Organizations (VO) and expanding a search to find sufficient number of matches involves traversing the hierarchy.,approach attain scalability work good hierarchical virtual organization expand search sufficient numb match involve traverse hierarchy.
+10,,,,7.248786578242826,,Specifically this approach is not a good match for systems that try to exploit the convergence of grid and peer-to-peer computing [5].,specifically approach good match system try exploit convergence grid compute.
+11,,,,10.39231721116829,,Beyond grid computing the problem of service discovery needs to be addressed more generally in the web services community.,grid compute problem service discovery need address generally web service community.
+12,,,,19.559723427546366,,Again scalability is a major concern since millions of buyers looking for specific services need to find all the potential sellers of the service who can meet their needs. Although there are different ways of doing this the web services standards committees address this requirement through a specification called UDDI (Universal Description Discovery and Integration).,scalability major concern buyer look specific service need potential seller service meet need. different way web service standard committee address requirement specification call universal description discovery integration.
+13,,,,30.657866900236197,,A UDDI registry enables a business to enter three types of information in a UDDI registry - white pages yellow pages and green pages. UDDI"s intent is to function as a registry for services just as the yellow pages is a registry for businesses. Just like in Yellow pages companies register themselves and their services under different categories. In UDDI White Pages are a listing of the business entities. Green pages represent the technical information that is necessary to invoke a given service. Thus by browsing a UDDI registry a developer should be able to locate a service and a company and find out how to invoke the service.,registry enable business enter type information registry white page yellow page green page. intent function registry service yellow page registry business. yellow page company register service different category. white page list business entity. green page represent technical information necessary invoke give service. browse registry developer able locate service company invoke service.
+14,,,,3.6703257763872994,,When UDDI was initially offered it provided a lot of potential.,initially offer provide lot potential.
+15,,,,17.341375156772415,,However today we find that UDDI has not been widely deployed in the Internet. In fact the only known uses of UDDI are what are known as private UDDI registries within an enterprise"s boundaries. The readers can refer to [7] for a recent article that discusses the shortcomings of UDDI and the properties of an ideal service registry. Improvement of the UDDI standard is continuing in full force and UDDI version 3 (V3) was recently approved as an OASIS Standard. However UDDI today has issues that have not been addressed such as scalability and autonomy of individual registries.,today widely deploy internet. fact know use know private registry enterprise boundary. reader refer recent article discuss shortcoming property ideal service registry. improvement standard continue full force version recently approve oasis standard. today issue address scalability autonomy individual registry.
+16,,,,32.36118319668883,,UDDI V3 provides larger support for multi-registry environments based on portability of keys By allowing keys to be re-registered in multiple registries the ability to link registries in various topologies is effectively enabled. However no normative description of these topologies is provided in the UDDI specification at this point. The improvements within UDDI V3 that allow support for multi-registry environments are significant and open the possibility for additional research around how multiregistry environments may be deployed. A recommended deployment scenario proposed by the UDDI V3.0.2 Specification is to use the UDDI Business Registries as root registries and it is possible to enable this using our solution.,provide large support environment base portability key allow key multiple registry ability link registry various topology effectively enable. normative description topology provide specification point. improvement allow support environment significant open possibility additional research environment deploy. recommend deployment scenario propose specification use business registry root registry possible enable use solution.
+17,,,,73.88102794882671,,A Distributed Hash Table (DHT) is a peer-to-peer (P2P) distributed system that forms a structured overlay allowing more efficient routing than the underlying network. It maintains a collection of key-value pairs on the nodes participating in this graph structure. For our deployment a key is the hash of a keyword from a service name or description. There will be multiple values for this key one for each service containing the keyword. Just like any other hash table data structure it provides a simple interface consisting of put() and get() operations. This has to be done with robustness because of the transient nature of nodes in P2P systems. The value stored in the DHT can be any object or a copy or reference to it. The DHT keys are obtained from a large identifier space. A hash function such as MD5 or SHA-1 is applied to an object name to obtain its DHT key. Nodes in a DHT are also mapped into the same identifier space by applying the hash function to their identifier such as IP address and port number or public key. The identifier space is assigned to the nodes in a distributed and deterministic fashion so that routing and lookup can be performed efficiently. The nodes of a DHT maintain links to some of the other nodes in the DHT. The pattern of these links is known as the DHT"s geometry. For example in the Bamboo DHT [11] and in the Pastry DHT [8] on which Bamboo is based nodes maintain links to neighboring nodes and to other distant nodes found in a routing table. The routing table entry at row i and column j denoted Ri[j] is another node whose identifier matches its own in first i digits and whose (i + 1)st digit is j. The routing table allows efficient overlay routing. Bamboo like all DHTs specifies algorithms to be followed when a node joins the overlay network or when a node fails or leaves the network The geometry must be maintained even when this rate is high. To attain consistent routing or lookup a DHT key must be routed to the node with the numerically closest identifier. For details of how the routing tables are constructed and maintained the reader is referred to [8 11].,distribute hash table dht distribute system form structure overlie allow efficient route underlie network. maintain collection pair node participate graph structure. deployment key hash keyword service name description. multiple value key service contain keyword. hash table datum structure provide simple interface consist put get operation. robustness transient nature node system. value store dht object copy reference. dht key obtain large identifier space. hash function apply object name obtain dht key. node dht map identifier space apply hash function identifier ip address port numb public key. identifier space assign node distribute deterministic fashion route lookup perform efficiently. node dht maintain link node dht. pattern link know dht geometry. example bamboo dht pastry dht bamboo base node maintain link neighbor node distant node route table. route table entry row column denote node identifier match digit digit. route table allow efficient overlie route. bamboo specify algorithm follow node join overlie network node fail leave network geometry maintain rate high. attain consistent route lookup dht key route node numerically close identifier. detail route table construct maintain reader refer.
+18,,,,43.01175379730881,,BASED UDDI REGISTRY HIERARCHIES As mentioned earlier we propose to build a distributed UDDI system on top of a DHT infrastructure. This choice is primarily motivated by the simplicity of the put/get abstraction that DHTs provide which is powerful enough for the task at hand especially since we plan to validate our approach with an implementation running on PlanetLab [9]. A secondary motivation is to understand deployment issues with DHT based systems. Several applications have been built as overlays using DHTs such as distributed file storage databases publish-subscribe systems and content distribution networks. In our case we are building a DHT based overlay network of UDDI registries where the DHT acts as a rendezvous network that connects multiple registries. In the grid computing scenario an overlay network of multiple UDDI registries seems to an interesting alternative to the UDDI public Article 2 registries currently maintained by Microsoft IBM SAP and NTT.,base registry hierarchy mention early propose build distribute system top dht infrastructure. choice primarily motivate simplicity abstraction provide powerful task hand especially plan validate approach implementation run. secondary motivation understand deployment issue dht base system. application build overlay use distribute file storage database system content distribution network. case build dht base overlie network registry dht act rendezvous network connect multiple registry. grid compute scenario overlie network multiple registry seem interest alternative public article registry currently maintain microsoft ibm sap.
+19,,,,3.832822257305515,,In addition our aim is to not change any of the UDDI interfaces for clients as well as publishers.,addition aim change interface client publisher.
+20,,,,16.418784129444177,,Figure 1 highlights the proposed architecture for the DHT based UDDI Registry framework. UDDI nodes are replicated in a UDDI registry as per the current UDDI standard. However each local registry has a local proxy registry that mediates between the local UDDI registry and the DHT Service. The DHT service is the glue that connects the Proxy Registries together and facilitates searching across registries.,figure highlight propose architecture dht base registry framework. node replicate registry current standard. local registry local proxy registry mediate local registry dht service. dht service glue connect proxy registry facilitate search registry.
+21,,,,25.068118868958265,,Figure 1: DUDE Architecture Service information can be dispersed to several UDDI registries to promote scalability. The proxy registry publishes performs queries and deletes information from the dispersed UDDI registries. However the scope of the queries is limited to relevant registries. The DHT provides information about the relevant registries. The core idea in the architecture is to populate DHT nodes with the necessary information from the proxies which enables easy and ubiquitous searching when queries are made.,figure dude architecture service information disperse registry promote scalability. proxy registry publish perform query delete information disperse registry. scope query limit relevant registry. dht provide information relevant registry. core idea architecture populate dht node necessary information proxy enable easy ubiquitous search query make.
+22,,,,50.91196421434246,,When a new service is added to a registry all potential search terms are hashed by the proxy and used as DHT keys to publish the service in the DHT. The value stored for this service uniquely identifies the service and includes the URL of a registry and the unique UDDI key of the service in that registry. Similarly when queries arrive they are parsed and a set of search terms are identified. These search terms are hashed and the values stored with those hash values are retrieved from the DHT. Note that a proxy does not need to know all DHT nodes; it needs to know just one DHT node (this is done as part of the bootstrapping process) and as described in Section 2.3 this DHT node can route the query as necessary to the other nodes on the DHT overlay. We describe three usage scenarios later that deal with adding a new local registry inserting a new service and querying for a service.,new service add registry potential search term hash proxy use dht key publish service dht. value store service uniquely identify service include url registry unique key service registry. similarly query arrive parse set search term identify. search term hash value store hash value retrieve dht. note proxy need know dht node need know dht node part bootstrap process describe section dht node route query necessary node dht overlie. describe usage scenario late deal add new local registry insert new service query service.
+23,,,,2.523537156113351,,Furthermore the DHT optimizes the UDDI query mechanism.,furthermore dht optimize query mechanism.
+24,,,,21.818739034792948,,This process becomes a lookup using a UDDI unique key rather than a query using a set of search parameters. This key and the URL of the registry are obtained by searching initially in the DHT. The DHT query can return multiple values for matching services and in each of the matching registries the proxy performs lookup operations.,process become lookup use unique key query use set search parameter. key url registry obtain search initially dht. dht query return multiple value match service match registry proxy perform lookup operation.
+25,,,,30.214921394280584,,The service name is used as a hash for inserting the service information. The service information contains the query URL and unique UDDI key for the registry containing the service. There could be multiple registries associated with a given service. The service information conforms to the following schema. Service Information … There can be multiple proxy UDDI registries in this architecture.,service name use hash insert service information. service information contain query url unique key registry contain service. multiple registry associate give service. service information conform schema. service information multiple proxy registry architecture.
+26,,,,11.191395289770623,,The advantage of this is to introduce distributed interactions between the UDDI clients and registries. Organization can also decide what information is available from the local registries by implementing policies at the proxy registry.,advantage introduce distribute interaction client registry. organization decide information available local registry implement policy proxy registry.
+27,,,,19.049435116015097,,In this section we demonstrate what the sequence of operations should be for three crucial scenarios - adding a new local registry inserting a new service and querying a service. Other operations like deleting a registry deleting a service etc. are similar and for the sake of brevity are omitted here.,section demonstrate sequence operation crucial scenario add new local registry insert new service query service. operation delete registry delete service similar sake brevity omit.
+28,,,,34.591823499220396,,Figure 2: Sequence Diagram- Add New Local Registry Add a New Local UDDI Registry Figure 2 contains a sequence diagram illustrating how a new UDDI registry is added to the network of UDDI registries. The new registry registers itself with its proxy registry. The proxy registry in turn queries the new registry for all services that it has UDDI Local Registry UDDI Local Registry UDDI Local Registry Proxy Registry DHT Based Distribution Proxy Registry Proxy Registry Article 2 stored in its databases and in turn registers each of those entries with the DHT.,figure sequence diagram add new local registry add new local registry figure contain sequence diagram illustrate new registry add network registry. new registry register proxy registry. proxy registry turn query new registry service local registry local registry local registry proxy registry dht base distribution proxy registry proxy registry article store database turn register entry dht.
+29,,,,44.069013290042435,,Figure 3: Sequence Diagram - Add New Service Add a New Service The use case diagram depicted in Error! Reference source not found. highlights how a client publishes a new service to the UDDI registry. In order to interact with the registry a client has to know how to contact its local proxy registry. It then publishes a service with the proxy registry which in turn publishes the service with the local UDDI registry and receives the UDDI key of the registry entry. Then new key-value pairs are published in the DHT where each key is obtained by hashing a searchable keyword of the service and the value consists of the query URL of the registry and the UDDI key.,figure sequence diagram add new service add new service use case diagram depict error. reference source. highlight client publish new service registry. order interact registry client know contact local proxy registry. publish service proxy registry turn publish service local registry receive key registry entry. new pair publish dht key obtain hash search keyword service value consist query url registry key.
+30,,,,26.430023045555153,,Figure 4: Sequence Diagram - Query for a Service Query a Service Figure 4 shows how a client queries the UDDI registry for a service. Once again the client needs to know how to contact its local proxy registry and invokes the query service request. The proxy registry in turn contacts one of the DHT nodes to determine DHT queries using the search terms.,figure sequence diagram query service query service figure show client query registry service. client need know contact local proxy registry invoke query service request. proxy registry turn contact dht node determine dht query use search term.
+31,,,,26.606236006784307,,As explained earlier in the context of Figure 1 multiple values might be retrieved from the DHT. Each value includes the query URL of a registry and the unique UDDI key of a matching service in that registry. The proxy then contacts the matching registries and waits for the response of lookup operations using the corresponding UDDI keys. Upon receiving the responses the proxy registry collates all responses and returns the aggregated set of services to the client.,explain early context figure multiple value retrieve dht. value include query url registry unique key match service registry. proxy contact match registry wait response lookup operation use correspond key. receive response proxy registry collate response return aggregate set service client.
+32,,,,5.892234550597878,,We will now illustrate these operations using an example.,illustrate operation use example.
+33,,,,20.34487306899909,,Consider a client contacting its local proxy to publish a service called Computer Accessories. The proxy follows the steps in Figure 3 to add the service to UDDI 1 registry and also publishes two entries in the DHT. The keys of these entries are obtained by hashing the words computer and accessories respectively.,consider client contact local proxy publish service call computer accessory. proxy follow step figure add service registry publish entry dht. key entry obtain hash word computer accessory respectively.
+34,,,,19.508963488275327,,Both entries have the same value consisting of the query URL of this registry and the unique UDDI key returned by the registry for this service. Next we consider another client publishing a service called Computer Repair through its proxy to UDDI 2 registry. A similar process results in 2 more entries being added to the DHT.,entry value consist query url registry unique key return registry service. consider client publish service call computer repair proxy registry. similar process result entry add dht.
+35,,,,31.726506341501565,,Recall that our DHT deployment can have multiple entries with the same key. If we follow the steps in Figure 4 for a client sending a query to its proxy using the word computer we see that the DHT is queried with the hash of the word computer as key. This retrieves the query URL and respective UDDI keys of both services mentioned before in this example. The proxy can then do a simple lookup operation at both UDDI 1 and 2 registries. It is clear that as the number of UDDI registries and clients increases this process of lookup at only relevant UDDI registries is more scalable that doing a full search using the word computer at all UDDI registries.,recall dht deployment multiple entry key. follow step figure client send query proxy use word computer see dht query hash word computer key. retrieve query url respective key service mention example. proxy simple lookup operation registry. clear numb registry client increase process lookup relevant registry scalable full search use word computer registry.
+36,,,,11.092405791138894,,In this section we describe our implementation which is currently deployed on PlanetLab [9]. PlanetLab is an open globally distributed platform for developing deploying and accessing network services. It currently has 527 machines hosted by 249 sites spanning over 25 countries. PlanetLab machines are hosted by research/academic institutions as well as industrial companies.,section describe implementation currently deploy. open globally distribute platform develop deploy access network service. currently machine host site span country. machine host institution industrial company.
+37,,,,20.24453585743115,,France Telecom and HP are two of the major industry supporters for PlanetLab. Every PlanetLab host machine is connected to the Internet and runs a common software package including a Linux based operating system that supports server virtualization. Thus the users can develop and experiment with new services under real-world conditions. The advantage of using PlanetLab is that we can test the DUDE architecture under real-world conditions with a large scale geographically dispersed node base.,france telecom hp major industry supporter. host machine connect internet run common software package include linux base operate system support server virtualization. user develop experiment new service condition. advantage use test dude architecture condition large scale geographically disperse node base.
+38,,,,27.74691262888972,,Due to the availability of jUDDI an open source UDDI V2 registry (http://www.juddi.org) and a lack of existing readily available UDDI V3 registry a decision to use UDDI V2 was made. The standardization of UDDI V3 is recent and we intend to extend this work to support UDDI V3 and subsequent versions in the future. The proxy registry is implemented by modifying the jUDDI source to enable publishing querying and deleting service information from a DHT. Furthermore it also allows querying multiple registries and collating the response using UDDI4j [13].,due availability open source registry lack exist readily available registry decision use make. standardise recent intend extend work support subsequent version future. proxy registry implement modify source enable publish query delete service information dht. furthermore allow query multiple registry collate response use.
+39,,,,14.419494277613111,,For the DHT implementation we use the Bamboo DHT code [11]. The Bamboo DHT allows multiple proxy registries to publish and delete service information from their respective UDDI registries as well as to query for services from all the registries.,dht implementation use bamboo dht code. bamboo dht allow multiple proxy registry publish delete service information respective registry query service registry.
+40,,,,33.0055827528266,,The proxy uses the service name as input to the DHT"s hash Article 2 function to get the DHT key. The value that is stored in the DHT using this key is the URI of the registry along with the UDDI key of the service. This ensures that when the proxy registry queries for services with a certain name it gets back the URI and UDDI keys for matching entries. Using these returned results the proxy can do fast lookup operations at the respective UDDI registries.,proxy use service name input dht hash article function get dht key. value store dht use key uri registry key service. ensure proxy registry query service certain name get back uri key match entry. use return result proxy fast lookup operation respective registry.
+41,,,,7.949183716623094,,The UDDI keys make it unnecessary to repeat the search at the UDDI registries with the service name.,key make unnecessary repeat search registry service name.
+42,,,,9.72207390831922,,We have so far described the process of exact match on service name. However there are additional types of search that must be supported. Firstly the search requested could be case-insensitive.,far describe process exact match service name. additional type search support. search request.
+43,,,,49.15057876338386,,To support that the proxy registry has to publish the same service once using the name exactly as entered in the UDDI registry and once with the name converted to all lower-case letters. To do a case-insensitive search the proxy registry simply has to convert the query string into lower-case letters. Secondly the user could query based on the prefix of a service name. Indeed this is the default behavior of search in UDDI. In other words a wildcard is implicit at the end of the service name being searched. To support this efficiently in the DHT our proxy registries have to take prefixes of the service name of varying length and publish the URI and UDDI key multiple times once using each prefix. For example the prefix sizes chosen in one deployment might be 5 10 15 and 20 characters. If a search for the first 12 characters of a service name is submitted the proxy registry will query the DHT with the first 10 characters of the search string and then refine the search result to ensure that the match extends to the 12th character.,support proxy registry publish service use name exactly enter registry name convert letter. search proxy registry simply convert query string letter. user query base prefix service name. default behavior search. word implicit end service name search. support efficiently dht proxy registry take prefix service name vary length publish uri key multiple time use prefix. example prefix size choose deployment character. search character service name submit proxy registry query dht character search string refine search result ensure match extend character.
+44,,,,33.91579371017981,,If the search string has less than 5 characters and the search is for a prefix rather than an exact match the DHT cannot be of any help unless every service is published in the DHT with prefix of length 0. Using this null prefix will send a copy of every advertised service to the DHT node to which the hash of the null prefix maps. Since this can lead to load-imbalance a better solution might be to use the DHT only to get a list of all UDDI registries and send the search to all of them in the locations to be searched. Thirdly the service name being searched can be a regular expression such as one with embedded wildcard characters. For example a search for Garden%s should match both Garden Supplies and Gardening Tools. This will be treated similarly to the previous case as the DHT has to be queried with the longest available prefix. The results returned have to be refined to ensure that the regular expression matches.,search string character search prefix exact match dht help service publish dht prefix length. use null prefix send copy advertise service dht node hash null prefix map. lead good solution use dht get list registry send search location search. service name search regular expression embed character. example search garden match garden supply garden tool. treat similarly previous case dht query long available prefix. result return refine ensure regular expression match.
+45,,,,4.771962486049976,,Figure 5 shows the network diagram for our implementation.,figure show network diagram implementation.
+46,,,,7.773094766459308,,There are two proxy UDDI and juddi registry pairs. Consider a client which contacts the UDDI proxy on grouse.hpl.hp.com. The proxy does a lookup of the DHT using the query string or a prefix.,proxy registry pair. consider client contact proxy. proxy lookup dht use query string prefix.
+47,,,,21.00531682621673,,This involves contacting one of the DHT nodes such as pli1-br3.hpl.hp.com which serves as the gateway to the DHT for grouse.hpl.hp.com based on the latter"s configuration file. The DHT node may then route the query to one of the other DHT nodes which is responsible for the DHT key that the query string maps to. The results of the DHT lookup return to pli1-br3.hpl.hp.com which forwards them to grouse.hpl.hp.com. The results may include a few services from each of the juddi registries. So the proxy registry performs the lookup operations at both planetlab1 and planetlab2.rdfrancetelecom.com for their respective entries listed in the search results. The responses to these lookups are collated by the proxy registry and returned to the client.,involve contact dht node. serve gateway dht base configuration file. dht node route query dht node responsible dht key query string map. result dht lookup return. forward. result include service registry. proxy registry perform lookup operation respective entry list search result. response lookup collate proxy registry return client.
+48,,,,3.1828635374001166,,Figure 5 Network Diagram,figure network diagram.
+49,,,,24.07329007985185,,A framework for QoS-based service discovery in grids has been proposed in [18]. UDDIe an extended UDDI registry for publishing and discovering services based on QoS parameters is proposed in [19]. Our work is complementary since we focus on how to federate the UDDI registries and address the scalability issue with UDDI. The DUDE proxy can publish the service properties supported by UDDIe in the DHT and support range queries using techniques proposed for such queries on DHTs.,framework service discovery grid propose. extend registry publish discover service base parameter propose. work complementary focus federate registry address scalability issue. dude proxy publish service property support dht support range query use technique propose query.
+50,,,,15.915898883884942,,Then we can deliver the scalability benefits of our current solution to both UDDI and UDDIe registries. Discovering services meeting QoS and price requirements has been studied in the context of a grid economy so that grid schedulers can use various market models such as commodity markets and auctions. The Grid Market Directory [20] was proposed for this purpose.,deliver scalability benefit current solution registry. discover service meet price requirement study context grid economy grid scheduler use various market model commodity market auction. grid market directory propose purpose.
+51,,,,1.2667807648655796,,In [12] the authors present an ontology-based matchmaker.,author present matchmaker.
+52,,,,26.162900397560175,,Resource and request descriptions are expressed in RDF Schema a semantic markup language. Matchmaking rules are expressed in TRIPLE a language based on Horn Logic. Although our current implementation focuses on UDDI version 2 in future we will consider semantic extensions to UDDI WS-Discovery [16] and other Grid computing standards such as Monitoring and Discovery Service (MDS) [10]. So the simplest extension of our work could involve using the DHT to do an initial syntax-based search to identify the local registries that need to be contacted.,resource request description express rdf schema semantic markup language. matchmaking rule express triple language base horn logic. current implementation focus version future consider semantic extension grid compute standard monitor discovery service mds. simple extension work involve use dht initial search identify local registry need contact.
+53,,,,8.493944236934881,,Then the Proxy Registry can contact these registries which do semantic matchmaking to identify their matches which are then merged at the Proxy Registry and returned to the client.,proxy registry contact registry semantic matchmaking identify match merge proxy registry return client.
+54,,,,23.32375140468534,,The convergence of grid and P2P computing has been explored in [5]. GridVine [2] builds a logical semantic overlay on top of a physical layer consisting of P-Grid [1] a structured overlay based on distributed search tree that uses prefix-based routing and changes the overlay paths as part of the network maintenance protocol to adapt to load in different parts of the keyspace. A federated UDDI service [4] has been built on top of the PlanetP [3] publish-subscribe system for unstructured P2P communities.,convergence grid compute explore. build logical semantic overlie top physical layer consist structure overlie base distribute search tree use route change overlie path part network maintenance protocol adapt load different part. federate service build top system unstructured community.
+55,,,,34.60040313229095,,The focus of this work has been on the manageability of the federated service. The UDDI service is treated as an application Article 2 service to be managed in their framework. So they do not address the issue of scalability in UDDI and instead use simple replication. In [21] the authors describe a UDDI extension (UX) system that launches a federated query only if locally found results are not adequate. While the UX Server is positioned as an intermediary similarly to the UDDI Proxy described in our DUDE framework it focuses more on the QoS framework and does not attempt to implement a seamless federation mechanism such as our DHT based approach. In [22] D2HT describes a discovery framework built on top of DHT. However we have chosen to use UDDI on top of DHT. D2HT have used (Agent Management System) AMS/ (Directory Facilitator) DF on top of DHT.,focus work manageability federate service. service treat application article service manage framework. address issue scalability instead use simple replication. author describe extension system launch federate query locally result adequate. server position intermediary similarly proxy describe dude framework focus framework attempt implement seamless federation mechanism dht base approach. describe discovery framework build top dht. choose use top dht. use agent management system ams directory facilitator top dht.
+56,,,,64.3847519873782,,In this paper we have described a distributed architecture to support large scale discovery of web-services. Our architecture will enable organizations to maintain autonomous control over their UDDI registries and at the same time allowing clients to query multiple registries simultaneously. The clients are oblivious to the transparent proxy approach we have adopted and get richer and more complete response to their queries. Based on initial prototype testing we believe that DUDE architecture can support effective distribution of UDDI registries thereby making UDDI more robust and also addressing its scaling issues. The paper has solved the scalability issues with UDDI but does not preclude the application of this approach to other service discovery mechanisms. An example of another service discovery mechanism that could benefit from such an approach is Globus Toolkit"s MDS. Furthermore we plan to investigate other aspects of grid service discovery that extend this work. Some of these aspects include the ability to subscribe to resource/service information the ability to maintain soft states and the ability to provide a variety of views for various different purposes. In addition we plan to revisit the service APIs for a Grid Service Discovery solution leveraging the available solutions and specifications as well as the work presented in this paper.,paper describe distribute architecture support large scale discovery. architecture enable organization maintain autonomous control registry time allow client query multiple registry simultaneously. client oblivious transparent proxy approach adopt get rich complete response query. base initial prototype test believe dude architecture support effective distribution registry make robust address scale issue. paper solve scalability issue preclude application approach service discovery mechanism. example service discovery mechanism benefit approach globus toolkit mds. furthermore plan investigate aspect grid service discovery extend work. aspect include ability subscribe information ability maintain soft state ability provide variety view various different purpose. addition plan revisit service apis grid service discovery solution leverage available solution specification work present paper.
+
+Topics - Relevance
+Keyword, Relevance,Tf,Average semantic similarity
+use (VB),2.601,4.611,0.564
+service (NN),1.876,5.654,0.332
+provide (VB),1.736,3.639,0.477
+information (NN),1.682,3.944,0.426
+need (VB),1.631,3.485,0.468
+make (VB),1.617,3.079,0.525
+base (VB),1.612,3.89,0.414
+multiple (JJ),1.537,3.773,0.407
+key (NN),1.398,4.401,0.318
+distribute (VB),1.396,3.996,0.349
+example (NN),1.39,2.792,0.498
+new (JJ),1.359,3.773,0.36
+result (NN),1.341,3.197,0.419
+system (NN),1.329,3.485,0.381
+include (VB),1.329,2.792,0.476
+work (NN),1.271,3.303,0.385
+value (NN),1.261,3.398,0.371
+section (NN),1.254,3.303,0.38
+enable (VB),1.251,2.792,0.448
+maintain (VB),1.238,3.197,0.387
+network (NN),1.219,3.565,0.342
+available (JJ),1.208,2.609,0.463
+operation (NN),1.208,3.197,0.378
+add (VB),1.207,3.303,0.366
+describe (VB),1.194,3.303,0.362
+figure (NN),1.187,3.485,0.341
+function (NN),1.184,2.792,0.424
+compute (NN),1.179,3.303,0.357
+different (JJ),1.175,2.792,0.421
+allow (VB),1.17,3.079,0.38
+application (NN),1.159,2.792,0.415
+local (JJ),1.153,3.773,0.306
+process (NN),1.113,2.609,0.427
+standard (NN),1.11,3.079,0.36
+obtain (VB),1.105,2.609,0.423
+know (VB),1.086,3.079,0.353
+support (VB),1.073,3.398,0.316
+grid (NN),1.068,4.178,0.256
+client (NN),1.06,3.773,0.281
+addition (NN),1.057,2.099,0.504
+part (NN),1.039,2.386,0.435
+necessary (JJ),1.013,2.099,0.483
+call (VB),1.004,2.609,0.385
+specific (JJ),1.003,2.099,0.478
+contact (VB),0.976,3.197,0.305
+ability (NN),0.974,2.792,0.349
+identify (VB),0.968,2.386,0.406
+various (JJ),0.967,2.099,0.461
+implementation (NN),0.965,2.946,0.327
+develop (VB),0.957,2.386,0.401
+way (NN),0.957,2.099,0.456
+unique (JJ),0.954,2.609,0.366
+proxy (NN),0.947,4.784,0.198
+consider (VB),0.941,2.386,0.394
+sequence (NN),0.94,2.609,0.36
+issue (NN),0.932,3.079,0.303
+entry (NN),0.926,3.303,0.28
+name (NN),0.922,3.639,0.253
+framework (NN),0.918,2.792,0.329
+furthermore (RB),0.915,2.099,0.436
+approach (NN),0.91,2.946,0.309
+structure (JJ),0.909,2.609,0.348
+similar (JJ),0.909,2.099,0.433
+list (NN),0.908,2.386,0.38
+purpose (NN),0.901,2.099,0.429
+simple (JJ),0.898,2.386,0.376
+mechanism (NN),0.897,2.609,0.344
+contain (VB),0.897,2.609,0.344
+page (NN),0.896,3.079,0.291
+involve (VB),0.893,2.099,0.425
+search (NN),0.888,4.367,0.203
+term (NN),0.886,2.386,0.371
+efficient (JJ),0.886,2.386,0.371
+match (NN),0.885,3.639,0.243
+case (NN),0.87,2.386,0.365
+form (VB),0.869,2.099,0.414
+specification (NN),0.867,2.386,0.363
+currently (RB),0.865,2.099,0.412
+follow (VB),0.859,2.609,0.329
+distribution (NN),0.859,2.099,0.409
+large (JJ),0.856,2.386,0.359
+datum (NN),0.848,2.386,0.355
+build (VB),0.832,3.079,0.27
+propose (VB),0.826,3.079,0.268
+discovery (NN),0.826,3.944,0.209
+source (NN),0.824,2.386,0.345
+publish (VB),0.823,3.773,0.218
+ensure (VB),0.821,2.099,0.391
+present (VB),0.816,2.099,0.389
+apply (VB),0.815,2.099,0.389
+description (NN),0.815,2.386,0.342
+similarly (RB),0.813,2.099,0.387
+potential (JJ),0.812,2.386,0.34
+requirement (NN),0.81,2.099,0.386
+consist (VB),0.81,2.386,0.339
+advantage (NN),0.8,2.099,0.381
+relevant (JJ),0.794,2.099,0.378
+implement (VB),0.788,2.099,0.376
+type (NN),0.785,1.693,0.463
+additional (JJ),0.78,1.693,0.46
+diagram (NN),0.777,2.946,0.264
+perform (VB),0.775,2.386,0.325
+good (JJ),0.77,2.099,0.367
+business (NN),0.77,2.386,0.322
+factor (NN),0.768,2.099,0.366
+organization (NN),0.755,2.099,0.36
+require (VB),0.755,1.693,0.446
+change (VB),0.755,2.099,0.36
+give (VB),0.755,1.693,0.446
+set (NN),0.752,2.099,0.358
+extension (NN),0.749,2.099,0.357
+response (NN),0.747,2.792,0.268
+copy (NN),0.74,2.792,0.265
+address (VB),0.735,3.079,0.239
+focus (VB),0.73,2.386,0.306
+motivate (VB),0.729,2.386,0.305
+plan (VB),0.726,2.099,0.346
+time (NN),0.726,1.693,0.429
+respective (JJ),0.723,2.386,0.303
+article (NN),0.721,2.792,0.258
+route (VB),0.718,3.565,0.201
+computer (NN),0.717,2.792,0.257
+word (NN),0.71,2.609,0.272
+version (NN),0.707,2.609,0.271
+registry (NN),0.702,5.745,0.122
+condition (NN),0.701,2.099,0.334
+extend (VB),0.699,2.386,0.293
+attain (VB),0.696,2.099,0.331
+illustrate (VB),0.694,1.693,0.41
+problem (NN),0.691,2.099,0.329
+exact (JJ),0.685,1.693,0.405
+become (VB),0.684,2.099,0.326
+exist (VB),0.68,1.693,0.402
+recent (JJ),0.672,2.099,0.32
+refer (VB),0.663,1.693,0.392
+monitor (NN),0.661,2.099,0.315
+numb (NN),0.661,2.099,0.315
+deployment (NN),0.66,2.946,0.224
+aspect (NN),0.659,1.693,0.389
+variety (NN),0.655,1.693,0.387
+fact (NN),0.655,1.693,0.387
+major (JJ),0.652,1.693,0.385
+return (VB),0.65,3.079,0.211
+initial (JJ),0.649,1.693,0.383
+discuss (VB),0.647,1.693,0.382
+link (NN),0.646,2.386,0.271
+prefix (NN),0.64,3.303,0.194
+improvement (NN),0.634,1.693,0.375
+initially (RB),0.634,1.693,0.374
+character (NN),0.634,2.792,0.227
+state (NN),0.631,2.099,0.301
+choose (VB),0.631,1.693,0.372
+show (NN),0.625,1.693,0.369
+assign (VB),0.621,1.693,0.367
+index (NN),0.618,2.099,0.295
+reference (NN),0.618,1.693,0.365
+easy (JJ),0.615,1.693,0.363
+crucial (JJ),0.614,1.693,0.363
+identifier (NN),0.608,2.792,0.218
+efficiently (RB),0.599,1.693,0.354
+benefit (NN),0.599,1.693,0.354
+detail (NN),0.598,1.693,0.353
+get (VB),0.594,2.609,0.228
+request (NN),0.588,2.099,0.28
+delete (VB),0.584,2.609,0.224
+connect (VB),0.583,2.099,0.278
+turn (NN),0.582,2.386,0.244
+future (NN),0.581,1.693,0.343
+store (VB),0.58,2.609,0.222
+industry (NN),0.579,2.099,0.276
+control (NN),0.575,1.693,0.339
+scale (NN),0.573,2.099,0.273
+insert (VB),0.57,2.099,0.272
+current (JJ),0.569,2.386,0.239
+underlie (JJ),0.568,1.693,0.336
+register (VB),0.567,2.386,0.238
+overlie (NN),0.567,3.303,0.172
+solution (NN),0.566,2.609,0.217
+choice (NN),0.565,1.693,0.334
+company (NN),0.561,2.099,0.267
+architecture (NN),0.559,3.485,0.16
+semantic (JJ),0.555,2.386,0.233
+user (NN),0.555,1.693,0.328
+highlight (VB),0.552,1.693,0.326
+resource (NN),0.549,2.099,0.261
+full (JJ),0.546,2.099,0.26
+top (NN),0.545,2.946,0.185
+invoke (VB),0.544,2.099,0.259
+paper (NN),0.541,2.609,0.207
+technology (NN),0.541,1.693,0.32
+scenario (NN),0.539,2.386,0.226
+receive (VB),0.537,1.693,0.317
+space (NN),0.537,2.099,0.256
+test (VB),0.537,2.099,0.256
+regular (JJ),0.533,1.693,0.315
+query (NN),0.526,4.689,0.112
+discover (VB),0.524,2.099,0.25
+market (NN),0.524,2.099,0.249
+property (NN),0.522,2.099,0.249
+table (NN),0.522,2.946,0.177
+environment (NN),0.521,2.099,0.248
+context (NN),0.52,1.693,0.307
+machine (NN),0.519,2.099,0.247
+usage (NN),0.512,1.693,0.303
+overview (NN),0.512,1.693,0.302
+node (NN),0.51,4.219,0.121
+abstraction (NN),0.509,2.099,0.242
+community (NN),0.508,2.099,0.242
+lack (NN),0.502,1.693,0.296
+refine (VB),0.501,1.693,0.296
+possible (JJ),0.49,1.0,0.49
+early (RB),0.489,1.693,0.289
+basic (JJ),0.487,1.0,0.487
+clear (JJ),0.487,1.693,0.288
+parameter (NN),0.483,1.693,0.285
+keyword (NN),0.479,2.099,0.228
+hierarchy (NN),0.479,1.693,0.283
+interface (NN),0.476,1.693,0.281
+retrieve (VB),0.475,2.099,0.226
+standardise (NN),0.474,1.693,0.28
+meet (VB),0.471,1.693,0.278
+mention (VB),0.471,1.693,0.278
+certain (JJ),0.471,1.0,0.471
+today (NN),0.47,1.693,0.278
+hierarchical (JJ),0.464,1.693,0.274
+determine (VB),0.463,1.0,0.463
+express (VB),0.463,1.693,0.273
+enter (VB),0.456,1.693,0.269
+public (JJ),0.452,1.693,0.267
+tool (NN),0.448,1.693,0.265
+digit (NN),0.447,1.693,0.264
+autonomous (JJ),0.445,1.693,0.263
+specifically (RB),0.444,1.0,0.444
+aggregate (JJ),0.44,1.693,0.26
+primarily (RB),0.438,1.0,0.438
+accessory (NN),0.436,1.693,0.258
+limit (VB),0.435,1.0,0.435
+open (JJ),0.434,2.099,0.207
+file (NN),0.432,1.693,0.255
+length (NN),0.431,1.693,0.255
+step (NN),0.431,1.693,0.255
+convert (VB),0.421,1.693,0.249
+generally (RB),0.419,1.0,0.419
+facilitate (VB),0.418,1.0,0.418
+high (JJ),0.418,1.693,0.247
+effective (JJ),0.418,1.0,0.418
+reader (NN),0.415,1.693,0.245
+complete (JJ),0.414,1.0,0.414
+simplicity (NN),0.413,1.693,0.244
+technical (JJ),0.411,1.0,0.411
+specify (VB),0.41,1.0,0.41
+technique (NN),0.406,1.0,0.406
+component (NN),0.406,1.0,0.406
+design (NN),0.404,1.0,0.404
+limitation (NN),0.403,1.0,0.403
+directory (NN),0.403,1.693,0.238
+effectively (RB),0.401,1.0,0.401
+individual (JJ),0.401,1.0,0.401
+essential (JJ),0.401,1.0,0.401
+order (NN),0.4,1.0,0.4
+late (RB),0.398,1.693,0.235
+alternative (NN),0.397,1.0,0.397
+map (VB),0.397,2.099,0.189
+utilize (VB),0.395,1.0,0.395
+able (JJ),0.394,1.0,0.394
+object (NN),0.394,1.693,0.233
+indicate (VB),0.392,1.0,0.392
+scope (NN),0.39,1.0,0.39
+significant (JJ),0.387,1.0,0.387
+location (NN),0.387,1.0,0.387
+author (NN),0.387,1.693,0.228
+objective (NN),0.386,1.0,0.386
+leverage (VB),0.382,1.693,0.225
+adequate (JJ),0.381,1.0,0.381
+relate (JJ),0.379,1.0,0.379
+simply (RB),0.375,1.0,0.375
+conform (VB),0.374,1.0,0.374
+operate (VB),0.374,1.0,0.374
+task (NN),0.373,1.0,0.373
+recommend (VB),0.372,1.0,0.372
+hand (NN),0.372,1.693,0.22
+inherent (JJ),0.371,1.0,0.371
+previous (JJ),0.371,1.0,0.371
+deploy (VB),0.37,2.609,0.142
+vary (VB),0.37,1.0,0.37
+category (NN),0.37,1.0,0.37
+language (NN),0.37,1.693,0.218
+consistent (JJ),0.369,1.0,0.369
+take (VB),0.369,1.0,0.369
+represent (VB),0.369,1.0,0.369
+geometry (NN),0.368,1.693,0.217
+demonstrate (VB),0.368,1.0,0.368
+achieve (VB),0.367,1.0,0.367
+subscribe (VB),0.367,1.693,0.217
+disperse (VB),0.367,2.099,0.175
+deal (NN),0.366,1.0,0.366
+management (NN),0.366,1.0,0.366
+logical (JJ),0.364,1.0,0.364
+possibility (NN),0.362,1.0,0.362
+prior (RB),0.361,1.0,0.361
+maintenance (NN),0.36,1.0,0.36
+personal (JJ),0.358,1.0,0.358
+widely (RB),0.357,1.0,0.357
+attempt (VB),0.357,1.0,0.357
+fashion (NN),0.356,1.693,0.21
+readily (RB),0.355,1.0,0.355
+concern (NN),0.354,1.0,0.354
+subsequent (JJ),0.353,1.0,0.353
+common (JJ),0.352,1.0,0.352
+send (VB),0.352,2.099,0.168
+help (NN),0.35,1.0,0.35
+explore (VB),0.35,1.693,0.207
+availability (NN),0.349,1.0,0.349
+instead (RB),0.349,1.0,0.349
+promote (VB),0.349,1.0,0.349
+complexity (NN),0.347,1.0,0.347
+fundamental (JJ),0.347,1.0,0.347
+understand (VB),0.347,1.0,0.347
+area (NN),0.347,1.0,0.347
+access (VB),0.346,1.0,0.346
+interest (JJ),0.344,1.0,0.344
+specialize (VB),0.344,1.0,0.344
+correspond (JJ),0.344,1.0,0.344
+simultaneously (RB),0.343,1.0,0.343
+expression (NN),0.342,1.693,0.202
+note (VB),0.338,1.0,0.338
+point (NN),0.337,1.0,0.337
+serve (VB),0.337,1.0,0.337
+sufficient (JJ),0.336,1.0,0.336
+construct (VB),0.335,1.0,0.335
+letter (NN),0.334,1.693,0.197
+research (NN),0.333,1.0,0.333
+finding (NN),0.333,1.0,0.333
+treat (VB),0.333,1.693,0.197
+study (VB),0.331,1.0,0.331
+especially (RB),0.331,1.0,0.331
+logic (NN),0.331,1.0,0.331
+content (JJ),0.33,1.0,0.33
+position (VB),0.33,1.0,0.33
+responsible (JJ),0.328,1.0,0.328
+pattern (NN),0.328,1.0,0.328
+server (NN),0.327,2.099,0.156
+commercial (JJ),0.327,1.0,0.327
+input (NN),0.326,1.0,0.326
+handle (VB),0.326,1.0,0.326
+associate (VB),0.326,1.0,0.326
+error (NN),0.325,1.0,0.325
+integration (NN),0.324,1.0,0.324
+supply (NN),0.324,1.0,0.324
+secondary (JJ),0.32,1.0,0.32
+offer (VB),0.32,1.0,0.32
+idea (NN),0.319,1.0,0.319
+interaction (NN),0.318,1.0,0.318
+locate (VB),0.318,1.0,0.318
+omit (VB),0.317,1.0,0.317
+model (NN),0.316,1.0,0.316
+software (NN),0.314,1.0,0.314
+introduce (VB),0.314,1.0,0.314
+increase (NN),0.313,1.0,0.313
+continue (VB),0.313,1.0,0.313
+decide (VB),0.311,1.0,0.311
+intend (VB),0.309,1.0,0.309
+run (VB),0.309,1.693,0.182
+summary (NN),0.308,1.0,0.308
+modify (VB),0.307,1.0,0.307
+recently (RB),0.306,1.0,0.306
+unnecessary (JJ),0.305,1.0,0.305
+see (VB),0.304,1.0,0.304
+collection (NN),0.304,1.0,0.304
+anticipate (VB),0.304,1.0,0.304
+submit (VB),0.303,1.0,0.303
+explain (VB),0.303,1.0,0.303
+nature (NN),0.303,1.0,0.303
+size (NN),0.301,1.0,0.301
+code (NN),0.3,1.0,0.3
+expand (VB),0.3,1.0,0.3
+host (VB),0.299,2.099,0.142
+relatively (RB),0.299,1.0,0.299
+storage (NN),0.299,1.0,0.299
+range (NN),0.296,1.0,0.296
+decision (NN),0.296,1.0,0.296
+widespread (JJ),0.295,1.0,0.295
+participate (VB),0.295,1.0,0.295
+success (NN),0.294,1.0,0.294
+entity (NN),0.293,1.0,0.293
+interact (VB),0.292,1.0,0.292
+view (NN),0.292,1.0,0.292
+motivation (NN),0.291,1.0,0.291
+fail (VB),0.29,1.0,0.29
+exactly (RB),0.289,1.0,0.289
+physical (JJ),0.288,1.0,0.288
+recognise (VB),0.288,1.0,0.288
+approve (VB),0.287,1.0,0.287
+long (JJ),0.286,1.0,0.286
+brief (JJ),0.283,1.0,0.283
+ideal (JJ),0.283,1.0,0.283
+merge (VB),0.282,1.0,0.282
+denote (VB),0.282,1.0,0.282
+schema (NN),0.281,1.693,0.166
+developer (NN),0.281,1.0,0.281
+mediate (VB),0.281,1.0,0.281
+aim (NN),0.28,1.0,0.28
+thing (NN),0.28,1.0,0.28
+commodity (NN),0.278,1.0,0.278
+locally (RB),0.278,1.0,0.278
+implicit (JJ),0.277,1.0,0.277
+always (RB),0.275,1.0,0.275
+permission (NN),0.275,1.693,0.163
+uniquely (RB),0.275,1.0,0.275
+ibm (NN),0.273,1.0,0.273
+fee (NN),0.273,1.693,0.161
+end (NN),0.271,1.0,0.271
+investigate (VB),0.27,1.0,0.27
+lead (VB),0.27,1.0,0.27
+pair (NN),0.269,2.099,0.128
+enterprise (NN),0.269,1.0,0.269
+universal (NN),0.267,1.0,0.267
+act (VB),0.266,1.0,0.266
+institution (NN),0.266,1.0,0.266
+try (VB),0.265,1.0,0.265
+rapidly (RB),0.264,1.0,0.264
+configuration (NN),0.264,1.0,0.264
+numerically (RB),0.263,1.0,0.263
+collect (VB),0.262,1.0,0.262
+prove (VB),0.262,1.0,0.262
+normative (JJ),0.262,1.0,0.262
+economy (NN),0.262,1.0,0.262
+due (JJ),0.261,1.0,0.261
+advertise (JJ),0.259,1.0,0.259
+industrial (JJ),0.258,1.0,0.258
+agent (NN),0.257,1.0,0.257
+digital (JJ),0.255,1.0,0.255
+site (NN),0.253,1.0,0.253
+policy (NN),0.252,1.0,0.252
+prevent (VB),0.252,1.0,0.252
+rule (NN),0.249,1.0,0.249
+adapt (VB),0.249,1.0,0.249
+string (NN),0.248,2.609,0.095
+adopt (VB),0.247,1.0,0.247
+conclude (VB),0.246,1.0,0.246
+recall (VB),0.245,1.0,0.245
+rate (NN),0.245,1.0,0.245
+grant (VB),0.244,1.0,0.244
+profit (NN),0.244,1.0,0.244
+private (JJ),0.243,1.0,0.243
+impose (VB),0.241,1.0,0.241
+repeat (VB),0.24,1.0,0.24
+look (VB),0.24,1.0,0.24
+far (RB),0.238,1.0,0.238
+close (JJ),0.238,1.0,0.238
+leave (VB),0.236,1.0,0.236
+autonomy (NN),0.236,1.0,0.236
+behavior (NN),0.236,1.0,0.236
+citation (NN),0.235,1.0,0.235
+put (NN),0.233,1.0,0.233
+validate (VB),0.231,1.0,0.231
+boundary (NN),0.23,1.0,0.23
+seem (VB),0.23,1.0,0.23
+notice (NN),0.23,1.0,0.23
+graph (NN),0.229,1.0,0.229
+default (NN),0.228,1.0,0.228
+complementary (JJ),0.226,1.0,0.226
+buyer (NN),0.224,1.0,0.224
+severely (RB),0.224,1.0,0.224
+shortcoming (NN),0.224,1.0,0.224
+suffice (VB),0.223,1.0,0.223
+federate (JJ),0.223,2.386,0.093
+hard (JJ),0.222,1.0,0.222
+traverse (VB),0.22,1.0,0.22
+prototype (NN),0.218,1.0,0.218
+country (NN),0.218,1.0,0.218
+back (RB),0.216,1.0,0.216
+solve (VB),0.216,1.0,0.216
+deliver (VB),0.216,1.0,0.216
+hinder (VB),0.216,1.0,0.216
+believe (VB),0.216,1.0,0.216
+package (NN),0.215,1.0,0.215
+force (NN),0.215,1.0,0.215
+classroom (NN),0.215,1.0,0.215
+repair (NN),0.214,1.0,0.214
+experiment (NN),0.213,1.0,0.213
+null (JJ),0.21,1.693,0.124
+convergence (NN),0.21,1.693,0.124
+soft (JJ),0.208,1.693,0.123
+core (NN),0.208,1.0,0.208
+powerful (JJ),0.207,1.0,0.207
+protocol (NN),0.206,1.0,0.206
+respectively (RB),0.206,1.0,0.206
+manage (VB),0.206,1.0,0.206
+intermediary (JJ),0.205,1.0,0.205
+replication (NN),0.205,1.0,0.205
+price (NN),0.205,1.0,0.205
+publisher (NN),0.204,1.0,0.204
+geographically (RB),0.202,1.0,0.202
+seller (NN),0.201,1.0,0.201
+threshold (NN),0.201,1.0,0.201
+transient (JJ),0.2,1.0,0.2
+advent (NN),0.196,1.0,0.196
+intent (NN),0.192,1.0,0.192
+committee (NN),0.19,1.0,0.19
+virtual (JJ),0.19,1.0,0.19
+exploit (VB),0.189,1.0,0.189
+preclude (VB),0.189,1.0,0.189
+replicate (VB),0.187,1.0,0.187
+optimize (VB),0.185,1.0,0.185
+algorithm (NN),0.185,1.0,0.185
+post (VB),0.184,1.0,0.184
+column (NN),0.179,1.0,0.179
+depict (VB),0.177,1.0,0.177
+triple (NN),0.176,1.0,0.176
+overlay (NN),0.174,1.0,0.174
+white (JJ),0.174,1.693,0.103
+fast (JJ),0.172,1.0,0.172
+gather (VB),0.172,1.0,0.172
+unstructured (JJ),0.17,1.0,0.17
+lot (NN),0.168,1.0,0.168
+yellow (JJ),0.165,2.099,0.079
+container (NN),0.163,1.0,0.163
+deterministic (JJ),0.16,1.0,0.16
+supporter (NN),0.16,1.0,0.16
+join (VB),0.16,1.0,0.16
+web (NN),0.16,3.197,0.05
+arrive (VB),0.159,1.0,0.159
+federation (NN),0.158,1.0,0.158
+transparent (JJ),0.157,1.0,0.157
+green (JJ),0.153,1.693,0.09
+embed (JJ),0.153,1.0,0.153
+stem (VB),0.153,1.0,0.153
+load (VB),0.152,1.0,0.152
+redistribute (VB),0.15,1.0,0.15
+brevity (NN),0.149,1.0,0.149
+span (VB),0.145,1.0,0.145
+wait (VB),0.145,1.0,0.145
+roadblock (NN),0.144,1.0,0.144
+garden (NN),0.14,2.099,0.067
+huge (JJ),0.139,1.0,0.139
+france (NN),0.135,1.693,0.08
+tackle (VB),0.134,1.0,0.134
+rich (JJ),0.133,1.0,0.133
+neighbor (VB),0.132,1.0,0.132
+root (NN),0.131,1.0,0.131
+hash (NN),0.129,3.708,0.035
+markup (NN),0.128,1.0,0.128
+ubiquitous (JJ),0.126,1.0,0.126
+forward (RB),0.121,1.0,0.121
+bear (VB),0.117,1.0,0.117
+distant (JJ),0.116,1.0,0.116
+layer (NN),0.113,1.0,0.113
+revisit (VB),0.112,1.0,0.112
+database (NN),0.111,1.693,0.066
+port (NN),0.109,1.0,0.109
+path (NN),0.107,1.0,0.107
+row (NN),0.105,1.0,0.105
+glue (NN),0.102,1.0,0.102
+sake (NN),0.097,1.0,0.097
+launch (VB),0.093,1.0,0.093
+populate (VB),0.086,1.0,0.086
+platform (NN),0.085,1.0,0.085
+overhead (NN),0.084,1.0,0.084
+bamboo (NN),0.084,2.609,0.032
+remark (NN),0.079,1.0,0.079
+horn (NN),0.077,1.0,0.077
+trap (NN),0.077,1.0,0.077
+tree (NN),0.076,1.0,0.076
+november (NN),0.074,1.0,0.074
+collate (VB),0.072,2.099,0.034
+robust (JJ),0.071,1.0,0.071
+december (NN),0.067,1.0,0.067
+matchmaker (NN),0.064,1.0,0.064
+dude (NN),0.061,2.609,0.023
+topology (NN),0.058,1.693,0.034
+gateway (NN),0.057,1.0,0.057
+rendezvous (NN),0.053,1.0,0.053
+oblivious (JJ),0.051,1.0,0.051
+browse (VB),0.043,1.0,0.043
+auction (NN),0.04,1.0,0.04
+matchmaking (NN),0.04,1.693,0.023
+portability (NN),0.038,1.0,0.038
+scheduler (NN),0.036,1.0,0.036
+infrastructure (NN),0.036,1.0,0.036
+uri (NN),0.034,2.099,0.016
+globally (RB),0.033,1.0,0.033
+sap (NN),0.03,1.0,0.03
+pastry (NN),0.028,1.0,0.028
+microsoft (NN),0.027,1.0,0.027
+functionality (NN),0.027,1.693,0.016
+facilitator (NN),0.019,1.0,0.019
+ip (NN),0.018,1.0,0.018
+manageability (NN),0.016,1.0,0.016
+oasis (NN),0.016,1.0,0.016
+hp (NN),0.014,1.0,0.014
+republish (VB),0.013,1.0,0.013
+grenoble (NN),0.01,1.0,0.01
+mds (NN),0.01,2.099,0.005
+seamless (JJ),0.01,1.0,0.01
+robustness (NN),0.009,1.0,0.009
+parse (VB),0.007,1.0,0.007
+bootstrap (NN),0.006,1.0,0.006
+apis (NN),0.002,1.0,0.002
+ams (NN),0.0,1.0,0.0
+dht (NN),0.0,5.234,0.0
+globus (NN),0.0,2.099,0.0
+internet (NN),0.0,1.693,0.0
+linux (NN),0.0,1.0,0.0
+rdf (NN),0.0,1.0,0.0
+telecom (NN),0.0,1.0,0.0
+toolkit (NN),0.0,1.693,0.0
+url (NN),0.0,2.946,0.0
+lookup (NN),0.0,3.485,0.0
+scalability (NN),0.0,3.398,0.0
+scalable (JJ),0.0,2.386,0.0
+virtualization (NN),0.0,1.0,0.0
+
+
+Topics - Clusters
+-1:,ip (0.017576633391533706),hp (0.014234803979353483),ams (0.0),dht (0.0),globus (0.0),internet (0.0),linux (0.0),rdf (0.0),telecom (0.0),toolkit (0.0),url (0.0),lookup (0.0),scalability (0.0),scalable (0.0),virtualization (0.0),
+2:,lot (0.16832902244658107),dude (0.06053131032692734),
+5:,service (1.8764356691087722),local (1.1528645928084602),implementation (0.9645850513916259),public (0.4522057961486647),promote (0.34859516459987505),act (0.2659284256474517),policy (0.2523584091000506),private (0.24251813148881718),intermediary (0.2054538736763415),supporter (0.1603292123218858),federation (0.15829628450063085),redistribute (0.15048823706101658),
+7:,normative (0.26171874600634126),classroom (0.2146125518110337),optimize (0.1851834815179886),facilitator (0.01942943898713648),
+8:,rendezvous (0.05346128027139759),
+13:,top (0.5450998040431405),run (0.3086393070371195),fast (0.17237022638793517),horn (0.07706595617846125),
+14:,property (0.5222655615095357),seller (0.20139105298798513),
+18:,need (1.6305262585696592),make (1.6170412066645765),part (1.0391710390932745),way (0.9567519584420641),search (0.888212800862628),follow (0.8594110113315103),build (0.8317937273519872),good (0.7699527423563067),change (0.7549828291833152),give (0.7545076001568577),set (0.7520483972966852),plan (0.7264021657345453),time (0.7259375725758593),become (0.6840500331024081),return (0.6496438897205172),choose (0.6306316154724889),easy (0.6154327328184633),get (0.5939748916301167),turn (0.5815087941038445),full (0.5463562483880897),discover (0.523815871951687),meet (0.4711331292015746),open (0.4339988010863171),step (0.43099114748889683),order (0.39972212858306944),late (0.3975315491320985),able (0.3943024972711628),take (0.3693995152020262),send (0.3515618822150363),help (0.350415819566366),instead (0.3487289645380017),idea (0.31896221378656797),continue (0.31253638669759554),decide (0.31088714252297983),success (0.29407869088115296),fail (0.2899595757593901),long (0.2863588911898392),always (0.2754430873133498),permission (0.2752627754057275),end (0.27069169311452773),lead (0.2703126233043888),try (0.26479509526028366),far (0.23837885935121253),close (0.23809756711516764),leave (0.23642985767299649),put (0.23340888575709862),seem (0.22987881242570932),notice (0.2296579206980943),hard (0.22246333939091004),back (0.21586254775546554),manage (0.20580725453965618),join (0.16028509972196123),arrive (0.15897099979640958),wait (0.14486830926851504),tackle (0.1342115709166135),forward (0.12147030723526063),
+19:,grenoble (0.010192077652835885),
+21:,seamless (0.009684957434555682),
+22:,use (2.6008250200424454),provide (1.7356561225000229),base (1.611783009652719),multiple (1.5367245195668504),distribute (1.3961307831451744),result (1.3409763563890258),include (1.328720721499577),section (1.254480441138549),enable (1.2507478516347632),maintain (1.2381882041992294),network (1.2185268615287508),available (1.208410665619882),operation (1.208014970642564),add (1.2074140980611805),figure (1.187092093920409),allow (1.1700222814534247),application (1.1587968652433591),standard (1.1098441055064652),obtain (1.1048828048870496),support (1.0725071516653917),addition (1.056749517954681),necessary (1.0134220575205248),contact (0.9760757538723933),ability (0.9742441171478239),various (0.9668209502192691),develop (0.9571796592379467),furthermore (0.9152558975132851),similar (0.9087515629534506),purpose (0.9012667249851293),mechanism (0.8974301735631254),contain (0.8972624438946377),efficient (0.8857496844387547),case (0.8704290465141313),form (0.8690236699781233),currently (0.8652562311902514),distribution (0.859346306816588),large (0.8564151066617419),ensure (0.8206976591813454),apply (0.8154385394672607),potential (0.8123525615565268),requirement (0.8097006260954482),consist (0.8095960244930624),advantage (0.7997423321083487),type (0.7847325772913125),additional (0.7796462221596753),perform (0.7748622310054963),factor (0.767978835287047),require (0.7551330143189908),extension (0.7494259524516536),route (0.717880594872712),version (0.7068803274393163),condition (0.7008502999265064),extend (0.6993580194325414),exact (0.6854736616754387),recent (0.6721319663936401),numb (0.6605441595894532),variety (0.655006522702568),initial (0.6491402759641294),improvement (0.6343931012588891),initially (0.6337861080192956),efficiently (0.5990031434818585),benefit (0.5985559549888501),control (0.5748080894138636),insert (0.570355101061397),register (0.5673727660307161),receive (0.5369675131041153),space (0.5368876389594278),regular (0.5326351886431356),usage (0.5121828843825593),lack (0.5017372876235443),possible (0.48962619068662194),certain (0.47074376006776425),determine (0.46305084180252526),enter (0.45603906073047645),accessory (0.4360966667560464),limit (0.4349990952784902),length (0.4312229987835829),convert (0.42140187353434816),generally (0.41874784989396696),high (0.41812284191532484),effective (0.41754467006448265),complete (0.4135693383524044),technique (0.40624731180405727),design (0.4041986975525635),limitation (0.4032332564522895),effectively (0.40139119610148466),utilize (0.3947208792041783),location (0.3871995753902029),leverage (0.3817782566800427),adequate (0.38106287544915424),simply (0.3753021461213222),operate (0.3736357276078734),recommend (0.3724739818787873),vary (0.37005881204855756),achieve (0.36699897274860954),disperse (0.36673946968716675),management (0.3658622601987376),possibility (0.3620507230983127),prior (0.360820379885822),maintenance (0.3601097580077465),widely (0.35730126508793575),readily (0.35462872831474385),common (0.3517761024349397),availability (0.34896742588261365),area (0.346561276550881),access (0.3460414606566761),serve (0.33677994879659057),sufficient (0.3361260124554681),construct (0.33517605920812427),especially (0.3307198364227219),content (0.329866983284492),position (0.32958910511075584),responsible (0.3282883901147578),server (0.3268880564009796),commercial (0.3268718006478091),handle (0.32568335325143255),supply (0.32387034397291947),offer (0.320201961864873),locate (0.3175313070174535),introduce (0.3138531973370597),increase (0.3131093250002837),modify (0.3071179307840729),unnecessary (0.3050913840957542),size (0.30130570431721687),relatively (0.29876278193475964),range (0.29584202752646205),approve (0.2874387842662349),ideal (0.28309199279965386),commodity (0.27832561982298676),locally (0.2775663406666026),uniquely (0.2751901654483639),rapidly (0.2639607416044432),due (0.26096100890051327),agent (0.25687655355035016),site (0.2534732488337973),prevent (0.2522886364659486),rule (0.24930276379695926),adapt (0.24883687817617625),rate (0.24488802510401086),severely (0.22384967768527061),deliver (0.215614718783774),hinder (0.21559066368074897),powerful (0.20733776180029095),load (0.15225753943325698),
+28:,state (0.631365559964805),
+32:,schema (0.2814941962066485),
+33:,collect (0.2624725638669277),auction (0.040262400059890395),
+34:,architecture (0.5587668217267037),developer (0.28075159457132015),repair (0.21357538973548537),
+35:,functionality (0.026514650991914815),
+36:,paper (0.5412198821418316),string (0.24812866797120153),transparent (0.15654421252250553),glue (0.10172360621408376),
+37:,experiment (0.21254818615557056),
+40:,oasis (0.015650917914484492),
+47:,path (0.10720285048443541),
+50:,deploy (0.3700959181010595),
+52:,discovery (0.8256147280846478),topology (0.058247072095652476),
+53:,industry (0.5790794548856848),industrial (0.25767159137649914),port (0.10865109865563106),
+55:,bamboo (0.08393096864308441),tree (0.07576333998846393),sap (0.030324686449080412),
+58:,business (0.7695308523646708),
+59:,resource (0.5487359570447737),
+61:,identifier (0.6078244392996304),delete (0.5844185861426167),keyword (0.4794425069367668),microsoft (0.02746786644082978),
+64:,replicate (0.18689476425040744),
+65:,virtual (0.18980192485786226),
+68:,manageability (0.0163419889865954),
+71:,container (0.1628596142554555),
+72:,mds (0.009860965195042322),
+81:,object (0.39379468545859025),force (0.21491976689119),
+84:,yellow (0.16538071377382127),
+85:,tool (0.44826720741226667),
+94:,fee (0.27259205076417986),
+97:,entry (0.9257392148524929),post (0.18441434852153185),column (0.17933714524565394),
+98:,market (0.5235632166261904),advertise (0.25945782170981635),package (0.21516793028140735),collate (0.07221868946387482),
+99:,registry (0.7024143210573913),
+108:,new (1.3592037823126166),federate (0.22272828746813814),gateway (0.05653055149306139),
+110:,list (0.9077500790352627),summary (0.3082788360680204),
+113:,deterministic (0.1604793310809409),
+125:,article (0.7205414868251859),index (0.6183617914109201),directory (0.4028530955571399),author (0.38663702213651807),citation (0.23470134756673774),publisher (0.20438085226382421),
+129:,node (0.5104460022896602),
+130:,garden (0.13990491393961826),
+131:,parse (0.006830159583024242),
+133:,machine (0.5190628344848983),
+135:,reader (0.41450395574882404),
+136:,november (0.07355692675575602),december (0.06739559883759606),
+145:,robustness (0.00940358477773538),
+149:,language (0.36976032213422955),
+155:,word (0.709783260417623),prefix (0.639660039596825),semantic (0.5554218690974978),
+156:,uri (0.034451097827029285),
+159:,compute (1.1786509530953946),datum (0.8475580091701942),computer (0.716858069839006),monitor (0.6611064490043792),user (0.5551929107629207),interface (0.4762657570469119),retrieve (0.4747801150790966),input (0.32604689405083587),software (0.3144156501376841),code (0.3003334764586269),storage (0.2985522377076959),merge (0.2823986403674709),ibm (0.27281335631437614),digital (0.25523704115527496),hash (0.12911573594390194),database (0.11127039870138489),scheduler (0.03562669818299049),
+161:,know (1.086304658273867),exactly (0.28918489335305936),thing (0.2799823472361141),believe (0.2155301683168944),
+164:,committee (0.1903619359001182),
+165:,personal (0.3578124571553302),roadblock (0.14434940026856982),matchmaking (0.039556055911319866),
+166:,unstructured (0.17039626704453759),
+169:,deployment (0.660428884142735),future (0.5808442417370372),technology (0.5410088367332229),scenario (0.5393152766813406),early (0.4894080365155446),subscribe (0.3669079008876529),expand (0.2996258719922415),widespread (0.295195942025786),institution (0.26553462642285325),autonomy (0.236232714747886),default (0.22844932030999077),prototype (0.21793429448586166),geographically (0.20224409966146215),advent (0.19603807082051197),launch (0.09275720866471225),populate (0.0859582546613114),infrastructure (0.03553623165963984),globally (0.032782833269193706),
+171:,bootstrap (0.006167042780937119),
+172:,stem (0.15252536549351378),
+178:,hand (0.371991294586686),web (0.1596859512548144),huge (0.13902086324559895),trap (0.0767589260357034),
+179:,france (0.13490234482052832),
+183:,layer (0.11312227735434525),
+188:,work (1.270888660805512),
+189:,different (1.174941329913998),page (0.8961321818943779),diagram (0.7772445819509566),show (0.6245138972582337),look (0.23966679374782743),
+196:,information (1.6821222222104626),key (1.3981406119703719),example (1.3895898308182164),system (1.3290500816373105),value (1.2609026997666197),describe (1.1944938138893035),function (1.184296668755584),process (1.1129653248837417),specific (1.003395396809884),identify (0.9683077621881346),unique (0.9542481389217425),consider (0.9407199468314739),sequence (0.9395649507217074),issue (0.9319546432120155),framework (0.917905687955029),approach (0.9102906706633883),structure (0.9088279472075408),simple (0.8983000662983447),involve (0.8925840048078891),term (0.8861966338678718),match (0.8852283910570864),specification (0.8667782724734978),propose (0.8260638669447757),source (0.8235991197055048),present (0.8160125913270562),description (0.8154274673930397),similarly (0.8131462922650625),relevant (0.7935727330824836),implement (0.7882664376858903),organization (0.755431384426755),response (0.7473692780306809),focus (0.7301063694719859),motivate (0.7289597060487875),respective (0.7226945524142168),attain (0.6955513935410756),illustrate (0.6938047290946517),exist (0.6800726845464892),refer (0.6631980251777785),aspect (0.6590642631829536),fact (0.6548836833602917),major (0.6524594133877688),discuss (0.6472956960588101),link (0.6460336745433468),assign (0.6210683102872177),reference (0.6176800367603547),crucial (0.61425171592946),detail (0.5980572402733978),connect (0.5826394253619505),current (0.5693151987060849),underlie (0.5684200936663008),highlight (0.5522086986709932),invoke (0.5439950938193306),context (0.5199864883205306),overview (0.5120067787695204),abstraction (0.5088740915148231),refine (0.5007580491799188),basic (0.48730946779884105),clear (0.48692088551105933),parameter (0.4826340756928163),hierarchy (0.479077517731743),standardise (0.4741302241507231),mention (0.4707594719837851),hierarchical (0.46401155616448964),autonomous (0.4450510376943856),specifically (0.44395729322468447),primarily (0.4377014745275216),facilitate (0.41815138325160534),technical (0.41139108696213916),specify (0.41019679331414743),component (0.40590313120581767),individual (0.4012534327169515),essential (0.40114056049201574),alternative (0.3974306649883732),indicate (0.39165466067832205),scope (0.3903671810046207),significant (0.3872188401594479),objective (0.38627438867014385),relate (0.37857069505804536),conform (0.373840830062655),task (0.37273120428717604),inherent (0.3713063332716408),previous (0.3711993922232419),category (0.36992875360685756),consistent (0.3694905141770546),represent (0.36929157452158967),demonstrate (0.3676048213598391),deal (0.3663715756544084),logical (0.36396678746659467),attempt (0.35661838823272546),concern (0.35400300325731265),subsequent (0.3529159713503745),explore (0.35037320786821785),complexity (0.34711066549511943),fundamental (0.34668284483264006),understand (0.346661455335189),interest (0.34410708161860937),specialize (0.3436861845859023),correspond (0.3435923826540825),simultaneously (0.34328411377777207),note (0.3380609067158942),point (0.33735223685767934),research (0.33311091535574083),finding (0.33286248007173147),treat (0.3328062099198232),study (0.3310066723362088),logic (0.3305283000401286),pattern (0.32798075350210104),associate (0.3255981429551525),error (0.32546334014897244),integration (0.32401635545035323),secondary (0.32030976420080504),interaction (0.318123685165636),omit (0.3171465089537088),model (0.3155958706213843),collection (0.3037425810588788),anticipate (0.30355611702286384),explain (0.3030648096314345),nature (0.30291050500463895),participate (0.2951360666939896),entity (0.2927405099594079),interact (0.292219903094489),view (0.2915015505597774),motivation (0.2909758133785763),physical (0.28791559067712624),recognise (0.28789133983522486),brief (0.28327722436693464),denote (0.28222971488153953),mediate (0.28053333407541453),aim (0.28007097574638795),implicit (0.27719703845456123),investigate (0.27041519876337256),pair (0.26917289701954134),universal (0.26673763342997586),configuration (0.26357773300302234),adopt (0.2465938722882998),conclude (0.24566088316369214),recall (0.24503594797057207),behavior (0.2356264094101986),validate (0.2310003173827825),boundary (0.22998918509217414),complementary (0.2256362454306853),core (0.20796546995876944),respectively (0.20644993278941845),replication (0.20508809718996715),threshold (0.2011761857426426),depict (0.1770492260980253),embed (0.15253085098498131),span (0.14545737498347897),root (0.13111621875514648),
+197:,community (0.5078469611059454),
+203:,file (0.43222138914895253),
+206:,client (1.0603723251103943),
+212:,pastry (0.02774397537983343),
+215:,call (1.004134733938118),today (0.4698912248470062),country (0.21763959708387584),gather (0.17200635759408703),rich (0.13267724149419124),
+216:,environment (0.5214866999715957),
+217:,problem (0.691175108665268),solution (0.5656018135925172),choice (0.5648519062391766),decision (0.2957918433028852),solve (0.2157612960904293),
+218:,address (0.7348449267106313),character (0.6336069600886574),request (0.5877786294290208),query (0.5256676035189517),express (0.4625838181632532),simplicity (0.41259870926931275),fashion (0.35553508179078647),expression (0.3424974337647143),intend (0.30932411868834925),recently (0.306316743636584),submit (0.30318441056679646),host (0.29891102868050073),prove (0.2619189352419297),grant (0.24440681463709),impose (0.24054242579985255),repeat (0.24019645600838765),shortcoming (0.22361797896397514),suffice (0.22329551631366382),traverse (0.22001619127199598),protocol (0.20647120008671396),transient (0.2001354475704069),intent (0.19215530462600874),exploit (0.18915341193928104),preclude (0.18890663615382908),brevity (0.1486305618358246),neighbor (0.1320131222298894),ubiquitous (0.12597639986814324),bear (0.11730766294792587),distant (0.1155977144877517),revisit (0.11155904120772497),sake (0.09713146257440575),remark (0.07915553356676251),robust (0.07064351079767804),matchmaker (0.0641311514020053),oblivious (0.05145941148345717),
+228:,name (0.9216512668552126),
+231:,overlie (0.5670895565623233),overlay (0.1744540789754521),
+232:,see (0.30410406113321165),
+236:,letter (0.33356663747857795),triple (0.17588188350589504),
+239:,apis (0.0018390393153432383),
+241:,geometry (0.36771455109710727),convergence (0.20956522787475923),portability (0.03797445739604869),
+244:,proxy (0.9466656189761824),profit (0.2439920940685261),
+245:,enterprise (0.26916119653394105),economy (0.2615575551455482),
+248:,company (0.5605631145855449),
+251:,scale (0.573312723073033),numerically (0.2630450738542677),
+252:,publish (0.8228893484588672),republish (0.013201983718329327),
+257:,aggregate (0.4400713875371741),price (0.20481130462792532),markup (0.12769597706911331),
+265:,soft (0.20807612068433198),white (0.1739457826982065),green (0.15322965311459935),overhead (0.08428751617362207),
+266:,null (0.2103645586634017),
+270:,platform (0.08500505515986843),browse (0.04273579410246514),
+278:,store (0.5803707733798704),buyer (0.22394265285366363),
+282:,test (0.5368229874187067),
+286:,grid (1.0681427111343302),map (0.39673441274052823),
+295:,table (0.5219425814413933),digit (0.4465971188977484),graph (0.22903039942307366),algorithm (0.1845747141133948),row (0.10454707692115534),
+296:,copy (0.7398143960208327),
+
+Voices - Semantic chains
+(registry(115), service(105), query(40), use(37), key(30), search(28), node(25), distribute(20), information(19), discovery(19), base(18), client(16), name(14), publish(14), provide(14), route(13), network(13), match(13), need(12), figure(12), system(12), architecture(12), lookup(12), support(11), describe(10), add(10), work(10), section(10), entry(10), maintain(9), result(9), operation(9), contact(9), web(9), address(8), allow(8), issue(8), propose(8), return(8), make(8), build(8), know(7), approach(7), top(7), implementation(7), character(6), example(6), article(6), enable(6), computer(6), ability(6), framework(6), function(6), application(6), response(6), version(5), mechanism(5), contain(5), store(5), call(5), word(5), get(5), solution(5), obtain(5), paper(5), process(5), follow(5), turn(4), term(4), register(4), source(4), develop(4), list(4), description(4), identify(4), perform(4), specification(4), consist(4), case(4), consider(4), datum(4), part(4), link(4), state(3), addition(3), community(3), extend(3), connect(3), set(3), involve(3), implement(3), ensure(3), test(3), company(3), factor(3), apply(3), way(3), pair(3), environment(3), form(3), invoke(3), property(3), attain(3), plan(3), index(3), become(3), server(3), extension(3), distribution(3), map(3), change(3), machine(3), organization(3), space(3), host(3), discover(3), resource(3), condition(3), retrieve(3), present(3), send(3), request(3), purpose(3), scale(3), insert(3), advantage(3), requirement(3), soft(2), refine(2), require(2), easy(2), benefit(2), detail(2), object(2), schema(2), fact(2), variety(2), aspect(2), hand(2), receive(2), expression(2), meet(2), discuss(2), fashion(2), treat(2), run(2), express(2), disperse(2), digit(2), lack(2), show(2), choose(2), directory(2), technology(2), improvement(2), refer(2), time(2), assign(2), usage(2), convert(2), type(2), context(2), enter(2), give(2), exist(2), mention(2), explore(2), choice(2), reference(2), author(2), illustrate(2), tool(2), leverage(2), aggregate(2), database(2), parameter(2), subscribe(2), control(2), structure(2), vary(1), supply(1), objective(1), offer(1), path(1), hinder(1), merge(1), sake(1), economy(1), input(1), adopt(1), deal(1), prove(1), depict(1), access(1), achieve(1), suffice(1), fundamental(1), recommend(1), believe(1), seem(1), promote(1), see(1), default(1), indicate(1), behavior(1), close(1), validate(1), participate(1), decision(1), launch(1), supporter(1), component(1), exploit(1), represent(1), country(1), research(1), compute(1), institution(1), view(1), act(1), post(1), continue(1), leave(1), area(1), collection(1), gather(1), finding(1), look(1), take(1), solve(1), tackle(1), demonstrate(1), submit(1), idea(1), motivation(1), rule(1), prevent(1), impose(1), arrive(1), scope(1), root(1), end(1), preclude(1), citation(1), introduce(1), manage(1), modify(1), infrastructure(1), location(1), grant(1), gateway(1), stem(1), software(1), decide(1), construct(1), attempt(1), put(1), experiment(1), recognise(1), model(1), join(1), trap(1), specify(1), conclude(1), understand(1), handle(1), fail(1), operate(1), utilize(1), browse(1), wait(1), study(1), aim(1), pattern(1), range(1), deliver(1), facilitator(1), lot(1), recall(1), replication(1), prototype(1), lead(1), help(1), site(1), specialize(1), span(1), threshold(1), serve(1), associate(1), denote(1), limit(1), bear(1), package(1), core(1), traverse(1), expand(1), task(1), try(1), position(1), collect(1), boundary(1), note(1), limitation(1), facilitate(1), repair(1), code(1), locate(1), configuration(1), interact(1), remark(1), investigate(1), storage(1), point(1), design(1), profit(1), universal(1), possibility(1), determine(1), alternative(1), increase(1), intent(1), anticipate(1), category(1), intend(1), maintenance(1))
+(proxy(43), agent(1))
+(grid(24))
+(value(11), standard(8), price(1))
+(efficient(4), good(3), full(3), future(2), commodity(1), effective(1), effectively(1), widely(1))
+(multiple(16))
+(local(16))
+(hash(13))
+(new(12))
+(scalability(11))
+(business(4), problem(3), enterprise(1), force(1), concern(1))
+(prefix(10))
+(sequence(5), string(5))
+(table(7), column(1), row(1))
+(page(8))
+(recent(3), late(2), previous(1), recently(1))
+(focus(4), management(1), conform(1), adapt(1))
+(respective(4), various(3))
+(deployment(7))
+(copy(6), replicate(1))
+(diagram(7))
+
+Lexical chains
+(abstraction(1), entity(1))
+(exactly(1), simply(1))
+(implicit(1))
+(optimize(1))
+(always(1))
+(registry(115), service(105), query(40), use(37), key(30), search(28), node(25), distribute(20), information(19), discovery(19), base(18), client(16), name(14), publish(14), provide(14), route(13), network(13), match(13), need(12), figure(12), system(12), lookup(12), support(11), describe(10), add(10), work(10), section(10), entry(10), maintain(9), result(9), operation(9), contact(9), web(9), address(8), allow(8), issue(8), propose(8), return(8), make(8), build(8), know(7), approach(7), top(7), implementation(7), character(6), example(6), article(6), enable(6), computer(6), ability(6), function(6), application(6), response(6), mechanism(5), contain(5), store(5), call(5), word(5), get(5), framework(5), solution(5), obtain(5), paper(5), process(5), version(4), turn(4), term(4), register(4), source(4), develop(4), list(4), description(4), identify(4), perform(4), specification(4), consist(4), case(4), consider(4), datum(4), part(4), link(4), state(3), addition(3), extend(3), connect(3), set(3), involve(3), implement(3), ensure(3), test(3), factor(3), apply(3), way(3), pair(3), environment(3), form(3), invoke(3), property(3), attain(3), plan(3), index(3), become(3), server(3), extension(3), distribution(3), map(3), change(3), organization(3), space(3), host(3), discover(3), resource(3), condition(3), retrieve(3), present(3), send(3), request(3), purpose(3), scale(3), insert(3), advantage(3), requirement(3), follow(3), soft(2), refine(2), require(2), easy(2), benefit(2), detail(2), object(2), schema(2), fact(2), variety(2), aspect(2), hand(2), receive(2), expression(2), meet(2), discuss(2), fashion(2), treat(2), run(2), express(2), disperse(2), digit(2), lack(2), show(2), choose(2), directory(2), technology(2), improvement(2), refer(2), time(2), assign(2), usage(2), convert(2), type(2), context(2), enter(2), give(2), exist(2), mention(2), architecture(2), explore(2), machine(2), choice(2), reference(2), author(2), illustrate(2), tool(2), leverage(2), aggregate(2), database(2), parameter(2), subscribe(2), control(2), vary(1), supply(1), objective(1), offer(1), path(1), hinder(1), merge(1), sake(1), economy(1), community(1), input(1), adopt(1), deal(1), prove(1), depict(1), access(1), achieve(1), suffice(1), fundamental(1), recommend(1), believe(1), seem(1), promote(1), see(1), default(1), indicate(1), behavior(1), close(1), validate(1), participate(1), decision(1), launch(1), supporter(1), component(1), exploit(1), represent(1), country(1), research(1), compute(1), view(1), act(1), post(1), continue(1), leave(1), area(1), collection(1), gather(1), finding(1), look(1), take(1), solve(1), tackle(1), demonstrate(1), submit(1), idea(1), motivation(1), rule(1), prevent(1), impose(1), arrive(1), scope(1), root(1), end(1), preclude(1), citation(1), introduce(1), manage(1), modify(1), infrastructure(1), location(1), grant(1), gateway(1), stem(1), software(1), decide(1), construct(1), attempt(1), put(1), experiment(1), recognise(1), model(1), join(1), trap(1), specify(1), conclude(1), understand(1), handle(1), fail(1), operate(1), utilize(1), browse(1), wait(1), study(1), aim(1), pattern(1), range(1), deliver(1), facilitator(1), lot(1), recall(1), replication(1), prototype(1), lead(1), help(1), site(1), specialize(1), span(1), threshold(1), serve(1), associate(1), denote(1), limit(1), bear(1), package(1), core(1), traverse(1), expand(1), task(1), try(1), position(1), collect(1), boundary(1), note(1), limitation(1), facilitate(1), repair(1), code(1), locate(1), configuration(1), interact(1), remark(1), investigate(1), storage(1), point(1), design(1), profit(1), universal(1), possibility(1), determine(1), alternative(1), increase(1), intent(1), structure(1), anticipate(1), category(1), intend(1), maintenance(1))
+(furthermore(3))
+(specifically(1))
+(primarily(1), generally(1))
+(potential(4), possible(1))
+(currently(3))
+(advent(1))
+(additional(2))
+(complementary(1))
+(adequate(1))
+(efficient(4), good(3), full(3), commodity(1), effective(1), future(1), effectively(1), widely(1))
+(success(1))
+(forward(1))
+(error(1))
+(back(1))
+(rapidly(1))
+(large(4), hard(1), severely(1))
+(instead(1))
+(recent(3), late(2), previous(1), recently(1))
+(early(2))
+(far(1))
+(initially(2))
+(simultaneously(1))
+(subsequent(1))
+(globally(1))
+(locally(1))
+(respectively(1))
+(similarly(3))
+(focus(4), management(1), conform(1), adapt(1))
+(relatively(1))
+(readily(1))
+(oblivious(1))
+(due(1))
+(step(2))
+(uniquely(1))
+(available(5))
+(geographically(1))
+(efficiently(2))
+(responsible(1))
+(certain(1))
+(necessary(3))
+(federate(4))
+(numerically(1))
+(transparent(1))
+(consistent(1), logical(1))
+(seamless(1))
+(load(1))
+(regular(2))
+(auction(1))
+(green(2), common(1))
+(respective(4), various(3))
+(especially(1))
+(unique(5))
+(open(3), clear(2), able(1))
+(highlight(2))
+(business(4), problem(3), enterprise(1), force(1), concern(1))
+(content(1))
+(omit(1))
+(significant(1))
+(physical(1))
+(parse(1))
+(current(4))
+(approve(1))
+(high(2))
+(follow(1))
+(integration(1))
+(exact(2))
+(explain(1))
+(inherent(1))
+(fast(1))
+(order(1))
+(initial(2))
+(autonomous(2))
+(white(2))
+(widespread(1))
+(specific(3))
+(permission(2))
+(deployment(7))
+(federation(1))
+(yellow(3))
+(hierarchical(2))
+(matchmaking(1))
+(hash(13))
+(version(1))
+(crucial(2), essential(1))
+(horn(1))
+(deploy(5))
+(redistribute(1))
+(collate(3))
+(huge(1))
+(brief(1))
+(major(2))
+(secondary(1))
+(complete(1))
+(delete(4))
+(unnecessary(1))
+(new(12))
+(motivate(4))
+(unstructured(1))
+(copy(6), replicate(1))
+(republish(1))
+(transient(1))
+(private(1), individual(1))
+(simple(4))
+(powerful(1))
+(revisit(1))
+(ubiquitous(1))
+(public(2))
+(virtual(1))
+(relevant(3))
+(distant(1))
+(different(6))
+(scalable(4))
+(deterministic(1))
+(monitor(3))
+(multiple(16))
+(technical(1))
+(basic(1))
+(sufficient(1))
+(similar(3))
+(long(1))
+(robust(1), rich(1))
+(include(6))
+(null(2))
+(follow(1))
+(repeat(1))
+(populate(1), neighbor(1))
+(accessory(2))
+(mediate(1))
+(digital(1))
+(ideal(1))
+(industrial(1))
+(local(16))
+(semantic(4))
+(personal(1))
+(bootstrap(1))
+(normative(1))
+(classroom(1))
+(container(1))
+(commercial(1))
+(developer(1))
+(diagram(7))
+(garden(3))
+(grid(12))
+(oasis(1))
+(convergence(2), interface(2), port(1))
+(internet(2))
+(overlay(1), layer(1))
+(length(2))
+(overhead(1))
+(platform(1))
+(grid(4))
+(roadblock(1))
+(scheduler(1))
+(simplicity(2), complexity(1))
+(availability(1))
+(portability(1))
+(industry(1))
+(manageability(1))
+(architecture(10), framework(1), structure(1))
+(robustness(1))
+(brevity(1))
+(size(1))
+(value(11), standard(8), price(1))
+(functionality(2))
+(shortcoming(1))
+(scalability(11))
+(logic(1))
+(technique(1))
+(thing(1))
+(notice(1))
+(nature(1))
+(algorithm(1))
+(abstraction(2))
+(policy(1))
+(grid(8))
+(geometry(2))
+(topology(2))
+(page(8))
+(telecom(1))
+(prefix(10))
+(overview(2), summary(1))
+(file(1))
+(protocol(1))
+(scenario(4))
+(markup(1))
+(letter(2))
+(graph(1))
+(sequence(5), string(4))
+(language(2))
+(identifier(6))
+(pastry(1))
+(triple(1))
+(company(3), institution(1), machine(1))
+(market(3), industry(2))
+(community(2))
+(table(7), column(1), row(1))
+(committee(1))
+(hierarchy(2))
+(rendezvous(1))
+(file(1))
+(string(1))
+(proxy(43), agent(1))
+(buyer(1))
+(dude(5))
+(matchmaker(1))
+(publisher(1))
+(seller(1))
+(reader(2))
+(user(2))
+(interaction(1))
+(bamboo(5))
+(tree(1))
+(fee(2))
+(rate(1))
+(autonomy(1))
+(glue(1))
+(sap(1))
+(future(1))
+(today(2))
+
+Cohesion measurements
+Items,LSA,LDA,Leacock Chodorow,Wu Palmer,Path Similarity,Distance,Overall
+D - B0,0.848,0.819,0.686,0.785,0.943,0.9,
+D - B1,0.843,0.815,0.683,0.766,0.883,0.921,
+D - B2,0.814,0.781,0.642,0.65,0.912,0.847,
+D - B3,0.81,0.781,0.639,0.682,0.904,0.89,
+D - B4,0.841,0.807,0.655,0.64,0.803,0.903,
+D - B5,0.84,0.805,0.663,0.74,0.931,0.885,
+D - B6,0.818,0.789,0.65,0.739,0.895,0.863,
+D - B7,0.833,0.798,0.661,0.684,0.929,0.913,
+D - B8,0.799,0.77,0.628,0.673,0.888,0.893,
+D - B9,0.797,0.766,0.623,0.549,0.847,0.839,
+D - B10,0.754,0.733,0.6,0.462,0.798,0.77,
+D - B11,0.762,0.734,0.602,0.489,0.723,0.796,
+D - B12,0.82,0.784,0.637,0.674,0.92,0.845,
+D - B13,0.83,0.794,0.648,0.612,0.852,0.795,
+D - B14,0.699,0.693,0.579,0.464,0.698,0.601,
+D - B15,0.828,0.799,0.652,0.72,0.925,0.858,
+D - B16,0.817,0.789,0.654,0.779,0.895,0.935,
+D - B17,0.899,0.873,0.752,0.825,0.95,0.935,
+D - B18,0.866,0.838,0.699,0.744,0.937,0.939,
+D - B19,0.727,0.71,0.587,0.344,0.665,0.781,
+D - B20,0.805,0.774,0.632,0.494,0.713,0.835,
+D - B21,0.834,0.805,0.664,0.681,0.919,0.91,
+D - B22,0.861,0.833,0.697,0.804,0.954,0.917,
+D - B23,0.694,0.673,0.559,0.281,0.401,0.725,
+D - B24,0.81,0.785,0.649,0.743,0.885,0.843,
+D - B25,0.825,0.786,0.64,0.618,0.877,0.839,
+D - B26,0.793,0.762,0.622,0.567,0.725,0.877,
+D - B27,0.789,0.759,0.619,0.56,0.762,0.861,
+D - B28,0.807,0.777,0.638,0.614,0.824,0.803,
+D - B29,0.846,0.822,0.685,0.744,0.922,0.895,
+D - B30,0.809,0.782,0.648,0.697,0.929,0.855,
+D - B31,0.854,0.819,0.67,0.734,0.923,0.878,
+D - B32,0.72,0.704,0.582,0.658,0.758,0.739,
+D - B33,0.826,0.794,0.65,0.624,0.882,0.833,
+D - B34,0.824,0.789,0.647,0.673,0.879,0.884,
+D - B35,0.845,0.816,0.679,0.689,0.905,0.837,
+D - B36,0.803,0.775,0.63,0.546,0.79,0.776,
+D - B37,0.84,0.807,0.665,0.728,0.904,0.86,
+D - B38,0.838,0.808,0.672,0.821,0.931,0.925,
+D - B39,0.786,0.754,0.616,0.605,0.772,0.815,
+D - B40,0.832,0.802,0.666,0.733,0.909,0.817,
+D - B41,0.793,0.761,0.613,0.568,0.875,0.593,
+D - B42,0.795,0.758,0.614,0.636,0.866,0.829,
+D - B43,0.856,0.823,0.69,0.751,0.941,0.854,
+D - B44,0.851,0.825,0.695,0.778,0.951,0.855,
+D - B45,0.757,0.718,0.583,0.346,0.672,0.587,
+D - B46,0.773,0.744,0.606,0.596,0.766,0.673,
+D - B47,0.832,0.798,0.66,0.685,0.816,0.872,
+D - B48,0.702,0.664,0.554,0.273,0.547,0.561,
+D - B49,0.831,0.799,0.658,0.664,0.858,0.85,
+D - B50,0.811,0.782,0.643,0.601,0.836,0.868,
+D - B51,0.653,0.648,0.557,0.3,0.48,0.505,
+D - B52,0.841,0.81,0.674,0.739,0.877,0.925,
+D - B53,0.756,0.732,0.597,0.414,0.68,0.715,
+D - B54,0.835,0.806,0.662,0.673,0.887,0.787,
+D - B55,0.848,0.82,0.681,0.793,0.907,0.933,
+D - B56,0.877,0.856,0.74,0.851,0.958,0.965,
+B0-B1,0.71,0.654,0.418,0.671,0.854,0.856,
+B0-B2,0.72,0.669,0.464,0.697,0.895,0.767,
+B0-B3,0.744,0.71,0.475,0.741,0.91,0.846,
+B0-B7,0.795,0.728,0.495,0.755,0.902,0.859,
+B0-B12,0.774,0.7,0.47,0.735,0.892,0.795,
+B0-B17,0.79,0.729,0.471,0.617,0.863,0.839,
+B1-B2,0.716,0.669,0.449,0.603,0.862,0.852,
+B1-B7,0.734,0.682,0.452,0.639,0.831,0.877,
+B1-B12,0.804,0.721,0.473,0.658,0.817,0.841,
+B1-B21,0.636,0.593,0.358,0.734,0.85,0.897,
+B2-B3,0.764,0.692,0.454,0.638,0.859,0.795,
+B2-B7,0.802,0.738,0.51,0.688,0.899,0.845,
+B2-B11,0.83,0.783,0.641,0.739,0.793,0.845,
+B2-B12,0.802,0.735,0.523,0.725,0.915,0.826,
+B2-B15,0.77,0.696,0.452,0.633,0.869,0.834,
+B3-B4,0.702,0.683,0.524,0.633,0.754,0.884,
+B3-B7,0.793,0.739,0.534,0.723,0.902,0.889,
+B3-B8,0.718,0.669,0.509,0.721,0.888,0.844,
+B3-B12,0.754,0.684,0.454,0.724,0.89,0.792,
+B4-B5,0.722,0.648,0.39,0.44,0.727,0.851,
+B4-B17,0.846,0.792,0.588,0.695,0.824,0.863,
+B5-B6,0.703,0.646,0.34,0.541,0.83,0.697,
+B5-B18,0.725,0.673,0.476,0.603,0.888,0.878,
+B6-B7,0.795,0.729,0.438,0.594,0.884,0.795,
+B6-B21,0.766,0.678,0.364,0.687,0.872,0.842,
+B6-B25,0.786,0.704,0.433,0.68,0.901,0.78,
+B7-B8,0.717,0.653,0.423,0.712,0.859,0.867,
+B7-B12,0.771,0.684,0.415,0.712,0.885,0.819,
+B7-B15,0.763,0.692,0.456,0.669,0.928,0.823,
+B7-B17,0.785,0.72,0.451,0.622,0.903,0.87,
+B7-B22,0.758,0.682,0.408,0.694,0.92,0.88,
+B7-B25,0.734,0.694,0.441,0.751,0.918,0.88,
+B8-B9,0.642,0.592,0.37,0.33,0.766,0.714,
+B9-B10,0.618,0.596,0.477,0.484,0.848,0.731,
+B10-B11,0.671,0.619,0.363,0.224,0.659,0.595,
+B11-B12,0.774,0.699,0.511,0.72,0.75,0.891,
+B12-B13,0.737,0.642,0.332,0.625,0.819,0.756,
+B12-B22,0.77,0.669,0.346,0.717,0.901,0.86,
+B12-B30,0.812,0.703,0.36,0.733,0.908,0.858,
+B13-B14,0.591,0.533,0.243,0.324,0.627,0.458,
+B14-B15,0.493,0.442,0.163,0.383,0.679,0.495,
+B15-B16,0.701,0.617,0.323,0.554,0.827,0.789,
+B15-B22,0.695,0.64,0.357,0.644,0.916,0.829,
+B16-B17,0.731,0.673,0.416,0.607,0.844,0.854,
+B16-B18,0.743,0.692,0.45,0.583,0.892,0.895,
+B17-B18,0.826,0.761,0.492,0.64,0.898,0.898,
+B17-B22,0.774,0.741,0.521,0.671,0.89,0.836,
+B17-B29,0.804,0.748,0.515,0.625,0.857,0.841,
+B17-B31,0.791,0.736,0.505,0.676,0.88,0.827,
+B17-B34,0.752,0.692,0.451,0.667,0.884,0.827,
+B18-B19,0.671,0.601,0.24,0.208,0.596,0.691,
+B18-B37,0.726,0.656,0.368,0.686,0.897,0.876,
+B18-B38,0.731,0.682,0.432,0.613,0.892,0.883,
+B19-B20,0.619,0.532,0.234,0.112,0.476,0.599,
+B20-B21,0.696,0.678,0.516,0.518,0.705,0.776,
+B20-B30,0.838,0.801,0.608,0.726,0.73,0.782,
+B21-B22,0.699,0.671,0.476,0.57,0.889,0.854,
+B21-B25,0.689,0.673,0.538,0.784,0.88,0.87,
+B21-B30,0.766,0.741,0.574,0.625,0.899,0.804,
+B21-B38,0.724,0.694,0.521,0.758,0.925,0.899,
+B21-B39,0.741,0.721,0.59,0.738,0.805,0.847,
+B22-B23,0.521,0.507,0.339,0.168,0.388,0.608,
+B22-B24,0.715,0.731,0.635,0.761,0.874,0.835,
+B22-B25,0.767,0.733,0.555,0.636,0.871,0.852,
+B22-B27,0.735,0.7,0.549,0.739,0.839,0.874,
+B22-B28,0.822,0.781,0.567,0.671,0.864,0.805,
+B22-B29,0.865,0.836,0.69,0.825,0.96,0.913,
+B22-B30,0.807,0.786,0.625,0.719,0.923,0.85,
+B22-B31,0.811,0.767,0.607,0.738,0.906,0.857,
+B22-B33,0.8,0.764,0.557,0.615,0.849,0.843,
+B22-B34,0.824,0.804,0.653,0.721,0.857,0.901,
+B22-B35,0.78,0.757,0.602,0.602,0.863,0.819,
+B22-B38,0.674,0.634,0.418,0.677,0.891,0.852,
+B22-B40,0.745,0.73,0.608,0.726,0.888,0.841,
+B23-B24,0.564,0.553,0.37,0.187,0.407,0.607,
+B24-B25,0.803,0.773,0.615,0.583,0.903,0.784,
+B24-B29,0.771,0.762,0.591,0.661,0.845,0.808,
+B24-B31,0.846,0.852,0.779,0.816,0.949,0.883,
+B24-B34,0.776,0.794,0.651,0.729,0.829,0.832,
+B24-B35,0.82,0.803,0.665,0.688,0.887,0.801,
+B24-B38,0.679,0.668,0.485,0.675,0.916,0.802,
+B24-B40,0.786,0.764,0.693,0.755,0.859,0.844,
+B24-B43,0.81,0.775,0.601,0.639,0.903,0.806,
+B24-B44,0.751,0.714,0.553,0.701,0.885,0.853,
+B25-B26,0.739,0.684,0.457,0.536,0.726,0.788,
+B25-B29,0.797,0.753,0.542,0.625,0.845,0.858,
+B25-B30,0.741,0.714,0.515,0.693,0.902,0.836,
+B25-B31,0.811,0.796,0.621,0.627,0.909,0.829,
+B25-B33,0.775,0.722,0.501,0.631,0.862,0.859,
+B25-B34,0.807,0.77,0.57,0.642,0.848,0.865,
+B25-B38,0.707,0.68,0.518,0.7,0.898,0.809,
+B25-B39,0.735,0.691,0.559,0.897,0.918,0.922,
+B25-B40,0.716,0.699,0.563,0.685,0.885,0.83,
+B25-B43,0.801,0.763,0.584,0.66,0.902,0.845,
+B26-B27,0.697,0.649,0.38,0.32,0.66,0.803,
+B27-B28,0.795,0.743,0.551,0.745,0.922,0.859,
+B27-B29,0.771,0.718,0.493,0.823,0.889,0.9,
+B28-B29,0.861,0.835,0.689,0.857,0.935,0.898,
+B29-B30,0.84,0.837,0.721,0.738,0.892,0.865,
+B29-B31,0.809,0.765,0.58,0.712,0.882,0.864,
+B29-B33,0.878,0.837,0.678,0.682,0.84,0.891,
+B29-B34,0.81,0.788,0.644,0.69,0.828,0.897,
+B29-B38,0.732,0.691,0.467,0.666,0.861,0.835,
+B29-B40,0.781,0.739,0.587,0.662,0.859,0.838,
+B29-B43,0.773,0.747,0.561,0.621,0.88,0.819,
+B29-B44,0.768,0.729,0.531,0.634,0.883,0.847,
+B30-B31,0.836,0.793,0.608,0.722,0.917,0.871,
+B30-B33,0.856,0.816,0.591,0.635,0.858,0.832,
+B30-B35,0.838,0.806,0.633,0.545,0.909,0.786,
+B30-B38,0.723,0.696,0.471,0.661,0.914,0.806,
+B30-B39,0.794,0.746,0.54,0.727,0.833,0.816,
+B30-B40,0.811,0.762,0.56,0.662,0.925,0.812,
+B30-B43,0.832,0.795,0.585,0.624,0.912,0.762,
+B30-B44,0.79,0.744,0.524,0.679,0.937,0.804,
+B30-B49,0.843,0.764,0.49,0.679,0.854,0.733,
+B31-B32,0.759,0.692,0.427,0.586,0.834,0.673,
+B31-B33,0.808,0.757,0.536,0.633,0.866,0.815,
+B31-B34,0.814,0.78,0.625,0.723,0.874,0.873,
+B31-B35,0.85,0.821,0.656,0.616,0.907,0.812,
+B31-B38,0.756,0.711,0.494,0.676,0.914,0.829,
+B31-B40,0.767,0.749,0.647,0.719,0.89,0.849,
+B31-B43,0.794,0.747,0.546,0.619,0.929,0.817,
+B31-B44,0.774,0.728,0.513,0.641,0.911,0.815,
+B31-B47,0.79,0.77,0.643,0.682,0.842,0.863,
+B32-B33,0.594,0.588,0.246,0.456,0.699,0.622,
+B33-B34,0.842,0.811,0.681,0.811,0.916,0.91,
+B33-B35,0.828,0.81,0.675,0.848,0.901,0.892,
+B33-B40,0.803,0.773,0.596,0.662,0.834,0.839,
+B33-B43,0.797,0.747,0.508,0.624,0.882,0.803,
+B34-B35,0.815,0.796,0.656,0.684,0.817,0.826,
+B34-B40,0.747,0.727,0.598,0.713,0.802,0.862,
+B34-B47,0.802,0.785,0.637,0.703,0.858,0.883,
+B35-B36,0.659,0.626,0.319,0.372,0.696,0.597,
+B35-B40,0.816,0.785,0.662,0.662,0.894,0.839,
+B35-B43,0.79,0.762,0.591,0.659,0.917,0.796,
+B35-B44,0.805,0.761,0.558,0.61,0.897,0.8,
+B36-B37,0.691,0.641,0.395,0.631,0.818,0.863,
+B37-B38,0.659,0.579,0.307,0.64,0.87,0.811,
+B37-B55,0.757,0.672,0.371,0.708,0.904,0.841,
+B37-B56,0.732,0.683,0.469,0.673,0.865,0.86,
+B38-B39,0.784,0.756,0.65,0.732,0.875,0.801,
+B38-B43,0.716,0.698,0.501,0.628,0.908,0.793,
+B38-B44,0.685,0.657,0.447,0.652,0.917,0.801,
+B38-B49,0.755,0.723,0.544,0.728,0.929,0.858,
+B38-B52,0.68,0.631,0.397,0.692,0.934,0.892,
+B38-B55,0.676,0.637,0.416,0.727,0.951,0.878,
+B38-B56,0.736,0.711,0.522,0.784,0.918,0.927,
+B39-B40,0.785,0.729,0.551,0.659,0.807,0.814,
+B39-B49,0.786,0.745,0.551,0.725,0.889,0.81,
+B39-B55,0.705,0.651,0.413,0.683,0.897,0.83,
+B40-B41,0.718,0.712,0.608,0.744,0.845,0.726,
+B40-B43,0.832,0.798,0.64,0.735,0.909,0.794,
+B40-B44,0.769,0.723,0.565,0.74,0.951,0.833,
+B41-B42,0.752,0.679,0.452,0.692,0.779,0.74,
+B41-B43,0.787,0.747,0.588,0.749,0.859,0.742,
+B42-B43,0.745,0.702,0.527,0.702,0.873,0.853,
+B43-B44,0.825,0.796,0.66,0.792,0.94,0.868,
+B43-B49,0.842,0.78,0.543,0.625,0.857,0.778,
+B43-B55,0.756,0.69,0.406,0.673,0.894,0.79,
+B44-B45,0.767,0.661,0.313,0.279,0.643,0.476,
+B44-B55,0.772,0.707,0.419,0.675,0.885,0.795,
+B45-B46,0.712,0.588,0.177,0.237,0.581,0.444,
+B45-B48,0.883,0.863,0.814,0.832,0.781,0.92,
+B46-B47,0.802,0.792,0.654,0.375,0.659,0.636,
+B47-B48,0.69,0.548,0.145,0.137,0.477,0.499,
+B48-B49,0.736,0.584,0.162,0.161,0.449,0.421,
+B49-B50,0.806,0.742,0.485,0.554,0.886,0.762,
+B49-B52,0.799,0.722,0.459,0.646,0.933,0.81,
+B49-B55,0.827,0.806,0.637,0.746,0.943,0.869,
+B49-B56,0.785,0.753,0.57,0.744,0.876,0.87,
+B50-B51,0.668,0.59,0.295,0.129,0.45,0.355,
+B51-B52,0.601,0.528,0.303,0.149,0.458,0.545,
+B52-B53,0.757,0.685,0.44,0.305,0.601,0.671,
+B52-B55,0.8,0.729,0.452,0.701,0.935,0.874,
+B52-B56,0.742,0.677,0.407,0.664,0.87,0.911,
+B53-B54,0.521,0.483,0.201,0.146,0.565,0.455,
+B54-B55,0.673,0.631,0.395,0.703,0.895,0.767,
+B55-B56,0.69,0.662,0.469,0.736,0.885,0.927,
+

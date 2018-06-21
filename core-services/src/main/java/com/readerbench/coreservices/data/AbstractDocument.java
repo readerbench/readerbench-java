@@ -23,8 +23,8 @@ import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  */
 public abstract class AbstractDocument extends AnalysisElement {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDocument.class);
+   // private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDocument.class);
 
     private static final long serialVersionUID = -6173684658096015060L;
 
@@ -232,6 +232,14 @@ public abstract class AbstractDocument extends AnalysisElement {
                 .flatMap(b -> b.getSentences().stream())
                 .mapToInt(s -> s.getAllWords().size())
                 .sum();
+    }
+    
+    public List<Word> getAllWords() {
+    	return getBlocks().parallelStream()
+                .filter(b -> b != null)
+                .flatMap(b -> b.getSentences().stream())
+                .flatMap(s -> s.getAllWords().stream())
+                .collect(Collectors.toList());
     }
 
     public int getNoContentWords() {

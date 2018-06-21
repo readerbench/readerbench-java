@@ -24,8 +24,8 @@ import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class KeywordModeling {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KeywordModeling.class);
+    //private static final Logger LOGGER = LoggerFactory.getLogger(KeywordModeling.class);
 
     public static final double LSA_WEIGHT = 1.0;
     public static final double LDA_WEIGHT = 1.0;
@@ -41,7 +41,7 @@ public class KeywordModeling {
     public static final double WN_WEIGHT = 1.0;
 
     public static List<Keyword> filterTopics(AnalysisElement e, Set<String> ignoredWords) {
-        LOGGER.info("Filtering toppics ...");
+        //LOGGER.info("Filtering toppics ...");
         List<Keyword> filteredTopics = new ArrayList<>();
         for (Keyword t : e.getTopics()) {
             if (!ignoredWords.contains(t.getWord().getLemma())) {
@@ -52,7 +52,7 @@ public class KeywordModeling {
     }
 
     public static void determineKeywords(AnalysisElement e, boolean useBigrams) {
-        LOGGER.info("Determining keywords using Tf-IDf, LSA and LDA ...");
+        //LOGGER.info("Determining keywords using Tf-IDf, LSA and LDA ...");
         // determine topics by using Tf-IDF and (LSA & LDA)
         for (Word w : e.getWordOccurences().keySet()) {
             Keyword newTopic = new Keyword(w, e);
@@ -67,7 +67,8 @@ public class KeywordModeling {
         }
         if (useBigrams) {
             try {
-                Map<NGram, Long> ngrams = e.getBiGrams().stream()
+            	AbstractDocument absDoc = (AbstractDocument) e;
+                Map<NGram, Long> ngrams = absDoc.getBiGrams().stream()
                         .collect(Collectors.groupingBy(
                                 Function.identity(),
                                 Collectors.counting()));
@@ -84,7 +85,7 @@ public class KeywordModeling {
                     }
                 }
             } catch (Exception x) {
-                LOGGER.error(x.getMessage());
+                //LOGGER.error(x.getMessage());
             }
         }
         Collections.sort(e.getTopics());
@@ -187,7 +188,7 @@ public class KeywordModeling {
     }
 
     public static void determineInferredConcepts(AnalysisElement e, List<Keyword> topics, double minThreshold) {
-        LOGGER.info("Determining inferred concepts ...");
+        //LOGGER.info("Determining inferred concepts ...");
         List<Keyword> inferredConcepts = new ArrayList<>();
 
         Map<SimilarityType, double[]> modelVectors = new EnumMap<>(SimilarityType.class);
@@ -209,7 +210,7 @@ public class KeywordModeling {
         // create possible matches by exploring 3 alternatives
         // 1 LSA
         if (e.getSemanticModel(SimilarityType.LSA) != null) {
-            LOGGER.info("Determining similar concepts using LSA ...");
+            //LOGGER.info("Determining similar concepts using LSA ...");
             TreeMap<Word, Double> listLSA;
             for (Keyword t : topics) {
                 listLSA = e.getSemanticModel(SimilarityType.LSA).getSimilarConcepts(t.getElement(), minThreshold);
@@ -219,7 +220,7 @@ public class KeywordModeling {
 
         // 2 LDA
         if (e.getSemanticModel(SimilarityType.LDA) != null) {
-            LOGGER.info("Determining similar concepts using LDA ...");
+            //LOGGER.info("Determining similar concepts using LDA ...");
             TreeMap<Word, Double> listLDA;
             for (Keyword t : topics) {
                 listLDA = e.getSemanticModel(SimilarityType.LDA).getSimilarConcepts(t.getElement(), minThreshold);
@@ -229,7 +230,7 @@ public class KeywordModeling {
 
         // 3 Word2Vec
         if (e.getSemanticModel(SimilarityType.WORD2VEC) != null) {
-            LOGGER.info("Determining similar concepts using word2vec ...");
+            //LOGGER.info("Determining similar concepts using word2vec ...");
             TreeMap<Word, Double> listW2V;
             for (Keyword t : topics) {
                 listW2V = e.getSemanticModel(SimilarityType.WORD2VEC).getSimilarConcepts(t.getElement(), minThreshold);
@@ -238,7 +239,7 @@ public class KeywordModeling {
         }
 
         // 4 WN
-        LOGGER.info("Determining similar concepts using WN ...");
+        //LOGGER.info("Determining similar concepts using WN ...");
         TreeMap<Word, Double> listWN;
         for (Keyword t : topics) {
             listWN = OntologySupport.getSimilarConcepts(t.getWord());
@@ -246,7 +247,7 @@ public class KeywordModeling {
         }
 
         // rearrange previously identified concepts
-        LOGGER.info("Building final list of inferred concepts ...");
+       // LOGGER.info("Building final list of inferred concepts ...");
         for (Word w : inferredConceptsCandidates.keySet()) {
             if (!containsLemma(w, e.getWordOccurences().keySet())) {
                 w.setSemanticModels(e.getSemanticModelsAsList());
@@ -271,6 +272,6 @@ public class KeywordModeling {
 
         Collections.sort(inferredConcepts);
         e.setInferredConcepts(inferredConcepts);
-        LOGGER.info("Finished building list of inferred concepts ...");
+        //LOGGER.info("Finished building list of inferred concepts ...");
     }
 }

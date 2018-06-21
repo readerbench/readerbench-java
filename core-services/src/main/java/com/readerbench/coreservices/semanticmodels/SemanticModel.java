@@ -90,6 +90,7 @@ public class SemanticModel {
 
     private void importModel(String fileName) {
         LOGGER.info("Loading model " + fileName + " ...");
+        System.out.println(this.getClass().getClassLoader().getResourceAsStream(fileName));
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(fileName); BufferedReader in = new BufferedReader(new InputStreamReader(input, "UTF-8"))) {
             String[] line = in.readLine().split(" ");
             int nWords = Integer.parseInt(line[0]);
