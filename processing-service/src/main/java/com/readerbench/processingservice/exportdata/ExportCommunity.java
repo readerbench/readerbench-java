@@ -31,7 +31,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -205,6 +208,37 @@ public class ExportCommunity {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }
+    }
+
+    /**
+     * Export discussed topics
+     *
+     * @param maxTimeframeTopics
+     * @return
+     */
+    public Map<String, List<Double>> exportDiscussedTopicsPerTimeframe(int maxTimeframeTopics) {
+        LOGGER.info("Determining discussed topics withing each timeframe  ");
+        Map<String, List<Double>> topicsEvolution = new TreeMap<>();
+
+        if (community.getTimeframeSubCommunities() == null || community.getTimeframeSubCommunities().isEmpty()) {
+            return topicsEvolution;
+        }
+
+        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+            //determine maximum #maxTimeframeTopics topics that are only nouns and verbs
+            List<Keyword> keywords = KeywordModeling.getSublist(
+                    KeywordModeling.getCollectionTopics(community.getTimeframeSubCommunities().get(i).getConversations()),
+                    maxTimeframeTopics,
+                    true,
+                    true);
+            for (Keyword k : keywords) {
+                if (!topicsEvolution.containsKey(k.getWord().getLemma())) {
+                    topicsEvolution.put(k.getWord().getLemma(), new ArrayList(community.getTimeframeSubCommunities().size()));
+                }
+                topicsEvolution.get(k.getWord().getLemma()).set(i, k.getRelevance());
+            }
+        }
+        return topicsEvolution;
     }
 
     /**
