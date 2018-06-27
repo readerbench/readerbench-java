@@ -91,6 +91,16 @@ public abstract class ComplexityIndex implements Serializable, IComplexityIndex 
     }
 
     @Override
+    public String getIndexName() {
+        return index.name();
+    }
+
+    @Override
+    public String getParam() {
+        return param;
+    }
+
+    @Override
     public String getCategoryName() {
         return index.getType().name();
     }

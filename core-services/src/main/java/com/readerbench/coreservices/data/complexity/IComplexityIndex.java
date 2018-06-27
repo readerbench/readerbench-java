@@ -9,6 +9,10 @@ public interface IComplexityIndex {
     String getAcronym();
 
     String getDescription();
+    
+    String getIndexName();
+    
+    String getParam();
 
     String getCategoryName();
 
