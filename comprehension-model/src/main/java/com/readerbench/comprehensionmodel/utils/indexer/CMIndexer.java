@@ -20,17 +20,21 @@ import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMCorefIndexer;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMSyntacticGraph;
+import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Ionut Paraschiv
  */
 public class CMIndexer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CMIndexer.class);
 
     private final SemanticModel semanticModel;
     private final String text;
@@ -41,27 +45,38 @@ public class CMIndexer {
     public CMIndexer(String text, SemanticModel semanticModel) {
         this.text = text;
         this.semanticModel = semanticModel;
-//        this.indexSyntacticDistances();
+        this.loadDocument();
+        this.indexSyntacticDistances();
     }
 
-//    private void indexSyntacticDistances() {
-//        CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, this.semanticModel.getLanguage());
-//
-//        List<Sentence> sentenceList = this.document.getSentencesInDocument();
-//        Iterator<Sentence> sentenceIterator = sentenceList.iterator();
-//        this.syntacticIndexerList = new ArrayList<>();
-//        int sentenceNum = 0;
-//        while (sentenceIterator.hasNext()) {
-//            Sentence sentence = sentenceIterator.next();
-//
-//            CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
-//            SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
-//
-//            WordDistanceIndexer wdIndexer = new WordDistanceIndexer(syntacticGraph.getWordList(), syntacticStrategy);
-//            this.syntacticIndexerList.add(wdIndexer);
-//            sentenceNum++;
-//        }
-//    }
+    private void loadDocument() {
+        LOGGER.info("Loading document for text:\n{}\nand semantic model {}", this.text, semanticModel.getName());
+        List<SemanticModel> models = new ArrayList<>();
+        models.add(semanticModel);
+        this.document = new Document(this.text, models, semanticModel.getLanguage());
+        LOGGER.info("Document contains {} blocks", this.document.getBlocks());
+    }
+
+    private void indexSyntacticDistances() {
+        CMCorefIndexer corefContainer = new CMCorefIndexer(this.document, this.semanticModel.getLanguage());
+
+        List<Sentence> sentenceList = this.document.getSentencesInDocument();
+        LOGGER.info("found {} sentences for the text", sentenceList.size());
+        
+        Iterator<Sentence> sentenceIterator = sentenceList.iterator();
+        this.syntacticIndexerList = new ArrayList<>();
+        int sentenceNum = 0;
+        while (sentenceIterator.hasNext()) {
+            Sentence sentence = sentenceIterator.next();
+
+            CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
+            SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
+
+            WordDistanceIndexer wdIndexer = new WordDistanceIndexer(syntacticGraph.getWordList(), syntacticStrategy);
+            this.syntacticIndexerList.add(wdIndexer);
+            sentenceNum++;
+        }
+    }
 
     public List<WordDistanceIndexer> getSyntacticIndexerList() {
         return this.syntacticIndexerList;
