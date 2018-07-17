@@ -28,16 +28,6 @@ import java.util.List;
 
 public class CMUtils {
 
-//    public Word convertToWord(IndexedWord node, Lang lang) {
-//        String wordStr = node.word().toLowerCase();
-//        Word word = Parsing.getWordFromConcept(wordStr, lang);
-//        word.setLemma(StaticLemmatizer.lemmaStatic(wordStr, lang));
-//        word.setPOS("");
-//        if (node.tag() != null && node.tag().length() >= 2) {
-//            word.setPOS(node.tag().substring(0, 2));
-//        }
-//        return word;
-//    }
 
     public Word convertStringToWord(String wordString, Lang lang) {
         Word word = Parsing.getWordFromConcept(wordString, lang);

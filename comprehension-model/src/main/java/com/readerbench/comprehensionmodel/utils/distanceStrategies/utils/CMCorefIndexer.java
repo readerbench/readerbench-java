@@ -26,6 +26,7 @@ import com.readerbench.coreservices.nlp.parsing.Parsing;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Triple;
 
 public class CMCorefIndexer {
 
@@ -43,79 +44,53 @@ public class CMCorefIndexer {
 
     private void indexCoreferences() {
         this.corefList = new ArrayList<>();
-//        List<Block> blockList = this.document.getBlocks();
-//        blockList.stream().forEach((block) -> {
-//            block.getStanfordSentences().stream().map((sentence) -> sentence.get(TokensAnnotation.class)).forEach((tokens) -> {
-//                tokens.stream().forEach((token) -> {
-//                    Integer corefClustId = token.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
-//                    CorefChain chain = block.getCorefs().get(corefClustId);
-//                    String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
-//                    if (pos.equals("PR") && chain != null && chain.getMentionsInTextualOrder().size() > 1) {
-//                        int sentINdx = chain.getRepresentativeMention().sentNum - 1;
-//                        CoreMap corefSentence = block.getStanfordSentences().get(sentINdx);
-//                        List<CoreLabel> corefSentenceTokens = corefSentence.get(TokensAnnotation.class);
-//
-//                        CorefChain.CorefMention reprMent = chain.getRepresentativeMention();
-//                        for (int i = reprMent.startIndex; i < reprMent.endIndex; i++) {
-//                            CoreLabel matchedLabel = corefSentenceTokens.get(i - 1);
-//                            pos = Parsing.getParser(lang).convertToPenn(matchedLabel.get(PartOfSpeechAnnotation.class));
-//                            if (pos.equals("NN")) {
-//                                this.corefList.add(new CMCoref(token, matchedLabel));
-//                            }
-//                        }
-//                    }
-//                });
-//            });
-//        });
+        // TODO: index the actual coreferences
+        /*
+        List<Block> blockList = this.document.getBlocks();
+        blockList.stream().forEach((block) -> {
+            block.getStanfordSentences().stream().map((sentence) -> sentence.get(CoreAnnotations.TokensAnnotation.class)).forEach((tokens) -> {
+                tokens.stream().forEach((token) -> {
+                    Integer corefClustId = token.get(CorefCoreAnnotations.CorefClusterIdAnnotation.class);
+                    CorefChain chain = block.getCorefs().get(corefClustId);
+                    String pos = Parsing.getParser(lang).convertToPenn(token.get(PartOfSpeechAnnotation.class));
+                    if (pos.equals("PR") && chain != null && chain.getMentionsInTextualOrder().size() > 1) {
+                        int sentINdx = chain.getRepresentativeMention().sentNum - 1;
+                        CoreMap corefSentence = block.getStanfordSentences().get(sentINdx);
+                        List<CoreLabel> corefSentenceTokens = corefSentence.get(TokensAnnotation.class);
+
+                        CorefChain.CorefMention reprMent = chain.getRepresentativeMention();
+                        for (int i = reprMent.startIndex; i < reprMent.endIndex; i++) {
+                            CoreLabel matchedLabel = corefSentenceTokens.get(i - 1);
+                            pos = Parsing.getParser(lang).convertToPenn(matchedLabel.get(PartOfSpeechAnnotation.class));
+                            if (pos.equals("NN")) {
+                                this.corefList.add(new CMCoref(token, matchedLabel));
+                            }
+                        }
+                    }
+                });
+            });
+        });
+        */
     }
 
-//    public CMSyntacticGraph getCMSyntacticGraph(Sentence sentence, int sentenceIndex) {
-//        SemanticGraph semanticGraph = sentence.getDependencies();
-//        CMSyntacticGraph syntacticGraph = new CMSyntacticGraph();
-//
-//        for (SemanticGraphEdge edge : semanticGraph.edgeListSorted()) {
-//            Word dependentNode = this.getActualWord(edge.getDependent(), sentenceIndex);
-//            Word governorNode = this.getActualWord(edge.getGovernor(), sentenceIndex);
-//            if (dependentNode.isContentWord() && governorNode.isContentWord()) {
-//                syntacticGraph.indexEdge(dependentNode, governorNode);
-//            }
-//        }
-//
-//        return syntacticGraph;
-//    }
-//
-//    private Word getActualWord(IndexedWord indexedWord, int sentenceIndex) {
-//        Word word = this.cmUtils.convertToWord(indexedWord, lang);
-//        if (word.getPOS().equals("PR")) {
-//            CMCoref dependentCoref = this.getCMCoref(indexedWord, sentenceIndex);
-//            if (dependentCoref != null) {
-//                System.out.println("[Sentence " + sentenceIndex + "] Replacing " + indexedWord.word() + " with " + dependentCoref.getReferencedToken().word() + "");
-//                return this.convertToWord(dependentCoref.getReferencedToken());
-//            }
-//        }
-//        return word;
-//    }
-//
-//    private Word convertToWord(CoreLabel node) {
-//        String wordStr = node.word().toLowerCase();
-//        Word word = Parsing.getWordFromConcept(wordStr, lang);
-//        word.setLemma(StaticLemmatizer.lemmaStatic(wordStr, lang));
-//        word.setPOS("");
-//        if (node.tag() != null && node.tag().length() >= 2) {
-//            word.setPOS(node.tag().substring(0, 2));
-//        }
-//        return word;
-//    }
-//
-//    private CMCoref getCMCoref(IndexedWord word, int sentenceIndex) {
-//        for (CMCoref coref : this.corefList) {
-//            if (coref.getSentenceIndex() != sentenceIndex) {
-//                continue;
-//            }
-//            if (coref.getToken().index() == word.index()) {
-//                return coref;
-//            }
-//        }
-//        return null;
-//    }
+    public CMSyntacticGraph getCMSyntacticGraph(Sentence sentence, int sentenceIndex) {
+        List<Triple<Word, Word, String>> dependencies = sentence.getDependencies();
+        CMSyntacticGraph syntacticGraph = new CMSyntacticGraph();
+
+        for (Triple<Word, Word, String> dependency : dependencies) {
+            Word dependentNode = this.getActualWord(dependency.getLeft(), sentenceIndex);
+            Word governorNode = this.getActualWord(dependency.getMiddle(), sentenceIndex);
+            if (dependentNode.isContentWord() && governorNode.isContentWord()) {
+                syntacticGraph.indexEdge(dependentNode, governorNode);
+            }
+        }
+
+        return syntacticGraph;
+    }
+    
+    private Word getActualWord(Word word, int sentenceIndex) {
+        // TODO: use the indexed coreferences
+        return word;
+    }
+
 }

@@ -15,11 +15,13 @@
  */
 package com.readerbench.comprehensionmodel.utils.distanceStrategies.utils;
 
+//import edu.stanford.nlp.ling.CoreLabel;
+
 public class CMCoref {
 
 //    private CoreLabel token;
 //    private CoreLabel referencedToken;
-
+//
 //    public CMCoref(CoreLabel token, CoreLabel referencedToken) {
 //        this.token = token;
 //        this.referencedToken = referencedToken;
