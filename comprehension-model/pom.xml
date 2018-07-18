@@ -38,6 +38,11 @@
             <artifactId>core-services</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>processing-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- LOGGING -->
         <dependency>
             <groupId>org.slf4j</groupId>

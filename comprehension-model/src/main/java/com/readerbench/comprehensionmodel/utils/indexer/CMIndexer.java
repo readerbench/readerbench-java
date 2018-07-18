@@ -20,10 +20,13 @@ import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.SyntacticWordDistanceStrategy;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMCorefIndexer;
 import com.readerbench.comprehensionmodel.utils.distanceStrategies.utils.CMSyntacticGraph;
-import com.readerbench.coreservices.data.document.Document;
+import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
+import com.readerbench.processingservice.Annotators;
+import com.readerbench.processingservice.document.DocumentProcessingPipeline;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import org.slf4j.Logger;
@@ -53,7 +56,10 @@ public class CMIndexer {
         LOGGER.info("Loading document for text:\n{}\nand semantic model {}", this.text, semanticModel.getName());
         List<SemanticModel> models = new ArrayList<>();
         models.add(semanticModel);
-        this.document = new Document(this.text, models, semanticModel.getLanguage());
+        List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
+        DocumentProcessingPipeline pipeline = new DocumentProcessingPipeline(semanticModel.getLanguage(), models, annotators);
+        this.document = pipeline.createDocumentFromTemplate(AbstractDocumentTemplate.getDocumentModel(this.text));
+        pipeline.processDocument(this.document);
         LOGGER.info("Document contains {} blocks", this.document.getBlocks());
     }
 
