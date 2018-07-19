@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.readerbench</groupId>
+        <artifactId>readerbench-nlp</artifactId>
+        <version>4.1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>processing-service</artifactId>
+    <packaging>jar</packaging>
+    <name>RB - Processing Service Module</name>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://artifactory.readerbench.com:8081/artifactory/libs-release</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>datasource-provider</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>core-services</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>reading-strategies</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench</groupId>
+            <artifactId>textual-complexity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- LOGGING -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <!-- /LOGGING -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+        </dependency>
+        <!--Stanford Core NLP models -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+        </dependency>
+        
+        <!-- ReaderBench resources required for testing-->
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-tasa-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-coca-en</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-fr</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-le_monde-fr</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-nl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-inl-nl</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-ro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-readme-ro</artifactId>
+        </dependency>
+        <!-- / ReaderBench resources-->
+    </dependencies>
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/config</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+    </build>
+</project>
