@@ -5,9 +5,11 @@
  */
 package com.readerbench.textualcomplexity.wordLists;
 
+import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
+import com.readerbench.textualcomplexity.ComplexityIndex;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +30,7 @@ import java.util.logging.Logger;
 public class WordValences {
 
     private static final Map<Lang, Map<String, Map<String, Double>>> WORD_VALENCE_MAP = new EnumMap<>(Lang.class);
-    private static final Map<Lang, List<String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
+    private static final Map<Lang, Map<String, String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
     private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
     private static final String PROPERTY_VALENCES_NAME = "VALENCES_%s_PATH";
     public static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.es);
@@ -44,9 +47,9 @@ public class WordValences {
                 header = in.readLine();
             }
             String[] splitHeader = header.split(";");
-            ArrayList<String> valences = new ArrayList<>();
+            Map<String, String> valences = new HashMap<>();
             for (int i = 1; i < splitHeader.length; i++) {
-                valences.add(splitHeader[i]);
+                valences.put(splitHeader[i], ResourceBundle.getBundle("sentiment_valences_descriptions", lang.getLocale()).getString(splitHeader[i]));
             }
             VALENCES_FOR_LANG.put(lang, valences);
             String line;
@@ -74,7 +77,7 @@ public class WordValences {
                 .getOrDefault(valence, 0.);
     }
 
-    public static List<String> getValences(Lang lang) {
+    public static Map<String, String> getValences(Lang lang) {
         if (!VALENCES_FOR_LANG.containsKey(lang)) {
             initLang(lang);
         }
