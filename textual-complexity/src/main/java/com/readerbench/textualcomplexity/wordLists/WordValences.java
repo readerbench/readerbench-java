@@ -8,15 +8,14 @@ package com.readerbench.textualcomplexity.wordLists;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
 import com.readerbench.datasourceprovider.pojo.Lang;
-
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,7 +26,7 @@ import java.util.logging.Logger;
 public class WordValences {
 
     private static final Map<Lang, Map<String, Map<String, Double>>> WORD_VALENCE_MAP = new EnumMap<>(Lang.class);
-    private static final Map<Lang, List<String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
+    private static final Map<Lang, Map<String, String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
     private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
     private static final String PROPERTY_VALENCES_NAME = "VALENCES_%s_PATH";
     public static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.es);
@@ -44,9 +43,14 @@ public class WordValences {
                 header = in.readLine();
             }
             String[] splitHeader = header.split(";");
-            ArrayList<String> valences = new ArrayList<>();
+            Map<String, String> valences = new HashMap<>();
             for (int i = 1; i < splitHeader.length; i++) {
-                valences.add(splitHeader[i]);
+                try {
+                    valences.put(splitHeader[i], ResourceBundle.getBundle("sentiment_valences_descriptions", lang.getLocale()).getString(splitHeader[i]));
+                }
+                catch(Exception e) {
+                    valences.put(splitHeader[i], "");
+                }
             }
             VALENCES_FOR_LANG.put(lang, valences);
             String line;
@@ -54,7 +58,12 @@ public class WordValences {
                 String[] values = line.split(";");
                 Map<String, Double> wordValues = new HashMap<>();
                 for (int i = 1; i < values.length; i++) {
-                    wordValues.put(splitHeader[i], Double.parseDouble(values[i]));
+                    if (VALENCES_FOR_LANG.get(lang).get(splitHeader[i]).compareTo("") != 0) {
+                        wordValues.put(VALENCES_FOR_LANG.get(lang).get(splitHeader[i]), Double.parseDouble(values[i]));
+                    }
+                    else {
+                        wordValues.put(splitHeader[i], Double.parseDouble(values[i]));
+                    }
                 }
                 WORD_VALENCE_MAP.get(lang).put(values[0], wordValues);
             }
@@ -74,7 +83,7 @@ public class WordValences {
                 .getOrDefault(valence, 0.);
     }
 
-    public static List<String> getValences(Lang lang) {
+    public static Map<String, String> getValences(Lang lang) {
         if (!VALENCES_FOR_LANG.containsKey(lang)) {
             initLang(lang);
         }
@@ -82,6 +91,7 @@ public class WordValences {
     }
 
     public static void main(String[] args) {
-        System.out.println(getValenceForWord(new Word("hate", null, null, null, null, Lang.en), "Valence_ANEW"));
+        System.out.println(getValences(Lang.en));
+//        System.out.println(getValenceForWord(new Word("hate", null, null, null, null, Lang.en), "Valence_ANEW"));
     }
 }

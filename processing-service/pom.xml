@@ -111,7 +111,10 @@
             <groupId>com.readerbench.resources</groupId>
             <artifactId>semantic-models-coca-en</artifactId>
         </dependency>
-        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-enea_tasa-en</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
             <artifactId>wordnet-fr</artifactId>
