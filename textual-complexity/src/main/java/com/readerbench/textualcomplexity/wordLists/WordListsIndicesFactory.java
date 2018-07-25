@@ -27,7 +27,7 @@ public class WordListsIndicesFactory extends ComplexityIndicesFactory {
         if (!WordValences.SUPPORTED_LANGUAGES.contains(lang)) {
             return result;
         }
-        WordValences.getValences(lang).stream()
+        WordValences.getValences(lang).keySet().stream()
                 .forEach(sv -> {
                     result.add(new AvgWordsInList(
                             ComplexityIndicesEnum.AVG_WORDS_IN_LIST_PER_DOC,
