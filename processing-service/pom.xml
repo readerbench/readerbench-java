@@ -154,6 +154,11 @@
             <artifactId>semantic-models-readme-ro</artifactId>
         </dependency>
         <!-- / ReaderBench resources-->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.7</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
