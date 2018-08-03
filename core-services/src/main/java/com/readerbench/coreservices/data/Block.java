@@ -62,11 +62,10 @@ public class Block extends AnalysisElement implements Serializable {
     }
 
     public void finalProcessing() {
-        StringBuilder processedText = new StringBuilder();
-        getSentences().stream().forEach((sentence) -> {
-            processedText.append(sentence.getProcessedText()).append(". ");
-        });
-        setProcessedText(processedText.toString().trim());
+        String processedText = getSentences().stream()
+                .map(Sentence::getProcessedText)
+                .collect(Collectors.joining(". "));
+        setProcessedText(processedText.trim());
 
         // determine overall word occurrences
         determineWordOccurences(getSentences());

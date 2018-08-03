@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -55,11 +56,10 @@ public class Sentence extends AnalysisElement implements Comparable<Sentence> {
 
     public void finalProcessing() {
         // write the processedText
-        StringBuilder processedText = new StringBuilder();
-        getWords().stream().forEach((word) -> {
-            processedText.append(word.getLemma()).append(" ");
-        });
-        setProcessedText(processedText.toString().trim());
+        String processedText = getWords().stream()
+                .map(Word::getLemma)
+                .collect(Collectors.joining(" "));
+        setProcessedText(processedText.trim());
 
         // determine LSA utterance vector
         determineSemanticDimensions();
