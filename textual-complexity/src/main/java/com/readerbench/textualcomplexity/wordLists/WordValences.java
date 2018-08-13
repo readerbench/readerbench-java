@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,12 +44,7 @@ public class WordValences {
             String[] splitHeader = header.split(";");
             Map<String, String> valences = new HashMap<>();
             for (int i = 1; i < splitHeader.length; i++) {
-                try {
-                    valences.put(splitHeader[i], ResourceBundle.getBundle("sentiment_valences_descriptions", lang.getLocale()).getString(splitHeader[i]));
-                }
-                catch(Exception e) {
-                    valences.put(splitHeader[i], "");
-                }
+                valences.put(splitHeader[i], splitHeader[i]);
             }
             VALENCES_FOR_LANG.put(lang, valences);
             String line;
