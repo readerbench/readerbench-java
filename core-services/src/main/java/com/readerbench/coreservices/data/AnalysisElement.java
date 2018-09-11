@@ -18,6 +18,7 @@ package com.readerbench.coreservices.data;
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.data.cscl.Utterance;
+import com.readerbench.coreservices.data.diff.difflib.DiffRow;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,8 @@ public abstract class AnalysisElement implements Serializable {
     private List<Keyword> topics;
     private List<Keyword> inferredConcepts;
 
+    // semantic diff data
+    private List<DiffRow<AnalysisElement>> changes = new LinkedList<>();
     /**
      *
      */
@@ -364,6 +367,14 @@ public abstract class AnalysisElement implements Serializable {
 
     public List<NGram> getNGrams(int n) {
         return new ArrayList<>();
+    }
+
+    public List<DiffRow<AnalysisElement>> getChanges() {
+        return changes;
+    }
+
+    public void setChanges(List<DiffRow<AnalysisElement>> changes) {
+        this.changes = changes;
     }
 
     @Override
