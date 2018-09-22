@@ -18,28 +18,23 @@ package com.readerbench.coreservices.nlp.parsing;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.async.Callback;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.AbstractDocument;
+import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
+import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.cscl.Conversation;
 import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.coreservices.data.cscl.Utterance;
-import com.readerbench.coreservices.data.document.Document;
-import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.coreservices.nlp.TextPreprocessing;
 import com.readerbench.coreservices.nlp.stemmer.Stemmer;
 import com.readerbench.datasourceprovider.commons.ReadProperty;
+import com.readerbench.datasourceprovider.pojo.Lang;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -47,6 +42,8 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * General NLP parsing class relying on the Stanford Core NLP
@@ -124,7 +121,7 @@ public class Parsing {
             if (bt.getSpeaker() != null) {
                 block.put("speaker", bt.getSpeaker());
             }
-            if (bt.getSpeakerAlias()!= null) {
+            if (bt.getSpeakerAlias() != null) {
                 block.put("speakerAlias", bt.getSpeakerAlias());
             }
             blocks.add(block);
@@ -164,11 +161,11 @@ public class Parsing {
                 }
             }
             Block.addBlock(d, b);
-            
+
         }
-        
+
     }
-    
+
     public static Block JSON2Block(JSONObject blockJSON, AbstractDocument d, int id) throws JSONException {
         Block block = new Block(d, id, blockJSON.getString("text"), d.getSemanticModelsAsList(), d.getLanguage());
         JSONArray sentences = blockJSON.getJSONArray("sentences");
@@ -179,23 +176,35 @@ public class Parsing {
         block.finalProcessing();
         return block;
     }
-    
+
+    private static String posToRB(String pos) {
+        switch (pos) {
+            case "V|":
+                return "VB";
+            case "N|":
+                return "NN";
+            case "Ad":
+                return "JJ";
+        }
+        return pos;
+    }
+
     public static Sentence JSON2Sentence(JSONObject sentenceJSON, Block parent, int id) throws JSONException {
         Sentence sentence = new Sentence(parent, id, sentenceJSON.getString("text"), parent.getSemanticModelsAsList(), parent.getLanguage());
         JSONArray words = sentenceJSON.getJSONArray("words");
         Map<Integer, Word> wordIndex = new HashMap<>();
-        
+
         for (int i = 0; i < words.length(); i++) {
             JSONObject word = words.getJSONObject(i);
             String text = word.getString("text");
-            String pos = word.getString("pos");
+            String pos = Parsing.posToRB(word.getString("pos"));
             String lemma = word.getString("lemma");
             String ner = null;
             if (word.has("ner")) {
-                ner = word.getString("ner");   
+                ner = word.getString("ner");
             }
             if (TextPreprocessing.isWord(text, parent.getLanguage())) {
-                Word w = new Word(sentence, text, lemma, Stemmer.stemWord(text, sentence.getLanguage()), 
+                Word w = new Word(sentence, text, lemma, Stemmer.stemWord(text, sentence.getLanguage()),
                         pos, ner, sentence.getSemanticModelsAsList(), sentence.getLanguage());
                 wordIndex.put(word.getInt("index"), w);
                 sentence.getAllWords().add(w);
@@ -224,7 +233,7 @@ public class Parsing {
         sentence.finalProcessing();
         return sentence;
     }
-    
+
     public static void parseDoc(AbstractDocumentTemplate adt, AbstractDocument d, boolean usePOSTagging, Lang lang) {
         d.setTitleText(adt.getTitle());
 
