@@ -177,18 +177,6 @@ public class Parsing {
         return block;
     }
 
-    private static String posToRB(String pos) {
-        switch (pos) {
-            case "V|":
-                return "VB";
-            case "N|":
-                return "NN";
-            case "Ad":
-                return "JJ";
-        }
-        return pos;
-    }
-
     public static Sentence JSON2Sentence(JSONObject sentenceJSON, Block parent, int id) throws JSONException {
         Sentence sentence = new Sentence(parent, id, sentenceJSON.getString("text"), parent.getSemanticModelsAsList(), parent.getLanguage());
         JSONArray words = sentenceJSON.getJSONArray("words");
@@ -197,7 +185,7 @@ public class Parsing {
         for (int i = 0; i < words.length(); i++) {
             JSONObject word = words.getJSONObject(i);
             String text = word.getString("text");
-            String pos = Parsing.posToRB(word.getString("pos"));
+            String pos = word.getString("pos");
             String lemma = word.getString("lemma");
             String ner = null;
             if (word.has("ner")) {
