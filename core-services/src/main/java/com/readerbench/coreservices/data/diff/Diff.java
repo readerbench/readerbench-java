@@ -11,13 +11,6 @@ import com.readerbench.coreservices.data.AnalysisElement;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
-import com.readerbench.coreservices.data.diff.difflib.Chunk;
-import com.readerbench.coreservices.data.diff.difflib.DeleteDelta;
-import com.readerbench.coreservices.data.diff.difflib.Delta;
-import com.readerbench.coreservices.data.diff.difflib.DiffRow;
-import com.readerbench.coreservices.data.diff.difflib.DiffUtils;
-import com.readerbench.coreservices.data.diff.difflib.InsertDelta;
-import com.readerbench.coreservices.data.diff.difflib.Patch;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
@@ -27,6 +20,14 @@ import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
 import com.readerbench.datasourceprovider.pojo.Lang;
+
+import difflib.Chunk;
+import difflib.DeleteDelta;
+import difflib.Delta;
+import difflib.DiffRow;
+import difflib.DiffUtils;
+import difflib.InsertDelta;
+import difflib.Patch;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
