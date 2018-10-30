@@ -5,17 +5,11 @@
  */
 package com.readerbench.coreservices.data.diff;
 
-import com.readerbench.coreservices.cna.DisambiguisationGraphAndLexicalChains;
-import com.readerbench.coreservices.data.AbstractDocumentTemplate;
 import com.readerbench.coreservices.data.AnalysisElement;
-import com.readerbench.coreservices.data.Block;
-import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.data.discourse.SemanticCohesion;
 import com.readerbench.coreservices.data.document.Document;
 import com.readerbench.coreservices.data.lexicalchains.LexicalChain;
-import com.readerbench.coreservices.data.lexicalchains.LexicalChainLink;
-import com.readerbench.coreservices.nlp.parsing.Parsing;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
 import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.coreservices.semanticmodels.wordnet.OntologySupport;
@@ -29,16 +23,9 @@ import difflib.DiffUtils;
 import difflib.InsertDelta;
 import difflib.Patch;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -79,29 +66,13 @@ public class Diff {
             break;
         }
         
-        this.originalDoc = createDisambiguationGraph(original);
-        this.revisedDoc = createDisambiguationGraph(revised);
+        this.originalDoc = Utils.createDisambiguationGraph(original, this.semanticModels, this.language, this.diffStrategy);
+        this.revisedDoc = Utils.createDisambiguationGraph(revised, this.semanticModels, this.language, this.diffStrategy);
     }
     
     public Diff(String original, String revised, DiffStrategy diffStrategy, Lang lang, SimilarityType similarityType, boolean skipNameEntities) {
         this(original, revised, diffStrategy, lang, skipNameEntities);
         this.SIM_TYPE = similarityType;
-    }
-
-    private Document createDisambiguationGraph(String text) {
-        Document d;
-       
-        d = new Document(null, this.semanticModels, language);
-        AbstractDocumentTemplate docTmp = AbstractDocumentTemplate.getDocumentModel(text);
-        Parsing.parseDoc(docTmp, d, true, language);
-
-        if (this.diffStrategy == DiffStrategy.DisambiguationGraphDiff) {
-            DisambiguisationGraphAndLexicalChains.buildDisambiguationGraph(d);
-            DisambiguisationGraphAndLexicalChains.pruneDisambiguationGraph(d);
-            DisambiguisationGraphAndLexicalChains.buildLexicalChains(d);
-        }
-
-        return d;
     }
 
     private List<Delta<AnalysisElement>> reviseDelta(Delta<AnalysisElement> delta, AnalysisElement w1, AnalysisElement w2) {
@@ -167,16 +138,6 @@ public class Diff {
         return null;
     }
 
-    private String getSenseFromChain(LexicalChain lc, Word word1) {
-        for (LexicalChainLink link : lc.getLinks()) {
-            if (link.getWord().compareTo(word1) == 0) {
-                return link.getSenseId();
-            }
-        }
-        
-        return null;
-    }
-
     private List<Delta<AnalysisElement>> ResolveChangedDeltasWords(Delta<AnalysisElement> delta) {
         LinkedList<Delta<AnalysisElement>> deltas = new LinkedList<>();
         SemanticCohesion sc;
@@ -198,13 +159,13 @@ public class Diff {
                         String senseIdOriginal = null, senseIdRevised = null;
 
                         for (LexicalChain lc : this.originalDoc.getLexicalChains()) {
-                            if ((senseIdOriginal = getSenseFromChain(lc, (Word) w1)) != null) {
+                            if ((senseIdOriginal = Utils.getSenseFromChain(lc, (Word) w1)) != null) {
                                 break;
                             }
                         }
 
                         for (LexicalChain lc : revisedDoc.getLexicalChains()) {
-                            if ((senseIdRevised = getSenseFromChain(lc, (Word) w2)) != null) {
+                            if ((senseIdRevised = Utils.getSenseFromChain(lc, (Word) w2)) != null) {
                                 break;
                             }
                         }
@@ -248,21 +209,6 @@ public class Diff {
         deltas.add(delta);
         return deltas;
     }
-    
-    private List<AnalysisElement> toList(List<AnalysisElement> elem) {
-        List<AnalysisElement> list = new LinkedList<>();
-
-        elem.forEach((block) -> {
-            if (block instanceof Sentence) {
-                list.addAll(((Sentence)block).getAllWords());
-            }
-            if (block instanceof Block) {
-                list.addAll(((Block)block).getSentences());
-            }
-        });
-
-        return list;
-    }
 
     private boolean diff(List<AnalysisElement> originalElem, List<AnalysisElement> revisedElem) {
         List<Delta<AnalysisElement>> revisedDelta = new LinkedList<>();
@@ -288,8 +234,8 @@ public class Diff {
             } else {
                 if (delta.getType() == Delta.TYPE.CHANGE) {
                     boolean equal = diff(
-                            toList(delta.getOriginal().getLines()),
-                            toList(delta.getRevised().getLines()));
+                            Utils.toList(delta.getOriginal().getLines()),
+                            Utils.toList(delta.getRevised().getLines()));
                     if (!equal) {
                         revisedDelta.add(delta);
                     }
@@ -299,7 +245,7 @@ public class Diff {
             }
         });
 
-        List<DiffRow<AnalysisElement>> diffs = generateDiffElems(
+        List<DiffRow<AnalysisElement>> diffs = Utils.generateDiffElems(
                 originalElem, revisedElem, revisedDelta);
 
         AnalysisElement lastBlock = ((AnalysisElement)originalElem.get(0)).getContainer();
@@ -322,154 +268,6 @@ public class Diff {
 
         return revisedDelta.isEmpty();
     }
-    
-    private List<DiffRow<AnalysisElement>> generateDiffElems(List<AnalysisElement> original, List<AnalysisElement> revised, List<Delta<AnalysisElement>> deltaList) {
-
-        List<DiffRow<AnalysisElement>> diffRows = new ArrayList<>();
-        int endPos = 0;
-        
-        for (int i = 0; i < deltaList.size(); i++) {
-            Delta<AnalysisElement> delta = deltaList.get(i);
-            Chunk<AnalysisElement> orig = delta.getOriginal();
-            Chunk<AnalysisElement> rev = delta.getRevised();
-
-            // catch the equal prefix for each chunk
-            for (AnalysisElement line : original.subList(endPos, orig.getPosition())) {
-                diffRows.add(new DiffRow(DiffRow.Tag.EQUAL, line, line));
-            }
-
-            // Inserted DiffRow
-            if (delta.getClass().equals(InsertDelta.class)) {
-                endPos = orig.last() + 1;
-                ((List<AnalysisElement>) rev.getLines()).forEach((line) -> {
-                    diffRows.add(new DiffRow(DiffRow.Tag.INSERT, "", line));
-                });
-                continue;
-            }
-
-            // Deleted DiffRow
-            if (delta.getClass().equals(DeleteDelta.class)) {
-                endPos = orig.last() + 1;
-                ((List<AnalysisElement>) orig.getLines()).forEach((line) -> {
-                    diffRows.add(new DiffRow(DiffRow.Tag.DELETE, line, ""));
-                });
-                continue;
-            }
-
-            // the changed size is match
-            if (orig.size() == rev.size()) {
-                for (int j = 0; j < orig.size(); j++) {
-                    diffRows.add(new DiffRow(DiffRow.Tag.CHANGE, (AnalysisElement) orig.getLines().get(j),
-                            (AnalysisElement) rev.getLines().get(j)));
-                }
-            } else if (orig.size() > rev.size()) {
-                for (int j = 0; j < orig.size(); j++) {
-                    diffRows.add(new DiffRow(DiffRow.Tag.CHANGE, (AnalysisElement) orig.getLines().get(j), rev
-                            .getLines().size() > j ? (AnalysisElement) rev.getLines().get(j) : ""));
-                }
-            } else {
-                for (int j = 0; j < rev.size(); j++) {
-                    diffRows.add(new DiffRow(DiffRow.Tag.CHANGE, orig.getLines().size() > j ? (AnalysisElement) orig
-                            .getLines().get(j) : "", (AnalysisElement) rev.getLines().get(j)));
-                }
-            }
-            endPos = orig.last() + 1;
-        }
-
-        // Copy the final matching chunk if any.
-        for (AnalysisElement line : original.subList(endPos, original.size())) {
-            diffRows.add(new DiffRow(DiffRow.Tag.EQUAL, line, line));
-        }
-
-        return diffRows;
-    }
-    
-    private String diffToString(AnalysisElement oldLine) {
-        StringBuilder sb = new StringBuilder();
-
-        oldLine.getChanges().stream().map((block) -> {
-            if (block.getTag() == DiffRow.Tag.CHANGE) {
-                if (oldLine instanceof Sentence){
-                    if (((Object) block.getOldLine()) instanceof String) {
-                    } else {
-                        sb.append(colorText(block.getOldLine().getText(), "red"))
-                                .append(" ");
-                    }
-
-                    if (((Object) block.getNewLine()) instanceof String) {
-                    } else {
-                        sb.append(colorText(block.getNewLine().getText(), "blue"))
-                                .append(" ");
-                    }
-                } else {
-                    if (((Object)block.getOldLine()) instanceof String)
-                    {
-                        sb.append(block.getOldLine());
-                    } else 
-                    {
-                        sb.append(diffToString(block.getOldLine()));
-                    }
-                }
-            }
-            return block;
-        }).map((block) -> {
-            if (block.getTag() == DiffRow.Tag.EQUAL) {
-                sb.append(block.getOldLine().getText());
-            }
-            return block;
-        }).map((block) -> {
-            if (block.getTag() == DiffRow.Tag.DELETE) {
-                sb.append(colorText(block.getOldLine().getText(), "orange"));
-            }
-            return block;
-        }).map((block) -> {
-            if (block.getTag() == DiffRow.Tag.INSERT) {
-                sb.append(colorText(block.getNewLine().getText(), "green"));
-            }
-            return block;
-        }).forEachOrdered((_item) -> {
-            if (oldLine instanceof Document) {
-                sb.append("<br>");
-            } else {
-                sb.append(" ");
-            }
-        });
-
-        return sb.toString();
-    }
-
-    private static String colorText(String text, String color) {
-        String phrase = " <font color='" + color + "'><b>" + text + "</b></font> ";
-        return phrase.trim();
-    }
-
-    private static String readFile(String filename) {
-        BufferedReader bufferedReader;
-
-        try {
-            bufferedReader = new BufferedReader(new FileReader(filename));
-            StringBuilder stringBuffer;
-            stringBuffer = new StringBuilder();
-            String line;
-
-            while ((line = bufferedReader.readLine()) != null) {
-                stringBuffer.append(line).append("\n");
-            }
-
-            return stringBuffer.toString();
-
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Diff.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Diff.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return "";
-    }
-
-    public String diffToString() {
-        return diffToString(originalDoc);
-    }
 
     public Document diff() {
         this.diff((new LinkedList<>(originalDoc.getBlocks())), (new LinkedList<>(revisedDoc.getBlocks())));
@@ -480,12 +278,11 @@ public class Diff {
         String originalFilePath = "/home/tzuie/Desktop/dizertatie/diffData/dis1";
         String revisedFilePath = "/home/tzuie/Desktop/dizertatie/diffData/dis2";
 
-        String original = readFile(originalFilePath);
-        String revised = readFile(revisedFilePath);
+        String original = Utils.readFile(originalFilePath);
+        String revised = Utils.readFile(revisedFilePath);
 
         Diff diff;
         diff = new Diff(original, revised, DiffStrategy.WordNetDiff, Lang.en, true);
-        diff.diff();
-        System.out.println(diff.diffToString());
+        System.out.println(BasicHTMLVisualization.diffToString(diff.diff()));
     }
 }
