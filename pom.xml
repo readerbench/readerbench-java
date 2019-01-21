@@ -329,7 +329,7 @@
             </dependency>
             <dependency>
                 <groupId>com.readerbench.resources</groupId>
-                <artifactId>semantic-models-aoe-grade5</artifactId>
+                <artifactId>semantic-models-aoe_grade5-en</artifactId>
                 <version>1.0</version>
             </dependency>
             <dependency>
