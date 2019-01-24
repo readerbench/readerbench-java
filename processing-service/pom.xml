@@ -113,6 +113,10 @@
         </dependency>
         <dependency>
             <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-aoe_grade5-en</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
             <artifactId>semantic-models-enea_tasa-en</artifactId>
         </dependency>
         <dependency>
