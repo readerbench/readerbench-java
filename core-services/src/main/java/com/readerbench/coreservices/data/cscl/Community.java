@@ -15,7 +15,10 @@
  */
 package com.readerbench.coreservices.data.cscl;
 
+import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.AnalysisElement;
+import com.readerbench.coreservices.semanticmodels.SemanticModel;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +34,16 @@ public class Community extends AnalysisElement {
     private String name;
     private List<Participant> participants;
     private List<Conversation> conversations;
+    private AbstractDocument eligibleContributions;
+
     private List<Community> timeframeSubCommunities;
     private double[][] participantContributions;
     private Date startDate, endDate;
     private Date firstContributionDate, lastContributionDate;
 
-    public Community(String name, Lang lang, Date startDate, Date endDate) {
+    public Community(String name, Lang lang, List<SemanticModel> models, Date startDate, Date endDate) {
         super(null, 0, null, null, lang);
+        super.setSemanticModels(models);
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -116,5 +122,13 @@ public class Community extends AnalysisElement {
 
     public void setParticipantContributions(double[][] participantContributions) {
         this.participantContributions = participantContributions;
+    }
+
+    public AbstractDocument getEligibleContributions() {
+        return eligibleContributions;
+    }
+
+    public void setEligibleContributions(AbstractDocument eligibleContributions) {
+        this.eligibleContributions = eligibleContributions;
     }
 }

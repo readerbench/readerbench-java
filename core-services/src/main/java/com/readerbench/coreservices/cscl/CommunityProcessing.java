@@ -80,6 +80,7 @@ public class CommunityProcessing {
                                 community.setLastContributionDate(u.getTime());
                             }
                             Block.addBlock(participantToUpdate.getContributions(), b);
+                            Block.addBlock(community.getEligibleContributions(), b);
                             if (b.isSignificant()) {
                                 Block.addBlock(participantToUpdate.getSignificantContributions(), b);
                             }

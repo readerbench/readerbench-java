@@ -24,6 +24,7 @@ import com.readerbench.coreservices.data.cscl.Participant;
 import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.coreservices.semanticmodels.SemanticModel;
+import com.readerbench.coreservices.semanticmodels.SimilarityType;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.processingservice.Annotators;
 import java.util.Date;
@@ -49,8 +50,9 @@ public class CommunityProcessingPipeline extends ConversationProcessingPipeline 
         super(lang, models, annotators);
     }
 
-    public Community createCommunityFromConversations(String name, List<Conversation> conversations, Date startDate, Date endDate) {
-        Community community = new Community(name, getLanguage(), startDate, endDate);
+    public Community createCommunityFromConversations(String name, List<Conversation> conversations, List<SemanticModel> models, Date startDate, Date endDate) {
+        Community community = new Community(name, getLanguage(), models, startDate, endDate);
+        community.setEligibleContributions(new Conversation(null, community.getSemanticModelsAsList(), community.getLanguage()));
 
         community.setName(name);
         for (Conversation c : conversations) {

@@ -22,5 +22,5 @@ public class ConversationActorSystem {
     public static final ActorRef PROCESSING_WORKER = ACTOR_SYSTEM.actorOf(ConversationWorkerActor.props(NUMBER_OF_WORKERS_ACTORS), "convert-document-worker");
     public static final ActorRef PROCESSING_MASTER = ACTOR_SYSTEM.actorOf(ConversationMasterActor.props(NUMBER_OF_MASTER_ACTORS), "convert-document-master");
 
-    public static final long TIMEOUT = 1000 * 1000l;
+    public static final long TIMEOUT = 20000000;
 }

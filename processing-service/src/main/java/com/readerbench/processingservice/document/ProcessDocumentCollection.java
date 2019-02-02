@@ -108,9 +108,23 @@ public class ProcessDocumentCollection {
     }
 
     public static void main(String[] args) {
-        Lang lang = Lang.en;
+        /*Lang lang = Lang.en;
         List<SemanticModel> models = SemanticModel.loadModels("tasa", lang);
         String path = "../resources/in/essays/all essays";
+
+        Txt2XmlConverter converter = new Txt2XmlConverter(lang);
+        converter.parseTxtFiles(path, lang, "UTF-8", false);
+
+        ProcessDocumentCollection processing = new ProcessDocumentCollection();
+        processing.processTexts(path, models, lang, false);*/
+
+        processQuantitativeAnalysis();
+    }
+
+    private static void processQuantitativeAnalysis() {
+        Lang lang = Lang.en;
+        List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
+        String path = "C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\NATO\\Corpus analiza cantitativa - v5\\integrative nou 1991-2018";
 
         Txt2XmlConverter converter = new Txt2XmlConverter(lang);
         converter.parseTxtFiles(path, lang, "UTF-8", false);

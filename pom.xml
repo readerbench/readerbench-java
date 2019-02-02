@@ -29,7 +29,7 @@
         <weka-dev.version>3.9.1</weka-dev.version>
         <svm.version>3.22</svm.version>
 
-        <elasticsearch.version>6.2.4</elasticsearch.version>
+        <elasticsearch.version>6.4.0</elasticsearch.version>
         <jackson-databind.version>2.8.8</jackson-databind.version>
 
         <libthrift.version>0.10.0</libthrift.version>

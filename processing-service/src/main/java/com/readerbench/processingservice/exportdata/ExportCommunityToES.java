@@ -15,13 +15,22 @@
  */
 package com.readerbench.processingservice.exportdata;
 
+import com.readerbench.coreservices.cna.extendedcna.distancestrategies.AuthorDistanceStrategyType;
+import com.readerbench.coreservices.data.AbstractDocument;
 import com.readerbench.coreservices.data.cscl.CSCLIndices;
 import com.readerbench.coreservices.data.cscl.Community;
 import com.readerbench.coreservices.data.cscl.Participant;
+import com.readerbench.coreservices.data.discourse.SemanticCohesion;
+import com.readerbench.coreservices.keywordmining.Keyword;
+import com.readerbench.coreservices.keywordmining.KeywordModeling;
 import com.readerbench.datasourceprovider.commons.Formatting;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.HdrHistogram.DoubleLinearIterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -197,5 +206,198 @@ public class ExportCommunityToES {
         LOGGER.info("Successfully finished writing Individual Stats in Elasticsearch ...");
 
         return participantsStats;
+    }
+
+    /**
+     * Get data fro trend chart for entire community
+     *
+     * @return
+     */
+    public List<Map<String, Object>> getContributionsForTrend() {
+        List<Map<String, Object>> communityResult = new ArrayList<>();
+
+        for (Community subCommunity : community.getTimeframeSubCommunities()) {
+            List<Double> subcommunityValues = new ArrayList<>();
+            for (int index = 0; index < subCommunity.getParticipants().size(); index++) {
+                Participant p = subCommunity.getParticipants().get(index);
+
+                if (p.getContributions().getNoBlocks() > 0) {
+                    Double score = p.getIndices().get(CSCLIndices.SCORE);
+                    subcommunityValues.add(score);
+                }
+
+            }
+
+            subcommunityValues.sort(Comparator.naturalOrder());
+
+            Map<String, Object> subcommunityResult = new HashMap<>();
+            Date startDate = subCommunity.getStartDate() != null ? subCommunity.getStartDate() : subCommunity.getFistContributionDate();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            subcommunityResult.put("date", dateFormat.format(startDate));
+
+            DecimalFormat df = new DecimalFormat(".##");
+            subcommunityResult.put("pct05", Double.valueOf(df.format(subcommunityValues.get(Math.min((int) Math.round(.05 * subcommunityValues.size()),subcommunityValues.size()-1)))));
+            subcommunityResult.put("pct25", Double.valueOf(df.format(subcommunityValues.get(Math.min((int) Math.round(.25 * subcommunityValues.size()),subcommunityValues.size()-1)))));
+            subcommunityResult.put("pct50", Double.valueOf(df.format(subcommunityValues.get(Math.min((int) Math.round(.50 * subcommunityValues.size()),subcommunityValues.size()-1)))));
+            subcommunityResult.put("pct75", Double.valueOf(df.format(subcommunityValues.get(Math.min((int) Math.round(.75 * subcommunityValues.size()),subcommunityValues.size()-1)))));
+            subcommunityResult.put("pct95", Double.valueOf(df.format(subcommunityValues.get(Math.min((int) Math.round(.95 * subcommunityValues.size()),subcommunityValues.size()-1)))));
+            communityResult.add(subcommunityResult);
+        }
+
+        return communityResult;
+    }
+
+    /**
+     * Get data for timeline evolution of global participation
+     * @return
+     */
+    public List<Map<String, Object>> getGlobalTimelineEvolution() {
+
+        List<Map<String, Object>> communityResult = new ArrayList<>();
+        for (Community subCommunity : community.getTimeframeSubCommunities()) {
+            Double density = 0d;
+            int noParticipants = 0;
+            if (subCommunity.getEligibleContributions().getNoBlocks() > 0) {
+                for (Participant participant : subCommunity.getParticipants()) {
+                    if (participant.getContributions().getNoBlocks() > 0) {
+                        noParticipants ++;
+                    }
+                }
+                for (int row = 0; row < subCommunity.getParticipantContributions().length; row++) {
+                    for (int col = row; col < subCommunity.getParticipantContributions()[row].length; col++) {
+                        if (row!=col && subCommunity.getParticipantContributions()[row][col] > 0) {
+                            density ++;
+                        }
+                    }
+                }
+
+                if (subCommunity.getEligibleContributions().getNoBlocks() == 1  && noParticipants == 1) {
+                    density = 0.0;
+                } else {
+                    density = density / (noParticipants * (noParticipants - 1));
+                }
+
+            }
+
+
+            Map<String, Object> subcommunityResult = new HashMap<>();
+
+            Date startDate = subCommunity.getStartDate() != null ? subCommunity.getStartDate() : subCommunity.getFistContributionDate();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            subcommunityResult.put("date", dateFormat.format(startDate));
+
+            subcommunityResult.put("participants", noParticipants);
+            subcommunityResult.put("contributions", subCommunity.getEligibleContributions().getNoBlocks());
+            subcommunityResult.put("density", density);
+
+            communityResult.add(subcommunityResult);
+        }
+
+        return communityResult;
+
+    }
+
+
+    public Map<String, List<Integer>> getKeywordsSimilarity(double threshold, int maxTimeframeTopics) {
+        AbstractDocument eligibleContributions = community.getEligibleContributions();
+        eligibleContributions.determineWordOccurences(eligibleContributions.getBlocks());
+        eligibleContributions.determineSemanticDimensions();
+        KeywordModeling.determineKeywords(eligibleContributions, false);
+        //determine maximum #maxTimeframeTopics topics that are only nouns and verbs
+        List<Keyword> keywords = KeywordModeling.getSublist(eligibleContributions.getTopics(),
+                maxTimeframeTopics,
+                true,
+                true);
+
+        Map<String, List<Integer>> keywordsResult = new HashMap<>();
+        for (Keyword t1 : keywords) {
+            List<Integer> row = new ArrayList<>();
+            System.out.print(t1.getWord().getLemma() + " : ");
+            for (Keyword t2 : keywords) {
+                int value = 0;
+                if (!t1.equals(t2)) {
+                    double sim = SemanticCohesion.getAverageSemanticModelSimilarity(t1.getElement(), t2.getElement());
+                    if (sim > threshold) {
+                        value = (int) Math.ceil((sim - threshold) * 10);
+                        row.add(value);
+                    } else {
+                        row.add(0);
+                    }
+                } else {
+                    row.add(0);
+                }
+                System.out.print(value + ", ");
+            }
+            System.out.println("\n");
+            keywordsResult.put(t1.getWord().getLemma(), row);
+        }
+
+        return keywordsResult;
+    }
+
+
+    /**
+     * Builds keywords for heap map. Only for the entire community (week = 0).
+     * @param week
+     * @return
+     */
+    public JSONObject buildKeywordsForHeapMap(Integer week, Community community) {
+        LOGGER.info("Write keywords to Elasticsearch");
+        JSONObject result = new JSONObject();
+
+        result.put("communityName", community.getName());
+        result.put("week", week);
+        Date startDate = community.getStartDate() != null ? community.getStartDate() : community.getFistContributionDate();
+        Date endDate = community.getEndDate() != null ? community.getEndDate() : community.getLastContributionDate();
+        result.put("startDate", startDate);
+        result.put("endDate", endDate);
+
+        Map<String, double[]> keywords = exportDiscussedTopicsPerTimeframe(10, community);
+
+        Map<String, List<Double>> finalResult = new HashMap<>();
+        keywords.forEach((k,v)->{
+            List<Double> values = new ArrayList<>();
+            for(int i = 0; i < v.length; i ++) {
+                values.add(v[i]);
+            }
+            finalResult.put(k, values);
+        });
+
+        result.put("data", finalResult);
+        return result;
+    }
+
+    /**
+     * Export discussed topics
+     *
+     * @param maxTimeframeTopics
+     * @return
+     */
+    private Map<String, double[]> exportDiscussedTopicsPerTimeframe(int maxTimeframeTopics, Community community) {
+        LOGGER.info("Determining discussed topics withing each timeframe  ");
+        Map<String, double[]> topicsEvolution = new TreeMap<>();
+
+        if (community.getTimeframeSubCommunities() == null || community.getTimeframeSubCommunities().isEmpty()) {
+            return topicsEvolution;
+        }
+
+        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+            AbstractDocument eligibleContributions = community.getTimeframeSubCommunities().get(i).getEligibleContributions();
+            eligibleContributions.determineWordOccurences(eligibleContributions.getBlocks());
+            eligibleContributions.determineSemanticDimensions();
+            KeywordModeling.determineKeywords(eligibleContributions, false);
+            //determine maximum #maxTimeframeTopics topics that are only nouns and verbs
+            List<Keyword> keywords = KeywordModeling.getSublist(eligibleContributions.getTopics(),
+                    maxTimeframeTopics,
+                    true,
+                    true);
+            for (Keyword k : keywords) {
+                if (!topicsEvolution.containsKey(k.getWord().getLemma())) {
+                    topicsEvolution.put(k.getWord().getLemma(), new double[community.getTimeframeSubCommunities().size()]);
+                }
+                topicsEvolution.get(k.getWord().getLemma())[i] = k.getRelevance();
+            }
+        }
+        return topicsEvolution;
     }
 }

@@ -63,7 +63,9 @@ public class CommunityTimeProcessing {
     }
 
     private Community extractSubCommunity(Community community, Date startSubCommunities, Date endSubCommunities) {
-        Community subCommunity = new Community(community.getName(), community.getLanguage(), startSubCommunities, endSubCommunities);
+        Community subCommunity = new Community(community.getName(), community.getLanguage(), community.getSemanticModelsAsList(), startSubCommunities, endSubCommunities);
+        subCommunity.setEligibleContributions(new Conversation(null, community.getSemanticModelsAsList(), community.getLanguage()));
+
         for (Conversation c : community.getConversations()) {
             subCommunity.getConversations().add(c);
         }
