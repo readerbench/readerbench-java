@@ -89,7 +89,7 @@ public class TextPreprocessing {
                 pattern = "[a-zàâäæçéêèëîïôœùûü]+";
                 break;
             case ro:
-                pattern = "[a-zăâîşţ]+";
+                pattern = "[a-zăâîşţșț]+";
                 break;
             case es:
                 pattern = "[a-zñóéíáúü]+";

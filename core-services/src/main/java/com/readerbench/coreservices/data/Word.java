@@ -235,8 +235,8 @@ public class Word extends AnalysisElement implements Comparable<Word>, Serializa
         if (this.getText().length() > 1
                 && !StopWords.isStopWord(this.getText(), getLanguage())
                 && !StopWords.isStopWord(this.getLemma(), getLanguage())
-                && (Dictionary.isDictionaryWord(this.getText(), getLanguage())
-                || Dictionary.isDictionaryWord(this.getLemma(), getLanguage()))) {
+                && (Dictionary.isDictionaryWord(this.getText().toLowerCase(), getLanguage())
+                || Dictionary.isDictionaryWord(this.getLemma().toLowerCase(), getLanguage()))) {
             if (this.getPOS() != null) {
                 return this.getPOS().equals("NN") || this.getPOS().equals("VB") || this.getPOS().equals("JJ") || this.getPOS().equals("RB");
             }
