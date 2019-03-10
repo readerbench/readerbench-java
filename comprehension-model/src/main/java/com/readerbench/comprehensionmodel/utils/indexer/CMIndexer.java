@@ -74,7 +74,7 @@ public class CMIndexer {
         int sentenceNum = 0;
         while (sentenceIterator.hasNext()) {
             Sentence sentence = sentenceIterator.next();
-
+            
             CMSyntacticGraph syntacticGraph = corefContainer.getCMSyntacticGraph(sentence, sentenceNum);
             SyntacticWordDistanceStrategy syntacticStrategy = new SyntacticWordDistanceStrategy(syntacticGraph);
 

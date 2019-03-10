@@ -43,9 +43,19 @@ public class CMSyntacticGraph {
         CMNodeDO node1 = new CMNodeDO(word1, CMNodeType.TextBased);
         CMNodeDO node2 = new CMNodeDO(word2, CMNodeType.TextBased);
         CMEdgeDO edge = new CMEdgeDO(node1, node2, CMEdgeType.Syntactic, 1.0d);
-        this.wordSet.add(word1);
-        this.wordSet.add(word2);
-        this.edgeList.add(edge);
+        if(!this.containsEdge(edge)) {
+            this.edgeList.add(edge);
+            this.wordSet.add(word1);
+            this.wordSet.add(word2);
+        }
+    }
+    private boolean containsEdge(CMEdgeDO edge) {
+        for(CMEdgeDO currentEdge : this.edgeList) {
+            if(currentEdge.equals(edge)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Word> getWordList() {

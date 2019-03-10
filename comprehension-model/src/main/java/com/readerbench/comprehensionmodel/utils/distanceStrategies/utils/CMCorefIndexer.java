@@ -16,13 +16,10 @@
 package com.readerbench.comprehensionmodel.utils.distanceStrategies.utils;
 
 import com.readerbench.coreservices.data.AbstractDocument;
-import com.readerbench.coreservices.data.Block;
 import com.readerbench.coreservices.data.Sentence;
 import com.readerbench.coreservices.data.Word;
 import com.readerbench.datasourceprovider.pojo.Lang;
 import com.readerbench.comprehensionmodel.utils.CMUtils;
-import com.readerbench.coreservices.nlp.lemmatizer.StaticLemmatizer;
-import com.readerbench.coreservices.nlp.parsing.Parsing;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,16 +73,62 @@ public class CMCorefIndexer {
     public CMSyntacticGraph getCMSyntacticGraph(Sentence sentence, int sentenceIndex) {
         List<Triple<Word, Word, String>> dependencies = sentence.getDependencies();
         CMSyntacticGraph syntacticGraph = new CMSyntacticGraph();
-
-        for (Triple<Word, Word, String> dependency : dependencies) {
+        
+        for(int i = 0; i < dependencies.size(); i++) {
+            Triple<Word, Word, String> dependency = dependencies.get(i);
             Word dependentNode = this.getActualWord(dependency.getLeft(), sentenceIndex);
             Word governorNode = this.getActualWord(dependency.getMiddle(), sentenceIndex);
+            
             if (dependentNode.isContentWord() && governorNode.isContentWord()) {
                 syntacticGraph.indexEdge(dependentNode, governorNode);
+                continue;
+            }
+            
+            Word contentWord, nonContentWord;
+            if (!dependentNode.isContentWord() && governorNode.isContentWord()) {
+                contentWord = governorNode;
+                nonContentWord = dependentNode;
+            } else if (dependentNode.isContentWord() && !governorNode.isContentWord()) {
+                contentWord = dependentNode;
+                nonContentWord = governorNode;
+            } else {
+                continue;
+            }
+            
+            List<Triple<Word, Word, String>> cloned = new ArrayList<>(dependencies);
+            cloned.remove(i);
+            explore(contentWord, nonContentWord, cloned, syntacticGraph, sentenceIndex);
+        }
+        
+        return syntacticGraph;
+    }
+    private void explore(Word contentWord, Word nonContentWord,
+            List<Triple<Word, Word, String>> dependencies,
+            CMSyntacticGraph syntacticGraph,
+            int sentenceIndex) {
+        for(int i = 0; i < dependencies.size(); i++) {
+            Triple<Word, Word, String> candidate = dependencies.get(i);
+            Word dependentCandidate = this.getActualWord(candidate.getLeft(), sentenceIndex);
+            Word governorCandidate = this.getActualWord(candidate.getMiddle(), sentenceIndex);
+            
+            if(dependentCandidate.getLemma().equals(nonContentWord.getLemma())) {
+                if(governorCandidate.isContentWord()) {
+                    syntacticGraph.indexEdge(contentWord, governorCandidate);
+                } else {
+                    List<Triple<Word, Word, String>> cloned = new ArrayList<>(dependencies);
+                    cloned.remove(i);
+                    explore(contentWord, governorCandidate, cloned, syntacticGraph, sentenceIndex);
+                }
+            } else if(governorCandidate.getLemma().equals(nonContentWord.getLemma())) {
+                if(dependentCandidate.isContentWord()) {
+                    syntacticGraph.indexEdge(contentWord, dependentCandidate);
+                } else {
+                    List<Triple<Word, Word, String>> cloned = new ArrayList<>(dependencies);
+                    cloned.remove(i);
+                    explore(contentWord, dependentCandidate, cloned, syntacticGraph, sentenceIndex);
+                }
             }
         }
-
-        return syntacticGraph;
     }
     
     private Word getActualWord(Word word, int sentenceIndex) {
