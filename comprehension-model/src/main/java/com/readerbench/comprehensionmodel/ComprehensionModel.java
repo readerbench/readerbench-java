@@ -26,16 +26,18 @@ import com.readerbench.coreservices.semanticmodels.SemanticModel;
 public class ComprehensionModel {
 
     private final double minActivationScore;
+    private final int maxActiveConcepts;
     private final int maxDictionaryExpansion;
     private final ActivationScoreLogger activationScoreLogger;
 
     private final CMIndexer cmIndexer;
     private CMGraphDO currentGraph;
 
-    public ComprehensionModel(String text, SemanticModel semModel, double minActivationScore, int maxDictionaryExpansion) {
+    public ComprehensionModel(String text, SemanticModel semModel, double minActivationScore, int maxActiveConcepts, int maxDictionaryExpansion) {
         this.cmIndexer = new CMIndexer(text, semModel);
         this.currentGraph = new CMGraphDO();
         this.minActivationScore = minActivationScore;
+        this.maxActiveConcepts = maxActiveConcepts;
         this.maxDictionaryExpansion = maxDictionaryExpansion;
         this.activationScoreLogger = new ActivationScoreLogger();
     }
@@ -65,6 +67,7 @@ public class ComprehensionModel {
         pageRank.runPageRank(this.currentGraph);
         this.normalizeActivationScoreMapWithMax();
         this.activateWordsOverThreshold();
+        this.currentGraph.restrictActiveNodes(maxActiveConcepts);
         this.activationScoreLogger.saveScores(this.currentGraph.getActivationMap());
     }
 

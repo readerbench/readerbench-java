@@ -101,6 +101,19 @@ public class CMGraphDO {
             }
         }
     }
+    
+    public void restrictActiveNodes(int maxActiveConcepts) {
+        Collections.sort(this.nodeList, (n1, n2) -> (-1) * new Double(n1.getActivationScore()).compareTo(n2.getActivationScore()));
+        for(int i = 0; i < this.nodeList.size(); i++) {
+            CMNodeDO node = this.nodeList.get(i);
+            if(node.isActive() && i >= maxActiveConcepts) {
+                node.deactivate();
+                this.getEdgeList(node).stream().forEach(edge -> {
+                    edge.deactivate();
+                });
+            }
+        }
+    }
 
     private boolean containsEdge(CMEdgeDO otherEdge) {
         return edgeListContainsEdge(this.edgeList, otherEdge);
