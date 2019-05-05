@@ -27,13 +27,16 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.json.*;
 import org.joda.time.DateTime;
-import org.json.simple.JSONObject;
+//import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.*;
 
 /**
  *
@@ -50,7 +53,7 @@ public class ParallelConversationProcessingPipeline {
     private static final String DISCUSSED_TOPICS = "discussedTopics.csv";
     private static final String INDIVIDUAL_THREAD_STATISTICS = "individualThreadStatistics.csv";
     private static final String PARTICIPANT_VIEW_D3_FILE = "particiantViewD3.json";
-    private static final String PATH = "C:\\Users\\Administrator\\Desktop\\projects\\resources\\out\\uso";
+    private static final String PATH = "/home/fetoiucatalinemil/Licenta/results";
     private static final String ELASTICSEARCH_INDEX_PARTICIPANTS = "community-participant";
     private static final String ELASTICSEARCH_INDEX_DIRECTED_GRAPH = "community-dr";
     private static final String ELASTICSEARCH_INDEX_EDGEBUNDLING = "community-eb";
@@ -69,7 +72,7 @@ public class ParallelConversationProcessingPipeline {
     private Date endDate;
     private int monthIncrement;
     private int dayIncrement;
-    private ElasticsearchService elasticsearchService = new ElasticsearchService();
+    private static ElasticsearchService elasticsearchService = new ElasticsearchService();
 
     public ParallelConversationProcessingPipeline(String communityName, Lang lang, List<SemanticModel> models, List<Annotators> annotators, int monthIncrement, int dayIncrement) {
         this.communityName = communityName;
@@ -78,6 +81,36 @@ public class ParallelConversationProcessingPipeline {
         this.annotators = annotators;
         this.monthIncrement = monthIncrement;
         this.dayIncrement = dayIncrement;
+    }
+
+    
+    public List<Conversation> extractConvTemplateFromEs(String communityName, String communityType) {
+        ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(lang, models, annotators);
+        List<AbstractDocumentTemplate> templates = new ArrayList<>();
+
+        ArrayList<org.json.simple.JSONObject> discussionThreads = elasticsearchService.getDiscussionThreads(communityName, communityType);
+
+        try {
+            for (org.json.simple.JSONObject threadSimple : discussionThreads) {
+                JSONObject thread = new  JSONObject(threadSimple.toString());
+                AbstractDocumentTemplate template = pipeline.extractConvTemplateFromEsJson(thread);
+                if (template != null) {
+                    templates.add(template);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        List<Conversation> listOfProcessedConversations = new ArrayList<>();
+        for (AbstractDocumentTemplate template : templates) {
+            Conversation conversation = pipeline.createConversationFromTemplate(template);
+            pipeline.processConversation(conversation);
+
+            listOfProcessedConversations.add(conversation);
+        }
+
+        return listOfProcessedConversations;   
     }
 
     public List<Conversation> loadXMLsFromDirectory(String directoryPath) {
@@ -119,19 +152,18 @@ public class ParallelConversationProcessingPipeline {
             listOfProcessedConversations.add(conversation);
         }
 
-
         return listOfProcessedConversations;
     }
 
-    public void processCommunity(String directoryPath) {
-        String eDate="2018.01.26";
+    public void processCommunity(String communityName, String communityType) {
+        String eDate="2019.05.04";
         try {
             endDate = new SimpleDateFormat("yyyy.MM.dd").parse(eDate);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        String sDate="2017.09.25";
+        String sDate="2019.01.01";
         try {
             startDate = new SimpleDateFormat("yyyy.MM.dd").parse(sDate);
         } catch (Exception e) {
@@ -139,7 +171,9 @@ public class ParallelConversationProcessingPipeline {
         }
 
         CommunityProcessingPipeline pipeline = new CommunityProcessingPipeline(lang, models, annotators);
-        List<Conversation> conversations = loadXMLsFromDirectory(directoryPath);
+
+        List<Conversation> conversations = extractConvTemplateFromEs(communityName, communityType);
+
         Community community = pipeline.createCommunityFromConversations(communityName, conversations, models, startDate, endDate);
         pipeline.processCommunity(community);
         pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
@@ -156,7 +190,6 @@ public class ParallelConversationProcessingPipeline {
         for (Map<String, Object> globalTimeline : globalTimelineEvolution) {
             System.out.println(globalTimeline);
         }
-
 
         Map<String, List<Integer>> keywordsSimilarity = ec.getKeywordsSimilarity(0.7, 20);
         System.out.println("\n----------------- keywordsSimilarity ------------------- ");
@@ -211,15 +244,13 @@ public class ParallelConversationProcessingPipeline {
 //
 //        LOGGER.info("\n------- Ending subcommunities processing -------\n");
 //        LOGGER.info("---------- Starting export community statistics to files --------\n");
-//        ExportCommunity export = new ExportCommunity(community);
-//
-//        export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
-//        export.exportTextualComplexity(PATH + "/" + communityName + "_" + TEXTUAL_COMPLEXITY);
-//        export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
-//        export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
-//        export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
+        ExportCommunity export = new ExportCommunity(community);
 
-
+        export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
+        export.exportTextualComplexity(PATH + "/" + communityName + "_" + TEXTUAL_COMPLEXITY);
+        export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
+        export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
+        export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
     }
 
     public static void main(String[] args) {
@@ -229,7 +260,9 @@ public class ParallelConversationProcessingPipeline {
 
         //processEDMMooc();
 
-        processUsoData();
+        processRedditCommunity();
+        
+        //processUsoData();
     }
 
     private static void processMathEqualsLove() {
@@ -241,7 +274,19 @@ public class ParallelConversationProcessingPipeline {
         ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
                 communityName, lang, models, annotators, 0, 7 );
 
-        processingPipeline.processCommunity("C:\\Users\\Administrator\\Desktop\\projects\\mathequalslove.blogspot.ro\\mathequalslove.blogspot.ro");
+        //processingPipeline.processCommunity("C:\\Users\\Administrator\\Desktop\\projects\\mathequalslove.blogspot.ro\\mathequalslove.blogspot.ro");
+    }
+
+    private static void processRedditCommunity() {
+        Lang lang = Lang.en;
+        List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
+        List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
+        String communityName = "community_democracyexperiment";
+
+        ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
+                communityName, lang, models, annotators, 0, 7 );
+
+        processingPipeline.processCommunity("community_democracyexperiment", "thread");
     }
 
     private static void processEDMMooc() {
@@ -255,7 +300,7 @@ public class ParallelConversationProcessingPipeline {
 
         //processingPipeline.startDate = new Date(1382630400);
         //processingPipeline.endDate = new Date(1387472400);
-        processingPipeline.processCommunity("C:\\Users\\Administrator\\ownCloud\\ReaderBench\\in\\MOOC\\forum_posts&comments");
+        //processingPipeline.processCommunity("C:\\Users\\Administrator\\ownCloud\\ReaderBench\\in\\MOOC\\forum_posts&comments");
     }
 
     private static void processBarnesMOOC() {
@@ -267,7 +312,7 @@ public class ParallelConversationProcessingPipeline {
         ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
                 communityName, lang, models, annotators, 0, 7 );
 
-        processingPipeline.processCommunity("C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\Barnes_MOOC");
+        //processingPipeline.processCommunity("C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\Barnes_MOOC");
     }
 
     private static void processUsoData() {
@@ -280,7 +325,7 @@ public class ParallelConversationProcessingPipeline {
                 communityName, lang, models, annotators, 0, 7 );
 
         //processingPipeline.processCommunity("C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\uso");
-        processingPipeline.processCommunity("C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\uso\\uso_files_no_tags");
+        //processingPipeline.processCommunity("C:\\Users\\Administrator\\Nextcloud\\ReaderBench\\in\\uso\\uso_files_no_tags");
     }
 
 

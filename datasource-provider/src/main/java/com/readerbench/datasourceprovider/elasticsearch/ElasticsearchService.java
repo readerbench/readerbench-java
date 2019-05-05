@@ -38,7 +38,7 @@ public class ElasticsearchService {
     static {
         try {
             Settings settings = Settings.builder()
-                    .put("cluster.name", "elasticsearch").build();
+                    .put("cluster.name", "docker-cluster").build();
             client = new PreBuiltTransportClient(settings)
                     .addTransportAddress(new TransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), ELSTICSEARCH_PORT));
         } catch (Exception e) {
@@ -183,6 +183,28 @@ public class ElasticsearchService {
             e.printStackTrace();
         }
 
+
+        return result;
+    }
+
+    public ArrayList<JSONObject> getDiscussionThreads(String communityIndex, String communityType) {
+        ArrayList<JSONObject> result = new ArrayList<>();
+
+        try {
+            QueryBuilder queryBuilder = QueryBuilders.matchAllQuery();
+            SearchResponse response = client.prepareSearch(communityIndex)
+                    .setTypes(communityType)
+                    .setQuery(queryBuilder)
+                    .setSize(5000)
+                    .get();
+
+            SearchHit[] searchHits = response.getHits().getHits();
+            for (SearchHit searchHit : searchHits) {
+                result.add(new JSONObject(searchHit.getSourceAsMap()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return result;
     }

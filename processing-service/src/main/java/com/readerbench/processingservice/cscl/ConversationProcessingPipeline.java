@@ -25,6 +25,13 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import org.elasticsearch.client.transport.TransportClient;
+//import org.json.simple.JSONObject;
+//import org.json.simple.JSONArray;
+import org.json.*;
+import java.net.InetAddress;
+
+
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileFilter;
@@ -168,6 +175,46 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
         }
     }
 
+    
+    public AbstractDocumentTemplate extractConvTemplateFromEsJson(JSONObject discussionThread) {
+        AbstractDocumentTemplate contents = new AbstractDocumentTemplate();
+        List<AbstractDocumentTemplate.BlockTemplate> blocks = new ArrayList<>();
+        String title = "";
+
+        try {
+            JSONArray participants = discussionThread.getJSONArray("participants");
+            title = discussionThread.getString("title");
+            JSONArray body = discussionThread.getJSONArray("body");
+
+            for (int index = 0; index < body.length(); index++) {
+                JSONObject comment = body.getJSONObject(index);
+                AbstractDocumentTemplate.BlockTemplate block = contents.new BlockTemplate();
+
+                block.setSpeaker(comment.getString("nickname"));
+
+                block.setTime(comment.getString("time"));
+                block.setId(Integer.parseInt(comment.getString("genid")));
+                block.setRefId(Integer.parseInt(comment.getString("refid")));
+
+                String text = comment.getString("text");
+                text = spellChecker.checkText(text, getLanguage(), "");
+                block.setContent(text);
+                if (text.length() > 0) {
+                    blocks.add(block);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        support.mergeAdjacentContributions(blocks);
+        contents.setBlocks(support.getNewBlocks());
+        contents.setTitle(title);
+        
+        return contents;
+    }
+  
+
     public AbstractDocumentTemplate extractConvTemplateFromXML(String path) {
         // parse the XML file
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -207,8 +254,8 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
                                 }
                                 if (el.hasAttribute("genid")) {
                                     block.setId(Integer.parseInt(el.getAttribute("genid")));
-                                }
-                                if (el.hasAttribute("ref")) {
+					}
+					if (el.hasAttribute("ref")) {
                                     if (el.getAttribute("ref").isEmpty()) {
                                         block.setRefId(0);
                                     } else {
