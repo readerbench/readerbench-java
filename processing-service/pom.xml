@@ -147,6 +147,19 @@
         
         <dependency>
             <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordnet-es</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>wordlists-es</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
+            <artifactId>semantic-models-jose_antonio-es</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.readerbench.resources</groupId>
             <artifactId>wordnet-ro</artifactId>
         </dependency>
         <dependency>
