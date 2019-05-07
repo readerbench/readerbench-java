@@ -28,7 +28,7 @@ public class WordValences {
     private static final Map<Lang, Map<String, String>> VALENCES_FOR_LANG = new EnumMap<>(Lang.class);
     private static final Properties PROPERTIES = ReadProperty.getProperties("textual_complexity_paths.properties");
     private static final String PROPERTY_VALENCES_NAME = "VALENCES_%s_PATH";
-    public static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr, Lang.es);
+    public static final List<Lang> SUPPORTED_LANGUAGES = Arrays.asList(Lang.en, Lang.fr);
 
     private static void initLang(Lang lang) {
         WORD_VALENCE_MAP.put(lang, new HashMap<>());
