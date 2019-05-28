@@ -125,9 +125,12 @@ public class ExportCommunity {
                 for (int index = 0; index < community.getParticipants().size(); index++) {
                     Participant p = community.getParticipants().get(index);
                     outTextualComplexity.write(p.getName().replaceAll(",", "").replaceAll("\\s+", " ") + ",Member " + index);
+		    System.out.println("new participant" + p.getName());
 
                     for (ComplexityIndex factor : factors) {
+			//System.out.println("factor");
                         if (p.getSignificantContributions().getComplexityIndices() != null) {
+			    System.out.println("daaaaa");
                             outTextualComplexity.write("," + Formatting.formatNumber(p.getSignificantContributions().getComplexityIndices().get(factor)));
                         }
                     }

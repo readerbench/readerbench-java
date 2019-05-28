@@ -156,7 +156,7 @@ public class ParallelConversationProcessingPipeline {
     }
 
     public void processCommunity(String communityName, String communityType) {
-        String eDate="2019.05.04";
+        String eDate="2019.07.08";
         try {
             endDate = new SimpleDateFormat("yyyy.MM.dd").parse(eDate);
         } catch (Exception e) {
@@ -173,10 +173,11 @@ public class ParallelConversationProcessingPipeline {
         CommunityProcessingPipeline pipeline = new CommunityProcessingPipeline(lang, models, annotators);
 
         List<Conversation> conversations = extractConvTemplateFromEs(communityName, communityType);
+	//List<Conversation> conversations = loadXMLsFromDirectory("/home/fetoiucatalinemil/Licenta/RedditCrawling/xml_posts");
 
         Community community = pipeline.createCommunityFromConversations(communityName, conversations, models, startDate, endDate);
         pipeline.processCommunity(community);
-        pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
+	//pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
 
         CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + communityName + "_week_" + 0 + ".csv");
         ExportCommunityToES ec = new ExportCommunityToES(community);
@@ -246,11 +247,11 @@ public class ParallelConversationProcessingPipeline {
 //        LOGGER.info("---------- Starting export community statistics to files --------\n");
         ExportCommunity export = new ExportCommunity(community);
 
-        export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
+	//export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
         export.exportTextualComplexity(PATH + "/" + communityName + "_" + TEXTUAL_COMPLEXITY);
-        export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
-        export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
-        export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
+        //export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
+        //export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
+        //export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
     }
 
     public static void main(String[] args) {
