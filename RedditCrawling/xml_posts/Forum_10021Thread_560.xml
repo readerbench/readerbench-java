@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387105086"/>
+                <Person nickname="1780650"/>
+                <Person nickname="120635"/>
+            </Participants>
+            <Body>
+                <Turn nickname="3189401">
+                    <Utterance genid="1" refid="0" time="1387105086">Did this assignment with python and the networkx library in a IPython environment. Crunching numbers is fun but the cherry on the pie is if you visualize the graph in (I think). With networkx you can write the graph to a 'gexf' file which I loaded into Gephi and fiddled around with it (I am by no means a Gephi expert) is this is a result:</Utterance>
+                </Turn>
+                <Turn nickname="1780650">
+                    <Utterance genid="2" refid="1" time="1387369067">"Hi Rose, See this: I compiled the file using Python to create the graph using the syntax of GraphViz (It's Open Source and Free Graph Visualization). I like it. You can download it here: </Utterance>
+                </Turn>
+                <Turn nickname="120635">
+                    <Utterance genid="3" refid="1" time="1387839729">"How about that! I didn't know this was available for Excel .. especially not as a free download. Thanks, Jaime .. a new toy to play with this season bright! </Utterance>
+                </Turn>
+                <Turn nickname="3189401">
+                    <Utterance genid="4" refid="3" time="1387105275">Did this assignment with python and the networkx library in a IPython environment. Crunching numbers is fun but the cherry on the pie is if you visualize the graph in (I think). With networkx you can write the graph to a 'gexf' file which I loaded into Gephi and fiddled around with it (I am by no means a Gephi expert) and this is a result:</Utterance>
+                </Turn>
+                <Turn nickname="1155809">
+                    <Utterance genid="5" refid="4" time="1387107858"> This is another example of Gephi output corresponding to a small part of Melvin's graph - with node size related to eigenvector centrality and edge color to degree..</Utterance>
+                </Turn>
+                <Turn nickname="2093911">
+                    <Utterance genid="6" refid="5" time="1387109678">Nice! Thank you for sharing this</Utterance>
+                </Turn>
+                <Turn nickname="120635">
+                    <Utterance genid="7" refid="6" time="1387183524">"Very nice work, Andrew and Melvin. Thanks. </Utterance>
+                </Turn>
+                <Turn nickname="1780650">
+                    <Utterance genid="8" refid="7" time="1387303354"></Utterance>
+                </Turn>
+                <Turn nickname="3862195">
+                    <Utterance genid="9" refid="8" time="1387359405">Which software was used to have the above graph? That is amazing</Utterance>
+                </Turn>
+                <Turn nickname="1802444">
+                    <Utterance genid="10" refid="9" time="1387488868">"This would be mine.... I actually used this to find the geodesic distance between nodes. Obtained using Gephi - Fruchterman Reingold Layout. Both the nodes and the edges are coloured by their degrees and weights respectively. Brighter the red, higher is the degree or the edge weight as the case may be.</Utterance>
+                </Turn>
+                <Turn nickname="184763">
+                    <Utterance genid="11" refid="10" time="1387519051">Igraph in R. I am still learning it.</Utterance>
+                </Turn>
+                <Turn nickname="242493">
+                    <Utterance genid="12" refid="11" time="1387683101">"Wow! This is a great thread! Thanks, everyone for sharing.</Utterance>
+                </Turn>
+                <Turn nickname="131162">
+                    <Utterance genid="13" refid="12" time="1387817158">"HI all, I used which is a free plug in for excel. You just have to include both nodes when describe an edge (post and post-to in our terms)</Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

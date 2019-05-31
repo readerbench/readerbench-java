@@ -1,0 +1,32 @@
+tehnologii:
+elastic search
+reddit api
+readerbench ?
+keras
+
+capitole:
+nlp + cscl
+cna, textual complexity indices, descriere indici
+text classification - svr, mlp, clustering
+
+tehnologii dupa
+
+metoda:
+descriere comunitati, corpus
+modul de extragere date, workflow
+indicii de regularitate
+descriere folosire svr, mlp, clustering
+vizualizari ReaderBench
+grafice regularitate - limita inferioara nr de replici, regularitate f mica sau f mare
+plotare rezultate predictor.py in functie de hiperparametrii
+
+filtrare textual complexity indices
+svr - best k din fiecare categorie apoi din toate
++- interfata grafica
+
+rezultate:
+
+comunitati - r/democracy_experiment - 1000
+	   - uso
+
+eprintare.ro

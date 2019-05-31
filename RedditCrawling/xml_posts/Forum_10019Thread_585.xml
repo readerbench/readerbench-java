@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387526980"/>
+            </Participants>
+            <Body>
+                <Turn nickname="2064944">
+                    <Utterance genid="1" refid="0" time="1387526980"> says the due date is Dec 20. I operated on that belief and my 10 points were reduced to 0 because this due date information was wrong. Please restore my points.</Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

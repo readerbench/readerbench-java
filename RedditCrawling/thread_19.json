@@ -1,0 +1,77 @@
+{'body': [{'genid': 1,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 0,
+           'text': 'Passed by senate, 3-1',
+           'time': 1556825880},
+          {'genid': 2,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 0,
+           'text': 'senator ping chain',
+           'time': 1556732506},
+          {'genid': 3,
+           'nickname': 't2_6l4z3',
+           'refid': 0,
+           'text': '**Voting comment:** reply to this comment with "aye" or '
+                   '"nay" to cast your vote! Do not vote more than once, and '
+                   'do not vote after the voting period has ended; **only '
+                   'votes cast within the voting period will be counted.** '
+                   'Also **if this vote is not labelled "public proposition" '
+                   '*only senators may vote on it*.** For more information '
+                   'about voting rules, please see [our '
+                   'wiki](https://www.reddit.com/r/DemocracyExperiment/wiki/index). '
+                   'Thank you!  \n'
+                   '\n'
+                   '\n'
+                   '*I am a bot, and this action was performed automatically. '
+                   'Please [contact the moderators of this '
+                   'subreddit](/message/compose/?to=/r/DemocracyExperiment) if '
+                   'you have any questions or concerns.*',
+           'time': 1556732367},
+          {'genid': 4,
+           'nickname': 't2_6l4z3',
+           'refid': 2,
+           'text': '/u/Occlpv3 /u/conalfisher /u/nullace652\n'
+                   '\n'
+                   '\n'
+                   '*I am a bot, and this action was performed automatically. '
+                   'Please [contact the moderators of this '
+                   'subreddit](/message/compose/?to=/r/DemocracyExperiment) if '
+                   'you have any questions or concerns.*',
+           'time': 1556732506},
+          {'genid': 5,
+           'nickname': 't2_6l4z3',
+           'refid': 2,
+           'text': '/u/donelikeasir /u/therealbutterpanda /u/whataworldphotos\n'
+                   '\n'
+                   '*I am a bot, and this action was performed automatically. '
+                   'Please [contact the moderators of this '
+                   'subreddit](/message/compose/?to=/r/DemocracyExperiment) if '
+                   'you have any questions or concerns.*',
+           'time': 1556732507},
+          {'genid': 6,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 3,
+           'text': 'Aye',
+           'time': 1556732409},
+          {'genid': 7,
+           'nickname': 't2_1716rb',
+           'refid': 3,
+           'text': 'Aye',
+           'time': 1556732417},
+          {'genid': 8,
+           'nickname': 't2_179h13',
+           'refid': 3,
+           'text': 'Aye',
+           'time': 1556733437},
+          {'genid': 9,
+           'nickname': 't2_14u7z0',
+           'refid': 3,
+           'text': 'Nay',
+           'time': 1556748455}],
+ 'is_rank': False,
+ 'participants': ['t2_1716rb',
+                  't2_179h13',
+                  't2_6l4z3',
+                  't2_14u7z0',
+                  't2_1sp4vv6v'],
+ 'title': '[Proposal] SimRepublic Act'}

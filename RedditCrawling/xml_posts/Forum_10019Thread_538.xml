@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1386833579"/>
+                <Person nickname="90343"/>
+                <Person nickname="90343"/>
+                <Person nickname="90343"/>
+                <Person nickname="2530885"/>
+                <Person nickname="90343"/>
+            </Participants>
+            <Body>
+                <Turn nickname="5156286">
+                    <Utterance genid="1" refid="0" time="1386833579">Must be doing something wrong because I had the answer on question 2 wrong for two times and I have only one more try. It should be an easy one as I am only counting what I see in the plot but I don't get where I make the mistake. what does the question want me to count? please help. got one more chance and I don't want to loose the easy question. Thanks very much in advanc</Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="2" refid="1" time="1387118278">"Hi Sabit, Did you remove the unwanted variables from your dataset? My impression here is that you are building your clusters using more than 2 variables. When you look at the scatter plot, you can only see two variables at the same time. So the green point among the red and orange point might be there because this point has values in the other variables that more closely match the green cluster. For the assignment, you should only keep 2 variables (the one selected in question 1).</Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="3" refid="1" time="1387389063">"Hi Sabit, For question 2, the k parameter of the k-means operator should be 2 (in your image your k is 7).</Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="4" refid="1" time="1387403293">"I haven't checked my answer, but this seems alright.</Utterance>
+                </Turn>
+                <Turn nickname="2530885">
+                    <Utterance genid="5" refid="1" time="1387613192">"I got this too. But when I counted the reds, my solution is wrong. Now that the quiz hard deadline has passed, can the answer for this question revealed? I would like to know where I went wrong. </Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="6" refid="1" time="1387640776">"The right answer for this question is 1. Only the ""lump"" in the top right corner is included in the ""red"" cluster. </Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="7" refid="6" time="1386857701">"Hi, Here is another forum thread about this question: If you still need help after reading it.</Utterance>
+                </Turn>
+                <Turn nickname="1273669">
+                    <Utterance genid="8" refid="7" time="1387091766">" If We look at the right corner, we have one green point among red and orange. Why doesn't this green point belong to red or orange cluster ?Why don't we cluster red and orange to one cluster ? If we look physically, They are in the same cluster.but they are different clusters.</Utterance>
+                </Turn>
+                <Turn nickname="1273669">
+                    <Utterance genid="9" refid="8" time="1387388540">" Here, I counted red colors,but my solution is wrong,Please Can you tell me where I'm doing wrong ?</Utterance>
+                </Turn>
+                <Turn nickname="1273669">
+                    <Utterance genid="10" refid="9" time="1387400731"> Is that right ?</Utterance>
+                </Turn>
+                <Turn nickname="2530885">
+                    <Utterance genid="11" refid="10" time="1387740233">"Thanks, Luc. I had entered 'one'. but it was marked wrong. Why?</Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

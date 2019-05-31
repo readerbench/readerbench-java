@@ -1,0 +1,25 @@
+Invocation
+Participant name,Anonymized name,Initiated thread (IniThreads),Average length of initiated threads(AvgLenIniThreads),Cumulated first contribution scores for initiated threads(OverScrIniThreads),Inter-animation degree for initiated threads(InterAnimIniThreads),Social KB for initiated threads(SocialKBIniThreads),Personal chat entropy for regularity measure(PersRegEntropy),Personal rhythmic index(RhythmicId),Frequency of maximal rhythmic index(FreqMaxRhythmId),Personal rhythmic coefficient(RhythmicCoeff)
+3189401,Member 0,1.0,339.0,72.904,27.085,69.818,0.0,0.0,0.0,0.0
+1780650,Member 1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+120635,Member 2,1.0,1478.0,281.387,146.705,298.776,0.0,0.0,0.0,0.0
+1155809,Member 3,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+2093911,Member 4,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+3862195,Member 5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+1802444,Member 6,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+184763,Member 7,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+242493,Member 8,1.0,1035.0,28.547,0.0,0.0,0.0,0.0,0.0,0.0
+131162,Member 9,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+2064944,Member 10,1.0,160.0,8.069,0.0,0.0,0.0,0.0,0.0,0.0
+4522578,Member 11,1.0,152.0,30.724,0.758,21.118,0.0,0.0,0.0,0.0
+90343,Member 12,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+2530885,Member 13,1.0,496.0,26.371,0.0,0.0,0.0,0.0,0.0,0.0
+5157234,Member 14,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+475014,Member 15,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+1787288,Member 16,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+2152541,Member 17,1.0,236.0,37.094,7.536,24.593,0.0,0.0,0.0,0.0
+5083393,Member 18,1.0,214.0,99.271,21.283,75.762,0.0,0.0,0.0,0.0
+5156286,Member 19,1.0,376.0,72.943,45.357,69.949,0.0,0.0,0.0,0.0
+1273669,Member 20,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+4884402,Member 21,1.0,626.0,137.33,19.542,144.586,0.0,0.0,0.0,0.0
+4463644,Member 22,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

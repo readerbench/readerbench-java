@@ -1,0 +1,32 @@
+{'body': [{'genid': 1,
+           'nickname': 't2_kq14w',
+           'refid': 0,
+           'text': "I'm a bot, *bleep*, *bloop*. Someone has linked to this "
+                   'thread from another place on reddit:\n'
+                   '\n'
+                   '- [/r/simrepublic] [New idea, tell me if it’s '
+                   'good](https://www.reddit.com/r/SimRepublic/comments/bjogar/new_idea_tell_me_if_its_good/)\n'
+                   '\n'
+                   '&nbsp;*^(If you follow any of the above links, please '
+                   "respect the rules of reddit and don't vote in the other "
+                   'threads.) ^\\([Info](/r/TotesMessenger) ^/ '
+                   '^[Contact](/message/compose?to=/r/TotesMessenger))*',
+           'time': 1556755952},
+          {'genid': 2,
+           'nickname': 't2_2npefi2n',
+           'refid': 0,
+           'text': 'Interesting.',
+           'time': 1556776742},
+          {'genid': 3,
+           'nickname': 't2_36cacfrk',
+           'refid': 1,
+           'text': 'Yes bot I know',
+           'time': 1556756265},
+          {'genid': 4,
+           'nickname': 't2_36cacfrk',
+           'refid': 2,
+           'text': 'Truly it out!',
+           'time': 1556792451}],
+ 'is_rank': False,
+ 'participants': ['t2_36cacfrk', 't2_kq14w', 't2_2npefi2n'],
+ 'title': '[Discussion] New sub idea'}

@@ -1,0 +1,17 @@
+{'body': [{'genid': 1,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 0,
+           'text': "I'd love to join this organisation!\n"
+                   '\n'
+                   'BTW do you have a base for discussions? Maybe a subreddit '
+                   'or discord chat?',
+           'time': 1557351494},
+          {'genid': 2,
+           'nickname': 't2_wqpyynj',
+           'refid': 1,
+           'text': 'I welcome you as a new member of the DESD.',
+           'time': 1557351706}],
+ 'is_rank': False,
+ 'participants': ['t2_wqpyynj', 't2_1sp4vv6v'],
+ 'title': '[Announcment][Organisations] Creating the DemocracyExperiment '
+          'Statistics Department'}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1386992013"/>
+            </Participants>
+            <Body>
+                <Turn nickname="2152541">
+                    <Utterance genid="1" refid="0" time="1386992013">"In Q8, when using ""Expectation Maximization Clustering"" operator with k=7, I have the cluster probabilities like below: So I am confused about how to pick the one with most outliers from this data. Please help. cluster probabilities: </Utterance>
+                </Turn>
+                <Turn nickname="2093911">
+                    <Utterance genid="2" refid="1" time="1387047168">I'd recommend looking at the graph in RapidMiner (with cluster=color); this question is easier to answer this way. The representation you're showing can't distinguish between a relatively loose cluster and a generally tight cluster with outliers</Utterance>
+                </Turn>
+                <Turn nickname="4522578">
+                    <Utterance genid="3" refid="2" time="1387075690">"I get the same probabilities as Raymond and the only option I see for ""graph view"" doesn't have an option of (with cluster = color).(Probably the latter...) I just noticed that just like Question 1, I had only connected one of the output ports from the Expectation Maximization Clustering component to Res. Once I connected the other one, I had another tab on the output and could select ""Plot View"" and see Color Column and could select each cluster's probability, so I guess I'm answering my own post...</Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

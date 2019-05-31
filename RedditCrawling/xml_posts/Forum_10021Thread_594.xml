@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387700063"/>
+                <Person nickname="90343"/>
+                <Person nickname="2093911"/>
+            </Participants>
+            <Body>
+                <Turn nickname="5083393">
+                    <Utterance genid="1" refid="0" time="1387700063">I initially treated each thread as separate cluster but my answer was marked wrong.�� I then surrendered and got the 'right' answer. But I'd like to know why each thread can not be treated as separate cluster here.</Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="2" refid="1" time="1387768586">"Yeah, the question for the assignment as a very limited concept of interactions between posters (only direct response are counted). This is definitely something that we could consider if we wanted to make a more in depth analysis of the social network.</Utterance>
+                </Turn>
+                <Turn nickname="2093911">
+                    <Utterance genid="3" refid="1" time="1387817521">"I agree with both of you - I just simplified to make the assignment easier to complete, but a real-world analysis of this type would want to count both types of interactions (but perhaps weighting them differently)</Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="4" refid="3" time="1387740609">"Hi Anonymous, I am not sure what you mean by ""cluster"" in the context of Quiz 8 Question 5. From what I am seeing, the question ask for the geodesic distance between two posters. To get this distance, you need to count the number of links on the shortest path between the two posters.</Utterance>
+                </Turn>
+                <Turn nickname="5083393">
+                    <Utterance genid="5" refid="4" time="1387756410">"Thanks Luc. The second time I did count the shortest distance between the two posters assuming the posters in different thread are connected across thread. I realize posters are able to move across thread, but I initially viewed the problem as problem-oriented network analysis and did not see the context of the problem as analysis of social network among posters, That's why I treated each thread as isolated cluster initially. I don't know if this makes sense. Also, the right answer to this question doesn't seem to make much sense to me in this context. If two posters appear in the same thread and have the same number of nodes between them (so-called geodesic distance) as the one we counted for the two posters of interest,�� it appears to me that, in the real sense, the social distance would actually be much shorter than the one between the two posters in the question considering the factor of exposure - posters in the same thread are more likely to have viewed other posts in the thread and get acquainted with the posters in the same thread. </Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

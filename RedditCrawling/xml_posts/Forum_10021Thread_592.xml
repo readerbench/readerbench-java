@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387682823"/>
+            </Participants>
+            <Body>
+                <Turn nickname="242493">
+                    <Utterance genid="1" refid="0" time="1387682823">"Hi everyone, Since Q2 is fairly easy to understand conceptually, but can require a lot of software or spreadsheet knowledge not covered in the course I thought it may be appropriate to share a helper formula so folks can get past this bump. First, it helps to try writing the logic for the formula in plain English. Example: ""If the poster on this line is different from the poster who was replied to, put the two poster IDs together with the lower # first."" Using Google Spreadsheets (free), here's a formula that achieves the above: =if(B2&lt;&gt;vlookup(D2,$A$2:$D,2,FALSE), concatenate(min(B2, vlookup(D2,$A$2:$D,2,FALSE)), ""+"", max(B2, vlookup(D2,$A$2:$D ,2,FALSE))), FALSE) This doesn't directly give the answer, but if you check the # of unique relationships and think about the question wording it should help you get past this hurdle. On that note, confirming it's possible to complete all 10 questions in Google Spreadsheets without too much trouble (and with no additional formulas nearly as complex as above). Good luck! -Michael </Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

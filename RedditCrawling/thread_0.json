@@ -1,0 +1,58 @@
+{'body': [{'genid': 1,
+           'nickname': 't2_6l4z3',
+           'refid': 0,
+           'text': '**Voting comment:** reply to this comment with "aye" or '
+                   '"nay" to cast your vote! Do not vote more than once, and '
+                   'do not vote after the voting period has ended; **only '
+                   'votes cast within the voting period will be counted.** '
+                   'Also **if this vote is not labelled "public proposition" '
+                   '*only senators may vote on it*.** For more information '
+                   'about voting rules, please see [our '
+                   'wiki](https://www.reddit.com/r/DemocracyExperiment/wiki/index). '
+                   'Thank you!  \n'
+                   '\n'
+                   '\n'
+                   '*I am a bot, and this action was performed automatically. '
+                   'Please [contact the moderators of this '
+                   'subreddit](/message/compose/?to=/r/DemocracyExperiment) if '
+                   'you have any questions or concerns.*',
+           'time': 1557415932},
+          {'genid': 2,
+           'nickname': 't2_161ws7',
+           'refid': 0,
+           'text': '[In case anyone is '
+                   'confused](https://old.reddit.com/r/DemocracyExperiment/comments/bmbxdc/rsimdemocracy_is_back/)',
+           'time': 1557416982},
+          {'genid': 3,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 1,
+           'text': 'Aye',
+           'time': 1557415950},
+          {'genid': 4,
+           'nickname': 't2_161ws7',
+           'refid': 1,
+           'text': 'Aye',
+           'time': 1557416969},
+          {'genid': 5,
+           'nickname': 't2_d9dvvda',
+           'refid': 1,
+           'text': 'Aye',
+           'time': 1557429770},
+          {'genid': 6,
+           'nickname': 't2_wou9c',
+           'refid': 1,
+           'text': 'Aye',
+           'time': 1557429889},
+          {'genid': 7,
+           'nickname': 't2_1716rb',
+           'refid': 1,
+           'text': 'Aye',
+           'time': 1557430546}],
+ 'is_rank': False,
+ 'participants': ['t2_161ws7',
+                  't2_1716rb',
+                  't2_d9dvvda',
+                  't2_wou9c',
+                  't2_6l4z3',
+                  't2_1sp4vv6v'],
+ 'title': '[Proposition] [Repeal] Repeal of The SimRepublic Act'}

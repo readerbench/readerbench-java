@@ -1,0 +1,22 @@
+{'body': [{'genid': 1,
+           'nickname': 't2_wou9c',
+           'refid': 0,
+           'text': 'Was the questions channel saved? Nothing is showing up for '
+                   'me when I click it.',
+           'time': 1557150671},
+          {'genid': 2,
+           'nickname': 't2_1sp4vv6v',
+           'refid': 0,
+           'text': "Nice! 'Twas a legendary debate and I hope it will be the "
+                   'first of many.',
+           'time': 1557095192},
+          {'genid': 3,
+           'nickname': 't2_3akljsum',
+           'refid': 1,
+           'text': 'I was going to save the questions channel, too, but the '
+                   'script I was using bugged out.',
+           'time': 1557151161}],
+ 'is_rank': False,
+ 'participants': ['t2_wou9c', 't2_3akljsum', 't2_1sp4vv6v'],
+ 'title': '[Debate]The Transcript of the Debate between u/DoneLikeASir and '
+          'u/Occlpv3'}

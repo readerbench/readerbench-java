@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387126019"/>
+            </Participants>
+            <Body>
+                <Turn nickname="4522578">
+                    <Utterance genid="1" refid="0" time="1387126019">"I'm in Chrome, Version 31.0.1650.63 m, and I don't see a graph for Q1. Are we supposed to be making one ourselves from the text file that was supplied? </Utterance>
+                </Turn>
+                <Turn nickname="90343">
+                    <Utterance genid="2" refid="1" time="1387130077">"Hi Sarah, Yes the text file that you have is data describing the posts made in the coursera forum for week 1. You can use the data contained in the file to construct a graph of the interactions between posters in the forums. Note that you do not actually have to visualize the graph to answer any of the questions (although it might be helpful for some of them). Here is a post giving additional details about how the data can be ""viewed"" as a graph: Here are two posts about tools that can be used to visualize the graph: </Utterance>
+                </Turn>
+            </Body>
+</Dialog>        

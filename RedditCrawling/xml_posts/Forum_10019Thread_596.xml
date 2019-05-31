@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Dialog team="0">
+            <Participants>
+                <Person nickname="1387819859"/>
+            </Participants>
+            <Body>
+                <Turn nickname="2530885">
+                    <Utterance genid="1" refid="0" time="1387819859">"In quiz 7, in my first attempt, two correct answers were marked wrong. In question 2, my answer was one, and it was marked wrong. In question 10, my answer was two nodes, and it was marked wrong. The quiz did not state anywhere that the answer should be in the format of numbers. Just because I did not enter my answers in numerical format ('1' for question 2, and '2' for question 10), marking it wrong is a heavy penalty on my grade. Please rescore and give me the correct grade on this quiz.</Utterance>
+                </Turn>
+            </Body>
+</Dialog>        
