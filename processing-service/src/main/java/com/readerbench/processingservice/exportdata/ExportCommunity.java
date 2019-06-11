@@ -15,11 +15,7 @@
  */
 package com.readerbench.processingservice.exportdata;
 
-import com.readerbench.coreservices.data.cscl.CSCLIndices;
-import com.readerbench.coreservices.data.cscl.Conversation;
-import com.readerbench.coreservices.data.cscl.Participant;
-import com.readerbench.coreservices.data.cscl.CSCLCriteria;
-import com.readerbench.coreservices.data.cscl.Community;
+import com.readerbench.coreservices.data.cscl.*;
 import com.readerbench.coreservices.commons.VectorAlgebra;
 import com.readerbench.coreservices.keywordmining.Keyword;
 import com.readerbench.coreservices.keywordmining.KeywordModeling;
@@ -30,11 +26,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +71,8 @@ public class ExportCommunity {
                         outInitiation.write("," + CSCLindex.getDescription(community.getLanguage()) + "(" + CSCLindex.getAcronym() + ")");
                     }
                 }
+                outIndividualStats.write(",Number of ACTIVE");
+                outIndividualStats.write(",Number of CENTRAL");
                 outIndividualStats.write("\n");
                 outInitiation.write("\n");
                 for (int index = 0; index < community.getParticipants().size(); index++) {
@@ -91,6 +86,25 @@ public class ExportCommunity {
                             outInitiation.write("," + Formatting.formatNumber(p.getIndices().get(CSCLindex)));
                         }
                     }
+
+                    int nrOfActive = 0;
+                    int nrOfCentral = 0;
+                    for (Community subCommunity : community.getTimeframeSubCommunities()) {
+                        Optional<Participant> first = subCommunity.getParticipants().stream().filter(sp -> sp.getName().equals(p.getName()))
+                                .findFirst();
+                        if (first.isPresent()) {
+                            ParticipantGroup participantGroup = first.get().getParticipantGroup();
+                            if (participantGroup != null && participantGroup.equals(ParticipantGroup.ACTIVE)) {
+                                nrOfActive ++;
+                            }
+                            if (participantGroup != null && participantGroup.equals(ParticipantGroup.CENTRAL)) {
+                                nrOfCentral ++;
+                            }
+                        }
+                    }
+                    outIndividualStats.write("," + nrOfActive);
+                    outIndividualStats.write("," + nrOfCentral);
+
                     outIndividualStats.write("\n");
                     outInitiation.write("\n");
                 }
@@ -99,6 +113,8 @@ public class ExportCommunity {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }
+
+        //pentru fiecare subcomunitate, de cate ori a fost activ un participant si de cate ori a fost central
     }
 
     /**
@@ -264,7 +280,8 @@ public class ExportCommunity {
                     int noBlocks = 0;
                     noBlocks = c.getBlocks().stream().filter((b) -> (b != null)).map((_item) -> 1).reduce(noBlocks, Integer::sum);
 
-                    outIndividualThreadsStatistics.write(new File(c.getPath()).getName() + "," + noBlocks + ","
+                    int i = 1;
+                    outIndividualThreadsStatistics.write( "Conversation" + i++ + "," + noBlocks + ","
                             + ((Conversation) c).getParticipants().size() + ","
                             + Formatting.formatNumber(c.getScore()) + ","
                             + Formatting.formatNumber(VectorAlgebra.sumElements(((Conversation) c).getVoicePMIEvolution()))
