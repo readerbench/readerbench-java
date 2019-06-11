@@ -23,11 +23,12 @@ import com.readerbench.processingservice.cscl.CommunityUtils;
 import com.readerbench.processingservice.cscl.ConversationProcessingPipeline;
 import com.readerbench.processingservice.exportdata.ExportCommunity;
 import com.readerbench.processingservice.exportdata.ExportCommunityToES;
-import java.io.File;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.json.*;
+import org.json.simple.parser.JSONParser;
 import org.joda.time.DateTime;
 //import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -83,15 +84,38 @@ public class ParallelConversationProcessingPipeline {
         this.dayIncrement = dayIncrement;
     }
 
+    private ArrayList<JSONObject> getThreads(String path) {
+	File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+	ArrayList<JSONObject> jsonList = new ArrayList<JSONObject>();
+
+	JSONParser parser = new JSONParser();
+
+        for (int i = 0; i < listOfFiles.length; ++i) {
+            if (listOfFiles[i].isFile()) {
+		String fPath = path + "/" + listOfFiles[i].getName();
+		try {
+			JSONObject obj = new JSONObject(parser.parse(new FileReader(fPath)).toString());
+               		jsonList.add(obj);
+			//System.out.println(obj.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+            }
+        }
+
+	return jsonList;
+    }
     
-    public List<Conversation> extractConvTemplateFromEs(String communityName, String communityType) {
+    public List<Conversation> extractConvTemplateFromEs(String path) {
         ConversationProcessingPipeline pipeline = new ConversationProcessingPipeline(lang, models, annotators);
         List<AbstractDocumentTemplate> templates = new ArrayList<>();
 
-        ArrayList<org.json.simple.JSONObject> discussionThreads = elasticsearchService.getDiscussionThreads(communityName, communityType);
+        //ArrayList<org.json.simple.JSONObject> discussionThreads = elasticsearchService.getDiscussionThreads(communityName, communityType);
+	ArrayList<JSONObject> discussionThreads = getThreads(path);
 
         try {
-            for (org.json.simple.JSONObject threadSimple : discussionThreads) {
+            for (JSONObject threadSimple : discussionThreads) {
                 JSONObject thread = new  JSONObject(threadSimple.toString());
                 AbstractDocumentTemplate template = pipeline.extractConvTemplateFromEsJson(thread);
                 if (template != null) {
@@ -155,15 +179,15 @@ public class ParallelConversationProcessingPipeline {
         return listOfProcessedConversations;
     }
 
-    public void processCommunity(String communityName, String communityType) {
-        String eDate="2019.07.08";
+    public void processCommunity(String communityName, String path) {
+        String eDate="2019.06.12";
         try {
             endDate = new SimpleDateFormat("yyyy.MM.dd").parse(eDate);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        String sDate="2019.01.01";
+        String sDate="2019.04.09";
         try {
             startDate = new SimpleDateFormat("yyyy.MM.dd").parse(sDate);
         } catch (Exception e) {
@@ -172,7 +196,7 @@ public class ParallelConversationProcessingPipeline {
 
         CommunityProcessingPipeline pipeline = new CommunityProcessingPipeline(lang, models, annotators);
 
-        List<Conversation> conversations = extractConvTemplateFromEs(communityName, communityType);
+        List<Conversation> conversations = extractConvTemplateFromEs(path);
 	//List<Conversation> conversations = loadXMLsFromDirectory("/home/fetoiucatalinemil/Licenta/RedditCrawling/xml_posts");
 
         Community community = pipeline.createCommunityFromConversations(communityName, conversations, models, startDate, endDate);
@@ -247,7 +271,7 @@ public class ParallelConversationProcessingPipeline {
 //        LOGGER.info("---------- Starting export community statistics to files --------\n");
         ExportCommunity export = new ExportCommunity(community);
 
-	//export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
+	export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
         export.exportTextualComplexity(PATH + "/" + communityName + "_" + TEXTUAL_COMPLEXITY);
         //export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
         //export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
@@ -282,12 +306,13 @@ public class ParallelConversationProcessingPipeline {
         Lang lang = Lang.en;
         List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
         List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
-        String communityName = "community_democracyexperiment";
+        String communityName = "community_debatecommunism";
 
         ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
                 communityName, lang, models, annotators, 0, 7 );
 
-        processingPipeline.processCommunity("community_democracyexperiment", "thread");
+	String threadsPath = "/home/fetoiucatalinemil/Licenta/RedditCrawling/threads";
+        processingPipeline.processCommunity(communityName, threadsPath);
     }
 
     private static void processEDMMooc() {
