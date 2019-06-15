@@ -180,45 +180,45 @@ public class ParallelConversationProcessingPipeline {
     }
 
     public void processCommunity(String communityName, String path) {
-        String eDate="2019.06.12";
-        try {
-            endDate = new SimpleDateFormat("yyyy.MM.dd").parse(eDate);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        String sDate="2019.04.09";
-        try {
-            startDate = new SimpleDateFormat("yyyy.MM.dd").parse(sDate);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        String eDate="2019.06.12";
+//        try {
+//            endDate = new SimpleDateFormat("yyyy.MM.dd").parse(eDate);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        String sDate="2019.04.09";
+//        try {
+//            startDate = new SimpleDateFormat("yyyy.MM.dd").parse(sDate);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         CommunityProcessingPipeline pipeline = new CommunityProcessingPipeline(lang, models, annotators);
 
         List<Conversation> conversations = extractConvTemplateFromEs(path);
-	//List<Conversation> conversations = loadXMLsFromDirectory("/home/fetoiucatalinemil/Licenta/RedditCrawling/xml_posts");
+	    //List<Conversation> conversations = loadXMLsFromDirectory("/home/fetoiucatalinemil/Licenta/RedditCrawling/xml_posts");
 
         Community community = pipeline.createCommunityFromConversations(communityName, conversations, models, startDate, endDate);
         pipeline.processCommunity(community);
-	//pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
+	    pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
 
         CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + communityName + "_week_" + 0 + ".csv");
-        ExportCommunityToES ec = new ExportCommunityToES(community);
-
-        List<Map<String, Object>> contributionsForTrend = ec.getContributionsForTrend();
-        System.out.println("\n----------------- contributionsForTrend ------------------- ");
-        System.out.println(contributionsForTrend);
-
-        List<Map<String, Object>> globalTimelineEvolution = ec.getGlobalTimelineEvolution();
-        System.out.println("\n----------------- globalTimelineEvolution ------------------- ");
-        for (Map<String, Object> globalTimeline : globalTimelineEvolution) {
-            System.out.println(globalTimeline);
-        }
-
-        Map<String, List<Integer>> keywordsSimilarity = ec.getKeywordsSimilarity(0.7, 20);
-        System.out.println("\n----------------- keywordsSimilarity ------------------- ");
-        System.out.println(keywordsSimilarity);
+//        ExportCommunityToES ec = new ExportCommunityToES(community);
+//
+//        List<Map<String, Object>> contributionsForTrend = ec.getContributionsForTrend();
+//        System.out.println("\n----------------- contributionsForTrend ------------------- ");
+//        System.out.println(contributionsForTrend);
+//
+//        List<Map<String, Object>> globalTimelineEvolution = ec.getGlobalTimelineEvolution();
+//        System.out.println("\n----------------- globalTimelineEvolution ------------------- ");
+//        for (Map<String, Object> globalTimeline : globalTimelineEvolution) {
+//            System.out.println(globalTimeline);
+//        }
+//
+//        Map<String, List<Integer>> keywordsSimilarity = ec.getKeywordsSimilarity(0.7, 20);
+//        System.out.println("\n----------------- keywordsSimilarity ------------------- ");
+//        System.out.println(keywordsSimilarity);
 
 //        List<Map<String, Object>> participantsStats = ec.writeIndividualStatsToElasticsearch(0);
 //        LOGGER.info("participantsStats: " + participantsStats);
@@ -271,11 +271,11 @@ public class ParallelConversationProcessingPipeline {
 //        LOGGER.info("---------- Starting export community statistics to files --------\n");
         ExportCommunity export = new ExportCommunity(community);
 
-	export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
+	    export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
         export.exportTextualComplexity(PATH + "/" + communityName + "_" + TEXTUAL_COMPLEXITY);
-        //export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
-        //export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
-        //export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
+        export.exportTimeAnalysis(PATH + "/" + communityName + "_" + TIME_ANALYSIS);
+        export.exportDiscussedTopics(PATH + "/" + communityName + "_" + DISCUSSED_TOPICS);
+        export.exportIndividualThreadStatistics(PATH + "/" + communityName + "_" + INDIVIDUAL_THREAD_STATISTICS);
     }
 
     public static void main(String[] args) {

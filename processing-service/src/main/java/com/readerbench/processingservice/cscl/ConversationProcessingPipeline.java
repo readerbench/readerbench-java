@@ -192,7 +192,7 @@ public class ConversationProcessingPipeline extends GenericProcessingPipeline {
 
                 block.setSpeaker(comment.getString("nickname"));
 
-                block.setTime(comment.getString("time"));
+                block.setTime(comment.getString("time") + "000");
                 block.setId(Integer.parseInt(comment.getString("genid")));
                 block.setRefId(Integer.parseInt(comment.getString("refid")));
 
