@@ -54,7 +54,7 @@ public class ParallelConversationProcessingPipeline {
     private static final String DISCUSSED_TOPICS = "discussedTopics.csv";
     private static final String INDIVIDUAL_THREAD_STATISTICS = "individualThreadStatistics.csv";
     private static final String PARTICIPANT_VIEW_D3_FILE = "particiantViewD3.json";
-    private static final String PATH = "/home/fetoiucatalinemil/Licenta/results";
+    private static final String PATH = "C:\\Users\\Dorinela\\Desktop\\catalin\\out";
     private static final String ELASTICSEARCH_INDEX_PARTICIPANTS = "community-participant";
     private static final String ELASTICSEARCH_INDEX_DIRECTED_GRAPH = "community-dr";
     private static final String ELASTICSEARCH_INDEX_EDGEBUNDLING = "community-eb";
@@ -204,71 +204,71 @@ public class ParallelConversationProcessingPipeline {
 	    pipeline.processTimeSeries(community, monthIncrement, dayIncrement);
 
         CommunityUtils.hierarchicalClustering(community, PATH + "/clustered_results_" + communityName + "_week_" + 0 + ".csv");
-//        ExportCommunityToES ec = new ExportCommunityToES(community);
-//
-//        List<Map<String, Object>> contributionsForTrend = ec.getContributionsForTrend();
-//        System.out.println("\n----------------- contributionsForTrend ------------------- ");
-//        System.out.println(contributionsForTrend);
-//
-//        List<Map<String, Object>> globalTimelineEvolution = ec.getGlobalTimelineEvolution();
-//        System.out.println("\n----------------- globalTimelineEvolution ------------------- ");
-//        for (Map<String, Object> globalTimeline : globalTimelineEvolution) {
-//            System.out.println(globalTimeline);
-//        }
-//
-//        Map<String, List<Integer>> keywordsSimilarity = ec.getKeywordsSimilarity(0.7, 20);
-//        System.out.println("\n----------------- keywordsSimilarity ------------------- ");
-//        System.out.println(keywordsSimilarity);
+        ExportCommunityToES ec = new ExportCommunityToES(community);
 
-//        List<Map<String, Object>> participantsStats = ec.writeIndividualStatsToElasticsearch(0);
-//        LOGGER.info("participantsStats: " + participantsStats);
-//        elasticsearchService.indexParticipantsStats(ELASTICSEARCH_INDEX_PARTICIPANTS, ELASTICSEARCH_TYPE_PARTICIPANTS, participantsStats);
-//        /**
-//         * index participant interaction results
-//         */
-//        LOGGER.info("Start generating participants directed graph representation.");
-//        JSONObject participantInteraction = ec.generateParticipantViewD3(0);
-//        LOGGER.info("participantInteraction: " + participantInteraction);
-//        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_DIRECTED_GRAPH, ELASTICSEARCH_TYPE_DIRECTED_GRAPH, participantInteraction);
-//
-//        LOGGER.info("Start generating hierarchical edge bundling.");
-//        JSONObject hierarchicalEdgeBundling = ec.generateHierarchicalEdgeBundling(0);
-//        LOGGER.info("hierarchicalEdgeBundling: " + hierarchicalEdgeBundling);
-//        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_EDGEBUNDLING, ELASTICSEARCH_TYPE_EDGEBUNDLING, hierarchicalEdgeBundling);
-//
-//        LOGGER.info("Start generating keywords for heapMap");
-//        JSONObject keywords = ec.buildKeywordsForHeapMap(0, community);
-//        LOGGER.info("keywords: " + keywords);
-//        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_KEYWORDS, ELASTICSEARCH_TYPE_KEYWORDS, keywords);
+        List<Map<String, Object>> contributionsForTrend = ec.getContributionsForTrend();
+        System.out.println("\n----------------- contributionsForTrend ------------------- ");
+        System.out.println(contributionsForTrend);
 
-//        LOGGER.info("\n----------- Subcommunities stats -------- \n");
-//        LOGGER.info("\n----------- The number of communities are: " + community.getTimeframeSubCommunities().size() + "\n");
-//        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
-//            LOGGER.info("Start extracting statistics for community " + (i + 1));
-//            Community subCommunity = community.getTimeframeSubCommunities().get(i);
-//            CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + communityName + "_clustered_results_week_" + (i + 1) + ".csv");
-//            ec = new ExportCommunityToES(subCommunity);
-//
-//            List<Map<String, Object>> participantsStatsSubCommunity = ec.writeIndividualStatsToElasticsearch(i + 1);
-//            LOGGER.info("participantsStatsSubCommunity: " + participantsStatsSubCommunity);
-//            elasticsearchService.indexParticipantsStats(ELASTICSEARCH_INDEX_PARTICIPANTS, ELASTICSEARCH_TYPE_PARTICIPANTS, participantsStatsSubCommunity);
-//
-//            /**
-//             * index participant interaction results
-//             */
-//            LOGGER.info("Start generating participants directed graph representation.");
-//            JSONObject participantInteractionSubcommunity = ec.generateParticipantViewD3(i + 1);
-//            LOGGER.info("participantInteractionSubcommunity: " + participantInteractionSubcommunity);
-//            elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_DIRECTED_GRAPH, ELASTICSEARCH_TYPE_DIRECTED_GRAPH, participantInteractionSubcommunity);
-//
-//            LOGGER.info("Start generating hierarchical edge bundling.");
-//            JSONObject hierarchicalEdgeBundlingSubcommunity = ec.generateHierarchicalEdgeBundling(i + 1);
-//            LOGGER.info("hierarchicalEdgeBundlingSubcommunity: " + hierarchicalEdgeBundlingSubcommunity);
-//            elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_EDGEBUNDLING, ELASTICSEARCH_TYPE_EDGEBUNDLING, hierarchicalEdgeBundlingSubcommunity);
-//        }
-//
-//        LOGGER.info("\n------- Ending subcommunities processing -------\n");
-//        LOGGER.info("---------- Starting export community statistics to files --------\n");
+        List<Map<String, Object>> globalTimelineEvolution = ec.getGlobalTimelineEvolution();
+        System.out.println("\n----------------- globalTimelineEvolution ------------------- ");
+        for (Map<String, Object> globalTimeline : globalTimelineEvolution) {
+            System.out.println(globalTimeline);
+        }
+
+        Map<String, List<Integer>> keywordsSimilarity = ec.getKeywordsSimilarity(0.7, 20);
+        System.out.println("\n----------------- keywordsSimilarity ------------------- ");
+        System.out.println(keywordsSimilarity);
+
+        List<Map<String, Object>> participantsStats = ec.writeIndividualStatsToElasticsearch(0);
+        LOGGER.info("participantsStats: " + participantsStats);
+        elasticsearchService.indexParticipantsStats(ELASTICSEARCH_INDEX_PARTICIPANTS, ELASTICSEARCH_TYPE_PARTICIPANTS, participantsStats);
+        /**
+         * index participant interaction results
+         */
+        LOGGER.info("Start generating participants directed graph representation.");
+        org.json.simple.JSONObject participantInteraction = ec.generateParticipantViewD3(0);
+        LOGGER.info("participantInteraction: " + participantInteraction);
+        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_DIRECTED_GRAPH, ELASTICSEARCH_TYPE_DIRECTED_GRAPH, participantInteraction);
+
+        LOGGER.info("Start generating hierarchical edge bundling.");
+        org.json.simple.JSONObject hierarchicalEdgeBundling = ec.generateHierarchicalEdgeBundling(0);
+        LOGGER.info("hierarchicalEdgeBundling: " + hierarchicalEdgeBundling);
+        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_EDGEBUNDLING, ELASTICSEARCH_TYPE_EDGEBUNDLING, hierarchicalEdgeBundling);
+
+        LOGGER.info("Start generating keywords for heapMap");
+        org.json.simple.JSONObject keywords = ec.buildKeywordsForHeapMap(0, community);
+        LOGGER.info("keywords: " + keywords);
+        elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_KEYWORDS, ELASTICSEARCH_TYPE_KEYWORDS, keywords);
+
+        LOGGER.info("\n----------- Subcommunities stats -------- \n");
+        LOGGER.info("\n----------- The number of communities are: " + community.getTimeframeSubCommunities().size() + "\n");
+        for (int i = 0; i < community.getTimeframeSubCommunities().size(); i++) {
+            LOGGER.info("Start extracting statistics for community " + (i + 1));
+            Community subCommunity = community.getTimeframeSubCommunities().get(i);
+            CommunityUtils.hierarchicalClustering(subCommunity, PATH + "/" + communityName + "_clustered_results_week_" + (i + 1) + ".csv");
+            ec = new ExportCommunityToES(subCommunity);
+
+            List<Map<String, Object>> participantsStatsSubCommunity = ec.writeIndividualStatsToElasticsearch(i + 1);
+            LOGGER.info("participantsStatsSubCommunity: " + participantsStatsSubCommunity);
+            elasticsearchService.indexParticipantsStats(ELASTICSEARCH_INDEX_PARTICIPANTS, ELASTICSEARCH_TYPE_PARTICIPANTS, participantsStatsSubCommunity);
+
+            /**
+             * index participant interaction results
+             */
+            LOGGER.info("Start generating participants directed graph representation.");
+            org.json.simple.JSONObject participantInteractionSubcommunity = ec.generateParticipantViewD3(i + 1);
+            LOGGER.info("participantInteractionSubcommunity: " + participantInteractionSubcommunity);
+            elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_DIRECTED_GRAPH, ELASTICSEARCH_TYPE_DIRECTED_GRAPH, participantInteractionSubcommunity);
+
+            LOGGER.info("Start generating hierarchical edge bundling.");
+            org.json.simple.JSONObject hierarchicalEdgeBundlingSubcommunity = ec.generateHierarchicalEdgeBundling(i + 1);
+            LOGGER.info("hierarchicalEdgeBundlingSubcommunity: " + hierarchicalEdgeBundlingSubcommunity);
+            elasticsearchService.indexParticipantGraphRepresentation(ELASTICSEARCH_INDEX_EDGEBUNDLING, ELASTICSEARCH_TYPE_EDGEBUNDLING, hierarchicalEdgeBundlingSubcommunity);
+        }
+
+        LOGGER.info("\n------- Ending subcommunities processing -------\n");
+        LOGGER.info("---------- Starting export community statistics to files --------\n");
         ExportCommunity export = new ExportCommunity(community);
 
 	    export.exportIndividualStatsAndInitiation(PATH + "/" + communityName + "_" + INDIVIDUAL_STATS_FILENAME, PATH + "/" + communityName + "_" + INITIATION_FILENAME);
@@ -306,12 +306,12 @@ public class ParallelConversationProcessingPipeline {
         Lang lang = Lang.en;
         List<SemanticModel> models = SemanticModel.loadModels("coca", lang);
         List<Annotators> annotators = Arrays.asList(Annotators.NLP_PREPROCESSING, Annotators.DIALOGISM, Annotators.TEXTUAL_COMPLEXITY);
-        String communityName = "community_debatecommunism";
+        String communityName = "debatecommunism";
 
         ParallelConversationProcessingPipeline processingPipeline = new ParallelConversationProcessingPipeline(
                 communityName, lang, models, annotators, 0, 7 );
 
-	String threadsPath = "/home/fetoiucatalinemil/Licenta/RedditCrawling/threads";
+	String threadsPath = "C:\\Users\\Dorinela\\Desktop\\catalin\\threads";
         processingPipeline.processCommunity(communityName, threadsPath);
     }
 
