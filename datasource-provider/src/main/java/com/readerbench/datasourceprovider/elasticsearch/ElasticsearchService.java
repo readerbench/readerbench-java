@@ -38,7 +38,7 @@ public class ElasticsearchService {
     static {
         try {
             Settings settings = Settings.builder()
-                    .put("cluster.name", "docker-cluster").build();
+                    .put("cluster.name", "elasticsearch-6.4.2").build();
             client = new PreBuiltTransportClient(settings)
                     .addTransportAddress(new TransportAddress(InetAddress.getByName(ELASTICSEARCH_HOST_ADDRESS), ELSTICSEARCH_PORT));
         } catch (Exception e) {
