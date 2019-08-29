@@ -748,22 +748,23 @@ public class EssayMeasurementsPCA {
 
     public static void main(String[] args) {
         EssayMeasurementsPCA fe = new EssayMeasurementsPCA();
-
-        Map<String, ArrayList<MetricValue>> doc = fe.parseCSV("resources/in/tasa(2+)_demo/tasa2+_no_readability.csv/");
+        String baseDir = "/home/teo/projects/readme/corpus_categories/stats/literature/";
+        
+        Map<String, ArrayList<MetricValue>> doc = fe.parseCSV(baseDir + "measurements.csv");
         doc = fe.removeLocalMetrics(doc);
-        fe.writeToCSV(doc, "resources/in/tasa(2+)_demo/stage1.csv/");
-        doc = fe.removeOutliers(doc, "resources/in/tasa(2+)_demo/stage1.csv");
-        fe.writeToCSV(doc, "resources/in/tasa(2+)_demo/stage1.csv");
-        doc = fe.pruneSkewnessKurtosis(doc, "resources/in/tasa(2+)_demo/stage1.csv");
-        fe.writeToCSV(doc, "resources/in/tasa(2+)_demo/stage12.csv");
-        doc = fe.removeCorrelatedMetrics(doc, "resources/in/tasa(2+)_demo/stage12.csv");
-        fe.writeToCSV(doc, "resources/in/tasa(2+)_demo/stage123.csv");
-        fe.PCAPruning(doc, "resources/in/tasa(2+)_demo/stage123.csv",
-                "resources/in/tasa(2+)_demo/loadings.csv",
-                "resources/in/tasa(2+)_demo/zscores",
-                "resources/in/tasa(2+)_demo");
-        fe.computeScores("resources/in/tasa(2+)_demo/stage123.csv",
-                "resources/in/tasa(2+)_demo");
+        fe.writeToCSV(doc, baseDir + "stage1.csv");
+        doc = fe.removeOutliers(doc, baseDir + "stage1.csv");
+        fe.writeToCSV(doc, baseDir + "stage1.csv");
+        doc = fe.pruneSkewnessKurtosis(doc, baseDir + "stage1.csv");
+        fe.writeToCSV(doc, baseDir + "stage12.csv");
+        doc = fe.removeCorrelatedMetrics(doc, baseDir + "stage12.csv");
+        fe.writeToCSV(doc, baseDir + "stage123.csv");
+        fe.PCAPruning(doc, baseDir + "stage123.csv",
+                baseDir + "loadings.csv",
+                baseDir + "zscores",
+                baseDir);
+        fe.computeScores(baseDir + "stage123.csv",
+                baseDir);
     }
 }
 
