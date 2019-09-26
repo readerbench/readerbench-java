@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.readerbench</groupId>
         <artifactId>readerbench-nlp</artifactId>
-        <version>4.1.0</version>
+        <version>4.1.1</version>
     </parent>
 
     <artifactId>core-services</artifactId>
