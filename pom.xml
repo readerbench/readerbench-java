@@ -30,7 +30,7 @@
         <svm.version>3.22</svm.version>
 
         <elasticsearch.version>6.4.2</elasticsearch.version>
-        <jackson-databind.version>2.8.8</jackson-databind.version>
+        <jackson-databind.version>2.12.6.1</jackson-databind.version>
 
         <libthrift.version>0.10.0</libthrift.version>
         <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
