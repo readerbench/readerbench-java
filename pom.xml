@@ -33,7 +33,7 @@
         <jackson-databind.version>2.8.8</jackson-databind.version>
 
         <libthrift.version>0.10.0</libthrift.version>
-        <apache.pdfbox.vesion>2.0.4</apache.pdfbox.vesion>
+        <apache.pdfbox.vesion>2.0.24</apache.pdfbox.vesion>
         <apache.poi.version>3.17</apache.poi.version>
         <jsoup.version>1.10.3</jsoup.version>
         <collections4.version>4.0</collections4.version>
